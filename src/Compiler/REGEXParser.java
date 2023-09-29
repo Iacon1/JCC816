@@ -18,17 +18,11 @@ public class REGEXParser extends GeneralParser
 		@Override
 		public boolean matchTerminal(String listed, String given) {return given.matches(listed);}
 	}
-	public static GeneralNode<String> parseTreeString(List<String> sequence, GeneralGrammar<String> grammar, Integer startSymbol)
-	{
-		ParseSuite<String, Integer, GeneralNode<String>> suite = new REGEXSuite(grammar);
-		GeneralNode<String>[][][] parseTable = (GeneralNode<String>[][][]) parse(sequence, grammar, suite);
-		
-		return parseTable[sequence.size() - 1][0][grammar.nonTerminals().indexOf(startSymbol)];
-	}
 
 	public static <T1> GeneralNode<T1> parseTree(List<T1> sequence, GeneralGrammar<T1> grammar, Integer startSymbol)
 	{
 		if (sequence.isEmpty() || !String.class.isAssignableFrom(sequence.get(0).getClass())) return null;
-		else return (GeneralNode<T1>) parseTreeString((List<String>) sequence, (GeneralGrammar<String>) grammar, startSymbol);
+		ParseSuite<String, Integer, GeneralNode<String>> suite = new REGEXSuite((GeneralGrammar<String>) grammar);
+		return (GeneralNode<T1>) parseTree((List<String>) sequence, (GeneralGrammar<String>) grammar, suite, startSymbol);
 	}
 }

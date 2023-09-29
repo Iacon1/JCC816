@@ -13,23 +13,23 @@ public class TypeNode extends ComponentNode<TypeNode> implements NamedNode
 {
 	protected String name;
 	
-	private List<VariableNode> members;
+	private List<VarDeclarationNode> members;
 	
 	public TypeNode(String name, ComponentNode<?> parent)
 	{
 		super(parent);
 		this.name = name;
-		this.members = new LinkedList<VariableNode>();
+		this.members = new LinkedList<VarDeclarationNode>();
 	}
 	public TypeNode(String name)
 	{
 		super();
 		this.name = name;
-		this.members = new LinkedList<VariableNode>();
+		this.members = new LinkedList<VarDeclarationNode>();
 	}
 	
 	@Override
-	public <P extends GeneralParser> TypeNode interpret(GeneralNode<String> node)
+	public TypeNode interpret(GeneralNode<String> node)
 	{
 		// TODO Auto-generated method stub
 		return null;
@@ -37,7 +37,7 @@ public class TypeNode extends ComponentNode<TypeNode> implements NamedNode
 	
 	public String getName() {return name;}
 
-	public List<VariableNode> getMembers()
+	public List<VarDeclarationNode> getMembers()
 	{
 		return members;
 	}

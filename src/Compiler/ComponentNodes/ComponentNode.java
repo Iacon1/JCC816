@@ -10,7 +10,9 @@ import java.util.List;
 import java.util.Map;
 
 import Grammar.GeneralParser.GeneralInterpreter;
+import Grammar.GeneralParser.GeneralNode;
 import Compiler.CompConfig;
+import Compiler.Compiler;
 
 public abstract class ComponentNode<T extends ComponentNode<T>> implements GeneralInterpreter<String, T>
 {
@@ -75,13 +77,13 @@ public abstract class ComponentNode<T extends ComponentNode<T>> implements Gener
 	 * 
 	 * @return The variables visible to this node (i. e. in this node or in one below it).
 	 */
-	public Map<String, VariableNode> variables()
+	public Map<String, VarDeclarationNode> variables()
 	{
-		Map<String, VariableNode> variables = new HashMap<String, VariableNode>();
+		Map<String, VarDeclarationNode> variables = new HashMap<String, VarDeclarationNode>();
 		for (ComponentNode<?> child : children) variables.putAll(child.variables());
 		return variables;
 	}
-	public VariableNode resolveVariable(String name)
+	public VarDeclarationNode resolveVariable(String name)
 	{
 		if (resolveT(variables(), name) != null) return resolveT(variables(), name);
 		else if (parent != null) return parent.resolveVariable(name);
@@ -111,5 +113,25 @@ public abstract class ComponentNode<T extends ComponentNode<T>> implements Gener
 		else if (parent != null) return parent.resolveFunctions(name);
 		else return null;
 	}
-	
+	@Override
+	public T interpret(GeneralNode<String> node)
+	{
+		for (int i = 0; i < node.childrenNodes.size(); ++i)
+		{
+			GeneralNode<String> childNode = node.getNode(i);
+			switch (Compiler.getType(childNode.ruleName))
+			{
+			case varDeclaration:
+				new VarDeclarationNode(this).interpret(childNode);
+				break;
+			case statement: case codeBlock:
+				new StatementNode(this).interpret(childNode);
+				break;
+			default:
+				break;
+			}
+		}
+		return (T) this;
+	}
+
 }
