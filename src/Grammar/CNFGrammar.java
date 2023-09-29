@@ -33,4 +33,12 @@ public class CNFGrammar<T1, T2> extends ArrayList<Rule<T1, T2>>
 	{
 		return nonTerminals().size();
 	}
+
+	public int getSubRule(int ruleNo, T2 ruleName)
+	{
+		int subRule = 0;
+		for (int i = 0; i < ruleNo; ++i)
+			if (get(i).name.equals(ruleName)) subRule += 1;
+		return subRule;
+	}
 }

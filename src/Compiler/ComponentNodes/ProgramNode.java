@@ -3,24 +3,8 @@
 // The program itself.
 package Compiler.ComponentNodes;
 
-import Grammar.GeneralParser;
-import Grammar.GeneralParser.GeneralNode;
-
 public class ProgramNode extends ComponentNode<ProgramNode>
 {
-	@Override
-	public <P extends GeneralParser> ProgramNode interpret(GeneralNode<String> node)
-	{
-		switch (node.subRule)
-		{
-		case 0, 1:	// Statement
-			new StatementNode(this).interpret(node);
-			break;
-		}
-		
-		return this;
-	}
-	
 	public String getAssembly()
 	{
 		String assembly = "";
@@ -34,7 +18,7 @@ public class ProgramNode extends ComponentNode<ProgramNode>
 		{
 			assembly += ".struct " + typeNode.getFullName() + "\n";
 			
-			for (VariableNode member : typeNode.getMembers())
+			for (VarDeclarationNode member : typeNode.getMembers())
 			{
 				String suffix = null;
 				
@@ -53,22 +37,28 @@ public class ProgramNode extends ComponentNode<ProgramNode>
 			assembly += ".endstruct\n";
 		}
 		
-		for (VariableNode variableNode : variables().values())
+		for (VarDeclarationNode varDeclNode : variables().values())
 		{
 			String suffix = null;
 			
-			switch (variableNode.getTypeName())
+			switch (varDeclNode.getTypeName())
 			{
 			case "int": suffix = "\t.res\t4, $00"; break;
 			case "char": suffix = "\t.res\t1, $00"; break;
 			default: 
-				if (variableNode.getTypeName().endsWith("*")) suffix = ".res\t6, $00";
-				else suffix = ".tag " + variableNode.getType().getFullName();
+				if (varDeclNode.getTypeName().endsWith("*")) suffix = "\t.res\t6, $00";
+				else suffix = ".tag " + varDeclNode.getType().getFullName();
 				break;
 			}
 			
-			assembly += variableNode.getFullName() + ": " + suffix + "\n";
+			assembly += varDeclNode.getFullName() + ": " + suffix + "\n";
 		}
+		
+		for (FunctionNode funcNode : functions().values())
+		{
+			assembly += funcNode.getFullName() + ": \n";
+		}
+		
 		return assembly;
 	}
 	

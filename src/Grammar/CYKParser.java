@@ -18,13 +18,7 @@ public class CYKParser
 		public boolean doGetP(T3 a, T3 b); // Should we get a nonterminal?
 	}
 	
-	private static <T1, T2> int getSubRule(CNFGrammar<T1, T2> grammar, int ruleNo, T2 ruleName)
-	{
-		int subRule = 0;
-		for (int i = 0; i < ruleNo; ++i)
-			if (grammar.get(i).name.equals(ruleName)) subRule += 1;
-		return subRule;
-	}
+	
 	
 	protected static <T1, T2, T3> T3[][][] parse(List<T1> sequenceList, CNFGrammar<T1, T2> grammar, ParseSuite<T1, T2, T3> suite)
 	{
@@ -42,7 +36,7 @@ public class CYKParser
 				if (rule.isUnit() && suite.matchTerminal(rule.getUnitValue(), sequenceList.get(s))) // Rv = As?
 				{
 					int v = nonTerminals.indexOf(rule.name);
-					P[0][s][v] = suite.getP(rule.name, getSubRule(grammar, i, rule.name), sequenceList.get(s));
+					P[0][s][v] = suite.getP(rule.name, grammar.getSubRule(i, rule.name), sequenceList.get(s));
 				}
 			}
 		
@@ -63,7 +57,7 @@ public class CYKParser
 							
 							T3 pA = P[p - 1][s - 1][b];
 							T3 pB =	P[l - p - 1][s + p - 1][c];
-							if (suite.doGetP(pA, pB)) P[l - 1][s - 1][a] = suite.getP(rule.name, getSubRule(grammar, i, rule.name), pA, pB);
+							if (suite.doGetP(pA, pB)) P[l - 1][s - 1][a] = suite.getP(rule.name, grammar.getSubRule(i, rule.name), pA, pB);
 						}
 					}
 		

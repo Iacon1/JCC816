@@ -13,7 +13,10 @@ public class Test
 	}
 	public static void main(String[] args)
 	{
-		print(Compiler.compile("int intX; char charX;")); // int inta;");
+		String main = "char* p;";
+		try {main = new String(ClassLoader.getSystemResourceAsStream("Executables/test.c").readAllBytes());}
+		catch (Exception e) {print(e.getMessage()); return;}
+		print(Compiler.compile(main));
 		
 		
 	}

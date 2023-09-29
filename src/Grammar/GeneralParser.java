@@ -11,21 +11,24 @@ public class GeneralParser extends CYKParser
 	public static class GeneralNode<T1>
 	{
 		public Integer ruleName;
+		public List<Integer> ruleChain;
 		public int subRule;
 		public List<T1> childrenT;
 		public List<GeneralNode<T1>> childrenNodes;
 		
-		public GeneralNode(Integer ruleName, int subRule)
+		public GeneralNode(Integer ruleName, List<Integer> ruleChain, int subRule)
 		{
 			this.ruleName = ruleName;
+			this.ruleChain = ruleChain;
 			this.subRule = subRule;
 			
 			this.childrenT = new ArrayList<T1>();
 			this.childrenNodes = new ArrayList<GeneralNode<T1>>();
 		}
-		public GeneralNode(Integer ruleName, int subRule, T1 terminal)
+		public GeneralNode(Integer ruleName, List<Integer> ruleChain, int subRule, T1 terminal)
 		{
 			this.ruleName = ruleName;
+			this.ruleChain = ruleChain;
 			this.subRule = subRule;
 			
 			this.childrenT = new ArrayList<T1>();
@@ -33,7 +36,7 @@ public class GeneralParser extends CYKParser
 			
 			addTerminal(terminal);
 		}
-		public GeneralNode() {this(null, 0);}
+		public GeneralNode() {this(null, null, 0);}
 		
 		
 		public void addTerminal(T1 terminal) {childrenT.add(terminal);}
@@ -51,8 +54,9 @@ public class GeneralParser extends CYKParser
 		
 		public String dumpTree(int level)
 		{
-
-			String text = "-".repeat(2*level) + ruleName + " (" + subRule + ")" + ":\n";
+			String fullChain = "" + ruleName;
+			if (ruleChain != null) for (int i = 0; i < ruleChain.size(); ++i) fullChain += " > " + ruleChain.get(i);
+			String text = "-".repeat(2*level) + fullChain + ":\n";
 			for (int i = 0; i < childrenT.size(); ++i)
 				text += "-".repeat(2*level + 2) + getT(i) + "\n";
 			for (int i = 0; i < childrenNodes.size(); ++i)
@@ -63,7 +67,7 @@ public class GeneralParser extends CYKParser
 	}
 	public static interface GeneralInterpreter<T1, T extends GeneralInterpreter<T1, ?>>
 	{
-		public <P extends GeneralParser> T interpret(GeneralNode<T1> node);
+		public T interpret(GeneralNode<T1> node);
 	}
 	protected static class GeneralSuite<T1> implements ParseSuite<T1, Integer, GeneralNode<T1>>
 	{
@@ -82,11 +86,11 @@ public class GeneralParser extends CYKParser
 		}
 		@Override
 		public GeneralNode<T1> getP(Integer ruleName, int subRule, T1 terminalValue)
-		{return new GeneralNode<T1>(ruleName, subRule, terminalValue);}
+		{return new GeneralNode<T1>(ruleName, grammar.getUnitChain(ruleName, subRule), subRule, terminalValue);}
 		@Override
 		public GeneralNode<T1> getP(Integer ruleName, int subRule, GeneralNode<T1> pA, GeneralNode<T1> pB)
 		{
-			GeneralNode<T1> node = new GeneralNode<T1>(ruleName, subRule);
+			GeneralNode<T1> node = new GeneralNode<T1>(ruleName, grammar.getUnitChain(ruleName, subRule), subRule);
 			
 			if (grammar.isPrimary(pA.ruleName)) node.addNode(pA);
 			else node.assimilate(pA);
@@ -101,13 +105,60 @@ public class GeneralParser extends CYKParser
 		@Override
 		public boolean doGetP(GeneralNode<T1> a, GeneralNode<T1> b) {return a != null && b != null;}
 	}
+	
+	// Recursive cleaning functions
+	private static <T1> GeneralNode<T1> stretchChains(GeneralNode<T1> node)
+	{
+		for (int i = 0; i < node.childrenNodes.size(); ++i)
+			node.childrenNodes.set(i, stretchChains(node.getNode(i))); // Apply recursively
+		if (node.ruleChain != null && !node.ruleChain.isEmpty()) // Then, if we ourselves have a chain
+		{
+			GeneralNode<T1> overNode = new GeneralNode<T1>(node.ruleName, null, node.subRule); // Make a new version of ourselves...
+			node.ruleName = node.ruleChain.get(0); // And kick the can down the road!
+			node.ruleChain.remove(0);
+			overNode.addNode(stretchChains(node));
+			
+			return overNode;
+		}
+		else return node;
+	}
+	private static <T1> GeneralNode<T1> removeNonprimaries(GeneralGrammar<T1> grammar, GeneralNode<T1> node)
+	{
+		if (node.ruleName == 4)
+		{
+			node.ruleName = 4;
+		}
+		for (int i = 0; i < node.childrenNodes.size(); ++i)
+			if (!grammar.isPrimary(node.getNode(i).ruleName))
+			{	
+				node.childrenNodes.addAll(node.getNode(i).childrenNodes);
+				node.childrenT.addAll(node.getNode(i).childrenT);
+			}
+		for (int i = node.childrenNodes.size() - 1; i >= 0; --i)
+			if (grammar.isPrimary(node.getNode(i).ruleName))
+				node.childrenNodes.set(i, removeNonprimaries(grammar, node.getNode(i)));
+			else
+				node.childrenNodes.remove(i);
+		return node;
+	}
+	
+	protected static <T1> GeneralNode<T1> parseTree(List<T1> sequence, GeneralGrammar<T1> grammar, ParseSuite<T1, Integer, GeneralNode<T1>> suite, Integer startSymbol)
+	{
+		// Parses in CNF, need to fix
+		GeneralNode<T1>[][][] parseTable = (GeneralNode<T1>[][][]) parse(sequence, grammar, suite);
+		
+		GeneralNode<T1> rootNode = parseTable[sequence.size() - 1][0][grammar.nonTerminals().indexOf(startSymbol)];
+		
+		// Reconstruction
+		rootNode = stretchChains(rootNode);
+		rootNode = removeNonprimaries(grammar, rootNode);
+		return rootNode;
+	}
 	public static <T1> GeneralNode<T1> parseTree(List<T1> sequence, GeneralGrammar<T1> grammar, Integer startSymbol)
 	{
 		ParseSuite<T1, Integer, GeneralNode<T1>> suite = new GeneralSuite<T1>(grammar);
-		
-		GeneralNode<T1>[][][] parseTable = (GeneralNode<T1>[][][]) parse(sequence, grammar, suite);
-		
-		return parseTable[sequence.size() - 1][0][grammar.nonTerminals().indexOf(startSymbol)];
+		return parseTree(sequence, grammar, suite, startSymbol);
 	}
+	
 
 }
