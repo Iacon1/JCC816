@@ -17,7 +17,6 @@ public class CNFGrammar<T1, T2> extends ArrayList<Rule<T1, T2>>
 	{
 		add(new Rule<T1, T2>(name, nonTerminalA, nonTerminalB));
 	}
-	
 	public List<T2> nonTerminals()
 	{
 		List<T2> list = new ArrayList<T2>();
@@ -28,5 +27,10 @@ public class CNFGrammar<T1, T2> extends ArrayList<Rule<T1, T2>>
 		}
 		
 		return list;
+	}
+	
+	public int nonTerminalCount()
+	{
+		return nonTerminals().size();
 	}
 }

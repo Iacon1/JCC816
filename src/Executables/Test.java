@@ -4,12 +4,7 @@
 
 package Executables;
 
-import java.util.Arrays;
-import java.util.List;
-
-import Grammar.CYKParser;
-import Grammar.CNFGrammar;
-
+import Compiler.Compiler;
 public class Test
 {
 	private static void print(String toPrint)
@@ -18,14 +13,8 @@ public class Test
 	}
 	public static void main(String[] args)
 	{
-		CNFGrammar<String, String> grammar = new CNFGrammar<String, String>();
-		grammar.addRule("A", "A", "A");
-		grammar.addRule("A", "A");
-		grammar.addRule("A", "B");
-		grammar.addRule("A", "C");
-		String string = "A A A B A C B B B C C C";
-		List<String> sequence = Arrays.asList(string.split(" "));
+		print(Compiler.compile("int intX; char charX;")); // int inta;");
 		
-		print(CYKParser.parseTree(sequence, grammar).dumpTree(0));
+		
 	}
 }
