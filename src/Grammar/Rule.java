@@ -25,7 +25,6 @@ public class Rule<T1, T2>
 	{
 		return terminalValue != null;
 	}
-	
 	public Rule()
 	{
 		name = null;
@@ -45,5 +44,11 @@ public class Rule<T1, T2>
 		this.name = name;
 		this.nonTerminalB = nonTerminalB;
 		this.nonTerminalC = nonTerminalC;
+	}
+	
+	public Rule(T2 name)
+	{
+		this.name = name;
+		
 	}
 }

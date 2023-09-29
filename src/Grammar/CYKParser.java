@@ -4,20 +4,29 @@
 
 package Grammar;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class CYKParser
 {
-	private static interface ParseSuite<T1, T2, T3>
+	protected static interface ParseSuite<T1, T2, T3>
 	{
 		public T3[][][] getBlankArray(int n, int r);
-		public T3 getP(T2 ruleName, T1 terminalValue);
-		public boolean doGetP(T3 a, T3 b);
-		public T3 getP(T2 ruleName, T3 pA, T3 pB);
+		public T3 getP(T2 ruleName, int subRule, T1 terminalValue); // Get a terminal - If multiple rules have the same name, "subRule" allows differentiating between them.
+		public T3 getP(T2 ruleName, int subRule, T3 pA, T3 pB); // Get a nonterminal
+		
+		public boolean matchTerminal(T1 listed, T1 given); // Does the given terminal match the listed one?
+		public boolean doGetP(T3 a, T3 b); // Should we get a nonterminal?
 	}
-	private static <T1, T2, T3> T3[][][] parse(List<T1> sequenceList, CNFGrammar<T1, T2> grammar, ParseSuite<T1, T2, T3> suite)
+	
+	private static <T1, T2> int getSubRule(CNFGrammar<T1, T2> grammar, int ruleNo, T2 ruleName)
+	{
+		int subRule = 0;
+		for (int i = 0; i < ruleNo; ++i)
+			if (grammar.get(i).name.equals(ruleName)) subRule += 1;
+		return subRule;
+	}
+	
+	protected static <T1, T2, T3> T3[][][] parse(List<T1> sequenceList, CNFGrammar<T1, T2> grammar, ParseSuite<T1, T2, T3> suite)
 	{
 		List<T2> nonTerminals = grammar.nonTerminals();
 		
@@ -30,10 +39,10 @@ public class CYKParser
 			for (int i = 0; i < m; ++i)
 			{
 				Rule<T1, T2> rule = grammar.get(i);
-				if (rule.isUnit() && rule.getUnitValue().equals(sequenceList.get(s))) // Rv = As?
+				if (rule.isUnit() && suite.matchTerminal(rule.getUnitValue(), sequenceList.get(s))) // Rv = As?
 				{
 					int v = nonTerminals.indexOf(rule.name);
-					P[0][s][v] = suite.getP(rule.name, sequenceList.get(s));
+					P[0][s][v] = suite.getP(rule.name, getSubRule(grammar, i, rule.name), sequenceList.get(s));
 				}
 			}
 		
@@ -54,14 +63,14 @@ public class CYKParser
 							
 							T3 pA = P[p - 1][s - 1][b];
 							T3 pB =	P[l - p - 1][s + p - 1][c];
-							if (suite.doGetP(pA, pB)) P[l - 1][s - 1][a] = suite.getP(rule.name, pA, pB);
+							if (suite.doGetP(pA, pB)) P[l - 1][s - 1][a] = suite.getP(rule.name, getSubRule(grammar, i, rule.name), pA, pB);
 						}
 					}
 		
 		return P;
 	}
 	
-	public static <T1, T2> boolean isInLanguage(List<T1> sequenceList, CNFGrammar<T1, T2> grammar)
+	public static <T1, T2> boolean isInLanguage(List<T1> sequenceList, CNFGrammar<T1, T2> grammar, T2 startSymbol)
 	{
 		ParseSuite<T1, T2, Boolean> suite = new ParseSuite<T1, T2, Boolean>()
 		{
@@ -76,27 +85,31 @@ public class CYKParser
 				return array;
 			}
 			@Override
-			public Boolean getP(T2 ruleName, T1 terminalValue) {return true;}
+			public Boolean getP(T2 ruleName, int subRule, T1 terminalValue) {return true;}
 			@Override
-			public Boolean getP(T2 ruleName, Boolean pA, Boolean pB) {return true;}
+			public Boolean getP(T2 ruleName, int subRule, Boolean pA, Boolean pB) {return true;}
 			
 			@Override
-			public boolean doGetP(Boolean a, Boolean b) {return a && b;}	
+			public boolean matchTerminal(T1 listed, T1 given) {return listed.equals(given);}
+			@Override
+			public boolean doGetP(Boolean a, Boolean b) {return a && b;}
+			
 		};
 		
 		Boolean[][][] parseTable = (Boolean[][][]) parse(sequenceList, grammar, suite);
 		
-		return parseTable[sequenceList.size() - 1][0][0];
+		return parseTable[sequenceList.size() - 1][0][grammar.nonTerminals().indexOf(startSymbol)];
 	}
 	
-	public static class Node<T1, T2>
+	public static class CNFNode<T1, T2>
 	{
 		public T1 terminalValue;
 		public T2 ruleName;
-		public Node<T1, T2> childA;
-		public Node<T1, T2> childB;
+		public int subRule;
+		public CNFNode<T1, T2> childA;
+		public CNFNode<T1, T2> childB;
 		
-		public Node()
+		public CNFNode()
 		{
 			this.terminalValue = null;
 			this.ruleName = null;
@@ -104,18 +117,20 @@ public class CYKParser
 			this.childA = null;
 			this.childB = null;
 		}
-		public Node(T2 ruleName, T1 terminalValue)
+		public CNFNode(T2 ruleName, int subRule, T1 terminalValue)
 		{
 			this.terminalValue = terminalValue;
 			this.ruleName = ruleName;
+			this.subRule = subRule;
 			
 			this.childA = null;
 			this.childB = null;
 		}
-		public Node(T2 ruleName, Node<T1, T2> childA, Node<T1, T2> childB)
+		public CNFNode(T2 ruleName, int subRule, CNFNode<T1, T2> childA, CNFNode<T1, T2> childB)
 		{
 			this.terminalValue = null;
 			this.ruleName = ruleName;
+			this.subRule = subRule;
 			
 			this.childA = childA;
 			this.childB = childB;
@@ -130,14 +145,14 @@ public class CYKParser
 		
 		}
 	}
-	public static <T1, T2> Node<T1, T2> parseTree(List<T1> sequence, CNFGrammar<T1, T2> grammar)
+	public static <T1, T2> CNFNode<T1, T2> parseTree(List<T1> sequence, CNFGrammar<T1, T2> grammar, T2 startSymbol)
 	{
-		ParseSuite<T1, T2, Node<T1, T2>> suite = new ParseSuite<T1, T2, Node<T1, T2>>()
+		ParseSuite<T1, T2, CNFNode<T1, T2>> suite = new ParseSuite<T1, T2, CNFNode<T1, T2>>()
 		{
 			@Override
-			public Node<T1, T2>[][][] getBlankArray(int n, int r)
+			public CNFNode<T1, T2>[][][] getBlankArray(int n, int r)
 			{
-				Node<T1, T2>[][][] array =new Node[n][n][r];
+				CNFNode<T1, T2>[][][] array =new CNFNode[n][n][r];
 				for (int i = 0; i < n; ++i)
 					for (int j = 0; j < n; ++j)
 						for (int k = 0; k < r; ++k)
@@ -145,19 +160,22 @@ public class CYKParser
 				return array;
 			}
 			@Override
-			public Node<T1, T2> getP(T2 ruleName, T1 terminalValue)
-			{return new Node<T1, T2>(ruleName, terminalValue);}
+			public CNFNode<T1, T2> getP(T2 ruleName, int subRule, T1 terminalValue)
+			{return new CNFNode<T1, T2>(ruleName, subRule, terminalValue);}
 			@Override
-			public Node<T1, T2> getP(T2 ruleName, Node<T1, T2> pA, Node<T1, T2> pB)
-			{return new Node<T1, T2>(ruleName, pA, pB);}
+			public CNFNode<T1, T2> getP(T2 ruleName, int subRule, CNFNode<T1, T2> pA, CNFNode<T1, T2> pB)
+			{return new CNFNode<T1, T2>(ruleName, subRule, pA, pB);}
 			
 			@Override
-			public boolean doGetP(Node<T1, T2> a, Node<T1, T2> b) {return a != null && b != null;}
+			public boolean matchTerminal(T1 listed, T1 given) {return listed.equals(given);}
+			@Override
+			public boolean doGetP(CNFNode<T1, T2> a, CNFNode<T1, T2> b) {return a != null && b != null;}
+			
 		};
 		
-		Node<T1, T2>[][][] parseTable = (Node<T1, T2>[][][]) parse(sequence, grammar, suite);
+		CNFNode<T1, T2>[][][] parseTable = (CNFNode<T1, T2>[][][]) parse(sequence, grammar, suite);
 		
-		return parseTable[sequence.size() - 1][0][0];
+		return parseTable[sequence.size() - 1][0][grammar.nonTerminals().indexOf(startSymbol)];
 	}
-	
+
 }
