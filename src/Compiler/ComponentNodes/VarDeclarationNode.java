@@ -3,15 +3,15 @@
 //
 package Compiler.ComponentNodes;
 
-import java.util.List;
 import java.util.Map;
 
-import Grammar.GeneralParser;
+import Compiler.ComponentNodes.Interfaces.NamedNode;
+import Compiler.ComponentNodes.Interfaces.TypedNode;
 import Grammar.GeneralParser.GeneralNode;
 
-public class VarDeclarationNode extends ComponentNode<VarDeclarationNode> implements NamedNode
+public class VarDeclarationNode extends ComponentNode<VarDeclarationNode> implements NamedNode, TypedNode
 {
-	private String name;
+	protected String name;
 	private String type;
 	
 	public VarDeclarationNode(ComponentNode<?> parent)
@@ -39,7 +39,7 @@ public class VarDeclarationNode extends ComponentNode<VarDeclarationNode> implem
 		return variables;
 	}
 	@Override
-	public VarDeclarationNode interpret(GeneralNode<String> node)
+	public VarDeclarationNode interpret(GeneralNode<String, String> node)
 	{
 		if (node.childrenNodes.size() == 0)
 		{
@@ -58,10 +58,12 @@ public class VarDeclarationNode extends ComponentNode<VarDeclarationNode> implem
 		}
 		return this;
 	}
+	@Override
 	public String getTypeName()
 	{
 		return type;
 	}
+	@Override
 	public TypeNode getType()
 	{
 		try {return resolveType(type);}

@@ -51,4 +51,11 @@ public class Rule<T1, T2>
 		this.name = name;
 		
 	}
+
+	@Override
+	public String toString()
+	{
+		if (terminalValue != null) return name.toString() + ": " + terminalValue.toString();
+		else return name.toString() + ": " + nonTerminalB.toString() + " " + nonTerminalC.toString();
+	}
 }

@@ -1,7 +1,7 @@
 // By Iacon1
 // Created 05/17/2023
 //
-package Compiler.ComponentNodes;
+package Compiler.ComponentNodes.Interfaces;
 
 public interface NamedNode
 {

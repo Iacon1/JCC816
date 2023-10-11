@@ -6,16 +6,25 @@ package Compiler.ComponentNodes;
 import Grammar.GeneralParser.GeneralNode;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
+import Compiler.CompConfig;
 import Compiler.Compiler;
+import Compiler.ComponentNodes.Interfaces.AssemblableNode;
+import Compiler.ComponentNodes.Interfaces.NamedNode;
+import Compiler.ComponentNodes.Interfaces.TypedNode;
 
-public class FunctionNode extends ComponentNode<FunctionNode> implements NamedNode
+public class FunctionNode extends ComponentNode<FunctionNode> implements NamedNode, TypedNode, AssemblableNode
 {
 	private String returnType;
 	private String name;
+	private StatementNode code;
 	
+	public FunctionNode(ComponentNode<?> parent) {super(parent);}
+
 	@Override
-	public FunctionNode interpret(GeneralNode<String> node)
+	public FunctionNode interpret(GeneralNode<String, String> node) throws Exception
 	{
 		returnType = node.getT(0);
 		name = node.getT(1);
@@ -29,14 +38,21 @@ public class FunctionNode extends ComponentNode<FunctionNode> implements NamedNo
 		default: // ???
 			break;
 		}
-		new StatementNode(this).interpret(node.getNode(statementIndex));
+		code = new StatementNode(this).interpret(node.getNode(statementIndex));
 		return this;
 	}
 	
 	@Override
+	public Map<String, FunctionNode> functions()
+	{
+		Map<String, FunctionNode> functions = super.functions();
+		if (name != null) functions.put(getFullName(), this);
+		
+		return functions;
+	}
 	public String[] getScope()
 	{
-		if (parent != null)
+		if (parent != null && parent.getScope() != null)
 		{
 			String[] scope = Arrays.copyOf(parent.getScope(), parent.getScope().length + 1);
 			scope[scope.length - 1] = name;
@@ -47,4 +63,40 @@ public class FunctionNode extends ComponentNode<FunctionNode> implements NamedNo
 
 	@Override
 	public String getName() {return name;}
+	
+	@Override
+	public String getFullName() {return parent.getScopePrefix() + getName();}
+
+	@Override
+	public String getTypeName()
+	{
+		return returnType;
+	}
+
+	@Override
+	public TypeNode getType()
+	{
+		return resolveType(returnType);
+	}
+	
+	public List<VarDeclarationNode> getParameters()
+	{
+		return null;
+	}
+	
+	public String getEndLabel()
+	{
+		return "__" + getFullName() + "_END";
+	}
+	@Override
+	public String getAssembly(int leadingWhitespace) throws Exception
+	{
+		String whitespace = getWhitespace(leadingWhitespace);
+		String assembly = "";
+	
+		assembly += whitespace + getFullName() + ": \n";
+		if (code != null) assembly += code.getAssembly(leadingWhitespace + CompConfig.indentSize);
+		assembly += whitespace + getEndLabel() + ": RTL\n";
+		return assembly;
+	}
 }

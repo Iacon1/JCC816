@@ -4,22 +4,19 @@
 
 package Grammar;
 
-import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.ArrayDeque;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Queue;
 import java.util.Set;
+import java.util.function.Supplier;
 
 @SuppressWarnings("serial")
-public class GeneralGrammar<T1> extends CNFGrammar<T1, Integer>
+public class GeneralGrammar<T1, T2> extends CNFGrammar<T1, T2>
 {
-	private Set<Integer> primaryNonterminals;
-	
-	private int nextRule()
-	{
-		return nonTerminalCount();
-	}
+	private Supplier<T2> nameSupplier;
+	private Set<T2> primaryNonterminals;
 	
 	// Rule with metadata built-in for re-constructing the original grammar with.
 	public static class TrackedRule<T1, T2> extends Rule<T1, T2>
@@ -42,28 +39,37 @@ public class GeneralGrammar<T1> extends CNFGrammar<T1, Integer>
 			super(name);
 			this.unitChain = unitChain;
 		}
+
+		@Override
+		public String toString()
+		{
+			String chain = name.toString();
+			if (unitChain != null) for (T2 link : unitChain) chain += " > " + link.toString();
+			if (terminalValue != null) return chain + ": " + terminalValue.toString();
+			else return chain + ": " + nonTerminalB.toString() + " " + nonTerminalC.toString();
+		}
 	}
 
-	private void addRule(Integer name, List<Integer> unitChain, T1 terminalValue)
+	private void addRule(T2 name, List<T2> unitChain, T1 terminalValue)
 	{
-		add(new TrackedRule<T1, Integer>(name, unitChain, terminalValue));
+		add(new TrackedRule<T1, T2>(name, unitChain, terminalValue));
 	}
-	private void addRule(Integer name, List<Integer> unitChain, Integer nonTerminalA, Integer nonTerminalB)
+	private void addRule(T2 name, List<T2> unitChain, T2 nonTerminalA, T2 nonTerminalB)
 	{
-		add(new TrackedRule<T1, Integer>(name, unitChain, nonTerminalA, nonTerminalB));
+		add(new TrackedRule<T1, T2>(name, unitChain, nonTerminalA, nonTerminalB));
 	}
 	@Override
-	public void addRule(Integer name, T1 terminalValue)
+	public void addRule(T2 name, T1 terminalValue)
 	{
 		addRule(name, null, terminalValue);
 	}
 	@Override
-	public void addRule(Integer name, Integer nonTerminalA, Integer nonTerminalB)
+	public void addRule(T2 name, T2 nonTerminalA, T2 nonTerminalB)
 	{
 		addRule(name, null, nonTerminalA, nonTerminalB);
 	}
 	
-	public List<Integer> getUnitChain(Integer ruleName, int subRule)
+	public List<T2> getUnitChain(T2 ruleName, int subRule)
 	{
 		int subRulesToGo = subRule;
 		for (int i = 0; i < size(); ++i)
@@ -71,8 +77,8 @@ public class GeneralGrammar<T1> extends CNFGrammar<T1, Integer>
 			if (get(i).name == ruleName)
 				if (subRulesToGo == 0)
 				{
-					List<Integer> unitChain = ((TrackedRule<T1, Integer>) get(i)).unitChain;
-					if (unitChain != null) return new ArrayList<Integer>(unitChain);
+					List<T2> unitChain = ((TrackedRule<T1, T2>) get(i)).unitChain;
+					if (unitChain != null) return new ArrayList<T2>(unitChain);
 					else return null;
 				}
 				else subRulesToGo -= 1;
@@ -83,17 +89,17 @@ public class GeneralGrammar<T1> extends CNFGrammar<T1, Integer>
 	// Used to build a rule.
 	public class RuleBuilder
 	{
-		private int id;
+		private T2 id;
 		
 		private Queue<T1> terminals;
-		private Queue<Integer> nonTerminals;
+		private Queue<T2> nonTerminals;
 		private Queue<Boolean> order; // Used to assemble the CNF rules; 0 means a terminal and 1 means a terminal.
 		
-		public RuleBuilder(int id)
+		public RuleBuilder(T2 id)
 		{
 			this.id = id;
 			terminals = new ArrayDeque<T1>();
-			nonTerminals = new ArrayDeque<Integer>();
+			nonTerminals = new ArrayDeque<T2>();
 			order = new ArrayDeque<Boolean>();
 		}
 		
@@ -106,22 +112,24 @@ public class GeneralGrammar<T1> extends CNFGrammar<T1, Integer>
 		}
 		public RuleBuilder addT(T1 terminal) {return addTerminal(terminal);}
 		
-		public RuleBuilder addNonTerminal(Integer nonTerminal)
+		public RuleBuilder addNonTerminal(T2 nonTerminal)
 		{
 			nonTerminals.add(nonTerminal);
 			order.add(true);
 			
 			return this;
 		}
-		public RuleBuilder addNT(Integer nonTerminal) {return addNonTerminal(nonTerminal);}
-		public int build() // Builds the rule and converts it to CNF, adding it to the grammar.
+		public RuleBuilder addNT(T2 nonTerminal) {return addNonTerminal(nonTerminal);}
+		public T2 build() // Builds the rule and converts it to CNF, adding it to the grammar.
 		{
-			int a, b, rule, length, tempId;
+			T2 a, b, rule, tempId;
+			int length;
 			length = order.size();
 			switch (length)
 			{
 			case 1:	// Only one token.
-				if (id == -1) rule = nextRule();
+				if (id == null) rule = nameSupplier.get();
+				
 				else rule = id;
 				
 				if (order.poll())
@@ -130,10 +138,10 @@ public class GeneralGrammar<T1> extends CNFGrammar<T1, Integer>
 					a = nonTerminals.poll(); // A
 					for (int i = 0; i < size(); ++i)
 					{
-						TrackedRule<T1, Integer> aRule = (TrackedRule<T1, Integer>) get(i);
+						TrackedRule<T1, T2> aRule = (TrackedRule<T1, T2>) get(i);
 						if (aRule.name.equals(a)) // Rule starts with A
 						{
-							List<Integer> unitChain = new ArrayList<Integer>();
+							List<T2> unitChain = new ArrayList<T2>();
 							if (aRule.unitChain != null) unitChain.addAll(aRule.unitChain);
 							unitChain.add(0, a);
 							
@@ -146,49 +154,50 @@ public class GeneralGrammar<T1> extends CNFGrammar<T1, Integer>
 				break;
 			case 2:  // Two tokens
 				if (order.poll()) a = nonTerminals.poll();
-				else {a = nextRule(); addRule(a, terminals.poll());}
+				else {a = nameSupplier.get(); addRule(a, terminals.poll());}
 				if (order.poll()) b = nonTerminals.poll();
-				else {b = nextRule(); addRule(b, terminals.poll());}
+				else {b = nameSupplier.get(); addRule(b, terminals.poll());}
 				
-				if (id == -1) rule = nextRule(); // id not set.
+				if (id == null) rule = nameSupplier.get(); // id not set.
 				else rule = id; // id set.
 				addRule(rule, a, b);
 				break;
 			default: // Three or more tokens.
-				if (length < 1) return -1; // If size unusable.
+				if (length < 1) return null; // If size unusable.
 				
 				if (order.poll()) a = nonTerminals.poll();
-				else {a = nextRule(); addRule(a, terminals.poll());}
+				else {a = nameSupplier.get(); addRule(a, terminals.poll());}
 				if (order.poll()) b = nonTerminals.poll();
-				else {b = nextRule(); addRule(b, terminals.poll());}
+				else {b = nameSupplier.get(); addRule(b, terminals.poll());}
 				
-				rule = nextRule();
+				rule = nameSupplier.get();
 				addRule(rule, a, b);
 				a = rule;
 				tempId = id;
-				id = -1;
+				id = null;
 				if (length > 3) b = build();
 				else // Avoid creating a unit rule.
 				{
 					if (order.poll()) b = nonTerminals.poll();
-					else {b = nextRule(); addRule(b, terminals.poll());}
+					else {b = nameSupplier.get(); addRule(b, terminals.poll());}
 				}
 				id = tempId;
-				if (id == -1) rule = nextRule(); // id not set.
+				if (id == null) rule = nameSupplier.get(); // id not set.
 				else rule = id; // id set.
 				
 				addRule(rule, a, b);
 				break;
 			}
 			
-			if (id != -1) primaryNonterminals.add(id);
+			if (id != null) primaryNonterminals.add(id);
 			return rule;
 		}
 	}
 
-	public GeneralGrammar() {primaryNonterminals = new HashSet<Integer>();}
-	public RuleBuilder getBuilder(int id) {return new RuleBuilder(id);}
-	public RuleBuilder getBuilder() {return getBuilder(-1);}
+	public GeneralGrammar(Supplier<T2> nameSupplier) {this.nameSupplier = nameSupplier; primaryNonterminals = new HashSet<T2>();}
+	public RuleBuilder getBuilder(T2 id) {return new RuleBuilder(id);}
+	public RuleBuilder getBuilder() {return getBuilder(null);}
 
-	public boolean isPrimary(Integer rule) {return primaryNonterminals.contains(rule);}
+	public void markPrimary(T2 rule) {primaryNonterminals.add(rule);}
+	public boolean isPrimary(T2 rule) {return primaryNonterminals.contains(rule);}
 }
