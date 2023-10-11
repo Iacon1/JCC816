@@ -41,4 +41,15 @@ public class CNFGrammar<T1, T2> extends ArrayList<Rule<T1, T2>>
 			if (get(i).name.equals(ruleName)) subRule += 1;
 		return subRule;
 	}
+
+	public List<Rule<T1, T2>> subGrammar(T2 name)
+	{
+		List<Rule<T1, T2>> subGrammar = new ArrayList<Rule<T1, T2>>();
+		for (Rule<T1, T2> rule : this)
+		{
+			if (rule.name.equals(name)) subGrammar.add(rule);
+		}
+		
+		return subGrammar;
+	}
 }

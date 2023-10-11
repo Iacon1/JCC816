@@ -14,7 +14,7 @@ import Grammar.GeneralParser.GeneralNode;
 import Compiler.CompConfig;
 import Compiler.Compiler;
 
-public abstract class ComponentNode<T extends ComponentNode<T>> implements GeneralInterpreter<String, T>
+public abstract class ComponentNode<T extends ComponentNode<T>> implements GeneralInterpreter<String, String, T>
 {
 	protected ComponentNode<?> parent;
 	protected List<ComponentNode<?>> children;
@@ -46,7 +46,7 @@ public abstract class ComponentNode<T extends ComponentNode<T>> implements Gener
 		
 		String prefix = "";
 		for (int i = 0; i < getScope().length; ++i)
-			prefix += getScope()[i] + CompConfig.scopeDelimiter();
+			prefix += getScope()[i] + CompConfig.scopeDelimiter;
 		
 		return prefix;
 	}
@@ -89,6 +89,7 @@ public abstract class ComponentNode<T extends ComponentNode<T>> implements Gener
 		else if (parent != null) return parent.resolveVariable(name);
 		else return null;
 	}
+
 	public Map<String, TypeNode> types()
 	{
 		Map<String, TypeNode> types = new HashMap<String, TypeNode>();
@@ -98,6 +99,7 @@ public abstract class ComponentNode<T extends ComponentNode<T>> implements Gener
 	public TypeNode resolveType(String name) throws TypeNotPresentException
 	{
 		if (resolveT(types(), name) != null) return resolveT(types(), name);
+		else if (CompConfig.BasicType.isBasic(name)) return CompConfig.BasicType.getType(name).getType();
 		else if (parent != null) return parent.resolveType(name);
 		else throw new TypeNotPresentException(name, null);
 	}
@@ -107,25 +109,38 @@ public abstract class ComponentNode<T extends ComponentNode<T>> implements Gener
 		for (ComponentNode<?> child : children) functions.putAll(child.functions());
 		return functions;
 	}
-	public FunctionNode resolveFunctions(String name)
+	public FunctionNode resolveFunction(String name)
 	{
 		if (resolveT(functions(), name) != null) return resolveT(functions(), name);
-		else if (parent != null) return parent.resolveFunctions(name);
+		else if (parent != null) return parent.resolveFunction(name);
 		else return null;
 	}
+
 	@Override
-	public T interpret(GeneralNode<String> node)
+	public T interpret(GeneralNode<String, String> node) throws Exception
 	{
 		for (int i = 0; i < node.childrenNodes.size(); ++i)
 		{
-			GeneralNode<String> childNode = node.getNode(i);
+			GeneralNode<String, String> childNode = node.getNode(i);
 			switch (Compiler.getType(childNode.ruleName))
 			{
 			case varDeclaration:
 				new VarDeclarationNode(this).interpret(childNode);
 				break;
+			case function:
+				new FunctionNode(this).interpret(childNode);
+				break;
 			case statement: case codeBlock:
 				new StatementNode(this).interpret(childNode);
+				break;
+			case assignment:
+				new AssignmentNode(this).interpret(childNode);
+				break;
+			case returnStm:
+				new ReturnNode(this).interpret(childNode);
+				break;
+			case ifStm:
+				new IfNode(this).interpret(childNode);
 				break;
 			default:
 				break;
