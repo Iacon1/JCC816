@@ -12,14 +12,14 @@ import Compiler.Compiler;
 
 public class ArgListNode extends ComponentNode<ArgListNode>
 {
-	private List<Object> parameters;
+	private List<RValNode> parameters;
 	
 	public ArgListNode(ComponentNode<?> parent) {super(parent);}
 
 	@Override
 	public ArgListNode interpret(GeneralNode<String, String> node) throws Exception
 	{
-		parameters = new ArrayList<Object>();
+		parameters = new ArrayList<RValNode>();
 		if (node.childrenT.size() > 0 && node.getT(0).equals(",")) // Split
 		{
 			ArgListNode x = new ArgListNode(this).interpret(node.getNode(0));
@@ -28,27 +28,13 @@ public class ArgListNode extends ComponentNode<ArgListNode>
 			parameters.addAll(x.parameters);
 			parameters.addAll(y.parameters);
 		}
-		else if (node.childrenT.size() > 0) // A literal or variable
-			parameters.add(node.getT(0)); // We'll figure out which during assembly
-		else // Expression or call
-		{
-			switch (Compiler.getType(node.getNode(0).ruleName))
-			{
-			case expression:
-				parameters.add(new ExpressionNode(this).interpret(node.getNode(0)));
-				break;
-			case functionCall:
-				parameters.add(new FunctionCallNode(this).interpret(node.getNode(0)));
-				break;
-			default:
-				break;
-			}
-		}
+		else // Only an r-val node
+			parameters.add(new RValNode(this).interpret(node.getNode(0)));
 
 		return this;
 	}
 	
-	public List<Object> getArguments()
+	public List<RValNode> getArguments()
 	{
 		return parameters;
 	}

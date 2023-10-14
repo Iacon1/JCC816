@@ -4,6 +4,9 @@
 
 package Compiler.ComponentNodes;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import Compiler.CompConfig;
 import Compiler.Compiler;
 import Compiler.ComponentNodes.Exceptions.TypeMismatchException;
@@ -12,44 +15,54 @@ import Grammar.GeneralParser.GeneralNode;
 
 public class IfNode extends ComponentNode<IfNode> implements AssemblableNode
 {
-	private String x;
-	private Object literal;
-	private Class<?> literalClass;
+	private List<RValNode> conditions;
+	private List<StatementNode> statements;
+	private static int ifCount = 0;
 	
-	private ExpressionNode expNode;
-	private FunctionCallNode callNode;
-	private StatementNode stmNode;
-	
-	public IfNode(ComponentNode<?> parent) {super(parent);}
+	public IfNode(ComponentNode<?> parent)
+	{
+		super(parent);
+		ifCount += 1;
+		
+		conditions = new ArrayList<RValNode>();
+		statements = new ArrayList<StatementNode>();
+		}
+	@Override public void finalize() {ifCount -= 1;}
 	
 	@Override
 	public IfNode interpret(GeneralNode<String, String> node) throws Exception
 	{
-		switch (node.childrenNodes.size()) // How many non-terminals?
+		int offset = 0;
+		boolean noCondition = false;
+		if (Compiler.getType(node.childrenNodes.get(0).ruleName) == Compiler.ComponentType.ifStm) // absorb prior case
 		{
-		case 1: // Possible forms: [var], [literal]
-			x = node.getT(2);
+			IfNode temp = new IfNode(this).interpret(node.getNode(0));
+			conditions = temp.conditions;
+			statements = temp.statements;
 			
-			literal = ExpressionNode.determineLiteral(x);
-			if (literal != null)
-				literalClass = literal.getClass();
-			
-			stmNode = new StatementNode(this).interpret(node.getNode(0));
-			break;
-		case 2: // Possible forms: [expression], [function call]
-			if (Compiler.getType(node.getNode(0).ruleName).equals(Compiler.ComponentType.expression))
-				expNode = new ExpressionNode(this).interpret(node.getNode(0));
-			else if (Compiler.getType(node.getNode(0).ruleName).equals(Compiler.ComponentType.functionCall))
-				callNode = new FunctionCallNode(this).interpret(node.getNode(0));
-			
-			stmNode = new StatementNode(this).interpret(node.getNode(1));
-			break;
-		default:
-			break;
+			offset = 1;
+			if (node.childrenNodes.size() == 2) noCondition = true; // Else
 		}
 		
-		
+		if (noCondition) // Else
+			statements.add(new StatementNode(this).interpret(node.getNode(offset)));
+		else // Else If
+		{
+			conditions.add(new RValNode(this).interpret(node.getNode(offset)));
+			statements.add(new StatementNode(this).interpret(node.getNode(offset + 1)));
+		}
+			
 		return this;
+	}
+	
+	@Override
+	public boolean canCall(FunctionNode function)
+	{
+		for (int i = 0; i < conditions.size(); ++i)
+			if (conditions.get(i).canCall(function)) return true;
+		for (int i = 0; i < statements.size(); ++i)
+			if (statements.get(i).canCall(function)) return true;
+		return false;
 	}
 	
 	@Override
@@ -57,49 +70,43 @@ public class IfNode extends ComponentNode<IfNode> implements AssemblableNode
 	{
 		String whitespace = getWhitespace(leadingWhitespace);
 		String assembly = "";
-		String skipName = "__IFNOT_" + "1"; // TODO uniquely identify if statements
-		if (literal != null) // Literal
+		String skipName;
+		String lastSkip = "__IFNOT_" + ifCount + "_" + conditions.size();
+
+		for (int i = 0; i < conditions.size(); ++i)
 		{
-			if (CompConfig.BasicType.getType(literalClass).equals(CompConfig.BasicType.t_bool)) // Boolean
-				if (!(Boolean) literal) assembly += ""; // Just optimize by skipping this entirely if this is empty.
-				else assembly += stmNode.getAssembly(leadingWhitespace);
-			else throw new TypeMismatchException(CompConfig.BasicType.getType(literalClass).getName(), CompConfig.BasicType.t_bool.getName());
-		}
-		else if (expNode != null) // Expression
-		{
-			if (expNode.getType().equals(CompConfig.BasicType.t_bool.getType()))
+			skipName = "__IFNOT_" + ifCount + "_" + i;
+			RValNode condition = conditions.get(i);
+			StatementNode statement = statements.get(i);
+			if (condition.getType().equals(CompConfig.Primitive.t_bool.getType())) // Must be boolean
 			{
-				assembly += expNode.getAssembly(leadingWhitespace);
-				assembly += whitespace + "BEQ\t" + skipName + "\n";
-				assembly += stmNode.getAssembly(leadingWhitespace + CompConfig.indentSize);
-				assembly += whitespace + skipName + ":\n";
+				if (condition.hasPropValue()) // Known value at compile time
+				{
+					if ((Boolean) condition.getPropagatedValue())
+						assembly += condition.getAssembly(leadingWhitespace);
+					else
+						assembly += "";
+				}
+				else // Unknown value at compile time
+				{
+					if (condition.hasAssembly()) assembly += condition.getAssembly(leadingWhitespace);
+					else assembly += byteCopier(whitespace, condition.getType().getSize(), CompConfig.operandA, condition.getByteSource()); // Make sure variable loaded.
+					assembly += whitespace + "BEQ\t" + skipName + "\n";
+					assembly += statement.getAssembly(leadingWhitespace + CompConfig.indentSize);
+					if (statements.size() > 1) assembly += whitespace + "JML\t" + lastSkip + "\n"; // If there's more statements make sure to skip them.
+					assembly += whitespace + skipName + ":\n";
+				}
 			}
-			else throw new TypeMismatchException(expNode.getType().getName(), CompConfig.BasicType.t_bool.getName());
+			else throw new TypeMismatchException(condition.getType().getName(), CompConfig.Primitive.t_bool.getName());
 		}
-		else if (callNode != null) // Function Call
+		if (conditions.size() < statements.size())
 		{
-			if (callNode.getType().equals(CompConfig.BasicType.t_bool.getType()))
-			{
-				assembly += callNode.getAssembly(leadingWhitespace);
-				assembly += whitespace + "BEQ\t" + skipName + "\n";
-				assembly += stmNode.getAssembly(leadingWhitespace + CompConfig.indentSize);
-				assembly += whitespace + skipName + ":\n";
-			}
-			else throw new TypeMismatchException(callNode.getType().getName(), CompConfig.BasicType.t_bool.getName());
+			StatementNode statement = statements.get(statements.size() - 1);
+			assembly += statement.getAssembly(leadingWhitespace + CompConfig.indentSize);
+			assembly += whitespace + "JML\t" + lastSkip + "\n";
 		}
-		else // Variable
-		{
-			if (resolveVariable(x).getType().equals(CompConfig.BasicType.t_bool.getType()))
-			{
-				assembly += whitespace + "LDA\t" + x + "\n"; 
-				assembly += whitespace + "BEQ\t" + skipName + "\n";
-				assembly += stmNode.getAssembly(leadingWhitespace + CompConfig.indentSize);
-				assembly += whitespace + skipName + ":\n";
-			}
-			else throw new TypeMismatchException(resolveVariable(x).getType().getName(), CompConfig.BasicType.t_bool.getName());
-		}
+		assembly += whitespace + lastSkip + ":\n";
 		
 		return assembly;
 	}
-
 }

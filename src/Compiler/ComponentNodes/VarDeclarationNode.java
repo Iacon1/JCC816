@@ -73,5 +73,5 @@ public class VarDeclarationNode extends ComponentNode<VarDeclarationNode> implem
 	 * 
 	 * @return Size of the variable in bytes.
 	 */
-	public int size() {return name.length();}
+	public int size() {return  getType().getSize();}
 }

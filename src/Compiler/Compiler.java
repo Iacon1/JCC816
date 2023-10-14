@@ -4,11 +4,7 @@
 package Compiler;
 
 import java.util.Arrays;
-import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Random;
 import java.util.function.Supplier;
 
 import Compiler.ComponentNodes.ProgramNode;
@@ -30,10 +26,11 @@ public class Compiler
 		assignment,
 		argList,
 		functionCall,
-		rVal,
+		rVal, // Convienent wrapper for expressions, function calls, variables, and literals
 		returnStm,
-		ifStm,
-		forStm;
+		ifStm, ifElseStm,
+		forStm,
+		attributeStm,
 	}
 	private static class RuleNameGen implements Supplier<String>
 	{
@@ -75,6 +72,8 @@ public class Compiler
 	
 	private static void initGrammar(GeneralGrammar<String, String> grammar)
 	{
+		boolean doAgain = grammar.isEmpty();
+
 		grammar.markPrimary(ComponentType.varDeclaration.name());
 		grammar.getBuilder(ComponentType.varDeclaration.name()).addT(CompConfig.tokenPattern).addT(CompConfig.tokenPattern).build();				// [type name] [variable name]
 		grammar.getBuilder(ComponentType.varDeclaration.name()).addT(CompConfig.tokenPattern).addT("\\*").addT(CompConfig.tokenPattern).build();	// [type name]* [variable name]
@@ -82,32 +81,31 @@ public class Compiler
 		addNT(ComponentType.varDeclaration.name()).build();																							// [var dec], [var dec]
 		
 		grammar.markPrimary(ComponentType.rVal.name());
-		grammar.getBuilder(ComponentType.rVal.name());
+		grammar.getBuilder(ComponentType.rVal.name()).addT(CompConfig.tokenPattern).build();														// [variable declaration]
+		grammar.getBuilder(ComponentType.rVal.name()).addT(CompConfig.literalPattern).build();														// [literal declaration]
+		
 		grammar.markPrimary(ComponentType.statement.name());
 		grammar.getBuilder(ComponentType.statement.name()).addNT(ComponentType.varDeclaration.name()).addT(";").build();							// [var dec]
 		grammar.getBuilder(ComponentType.statement.name()).addNT(ComponentType.statement.name()).addNT(ComponentType.statement.name()).build();		// [statement] [statement]
 
 		grammar.markPrimary(ComponentType.expression.name());
-		grammar.getBuilder(ComponentType.expression.name()).addT(CompConfig.tokenPattern).addT(CompConfig.operatorPattern).
-		addT(CompConfig.tokenPattern).build();																										// [var name] [op] [var name]
-		grammar.getBuilder(ComponentType.expression.name()).addT(CompConfig.tokenPattern).addT(CompConfig.operatorPattern).
-		addT(CompConfig.literalPattern).build();																									// [var name] [op] [literal]
-		grammar.getBuilder(ComponentType.expression.name()).addT(CompConfig.literalPattern).addT(CompConfig.operatorPattern).
-		addT(CompConfig.tokenPattern).build();																										// [literal] [op] [var name]
-		grammar.getBuilder(ComponentType.expression.name()).addT(CompConfig.literalPattern).addT(CompConfig.operatorPattern).
-		addT(CompConfig.literalPattern).build();																									// [literal] [op] [literal]
-		grammar.getBuilder(ComponentType.expression.name()).addNT(ComponentType.expression.name()).addT(CompConfig.operatorPattern).
-		addT(CompConfig.tokenPattern).build();																										// [expression] [op] [var name]
-		grammar.getBuilder(ComponentType.expression.name()).addNT(ComponentType.expression.name()).addT(CompConfig.operatorPattern).
-		addT(CompConfig.literalPattern).build();																									// [expression] [op] [literal]
-		grammar.getBuilder(ComponentType.expression.name()).addT(CompConfig.tokenPattern).addT(CompConfig.operatorPattern).
-		addNT(ComponentType.expression.name()).build();																								// [var name] [op] [expression]
-		grammar.getBuilder(ComponentType.expression.name()).addT(CompConfig.literalPattern).addT(CompConfig.operatorPattern).
-		addNT(ComponentType.expression.name()).build();																								// [literal] [op] [expression]
-		grammar.getBuilder(ComponentType.expression.name()).addNT(ComponentType.expression.name()).addT(CompConfig.operatorPattern).
-		addNT(ComponentType.expression.name()).build();																								// [expression] [op] [expression]
-		grammar.getBuilder(ComponentType.expression.name()).addT("\\(").addT(CompConfig.tokenPattern).addT("\\)").build();							// ([var name])
-		grammar.getBuilder(ComponentType.expression.name()).addT("\\(").addNT(ComponentType.expression.name()).addT("\\)").build();					// ([expression])														// expression!
+		
+		grammar.markPrimary(ComponentType.expression.name());
+		grammar.getBuilder(ComponentType.expression.name()).addNT(ComponentType.rVal.name()).addT(CompConfig.operatorPattern).
+		addNT(ComponentType.rVal.name()).build();																									// [rval] [op] [rval]																			// [expression] [op] [expression]
+		grammar.getBuilder(ComponentType.expression.name()).addNT(ComponentType.rVal.name()).addT("<").addT("=").
+		addNT(ComponentType.rVal.name()).build();																									// [rval] <= [rval]	
+		grammar.getBuilder(ComponentType.expression.name()).addNT(ComponentType.rVal.name()).addT(">").addT("=").
+		addNT(ComponentType.rVal.name()).build();																									// [rval] >= [rval]	
+		grammar.getBuilder(ComponentType.expression.name()).addNT(ComponentType.rVal.name()).addT("=").addT("=").
+		addNT(ComponentType.rVal.name()).build();																									// [rval] == [rval]	
+		grammar.getBuilder(ComponentType.expression.name()).addNT(ComponentType.rVal.name()).addT("!").addT("=").
+		addNT(ComponentType.rVal.name()).build();																									// [rval] != [rval]	
+		grammar.getBuilder(ComponentType.expression.name()).addT("\\(").addNT(ComponentType.rVal.name()).addT("\\)").build();						// ([rval])
+		grammar.getBuilder(ComponentType.expression.name()).addT("\\-").addNT(ComponentType.rVal.name()).build();									// -[rval]
+		grammar.getBuilder(ComponentType.expression.name()).addT("\\!").addNT(ComponentType.rVal.name()).build();									// ![rval]
+		
+		grammar.getBuilder(ComponentType.rVal.name()).addNT(ComponentType.expression.name()).build();												// rVal: expression
 		
 		grammar.markPrimary(ComponentType.codeBlock.name());
 		grammar.getBuilder(ComponentType.codeBlock.name()).addT("\\{").addNT(ComponentType.statement.name()).addT("\\}").build();					// {[statement]}
@@ -122,55 +120,35 @@ public class Compiler
 		grammar.markPrimary(ComponentType.functionCall.name());
 		grammar.getBuilder(ComponentType.functionCall.name()).addT(CompConfig.tokenPattern).addT("\\(").addT("\\)").build();						// [func name]()
 		
-		grammar.getBuilder(ComponentType.expression.name()).addNT(ComponentType.functionCall.name()).
-		addT(CompConfig.operatorPattern).addT(CompConfig.literalPattern).build();																	// expression: [func call] [op] [literal]
-		grammar.getBuilder(ComponentType.expression.name()).addT(CompConfig.tokenPattern).
-		addT(CompConfig.operatorPattern).addNT(ComponentType.functionCall.name()).build();															// expression: [var name] [op] [func call]
-		grammar.getBuilder(ComponentType.expression.name()).addT(CompConfig.literalPattern).
-		addT(CompConfig.operatorPattern).addNT(ComponentType.functionCall.name()).build();															// expression: [literal] [op] [func call]
-		grammar.getBuilder(ComponentType.expression.name()).addNT(ComponentType.expression.name()).
-		addT(CompConfig.operatorPattern).addNT(ComponentType.functionCall.name()).build();															// expression: [expression] [op] [func call]
-		grammar.getBuilder(ComponentType.expression.name()).addNT(ComponentType.functionCall.name()).
-		addT(CompConfig.operatorPattern).addNT(ComponentType.expression.name()).build();															// expression: [func call] [op] [expression]
-		grammar.getBuilder(ComponentType.expression.name()).addNT(ComponentType.functionCall.name()).
-		addT(CompConfig.operatorPattern).addNT(ComponentType.functionCall.name()).build();															// expression: [func call] [op] [func call]
-		grammar.getBuilder(ComponentType.expression.name()).addT("\\(").
-		addNT(ComponentType.functionCall.name()).addT("\\)").build();																				// expression: ([func call])
+		grammar.getBuilder(ComponentType.rVal.name()).addNT(ComponentType.functionCall.name()).build();												// rVal: function call
 		
 		grammar.markPrimary(ComponentType.argList.name());
-		grammar.getBuilder(ComponentType.argList.name()).addT(CompConfig.tokenPattern).build();														// [variable name]
-		grammar.getBuilder(ComponentType.argList.name()).addT(CompConfig.literalPattern).build();													// [literal]
-		grammar.getBuilder(ComponentType.argList.name()).addNT(ComponentType.expression.name()).build();											// [expression]
-		grammar.getBuilder(ComponentType.argList.name()).addNT(ComponentType.functionCall.name()).build();											// [function call]
+		grammar.getBuilder(ComponentType.argList.name()).addNT(ComponentType.rVal.name()).build();													// [rVal]
 		grammar.getBuilder(ComponentType.argList.name()).addNT(ComponentType.argList.name()).addT("\\,").
 		addNT(ComponentType.argList.name()).build();																								// [arg List], [arg List]
 
 		grammar.getBuilder(ComponentType.functionCall.name()).addT(CompConfig.tokenPattern).addT("\\(").addNT(ComponentType.argList.name()).
-		addT("\\)").build();																														// function call: [func name]([var list])
+		addT("\\)").build();																														// function call: [func name]([arg list])
 		
 		grammar.markPrimary(ComponentType.assignment.name());
-		grammar.getBuilder(ComponentType.assignment.name()).addT(CompConfig.tokenPattern).addT("=").addT(CompConfig.tokenPattern).
-		addT(";").build();																															// [var name] = [var name];
-		grammar.getBuilder(ComponentType.assignment.name()).addT(CompConfig.tokenPattern).addT("=").addT(CompConfig.literalPattern).
-		addT(";").build();																															// [var name] = [literal];
-		grammar.getBuilder(ComponentType.assignment.name()).addT(CompConfig.tokenPattern).addT("=").addNT(ComponentType.expression.name()).
-		addT(";").build();																															// [var name] = [expression];
-		grammar.getBuilder(ComponentType.assignment.name()).addT(CompConfig.tokenPattern).addT("=").addNT(ComponentType.functionCall.name())
-		.addT(";").build();																															// [var name] = [function call];
+		grammar.getBuilder(ComponentType.assignment.name()).addT(CompConfig.tokenPattern).addT("=").addNT(ComponentType.rVal.name()).
+		addT(";").build();																															// [var name] = [rVal];
 
 		grammar.markPrimary(ComponentType.returnStm.name());
-		grammar.getBuilder(ComponentType.returnStm.name()).addT("return").addT(CompConfig.tokenPattern).addT(";").build();							// return [var name];
-		grammar.getBuilder(ComponentType.returnStm.name()).addT("return").addT(CompConfig.literalPattern).addT(";").build();						// return [literal];
-		grammar.getBuilder(ComponentType.returnStm.name()).addT("return").addNT(ComponentType.expression.name()).addT(";").build();					// return [expression];
-		grammar.getBuilder(ComponentType.returnStm.name()).addT("return").addNT(ComponentType.functionCall.name()).addT(";").build();				// return [function call];
+		grammar.getBuilder(ComponentType.returnStm.name()).addT(CompConfig.Keywords.returnKW).addNT(ComponentType.rVal.name()).addT(";").build();	// return [rVal];
 		
-		grammar.markPrimary(ComponentType.ifStm.name());
-		grammar.getBuilder(ComponentType.ifStm.name()).addT("if").addT("\\(").addT(CompConfig.tokenPattern).addT("\\)").
-		addNT(ComponentType.codeBlock.name()).build();																								// if ([var name]) {code}
-		grammar.getBuilder(ComponentType.ifStm.name()).addT("if").addT("\\(").addT(CompConfig.literalPattern).addT("\\)").
-		addNT(ComponentType.codeBlock.name()).build();																								// if ([literal]) {code}
-		grammar.getBuilder(ComponentType.ifStm.name()).addT("if").addT("\\(").addNT(ComponentType.expression.name()).addT("\\)").
-		addNT(ComponentType.codeBlock.name()).build();																								// if ([expression]) {code}
+		grammar.markPrimary(ComponentType.attributeStm.name());
+		grammar.getBuilder(ComponentType.attributeStm.name()).addT(CompConfig.Keywords.attributeKW).addT("\\(").
+		addT(CompConfig.tokenPattern).addT("\\)").addT(";").build();																				// __attribute__([rVal]);
+		
+		grammar.markPrimary(ComponentType.ifStm.name()); grammar.markPrimary(ComponentType.ifElseStm.name());
+		grammar.getBuilder(ComponentType.ifStm.name()).addT(CompConfig.Keywords.ifKW).addT("\\(").addNT(ComponentType.rVal.name()).addT("\\)").
+		addNT(ComponentType.codeBlock.name()).build();																								// if ([rVal]) {code}
+		grammar.getBuilder(ComponentType.ifStm.name()).addNT(ComponentType.ifStm.name()).addT(CompConfig.Keywords.elseKW).
+		addT(CompConfig.Keywords.ifKW).addT("\\(").addNT(ComponentType.rVal.name()).addT("\\)").addNT(ComponentType.codeBlock.name()).build();		// [if stm] else if {code}
+		grammar.getBuilder(ComponentType.ifElseStm.name()).addNT(ComponentType.ifStm.name()).addT(CompConfig.Keywords.elseKW).
+		addNT(ComponentType.codeBlock.name()).build();																								// [if stm] else {code}
+		
 		
 		grammar.markPrimary(ComponentType.forStm.name());
 		grammar.getBuilder(ComponentType.forStm.name()).addT("for").addT("\\(").addNT(ComponentType.assignment.name()).
@@ -179,11 +157,17 @@ public class Compiler
 		
 		grammar.getBuilder(ComponentType.statement.name()).addNT(ComponentType.function.name()).build();											// statement: [function]
 		grammar.getBuilder(ComponentType.statement.name()).addNT(ComponentType.assignment.name()).build();											// statement: [assignment]
-		grammar.getBuilder(ComponentType.statement.name()).addNT(ComponentType.functionCall.name()).build();										// statement: [function call]
+		grammar.getBuilder(ComponentType.statement.name()).addNT(ComponentType.functionCall.name()).addT(";").build();								// statement: [function call]
 		grammar.getBuilder(ComponentType.statement.name()).addNT(ComponentType.returnStm.name()).build();											// statement: [return statement]
-		grammar.getBuilder(ComponentType.statement.name()).addNT(ComponentType.ifStm.name()).build();												// statement: [return statement]
+		grammar.getBuilder(ComponentType.statement.name()).addNT(ComponentType.ifStm.name()).build();												// statement: [if statement]
+		grammar.getBuilder(ComponentType.statement.name()).addNT(ComponentType.ifElseStm.name()).build();											// statement: [if-else statement]
+
+		grammar.getBuilder(ComponentType.statement.name()).addNonTerminal(ComponentType.attributeStm.name()).build();								// statement: [attribute statement]
 		
 		grammar.getBuilder(ComponentType.program.name()).addNT(ComponentType.statement.name()).build(); 											// [statement]
+		
+		
+		if (doAgain) initGrammar(grammar); // Yes, we do it again to resolve any loops
 	}
 	
 	private static GeneralNode<String, String> parse(List<String> tokens, GeneralGrammar<String, String> grammar, String program)
@@ -201,6 +185,72 @@ public class Compiler
 		catch (Exception e) {e.printStackTrace(); return null;}
 	}
 
+	private static List<String> minimizeModeSwitches(List<String> lines)
+	{
+		int aMode = 0, xyMode = 0; // 0 = 8-bit, 1 = 16-bit, -1 = unknown
+		for (int i = 0; i < lines.size(); ++i)
+		{
+			String line = lines.get(i);
+			if (line.matches("[^:\s]*:.*")) // At a label, lose all assumptions of mode
+			{
+				aMode = -1;
+				xyMode = -1;
+			}
+				
+			if (line.contains(CompConfig.setAXY8))
+			{
+				if (aMode == 0 && xyMode == 0) lines.set(i, line.replace(CompConfig.setAXY8, ""));
+				else if (aMode == 0) lines.set(i, line.replace(CompConfig.setAXY8, CompConfig.setXY8));
+				else if (xyMode == 0) lines.set(i, line.replace(CompConfig.setAXY8, CompConfig.setA8));
+				
+				aMode = 0;
+				xyMode = 0;
+			}
+			else if (line.contains(CompConfig.setAXY16))
+			{
+				if (aMode == 1 && xyMode == 1) lines.set(i, line.replace(CompConfig.setAXY16, ""));
+				else if (aMode == 1) lines.set(i, line.replace(CompConfig.setAXY16, CompConfig.setXY16));
+				else if (xyMode == 1) lines.set(i, line.replace(CompConfig.setAXY16, CompConfig.setA16));
+				
+				aMode = 1;
+				xyMode = 1;
+			}
+			else if (line.contains(CompConfig.setA8))
+			{
+				if (aMode == 0) lines.set(i, line.replace(CompConfig.setA8, ""));
+				aMode = 0;
+			}
+			else if (line.contains(CompConfig.setA16))
+			{
+				if (aMode == 1) lines.set(i, line.replace(CompConfig.setA16, ""));
+				aMode = 1;
+			}
+			else if (line.contains(CompConfig.setXY8))
+			{
+				if (xyMode == 0) lines.set(i, line.replace(CompConfig.setXY8, ""));
+				xyMode = 0;
+			}
+			else if (line.contains(CompConfig.setXY16))
+			{
+				if (xyMode == 1) lines.set(i, line.replace(CompConfig.setXY16, ""));
+				xyMode = 1;
+			}
+		}
+		
+		return lines;
+	}
+
+	public static String postprocess(String assembly)
+	{
+		List<String> lines = Arrays.asList(assembly.split("\n"));
+
+		lines = minimizeModeSwitches(lines);
+		
+		assembly = "";
+		for (String line : lines) if (!line.matches("\s*")) assembly += line + "\n";
+		return assembly;
+	}
+		
 	public static String precompile(String main)
 	{
 		return main; // TODO
@@ -212,23 +262,27 @@ public class Compiler
 
 		long t = System.currentTimeMillis();
 		initGrammar(grammar);
-		printInfo("grammar initialized in " + (System.currentTimeMillis() - t) + " ms.");
+		printInfo("grammar initialized in " + (System.currentTimeMillis() - t) + " ms. Rules: " + grammar.size() + ".");
 		t = System.currentTimeMillis();
 		
 		List<String> tokens = lex(source);
-		printInfo(tokens.toArray());
 		printInfo("Lexed in " + (System.currentTimeMillis() - t) + " ms.");
 		t = System.currentTimeMillis();
 
 		GeneralParser.GeneralNode<String, String> tree = parse(tokens, grammar, ComponentType.program.name());
 		printInfo("Parsed in " + (System.currentTimeMillis() - t) + " ms.");
-		printInfo(tree.dumpTree(0));
+		//printInfo(tree.dumpTree(0));
 		t = System.currentTimeMillis();
 
 		String assembly = emit(tree);
 		printInfo("Emitted in " + (System.currentTimeMillis() - t) + " ms. Assembly length: " + assembly.length() + ".");
 		t = System.currentTimeMillis();
 		
+		assembly = postprocess(assembly);
+		printInfo("Postprocessed in " + (System.currentTimeMillis() - t) + " ms. New assembly length: " + assembly.length() + ".");
+		t = System.currentTimeMillis();
+		
 		return assembly;
 	}
+	
 }

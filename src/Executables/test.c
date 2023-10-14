@@ -1,9 +1,19 @@
 int main()
 {
-	int x;
-	bool y;
+	short x;
 	
-	x = 4;
+	x = 1;
 	
-	y = x < 5;
+	if (x == 5)
+	{
+		x = 0;
+	}
+	else if (x == 4)
+	{
+		x = 1;
+	}
+	else
+	{
+		x = 2;
+	}
 }

@@ -18,8 +18,6 @@ public class CYKParser
 		public boolean doGetP(T3 a, T3 b); // Should we get a nonterminal?
 	}
 	
-	
-	
 	protected static <T1, T2, T3> T3[][][] parse(List<T1> sequenceList, CNFGrammar<T1, T2> grammar, ParseSuite<T1, T2, T3> suite)
 	{
 		List<T2> nonTerminals = grammar.nonTerminals();
