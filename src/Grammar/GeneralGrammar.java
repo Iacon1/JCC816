@@ -48,15 +48,50 @@ public class GeneralGrammar<T1, T2> extends CNFGrammar<T1, T2>
 			if (terminalValue != null) return chain + ": " + terminalValue.toString();
 			else return chain + ": " + nonTerminalB.toString() + " " + nonTerminalC.toString();
 		}
+
+		public boolean equals(Object obj)
+		{
+			if (obj.getClass().equals(this.getClass()))
+			{
+				TrackedRule<T1, T2> other = (TrackedRule<T1, T2>) obj;
+				if (
+						(other.name == null && name != null) ||
+						(other.nonTerminalB == null && nonTerminalB != null) ||
+						(other.nonTerminalC == null && nonTerminalC != null) ||
+						(other.terminalValue == null && terminalValue != null) ||
+						(other.unitChain == null && unitChain != null))
+					return false;
+				if (
+						(other.name != null && name == null) ||
+						(other.nonTerminalB != null && nonTerminalB == null) ||
+						(other.nonTerminalC != null && nonTerminalC == null) ||
+						(other.terminalValue != null && terminalValue == null) ||
+						(other.unitChain != null && unitChain == null))
+					return false;
+				if (
+						(other.name == null || other.name.equals(name)) &&
+						(other.nonTerminalB == null || other.nonTerminalB.equals(nonTerminalB)) &&
+						(other.nonTerminalC == null || other.nonTerminalC.equals(nonTerminalC)) &&
+						(other.terminalValue == null || other.terminalValue.equals(terminalValue)) &&
+						(other.unitChain == null || other.unitChain.equals(unitChain)))
+					return true;
+				else return false;
+			}
+			else return false;
+		}
 	}
 
 	private void addRule(T2 name, List<T2> unitChain, T1 terminalValue)
 	{
-		add(new TrackedRule<T1, T2>(name, unitChain, terminalValue));
+		TrackedRule<T1, T2> rule = new TrackedRule<T1, T2>(name, unitChain, terminalValue);
+		for (Rule<T1, T2> other : this) if (rule.equals(other)) return;
+		add(rule);
 	}
 	private void addRule(T2 name, List<T2> unitChain, T2 nonTerminalA, T2 nonTerminalB)
 	{
-		add(new TrackedRule<T1, T2>(name, unitChain, nonTerminalA, nonTerminalB));
+		TrackedRule<T1, T2> rule = new TrackedRule<T1, T2>(name, unitChain, nonTerminalA, nonTerminalB);
+		for (Rule<T1, T2> other : this) if (rule.equals(other)) return;
+		add(rule);
 	}
 	@Override
 	public void addRule(T2 name, T1 terminalValue)

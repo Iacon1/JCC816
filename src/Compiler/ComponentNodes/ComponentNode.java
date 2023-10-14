@@ -99,7 +99,7 @@ public abstract class ComponentNode<T extends ComponentNode<T>> implements Gener
 	public TypeNode resolveType(String name) throws TypeNotPresentException
 	{
 		if (resolveT(types(), name) != null) return resolveT(types(), name);
-		else if (CompConfig.BasicType.isBasic(name)) return CompConfig.BasicType.getType(name).getType();
+		else if (CompConfig.Primitive.isBasic(name)) return CompConfig.Primitive.getType(name).getType();
 		else if (parent != null) return parent.resolveType(name);
 		else throw new TypeNotPresentException(name, null);
 	}
@@ -115,7 +115,17 @@ public abstract class ComponentNode<T extends ComponentNode<T>> implements Gener
 		else if (parent != null) return parent.resolveFunction(name);
 		else return null;
 	}
-
+	public FunctionNode getFunction()
+	{
+		String[] scope = getScope();
+		int i = scope.length - 1;
+		while (i >= 0)
+		{
+			if (resolveFunction(scope[i]) != null) return resolveFunction(scope[i]);
+		}
+		return null;
+	}
+	
 	@Override
 	public T interpret(GeneralNode<String, String> node) throws Exception
 	{
@@ -136,11 +146,17 @@ public abstract class ComponentNode<T extends ComponentNode<T>> implements Gener
 			case assignment:
 				new AssignmentNode(this).interpret(childNode);
 				break;
+			case functionCall:
+				new FunctionCallNode(this).interpret(childNode);
+				break;
 			case returnStm:
 				new ReturnNode(this).interpret(childNode);
 				break;
-			case ifStm:
+			case ifStm: case ifElseStm:
 				new IfNode(this).interpret(childNode);
+				break;
+			case attributeStm:
+				new AttributeNode(this).interpret(childNode);
 				break;
 			default:
 				break;

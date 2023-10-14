@@ -6,8 +6,10 @@ package Compiler.ComponentNodes;
 import Grammar.GeneralParser.GeneralNode;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import Compiler.CompConfig;
 import Compiler.Compiler;
@@ -20,8 +22,9 @@ public class FunctionNode extends ComponentNode<FunctionNode> implements NamedNo
 	private String returnType;
 	private String name;
 	private StatementNode code;
+	private Set<String> attributes;
 	
-	public FunctionNode(ComponentNode<?> parent) {super(parent);}
+	public FunctionNode(ComponentNode<?> parent) {super(parent); attributes = new HashSet<String>();}
 
 	@Override
 	public FunctionNode interpret(GeneralNode<String, String> node) throws Exception
@@ -88,6 +91,21 @@ public class FunctionNode extends ComponentNode<FunctionNode> implements NamedNo
 	{
 		return "__" + getFullName() + "_END";
 	}
+
+	public void addAttribute(String attribute)
+	{
+		attributes.add(attribute);
+	}
+	public boolean isInterruptHandler()
+	{
+		return attributes.contains(CompConfig.Attributes.interrupt);
+	}
+
+	@Override
+	public boolean canCall(FunctionNode function)
+	{
+		return code.canCall(function) || (function == this);
+	}
 	@Override
 	public String getAssembly(int leadingWhitespace) throws Exception
 	{
@@ -96,7 +114,7 @@ public class FunctionNode extends ComponentNode<FunctionNode> implements NamedNo
 	
 		assembly += whitespace + getFullName() + ": \n";
 		if (code != null) assembly += code.getAssembly(leadingWhitespace + CompConfig.indentSize);
-		assembly += whitespace + getEndLabel() + ": RTL\n";
+		assembly += whitespace + getEndLabel() + (isInterruptHandler() && attributes.contains(CompConfig.Attributes.noISR) ? ": RTI\n" : ": RTL\n");
 		return assembly;
 	}
 }

@@ -10,6 +10,14 @@ public class StatementNode extends ComponentNode<StatementNode> implements Assem
 	public StatementNode(ComponentNode<?> parent) {super(parent);}
 	
 	@Override
+	public boolean canCall(FunctionNode function)
+	{
+		for (ComponentNode<?> child : children)
+			if (AssemblableNode.class.isAssignableFrom(child.getClass())) // Child assemblable
+				if (((AssemblableNode) child).canCall(function)) return true;
+		return false;
+	}
+	@Override
 	public String getAssembly(int leadingWhitespace) throws Exception
 	{
 		String assembly = "";
