@@ -4,11 +4,6 @@
 package Compiler.ComponentNodes;
 
 import Grammar.GeneralParser.GeneralNode;
-import Compiler.CompConfig;
-import Compiler.Compiler;
-import Compiler.ComponentNodes.Exceptions.TypeMismatchException;
-import Compiler.ComponentNodes.Interfaces.AssemblableNode;
-import Compiler.ComponentNodes.Interfaces.TypedNode;
 
 public class AttributeNode extends ComponentNode<AttributeNode>
 {

@@ -9,7 +9,7 @@ import java.util.List;
 
 import Compiler.CompConfig;
 import Compiler.Compiler;
-import Compiler.ComponentNodes.Exceptions.TypeMismatchException;
+import Compiler.Exceptions.TypeMismatchException;
 import Compiler.ComponentNodes.Interfaces.AssemblableNode;
 import Grammar.GeneralParser.GeneralNode;
 
