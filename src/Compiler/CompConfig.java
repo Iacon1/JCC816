@@ -8,6 +8,8 @@ import Compiler.ComponentNodes.Dummies.DummyType;
 
 public final class CompConfig
 {
+	public static final String version = "0.X";
+	
 	public static final String scopeDelimiter = "::";
 	public static final int indentSize = 2;
 	

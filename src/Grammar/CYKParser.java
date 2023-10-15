@@ -6,6 +6,8 @@ package Grammar;
 
 import java.util.List;
 
+import Logging.Logging;
+
 public class CYKParser
 {
 	protected static interface ParseSuite<T1, T2, T3>
@@ -39,6 +41,8 @@ public class CYKParser
 			}
 		
 		for (int l = 2; l <= n; ++l)
+		{
+			Logging.logNotice("Processed terminal " + l);
 			for (int s = 1; s <= n - l + 1; ++s)
 				for (int p = 1; p <= l - 1; ++p)
 					for (int i = 0; i < m; ++i)
@@ -55,10 +59,11 @@ public class CYKParser
 							
 							T3 pA = P[p - 1][s - 1][b];
 							T3 pB =	P[l - p - 1][s + p - 1][c];
-							if (suite.doGetP(pA, pB)) P[l - 1][s - 1][a] = suite.getP(rule.name, grammar.getSubRule(i, rule.name), pA, pB);
+							if (suite.doGetP(pA, pB))
+								P[l - 1][s - 1][a] = suite.getP(rule.name, grammar.getSubRule(i, rule.name), pA, pB);
 						}
 					}
-		
+		}
 		return P;
 	}
 	

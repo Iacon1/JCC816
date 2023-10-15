@@ -5,20 +5,16 @@
 package Executables;
 
 import Compiler.Compiler;
+import Logging.DebugLogger;
+import Logging.Logging;
 public class Test
 {
-	private static void print(String toPrint)
-	{
-		System.out.println(toPrint);
-	}
-	public static void main(String[] args)
+	public static void main(String[] args) throws Exception
 	{
 		String main = null;
-		try {main = new String(ClassLoader.getSystemResourceAsStream("Executables/test.c").readAllBytes());}
-		catch (Exception e) {print(e.getMessage()); return;}
+		Logging.setLogger(new DebugLogger());
+		main = new String(ClassLoader.getSystemResourceAsStream("Executables/test.c").readAllBytes());
 
-		print(Compiler.compile(main));
-		
-		
+		Logging.logNotice(Compiler.compile(main));
 	}
 }

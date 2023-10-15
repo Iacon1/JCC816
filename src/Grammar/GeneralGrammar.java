@@ -5,6 +5,7 @@
 package Grammar;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.ArrayDeque;
 import java.util.HashSet;
 import java.util.List;
@@ -12,13 +13,15 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.function.Supplier;
 
+import Logging.Logging;
+
 @SuppressWarnings("serial")
 public class GeneralGrammar<T1, T2> extends CNFGrammar<T1, T2>
 {
 	private Supplier<T2> nameSupplier;
 	private Set<T2> primaryNonterminals;
 	
-	// Rule with metadata built-in for re-constructing the original grammar with.
+	// CNF Rule with metadata built-in for re-constructing the original grammar with.
 	public static class TrackedRule<T1, T2> extends Rule<T1, T2>
 	{
 		public List<T2> unitChain; // If this rule was added to eliminate a unit rule
@@ -121,118 +124,158 @@ public class GeneralGrammar<T1, T2> extends CNFGrammar<T1, T2>
 		return null;
 	}
 	
+	private class RuleElement
+	{
+		private T2 nonTerminal;
+		private T1 terminal;
+		
+		public RuleElement(T1 terminal, T2 nonTerminal)
+		{
+			this.terminal = terminal;
+			this.nonTerminal = nonTerminal;
+		}
+		
+		boolean isTerminal()
+		{
+			return terminal != null;
+		}
+	}
 	// Used to build a rule.
 	public class RuleBuilder
 	{
 		private T2 id;
+		private List<T2> unitChain;
 		
-		private Queue<T1> terminals;
-		private Queue<T2> nonTerminals;
-		private Queue<Boolean> order; // Used to assemble the CNF rules; 0 means a terminal and 1 means a terminal.
+		private List<RuleElement> elements;
 		
 		public RuleBuilder(T2 id)
 		{
 			this.id = id;
-			terminals = new ArrayDeque<T1>();
-			nonTerminals = new ArrayDeque<T2>();
-			order = new ArrayDeque<Boolean>();
+			elements = new ArrayList<RuleElement>();
 		}
 		
 		public RuleBuilder addTerminal(T1 terminal)
 		{
-			terminals.add(terminal);
-			order.add(false);
-			
+			elements.add(new RuleElement(terminal, null));
+
 			return this;
 		}
 		public RuleBuilder addT(T1 terminal) {return addTerminal(terminal);}
 		
 		public RuleBuilder addNonTerminal(T2 nonTerminal)
 		{
-			nonTerminals.add(nonTerminal);
-			order.add(true);
+			elements.add(new RuleElement(null, nonTerminal));
 			
 			return this;
 		}
 		public RuleBuilder addNT(T2 nonTerminal) {return addNonTerminal(nonTerminal);}
-		public T2 build() // Builds the rule and converts it to CNF, adding it to the grammar.
+		public void queue() // Adds the builder to the general buffer.
 		{
-			T2 a, b, rule, tempId;
-			int length;
-			length = order.size();
-			switch (length)
-			{
-			case 1:	// Only one token.
-				if (id == null) rule = nameSupplier.get();
-				
-				else rule = id;
-				
-				if (order.poll())
-				// Nonterminal; Copy all of the nonterminal's productions as per https://en.wikipedia.org/wiki/Chomsky_normal_form#UNIT:_Eliminate_unit_rules.
-				{
-					a = nonTerminals.poll(); // A
-					for (int i = 0; i < size(); ++i)
-					{
-						TrackedRule<T1, T2> aRule = (TrackedRule<T1, T2>) get(i);
-						if (aRule.name.equals(a)) // Rule starts with A
-						{
-							List<T2> unitChain = new ArrayList<T2>();
-							if (aRule.unitChain != null) unitChain.addAll(aRule.unitChain);
-							unitChain.add(0, a);
-							
-							if (aRule.isUnit()) addRule(rule, unitChain, aRule.terminalValue);
-							else addRule(rule, unitChain, aRule.nonTerminalB, aRule.nonTerminalC);
-						}
-					}
-				}
-				else addRule(rule, terminals.poll());
-				break;
-			case 2:  // Two tokens
-				if (order.poll()) a = nonTerminals.poll();
-				else {a = nameSupplier.get(); addRule(a, terminals.poll());}
-				if (order.poll()) b = nonTerminals.poll();
-				else {b = nameSupplier.get(); addRule(b, terminals.poll());}
-				
-				if (id == null) rule = nameSupplier.get(); // id not set.
-				else rule = id; // id set.
-				addRule(rule, a, b);
-				break;
-			default: // Three or more tokens.
-				if (length < 1) return null; // If size unusable.
-				
-				if (order.poll()) a = nonTerminals.poll();
-				else {a = nameSupplier.get(); addRule(a, terminals.poll());}
-				if (order.poll()) b = nonTerminals.poll();
-				else {b = nameSupplier.get(); addRule(b, terminals.poll());}
-				
-				rule = nameSupplier.get();
-				addRule(rule, a, b);
-				a = rule;
-				tempId = id;
-				id = null;
-				if (length > 3) b = build();
-				else // Avoid creating a unit rule.
-				{
-					if (order.poll()) b = nonTerminals.poll();
-					else {b = nameSupplier.get(); addRule(b, terminals.poll());}
-				}
-				id = tempId;
-				if (id == null) rule = nameSupplier.get(); // id not set.
-				else rule = id; // id set.
-				
-				addRule(rule, a, b);
-				break;
-			}
-			
-			if (id != null) primaryNonterminals.add(id);
-			return rule;
+			buildBuffer.add(this);
 		}
 	}
 
-	public GeneralGrammar(Supplier<T2> nameSupplier) {this.nameSupplier = nameSupplier; primaryNonterminals = new HashSet<T2>();}
+	private List<RuleBuilder> buildBuffer;
+	
+	public GeneralGrammar(Supplier<T2> nameSupplier) {this.nameSupplier = nameSupplier; primaryNonterminals = new HashSet<T2>(); buildBuffer = new ArrayList<RuleBuilder>();}
 	public RuleBuilder getBuilder(T2 id) {return new RuleBuilder(id);}
-	public RuleBuilder getBuilder() {return getBuilder(null);}
 
+	private void applyTERM() // Remove nonsolitary terminals
+	{
+		int i = 0;
+		while (i < buildBuffer.size())
+		{
+			RuleBuilder builder = buildBuffer.get(i);
+			if (builder.id.equals("compound-statement"))
+			{
+				int k = 0;
+			}
+			if (builder.elements.size() == 1) {i += 1; continue;}
+			for (int j = 0; j < builder.elements.size(); ++j)
+			{
+				if (builder.elements.get(j).isTerminal())
+				{
+					
+					RuleElement e = builder.elements.get(j);
+					T2 newRule = nameSupplier.get();
+					getBuilder(newRule).addT(e.terminal).queue();
+					e.terminal = null;
+					e.nonTerminal = newRule;
+				}
+			}
+			i += 1;
+		}
+	}
+	private void applyBIN() // Remove oversized (i. e. more than 2) nonterminals
+	{
+		int i = 0;
+		while (i < buildBuffer.size())
+		{
+			RuleBuilder builder = buildBuffer.get(i);
+			if (builder.elements.size() >= 2)
+			{
+				T2 newRule = nameSupplier.get();
+				RuleBuilder r = new RuleBuilder(newRule);
+				r.elements = new ArrayList<RuleElement>(builder.elements);
+				T2 start = builder.elements.get(0).nonTerminal;
+				r.elements.remove(0);
+				builder.elements = new ArrayList<RuleElement>();
+				builder.addNT(start).addNT(newRule);
+				r.queue();
+			}
+			i += 1;
+		}
+	}
+	private void applyUNIT() // Remove unit nonterminals
+	{
+		int i = 0;
+		while (i < buildBuffer.size())
+		{
+			RuleBuilder builder = buildBuffer.get(i); // Get a general-structure rule
+			if (builder.elements.size() == 1 && !builder.elements.get(0).isTerminal()) // If it *is* a unit nonterminal
+			{
+				int j = 0;
+				while (j < buildBuffer.size())
+				{
+					RuleBuilder builder2 = buildBuffer.get(j);
+					if (builder2.id.equals(builder.elements.get(0).nonTerminal)) // Find all the rules it points to
+					{
+						RuleBuilder r = getBuilder(builder.id); // Make a new rule with the same name
+						if (builder.unitChain == null) r.unitChain = new ArrayList<T2>(); // And update its chain by starting with ours
+						else r.unitChain = new ArrayList<T2>(builder.unitChain);
+						r.unitChain.add(0, builder2.id); // adding their name
+						if (builder2.unitChain != null) r.unitChain.addAll(builder2.unitChain); // and then adding their chain
+						r.elements = new ArrayList<RuleElement>(builder2.elements);
+						r.queue();
+					}
+					j += 1;
+				}
+				buildBuffer.remove(i);
+				i -= 1;
+			}
+			i += 1;
+		}
+	}
+	public void updateCNF()
+	{
+		Logging.logNotice("General Grammar Size:" + buildBuffer.size());
+		List<RuleBuilder> tempBuffer = new ArrayList<RuleBuilder>(buildBuffer);
+		this.clear();
+		// applySTART();
+		applyTERM();
+		applyBIN();
+		// applyDEL();
+		applyUNIT();
+		
+		for (RuleBuilder builder : buildBuffer)
+		{
+			if (builder.elements.get(0).isTerminal())
+				addRule(builder.id, builder.unitChain, builder.elements.get(0).terminal);
+			else
+				addRule(builder.id, builder.unitChain, builder.elements.get(0).nonTerminal, builder.elements.get(1).nonTerminal);
+		}
+		buildBuffer = tempBuffer;
+	}
 	public void markPrimary(T2 rule) {primaryNonterminals.add(rule);}
 	public boolean isPrimary(T2 rule) {return primaryNonterminals.contains(rule);}
 }

@@ -7,8 +7,8 @@ import Grammar.GeneralParser.GeneralNode;
 import Compiler.Compiler;
 import Compiler.ComponentNodes.Interfaces.AssemblableNode;
 import Compiler.ComponentNodes.Interfaces.TypedNode;
-import Compiler.ComponentNodes.Exceptions.TypeMismatchException;
-import Compiler.ComponentNodes.Exceptions.UndefinedOpException;
+import Compiler.Exceptions.TypeMismatchException;
+import Compiler.Exceptions.UndefinedOpException;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;

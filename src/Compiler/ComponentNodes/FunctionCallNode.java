@@ -4,7 +4,7 @@
 package Compiler.ComponentNodes;
 
 import Grammar.GeneralParser.GeneralNode;
-import Compiler.ComponentNodes.Exceptions.TypeMismatchException;
+import Compiler.Exceptions.TypeMismatchException;
 import Compiler.ComponentNodes.Interfaces.AssemblableNode;
 import Compiler.ComponentNodes.Interfaces.TypedNode;
 
@@ -67,6 +67,10 @@ public class FunctionCallNode extends ComponentNode<FunctionCallNode> implements
 				else throw new TypeMismatchException(arg.getType(), paramSlot.getType());
 			}
 		
+		if (resolveFunction(function).equals(getFunction())) // Recursive!
+		{
+			
+		}
 		assembly += whitespace + "JSL\t" + resolveFunction(function).getFullName() + "\n";
 		
 		return assembly;

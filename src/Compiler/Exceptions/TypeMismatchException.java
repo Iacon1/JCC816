@@ -1,7 +1,7 @@
 // By Iacon1
 // Created 10/01/2023
 //
-package Compiler.ComponentNodes.Exceptions;
+package Compiler.Exceptions;
 
 import Compiler.ComponentNodes.TypeNode;
 
