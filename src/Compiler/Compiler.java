@@ -5,81 +5,64 @@ package Compiler;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.Supplier;
 
-import Compiler.ComponentNodes.ProgramNode;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+
+import org.antlr.v4.gui.TreeViewer;
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.Parser;
+import org.antlr.v4.runtime.tree.ParseTree;
+
+import Grammar.C99.C99Lexer;
+import Grammar.C99.C99Parser;
 import Logging.Logging;
-import Grammar.GeneralGrammar;
-import Grammar.GeneralParser;
-import Grammar.GeneralParser.GeneralNode;
 
 public class Compiler
 {
-	// Component rule-number declarations
-	public static enum ComponentType
-	{
-		program,
-		varDeclaration, // Variable declaration
-		expression,
-		function,
-		statement,
-		codeBlock,
-		assignment,
-		argList,
-		functionCall,
-		rVal, // Convienent wrapper for expressions, function calls, variables, and literals
-		returnStm,
-		ifStm, ifElseStm,
-		forStm,
-		attributeStm,
-	}
-	private static class RuleNameGen implements Supplier<String>
-	{
-		String curr;
-		
-		public RuleNameGen(String seed) {curr = seed;}
-		public RuleNameGen() {curr = "FFFFFFFF";}
-		@Override
-		public String get()
-		{
-			curr = String.format("%08x", curr.hashCode());
-			return curr;
-		}
-	}
-	
-	public static ComponentType getType(String name)
-	{
-		for (ComponentType type : ComponentType.values())
-			if (type.name().equals(name)) return type;
-		return null;
-	}
 	private static void printInfo(Object... info)
 	{
 		for (int i = 0; i < info.length; ++i) Logging.logNotice(info[i].toString() + (i == info.length - 1 ? "" : ", ") + "\n");
 	}
 	
-	private static List<String> lex(String source)
+	private static CommonTokenStream lex(String source)
 	{
-		String whitespacePattern = "[\\s]+";
-		String[] articles = new String[]{"+", "-", "=", "<", ">", "/", "\\", ";", ",", "(", ")", "{", "}", "&"};
+		C99Lexer lexer = new C99Lexer(CharStreams.fromString(source));
 		
-		for (String article : articles) source = source.replaceAll("\\" + article, " " + article + " ");
-		return Arrays.asList(source.split(whitespacePattern));
+		return new CommonTokenStream(lexer);
+	}
+
+	private static void viewParseTree(Parser parser, ParseTree tree)
+	{
+		JFrame frame = new JFrame("Antlr");
+		JPanel panel = new JPanel();
+		TreeViewer viewer = new TreeViewer(Arrays.asList(parser.getRuleNames()), tree);
+		viewer.setScale(1.5);
+		panel.add(viewer);
+		frame.add(panel);
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.pack();
+		frame.setVisible(true);
+	}
+	private static ParseTree parse(CommonTokenStream tokens)
+	{
+		C99Parser parser = new C99Parser(tokens);
+		ParseTree tree = parser.translation_unit();
+		viewParseTree(parser, tree);
+		return tree;
 	}
 	
-	private static GeneralNode<String, String> parse(List<String> tokens, GeneralGrammar<String, String> grammar, String program)
+	private static String emit(ParseTree tree) throws Exception
 	{
-		return REGEXParser.parseTree(tokens, grammar, program);
+		return null;
+
 	}
-	private static String emit(GeneralNode<String, String> tree) throws Exception
+	private static String precompile(String main)
 	{
-		ProgramNode program = new ProgramNode();
-		
-		program.interpret(tree);
-
-		return program.getAssembly();
+		return main; // TODO
 	}
-
+	
 	private static List<String> minimizeModeSwitches(List<String> lines)
 	{
 		int aMode = 0, xyMode = 0; // 0 = 8-bit, 1 = 16-bit, -1 = unknown
@@ -134,8 +117,7 @@ public class Compiler
 		
 		return lines;
 	}
-
-	public static String postprocess(String assembly)
+	private  static String postprocess(String assembly)
 	{
 		List<String> lines = Arrays.asList(assembly.split("\n"));
 
@@ -146,31 +128,23 @@ public class Compiler
 		return assembly;
 	}
 		
-	public static String precompile(String main)
-	{
-		return main; // TODO
-	}
+	
 	public static String compile(String source) throws Exception
 	{ 
 		String assembly = "";
-		GeneralGrammar<String, String> grammar = new GeneralGrammar<String, String>(new RuleNameGen());
 
 		long t = System.currentTimeMillis();
-		C99.initGrammar(grammar);
-		printInfo("grammar initialized in " + (System.currentTimeMillis() - t) + " ms. Rules: " + grammar.size() + ".");
-		t = System.currentTimeMillis();
-		
-		List<String> tokens = lex(source);
+
+		CommonTokenStream tokens = lex(source);
 		printInfo("Lexed in " + (System.currentTimeMillis() - t) + " ms.");
-		printInfo(tokens);
+		
 		t = System.currentTimeMillis();
 
-		GeneralParser.GeneralNode<String, String> tree = parse(tokens, grammar, "expression");
+		ParseTree tree = parse(tokens);
 		printInfo("Parsed in " + (System.currentTimeMillis() - t) + " ms.");
-		printInfo(tree.dumpTree(0));
 		t = System.currentTimeMillis();
 
-		//assembly = emit(tree);
+		assembly = emit(tree);
 		printInfo("Emitted in " + (System.currentTimeMillis() - t) + " ms. Assembly length: " + assembly.length() + ".");
 		t = System.currentTimeMillis();
 		
