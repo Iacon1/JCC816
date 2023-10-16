@@ -1,0 +1,17 @@
+<?xml-model href=""?>
+<project name="BBSnCC" default="build" basedir=".">
+	<property name="src" location="src"/>
+	<property name="bin" location="bin"/>
+	<property name="test_bin" location="bin"/>
+	<target name="build">
+		<exec executable="java">
+			<arg value = "org.antlr.v4.Tool"/>
+			<arg value = "${src}/Grammar/C99.g4"/>
+			<arg value = "-package"/>
+			<arg value = "Grammar.C99"/>
+			<arg value = "-o"/>
+			<arg value = "${src}/Grammar/C99/"/>
+		</exec>
+		<javac srcdir="${src}" destdir="${bin}" debug="on"/>
+	</target>
+</project>
