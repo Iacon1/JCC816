@@ -3,7 +3,7 @@
 //
 package Compiler.Exceptions;
 
-import Compiler.ComponentNodes.TypeNode;
+import Compiler.ComponentNodes.Definitions.Type;
 
 @SuppressWarnings("serial")
 public class TypeMismatchException extends Exception
@@ -12,8 +12,8 @@ public class TypeMismatchException extends Exception
 	{
 		super("The type \"" + t1 + "\" is not equivalent to " + t2);
 	}
-	public TypeMismatchException(TypeNode t1, TypeNode t2)
+	public TypeMismatchException(Type t1, Type t2)
 	{
-		super("The type \"" + t1.getFullName() + "\" is not equivalent to " + t2.getFullName());
+		super("The type \"" + t1.getSignature() + "\" is not equivalent to " + t2.getSignature());
 	}
 }

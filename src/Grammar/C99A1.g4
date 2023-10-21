@@ -3,8 +3,26 @@
 // Note: Rules that are capitalized are lexical, rules that aren't are parsed.
 
 lexer grammar C99A1;
+tokens {Pp_token}
 
 WS : [ \t\r\n]+ -> skip ; // skip spaces, tabs, newlines
+
+/*
+// A.1.1 Lexical elements
+CToken
+	: Keyword 
+	| Identifier
+	| Constant
+	| String_literal
+	| Punctuator ;	
+Pp_Token
+	: Header_name
+	| Identifier
+	| Pp_number
+	| Character_constant
+	| String_literal
+	| Punctuator ;
+*/
 
 // A.1.2 Keywords
 Keyword
@@ -45,10 +63,10 @@ Keyword
 	| '_Bool'
 	| '_Complex'
 	| '_Imaginary'
-	| '__attribute__' ; // Note - interrupt is not C99-compliant
+	| 'asm'	;			// As per J.5.10
 	
 // A.1.3 Identifiers
-Identifier : [a-zA-Z_] ([0-9a-zA-Z_]|Universal_character_name)* ;
+Identifier : ([a-zA-Z_]|Universal_character_name) ([0-9a-zA-Z_]|Universal_character_name)* ;
 
 // A.1.4 Universal character names
 fragment Universal_character_name
@@ -84,8 +102,7 @@ fragment Escape_sequence
 	| '\\x' [0-9a-fA-F]+ ;
 
 // A.1.6 String literals
-String_literal
-	: 'L'? '"' (~('"'|'\\'|'\n')|Escape_sequence)+ '"';
+String_literal : 'L'? '"' (~('"'|'\\'|'\n')|Escape_sequence)+ '"' ;
 
 // A.1.7 Punctuators
 Punctuator
@@ -93,27 +110,11 @@ Punctuator
 	| '+' | '-' | '~' | '!' | '/' | '%' | '<<' | '>>' | '<' | '>' | '<=' | '>='
 	| '==' | '!=' | '^' | '|' | '&&' | '||' | '?' | ':' | ';' | '...' | '=' | '*='
 	| '/=' | '%=' | '+=' | '-=' | '<<=' | '>>=' | '&=' | '^=' | '|=' | ',' | '#'
-	| '##' | '<:' | ':>' | '<%' | '%>' | '%:' | '%:%:' ;
+	| '##' | '<:' | ':>' | '<%' | '%>' | '%:' | '%:%:' 
+	| '[[' | ']]' ; // These two are not C99-compliant and were added for the attribute functionality
 	
 // A.1.8 Header names
 Header_name
-	: '<' ~('\n'|'>')+ '>'
-	| '"' ~('\n'|'"')+ '"' ;
-
-// A.1.9 Preprocessing numbers
-Pp_number : '.'? [0-9] ([0-9a-zA-Z_]|Universal_character_name|[eEpP][+-]|'.')* ;
-
-// A.1.1 Lexical elements - Included at the end so they don't obscure the others
-CToken
-	: Keyword 
-	| Identifier
-	| Constant
-	| String_literal
-	| Punctuator ;
-Preprocessing_token
-	: Header_name
-	| Identifier
-	| Pp_number
-	| Character_constant
-	| String_literal
-	| Punctuator ;
+	: '<' ~[\n>]+ '>'
+	| '"' ~[\n>]+ '"' ;
+Pp_number: '.'? [0-9] ([0-9]|[a-zA-Z_]|Universal_character_name|[eEpP][+-]|'.')* ;
