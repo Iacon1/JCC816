@@ -15,15 +15,35 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.Parser;
 import org.antlr.v4.runtime.tree.ParseTree;
 
+import Compiler.ComponentNodes.ProgramNode;
+import Compiler.Utils.CompUtils;
 import Grammar.C99.C99Lexer;
 import Grammar.C99.C99Parser;
+import Grammar.C99.C99Parser.ProgramContext;
 import Logging.Logging;
 
 public class Compiler
 {
+	private static class ParseDouble
+	{
+		public C99Parser parser;
+		public ParseTree tree;
+	}
 	private static void printInfo(Object... info)
 	{
 		for (int i = 0; i < info.length; ++i) Logging.logNotice(info[i].toString() + (i == info.length - 1 ? "" : ", ") + "\n");
+	}
+	private static void viewParseTree(Parser parser, ParseTree tree)
+	{
+		JFrame frame = new JFrame("Antlr");
+		JPanel panel = new JPanel();
+		TreeViewer viewer = new TreeViewer(Arrays.asList(parser.getRuleNames()), tree);
+		viewer.setScale(1.0);
+		panel.add(viewer);
+		frame.add(panel);
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.pack();
+		frame.setVisible(true);
 	}
 	
 	private static CommonTokenStream lex(String source)
@@ -33,34 +53,42 @@ public class Compiler
 		return new CommonTokenStream(lexer);
 	}
 
-	private static void viewParseTree(Parser parser, ParseTree tree)
+	
+	private static ParseDouble parse(CommonTokenStream tokens)
 	{
-		JFrame frame = new JFrame("Antlr");
-		JPanel panel = new JPanel();
-		TreeViewer viewer = new TreeViewer(Arrays.asList(parser.getRuleNames()), tree);
-		viewer.setScale(1.5);
-		panel.add(viewer);
-		frame.add(panel);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.pack();
-		frame.setVisible(true);
-	}
-	private static ParseTree parse(CommonTokenStream tokens)
-	{
-		C99Parser parser = new C99Parser(tokens);
-		ParseTree tree = parser.translation_unit();
-		viewParseTree(parser, tree);
-		return tree;
+		ParseDouble parseDouble = new ParseDouble();
+		parseDouble.parser = new C99Parser(tokens);
+		parseDouble.tree = parseDouble.parser.program();
+		
+		return parseDouble;
 	}
 	
-	private static String emit(ParseTree tree) throws Exception
+	private static String emit(ParseDouble parseDouble) throws Exception
 	{
-		return null;
+		ProgramNode program = new ProgramNode().interpret((ProgramContext) parseDouble.tree);
+		return program.getAssembly();
 
 	}
-	private static String precompile(String main)
+	private static String precompile(String mainFile)
 	{
-		return main; // TODO
+		// Not using a language-based approach because ANTLR doesn't like the one they had in the C docs for preprocessing
+		String[] lines = mainFile.split("\n");
+		String source = "";
+		boolean bigComment = false;
+		for (String line : lines)
+		{
+			if (bigComment && line.contains("*/"))
+			{
+				line = line.replaceFirst(".*\\*/", "");
+				bigComment = false;
+			}
+			else if (bigComment) continue;
+			line = line.replaceFirst("//.*", "");
+			if (line.contains("/*")) bigComment = true;
+			if (!line.isEmpty()) source += line + "\n";
+		}
+		
+		return source;
 	}
 	
 	private static List<String> minimizeModeSwitches(List<String> lines)
@@ -75,42 +103,42 @@ public class Compiler
 				xyMode = -1;
 			}
 				
-			if (line.contains(CompConfig.setAXY8))
+			if (line.contains(CompUtils.setAXY8))
 			{
-				if (aMode == 0 && xyMode == 0) lines.set(i, line.replace(CompConfig.setAXY8, ""));
-				else if (aMode == 0) lines.set(i, line.replace(CompConfig.setAXY8, CompConfig.setXY8));
-				else if (xyMode == 0) lines.set(i, line.replace(CompConfig.setAXY8, CompConfig.setA8));
+				if (aMode == 0 && xyMode == 0) lines.set(i, line.replace(CompUtils.setAXY8, ""));
+				else if (aMode == 0) lines.set(i, line.replace(CompUtils.setAXY8, CompUtils.setXY8));
+				else if (xyMode == 0) lines.set(i, line.replace(CompUtils.setAXY8, CompUtils.setA8));
 				
 				aMode = 0;
 				xyMode = 0;
 			}
-			else if (line.contains(CompConfig.setAXY16))
+			else if (line.contains(CompUtils.setAXY16))
 			{
-				if (aMode == 1 && xyMode == 1) lines.set(i, line.replace(CompConfig.setAXY16, ""));
-				else if (aMode == 1) lines.set(i, line.replace(CompConfig.setAXY16, CompConfig.setXY16));
-				else if (xyMode == 1) lines.set(i, line.replace(CompConfig.setAXY16, CompConfig.setA16));
+				if (aMode == 1 && xyMode == 1) lines.set(i, line.replace(CompUtils.setAXY16, ""));
+				else if (aMode == 1) lines.set(i, line.replace(CompUtils.setAXY16, CompUtils.setXY16));
+				else if (xyMode == 1) lines.set(i, line.replace(CompUtils.setAXY16, CompUtils.setA16));
 				
 				aMode = 1;
 				xyMode = 1;
 			}
-			else if (line.contains(CompConfig.setA8))
+			else if (line.contains(CompUtils.setA8))
 			{
-				if (aMode == 0) lines.set(i, line.replace(CompConfig.setA8, ""));
+				if (aMode == 0) lines.set(i, line.replace(CompUtils.setA8, ""));
 				aMode = 0;
 			}
-			else if (line.contains(CompConfig.setA16))
+			else if (line.contains(CompUtils.setA16))
 			{
-				if (aMode == 1) lines.set(i, line.replace(CompConfig.setA16, ""));
+				if (aMode == 1) lines.set(i, line.replace(CompUtils.setA16, ""));
 				aMode = 1;
 			}
-			else if (line.contains(CompConfig.setXY8))
+			else if (line.contains(CompUtils.setXY8))
 			{
-				if (xyMode == 0) lines.set(i, line.replace(CompConfig.setXY8, ""));
+				if (xyMode == 0) lines.set(i, line.replace(CompUtils.setXY8, ""));
 				xyMode = 0;
 			}
-			else if (line.contains(CompConfig.setXY16))
+			else if (line.contains(CompUtils.setXY16))
 			{
-				if (xyMode == 1) lines.set(i, line.replace(CompConfig.setXY16, ""));
+				if (xyMode == 1) lines.set(i, line.replace(CompUtils.setXY16, ""));
 				xyMode = 1;
 			}
 		}
@@ -129,22 +157,25 @@ public class Compiler
 	}
 		
 	
-	public static String compile(String source) throws Exception
+	public static String compile(String mainFile) throws Exception
 	{ 
 		String assembly = "";
 
 		long t = System.currentTimeMillis();
 
+		String source = precompile(mainFile);
+		Logging.logNotice(source);
 		CommonTokenStream tokens = lex(source);
 		printInfo("Lexed in " + (System.currentTimeMillis() - t) + " ms.");
 		
 		t = System.currentTimeMillis();
 
-		ParseTree tree = parse(tokens);
+		ParseDouble parseDouble = parse(tokens);
 		printInfo("Parsed in " + (System.currentTimeMillis() - t) + " ms.");
+		viewParseTree(parseDouble.parser, parseDouble.tree);
 		t = System.currentTimeMillis();
 
-		assembly = emit(tree);
+		assembly = emit(parseDouble);
 		printInfo("Emitted in " + (System.currentTimeMillis() - t) + " ms. Assembly length: " + assembly.length() + ".");
 		t = System.currentTimeMillis();
 		

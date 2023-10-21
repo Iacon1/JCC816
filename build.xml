@@ -6,6 +6,8 @@
 	<target name="build">
 		<exec executable="java">
 			<arg value = "org.antlr.v4.Tool"/>
+			<arg value = "-no-listener"/>
+			<arg value = "-visitor"/>
 			<arg value = "${src}/Grammar/C99.g4"/>
 			<arg value = "-package"/>
 			<arg value = "Grammar.C99"/>

@@ -3,13 +3,16 @@
 //
 package Compiler.ComponentNodes.Interfaces;
 
+import Compiler.ComponentNodes.Definitions.Scope;
+
 public interface NamedNode
 {
-	public String getScopePrefix();
+	public Scope getScope();
 	public String getName();
 	
 	public default String getFullName()
 	{
-		return getScopePrefix() + getName();
+		if (getScope() != null) return getScope().getPrefix() + getName();
+		else return getName();
 	}
 }

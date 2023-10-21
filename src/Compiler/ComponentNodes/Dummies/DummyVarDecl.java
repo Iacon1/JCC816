@@ -3,8 +3,8 @@
 //
 package Compiler.ComponentNodes.Dummies;
 
-import Compiler.ComponentNodes.TypeNode;
 import Compiler.ComponentNodes.VarDeclarationNode;
+import Compiler.ComponentNodes.Definitions.TypeNode;
 
 public class DummyVarDecl extends VarDeclarationNode
 {

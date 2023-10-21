@@ -3,23 +3,13 @@
 // Typed Node
 package Compiler.ComponentNodes.Interfaces;
 
-import Compiler.ComponentNodes.TypeNode;
-import Compiler.CompConfig;
+import Compiler.ComponentNodes.Definitions.Type;
 
 public interface TypedNode
 {
-	public TypeNode getType();
-	public default boolean canCastTo(TypeNode type)
-	{
-		return  CompConfig.Primitive.getType(getType()).isNumeric() &&
-				CompConfig.Primitive.getType(type).isNumeric() &&
-				getType().getSize() <= type.getSize();
-	}
-	public default boolean canCastFrom(TypeNode type)
-	{
-		return  CompConfig.Primitive.getType(getType()).isNumeric() &&
-				CompConfig.Primitive.getType(type).isNumeric() &&
-				getType().getSize() >= type.getSize();
-	}
-	public default String getTypeName() {return getType().getName();}
+	public Type getType();
+	public default boolean canCastTo(Type type) {return getType().canCastTo(type);}
+	public default boolean canCastFrom(Type type) {return getType().canCastFrom(type);}
+	public default boolean canCastTo(TypedNode node) {return getType().canCastTo(node.getType());}
+	public default boolean canCastFrom(TypedNode node) {return getType().canCastFrom(node.getType());}
 }

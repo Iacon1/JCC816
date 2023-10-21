@@ -4,8 +4,8 @@
 package Compiler.ComponentNodes;
 
 import Grammar.GeneralParser.GeneralNode;
-import Compiler.CompConfig;
 import Compiler.ComponentNodes.Interfaces.AssemblableNode;
+import Compiler.Utils.CompUtils;
 
 public class ReturnNode extends ComponentNode<ReturnNode> implements AssemblableNode
 {
@@ -21,7 +21,7 @@ public class ReturnNode extends ComponentNode<ReturnNode> implements Assemblable
 	}
 	
 	@Override
-	public boolean canCall(FunctionNode function)
+	public boolean canCall(FunctionDefinitionNode function)
 	{
 		return rValNode.canCall(function);
 	}
@@ -33,7 +33,7 @@ public class ReturnNode extends ComponentNode<ReturnNode> implements Assemblable
 		
 		if (rValNode.hasAssembly()) assembly += rValNode.getAssembly(leadingWhitespace);
 		
-		assembly += byteCopier(whitespace, rValNode.getType().getSize(), CompConfig.callResult, rValNode.getByteSource(rValNode.getType().getSize()));
+		assembly += byteCopier(whitespace, rValNode.getType().getSize(), CompUtils.callResult, rValNode.getByteSource(rValNode.getType().getSize()));
 		
 		assembly += whitespace + "JML\t" + getFunction().getEndLabel() + "\n";
 		

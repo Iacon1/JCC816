@@ -5,6 +5,7 @@ package Compiler.ComponentNodes;
 
 import Grammar.GeneralParser.GeneralNode;
 import Compiler.Exceptions.TypeMismatchException;
+import Compiler.ComponentNodes.Definitions.TypeNode;
 import Compiler.ComponentNodes.Interfaces.AssemblableNode;
 import Compiler.ComponentNodes.Interfaces.TypedNode;
 
@@ -33,13 +34,13 @@ public class FunctionCallNode extends ComponentNode<FunctionCallNode> implements
 		return resolveFunction(function).getType();
 	}
 	
-	public FunctionNode getFunction()
+	public FunctionDefinitionNode getFunction()
 	{
 		return resolveFunction(function);
 	}
 	
 	@Override
-	public boolean canCall(FunctionNode function)
+	public boolean canCall(FunctionDefinitionNode function)
 	{
 		return function.equals(resolveFunction(this.function));
 	}

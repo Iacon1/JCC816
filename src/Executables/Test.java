@@ -15,11 +15,6 @@ public class Test
 		Logging.setLogger(new DebugLogger());
 		main = new String(ClassLoader.getSystemResourceAsStream("Executables/test.c").readAllBytes());
 
-		Compiler.compile(main);
-		
-		
-		
-		
-		
+		Logging.logNotice("\n" + Compiler.compile(main));
 	}
 }

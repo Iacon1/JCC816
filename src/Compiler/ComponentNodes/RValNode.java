@@ -7,10 +7,11 @@ package Compiler.ComponentNodes;
 
 import java.util.function.Function;
 
-import Compiler.CompConfig;
 import Compiler.Compiler;
+import Compiler.ComponentNodes.Definitions.TypeNode;
 import Compiler.ComponentNodes.Interfaces.AssemblableNode;
 import Compiler.ComponentNodes.Interfaces.TypedNode;
+import Compiler.Utils.CompUtils;
 import Grammar.GeneralParser.GeneralNode;
 
 public class RValNode extends ComponentNode<RValNode> implements TypedNode, AssemblableNode
@@ -34,10 +35,10 @@ public class RValNode extends ComponentNode<RValNode> implements TypedNode, Asse
 		if (a.matches("[0-9]+")) // Number
 		{
 			long value = Long.valueOf(a); // We must determine the smallest size we can use
-			if (Math.abs(value) < Math.pow(2, 8 * CompConfig.Primitive.t_char.getSize())) return Byte.valueOf(a); // Character
-			else if (Math.abs(value) < Math.pow(2, 8 * CompConfig.Primitive.t_short.getSize())) return Short.valueOf(a); // Short
-			else if (Math.abs(value) < Math.pow(2, 8 * CompConfig.Primitive.t_int.getSize())) return Integer.valueOf(a); // Int
-			else if (Math.abs(value) < Math.pow(2, 8 * CompConfig.Primitive.t_long.getSize())) return Long.valueOf(a); // Long
+			if (Math.abs(value) < Math.pow(2, 8 * CompConfig.CompUtils.t_char.getSize())) return Byte.valueOf(a); // Character
+			else if (Math.abs(value) < Math.pow(2, 8 * CompConfig.CompUtils.t_short.getSize())) return Short.valueOf(a); // Short
+			else if (Math.abs(value) < Math.pow(2, 8 * CompConfig.CompUtils.t_int.getSize())) return Integer.valueOf(a); // Int
+			else if (Math.abs(value) < Math.pow(2, 8 * CompConfig.CompUtils.t_long.getSize())) return Long.valueOf(a); // Long
 			else return null;
 		}
 		else if (a.endsWith("\"")) // Quote
@@ -93,12 +94,12 @@ public class RValNode extends ComponentNode<RValNode> implements TypedNode, Asse
 		Function<Integer, String> source = null;
 		if (hasPropValue())
 		{
-			if (CompConfig.Primitive.getType(getType()).isNumeric())
-				source = numericSource(((Number) getPropagatedValue()).longValue(), size);
-			else if (getType().equals(CompConfig.Primitive.t_string.getType()))
-				source = stringSource((String) getPropagatedValue());
-			else if (getType().equals(CompConfig.Primitive.t_bool.getType()))
-				source = byteStreamSource(new byte[] {(byte) ((Boolean) getPropagatedValue() ? 0xFF : 0x00)});
+			if (CompUtils.Primitive.getType(getType()).isNumeric())
+				source = numericSource(((Number) getPropValue()).longValue(), size);
+			else if (getType().equals(CompConfig.CompUtils.t_string.getType()))
+				source = stringSource((String) getPropValue());
+			else if (getType().equals(CompConfig.CompUtils.t_bool.getType()))
+				source = byteStreamSource(new byte[] {(byte) ((Boolean) getPropValue() ? 0xFF : 0x00)});
 			return source;
 		}
 		else
@@ -112,7 +113,7 @@ public class RValNode extends ComponentNode<RValNode> implements TypedNode, Asse
 				source = addressSource(expOperand, size);
 				break;
 			case functionCall:
-				source = addressSource(CompConfig.callResult, size);
+				source = addressSource(CompUtils.callResult, size);
 				break;
 			default:
 				source = null;
@@ -123,7 +124,7 @@ public class RValNode extends ComponentNode<RValNode> implements TypedNode, Asse
 	}
 	public Function<Integer, String> getByteSource(int size)
 	{
-		return getByteSource(CompConfig.operandA, size);	
+		return getByteSource(CompUtils.operandA, size);	
 	}
 	public Function<Integer, String> getByteSource()
 	{
@@ -140,14 +141,14 @@ public class RValNode extends ComponentNode<RValNode> implements TypedNode, Asse
 		return (type == Type.expression && !expNode.hasPropValue()) || (type == Type.functionCall && !callNode.hasPropValue());
 	}
 	@Override
-	public Object getPropagatedValue()
+	public Object getPropValue()
 	{
 		switch (type)
 		{
 		case literal:
 			return litValue;
 		case expression:
-			return expNode.getPropagatedValue();
+			return expNode.getPropValue();
 		default:
 			return null;
 		}
@@ -164,7 +165,7 @@ public class RValNode extends ComponentNode<RValNode> implements TypedNode, Asse
 	}
 
 	@Override
-	public boolean canCall(FunctionNode function)
+	public boolean canCall(FunctionDefinitionNode function)
 	{
 		if (type == Type.expression) return expNode.canCall(function);
 		else if (type == Type.functionCall) return callNode.canCall(function);
@@ -173,7 +174,7 @@ public class RValNode extends ComponentNode<RValNode> implements TypedNode, Asse
 	@Override
 	public String getAssembly(int leadingWhitespace) throws Exception
 	{
-		return getAssembly(leadingWhitespace, CompConfig.operandA, false);
+		return getAssembly(leadingWhitespace, CompUtils.operandA, false);
 	}
 
 	@Override
@@ -182,7 +183,7 @@ public class RValNode extends ComponentNode<RValNode> implements TypedNode, Asse
 		switch (type)
 		{
 		case variable: return resolveVariable(varName).getType();
-		case literal: return CompConfig.Primitive.getType(litValue.getClass()).getType();
+		case literal: return CompUtils.Primitive.getType(litValue.getClass()).getType();
 		case expression: return expNode.getType();
 		case functionCall: return callNode.getType();
 		default: return null;

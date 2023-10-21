@@ -75,10 +75,12 @@ constant_expression : conditional_expression ;
 // A.2.2 Declarations
 declaration : declaration_specifiers init_declarator_list? ';' ;
 declaration_specifiers
-	: ('typedef'|'extern'|'static'|'auto'|'register') declaration_specifiers?
-	| type_specifier declaration_specifiers?
-	| type_qualifier declaration_specifiers?
-	| 'inline' declaration_specifiers? ;
+	: (storage_class_specifier
+	| type_specifier
+	| type_qualifier
+	| function_specifier)+? ;
+storage_class_specifier:'typedef'|'extern'|'static'|'auto'|'register';
+function_specifier : 'inline' ;
 init_declarator_list : init_declarator (',' init_declarator)* ;
 init_declarator: declarator ('=' initializer)? ;
 type_specifier
@@ -112,11 +114,11 @@ direct_declarator
 	| direct_declarator '[' type_qualifier_list? '*' ']'
 	| direct_declarator '(' parameter_type_list ')'
 	| direct_declarator '(' identifier_list? ')' ;
-pointer : '*' type_qualifier_list? pointer? ;
+pointer : ('*' type_qualifier_list?)+ ;
 type_qualifier_list : type_qualifier+ ;
 parameter_type_list : parameter_list (',' '...')? ;
 parameter_list : parameter_declaration (',' parameter_declaration)* ;
-parameter_declaration : declaration_specifiers (declarator|abstract_declarator)? ;
+parameter_declaration : declaration_specifiers (declarator|abstract_declarator?) ;
 identifier_list : Identifier (',' Identifier)* ;
 type_name : specifier_qualifier_list abstract_declarator? ;
 abstract_declarator
@@ -140,6 +142,7 @@ designator_list : designator+ ;
 designator
 	: '[' constant_expression ']'
 	| '.' Identifier ;
+attributes_declaration : '[[' identifier_list ']]' ;
 
 // A.2.3 Statements
 statement
@@ -148,7 +151,8 @@ statement
 	| expression_statement
 	| selection_statement
 	| iteration_statement
-	| jump_statement ;
+	| jump_statement 
+	| asm_statement ;
 labeled_statement
 	: Identifier ':' statement
 	| 'case' constant_expression ':' statement
@@ -173,11 +177,12 @@ jump_statement
 	| 'continue' ';'
 	| 'break' ';'
 	| 'return' expression? ';' ;
+asm_statement : 'asm' '(' String_literal ')' ';' ; // As per J.5.10
 
-// A.2.4 External definitions
+// A.2.4 External definitions 
 translation_unit: external_declaration+ ;
 external_declaration
 	: function_definition
 	| declaration ;
-function_definition : declaration_specifiers declarator declaration_list? compound_statement ;
+function_definition : attributes_declaration* declaration_specifiers declarator declaration_list? compound_statement ;
 declaration_list : declaration+ ;

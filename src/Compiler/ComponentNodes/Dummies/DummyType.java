@@ -3,18 +3,21 @@
 // A type
 package Compiler.ComponentNodes.Dummies;
 
-import Compiler.ComponentNodes.TypeNode;
+import java.util.Arrays;
+import java.util.List;
 
-public class DummyType extends TypeNode
+import Compiler.ComponentNodes.Definitions.Type;
+
+public class DummyType extends Type
 {
-	private int size;
-	
-	public DummyType(String name, int size)
+	public DummyType(List<String> typeSpecifiers)
 	{
-		super(name);
-		this.size = size;
+		super();
+		this.typeSpecifiers = typeSpecifiers;
 	}
-
-	@Override
-	public int getSize() {return size;}
+	public DummyType(String... typeSpecifiers)
+	{
+		super();
+		this.typeSpecifiers = Arrays.asList(typeSpecifiers);
+	}
 }

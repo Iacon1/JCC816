@@ -7,10 +7,11 @@ package Compiler.ComponentNodes;
 import java.util.ArrayList;
 import java.util.List;
 
-import Compiler.CompConfig;
 import Compiler.Compiler;
 import Compiler.Exceptions.TypeMismatchException;
+import Compiler.Utils.CompUtils;
 import Compiler.ComponentNodes.Interfaces.AssemblableNode;
+import Compiler.ComponentNodes.Statements.StatementNode;
 import Grammar.GeneralParser.GeneralNode;
 
 public class IfNode extends ComponentNode<IfNode> implements AssemblableNode
@@ -56,7 +57,7 @@ public class IfNode extends ComponentNode<IfNode> implements AssemblableNode
 	}
 	
 	@Override
-	public boolean canCall(FunctionNode function)
+	public boolean canCall(FunctionDefinitionNode function)
 	{
 		for (int i = 0; i < conditions.size(); ++i)
 			if (conditions.get(i).canCall(function)) return true;
@@ -78,11 +79,11 @@ public class IfNode extends ComponentNode<IfNode> implements AssemblableNode
 			skipName = "__IFNOT_" + ifCount + "_" + i;
 			RValNode condition = conditions.get(i);
 			StatementNode statement = statements.get(i);
-			if (condition.getType().equals(CompConfig.Primitive.t_bool.getType())) // Must be boolean
+			if (condition.getType().equals(CompConfig.CompUtils.t_bool.getType())) // Must be boolean
 			{
 				if (condition.hasPropValue()) // Known value at compile time
 				{
-					if ((Boolean) condition.getPropagatedValue())
+					if ((Boolean) condition.getPropValue())
 						assembly += condition.getAssembly(leadingWhitespace);
 					else
 						assembly += "";
@@ -90,19 +91,19 @@ public class IfNode extends ComponentNode<IfNode> implements AssemblableNode
 				else // Unknown value at compile time
 				{
 					if (condition.hasAssembly()) assembly += condition.getAssembly(leadingWhitespace);
-					else assembly += byteCopier(whitespace, condition.getType().getSize(), CompConfig.operandA, condition.getByteSource()); // Make sure variable loaded.
+					else assembly += byteCopier(whitespace, condition.getType().getSize(), CompUtils.operandA, condition.getByteSource()); // Make sure variable loaded.
 					assembly += whitespace + "BEQ\t" + skipName + "\n";
-					assembly += statement.getAssembly(leadingWhitespace + CompConfig.indentSize);
+					assembly += statement.getAssembly(leadingWhitespace + CompUtils.indentSize);
 					if (statements.size() > 1) assembly += whitespace + "JML\t" + lastSkip + "\n"; // If there's more statements make sure to skip them.
 					assembly += whitespace + skipName + ":\n";
 				}
 			}
-			else throw new TypeMismatchException(condition.getType().getName(), CompConfig.Primitive.t_bool.getName());
+			else throw new TypeMismatchException(condition.getType().getName(), CompConfig.CompUtils.t_bool.getName());
 		}
 		if (conditions.size() < statements.size())
 		{
 			StatementNode statement = statements.get(statements.size() - 1);
-			assembly += statement.getAssembly(leadingWhitespace + CompConfig.indentSize);
+			assembly += statement.getAssembly(leadingWhitespace + CompUtils.indentSize);
 			assembly += whitespace + "JML\t" + lastSkip + "\n";
 		}
 		assembly += whitespace + lastSkip + ":\n";

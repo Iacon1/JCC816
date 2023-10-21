@@ -8,37 +8,43 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.function.Function;
 
-import Compiler.CompConfig;
-import Compiler.ComponentNodes.FunctionNode;
-import Compiler.ComponentNodes.VarDeclarationNode;
+import Compiler.ComponentNodes.FunctionDefinitionNode;
+import Compiler.ComponentNodes.VariableNode;
+import Compiler.Utils.CompUtils;
 
 public interface AssemblableNode
 {
 	// Assembly utils
+	public default String applyFiller(String string, int desiredLength)
+	{
+		String filler = new String(new char[desiredLength - string.length()]).replace('\0', ' ');
+		
+		return string + filler;
+	}
 	public default String getWhitespace(int leadingWhitespace) {return new String(new char[leadingWhitespace]).replace('\0', ' ');}
-	public default String getVariableBlock(String whitespace, Collection<VarDeclarationNode> varDecls)
+	public default String getVariableBlock(String whitespace, Collection<VariableNode> vars)
 	{
 		String assembly = "";
 		int maxLength = 0;
-		for (VarDeclarationNode declaration: varDecls)
-			maxLength = Math.max(maxLength, declaration.getFullName().length()); // 4 because we're assume nothing is more than 9999 bytes long
+		for (VariableNode variable: vars)
+			maxLength = Math.max(maxLength, variable.getFullName().length()); // 4 because we're assume nothing is more than 9999 bytes long
 		
-		for (VarDeclarationNode declaration: varDecls)
+		for (VariableNode variable: vars)
 		{
 			String suffix = null;
 				
-			if (declaration.getTypeName() == null && declaration.getType() != null)	// Dummy type
-				suffix = ".res " + String.format("%04d", declaration.getType().getSize()) + ", $00";
+			if (variable.getTypeName() == null && variable.getType() != null)	// Dummy type
+				suffix = ".res " + String.format("%04d", variable.getType().getSize()) + ", $00";
 			else
 			{
-				if (CompConfig.Primitive.isBasic(declaration.getTypeName()))
-					suffix = ".res " + String.format("%04d", declaration.getType().getSize()) + ", $00";
-				else if (declaration.getTypeName().endsWith("*"))
-					suffix = ".res " + String.format("%04d", CompConfig.Primitive.t_pointer.getSize()) + ", $00";
-				else suffix = ".tag " + declaration.getType().getFullName();
+				if (CompUtils.Primitive.isBasic(variable.getTypeName()))
+					suffix = ".res " + String.format("%04d", variable.getType().getSize()) + ", $00";
+				else if (variable.getTypeName().endsWith("*"))
+					suffix = ".res " + String.format("%04d", CompConfig.CompUtils.t_pointer.getSize()) + ", $00";
+				else suffix = ".tag " + variable.getType().getFullName();
 			}
-			String filler = new String(new char[maxLength - declaration.getFullName().length()]).replace('\0', ' ');
-			assembly += whitespace + declaration.getFullName() + ": " + filler + suffix + "\n";
+			String filler = new String(new char[maxLength - variable.getFullName().length()]).replace('\0', ' ');
+			assembly += whitespace + variable.getFullName() + ": " + filler + suffix + "\n";
 		}
 		
 		return assembly;
@@ -49,7 +55,7 @@ public interface AssemblableNode
 		
 		if (nBytes >= 2)
 		{
-			assembly += whitespace + CompConfig.setAXY16 + "\n";
+			assembly += whitespace + CompUtils.setAXY16 + "\n";
 			for (int i = 0; i < nBytes; i += 2)
 			{
 				for (String opLine : perBytePair.apply(i))
@@ -58,7 +64,7 @@ public interface AssemblableNode
 		}
 		if (nBytes % 2 == 1)
 		{
-			assembly += whitespace + CompConfig.setAXY8 + "\n";
+			assembly += whitespace + CompUtils.setAXY8 + "\n";
 			for (String opLine : finalByte)
 				assembly += whitespace + opLine + "\n";
 		}
@@ -69,7 +75,7 @@ public interface AssemblableNode
 	{
 		String assembly = "";
 		
-		if (nBytes >= 2) assembly += whitespace + CompConfig.setAXY16 + "\n";
+		if (nBytes >= 2) assembly += whitespace + CompUtils.setAXY16 + "\n";
 		for (int i = 0; i < nBytes; i += 2)
 		{
 			for (String opLine : perIteration.apply(i))
@@ -77,7 +83,7 @@ public interface AssemblableNode
 		}
 		if (nBytes % 2 == 1)
 		{
-			assembly += whitespace + CompConfig.setAXY8 + "\n";
+			assembly += whitespace + CompUtils.setAXY8 + "\n";
 			for (String opLine : perIteration.apply(nBytes - 1))
 				assembly += whitespace + opLine + "\n";
 		}
@@ -97,7 +103,7 @@ public interface AssemblableNode
 					"STA\t" + writeAddr + (nBytes == 1? "" : " + " + (nBytes - 1))}
 		);
 	}
-	public default String byteCopier(String whitespace, int nBytes, String writeAddr, String readAddr)
+	public default String byteCopierAddr(String whitespace, int nBytes, String writeAddr, String readAddr)
 	{
 		return byteCopier(whitespace, nBytes, writeAddr, (Integer i) ->
 			{
@@ -136,31 +142,31 @@ public interface AssemblableNode
 		if (size == 1) return (Integer i) -> {return s;};
 		else return (Integer i) -> {return s + " + " + Math.min(size - 1, i);};
 	}
+	public default Function<Integer, String> constantSource(Object constant, int size)
+	{
+		if (Boolean.class.isAssignableFrom(constant.getClass()))
+			return byteStreamSource(new byte[] {(byte) ((Boolean) constant ? 0xFF : 0x00)});
+		else if (String.class.isAssignableFrom(constant.getClass()))
+			return stringSource((String) constant);
+		else if (Number.class.isAssignableFrom(constant.getClass()))
+			return numericSource(((Number) constant).longValue(), size);
+		else return null;
+	}
 	public default String byteCopier(String whitespace, String writeAddr, byte[] bytes)
 	{
 		return byteCopier(whitespace, bytes.length, writeAddr, byteStreamSource(bytes));
 	}
-	public default String byteCopier(String whitespace, String writeAddr, int x)
+	public default String byteCopier(String whitespace, int nBytes, String writeAddr, Object constant)
 	{
-		return byteCopier(whitespace, CompConfig.Primitive.t_int.getSize(), writeAddr, numericSource(x, CompConfig.Primitive.t_int.getSize()));
-	}
-	public default String byteCopier(String whitespace, String writeAddr, String x)
-	{
-		return byteCopier(whitespace, CompConfig.Primitive.t_int.getSize(), writeAddr, stringSource(x));
-	}
-	public default String byteCopier(String whitespace, String writeAddr, char x)
-	{
-		return byteCopier(whitespace, CompConfig.Primitive.t_int.getSize(), writeAddr, byteStreamSource(new byte[] {(byte) x}));
-	}
-	public default String byteCopier(String whitespace, String writeAddr, boolean x)
-	{
-		return byteCopier(whitespace, CompConfig.Primitive.t_int.getSize(), writeAddr, byteStreamSource(new byte[] {(byte) (x ? 0xFF : 0x00)}));
+		Function<Integer, String> source = constantSource(constant, nBytes);
+		return byteCopier(whitespace, nBytes, writeAddr, source);
 	}
 	
-	public boolean canCall(FunctionNode function);
+	public boolean canCall(FunctionDefinitionNode function);
 	
 	public default boolean hasPropValue() {return true;}
-	public default Object getPropagatedValue() {return null;}
+	public default boolean hasAssembly() {return !hasPropValue();}
+	public default Object getPropValue() {return null;}
 	public String getAssembly(int leadingWhitespace) throws Exception;
 	public default String getAssembly() throws Exception {return getAssembly(0);}
 }

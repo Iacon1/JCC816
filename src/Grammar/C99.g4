@@ -5,6 +5,8 @@
 grammar C99;
 import C99A1, C99A2;
 
+program : translation_unit ;
+/*
 // A.3 Preprocessing directives
 preprocessing_file : group? ;
 group : group_part+ ;
@@ -36,4 +38,5 @@ control_line
 text_line : pp_tokens? '\n' ;
 non_directive : pp_tokens '\n' ;
 replacement_list : pp_tokens? ;
-pp_tokens : Preprocessing_token+ ;
+pp_tokens : pp_token+ ;
+*/
