@@ -14,23 +14,26 @@ public final class CompUtils
 {
 	public static final String version = "0.X";
 	
-	public static final String scopeDelimiter = "::";
+	public static final String scopeDelimiter = "__";
 	public static final int indentSize = 2;
 	
 	public static final String operandA = "__operandA";
 	public static final String operandB = "__operandB";
-	public static final String callResult = operandA;
-	public static final int operandSize = 128;
+	public static final int operandSize = 64;
+	public static final String callResult = "__callResult";
+	public static final int resultSize = 128;
 	
 	public static final String setA8 = "SEP\t#$20", setA16 = "REP\t#$20";
 	public static final String setXY8 = "SEP\t#$10", setXY16 = "REP\t#$10";
 	public static final String setAXY8 = "SEP\t#$30", setAXY16 = "REP\t#$30";
-	
+
 	public static final class Attributes
 	{
 		public static final String interrupt = "interrupt";
 		public static final String noISR = "no_isr";
 	}
+
+	public static String headerTag = "__HEADER_HERE";
 	
 	private static final int intSize = 4;
 	public static final int pointerSize = 6;
@@ -87,7 +90,8 @@ public final class CompUtils
 	}
 	public static Object parseLiteral(String literal)
 	{
-		return Long.parseLong(literal); // TODO
+		return Long.valueOf(literal); // TODO
+		
 	}
 	
 	public static int stackSize = 0x2000;
