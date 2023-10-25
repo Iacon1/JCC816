@@ -5,6 +5,11 @@
 package Executables;
 
 import Compiler.Compiler;
+
+import java.io.File;
+import java.io.FileOutputStream;
+
+import Assembler.Assembler;
 import Logging.DebugLogger;
 import Logging.Logging;
 public class Test
@@ -15,6 +20,14 @@ public class Test
 		Logging.setLogger(new DebugLogger());
 		main = new String(ClassLoader.getSystemResourceAsStream("Executables/test.c").readAllBytes());
 
-		Logging.logNotice("\n" + Compiler.compile(main));
+		String c = Compiler.compile(main);
+		Logging.logNotice("\n" + c);
+		byte[] sfc = Assembler.assemble("test", c, "3bank");
+		
+		File f = new File("./test.sfc");
+		f.createNewFile();
+		FileOutputStream fo = new FileOutputStream(f);
+		fo.write(sfc);
+		fo.close();
 	}
 }
