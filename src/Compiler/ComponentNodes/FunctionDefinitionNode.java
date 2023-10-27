@@ -21,6 +21,7 @@ import Compiler.ComponentNodes.Statements.CompoundStatementNode;
 import Compiler.ComponentNodes.Statements.StatementNode;
 import Compiler.ComponentNodes.UtilNodes.DeclarationSpecifiersNode;
 import Compiler.ComponentNodes.UtilNodes.DeclaratorNode;
+import Compiler.Utils.AssemblyUtils;
 import Compiler.Utils.CompUtils;
 
 public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionNode, Function_definitionContext> implements NamedNode, TypedNode, AssemblableNode
@@ -68,6 +69,10 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 	{
 		return super.getScope().getPrefix() + getName();
 	}
+	public String getLabel(String gotoLabel)
+	{
+		return "__" + getFullName() + CompUtils.scopeDelimiter + gotoLabel;
+	}
 	public String getEndLabel()
 	{
 		return "__" + getFullName() + "_END";
@@ -92,12 +97,14 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 	@Override
 	public String getAssembly(int leadingWhitespace) throws Exception
 	{
-		String whitespace = getWhitespace(leadingWhitespace);
+		String whitespace = AssemblyUtils.getWhitespace(leadingWhitespace);
 		String assembly = "";
 	
-		assembly += whitespace + getFullName() + ": \n";
+		assembly += whitespace + getFullName() + ":\n";
 		if (code != null) assembly += code.getAssembly(leadingWhitespace + CompUtils.indentSize);
-		assembly += whitespace + getEndLabel() + (isInterruptHandler() && attributes.contains(CompUtils.Attributes.noISR) ? ": RTI\n" : ": RTL\n");
+		assembly += whitespace + getEndLabel() + ": " + (isInterruptHandler() && attributes.contains(CompUtils.Attributes.noISR) ? "RTI\n" : "RTL") + "\n";
 		return assembly;
 	}
+
+	
 }

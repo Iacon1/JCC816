@@ -5,11 +5,10 @@ package Compiler.ComponentNodes.Expressions;
 import java.util.function.Function;
 
 import Compiler.ComponentNodes.ComponentNode;
+import Compiler.Utils.AssemblyUtils;
+import Compiler.Utils.OperandSource;
 import Grammar.C99.C99Parser.Additive_expressionContext;
 import Grammar.C99.C99Parser.Multiplicative_expressionContext;
-import Grammar.C99.C99Parser.Or_expressionContext;
-import Grammar.C99.C99Parser.Shift_expressionContext;
-import Grammar.C99.C99Parser.Xor_expressionContext;
 
 public class AdditiveExpressionNode extends BinaryExpressionNode
 <Additive_expressionContext, Multiplicative_expressionContext, Multiplicative_expressionContext, Additive_expressionContext>
@@ -30,37 +29,76 @@ public class AdditiveExpressionNode extends BinaryExpressionNode
 	{return new MultiplicativeExpressionNode(this).interpret(node.multiplicative_expression());}
 
 	@Override
-	public Object getPropValue() {
-		// TODO Auto-generated method stub
-		return null;
+	public Object getPropValue()
+	{
+		Long a = ((Number) x.getPropValue()).longValue();
+		Long b = ((Number) y.getPropValue()).longValue();
+		switch (operator)
+		{
+		case "+": return Long.valueOf(a + b);
+		case "-": return Long.valueOf(a - b);
+		default: return null;
+		}
 	}
+	public static String getAdder(String whitespace, String destAddr, OperandSource sourceX, OperandSource sourceY)
+	{
+		return whitespace + "CLC\n" + AssemblyUtils.bytewiseOperation(whitespace, sourceX.getSize(), (Integer i) -> 
+		{return new String[]
+			{
+				"LDA\t" + sourceX.apply(i),
+				"ADC\t" + sourceY.apply(i),
+				"STA\t" + destAddr + " + " + i,
+			};
+		});
+	}
+	public static String getIncrementer(String whitespace, String destAddr, OperandSource sourceX)
+	{
+		Function<Integer, String> sourceY = AssemblyUtils.numericSource(1, sourceX.getSize());
+		return whitespace + "CLC\n" + AssemblyUtils.bytewiseOperation(whitespace, sourceX.getSize(), (Integer i) -> 
+		{return new String[]
+			{
+				"LDA\t" + sourceX.apply(i),
+				"ADC\t" + sourceY.apply(i),
+				"STA\t" + destAddr + " + " + i,
+			};
+		});
+	}
+	public static String getSubtractor(String whitespace, String destAddr, OperandSource sourceX, OperandSource sourceY)
+	{
+		return whitespace + "SEC\n" + AssemblyUtils.bytewiseOperation(whitespace, sourceX.getSize(), (Integer i) -> 
+		{return new String[]
+			{
+				"LDA\t" + sourceX.apply(i),
+				"SBC\t" + sourceY.apply(i),
+				"STA\t" + destAddr + " + " + (i),
+			};
+		}, true, true);
+	}
+	public static String getDecrementer(String whitespace, String destAddr, OperandSource sourceX)
+	{
+		Function<Integer, String> sourceY = AssemblyUtils.numericSource(1, sourceX.getSize());
+		return whitespace + "SEC\n" + AssemblyUtils.bytewiseOperation(whitespace, sourceX.getSize(), (Integer i) -> 
+		{return new String[]
+			{
+				"LDA\t" + sourceX.apply(i),
+				"SBC\t" + sourceY.apply(i),
+				"STA\t" + destAddr + " + " + (i),
+			};
+		}, true, true);
+	}
+	
 	@Override
-	protected String getAssembly(String whitespace, String destAddr, boolean useB, Function<Integer, String> sourceX, Function<Integer, String> sourceY, int xSize) throws Exception
+	protected String getAssembly(String whitespace, String destAddr, boolean useB, OperandSource sourceX, OperandSource sourceY) throws Exception
 	{
 		String assembly = "";
 		
 		switch (operator)
 		{
 		case "+":
-			assembly += bytewiseOperation(whitespace, xSize, (Integer i) ->
-			{
-				return new String[]
-				{
-					"LDA\t" + sourceX.apply(i),
-					"ADC\t" + sourceY.apply(i),
-					"STA\t" + destAddr + " + " + i,
-				};
-			});
+			assembly += getAdder(whitespace, destAddr, sourceX, sourceY);
 			break;
 		case "-":
-			assembly += bytewiseOperation(whitespace, xSize, (Integer i) -> 
-			{return new String[]
-				{
-					"LDA\t" + sourceX.apply(i),
-					"SBC\t" + sourceY.apply(i),
-					"STA\t" + destAddr + " + " + i,
-				};
-			});
+			assembly += getSubtractor(whitespace, destAddr, sourceX, sourceY);
 			break;
 		}
 		return assembly;

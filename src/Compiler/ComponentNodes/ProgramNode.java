@@ -3,26 +3,110 @@
 // The program itself.
 package Compiler.ComponentNodes;
 
+import java.util.AbstractMap.SimpleEntry;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import Compiler.ComponentNodes.Expressions.MultiplicativeExpressionNode;
 import Compiler.ComponentNodes.Declarations.DeclarationNode;
 import Compiler.ComponentNodes.Interfaces.AssemblableNode;
+import Compiler.Utils.AssemblyUtils;
 import Compiler.Utils.CompUtils;
+import Compiler.Utils.SNESRegisters;
 import Grammar.C99.C99Parser.External_declarationContext;
 import Grammar.C99.C99Parser.ProgramContext;
 
 public class ProgramNode extends InterpretingNode<ProgramNode, ProgramContext> implements AssemblableNode
 {
+	private String mapMemory(int leadingWhitespace)
+	{
+		String whitespace = AssemblyUtils.getWhitespace(leadingWhitespace);
+		String assembly = "";
+		
+		Set<String> fullNames = new HashSet<String>();
+		for (VariableNode variable : variables)
+			fullNames.add(variable.getFullName());
+		
+		// Get longest variable name
+		int maxLength = Math.max(CompUtils.operandA.length(), CompUtils.operandB.length());
+		maxLength = Math.max(
+				Math.max(CompUtils.operandA.length(), CompUtils.operandB.length()),
+				CompUtils.callResult.length()
+		);
+		for (String fullName: fullNames)
+			maxLength = Math.max(maxLength, fullName.length());
+		for (SNESRegisters register : SNESRegisters.values())
+			maxLength = Math.max(maxLength, register.toString().length());
+		
+		int basePosition = 0;
+		assembly += whitespace + AssemblyUtils.applyFiller(CompUtils.operandA, maxLength) + " := " +
+				CompUtils.mapOffset(basePosition, CompUtils.operandSize) + "\n";
+		basePosition += CompUtils.operandSize;
+		assembly += whitespace + AssemblyUtils.applyFiller(CompUtils.operandB, maxLength) + " := " +
+				CompUtils.mapOffset(basePosition, CompUtils.operandSize) + "\n";
+		basePosition += CompUtils.operandSize;
+		assembly += whitespace + AssemblyUtils.applyFiller(CompUtils.operandC, maxLength) + " := " +
+				CompUtils.mapOffset(basePosition, CompUtils.resultSize) + "\n";
+		basePosition += CompUtils.operandSize;
+		assembly += whitespace + AssemblyUtils.applyFiller(CompUtils.callResult, maxLength) + " := " +
+				CompUtils.mapOffset(basePosition, CompUtils.resultSize) + "\n";
+		basePosition += CompUtils.resultSize;
+		
+		// Declare variable locations
+		Map<String, Integer> positions = new HashMap<String, Integer>();
+		// Using dynamic programming to make sure two variables whose functions share the stack don't overlap in memory
+		for (String fullName: fullNames) positions.put(fullName, basePosition);
+		for (String fullName: fullNames)
+		{
+			assembly += whitespace + AssemblyUtils.applyFiller(fullName, maxLength) + " := " + CompUtils.mapOffset(positions.get(fullName), resolveVariable(fullName).getSize()) + "\n";
+			FunctionDefinitionNode owner = resolveVariable(fullName).getEnclosingFunction();
+			for (String otherFullName: fullNames)
+			{
+				if (otherFullName.equals(fullName) || positions.get(otherFullName) == -1) continue;
+				FunctionDefinitionNode otherOwner = resolveVariable(otherFullName).getEnclosingFunction();
+				if ((owner == null && otherOwner == null) || owner.canCall(otherOwner) || otherOwner.isInterruptHandler())
+				{
+					int offset = positions.get(fullName) + resolveVariable(fullName).getSize();
+					positions.put(otherFullName, Math.max(positions.get(otherFullName), offset));
+				}
+			}
+			positions.put(fullName, -1); // Tags this as not being one we need to look at again.
+		}
+		
+		for (SNESRegisters register : SNESRegisters.values())
+			assembly += whitespace + AssemblyUtils.applyFiller(register.toString(), maxLength) + " := $" + String.format("%06x", register.address()) + "\n";
+		return assembly;
+	}
+	private String generateVectorTable(int leadingWhitespace)
+	{
+		String whitespace = AssemblyUtils.getWhitespace(leadingWhitespace);
+		String assembly = "";
+		assembly += whitespace + ".segment \"VECTORS\"\n";
+		// Native
+		assembly += whitespace + ".word\tRESET\n"; // Unused
+		assembly += whitespace + ".word\tRESET\n"; // Unused
+		assembly += whitespace + ".word\tRESET\n"; // COP
+		assembly += whitespace + ".word\tRESET\n"; // BRK
+		assembly += whitespace + ".word\tRESET\n"; // ABORT
+		assembly += whitespace + ".word\tRESET\n"; // NMI
+		assembly += whitespace + ".word\tRESET\n"; // RESET
+		assembly += whitespace + ".word\tRESET\n"; // IRQ
+		// Emulation
+		assembly += whitespace + ".word\tRESET\n"; // Unused
+		assembly += whitespace + ".word\tRESET\n"; // Unused
+		assembly += whitespace + ".word\tRESET\n"; // COP
+		assembly += whitespace + ".word\tRESET\n"; // Unused
+		assembly += whitespace + ".word\tRESET\n"; // ABORT
+		assembly += whitespace + ".word\tRESET\n"; // RESET
+		assembly += whitespace + ".word\tRESET\n"; // IRQ/BRK
+
+		return assembly;
+	}
+	
 	public ProgramNode(ComponentNode<?> parent) {super(parent);}
 	public ProgramNode() {super();}
-	@Override
-	public boolean canCall(FunctionDefinitionNode function)
-	{
-		return true;
-	}
 	
 	@Override
 	public ProgramNode interpret(ProgramContext node) throws Exception
@@ -36,59 +120,64 @@ public class ProgramNode extends InterpretingNode<ProgramNode, ProgramContext> i
 		return this;
 	}
 	
-	private String mapMemory(int leadingWhitespace)
+	@Override
+	public boolean canCall(FunctionDefinitionNode function)
 	{
-		String whitespace = getWhitespace(leadingWhitespace);
-		String assembly = "";
-		
-		Set<String> fullNames = new HashSet<String>();
-		for (VariableNode variable : variables)
-			fullNames.add(variable.getFullName());
-		
-		// Get longest variable name
-		int maxLength = Math.max(CompUtils.operandA.length(), CompUtils.operandB.length());
-		for (String fullName: fullNames)
-			maxLength = Math.max(maxLength, fullName.length() + 1);
-
-		assembly += whitespace + applyFiller(CompUtils.operandA, maxLength) + "= " + CompUtils.mapOffset(CompUtils.stackSize, CompUtils.operandSize) + "\n";
-		assembly += whitespace + applyFiller(CompUtils.operandB, maxLength) + "= " + CompUtils.mapOffset(CompUtils.stackSize + CompUtils.operandSize, CompUtils.operandSize) + "\n";
-		
-		// Declare variable locations
-		Map<String, Integer> positions = new HashMap<String, Integer>();
-		// Using dynamic programming to make sure two variables whose functions share the stack don't overlap in memory
-		for (String fullName: fullNames) positions.put(fullName, CompUtils.stackSize + 2 * CompUtils.operandSize);
-		for (String fullName: fullNames)
-		{
-			assembly += whitespace + applyFiller(fullName, maxLength) + "= " + CompUtils.mapOffset(positions.get(fullName), resolveVariable(fullName).getSize()) + "\n";
-//			FunctionNode owner = resolveVariable(fullName).getFunction();
-			for (String otherFullName: fullNames)
-			{
-				if (otherFullName.equals(fullName) || positions.get(otherFullName) == -1) continue;
-//				FunctionNode otherOwner = resolveVariable(otherFullName).getFunction();
-//				if ((owner == null && otherOwner == null) || owner.canCall(otherOwner) || otherOwner.isInterruptHandler())
-				{
-					int offset = positions.get(fullName) + resolveVariable(fullName).getSize();
-					positions.put(otherFullName, Math.max(positions.get(otherFullName), offset));
-				}
-			}
-			positions.put(fullName, -1); // Tags this as not being one we need to look at again.
-		}
-		
-		return assembly;
+		return true;
 	}
 	
 	@Override
 	public String getAssembly(int leadingWhitespace) throws Exception
 	{
-		String whitespace = getWhitespace(leadingWhitespace);
+		String whitespace = AssemblyUtils.getWhitespace(leadingWhitespace);
 		String assembly = "";
 
+		assembly += whitespace + ".p816\n" + ".smart\t+\n";
+		
+		assembly += generateVectorTable(leadingWhitespace); // Vector table
+		
+		assembly += whitespace + ".segment \"HEADER\"\n"; // Declare header
+		assembly += whitespace + ".res\t48, 0;\tHEADER_HERE\n";
 		assembly += mapMemory(leadingWhitespace);
 		
+		assembly += ".segment \"CODE\"\n"; // Begins runnable code
+		assembly += whitespace + "RESET:\n";
+		assembly +=
+				whitespace + "SEI\n" +
+				whitespace + "CLC\n" +
+				whitespace + "XCE\n" +
+				whitespace + "REP\t#$08\n";
 		assembly += whitespace + CompUtils.setA16 + "\n";
 		assembly += whitespace + "LDA\t#$" + String.format("%04x", CompUtils.stackSize) + "\n";
 		assembly += whitespace + "TCS\n";
 		assembly += whitespace + "JML\tmain\n";
+		
+		// Required multiplier subs
+		for (SimpleEntry<Integer, Integer> mult : reqMultSubs)
+		{
+			assembly += whitespace + "__MULT_" + mult.getKey() + "_" + mult.getValue() + ":CLC\n";
+			assembly += MultiplicativeExpressionNode.getMultiplier(
+					AssemblyUtils.getWhitespace(leadingWhitespace + CompUtils.indentSize),
+					CompUtils.callResult,
+					AssemblyUtils.addressSource(CompUtils.operandA, mult.getKey()),
+					AssemblyUtils.addressSource(CompUtils.operandB, mult.getValue()));
+			assembly += whitespace + "RTL\n";
+		}
+		
+		// Required divison subs
+		for (SimpleEntry<Integer, Integer> div : reqDivSubs)
+		{
+			assembly += whitespace + "__DIV_" + div.getKey() + "_" + div.getValue() + ":CLC\n";
+			if (div.getValue() == 1) // Can use short divider
+				assembly += MultiplicativeExpressionNode.getShortDivider(
+					AssemblyUtils.getWhitespace(leadingWhitespace + CompUtils.indentSize),
+					CompUtils.callResult, false, div.getKey(), div.getValue());
+			else // Must use long divider
+				assembly += MultiplicativeExpressionNode.getLongDivider(
+					AssemblyUtils.getWhitespace(leadingWhitespace + CompUtils.indentSize),
+					CompUtils.callResult, false, div.getKey(), div.getValue());
+			assembly += whitespace + "RTL\n";
+		}
 		// Get assembly from functions
 		for (FunctionDefinitionNode funcNode : functions)
 		{

@@ -14,7 +14,9 @@ import Compiler.ComponentNodes.ComponentNode;
 import Compiler.ComponentNodes.FunctionDefinitionNode;
 import Compiler.ComponentNodes.Definitions.Type;
 import Compiler.Exceptions.UndefinedOpException;
+import Compiler.Utils.AssemblyUtils;
 import Compiler.Utils.CompUtils;
+import Compiler.Utils.OperandSource;
 
 public abstract class BinaryExpressionNode<
 	C1 extends ParserRuleContext,
@@ -69,44 +71,38 @@ public abstract class BinaryExpressionNode<
 		return x.hasPropValue() && y.hasPropValue();
 	}
 	
-	protected String getAssembly(String whitespace, String destAddr, boolean useB, Function<Integer, String> sourceX, Function<Integer, String> sourceY, int xSize) throws Exception
-	{
-		return "";
-	}
-	
+	protected String getAssembly(String whitespace, String destAddr, boolean useB, OperandSource sourceX, OperandSource sourceY) throws Exception
+	{return null;}
 	@Override
 	protected String getAssembly(int leadingWhitespace, String destAddr, boolean useB) throws Exception
 	{
-		String whitespace = getWhitespace(leadingWhitespace);
+		String whitespace = AssemblyUtils.getWhitespace(leadingWhitespace);
 		final String destOperand = useB ? CompUtils.operandB : CompUtils.operandA;
 		final String otherOperand = useB ? CompUtils.operandA : CompUtils.operandB;
-		final Function<Integer, String> sourceX, sourceY;
+		final OperandSource sourceX, sourceY;
 		String assembly = "";
-		
-		final int xSize = x.getType().getSize();
-		
-		
+
 		if (y.hasAssembly())
 		{
 			assembly += y.getAssembly(leadingWhitespace, otherOperand, useB);
-			sourceY = addressSource(otherOperand, xSize);
+			sourceY = AssemblyUtils.addressSource(otherOperand, y.getType().getSize());
 		}
 		else if (y.hasPropValue())
-			sourceY = constantSource(y.getPropValue(), xSize);
+			sourceY = AssemblyUtils.constantSource(y.getPropValue(), y.getType().getSize());
 		else
-			sourceY = addressSource(y.getVariable().getFullName(), xSize);
+			sourceY = AssemblyUtils.addressSource(y.getVariable().getFullName(), y.getType().getSize());
 		// Now we figure out X
 		if (x.hasAssembly())
 		{
-			assembly += x.getAssembly(leadingWhitespace, otherOperand, useB);
-			sourceX = addressSource(otherOperand, xSize);
+			assembly += x.getAssembly(leadingWhitespace, destOperand, useB);
+			sourceX = AssemblyUtils.addressSource(destOperand, x.getType().getSize());
 		}
 		else if (x.hasPropValue())
-			sourceX = constantSource(x.getPropValue(), xSize);
+			sourceX = AssemblyUtils.constantSource(x.getPropValue(), x.getType().getSize());
 		else
-			sourceX = addressSource(x.getVariable().getFullName(), xSize);
+			sourceX = AssemblyUtils.addressSource(x.getVariable().getFullName(), x.getType().getSize());
 		
-		assembly += getAssembly(whitespace, destAddr, useB, sourceX, sourceY, xSize);
+		assembly += getAssembly(whitespace, destAddr, false, sourceX, sourceY);
 		
 		return assembly;
 	}

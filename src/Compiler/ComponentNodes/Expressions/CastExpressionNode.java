@@ -41,6 +41,12 @@ public class CastExpressionNode extends BaseExpressionNode<Cast_expressionContex
 	}
 
 	@Override
+	public boolean hasPropValue()
+	{
+		// TODO Auto-generated method stub
+		return false;
+	}
+	@Override
 	public Object getPropValue() {
 		// TODO Auto-generated method stub
 		return null;

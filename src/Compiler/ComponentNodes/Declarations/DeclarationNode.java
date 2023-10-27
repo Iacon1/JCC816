@@ -15,6 +15,7 @@ import Compiler.ComponentNodes.Definitions.Type;
 import Compiler.ComponentNodes.Interfaces.AssemblableNode;
 import Compiler.ComponentNodes.UtilNodes.DeclarationSpecifiersNode;
 import Compiler.ComponentNodes.UtilNodes.DeclaratorNode;
+import Compiler.Utils.AssemblyUtils;
 import Grammar.C99.C99Parser.Abstract_declaratorContext;
 import Grammar.C99.C99Parser.DeclarationContext;
 import Grammar.C99.C99Parser.DeclaratorContext;
@@ -92,7 +93,11 @@ public class DeclarationNode extends InterpretingNode<DeclarationNode, Declarati
 		String assembly = "";
 		for (int i = 0; i < variables.size(); ++i)
 			if (expressions.get(i) != null)
-				assembly += expressions.get(i).getAssembly(leadingWhitespace, variables.get(i).getFullName());
+			{
+				if (!expressions.get(i).hasPropValue()) assembly += expressions.get(i).getAssembly(leadingWhitespace, variables.get(i).getFullName());
+				else assembly += AssemblyUtils.byteCopier(AssemblyUtils.getWhitespace(leadingWhitespace), variables.get(i).getSize(), variables.get(i).getFullName(), expressions.get(i).getPropValue());
+			}
+				
 		return assembly;
 	}
 }

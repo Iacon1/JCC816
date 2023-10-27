@@ -22,7 +22,7 @@ public class Test
 
 		String c = Compiler.compile(main);
 		Logging.logNotice("\n" + c);
-		byte[] sfc = Assembler.assemble("test", c, "3bank");
+		byte[] sfc = Assembler.assemble("test", c, "3bank", true);
 		
 		File f = new File("./test.sfc");
 		f.createNewFile();

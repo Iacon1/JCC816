@@ -5,12 +5,13 @@ package Compiler.ComponentNodes.Statements;
 
 import Compiler.ComponentNodes.ComponentNode;
 import Compiler.ComponentNodes.FunctionDefinitionNode;
+import Compiler.ComponentNodes.Expressions.BaseExpressionNode;
 import Compiler.ComponentNodes.Expressions.ExpressionNode;
 import Grammar.C99.C99Parser.Expression_statementContext;
 
 public class ExpressionStatementNode extends StatementNode<Expression_statementContext>
 {
-	private ExpressionNode expression;
+	private BaseExpressionNode<?> expression;
 	public ExpressionStatementNode(ComponentNode<?> parent) {super(parent);}
 
 	@Override
@@ -21,7 +22,8 @@ public class ExpressionStatementNode extends StatementNode<Expression_statementC
 	}
 	
 	@Override
-	public boolean canCall(FunctionDefinitionNode function) {
+	public boolean canCall(FunctionDefinitionNode function)
+	{
 		return expression.canCall(function);
 	}
 

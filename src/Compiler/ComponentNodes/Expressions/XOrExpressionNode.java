@@ -3,6 +3,8 @@
 package Compiler.ComponentNodes.Expressions;
 
 import Compiler.ComponentNodes.ComponentNode;
+import Compiler.Utils.AssemblyUtils;
+import Compiler.Utils.OperandSource;
 import Grammar.C99.C99Parser.And_expressionContext;
 import Grammar.C99.C99Parser.Land_expressionContext;
 import Grammar.C99.C99Parser.Lor_expressionContext;
@@ -27,16 +29,30 @@ public class XOrExpressionNode extends BinaryExpressionNode
 	protected BaseExpressionNode<And_expressionContext> getPCNode(Xor_expressionContext node) throws Exception
 	{return new AndExpressionNode(this).interpret(node.and_expression());}
 
+	public static String getExclOr(String whitespace, String destAddr, OperandSource sourceX, OperandSource sourceY)
+	{
+		String assembly = AssemblyUtils.bytewiseOperation(whitespace, sourceX.getSize(), (Integer i) ->
+		{
+			return new String[]
+			{
+				"LDA\t" + sourceX.apply(i),
+				"EOR\t" + sourceY.apply(i),
+				"STA\t" + destAddr + " + " + i,
+			};
+		});
+		return assembly;
+	}
+	
 	@Override
 	public Object getPropValue()
 	{
-		// TODO Auto-generated method stub
-		return null;
+		Long a = ((Number) x.getPropValue()).longValue();
+		Long b = ((Number) y.getPropValue()).longValue();
+		return Long.valueOf(a ^ b);
 	}
 	@Override
-	protected String getAssembly(int leadingWhitespace, String writeAddr, boolean useB) throws Exception
+	protected String getAssembly(String whitespace, String destAddr, boolean useB, OperandSource sourceX, OperandSource sourceY) throws Exception
 	{
-		// TODO Auto-generated method stub
-		return null;
+		return getExclOr(whitespace, destAddr, sourceX, sourceY);
 	}
 }

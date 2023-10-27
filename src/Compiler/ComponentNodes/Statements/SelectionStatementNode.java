@@ -2,82 +2,121 @@
 //
 package Compiler.ComponentNodes.Statements;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import Compiler.ComponentNodes.ComponentNode;
 import Compiler.ComponentNodes.Expressions.BaseExpressionNode;
 import Compiler.ComponentNodes.Expressions.ExpressionNode;
+import Compiler.Utils.AssemblyUtils;
 import Compiler.Utils.CompUtils;
 import Compiler.ComponentNodes.FunctionDefinitionNode;
 import Grammar.C99.C99Parser.Selection_statementContext;
 
 public class SelectionStatementNode extends StatementNode<Selection_statementContext>
 {
-	private static int ifCount = 0;
-	private int ifId;
+	private static int selCount = 0;
+	private int selId;
 	
 	private BaseExpressionNode<?> expression;
 	
-	private StatementNode<?> ifStm, elseStm;
+	private StatementNode<?> switchStm, ifStm, elseStm;
+	
+	private Map<BaseExpressionNode<?>, String> cases;
 	boolean isSwitch;
 	
-	public SelectionStatementNode(ComponentNode<?> parent) {super(parent);}
+	
+	public SelectionStatementNode(ComponentNode<?> parent)
+	{
+		super(parent);
+		selId = selCount;
+		selCount += 1;
+	}
 	@Override
-	public void finalize() {if (!isSwitch) ifCount -= 1;}
+	public void finalize() {selCount -= 1;}
 	@Override
 	public StatementNode<Selection_statementContext> interpret(Selection_statementContext node) throws Exception
 	{
 		expression = new ExpressionNode(this).interpret(node.expression());
-		ifStm = StatementNode.manufacture(this, node.statement(0));
-		if (node.statement().size() == 2) elseStm = StatementNode.manufacture(this, node.statement().get(1));
 		isSwitch = (node.getChild(0).getText().equals("switch"));
+		if (!isSwitch)
+		{
+			ifStm = StatementNode.manufacture(this, node.statement(0));
+			if (node.statement().size() == 2) elseStm = StatementNode.manufacture(this, node.statement().get(1));
+		}
+		else
+		{
+			switchStm = StatementNode.manufacture(this, node.statement(0));
+			cases = new HashMap<BaseExpressionNode<?>, String>();
+		}
 		
-		if (!isSwitch) {ifId = ifCount; ifCount += 1;}
 		return this;
+	}
+	
+	public boolean isSwitch() {return isSwitch;}
+	public String getLabel(BaseExpressionNode<?> constExpr)
+	{
+		cases.put(constExpr, "__CASE_" + selId + "_" + cases.size());
+		return cases.get(constExpr);
+	}
+	public String getDefaultLabel()
+	{
+		return "__CASE_" + selId + "_" + "DEF";
+	}
+	public String getEndLabel()
+	{
+		if (!isSwitch)
+			if (elseStm != null)
+				return "__IFNOTELSE_" + selId;
+			else return "__IFNOT_" + selId;
+		else return null; // TODO
 	}
 	
 	@Override
 	public boolean canCall(FunctionDefinitionNode function)
 	{
-		return expression.canCall(function) || ifStm.canCall(function) || elseStm.canCall(function);
+		return expression.canCall(function) || (switchStm != null && switchStm.canCall(function)) || (ifStm != null && ifStm.canCall(function)) || (elseStm != null && elseStm.canCall(function));
 	}
-
 	@Override
 	public String getAssembly(int leadingWhitespace) throws Exception
 	{
-		String whitespace = getWhitespace(leadingWhitespace);
+		String whitespace = AssemblyUtils.getWhitespace(leadingWhitespace);
 		String assembly = "";
 		
 		if (!isSwitch)
 		{
-			if (expression.hasPropValue() && (Boolean) expression.getPropValue()) // Always true
+			if (expression.hasPropValue() && (((Number) expression.getPropValue()).longValue() != 0)) // Always true
 				assembly += ifStm.getAssembly(leadingWhitespace);
 			else if (expression.hasPropValue() && elseStm != null) // Always false
 				assembly += elseStm.getAssembly(leadingWhitespace);
 			else if (!expression.hasPropValue()) // Unknown
 			{
-				String skipName = "__IFNOT_" + ifId;
-				String skipElse = "__IFNOTELSE_" + ifId;
+				String skipName = "__IFNOT_" + selId;
 				if (expression.hasAssembly())
 					assembly += expression.getAssembly(leadingWhitespace);
 				else if (expression.hasPropValue())
-					assembly += byteCopier(whitespace, expression.getType().getSize(), CompUtils.operandA, expression.getPropValue());
+					assembly += AssemblyUtils.byteCopier(whitespace, expression.getType().getSize(), CompUtils.operandA, expression.getPropValue());
 				else
-					assembly += byteCopier(whitespace, expression.getType().getSize(), CompUtils.operandA, expression.getVariable().getFullName());
+					assembly += AssemblyUtils.byteCopier(whitespace, expression.getType().getSize(), CompUtils.operandA, expression.getVariable().getFullName());
 				// Make sure variable loaded.
 				assembly += whitespace + "BEQ\t" + skipName + "\n";
 				assembly += ifStm.getAssembly(leadingWhitespace + CompUtils.indentSize);
 				if (elseStm != null)
 				{
-					assembly += getWhitespace(leadingWhitespace + CompUtils.indentSize) + "JML\t" + skipElse + "\n";
+					assembly += AssemblyUtils.getWhitespace(leadingWhitespace + CompUtils.indentSize) + "JML\t" + getEndLabel() + "\n";
 					assembly += whitespace + skipName + ":\n";
 					assembly += elseStm.getAssembly(leadingWhitespace + CompUtils.indentSize);
-					assembly += whitespace + skipElse + ":\n";
 				}
-				else assembly += whitespace + skipName + ":\n";
+				assembly += whitespace + getEndLabel() + ":\n";
 			}
 		}
-		
+		else
+		{
+			
+			assembly += switchStm.getAssembly(leadingWhitespace + CompUtils.indentSize);
+		}
 		return assembly;
-	}
-	
-	
+	}	
 }

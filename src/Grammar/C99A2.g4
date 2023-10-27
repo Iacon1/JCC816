@@ -20,9 +20,7 @@ postfix_expression
 	| postfix_expression '++'
 	| postfix_expression '--'
 	| '(' type_name ')' '{' initializer_list ','? '}' ;	
-argument_expression_list
-	: assignment_expression
-	| argument_expression_list ',' assignment_expression ;	
+argument_expression_list : assignment_expression (',' assignment_expression)* ;	
 unary_expression
 	: postfix_expression
 	| '++' unary_expression
@@ -126,12 +124,12 @@ abstract_declarator
 	| pointer? direct_abstract_declarator ;
 direct_abstract_declarator
 	: '(' declarator ')'
-	| direct_abstract_declarator ('[' type_qualifier_list? assignment_expression? ']'
-	| '[' 'static' type_qualifier_list? assignment_expression ']'
-	| '[' type_qualifier_list 'static' assignment_expression ']'
-	| '[' type_qualifier_list? '*' ']'
-	| '(' parameter_type_list ')'
-	| '(' identifier_list? ')')+ ;
+	| direct_abstract_declarator '[' type_qualifier_list? assignment_expression? ']'
+	| direct_abstract_declarator '[' 'static' type_qualifier_list? assignment_expression ']'
+	| direct_abstract_declarator '[' type_qualifier_list 'static' assignment_expression ']'
+	| direct_abstract_declarator '[' type_qualifier_list? '*' ']'
+	| direct_abstract_declarator '(' parameter_type_list ')'
+	| direct_abstract_declarator '(' identifier_list? ')' ;
 typedef_name : Identifier ;
 initializer
 	: assignment_expression
@@ -160,8 +158,8 @@ labeled_statement
 compound_statement : '{' block_item_list? '}' ;
 block_item_list : block_item+ ;
 block_item
-	: declaration
-	| statement ;
+	: statement
+	| declaration ;
 expression_statement : expression? ';' ;
 selection_statement
 	: 'if' '(' expression ')' statement

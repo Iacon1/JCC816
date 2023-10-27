@@ -9,6 +9,7 @@ import java.util.List;
 
 import Compiler.ComponentNodes.ComponentNode;
 import Compiler.ComponentNodes.FunctionDefinitionNode;
+import Compiler.ComponentNodes.VariableNode;
 import Compiler.ComponentNodes.Definitions.Type;
 import Grammar.C99.C99Parser.Assignment_expressionContext;
 import Grammar.C99.C99Parser.ExpressionContext;
@@ -44,18 +45,31 @@ public class ExpressionNode extends BaseExpressionNode<ExpressionContext>
 			if (expression.canCall(function)) return true;
 		return false;
 	}
+	
+	@Override
+	public VariableNode getVariable()
+	{
+		if (expressions.size() == 1) return expressions.get(0).getVariable();
+		else return null;
+	}
 	@Override
 	public boolean hasPropValue()
 	{
 		if (expressions.size() == 1) return expressions.get(0).hasPropValue();
 		else return false;
 	}
-
 	@Override
 	public Object getPropValue()
 	{
 		if (expressions.size() == 1) return expressions.get(0).getPropValue();
 		else return null;
+	}
+	@Override
+	public boolean hasAssembly()
+	{
+		for (BaseExpressionNode<?> expression : expressions)
+			if (expression.hasAssembly()) return true;
+		return false;
 	}
 	@Override
 	protected String getAssembly(int leadingWhitespace, String writeTo, boolean useB) throws Exception

@@ -2,27 +2,58 @@
 //
 package Compiler.ComponentNodes.Expressions;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import Compiler.ComponentNodes.ComponentNode;
 import Compiler.ComponentNodes.FunctionDefinitionNode;
 import Compiler.ComponentNodes.Definitions.Type;
+import Grammar.C99.C99Parser.Assignment_expressionContext;
 import Grammar.C99.C99Parser.Postfix_expressionContext;
 
 public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expressionContext>
 {
-	private BaseExpressionNode<?> node;
+	private enum PFType
+	{
+		arraySubscript,
+		funcCall,
+		structMember,
+		structMemberP,
+	}
 	
-	public PostfixExpressionNode(ComponentNode<?> parent) {super(parent);}
+	private BaseExpressionNode<?> expr;
+	private FunctionDefinitionNode func; 
+	private List<BaseExpressionNode<?>> params;
+	
+	public PostfixExpressionNode(ComponentNode<?> parent)
+	{
+		super(parent);
+		params = new ArrayList<BaseExpressionNode<?>>();
+		
+	}
 
 	@Override
 	public boolean canCall(FunctionDefinitionNode function)
 	{
-		return node.canCall(function);
+		return func.canCall(function);
 	}
 
 	@Override
 	public BaseExpressionNode<Postfix_expressionContext> interpret(Postfix_expressionContext node) throws Exception
 	{
-		return (BaseExpressionNode) new PrimaryExpressionNode(this).interpret(node.primary_expression()); // TODO
+		if (node.primary_expression() != null)
+			return (BaseExpressionNode) new PrimaryExpressionNode(this).interpret(node.primary_expression());
+		
+		expr = new PostfixExpressionNode(this).interpret(node.postfix_expression());
+		switch (node.getChild(1).getText())
+		{
+		case "(": // Function call
+			if (node.argument_expression_list() != null)
+				for (Assignment_expressionContext expr : node.argument_expression_list().assignment_expression())
+					params.add(new AssignmentExpressionNode(this).interpret(expr));
+			
+		}
+		return this;
 	}
 	
 	@Override
@@ -44,7 +75,8 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 		return null;
 	}
 	@Override
-	protected String getAssembly(int leadingWhitespace, String writeAddr, boolean useB) throws Exception {
+	protected String getAssembly(int leadingWhitespace, String writeAddr, boolean useB) throws Exception
+	{
 		// TODO Auto-generated method stub
 		return null;
 	}
