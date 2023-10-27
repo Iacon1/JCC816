@@ -19,9 +19,10 @@ public final class CompUtils
 	
 	public static final String operandA = "__operandA";
 	public static final String operandB = "__operandB";
+	public static final String operandC = "__operandC";
 	public static final int operandSize = 64;
 	public static final String callResult = "__callResult";
-	public static final int resultSize = 128;
+	public static final int resultSize = 64;
 	
 	public static final String setA8 = "SEP\t#$20", setA16 = "REP\t#$20";
 	public static final String setXY8 = "SEP\t#$10", setXY16 = "REP\t#$10";

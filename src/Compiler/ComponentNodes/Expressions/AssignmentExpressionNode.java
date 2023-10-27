@@ -3,13 +3,15 @@
 // The program itself.
 package Compiler.ComponentNodes.Expressions;
 
+import java.util.function.Function;
+
 import Compiler.ComponentNodes.ComponentNode;
 import Compiler.ComponentNodes.FunctionDefinitionNode;
 import Compiler.ComponentNodes.InterpretingNode;
-import Compiler.ComponentNodes.RValNode;
 import Compiler.ComponentNodes.VariableNode;
 import Compiler.ComponentNodes.Interfaces.AssemblableNode;
 import Compiler.Exceptions.TypeMismatchException;
+import Compiler.Utils.AssemblyUtils;
 import Grammar.C99.C99Parser.Assignment_expressionContext;
 import Grammar.C99.C99Parser.Conditional_expressionContext;
 import Grammar.C99.C99Parser.Unary_expressionContext;
@@ -43,7 +45,7 @@ public class AssignmentExpressionNode extends BinaryExpressionNode
 	@Override
 	protected String getAssembly(int leadingWhitespace, String writeAddr, boolean useB) throws Exception
 	{
-		String whitespace = getWhitespace(leadingWhitespace);
+		String whitespace = AssemblyUtils.getWhitespace(leadingWhitespace);
 		String assembly = "";
 		VariableNode xVar;
 		
@@ -55,10 +57,11 @@ public class AssignmentExpressionNode extends BinaryExpressionNode
 		if (y.hasAssembly())
 			assembly += y.getAssembly(leadingWhitespace, xVar.getFullName(), useB);
 		else if (y.hasPropValue())
-			assembly += byteCopier(whitespace, xVar.getType().getSize(), xVar.getFullName(), y.getPropValue());
+			assembly += AssemblyUtils.byteCopier(whitespace, xVar.getType().getSize(), xVar.getFullName(), y.getPropValue());
 		else
-			assembly += byteCopierAddr(whitespace, xVar.getType().getSize(), xVar.getFullName(), y.getVariable().getFullName());
+			assembly += AssemblyUtils.byteCopierAddr(whitespace, xVar.getType().getSize(), xVar.getFullName(), y.getVariable().getFullName());
 		
 		return assembly;
 	}
+	
 }

@@ -91,65 +91,12 @@ public class Compiler
 		return source;
 	}
 	
-	private static List<String> minimizeModeSwitches(List<String> lines)
-	{
-		int aMode = 0, xyMode = 0; // 0 = 8-bit, 1 = 16-bit, -1 = unknown
-		for (int i = 0; i < lines.size(); ++i)
-		{
-			String line = lines.get(i);
-			if (line.matches("[^:\s]*:.*")) // At a label, lose all assumptions of mode
-			{
-				aMode = -1;
-				xyMode = -1;
-			}
-				
-			if (line.contains(CompUtils.setAXY8))
-			{
-				if (aMode == 0 && xyMode == 0) lines.set(i, line.replace(CompUtils.setAXY8, ""));
-				else if (aMode == 0) lines.set(i, line.replace(CompUtils.setAXY8, CompUtils.setXY8));
-				else if (xyMode == 0) lines.set(i, line.replace(CompUtils.setAXY8, CompUtils.setA8));
-				
-				aMode = 0;
-				xyMode = 0;
-			}
-			else if (line.contains(CompUtils.setAXY16))
-			{
-				if (aMode == 1 && xyMode == 1) lines.set(i, line.replace(CompUtils.setAXY16, ""));
-				else if (aMode == 1) lines.set(i, line.replace(CompUtils.setAXY16, CompUtils.setXY16));
-				else if (xyMode == 1) lines.set(i, line.replace(CompUtils.setAXY16, CompUtils.setA16));
-				
-				aMode = 1;
-				xyMode = 1;
-			}
-			else if (line.contains(CompUtils.setA8))
-			{
-				if (aMode == 0) lines.set(i, line.replace(CompUtils.setA8, ""));
-				aMode = 0;
-			}
-			else if (line.contains(CompUtils.setA16))
-			{
-				if (aMode == 1) lines.set(i, line.replace(CompUtils.setA16, ""));
-				aMode = 1;
-			}
-			else if (line.contains(CompUtils.setXY8))
-			{
-				if (xyMode == 0) lines.set(i, line.replace(CompUtils.setXY8, ""));
-				xyMode = 0;
-			}
-			else if (line.contains(CompUtils.setXY16))
-			{
-				if (xyMode == 1) lines.set(i, line.replace(CompUtils.setXY16, ""));
-				xyMode = 1;
-			}
-		}
-		
-		return lines;
-	}
+	
 	private  static String postprocess(String assembly)
 	{
 		List<String> lines = Arrays.asList(assembly.split("\n"));
 
-		lines = minimizeModeSwitches(lines);
+		lines = Optimizer.getOptimized(lines);
 		
 		assembly = "";
 		for (String line : lines) if (!line.matches("\s*")) assembly += line + "\n";
@@ -164,22 +111,23 @@ public class Compiler
 		long t = System.currentTimeMillis();
 
 		String source = precompile(mainFile);
-		Logging.logNotice(source);
+		printInfo("Precompiled in " + (System.currentTimeMillis() - t) + " ms. Source length: " + source.length() + ".");
+		t = System.currentTimeMillis();
+//		Logging.logNotice(source);
 		CommonTokenStream tokens = lex(source);
-		printInfo("Lexed in " + (System.currentTimeMillis() - t) + " ms.");
-		
+		printInfo("Lexed in " + (System.currentTimeMillis() - t) + " ms. Tokens: " + tokens.getNumberOfOnChannelTokens() + ".");
 		t = System.currentTimeMillis();
 
 		ParseDouble parseDouble = parse(tokens);
 		printInfo("Parsed in " + (System.currentTimeMillis() - t) + " ms.");
-		viewParseTree(parseDouble.parser, parseDouble.tree);
+//		viewParseTree(parseDouble.parser, parseDouble.tree);
 		t = System.currentTimeMillis();
 
 		assembly = emit(parseDouble);
 		printInfo("Emitted in " + (System.currentTimeMillis() - t) + " ms. Assembly length: " + assembly.length() + ".");
 		t = System.currentTimeMillis();
-		
-		//assembly = postprocess(assembly);
+
+		assembly = postprocess(assembly);
 		printInfo("Postprocessed in " + (System.currentTimeMillis() - t) + " ms. New assembly length: " + assembly.length() + ".");
 		t = System.currentTimeMillis();
 		

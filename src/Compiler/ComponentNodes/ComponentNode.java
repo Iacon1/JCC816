@@ -4,13 +4,18 @@
 
 package Compiler.ComponentNodes;
 
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
+import java.util.AbstractMap.SimpleEntry;
 
 import Compiler.ComponentNodes.Definitions.EnumDefinition;
 import Compiler.ComponentNodes.Definitions.Scope;
 import Compiler.ComponentNodes.Definitions.StructDefinition;
 import Compiler.ComponentNodes.Definitions.UnionDefinition;
+import Compiler.ComponentNodes.Statements.IterationStatementNode;
+import Compiler.ComponentNodes.Statements.SelectionStatementNode;
 
 public class ComponentNode<T extends ComponentNode<T>>
 {
@@ -23,6 +28,9 @@ public class ComponentNode<T extends ComponentNode<T>>
 	protected static List<UnionDefinition> unions;
 	protected static List<EnumDefinition> enums;
 	
+	protected static Set<SimpleEntry<Integer, Integer>> reqMultSubs;
+	protected static Set<SimpleEntry<Integer, Integer>> reqDivSubs;
+	
 	private void resetReferences()
 	{
 		variables = new LinkedList<VariableNode>();
@@ -30,6 +38,8 @@ public class ComponentNode<T extends ComponentNode<T>>
 		structs = new LinkedList<StructDefinition>();
 		unions = new LinkedList<UnionDefinition>();
 		enums = new LinkedList<EnumDefinition>();
+		reqMultSubs = new HashSet<SimpleEntry<Integer, Integer>>();
+		reqDivSubs = new HashSet<SimpleEntry<Integer, Integer>>();
 	}
 	protected static void registerVariable(VariableNode variable) {variables.add(variable);}
 	protected static void registerFunction(FunctionDefinitionNode function) {functions.add(function);}
@@ -48,6 +58,8 @@ public class ComponentNode<T extends ComponentNode<T>>
 	{
 		this.children = new LinkedList<ComponentNode<?>>();
 		this.parent = null;
+		reqMultSubs = new HashSet<SimpleEntry<Integer, Integer>>();
+		reqDivSubs = new HashSet<SimpleEntry<Integer, Integer>>();
 	}
 	
 	/**
@@ -92,14 +104,63 @@ public class ComponentNode<T extends ComponentNode<T>>
 				return definition;
 		return null;
 	}
-	/**
-	 * 
-	 * @return Whether this node is in a function or not.
+	/** Gets a function's node using its full name.
+	 * @param name The full name to look for.
+	 * @return The variable node in question, if present.
 	 */
-	public boolean isGlobal()
+	public static FunctionDefinitionNode resolveFunction(String fullName)
 	{
-		if (parent == null) return true;
-		return parent.isGlobal();
+		for (FunctionDefinitionNode definition : functions)
+			if (definition.getFullName().equals(fullName))
+				return definition;
+		return null;
 	}
 	
+	/** Gets the enclosing function, if any.
+	 * @return The variable node in question, if present.
+	 */
+	public FunctionDefinitionNode getEnclosingFunction()
+	{
+		if (FunctionDefinitionNode.class.isAssignableFrom(getClass()))
+			return (FunctionDefinitionNode) this;
+		else if (parent != null) return parent.getEnclosingFunction();
+		else return null;
+	}
+	
+	/** Gets the enclosing selection, if any.
+	 * @return The variable node in question, if present.
+	 */
+	public SelectionStatementNode getEnclosingSelection()
+	{
+		if (SelectionStatementNode.class.isAssignableFrom(getClass()))
+			return (SelectionStatementNode) this;
+		else if (parent != null) return parent.getEnclosingSelection();
+		else return null;
+	}
+	/** Gets the enclosing loop, if any.
+	 * @return The variable node in question, if present.
+	 */
+	public IterationStatementNode getEnclosingIteration()
+	{
+		if (IterationStatementNode.class.isAssignableFrom(getClass()))
+			return (IterationStatementNode) this;
+		else if (parent != null) return parent.getEnclosingIteration();
+		else return null;
+	}
+	/** Registers a multiplier combination as needed.
+	 * @return The name of the multiplier.
+	 */
+	public static String registerMult(int xSize, int ySize)
+	{
+		reqMultSubs.add(new SimpleEntry<Integer, Integer>(xSize, ySize));
+		return "__MULT_" + xSize + "_" + ySize;
+	}
+	/** Registers a multiplier combination as needed.
+	 * @return The name of the multiplier.
+	 */
+	public static String registerDiv(int xSize, int ySize)
+	{
+		reqDivSubs.add(new SimpleEntry<Integer, Integer>(xSize, ySize));
+		return "__DIV_" + xSize + "_" + ySize;
+	}
 }

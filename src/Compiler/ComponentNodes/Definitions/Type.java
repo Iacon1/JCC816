@@ -113,6 +113,7 @@ public class Type
 		typeSpecifiers = new LinkedList<String>();
 		typeQualifiers = new HashSet<String>();
 //		functionSpecifiers = new HashSet<String>();
+		dimensions = new LinkedList<Integer>();
 		
 		if (specifiers.storageClassSpecifiers.length > 0)
 			storageClassSpecifier = specifiers.storageClassSpecifiers[0];
@@ -128,7 +129,7 @@ public class Type
 		{
 			if (info == null) continue;
 			if (info.type != DirectDeclaratorNode.Type.array) continue;
-			if (Number.class.isAssignableFrom(info.assignExpr.getPropValue().getClass()))
+			if (info.assignExpr != null && Number.class.isAssignableFrom(info.assignExpr.getPropValue().getClass()))
 				dimensions.add(((Number) info.assignExpr.getPropValue()).intValue());
 		}
 		
@@ -145,21 +146,30 @@ public class Type
 			throw new ConstraintException("6.7.2", 2, start);
 	}
 	
-	public int getSize()
+	public int getBaseSize()
 	{
 		int baseSize;
 		if (isStruct()) baseSize = ComponentNode.resolveStruct(getStructUnionEnumType()).getSize();
 		else if (isUnion()) baseSize = ComponentNode.resolveUnion(getStructUnionEnumType()).getSize();
 		else if (isEnum()) baseSize = CompUtils.sizeOf("int");
-		else if (pointerQualifiers != null && !pointerQualifiers.isEmpty()) return CompUtils.pointerSize;
-		else return CompUtils.sizeOf(typeSpecifiers);
-		for (Integer d : dimensions) baseSize *= d;
+		else if (pointerQualifiers != null && !pointerQualifiers.isEmpty()) baseSize = CompUtils.pointerSize;
+		else baseSize = CompUtils.sizeOf(typeSpecifiers);
 		return baseSize;
+	}
+	public int getSize()
+	{
+		int size = getBaseSize();
+		for (Integer d : dimensions) size *= d;
+		return size;
 	}
 	
 	public boolean isConstant()
 	{
 		return typeQualifiers.contains("const");
+	}
+	public boolean isArray()
+	{
+		return dimensions.size() != 0;
 	}
 	public boolean canCastTo(Type type)
 	{
@@ -189,6 +199,16 @@ public class Type
 	public String getSignature()
 	{
 		String signature = "";
-		return "int"; // TODO
+		if (storageClassSpecifier != null) signature += storageClassSpecifier + " ";
+		for (String specifier : typeSpecifiers) signature += specifier + " ";
+		for (String qualifier : typeQualifiers) signature += qualifier + " ";
+		for (String specifier : typeSpecifiers) signature += specifier + " ";
+		for (Set<String> qualifierSet : pointerQualifiers)
+		{
+			signature += "* ";
+			for (String qualifier : qualifierSet) signature += qualifier + " ";
+		}
+			
+		return signature;
 	}
 }

@@ -68,7 +68,7 @@ public final class AssemblyUtils
 		
 		return assembly;
 	}
-	public static String bytewiseOperation(String whitespace, int nBytes, Function<Integer, String[]> perIteration, boolean set16)
+	public static String bytewiseOperation(String whitespace, int nBytes, Function<Integer, String[]> perIteration, boolean set16, boolean reverse)
 	{
 		String assembly = "";
 		
@@ -76,13 +76,16 @@ public final class AssemblyUtils
 		else if (!set16) assembly += whitespace + CompUtils.setAXY8 + "\n";
 		for (int i = 0; i < nBytes; i += (set16? 2 : 1))
 		{
-			for (String opLine : perIteration.apply(i))
+			int j = i;
+			if (reverse)
+				j = (nBytes % 2 == 1) ? nBytes - 1 - i : nBytes - 2 - i;
+			for (String opLine : perIteration.apply(j))
 				assembly += whitespace + opLine + "\n";
 		}
 		if (nBytes % 2 == 1 && set16)
 		{
 			assembly += whitespace + CompUtils.setAXY8 + "\n";
-			for (String opLine : perIteration.apply(nBytes - 1))
+			for (String opLine : perIteration.apply(reverse? 0 : nBytes - 1))
 				assembly += whitespace + opLine + "\n";
 		}
 		
@@ -90,7 +93,7 @@ public final class AssemblyUtils
 	}
 	public static String bytewiseOperation(String whitespace, int nBytes, Function<Integer, String[]> perIteration)
 	{
-		return bytewiseOperation(whitespace, nBytes, perIteration, true);
+		return bytewiseOperation(whitespace, nBytes, perIteration, true, false);
 	}
 	public static String byteCopier(String whitespace, int nBytes, String writeAddr, Function<Integer, String> readSource)
 	{
@@ -126,7 +129,7 @@ public final class AssemblyUtils
 		byte[] bytes = Arrays.copyOfRange(ByteBuffer.allocate(Long.BYTES).putLong(s).array(), Long.BYTES - size, Long.BYTES);
 		// little-endian WRT words
 		if (bytes.length >= 4)
-			for (int i = 0; i < Math.floor(bytes.length / 2); ++i)
+			for (int i = 0; i < Math.floor(bytes.length / 2); i += 2)
 			{
 				byte x = bytes[i];
 				byte y = bytes[i + 1];
@@ -141,8 +144,8 @@ public final class AssemblyUtils
 	}
 	public static OperandSource addressSource(String s, int size)
 	{
-		if (size == 1) return new OperandSource((Integer i) -> {return s;}, size, true);
-		else return new OperandSource((Integer i) -> {return s + " + " + Math.min(size - 1, i);}, size, true);
+		if (size == 1) return new OperandSource((Integer i) -> {return s;}, size, false);
+		else return new OperandSource((Integer i) -> {return s + " + " + Math.min(size - 1, i);}, size, false);
 	}
 	public static OperandSource constantSource(Object constant, int size)
 	{

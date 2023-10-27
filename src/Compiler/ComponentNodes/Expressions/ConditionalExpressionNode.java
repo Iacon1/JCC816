@@ -2,12 +2,10 @@
 // 
 package Compiler.ComponentNodes.Expressions;
 
+import java.util.function.Function;
+
 import Compiler.ComponentNodes.ComponentNode;
 import Compiler.ComponentNodes.FunctionDefinitionNode;
-import Compiler.ComponentNodes.InterpretingNode;
-import Compiler.ComponentNodes.RValNode;
-import Compiler.ComponentNodes.Interfaces.AssemblableNode;
-import Grammar.C99.C99Parser.Assignment_expressionContext;
 import Grammar.C99.C99Parser.Conditional_expressionContext;
 import Grammar.C99.C99Parser.Lor_expressionContext;
 
@@ -25,6 +23,7 @@ public class ConditionalExpressionNode extends BinaryExpressionNode
 	@Override
 	protected BaseExpressionNode<Lor_expressionContext> getPCNode(Conditional_expressionContext node) throws Exception
 		{return new LORExpressionNode(this).interpret(node.lor_expression());}
+	
 	@Override
 	public BaseExpressionNode<Conditional_expressionContext> interpret(Conditional_expressionContext node) throws Exception
 	{
@@ -42,9 +41,6 @@ public class ConditionalExpressionNode extends BinaryExpressionNode
 		}
 		return this;
 	}
-	
-	
-	
 	public ConditionalExpressionNode(ComponentNode<?> parent) {super(parent);}
 	
 	@Override
@@ -52,25 +48,6 @@ public class ConditionalExpressionNode extends BinaryExpressionNode
 	{
 		return x.canCall(function) || y.canCall(function) || z.canCall(function);
 	}
-	@Override
-	public String getAssembly(int leadingWhitespace) throws Exception
-	{
-		String whitespace = getWhitespace(leadingWhitespace);
-		String assembly = "";
-		VarDeclarationNode xNode;
-		
-		xNode = resolveVariable(x);	
-		if (!xNode.canCastFrom(y.getType()))
-		{
-			//throw TypeMismatchException();
-		}
-		if (y.hasAssembly())
-			assembly += y.getAssembly(leadingWhitespace, xNode.getFullName(), null);
-		else assembly += byteCopier(whitespace, xNode.getType().getSize(), xNode.getFullName(), y.getByteSource(xNode.getType().getSize()));
-		
-		return assembly;
-	}
-
 	public boolean hasPropValue()
 	{
 		return x.hasPropValue() && y.hasPropValue() && z.hasPropValue();
@@ -82,9 +59,9 @@ public class ConditionalExpressionNode extends BinaryExpressionNode
 		else return y.getPropValue();
 	}
 	@Override
-	protected String getAssembly(int leadingWhitespace, String writeAddr, boolean useB) throws Exception {
+	protected String getAssembly(int leadingWhitespace, String writeAddr, boolean useB) throws Exception
+	{
 		// TODO Auto-generated method stub
 		return null;
 	}
-	
 }

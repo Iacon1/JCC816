@@ -3,6 +3,8 @@
 package Compiler.ComponentNodes.Expressions;
 
 import Compiler.ComponentNodes.ComponentNode;
+import Compiler.Utils.AssemblyUtils;
+import Compiler.Utils.OperandSource;
 import Grammar.C99.C99Parser.And_expressionContext;
 import Grammar.C99.C99Parser.Equality_expressionContext;
 import Grammar.C99.C99Parser.Land_expressionContext;
@@ -29,14 +31,24 @@ public class AndExpressionNode extends BinaryExpressionNode
 	{return new EqualityExpressionNode(this).interpret(node.equality_expression());}
 
 	@Override
-	public Object getPropValue() {
-		// TODO Auto-generated method stub
-		return null;
+	public Object getPropValue()
+	{
+		Long a = ((Number) x.getPropValue()).longValue();
+		Long b = ((Number) y.getPropValue()).longValue();
+		return Long.valueOf(a & b);
 	}
 	@Override
-	protected String getAssembly(int leadingWhitespace, String writeAddr, boolean useB) throws Exception
+	protected String getAssembly(String whitespace, String destAddr, boolean useB, OperandSource sourceX, OperandSource sourceY) throws Exception
 	{
-		// TODO Auto-generated method stub
-		return null;
+		String assembly = AssemblyUtils.bytewiseOperation(whitespace, sourceX.getSize(), (Integer i) ->
+		{
+			return new String[]
+			{
+				"LDA\t" + sourceX.apply(i),
+				"AND\t" + sourceY.apply(i),
+				"STA\t" + destAddr + " + " + i,
+			};
+		});
+		return assembly;
 	}
 }

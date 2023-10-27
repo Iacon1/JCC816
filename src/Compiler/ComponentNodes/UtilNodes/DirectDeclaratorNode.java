@@ -10,8 +10,8 @@ import org.antlr.v4.runtime.Token;
 import Compiler.ComponentNodes.ComponentNode;
 import Compiler.ComponentNodes.InterpretingNode;
 import Compiler.ComponentNodes.Declarations.DeclarationNode;
-import Compiler.ComponentNodes.Declarations.ParameterDeclarationNode;
 import Compiler.ComponentNodes.Expressions.AssignmentExpressionNode;
+import Compiler.ComponentNodes.Expressions.BaseExpressionNode;
 import Compiler.Exceptions.UnsupportedSyntaxException;
 import Grammar.C99.C99Parser.Direct_abstract_declaratorContext;
 import Grammar.C99.C99Parser.Direct_declaratorContext;
@@ -39,7 +39,7 @@ public class DirectDeclaratorNode extends InterpretingNode<DirectDeclaratorNode,
 		}
 		
 		public String[] typeQualifiers;
-		public AssignmentExpressionNode assignExpr;
+		public BaseExpressionNode<?> assignExpr;
 		public DeclarationNode[] paramDecls;
 		public String[] idens;
 	}
