@@ -5,6 +5,7 @@ package Compiler.ComponentNodes.Expressions;
 import Compiler.ComponentNodes.ComponentNode;
 import Compiler.Utils.AssemblyUtils;
 import Compiler.Utils.OperandSource;
+import Compiler.Utils.ScratchManager;
 import Grammar.C99.C99Parser.Land_expressionContext;
 import Grammar.C99.C99Parser.Lor_expressionContext;
 import Grammar.C99.C99Parser.Or_expressionContext;
@@ -36,7 +37,7 @@ public class OrExpressionNode extends BinaryExpressionNode
 		return Long.valueOf(a | b);
 	}
 	@Override
-	protected String getAssembly(String whitespace, String destAddr, boolean useB, OperandSource sourceX, OperandSource sourceY) throws Exception
+	protected String getAssembly(String whitespace, String destAddr, ScratchManager scratchManager, OperandSource sourceX, OperandSource sourceY) throws Exception
 	{
 		String assembly = AssemblyUtils.bytewiseOperation(whitespace, sourceX.getSize(), (Integer i) ->
 		{

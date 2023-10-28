@@ -8,6 +8,7 @@ import java.util.List;
 import Compiler.ComponentNodes.ComponentNode;
 import Compiler.ComponentNodes.FunctionDefinitionNode;
 import Compiler.ComponentNodes.Definitions.Type;
+import Compiler.Utils.ScratchManager;
 import Grammar.C99.C99Parser.Assignment_expressionContext;
 import Grammar.C99.C99Parser.Postfix_expressionContext;
 
@@ -75,7 +76,7 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 		return null;
 	}
 	@Override
-	protected String getAssembly(int leadingWhitespace, String writeAddr, boolean useB) throws Exception
+	protected String getAssembly(int leadingWhitespace, String writeAddr, ScratchManager scratchManager) throws Exception
 	{
 		// TODO Auto-generated method stub
 		return null;

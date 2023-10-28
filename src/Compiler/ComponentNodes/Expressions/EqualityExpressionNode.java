@@ -4,12 +4,14 @@ package Compiler.ComponentNodes.Expressions;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Function;
 
 import Compiler.ComponentNodes.ComponentNode;
 import Compiler.ComponentNodes.Interfaces.AssemblableNode;
 import Compiler.Utils.AssemblyUtils;
 import Compiler.Utils.CompUtils;
 import Compiler.Utils.OperandSource;
+import Compiler.Utils.ScratchManager;
 import Grammar.C99.C99Parser.Equality_expressionContext;
 import Grammar.C99.C99Parser.Land_expressionContext;
 import Grammar.C99.C99Parser.Lor_expressionContext;
@@ -41,9 +43,18 @@ public class EqualityExpressionNode extends BinaryExpressionNode
 		return null;
 	}
 	
+	public static String getIsZero(String whitespace, String destAddr, ScratchManager scratchManager, OperandSource source)
+	{
+		String assembly = "";
+		assembly += CompUtils.setA8 + "\n";
+		assembly += whitespace + "LDA\t#$00\n";
+		assembly += AssemblyUtils.bytewiseOperation(whitespace, source.getSize(), (Integer i) -> {return new String[]{"ORA\t" + source.apply(i)};}, false, false);
+		assembly += whitespace + "STA\t" + destAddr + "\n";
+		return assembly;
+	}
 	
 	@Override
-	protected String getAssembly(String whitespace, String destAddr, boolean useB, OperandSource sourceX, OperandSource sourceY) throws Exception
+	protected String getAssembly(String whitespace, String destAddr, ScratchManager scratchManager, OperandSource sourceX, OperandSource sourceY) throws Exception
 	{
 		String assembly = "";
 		final String jumpOn;

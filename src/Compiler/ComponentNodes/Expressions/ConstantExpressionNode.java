@@ -6,6 +6,7 @@ import Compiler.ComponentNodes.ComponentNode;
 import Compiler.ComponentNodes.FunctionDefinitionNode;
 import Compiler.ComponentNodes.Definitions.Type;
 import Compiler.Exceptions.ConstraintException;
+import Compiler.Utils.ScratchManager;
 import Grammar.C99.C99Parser.Constant_expressionContext;
 
 public class ConstantExpressionNode extends BaseExpressionNode<Constant_expressionContext>
@@ -31,5 +32,5 @@ public class ConstantExpressionNode extends BaseExpressionNode<Constant_expressi
 	@Override
 	public Object getPropValue() {return null;}
 	@Override
-	protected String getAssembly(int leadingWhitespace, String writeAddr, boolean useB) throws Exception {return null;}
+	protected String getAssembly(int leadingWhitespace, String writeAddr, ScratchManager scratchManager) throws Exception {return null;}
 }

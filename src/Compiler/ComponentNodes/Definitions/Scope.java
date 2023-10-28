@@ -6,7 +6,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-import Compiler.Utils.CompUtils;
+import Compiler.Utils.CompConfig;
 
 public class Scope
 {
@@ -25,7 +25,7 @@ public class Scope
 	{
 		String prefix = "";
 		for (int i = 0; i < levels.size(); ++i)
-			prefix += levels.get(i) + CompUtils.scopeDelimiter;
+			prefix += levels.get(i) + CompConfig.scopeDelimiter;
 		return prefix;
 	}
 	

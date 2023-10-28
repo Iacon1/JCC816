@@ -9,6 +9,7 @@ import Compiler.ComponentNodes.ComponentNode;
 import Compiler.Utils.AssemblyUtils;
 import Compiler.Utils.CompUtils;
 import Compiler.Utils.OperandSource;
+import Compiler.Utils.ScratchManager;
 import Grammar.C99.C99Parser.Land_expressionContext;
 import Grammar.C99.C99Parser.Lor_expressionContext;
 import Grammar.C99.C99Parser.Or_expressionContext;
@@ -39,90 +40,85 @@ public class RelationalExpressionNode extends BinaryExpressionNode
 		// TODO Auto-generated method stub
 		return null;
 	}
-	public static String getComparison(String whitespace, String destAddr, boolean useB, OperandSource sourceX, String operator, OperandSource sourceY)
+	public static String getComparison(String whitespace, String destAddr, ScratchManager scratchManager, OperandSource sourceX, String operator, OperandSource sourceY)
 	{
 		String assembly = "";
 
-		switch (operator)
+		if (sourceX.isLiteral() && !sourceY.isLiteral()) switch (operator)
 		{
-		case "<": case ">": case "<=": case ">=":
-			final String jumpOne; // Condition to jump to true
-			final String jumpTwo; // Condition to jump to false
-			
-			switch (operator)
+			case "<": return getComparison(whitespace, destAddr, scratchManager, sourceY, ">=", sourceX);
+			case "<=": return getComparison(whitespace, destAddr, scratchManager, sourceY, ">", sourceX);
+			case ">": return getComparison(whitespace, destAddr, scratchManager, sourceY, "<=", sourceX);
+			case ">=": return getComparison(whitespace, destAddr, scratchManager, sourceY, "<", sourceX);
+		}
+
+		assembly += whitespace + CompUtils.setXY8 + "\n";
+		assembly += whitespace + "LDX\t#$00\n";
+		assembly += whitespace + "CLC\n";
+		assembly += AssemblyUtils.bytewiseOperation(whitespace, Math.max(sourceX.getSize(), sourceY.getSize()), (Integer i) -> 
+		{	
+			List<String> lines = new LinkedList<String>();
+			if (i >= Math.max(sourceX.getSize(), sourceY.getSize()) - 2)
 			{
-			case "<": case "<=": jumpOne = "BCC"; jumpTwo = "BNE"; break;
-			case ">": case ">=": jumpOne = "BCS"; jumpTwo = "BNE"; break;
-			default: jumpOne = ""; jumpTwo = ""; break;
-			}
-			assembly += whitespace + CompUtils.setXY8 + "\n";
-			assembly += whitespace + "LDX\t#$00\n";
-			
-			assembly += AssemblyUtils.bytewiseOperation(whitespace, sourceX.getSize(), (Integer i) -> 
-			{	
-				List<String> lines = new LinkedList<String>();
-				if (i == 0)
+				// Are we at the last byte of an odd-size number, i. e. in 8-bit mode?
+				String toXOR = (i < Math.max(sourceX.getSize(), sourceY.getSize()) - 1) ? "#$8000" : "#$80";
+				// Start at MSB
+				if (sourceY.isLiteral())
 				{
-					// Are we at the last byte of an odd-size number, i. e. in 8-bit mode?
-					String toXOR = (i < sourceX.getSize() - 1) ? "#$8000" : "#$80";
-					// Start at MSB
-					if (sourceY.isLiteral())
-					{
-						String oldY = sourceY.apply(sourceX.getSize() - 2 - i).substring(2);
-						int yVal = Integer.valueOf(oldY, 16);
-						String newY = "#$" + String.format("%0" + oldY.length() + "x", yVal ^ (oldY.length() == 2 ? 0x80 : 0x8000));
-						lines.add("LDA\t" + sourceX.apply(sourceX.getSize() - 2 - i));	// Get X
-						lines.add("EOR\t" + toXOR);										// Flip sign
-						lines.add("CMP\t" + newY);										// Cmp X & Y?
-					}
-					else if (sourceY.isLiteral())
-					{
-						String oldX = sourceX.apply(sourceX.getSize() - 2 - i).substring(2);
-						int xVal = Integer.valueOf(oldX, 16);
-						String newX = "#$" + String.format("%0" + oldX.length() + "x", xVal ^ (oldX.length() == 2 ? 0x80 : 0x8000));
-						lines.add("LDA\t" + sourceY.apply(sourceX.getSize() - 2 - i));	// Get Y
-						lines.add("EOR\t" + toXOR);										// Flip sign
-						lines.add("CMP\t" + newX);										// Cmp Y & X?
-						if (jumpOne.equals("BCC")) lines.add("BCS");
-						else if (jumpOne.equals("BCS")) lines.add("BCC");				// Invert operation for this one, since we did opposite comparison
-					}
-					else
-					{
-						lines.add("LDA\t" + sourceY.apply(sourceX.getSize() - 2 - i));	// Get Y
-						lines.add("EOR\t" + toXOR);										// Flip sign
-						lines.add("STA\t" + destAddr);									// Place Y in destAddr
-						lines.add("LDA\t" + sourceX.apply(sourceX.getSize() - 2 - i));	// Get X
-						lines.add("EOR\t" + toXOR);										// Flip sign
-						lines.add("CMP\t" + destAddr);									// Cmp Y & X?
-					}
+					String oldY = sourceY.apply(i).substring(2);
+					int yVal = Integer.valueOf(oldY, 16);
+					String newY = "#$" + String.format("%0" + oldY.length() + "x", yVal ^ (oldY.length() == 2 ? 0x80 : 0x8000));
+					lines.add("LDA\t" + sourceX.apply(i));							// Get X
+					lines.add("EOR\t" + toXOR);										// Flip sign
+					lines.add("CMP\t" + newY);										// Cmp X & Y?
 				}
 				else
 				{
-					lines.add("LDA\t" + sourceX.apply(sourceX.getSize() - 2 - i));		// Get X
-					lines.add("CMP\t" + sourceY.apply(sourceX.getSize() - 2 - i));		// Cmp X & Y?
+					lines.add("LDA\t" + sourceY.apply(i));							// Get Y
+					lines.add("EOR\t" + toXOR);										// Flip sign
+					lines.add("STA\t" + destAddr);									// Place Y in destAddr
+					lines.add("LDA\t" + sourceX.apply(i));							// Get X
+					lines.add("EOR\t" + toXOR);										// Flip sign
+					lines.add("CMP\t" + destAddr);									// Cmp Y & X?
 				}
-				if ((i != 0 || !sourceX.isLiteral()) && !jumpOne.isEmpty())
-					lines.add(jumpOne + "\t:+");										// If X [op] Y then yes
-				if (!jumpTwo.isEmpty() && !jumpOne.isEmpty())
-					lines.add(jumpTwo + "\t:++");										// If X [anti-op] Y then no
-				else if (!jumpTwo.isEmpty())
-					lines.add(jumpTwo + "\t:+");										// If X [anti-op] Y then no
-				// else maybe
-				return lines.toArray(new String[] {});
-			});
-			if (operator.equals("<") || operator.equals(">")) // equals is not good enough
-				assembly += whitespace + "DEX\n";
-			assembly += (!jumpOne.isEmpty() ? ":" : " ") + whitespace.substring(1) + "INX\n";
-			assembly += ":" + whitespace.substring(1) + "TXA\n";
-			assembly += whitespace + CompUtils.setA8 + "\n";
-			assembly += whitespace + "STA\t" + destAddr + "\n";
+			}
+			else
+			{
+				lines.add("LDA\t" + sourceX.apply(i));								// Get X
+				lines.add("CMP\t" + sourceY.apply(i));								// Cmp X & Y?
+			}
+			lines.add("BCC\t:+");													// If x < y then yes
+			lines.add("BNE\t:++");													// If x >= y then no
+			// else maybe
+			return lines.toArray(new String[] {});
+		}, true, true);
+		// The above actually always checks for "<". This is due to the behavior of the carry flag, it being set when the two words are equal.
+		switch (operator)
+		{
+		case "<":
+			assembly += whitespace + "DEX\n"; // If equal, false
+		case "<=":
+			assembly += ":" + whitespace.substring(1) + "INX\n"; // True
+			assembly += ":" + whitespace.substring(1) + "TXA\n"; // Default (false)
+			break;
+		case ">": // Opposite of <=
+			assembly += whitespace + "DEX\n"; // If equal, false
+		case ">=": // Opposite of <
+			assembly += whitespace + "BRA\t:++\n";
+			assembly += ":" + whitespace.substring(1) + "INX\n"; // True
+			assembly += ":" + whitespace.substring(1) + "TXA\n"; // Default (false)
+			assembly += whitespace + "EOR\t#1\n";				 // Reverse answer!
 			break;
 		}
+		
+		assembly += whitespace + CompUtils.setA8 + "\n";
+		assembly += whitespace + "STA\t" + destAddr + "\n";
+		
 		return assembly;
 	}
 	@Override
-	protected String getAssembly(String whitespace, String destAddr, boolean useB, OperandSource sourceX, OperandSource sourceY) throws Exception
+	protected String getAssembly(String whitespace, String destAddr, ScratchManager scratchManager, OperandSource sourceX, OperandSource sourceY) throws Exception
 	{
-		return getComparison(whitespace, destAddr, useB, sourceX, operator, sourceY);
+		return getComparison(whitespace, destAddr, scratchManager, sourceX, operator, sourceY);
 	}
 }

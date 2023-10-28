@@ -12,6 +12,7 @@ import Compiler.ComponentNodes.VariableNode;
 import Compiler.ComponentNodes.Interfaces.AssemblableNode;
 import Compiler.Exceptions.TypeMismatchException;
 import Compiler.Utils.AssemblyUtils;
+import Compiler.Utils.ScratchManager;
 import Grammar.C99.C99Parser.Assignment_expressionContext;
 import Grammar.C99.C99Parser.Conditional_expressionContext;
 import Grammar.C99.C99Parser.Unary_expressionContext;
@@ -43,19 +44,19 @@ public class AssignmentExpressionNode extends BinaryExpressionNode
 		return null;
 	}
 	@Override
-	protected String getAssembly(int leadingWhitespace, String writeAddr, boolean useB) throws Exception
+	protected String getAssembly(int leadingWhitespace, String writeAddr, ScratchManager scratchManager) throws Exception
 	{
 		String whitespace = AssemblyUtils.getWhitespace(leadingWhitespace);
 		String assembly = "";
 		VariableNode xVar;
 		
-		if (x.hasAssembly()) assembly += x.getAssembly(leadingWhitespace, useB);
+		if (x.hasAssembly()) assembly += x.getAssembly(leadingWhitespace);
 		xVar = x.getVariable();
 		if (xVar == null) return assembly;
 		if (!xVar.canCastFrom(y.getType()))
 			throw new TypeMismatchException(x.getType(), y.getType());
 		if (y.hasAssembly())
-			assembly += y.getAssembly(leadingWhitespace, xVar.getFullName(), useB);
+			assembly += y.getAssembly(leadingWhitespace, xVar.getFullName(), scratchManager);
 		else if (y.hasPropValue())
 			assembly += AssemblyUtils.byteCopier(whitespace, xVar.getType().getSize(), xVar.getFullName(), y.getPropValue());
 		else

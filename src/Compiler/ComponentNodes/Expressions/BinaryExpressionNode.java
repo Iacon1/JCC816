@@ -17,6 +17,8 @@ import Compiler.Exceptions.UndefinedOpException;
 import Compiler.Utils.AssemblyUtils;
 import Compiler.Utils.CompUtils;
 import Compiler.Utils.OperandSource;
+import Compiler.Utils.ScratchManager;
+import Compiler.Utils.ScratchManager.ScratchSource;
 
 public abstract class BinaryExpressionNode<
 	C1 extends ParserRuleContext,
@@ -71,21 +73,21 @@ public abstract class BinaryExpressionNode<
 		return x.hasPropValue() && y.hasPropValue();
 	}
 	
-	protected String getAssembly(String whitespace, String destAddr, boolean useB, OperandSource sourceX, OperandSource sourceY) throws Exception
+	protected String getAssembly(String whitespace, String destAddr, ScratchManager scratchManager, OperandSource sourceX, OperandSource sourceY) throws Exception
 	{return null;}
 	@Override
-	protected String getAssembly(int leadingWhitespace, String destAddr, boolean useB) throws Exception
+	protected String getAssembly(int leadingWhitespace, String destAddr, ScratchManager scratchManager) throws Exception
 	{
 		String whitespace = AssemblyUtils.getWhitespace(leadingWhitespace);
-		final String destOperand = useB ? CompUtils.operandB : CompUtils.operandA;
-		final String otherOperand = useB ? CompUtils.operandA : CompUtils.operandB;
+		ScratchSource scratchX = null, scratchY = null;
 		final OperandSource sourceX, sourceY;
 		String assembly = "";
 
 		if (y.hasAssembly())
 		{
-			assembly += y.getAssembly(leadingWhitespace, otherOperand, useB);
-			sourceY = AssemblyUtils.addressSource(otherOperand, y.getType().getSize());
+			scratchY = scratchManager.reserveScratchBlock(y.getType().getSize());
+			assembly += y.getAssembly(leadingWhitespace, scratchY.getAddress(), scratchManager);
+			sourceY = scratchY;
 		}
 		else if (y.hasPropValue())
 			sourceY = AssemblyUtils.constantSource(y.getPropValue(), y.getType().getSize());
@@ -94,15 +96,18 @@ public abstract class BinaryExpressionNode<
 		// Now we figure out X
 		if (x.hasAssembly())
 		{
-			assembly += x.getAssembly(leadingWhitespace, destOperand, useB);
-			sourceX = AssemblyUtils.addressSource(destOperand, x.getType().getSize());
+			scratchX = scratchManager.reserveScratchBlock(y.getType().getSize());
+			assembly += x.getAssembly(leadingWhitespace, scratchX.getAddress(), scratchManager);
+			sourceX = scratchX;
 		}
 		else if (x.hasPropValue())
 			sourceX = AssemblyUtils.constantSource(x.getPropValue(), x.getType().getSize());
 		else
 			sourceX = AssemblyUtils.addressSource(x.getVariable().getFullName(), x.getType().getSize());
 		
-		assembly += getAssembly(whitespace, destAddr, false, sourceX, sourceY);
+		assembly += getAssembly(whitespace, destAddr, scratchManager, sourceX, sourceY);
+		if (scratchX != null) scratchManager.releaseScratchBlock(scratchX);
+		if (scratchY != null) scratchManager.releaseScratchBlock(scratchY);
 		
 		return assembly;
 	}

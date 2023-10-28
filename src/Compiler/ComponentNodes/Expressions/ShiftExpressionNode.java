@@ -6,6 +6,8 @@ import Compiler.ComponentNodes.ComponentNode;
 import Compiler.Utils.AssemblyUtils;
 import Compiler.Utils.CompUtils;
 import Compiler.Utils.OperandSource;
+import Compiler.Utils.ScratchManager;
+import Compiler.Utils.ScratchManager.ScratchSource;
 import Grammar.C99.C99Parser.Additive_expressionContext;
 import Grammar.C99.C99Parser.Or_expressionContext;
 import Grammar.C99.C99Parser.Shift_expressionContext;
@@ -41,16 +43,17 @@ public class ShiftExpressionNode extends BinaryExpressionNode
 		default: return null;
 		}
 	}
-	public static String getShift(String whitespace, String destAddr, boolean useB, OperandSource sourceX, String operator, OperandSource sourceY)
+	public static String getShift(String whitespace, String destAddr, ScratchManager scratchManager, OperandSource sourceX, String operator, OperandSource sourceY) throws Exception
 	{
 		String assembly = "";
-
-		final String destOperand = useB ? CompUtils.operandB : CompUtils.operandA;
-		final String otherOperand = useB ? CompUtils.operandA : CompUtils.operandB;
+		ScratchSource sourceI = null;
+		if (!(sourceY.isLiteral() && (sourceY.apply(0).equals("#$0001") || sourceY.apply(0).equals("#$01"))))
+		{
+			sourceI = scratchManager.reserveScratchBlock(sourceY.getSize());
+			assembly += AssemblyUtils.byteCopier(whitespace, sourceY.getSize(), sourceI.getAddress(), sourceY);
+			assembly += ":\n"; // A loop
+		}
 		
-		assembly += whitespace + AssemblyUtils.byteCopier(whitespace, sourceY.getSize(), otherOperand, sourceY);
-		sourceY = AssemblyUtils.addressSource(otherOperand, sourceY.getSize());
-		assembly += ":\n"; // A loop
 		switch (operator)
 		{
 		case "<<":
@@ -59,7 +62,7 @@ public class ShiftExpressionNode extends BinaryExpressionNode
 				return new String[]
 				{
 					"LDA\t" + sourceX.apply(i),
-					"ASL",
+					(i >= sourceX.getSize() - 2) ? "ASL" : "ROL",
 					"STA\t" + destAddr + " + " + i,
 				};
 			});
@@ -69,19 +72,23 @@ public class ShiftExpressionNode extends BinaryExpressionNode
 			{return new String[]
 				{
 					"LDA\t" + sourceX.apply(i),
-					"LSR",
+					(i >= sourceX.getSize() - 2) ? "LSR" : "ROR",
 					"STA\t" + destAddr + " + " + i,
 				};
 			}, true, true);
 			break;
 		}
-		assembly += AdditiveExpressionNode.getDecrementer(whitespace, otherOperand, sourceY);
-		assembly += whitespace + "BNE\t:-\n";
+		if (!(sourceY.isLiteral() && (sourceY.apply(0).equals("#$0001") || sourceY.apply(0).equals("#$01"))))
+		{
+			assembly += AdditiveExpressionNode.getDecrementer(whitespace, sourceI.getAddress(), sourceI);
+			assembly += whitespace + "BNE\t:-\n";
+			scratchManager.releaseScratchBlock(sourceI);
+		}
 		return assembly;
 	}
 	@Override
-	protected String getAssembly(String whitespace, String destAddr, boolean useB, OperandSource sourceX, OperandSource sourceY) throws Exception
+	protected String getAssembly(String whitespace, String destAddr, ScratchManager scratchManager, OperandSource sourceX, OperandSource sourceY) throws Exception
 	{
-		return getShift(whitespace, destAddr, useB, sourceX, operator, sourceY);
+		return getShift(whitespace, destAddr, scratchManager, sourceX, operator, sourceY);
 	}
 }

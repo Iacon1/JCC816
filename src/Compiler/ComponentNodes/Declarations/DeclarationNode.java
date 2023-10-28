@@ -16,6 +16,7 @@ import Compiler.ComponentNodes.Interfaces.AssemblableNode;
 import Compiler.ComponentNodes.UtilNodes.DeclarationSpecifiersNode;
 import Compiler.ComponentNodes.UtilNodes.DeclaratorNode;
 import Compiler.Utils.AssemblyUtils;
+import Compiler.Utils.ScratchManager;
 import Grammar.C99.C99Parser.Abstract_declaratorContext;
 import Grammar.C99.C99Parser.DeclarationContext;
 import Grammar.C99.C99Parser.DeclaratorContext;

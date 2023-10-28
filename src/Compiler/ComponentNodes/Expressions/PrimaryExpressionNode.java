@@ -7,6 +7,7 @@ import Compiler.ComponentNodes.FunctionDefinitionNode;
 import Compiler.ComponentNodes.VariableNode;
 import Compiler.ComponentNodes.Definitions.Type;
 import Compiler.Utils.CompUtils;
+import Compiler.Utils.ScratchManager;
 import Grammar.C99.C99Parser.Primary_expressionContext;
 
 /**
@@ -64,7 +65,7 @@ public class PrimaryExpressionNode extends BaseExpressionNode<Primary_expression
 	}
 
 	@Override
-	protected String getAssembly(int leadingWhitespace, String writeAddr, boolean useB) throws Exception
+	protected String getAssembly(int leadingWhitespace, String writeAddr, ScratchManager scratchManager) throws Exception
 	{
 		return null;
 	}

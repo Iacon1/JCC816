@@ -11,6 +11,7 @@ import Compiler.ComponentNodes.ComponentNode;
 import Compiler.ComponentNodes.Expressions.BaseExpressionNode;
 import Compiler.ComponentNodes.Expressions.ExpressionNode;
 import Compiler.Utils.AssemblyUtils;
+import Compiler.Utils.CompConfig;
 import Compiler.Utils.CompUtils;
 import Compiler.ComponentNodes.FunctionDefinitionNode;
 import Grammar.C99.C99Parser.Selection_statementContext;
@@ -97,17 +98,17 @@ public class SelectionStatementNode extends StatementNode<Selection_statementCon
 				if (expression.hasAssembly())
 					assembly += expression.getAssembly(leadingWhitespace);
 				else if (expression.hasPropValue())
-					assembly += AssemblyUtils.byteCopier(whitespace, expression.getType().getSize(), CompUtils.operandA, expression.getPropValue());
+					assembly += AssemblyUtils.byteCopier(whitespace, expression.getType().getSize(), CompConfig.callResult, expression.getPropValue());
 				else
-					assembly += AssemblyUtils.byteCopier(whitespace, expression.getType().getSize(), CompUtils.operandA, expression.getVariable().getFullName());
+					assembly += AssemblyUtils.byteCopier(whitespace, expression.getType().getSize(), CompConfig.callResult, expression.getVariable().getFullName());
 				// Make sure variable loaded.
 				assembly += whitespace + "BEQ\t" + skipName + "\n";
-				assembly += ifStm.getAssembly(leadingWhitespace + CompUtils.indentSize);
+				assembly += ifStm.getAssembly(leadingWhitespace + CompConfig.indentSize);
 				if (elseStm != null)
 				{
-					assembly += AssemblyUtils.getWhitespace(leadingWhitespace + CompUtils.indentSize) + "JML\t" + getEndLabel() + "\n";
+					assembly += AssemblyUtils.getWhitespace(leadingWhitespace + CompConfig.indentSize) + "JML\t" + getEndLabel() + "\n";
 					assembly += whitespace + skipName + ":\n";
-					assembly += elseStm.getAssembly(leadingWhitespace + CompUtils.indentSize);
+					assembly += elseStm.getAssembly(leadingWhitespace + CompConfig.indentSize);
 				}
 				assembly += whitespace + getEndLabel() + ":\n";
 			}
@@ -115,7 +116,7 @@ public class SelectionStatementNode extends StatementNode<Selection_statementCon
 		else
 		{
 			
-			assembly += switchStm.getAssembly(leadingWhitespace + CompUtils.indentSize);
+			assembly += switchStm.getAssembly(leadingWhitespace + CompConfig.indentSize);
 		}
 		return assembly;
 	}	
