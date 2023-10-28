@@ -16,7 +16,6 @@ import org.antlr.v4.runtime.Parser;
 import org.antlr.v4.runtime.tree.ParseTree;
 
 import Compiler.ComponentNodes.ProgramNode;
-import Compiler.Utils.CompUtils;
 import Grammar.C99.C99Lexer;
 import Grammar.C99.C99Parser;
 import Grammar.C99.C99Parser.ProgramContext;

@@ -11,34 +11,30 @@ import Compiler.ComponentNodes.InterpretingNode;
 import Compiler.ComponentNodes.VariableNode;
 import Compiler.ComponentNodes.Interfaces.AssemblableNode;
 import Compiler.ComponentNodes.Interfaces.TypedNode;
-import Compiler.Utils.CompUtils;
+import Compiler.Utils.ScratchManager;
+import Compiler.Utils.ScratchManager.ScratchSource;
 
 public abstract class BaseExpressionNode<C extends ParserRuleContext> extends InterpretingNode<BaseExpressionNode<C>, C> implements AssemblableNode, TypedNode
 {
 
 	public BaseExpressionNode(ComponentNode<?> parent) {super(parent);}
-	
-	
 
-	protected abstract String getAssembly(int leadingWhitespace, String writeAddr, boolean useB) throws Exception;
-	protected String getAssembly(int leadingWhitespace, boolean useB) throws Exception
-	{
-		if (!useB) return getAssembly(leadingWhitespace, CompUtils.operandA, useB);
-		else return getAssembly(leadingWhitespace, CompUtils.operandB, useB);
-	}
-	public String getAssembly(int leadingWhitespace, String writeAddr) throws Exception
-	{
-		return getAssembly(leadingWhitespace, writeAddr, false);
-	}
-	
+	protected abstract String getAssembly(int leadingWhitespace, String destAddr, ScratchManager scratchManager) throws Exception;
+
 	public VariableNode getVariable() {return null;}
 	@Override
 	public abstract boolean hasPropValue();
 	@Override
 	public abstract Object getPropValue();
+	public String getAssembly(int leadingWhitespace, String destAddr) throws Exception
+	{
+		return getAssembly(leadingWhitespace, destAddr, new ScratchManager());
+	}
 	@Override
 	public String getAssembly(int leadingWhitespace) throws Exception
 	{
-		return getAssembly(leadingWhitespace, false);
+		ScratchManager scratchManager = new ScratchManager();
+		ScratchSource source = scratchManager.reserveScratchBlock(getType().getSize());
+		return getAssembly(leadingWhitespace, source.getAddress(), new ScratchManager());
 	}
 }

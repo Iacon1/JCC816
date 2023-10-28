@@ -13,8 +13,11 @@ import Compiler.ComponentNodes.Expressions.MultiplicativeExpressionNode;
 import Compiler.ComponentNodes.Declarations.DeclarationNode;
 import Compiler.ComponentNodes.Interfaces.AssemblableNode;
 import Compiler.Utils.AssemblyUtils;
+import Compiler.Utils.CompConfig;
 import Compiler.Utils.CompUtils;
 import Compiler.Utils.SNESRegisters;
+import Compiler.Utils.ScratchManager;
+import Compiler.Utils.ScratchManager.ScratchSource;
 import Grammar.C99.C99Parser.External_declarationContext;
 import Grammar.C99.C99Parser.ProgramContext;
 
@@ -30,29 +33,19 @@ public class ProgramNode extends InterpretingNode<ProgramNode, ProgramContext> i
 			fullNames.add(variable.getFullName());
 		
 		// Get longest variable name
-		int maxLength = Math.max(CompUtils.operandA.length(), CompUtils.operandB.length());
-		maxLength = Math.max(
-				Math.max(CompUtils.operandA.length(), CompUtils.operandB.length()),
-				CompUtils.callResult.length()
-		);
+		int maxLength = Math.max(CompConfig.scratchBase.length(), CompConfig.callResult.length());
 		for (String fullName: fullNames)
 			maxLength = Math.max(maxLength, fullName.length());
 		for (SNESRegisters register : SNESRegisters.values())
 			maxLength = Math.max(maxLength, register.toString().length());
 		
 		int basePosition = 0;
-		assembly += whitespace + AssemblyUtils.applyFiller(CompUtils.operandA, maxLength) + " := " +
-				CompUtils.mapOffset(basePosition, CompUtils.operandSize) + "\n";
-		basePosition += CompUtils.operandSize;
-		assembly += whitespace + AssemblyUtils.applyFiller(CompUtils.operandB, maxLength) + " := " +
-				CompUtils.mapOffset(basePosition, CompUtils.operandSize) + "\n";
-		basePosition += CompUtils.operandSize;
-		assembly += whitespace + AssemblyUtils.applyFiller(CompUtils.operandC, maxLength) + " := " +
-				CompUtils.mapOffset(basePosition, CompUtils.resultSize) + "\n";
-		basePosition += CompUtils.operandSize;
-		assembly += whitespace + AssemblyUtils.applyFiller(CompUtils.callResult, maxLength) + " := " +
-				CompUtils.mapOffset(basePosition, CompUtils.resultSize) + "\n";
-		basePosition += CompUtils.resultSize;
+		assembly += whitespace + AssemblyUtils.applyFiller(CompConfig.scratchBase, maxLength) + " := " +
+				CompUtils.mapOffset(basePosition, CompConfig.scratchSize) + "\n";
+		basePosition += CompConfig.scratchSize;
+		assembly += whitespace + AssemblyUtils.applyFiller(CompConfig.callResult, maxLength) + " := " +
+				CompUtils.mapOffset(basePosition, CompConfig.callResultSize) + "\n";
+		basePosition += CompConfig.callResultSize;
 		
 		// Declare variable locations
 		Map<String, Integer> positions = new HashMap<String, Integer>();
@@ -148,7 +141,7 @@ public class ProgramNode extends InterpretingNode<ProgramNode, ProgramContext> i
 				whitespace + "XCE\n" +
 				whitespace + "REP\t#$08\n";
 		assembly += whitespace + CompUtils.setA16 + "\n";
-		assembly += whitespace + "LDA\t#$" + String.format("%04x", CompUtils.stackSize) + "\n";
+		assembly += whitespace + "LDA\t#$" + String.format("%04x", CompUtils.stackSize - 1) + "\n";
 		assembly += whitespace + "TCS\n";
 		assembly += whitespace + "JML\tmain\n";
 		
@@ -156,26 +149,34 @@ public class ProgramNode extends InterpretingNode<ProgramNode, ProgramContext> i
 		for (SimpleEntry<Integer, Integer> mult : reqMultSubs)
 		{
 			assembly += whitespace + "__MULT_" + mult.getKey() + "_" + mult.getValue() + ":CLC\n";
+			ScratchManager scratchManager = new ScratchManager();
+			ScratchSource sourceX = scratchManager.reserveScratchBlock(mult.getKey());
+			ScratchSource sourceY = scratchManager.reserveScratchBlock(mult.getValue());
+
 			assembly += MultiplicativeExpressionNode.getMultiplier(
-					AssemblyUtils.getWhitespace(leadingWhitespace + CompUtils.indentSize),
-					CompUtils.callResult,
-					AssemblyUtils.addressSource(CompUtils.operandA, mult.getKey()),
-					AssemblyUtils.addressSource(CompUtils.operandB, mult.getValue()));
+					AssemblyUtils.getWhitespace(leadingWhitespace + CompConfig.indentSize),
+					CompConfig.callResult,
+					sourceX,
+					sourceY);
 			assembly += whitespace + "RTL\n";
 		}
 		
 		// Required divison subs
 		for (SimpleEntry<Integer, Integer> div : reqDivSubs)
-		{
+		{	
 			assembly += whitespace + "__DIV_" + div.getKey() + "_" + div.getValue() + ":CLC\n";
+			ScratchManager scratchManager = new ScratchManager();
+			ScratchSource sourceX = scratchManager.reserveScratchBlock(div.getKey());
+			ScratchSource sourceY = scratchManager.reserveScratchBlock(div.getValue());
+			assembly += AssemblyUtils.byteCopier(whitespace, sourceX.getSize(), CompConfig.callResult, 0);
 			if (div.getValue() == 1) // Can use short divider
 				assembly += MultiplicativeExpressionNode.getShortDivider(
-					AssemblyUtils.getWhitespace(leadingWhitespace + CompUtils.indentSize),
-					CompUtils.callResult, false, div.getKey(), div.getValue());
+					AssemblyUtils.getWhitespace(leadingWhitespace + CompConfig.indentSize),
+					CompConfig.callResult, scratchManager, sourceX, sourceY);
 			else // Must use long divider
 				assembly += MultiplicativeExpressionNode.getLongDivider(
-					AssemblyUtils.getWhitespace(leadingWhitespace + CompUtils.indentSize),
-					CompUtils.callResult, false, div.getKey(), div.getValue());
+					AssemblyUtils.getWhitespace(leadingWhitespace + CompConfig.indentSize),
+					CompConfig.callResult, scratchManager, sourceX, sourceY);
 			assembly += whitespace + "RTL\n";
 		}
 		// Get assembly from functions

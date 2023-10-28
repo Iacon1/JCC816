@@ -6,6 +6,7 @@ import Compiler.ComponentNodes.ComponentNode;
 import Compiler.ComponentNodes.FunctionDefinitionNode;
 import Compiler.ComponentNodes.Definitions.Type;
 import Compiler.ComponentNodes.UtilNodes.TypeNameNode;
+import Compiler.Utils.ScratchManager;
 import Grammar.C99.C99Parser.Cast_expressionContext;
 
 public class CastExpressionNode extends BaseExpressionNode<Cast_expressionContext>
@@ -52,7 +53,8 @@ public class CastExpressionNode extends BaseExpressionNode<Cast_expressionContex
 		return null;
 	}
 	@Override
-	protected String getAssembly(int leadingWhitespace, String writeAddr, boolean useB) throws Exception {
+	protected String getAssembly(int leadingWhitespace, String writeAddr, ScratchManager scratchManager) throws Exception
+	{
 		// TODO Auto-generated method stub
 		return null;
 	}

@@ -11,6 +11,7 @@ import Compiler.ComponentNodes.ComponentNode;
 import Compiler.ComponentNodes.FunctionDefinitionNode;
 import Compiler.ComponentNodes.VariableNode;
 import Compiler.ComponentNodes.Definitions.Type;
+import Compiler.Utils.ScratchManager;
 import Grammar.C99.C99Parser.Assignment_expressionContext;
 import Grammar.C99.C99Parser.ExpressionContext;
 
@@ -72,7 +73,7 @@ public class ExpressionNode extends BaseExpressionNode<ExpressionContext>
 		return false;
 	}
 	@Override
-	protected String getAssembly(int leadingWhitespace, String writeTo, boolean useB) throws Exception
+	protected String getAssembly(int leadingWhitespace, String writeTo, ScratchManager scratchManager) throws Exception
 	{
 		return getAssembly(leadingWhitespace);
 	}

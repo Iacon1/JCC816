@@ -20,7 +20,7 @@ public enum SNESRegisters
 	private SNESRegisters(int address) {this.address = address;}
 	
 	@Override
-	public String toString() {return "__REG" + CompUtils.scopeDelimiter + name();}
+	public String toString() {return "__REG" + CompConfig.scopeDelimiter + name();}
 	
 	public int address() {return address;}
 }

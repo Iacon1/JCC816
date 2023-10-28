@@ -145,7 +145,11 @@ public final class AssemblyUtils
 	public static OperandSource addressSource(String s, int size)
 	{
 		if (size == 1) return new OperandSource((Integer i) -> {return s;}, size, false);
-		else return new OperandSource((Integer i) -> {return s + " + " + Math.min(size - 1, i);}, size, false);
+		else return new OperandSource((Integer i) ->
+		{
+			if (i >= size) return "#0";
+			else return s + " + " + Math.min(size - 1, i);
+		}, size, false);
 	}
 	public static OperandSource constantSource(Object constant, int size)
 	{

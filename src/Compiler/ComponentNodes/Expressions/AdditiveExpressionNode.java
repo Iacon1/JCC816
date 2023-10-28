@@ -7,6 +7,7 @@ import java.util.function.Function;
 import Compiler.ComponentNodes.ComponentNode;
 import Compiler.Utils.AssemblyUtils;
 import Compiler.Utils.OperandSource;
+import Compiler.Utils.ScratchManager;
 import Grammar.C99.C99Parser.Additive_expressionContext;
 import Grammar.C99.C99Parser.Multiplicative_expressionContext;
 
@@ -53,15 +54,8 @@ public class AdditiveExpressionNode extends BinaryExpressionNode
 	}
 	public static String getIncrementer(String whitespace, String destAddr, OperandSource sourceX)
 	{
-		Function<Integer, String> sourceY = AssemblyUtils.numericSource(1, sourceX.getSize());
-		return whitespace + "CLC\n" + AssemblyUtils.bytewiseOperation(whitespace, sourceX.getSize(), (Integer i) -> 
-		{return new String[]
-			{
-				"LDA\t" + sourceX.apply(i),
-				"ADC\t" + sourceY.apply(i),
-				"STA\t" + destAddr + " + " + i,
-			};
-		});
+		OperandSource sourceY = AssemblyUtils.numericSource(1, sourceX.getSize());
+		return getAdder(whitespace, destAddr, sourceX, sourceY);
 	}
 	public static String getSubtractor(String whitespace, String destAddr, OperandSource sourceX, OperandSource sourceY)
 	{
@@ -76,19 +70,12 @@ public class AdditiveExpressionNode extends BinaryExpressionNode
 	}
 	public static String getDecrementer(String whitespace, String destAddr, OperandSource sourceX)
 	{
-		Function<Integer, String> sourceY = AssemblyUtils.numericSource(1, sourceX.getSize());
-		return whitespace + "SEC\n" + AssemblyUtils.bytewiseOperation(whitespace, sourceX.getSize(), (Integer i) -> 
-		{return new String[]
-			{
-				"LDA\t" + sourceX.apply(i),
-				"SBC\t" + sourceY.apply(i),
-				"STA\t" + destAddr + " + " + (i),
-			};
-		}, true, true);
+		OperandSource sourceY = AssemblyUtils.numericSource(1, sourceX.getSize());
+		return getSubtractor(whitespace, destAddr, sourceX, sourceY);
 	}
 	
 	@Override
-	protected String getAssembly(String whitespace, String destAddr, boolean useB, OperandSource sourceX, OperandSource sourceY) throws Exception
+	protected String getAssembly(String whitespace, String destAddr, ScratchManager scratchManager, OperandSource sourceX, OperandSource sourceY) throws Exception
 	{
 		String assembly = "";
 		

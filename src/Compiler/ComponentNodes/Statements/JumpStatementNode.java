@@ -8,6 +8,7 @@ import Compiler.ComponentNodes.Expressions.BaseExpressionNode;
 import Compiler.ComponentNodes.Expressions.ExpressionNode;
 import Compiler.ComponentNodes.Interfaces.AssemblableNode;
 import Compiler.Utils.AssemblyUtils;
+import Compiler.Utils.CompConfig;
 import Compiler.Utils.CompUtils;
 import Grammar.C99.C99Parser.Jump_statementContext;
 
@@ -86,9 +87,9 @@ public class JumpStatementNode extends StatementNode<Jump_statementContext> impl
 				assembly += whitespace + "JML\t" + iterNode.getEndLabel() + "\n";
 			break;
 		case returnM:
-			if (expr != null && expr.hasAssembly()) assembly += expr.getAssembly(leadingWhitespace, CompUtils.callResult);
-			else if (expr != null && expr.hasPropValue()) assembly += AssemblyUtils.byteCopier(whitespace, funcNode.getType().getSize(), CompUtils.callResult, expr.getPropValue());
-			else if (expr != null) assembly += AssemblyUtils.byteCopierAddr(whitespace, funcNode.getType().getSize(), CompUtils.callResult, expr.getVariable().getFullName());
+			if (expr != null && expr.hasAssembly()) assembly += expr.getAssembly(leadingWhitespace, CompConfig.callResult);
+			else if (expr != null && expr.hasPropValue()) assembly += AssemblyUtils.byteCopier(whitespace, funcNode.getType().getSize(), CompConfig.callResult, expr.getPropValue());
+			else if (expr != null) assembly += AssemblyUtils.byteCopierAddr(whitespace, funcNode.getType().getSize(), CompConfig.callResult, expr.getVariable().getFullName());
 			assembly += whitespace + "JML\t" + funcNode.getEndLabel() + "\n";
 			break;
 		}
