@@ -47,7 +47,7 @@ public class ShiftExpressionNode extends BinaryExpressionNode
 	{
 		String assembly = "";
 		ScratchSource sourceI = null;
-		if (!(sourceY.isLiteral() && (sourceY.apply(0).equals("#$0001") || sourceY.apply(0).equals("#$01"))))
+		if (!(sourceY.isLiteral() && sourceY.getSize() == 1 && sourceY.apply(0, true).equals("#$0001")))
 		{
 			sourceI = scratchManager.reserveScratchBlock(sourceY.getSize());
 			assembly += AssemblyUtils.byteCopier(whitespace, sourceY.getSize(), sourceI.getAddress(), sourceY);
@@ -57,28 +57,28 @@ public class ShiftExpressionNode extends BinaryExpressionNode
 		switch (operator)
 		{
 		case "<<":
-			assembly += AssemblyUtils.bytewiseOperation(whitespace, sourceX.getSize(), (Integer i) ->
+			assembly += AssemblyUtils.bytewiseOperation(whitespace, sourceX.getSize(), (Integer i, Boolean is16Bit) ->
 			{
 				return new String[]
 				{
-					"LDA\t" + sourceX.apply(i),
+					"LDA\t" + sourceX.apply(i, is16Bit),
 					(i >= sourceX.getSize() - 2) ? "ASL" : "ROL",
 					"STA\t" + destAddr + " + " + i,
 				};
 			});
 			break;
 		case ">>":
-			assembly += AssemblyUtils.bytewiseOperation(whitespace, sourceX.getSize(), (Integer i) -> 
+			assembly += AssemblyUtils.bytewiseOperation(whitespace, sourceX.getSize(), (Integer i, Boolean is16Bit) -> 
 			{return new String[]
 				{
-					"LDA\t" + sourceX.apply(i),
+					"LDA\t" + sourceX.apply(i, is16Bit),
 					(i >= sourceX.getSize() - 2) ? "LSR" : "ROR",
 					"STA\t" + destAddr + " + " + i,
 				};
 			}, true, true);
 			break;
 		}
-		if (!(sourceY.isLiteral() && (sourceY.apply(0).equals("#$0001") || sourceY.apply(0).equals("#$01"))))
+		if (!(sourceY.isLiteral() && sourceY.getSize() == 1 && sourceY.apply(0, true).equals("#$0001")))
 		{
 			assembly += AdditiveExpressionNode.getDecrementer(whitespace, sourceI.getAddress(), sourceI);
 			assembly += whitespace + "BNE\t:-\n";

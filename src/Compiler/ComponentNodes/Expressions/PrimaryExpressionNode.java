@@ -65,7 +65,7 @@ public class PrimaryExpressionNode extends BaseExpressionNode<Primary_expression
 	}
 
 	@Override
-	protected String getAssembly(int leadingWhitespace, String writeAddr, ScratchManager scratchManager) throws Exception
+	public String getAssembly(int leadingWhitespace, String writeAddr, ScratchManager scratchManager) throws Exception
 	{
 		return null;
 	}

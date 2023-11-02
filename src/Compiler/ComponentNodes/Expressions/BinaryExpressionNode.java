@@ -39,6 +39,7 @@ public abstract class BinaryExpressionNode<
 	@Override
 	public BaseExpressionNode<CC> interpret(CC node) throws Exception
 	{
+		if (node == null) return null;
 		if (node.children.size() == 1) // Only one, just propagate it
 			return (BaseExpressionNode) getPCNode(node);
 		else // Two
@@ -76,7 +77,7 @@ public abstract class BinaryExpressionNode<
 	protected String getAssembly(String whitespace, String destAddr, ScratchManager scratchManager, OperandSource sourceX, OperandSource sourceY) throws Exception
 	{return null;}
 	@Override
-	protected String getAssembly(int leadingWhitespace, String destAddr, ScratchManager scratchManager) throws Exception
+	public String getAssembly(int leadingWhitespace, String destAddr, ScratchManager scratchManager) throws Exception
 	{
 		String whitespace = AssemblyUtils.getWhitespace(leadingWhitespace);
 		ScratchSource scratchX = null, scratchY = null;

@@ -73,9 +73,14 @@ public class ExpressionNode extends BaseExpressionNode<ExpressionContext>
 		return false;
 	}
 	@Override
-	protected String getAssembly(int leadingWhitespace, String writeTo, ScratchManager scratchManager) throws Exception
+	public String getAssembly(int leadingWhitespace, String destAddr, ScratchManager scratchManager) throws Exception
 	{
-		return getAssembly(leadingWhitespace);
+		String assembly = "";
+		for (BaseExpressionNode<?> expression : expressions.subList(1, expressions.size()))
+			assembly += expression.getAssembly(leadingWhitespace,  scratchManager);
+		assembly += expressions.get(0).getAssembly(leadingWhitespace, destAddr, scratchManager);
+		
+		return assembly;
 	}
 	@Override
 	public String getAssembly(int leadingWhitespace) throws Exception

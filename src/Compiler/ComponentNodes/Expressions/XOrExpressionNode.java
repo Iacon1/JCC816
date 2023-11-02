@@ -32,12 +32,12 @@ public class XOrExpressionNode extends BinaryExpressionNode
 
 	public static String getExclOr(String whitespace, String destAddr, OperandSource sourceX, OperandSource sourceY)
 	{
-		String assembly = AssemblyUtils.bytewiseOperation(whitespace, sourceX.getSize(), (Integer i) ->
+		String assembly = AssemblyUtils.bytewiseOperation(whitespace, sourceX.getSize(), (Integer i, Boolean is16Bit) ->
 		{
 			return new String[]
 			{
-				"LDA\t" + sourceX.apply(i),
-				"EOR\t" + sourceY.apply(i),
+				"LDA\t" + sourceX.apply(i, is16Bit),
+				"EOR\t" + sourceY.apply(i, is16Bit),
 				"STA\t" + destAddr + " + " + i,
 			};
 		});

@@ -7,14 +7,13 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-import Assembler.Header.CartridgeType;
 import Assembler.Header.DestinationCode;
-import Assembler.Header.MapMode;
+import Compiler.CartConfig;
 import Logging.Logging;
 
 public class Assembler
 {
-	public static byte[] assemble(String name, String assembly, String cfgType, boolean debug) throws IOException
+	public static byte[] assemble(String name, CartConfig cartConfig, String assembly, String cfgType, boolean debug) throws IOException
 	{
 		File cfgFile, asmFile, sfcFile;
 		cfgFile = new File(name + ".cfg");
@@ -42,17 +41,17 @@ public class Assembler
 		sfcStream = new FileInputStream(sfcFile);
 		byte[] bytes = sfcStream.readAllBytes();
 		sfcStream.close();
-		
-		Header header = new Header("TT", "TEST", "TEST", 0, 0, 128, 0, false, MapMode.LoROM268, CartridgeType.ROMOnly, DestinationCode.USA);
 
+		Header header = new Header("TT", "TEST", "TEST", 0, 0, DestinationCode.USA, cartConfig);
+
+		header.calcROMSize(bytes);
 		header.calcChecksum(bytes);
 		byte[] headerBytes = header.asBytes();
-		for (int i = header.getOffset(); i < header.getOffset() + Header.size; ++i) bytes[i] = headerBytes[i - header.getOffset()];
+		for (int i = header.getOffset(); i < header.getOffset() + header.getSize(); ++i) bytes[i] = headerBytes[i - header.getOffset()];
 		
 		header.calcChecksum(bytes);
 		headerBytes = header.asBytes();
-		for (int i = header.getOffset(); i < header.getOffset() + Header.size; ++i) bytes[i] = headerBytes[i - header.getOffset()];
-		
+		for (int i = header.getOffset(); i < header.getOffset() + header.getSize(); ++i) bytes[i] = headerBytes[i - header.getOffset()];
 		
 		return bytes;
 	}

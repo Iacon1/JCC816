@@ -119,8 +119,7 @@ public class ProgramNode extends InterpretingNode<ProgramNode, ProgramContext> i
 		return true;
 	}
 	
-	@Override
-	public String getAssembly(int leadingWhitespace) throws Exception
+	private String getAssemblyPreface(int leadingWhitespace) throws Exception
 	{
 		String whitespace = AssemblyUtils.getWhitespace(leadingWhitespace);
 		String assembly = "";
@@ -179,12 +178,21 @@ public class ProgramNode extends InterpretingNode<ProgramNode, ProgramContext> i
 					CompConfig.callResult, scratchManager, sourceX, sourceY);
 			assembly += whitespace + "RTL\n";
 		}
+		
+		return assembly;
+	}
+	@Override
+	public String getAssembly(int leadingWhitespace) throws Exception
+	{
+		String whitespace = AssemblyUtils.getWhitespace(leadingWhitespace);
+		String assembly = "";
+		
 		// Get assembly from functions
 		for (FunctionDefinitionNode funcNode : functions)
 		{
 			assembly += funcNode.getAssembly(leadingWhitespace);
 		}
 		
-		return assembly;
+		return getAssemblyPreface(leadingWhitespace) + assembly;
 	}	
 }

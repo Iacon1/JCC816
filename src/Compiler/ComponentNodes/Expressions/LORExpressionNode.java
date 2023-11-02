@@ -40,13 +40,13 @@ public class LORExpressionNode extends BinaryExpressionNode
 	{
 		String assembly = whitespace + CompUtils.setXY8 + "\n";
 		assembly += whitespace + "LDX\t#$01\n";
-		assembly += AssemblyUtils.bytewiseOperation(whitespace, sourceX.getSize(), (Integer i) ->
+		assembly += AssemblyUtils.bytewiseOperation(whitespace, sourceX.getSize(), (Integer i, Boolean is16Bit) ->
 		{
 			return new String[]
 			{
-				"LDA\t" + sourceX.apply(i),
+				"LDA\t" + sourceX.apply(i, is16Bit),
 				"BNE\t:+",
-				"LDA\t" + sourceY.apply(i),
+				"LDA\t" + sourceY.apply(i, is16Bit),
 				"BNE\t:+",
 			};
 		});

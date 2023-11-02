@@ -43,11 +43,11 @@ public class AdditiveExpressionNode extends BinaryExpressionNode
 	}
 	public static String getAdder(String whitespace, String destAddr, OperandSource sourceX, OperandSource sourceY)
 	{
-		return whitespace + "CLC\n" + AssemblyUtils.bytewiseOperation(whitespace, sourceX.getSize(), (Integer i) -> 
+		return whitespace + "CLC\n" + AssemblyUtils.bytewiseOperation(whitespace, sourceX.getSize(), (Integer i, Boolean is16Bit) -> 
 		{return new String[]
 			{
-				"LDA\t" + sourceX.apply(i),
-				"ADC\t" + sourceY.apply(i),
+				"LDA\t" + sourceX.apply(i, is16Bit),
+				"ADC\t" + sourceY.apply(i, is16Bit),
 				"STA\t" + destAddr + " + " + i,
 			};
 		});
@@ -59,11 +59,11 @@ public class AdditiveExpressionNode extends BinaryExpressionNode
 	}
 	public static String getSubtractor(String whitespace, String destAddr, OperandSource sourceX, OperandSource sourceY)
 	{
-		return whitespace + "SEC\n" + AssemblyUtils.bytewiseOperation(whitespace, sourceX.getSize(), (Integer i) -> 
+		return whitespace + "SEC\n" + AssemblyUtils.bytewiseOperation(whitespace, sourceX.getSize(), (Integer i, Boolean is16Bit) -> 
 		{return new String[]
 			{
-				"LDA\t" + sourceX.apply(i),
-				"SBC\t" + sourceY.apply(i),
+				"LDA\t" + sourceX.apply(i, is16Bit),
+				"SBC\t" + sourceY.apply(i, is16Bit),
 				"STA\t" + destAddr + " + " + (i),
 			};
 		}, true, true);

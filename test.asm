@@ -18,9 +18,7 @@
 .word	RESET
 .segment "HEADER"
 .res	48, 0;	HEADER_HERE
-__operandA    := $7fffbf
-__operandB    := $7fff7f
-__operandC    := $7fff3f
+__ScratchBase := $7fff3f
 __callResult  := $7ffeff
 main__x       := $7ffefd
 main__y       := $7ffefb
@@ -40,130 +38,78 @@ CLC
 XCE
 REP	#$08
 REP	#$20
-LDA	#$2000
+LDA	#$1fff
 TCS
 JML	main
-__DIV_2_2:CLC
+__MULT_2_2:CLC
   SEP	#$30
-  LDY	#$00
-  LDA	__operandA + 1
-  BPL	:+
-  INY
-  REP	#$30
-  LDA	__operandA + 0
-  EOR	#$ffff
-  STA	__operandA + 0
-  SEP	#$20
-  LDA	__operandB + 1
-  BPL	:+
-  DEY
-  REP	#$20
-  LDA	__operandB + 0
-  EOR	#$ffff
-  STA	__operandB + 0
-:
-  REP	#$30
-  LDA	__operandB + 0
-  STA	__operandB + 2 + 0
-  LDA	#$0001
-  STA	__operandB + 0
-  LDA	#$0000
-  STA	__operandB + 2
-:
-  REP	#$30
-  LDA	__operandB + 2
-  LSR
-  STA	__operandB + 2
-  LDA	__operandB + 0
-  LSR
-  STA	__operandB + 0
-  SEC
-  LDA	__operandB + 2
-  SBC	#$0000
-  STA	__operandB + 2
-  LDA	__operandB + 0
-  SBC	#$0001
-  STA	__operandB + 0
-  BNE	:-
-  LDA	#$8000
-  STA	__operandC + 0
-@reiterate:
-  SEP	#$10
-  LDX	#$00
-  REP	#$30
-  LDA	__operandB + 0
-  EOR	#$8000
-  STA	__operandA + 2
-  LDA	__operandA + 0
-  EOR	#$8000
-  CMP	__operandA + 2
-  BCS	:+
-  BNE	:++
-: INX
-: TXA
-  SEP	#$20
-  STA	__operandA + 2
-  BEQ	:+
-  SEC
-  REP	#$30
-  LDA	__operandA + 0
-  SBC	__operandB + 0
-  STA	__operandA + 0
-  CLC
-  LDA	__callResult + 0
-  ADC	__operandC + 0
+  LDA	__ScratchBase + 190
+  STA	__REG__WRMPYA
+  LDA	__ScratchBase + 188
+  STA	__REG__WRMPYB
+  NOP
+  NOP
+  LDA	__REG__RDMPYL
   STA	__callResult + 0
-:
-    REP	#$30
-  LDA	#$0001
-  STA	__operandB + 0
-:
-  REP	#$30
-  LDA	__operandB + 2
-  LSR
-  STA	__operandB + 2
-  LDA	__operandB + 0
-  LSR
-  STA	__operandB + 0
-  SEC
-  LDA	__operandB + 0
-  SBC	#$0001
-  STA	__operandB + 0
-  BNE	:-
-  LDA	#$0001
-  STA	__operandB + 0
-:
-  REP	#$30
-  LDA	__operandC + 0
-  LSR
-  STA	__operandC + 0
-  SEC
-  LDA	__operandB + 0
-  SBC	#$0001
-  STA	__operandB + 0
-  BNE	:-
-  BEQ	:+
-  JMP	@reiterate
-  :
-  TYA
-  BEQ	:+
-  LDA	__callResult + 0
-  EOR	#$0000
-  STA	__callResult + 0
-:
+  LDA	__REG__RDMPYH
+  TAX
+  LDA	__ScratchBase + 190
+  STA	__REG__WRMPYA
+  LDA	__ScratchBase + 189
+  STA	__REG__WRMPYB
+  TXA
+  NOP
+  ADC	__REG__RDMPYL
+  STA	__callResult + 1
+  LDA	__ScratchBase + 191
+  STA	__REG__WRMPYA
+  LDA	__ScratchBase + 189
+  STA	__REG__WRMPYB
+  NOP
+  NOP
+  LDA	__REG__RDMPYL
+  STA	__callResult + 1
 RTL
 main:
   REP	#$30
-  LDA	#$02ee
+  LDA	#$0065
   STA	main__x + 0
   LDA	#$0002
   STA	main__y + 0
+  __ITER__START__0:
+    LDA	main__x + 0
+    STA	__ScratchBase + 190 + 0
+    LDA	main__y + 0
+    STA	__ScratchBase + 188 + 0
+    JSL	__MULT_2_2    
+    LDA	__callResult + 0
+    STA	main__x + 0
+    CLC
+    REP	#$30
+    LDA	main__y + 0
+    ADC	#$0001
+    STA	main__y + 0
+  SEP	#$10
+  LDX	#$00
+  CLC
+  REP	#$10
   LDA	main__x + 0
-  STA	__operandA + 0
-  LDA	main__y + 0
-  STA	__operandB + 0
-  JSL	__DIV_2_2
-  LDA	__callResult + 0
-  STA	main__x + 0
-  STP
+  EOR	#$8000
+  CMP	#$8064
+  BCC	:+
+  BNE	:++
+  DEX
+: INX
+: TXA
+  SEP	#$20
+  STA	__callResult
+  LDA	#$00
+  SEP	#$10
+  ORA	__callResult + 0
+  ORA	__callResult + 1
+  STA	__callResult
+  BNE	__ITER__START__0
+  __ITER__END__0:
+  lda main__x
+  L:JMP L
 __main_END: RTL

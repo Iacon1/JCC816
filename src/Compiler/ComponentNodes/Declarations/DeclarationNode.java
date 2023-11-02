@@ -8,6 +8,7 @@ import java.util.List;
 import Compiler.ComponentNodes.ComponentNode;
 import Compiler.ComponentNodes.Expressions.AssignmentExpressionNode;
 import Compiler.ComponentNodes.Expressions.BaseExpressionNode;
+import Compiler.ComponentNodes.Expressions.ExpressionNode;
 import Compiler.ComponentNodes.FunctionDefinitionNode;
 import Compiler.ComponentNodes.InterpretingNode;
 import Compiler.ComponentNodes.VariableNode;
@@ -85,8 +86,13 @@ public class DeclarationNode extends InterpretingNode<DeclarationNode, Declarati
 	@Override
 	public boolean canCall(FunctionDefinitionNode function)
 	{
-		// TODO Auto-generated method stub
+		for (BaseExpressionNode<?> expr : expressions) if (expr.canCall(function)) return true;
 		return false;
+	}
+	@Override
+	public boolean hasAssembly()
+	{
+		return expressions.size() != 0;
 	}
 	@Override
 	public String getAssembly(int leadingWhitespace) throws Exception
