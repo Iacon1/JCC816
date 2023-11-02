@@ -4,6 +4,9 @@
 
 package Executables;
 
+import Compiler.CartConfig;
+import Compiler.CartConfig.AddonChip;
+import Compiler.CartConfig.ROMType;
 import Compiler.Compiler;
 
 import java.io.File;
@@ -20,9 +23,12 @@ public class Test
 		Logging.setLogger(new DebugLogger());
 		main = new String(ClassLoader.getSystemResourceAsStream("Executables/test.c").readAllBytes());
 
+		CartConfig cartConfig = new CartConfig(ROMType.loROM, AddonChip.none, false, false, 0);
+		
 		String c = Compiler.compile(main);
 		Logging.logNotice("\n" + c);
-		byte[] sfc = Assembler.assemble("test", c, "3bank", true);
+		
+		byte[] sfc = Assembler.assemble("test", cartConfig, c, "loROM", true);
 		
 		File f = new File("./test.sfc");
 		f.createNewFile();

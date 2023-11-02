@@ -55,7 +55,7 @@ public class RelationalExpressionNode extends BinaryExpressionNode
 		assembly += whitespace + CompUtils.setXY8 + "\n";
 		assembly += whitespace + "LDX\t#$00\n";
 		assembly += whitespace + "CLC\n";
-		assembly += AssemblyUtils.bytewiseOperation(whitespace, Math.max(sourceX.getSize(), sourceY.getSize()), (Integer i) -> 
+		assembly += AssemblyUtils.bytewiseOperation(whitespace, Math.max(sourceX.getSize(), sourceY.getSize()), (Integer i, Boolean is16Bit) -> 
 		{	
 			List<String> lines = new LinkedList<String>();
 			if (i >= Math.max(sourceX.getSize(), sourceY.getSize()) - 2)
@@ -65,27 +65,27 @@ public class RelationalExpressionNode extends BinaryExpressionNode
 				// Start at MSB
 				if (sourceY.isLiteral())
 				{
-					String oldY = sourceY.apply(i).substring(2);
+					String oldY = sourceY.apply(i, is16Bit).substring(2);
 					int yVal = Integer.valueOf(oldY, 16);
-					String newY = "#$" + String.format("%0" + oldY.length() + "x", yVal ^ (oldY.length() == 2 ? 0x80 : 0x8000));
-					lines.add("LDA\t" + sourceX.apply(i));							// Get X
+					String newY = "#$" + String.format("%0" + (is16Bit? 4 : 0) + "x", yVal ^ (is16Bit? 0x8000 : 0x80));
+					lines.add("LDA\t" + sourceX.apply(i, is16Bit));					// Get X
 					lines.add("EOR\t" + toXOR);										// Flip sign
 					lines.add("CMP\t" + newY);										// Cmp X & Y?
 				}
 				else
 				{
-					lines.add("LDA\t" + sourceY.apply(i));							// Get Y
+					lines.add("LDA\t" + sourceY.apply(i, is16Bit));					// Get Y
 					lines.add("EOR\t" + toXOR);										// Flip sign
 					lines.add("STA\t" + destAddr);									// Place Y in destAddr
-					lines.add("LDA\t" + sourceX.apply(i));							// Get X
+					lines.add("LDA\t" + sourceX.apply(i, is16Bit));					// Get X
 					lines.add("EOR\t" + toXOR);										// Flip sign
 					lines.add("CMP\t" + destAddr);									// Cmp Y & X?
 				}
 			}
 			else
 			{
-				lines.add("LDA\t" + sourceX.apply(i));								// Get X
-				lines.add("CMP\t" + sourceY.apply(i));								// Cmp X & Y?
+				lines.add("LDA\t" + sourceX.apply(i, is16Bit));						// Get X
+				lines.add("CMP\t" + sourceY.apply(i, is16Bit));						// Cmp X & Y?
 			}
 			lines.add("BCC\t:+");													// If x < y then yes
 			lines.add("BNE\t:++");													// If x >= y then no

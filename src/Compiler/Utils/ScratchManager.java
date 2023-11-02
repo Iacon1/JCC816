@@ -22,17 +22,17 @@ public class ScratchManager
 		private int offset;
 		public ScratchSource(int offset, int size)
 		{
-			super((Integer i) ->
+			super((Integer i, Boolean is16Bit) ->
 			{
-				if (i >= size) return "#0";
+				if (i >= size) return (is16Bit? "#$0000" : "#$00");
 				else return CompConfig.scratchBase + " + " + (offset + i);
 			}, size, false);
 			this.offset = offset;
 		}
 		
 		public int getOffset() {return offset;}
-		public String getAddress(int mod) {return apply(mod);}
-		public String getAddress() {return apply(0);}
+		public String getAddress(int mod) {return apply(mod, true);}
+		public String getAddress() {return apply(0, true);}
 	}
 	
 	public ScratchSource reserveScratchBlock(int size) throws Exception

@@ -16,7 +16,7 @@ public final class Optimizer
 		{
 			String line = lines.get(i);
 			String prevLine = (i == 0) ? "" : lines.get(i - 1);
-			if (line.matches("[^:\s]*:.*")) // At a label, lose all assumptions of mode
+			if (line.matches("[^:\s]*:.*") || prevLine.contains("JSL")) // At a label or a JSL return point lose all assumptions of mode
 			{
 				aMode = -1;
 				xyMode = -1;

@@ -19,7 +19,7 @@ public abstract class BaseExpressionNode<C extends ParserRuleContext> extends In
 
 	public BaseExpressionNode(ComponentNode<?> parent) {super(parent);}
 
-	protected abstract String getAssembly(int leadingWhitespace, String destAddr, ScratchManager scratchManager) throws Exception;
+	public abstract String getAssembly(int leadingWhitespace, String destAddr, ScratchManager scratchManager) throws Exception;
 
 	public VariableNode getVariable() {return null;}
 	@Override
@@ -30,11 +30,17 @@ public abstract class BaseExpressionNode<C extends ParserRuleContext> extends In
 	{
 		return getAssembly(leadingWhitespace, destAddr, new ScratchManager());
 	}
+	protected String getAssembly(int leadingWhitespace, ScratchManager scratchManager) throws Exception
+	{
+		ScratchSource tempSource = scratchManager.reserveScratchBlock(getType().getSize());
+		return getAssembly(leadingWhitespace, tempSource.getAddress(), scratchManager);
+	}
 	@Override
 	public String getAssembly(int leadingWhitespace) throws Exception
 	{
 		ScratchManager scratchManager = new ScratchManager();
-		ScratchSource source = scratchManager.reserveScratchBlock(getType().getSize());
-		return getAssembly(leadingWhitespace, source.getAddress(), new ScratchManager());
+		return getAssembly(leadingWhitespace, scratchManager);
 	}
+
+	
 }

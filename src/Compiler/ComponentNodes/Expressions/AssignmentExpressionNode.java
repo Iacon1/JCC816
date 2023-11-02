@@ -3,16 +3,16 @@
 // The program itself.
 package Compiler.ComponentNodes.Expressions;
 
-import java.util.function.Function;
-
 import Compiler.ComponentNodes.ComponentNode;
 import Compiler.ComponentNodes.FunctionDefinitionNode;
-import Compiler.ComponentNodes.InterpretingNode;
 import Compiler.ComponentNodes.VariableNode;
-import Compiler.ComponentNodes.Interfaces.AssemblableNode;
+import Compiler.Exceptions.ConstraintException;
 import Compiler.Exceptions.TypeMismatchException;
 import Compiler.Utils.AssemblyUtils;
+import Compiler.Utils.CompUtils;
+import Compiler.Utils.OperandSource;
 import Compiler.Utils.ScratchManager;
+import Compiler.Utils.ScratchManager.ScratchSource;
 import Grammar.C99.C99Parser.Assignment_expressionContext;
 import Grammar.C99.C99Parser.Conditional_expressionContext;
 import Grammar.C99.C99Parser.Unary_expressionContext;
@@ -34,35 +34,112 @@ public class AssignmentExpressionNode extends BinaryExpressionNode
 	public AssignmentExpressionNode(ComponentNode<?> parent) {super(parent);}
 	
 	@Override
-	public boolean canCall(FunctionDefinitionNode function)
+	public BaseExpressionNode<Assignment_expressionContext> interpret(Assignment_expressionContext node) throws Exception
 	{
-		return y.canCall(function);
+		BaseExpressionNode sInt = super.interpret(node);
+		if (sInt != this) return sInt;
+		
+		if (x.getVariable() == null) throw new ConstraintException("6.5.16", 2, node.getStart());
+		BinaryExpressionNode<?,?,?,?> newY = null;
+		switch (operator)
+		{
+		case "*=":
+			newY = new MultiplicativeExpressionNode(this);
+			newY.x = x;
+			newY.operator = "*";
+			newY.y = y;
+			break;
+		case "/=":
+			newY = new MultiplicativeExpressionNode(this);
+			newY.x = x;
+			newY.operator = "/";
+			newY.y = y;
+			break;
+		case "%=":
+			newY = new MultiplicativeExpressionNode(this);
+			newY.x = x;
+			newY.operator = "%";
+			newY.y = y;
+			break;
+		case "+=":
+			newY = new AdditiveExpressionNode(this);
+			newY.x = x;
+			newY.operator = "+";
+			newY.y = y;
+			break;
+		case "-=":
+			newY = new AdditiveExpressionNode(this);
+			newY.x = x;
+			newY.operator = "-";
+			newY.y = y;
+			break;
+		case "<<=":
+			newY = new ShiftExpressionNode(this);
+			newY.x = x;
+			newY.operator = "<<";
+			newY.y = y;
+			break;
+		case ">>=":
+			newY = new ShiftExpressionNode(this);
+			newY.x = x;
+			newY.operator = ">>";
+			newY.y = y;
+			break;
+		case "&=":
+			newY = new AndExpressionNode(this);
+			newY.x = x;
+			newY.operator = "&";
+			newY.y = y;
+			break;
+		case "^=":
+			newY = new XOrExpressionNode(this);
+			newY.x = x;
+			newY.operator = "^";
+			newY.y = y;
+			break;
+		case "|=":
+			newY = new OrExpressionNode(this);
+			newY.x = x;
+			newY.operator = "|";
+			newY.y = y;
+			break;
+		}
+		newY.interpret(null);
+		y = newY;
+		
+		return this;
 	}
+	
 	@Override
-	public Object getPropValue() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+	public Object getPropValue() {return null;} // Should never happen
+	
 	@Override
-	protected String getAssembly(int leadingWhitespace, String writeAddr, ScratchManager scratchManager) throws Exception
+	public String getAssembly(int leadingWhitespace, String destAddr, ScratchManager scratchManager) throws Exception
 	{
 		String whitespace = AssemblyUtils.getWhitespace(leadingWhitespace);
+		final OperandSource sourceY;
 		String assembly = "";
-		VariableNode xVar;
 		
-		if (x.hasAssembly()) assembly += x.getAssembly(leadingWhitespace);
-		xVar = x.getVariable();
-		if (xVar == null) return assembly;
-		if (!xVar.canCastFrom(y.getType()))
-			throw new TypeMismatchException(x.getType(), y.getType());
 		if (y.hasAssembly())
-			assembly += y.getAssembly(leadingWhitespace, xVar.getFullName(), scratchManager);
+		{
+			assembly += y.getAssembly(leadingWhitespace, destAddr, scratchManager);
+			sourceY = AssemblyUtils.addressSource(destAddr, y.getType().getSize());
+		}
 		else if (y.hasPropValue())
-			assembly += AssemblyUtils.byteCopier(whitespace, xVar.getType().getSize(), xVar.getFullName(), y.getPropValue());
+			sourceY = AssemblyUtils.constantSource(y.getPropValue(), y.getType().getSize());
 		else
-			assembly += AssemblyUtils.byteCopierAddr(whitespace, xVar.getType().getSize(), xVar.getFullName(), y.getVariable().getFullName());
+			sourceY = AssemblyUtils.addressSource(y.getVariable().getFullName(), y.getType().getSize());
+		
+		if (!destAddr.equals(x.getVariable().getFullName()))
+			assembly += AssemblyUtils.byteCopier(whitespace, x.getVariable().getSize(), x.getVariable().getFullName(), sourceY);
 		
 		return assembly;
 	}
+	@Override
+	protected String getAssembly(int leadingWhitespace, ScratchManager scratchManager) throws Exception
+	{
+		return getAssembly(leadingWhitespace, x.getVariable().getFullName(), scratchManager);
+	}
+	
 	
 }

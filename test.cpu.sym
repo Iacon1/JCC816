@@ -1,7 +1,9 @@
-al 00815C .__main_END
-al 00808A .@reiterate
-al 00800F .__DIV_2_2
-al 00812F .main
+al 0080CD .__main_END
+al 0080CA .L
+al 0080C6 .__ITER__END__0
+al 00806C .__ITER__START__0
+al 00800F .__MULT_2_2
+al 00805C .main
 al 004217 .__REG__RDMPYH
 al 004216 .__REG__RDMPYL
 al 004216 .__REG__RDDIVH
@@ -14,7 +16,5 @@ al 004202 .__REG__WRMPYA
 al 7FFEFB .main__y
 al 7FFEFD .main__x
 al 7FFEFF .__callResult
-al 7FFF3F .__operandC
-al 7FFF7F .__operandB
-al 7FFFBF .__operandA
+al 7FFF3F .__ScratchBase
 al 008000 .RESET

@@ -5,6 +5,7 @@ package Compiler.Utils;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import Compiler.ComponentNodes.FunctionDefinitionNode;
@@ -46,29 +47,7 @@ public final class AssemblyUtils
 		
 		return assembly;
 	}
-	public static String bytewiseOperation(String whitespace, int nBytes, Function<Integer, String[]> perIteration, String[] finalByte)
-	{
-		String assembly = "";
-		
-		if (nBytes >= 2)
-		{
-			assembly += whitespace + CompUtils.setAXY16 + "\n";
-			for (int i = 0; i < nBytes; i += 2)
-			{
-				for (String opLine : perIteration.apply(i))
-					assembly += whitespace + opLine + "\n";
-			}
-		}
-		if (nBytes % 2 == 1)
-		{
-			assembly += whitespace + CompUtils.setAXY8 + "\n";
-			for (String opLine : finalByte)
-				assembly += whitespace + opLine + "\n";
-		}
-		
-		return assembly;
-	}
-	public static String bytewiseOperation(String whitespace, int nBytes, Function<Integer, String[]> perIteration, boolean set16, boolean reverse)
+	public static String bytewiseOperation(String whitespace, int nBytes, BiFunction<Integer, Boolean, String[]> perIteration, boolean set16, boolean reverse)
 	{
 		String assembly = "";
 		
@@ -79,49 +58,47 @@ public final class AssemblyUtils
 			int j = i;
 			if (reverse)
 				j = (nBytes % 2 == 1) ? nBytes - 1 - i : nBytes - 2 - i;
-			for (String opLine : perIteration.apply(j))
+			for (String opLine : perIteration.apply(j, set16))
 				assembly += whitespace + opLine + "\n";
 		}
 		if (nBytes % 2 == 1 && set16)
 		{
 			assembly += whitespace + CompUtils.setAXY8 + "\n";
-			for (String opLine : perIteration.apply(reverse? 0 : nBytes - 1))
+			for (String opLine : perIteration.apply(reverse? 0 : nBytes - 1, false))
 				assembly += whitespace + opLine + "\n";
 		}
 		
 		return assembly;
 	}
-	public static String bytewiseOperation(String whitespace, int nBytes, Function<Integer, String[]> perIteration)
+	public static String bytewiseOperation(String whitespace, int nBytes, BiFunction<Integer, Boolean, String[]> perIteration)
 	{
 		return bytewiseOperation(whitespace, nBytes, perIteration, true, false);
 	}
-	public static String byteCopier(String whitespace, int nBytes, String writeAddr, Function<Integer, String> readSource)
+	public static String byteCopier(String whitespace, int nBytes, String writeAddr, BiFunction<Integer, Boolean, String> readSource)
 	{
-		return bytewiseOperation(whitespace, nBytes, (Integer i) -> 
+		return bytewiseOperation(whitespace, nBytes, (Integer i, Boolean is16Bit) -> 
 			{
 				return new String[] {
-						"LDA\t" + readSource.apply(i),
+						"LDA\t" + readSource.apply(i, is16Bit),
 						"STA\t" + writeAddr + " + " + (nBytes == 1? "" : i)};
-			},
-			new String[] {
-					"LDA\t" + readSource.apply(nBytes - 1),
-					"STA\t" + writeAddr + (nBytes == 1? "" : " + " + (nBytes - 1))}
+			}
 		);
 	}
 	public static String byteCopierAddr(String whitespace, int nBytes, String writeAddr, String readAddr)
 	{
-		return byteCopier(whitespace, nBytes, writeAddr, (Integer i) ->
+		return byteCopier(whitespace, nBytes, writeAddr, (Integer i, Boolean is16Bit) ->
 			{
 				return readAddr + " + " + i;
 			});
 	}
 	public static OperandSource byteStreamSource(byte[] bytes)
 	{
-		return new OperandSource((Integer i) ->
+		return new OperandSource((Integer i, Boolean is16Bit) ->
 		{
-			if (i < bytes.length - 1) return "#$" + String.format("%02x%02x", bytes[Math.min(bytes.length - 2, i)], bytes[Math.min(bytes.length - 1, i + 1)]);
-			// Only odd if at end
-			return "#$" + String.format("%02x", bytes[Math.min(bytes.length - 1, i)]);
+			if (is16Bit)
+				if (bytes.length == 1) return "#$" + String.format("%02x%02x", 0, bytes[0]);
+				else return "#$" + String.format("%02x%02x", bytes[Math.min(bytes.length - 2, i)], bytes[Math.min(bytes.length - 1, i + 1)]);
+			else return "#$" + String.format("%02x", bytes[Math.min(bytes.length - 1, i)]);
 		}, bytes.length, true);
 	}
 	public static OperandSource numericSource(long s, int size)
@@ -144,10 +121,10 @@ public final class AssemblyUtils
 	}
 	public static OperandSource addressSource(String s, int size)
 	{
-		if (size == 1) return new OperandSource((Integer i) -> {return s;}, size, false);
-		else return new OperandSource((Integer i) ->
+		if (size == 1) return new OperandSource((Integer i, Boolean is16Bit) -> {return s;}, size, false);
+		else return new OperandSource((Integer i, Boolean is16Bit) ->
 		{
-			if (i >= size) return "#0";
+			if (i >= size) return (is16Bit? "#$0000" : "#$00");
 			else return s + " + " + Math.min(size - 1, i);
 		}, size, false);
 	}
@@ -167,7 +144,7 @@ public final class AssemblyUtils
 	}
 	public static String byteCopier(String whitespace, int nBytes, String writeAddr, Object constant)
 	{
-		Function<Integer, String> source = constantSource(constant, nBytes);
+		BiFunction<Integer, Boolean, String> source = constantSource(constant, nBytes);
 		return byteCopier(whitespace, nBytes, writeAddr, source);
 	}
 }

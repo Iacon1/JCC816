@@ -2,11 +2,15 @@
 //
 package Compiler.ComponentNodes.Expressions;
 
+import org.antlr.v4.runtime.tree.TerminalNode;
+
 import Compiler.ComponentNodes.ComponentNode;
 import Compiler.ComponentNodes.FunctionDefinitionNode;
 import Compiler.ComponentNodes.VariableNode;
 import Compiler.ComponentNodes.Definitions.Type;
 import Compiler.ComponentNodes.UtilNodes.TypeNameNode;
+import Compiler.Utils.AssemblyUtils;
+import Compiler.Utils.OperandSource;
 import Compiler.Utils.ScratchManager;
 import Grammar.C99.C99Parser.Unary_expressionContext;
 
@@ -34,7 +38,8 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 
 			operator = "";
 			for (int i = 0; i < node.getChildCount(); ++i)
-				if (node.getTokens(i).size() == 1) operator += node.getToken(i, 0);
+				if (TerminalNode.class.isAssignableFrom(node.getChild(i).getClass()))
+					operator += node.getChild(i).getText();
 		}
 		return this;
 	}
@@ -42,7 +47,8 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 	@Override
 	public Type getType()
 	{
-		return type;
+		if (type != null) return type;
+		else return expr.getType(); 
 	}
 	
 	@Override
@@ -68,9 +74,28 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 		return null;
 	}
 	@Override
-	protected String getAssembly(int leadingWhitespace, String writeAddr, ScratchManager scratchManager) throws Exception {
-		// TODO Auto-generated method stub
-		return null;
+	public String getAssembly(int leadingWhitespace, String writeAddr, ScratchManager scratchManager) throws Exception
+	{
+		String whitespace = AssemblyUtils.getWhitespace(leadingWhitespace);
+		String assembly = "";
+		switch (operator)
+		{
+		case "++":
+			OperandSource exprSource = AssemblyUtils.addressSource(expr.getVariable().getFullName(), expr.getVariable().getSize());
+			assembly += AdditiveExpressionNode.getIncrementer(whitespace, expr.getVariable().getFullName(), exprSource);
+			if (!writeAddr.equals(expr.getVariable().getFullName()))
+				assembly += AssemblyUtils.byteCopier(whitespace, expr.getVariable().getSize(), writeAddr, exprSource);
+			return assembly;
+		default: return "";
+		}
+	}
+	
+	@Override
+	public String getAssembly(int leadingWhitespace) throws Exception
+	{
+		if (operator.equals("++") || operator.equals("--"))
+			return getAssembly(leadingWhitespace, expr.getVariable().getFullName(), new ScratchManager());
+		else return super.getAssembly(leadingWhitespace);
 	}
 
 	

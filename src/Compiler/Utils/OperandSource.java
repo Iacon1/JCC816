@@ -2,15 +2,15 @@
 //
 package Compiler.Utils;
 
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
-public class OperandSource implements Function<Integer, String>
+public class OperandSource implements BiFunction<Integer, Boolean, String>
 {
-	Function<Integer, String> f;
+	BiFunction<Integer, Boolean, String> f;
 	private boolean isLiteral;
 	private int size;
 	
-	public OperandSource(Function<Integer, String> f, int size, boolean isLiteral)
+	public OperandSource(BiFunction<Integer, Boolean, String> f, int size, boolean isLiteral)
 	{
 		this.f = f;
 		this.size = size;
@@ -20,8 +20,8 @@ public class OperandSource implements Function<Integer, String>
 	public int getSize() {return size;}
 	
 	@Override
-	public String apply(Integer i)
+	public String apply(Integer i, Boolean is16Bit)
 	{
-		return f.apply(i);
+		return f.apply(i, is16Bit);
 	}
 }

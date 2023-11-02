@@ -60,7 +60,7 @@ public class ConditionalExpressionNode extends BinaryExpressionNode
 		else return y.getPropValue();
 	}
 	@Override
-	protected String getAssembly(int leadingWhitespace, String writeAddr, ScratchManager scratchManager) throws Exception
+	public String getAssembly(int leadingWhitespace, String writeAddr, ScratchManager scratchManager) throws Exception
 	{
 		// TODO Auto-generated method stub
 		return null;

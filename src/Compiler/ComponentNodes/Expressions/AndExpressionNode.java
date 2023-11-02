@@ -41,12 +41,12 @@ public class AndExpressionNode extends BinaryExpressionNode
 	@Override
 	protected String getAssembly(String whitespace, String destAddr, ScratchManager scratchManager, OperandSource sourceX, OperandSource sourceY) throws Exception
 	{
-		String assembly = AssemblyUtils.bytewiseOperation(whitespace, sourceX.getSize(), (Integer i) ->
+		String assembly = AssemblyUtils.bytewiseOperation(whitespace, sourceX.getSize(), (Integer i, Boolean is16Bit) ->
 		{
 			return new String[]
 			{
-				"LDA\t" + sourceX.apply(i),
-				"AND\t" + sourceY.apply(i),
+				"LDA\t" + sourceX.apply(i, is16Bit),
+				"AND\t" + sourceY.apply(i, is16Bit),
 				"STA\t" + destAddr + " + " + i,
 			};
 		});
