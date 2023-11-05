@@ -43,7 +43,20 @@ public class XOrExpressionNode extends BinaryExpressionNode
 		});
 		return assembly;
 	}
-	
+	public static String getComplementer(String whitespace, OperandSource destSource, OperandSource sourceX)
+	{
+		OperandSource sourceY = AssemblyUtils.constantSource(Long.valueOf("FF".repeat(sourceX.getSize())), sourceX.getSize()); // 0xFF...FF
+		String assembly = AssemblyUtils.bytewiseOperation(whitespace, sourceX.getSize(), (Integer i, Boolean is16Bit) ->
+		{
+			return new String[]
+			{
+				"LDA\t" + sourceX.apply(i, is16Bit),
+				"EOR\t" + sourceY.apply(i, is16Bit),
+				"STA\t" + destSource.apply(i, is16Bit),
+			};
+		});
+		return assembly;
+	}
 	@Override
 	public Object getPropValue()
 	{
