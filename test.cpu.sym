@@ -1,9 +1,5 @@
-al 0080CD .__main_END
-al 0080CA .L
-al 0080C6 .__ITER__END__0
-al 00806C .__ITER__START__0
-al 00800F .__MULT_2_2
-al 00805C .main
+al 00800F .__main_END
+al 00800F .main
 al 004217 .__REG__RDMPYH
 al 004216 .__REG__RDMPYL
 al 004216 .__REG__RDDIVH
@@ -13,8 +9,7 @@ al 004205 .__REG__WRDIVH
 al 004204 .__REG__WRDIVL
 al 004203 .__REG__WRMPYB
 al 004202 .__REG__WRMPYA
-al 7FFEFB .main__y
-al 7FFEFD .main__x
+al 7FFEFB .main__p
 al 7FFEFF .__callResult
 al 7FFF3F .__ScratchBase
 al 008000 .RESET
