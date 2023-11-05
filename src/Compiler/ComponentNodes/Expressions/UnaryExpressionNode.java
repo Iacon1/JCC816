@@ -7,11 +7,16 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import Compiler.ComponentNodes.ComponentNode;
 import Compiler.ComponentNodes.FunctionDefinitionNode;
 import Compiler.ComponentNodes.Definitions.Type;
+import Compiler.ComponentNodes.Dummies.DummyType;
+import Compiler.ComponentNodes.Definitions.PointerType;
 import Compiler.ComponentNodes.LVals.ImmediateLValNode;
 import Compiler.ComponentNodes.LVals.IndirectLValNode;
 import Compiler.ComponentNodes.LVals.LValueNode;
 import Compiler.ComponentNodes.UtilNodes.TypeNameNode;
+import Compiler.Exceptions.ConstraintException;
 import Compiler.Utils.AssemblyUtils;
+import Compiler.Utils.CompConfig;
+import Compiler.Utils.CompUtils;
 import Compiler.Utils.OperandSource;
 import Compiler.Utils.ScratchManager;
 
@@ -38,11 +43,14 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 				this.expr = new CastExpressionNode(this).interpret(node.cast_expression());
 			else if (node.type_name() != null)
 				type = new TypeNameNode(this).interpret(node.type_name()).getType();
-
+			
 			operator = "";
 			for (int i = 0; i < node.getChildCount(); ++i)
 				if (TerminalNode.class.isAssignableFrom(node.getChild(i).getClass()))
 					operator += node.getChild(i).getText();
+			
+			if (operator.equals("++") || operator.equals("--") && !expr.hasLValue())
+				throw new ConstraintException("6.5.3", 1, node.start);
 		}
 		return this;
 	}
@@ -50,7 +58,7 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 	@Override
 	public Type getType()
 	{
-		if (type != null) return type;
+		if (type != null) return new PointerType(new DummyType("void")); // No object can have a greater size than a pointer
 		else return expr.getType(); 
 	}
 	
@@ -86,23 +94,47 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 	@Override
 	public Object getPropValue()
 	{
-		if (operator.equals("sizeof")) return expr.getType().getSize();
+		if (operator.equals("sizeof"))
+		{
+			if (type != null) return type.getSize();
+			else return expr.getType().getSize();
+		}
+		else if (operator.equals("-")) return Long.valueOf(-1 * expr.getPropLong());
+		else if (operator.equals("~")) return Long.valueOf(~expr.getPropLong());
+		else if (operator.equals("!")) return Boolean.valueOf(expr.getPropBool());
 		else return expr.getPropValue();
 	}
 	@Override
-	public String getAssembly(int leadingWhitespace, OperandSource writeAddr, ScratchManager scratchManager) throws Exception
+	public String getAssembly(int leadingWhitespace, OperandSource destSource, ScratchManager scratchManager) throws Exception
 	{
 		String whitespace = AssemblyUtils.getWhitespace(leadingWhitespace);
 		String assembly = "";
+		OperandSource sourceX = expr.getLValue().getSource();
 		switch (operator)
 		{
 		case "++":
-			assembly += AdditiveExpressionNode.getIncrementer(whitespace, expr.getLVal().getSource(), expr.getLVal().getSource());
-			if (!writeAddr.equals(expr.getLVal().getSource()))
-				assembly += AssemblyUtils.byteCopier(whitespace, expr.getLVal().getSize(), writeAddr, expr.getLVal().getSource());
-			return assembly;
+			assembly += AdditiveExpressionNode.getIncrementer(whitespace, sourceX, sourceX);
+			if (!destSource.equals(sourceX))
+				assembly += AssemblyUtils.byteCopier(whitespace, sourceX.getSize(), destSource, sourceX);
+			break;
+		case "--":
+			assembly += AdditiveExpressionNode.getDecrementer(whitespace, sourceX, sourceX);
+			if (!destSource.equals(sourceX))
+				assembly += AssemblyUtils.byteCopier(whitespace, sourceX.getSize(), destSource, sourceX);
+			break;
+		case "-": // -x = ~(x-1)
+			assembly += AdditiveExpressionNode.getDecrementer(whitespace, destSource, sourceX);
+			sourceX = destSource;
+		case "~":
+			assembly += XOrExpressionNode.getComplementer(whitespace, destSource, sourceX);
+			break;
+		case "!":
+			assembly += EqualityExpressionNode.getIsZero(whitespace, destSource, scratchManager, sourceX);
+			break;
 		default: return "";
 		}
+		
+		return assembly;
 	}
 	
 	@Override
