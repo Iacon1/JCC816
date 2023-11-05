@@ -12,6 +12,7 @@ import Compiler.ComponentNodes.Expressions.BaseExpressionNode;
 import Compiler.ComponentNodes.Expressions.ExpressionNode;
 import Compiler.ComponentNodes.FunctionDefinitionNode;
 import Compiler.ComponentNodes.InterpretingNode;
+import Compiler.ComponentNodes.Definitions.PointerType;
 import Compiler.ComponentNodes.Definitions.Type;
 import Compiler.ComponentNodes.Interfaces.AssemblableNode;
 import Compiler.ComponentNodes.LVals.VariableNode;
@@ -53,6 +54,9 @@ public class DeclarationNode extends InterpretingNode<DeclarationNode, Declarati
 				else expressions.add(null);
 				DeclaratorNode declaratorNode = new DeclaratorNode(this).interpret(initDeclarator);
 				Type type = new Type(specifiers.getSpecifiers(), declaratorNode, initDeclarator.start);
+				if (declaratorNode.pointerQualifiers() != null)
+					for (int i = declaratorNode.pointerQualifiers().size() - 1; i >= 0; --i)
+						type = new PointerType(type, declaratorNode.pointerQualifiers().get(i));
 				VariableNode variable = new VariableNode(this, declaratorNode.getIdentifier(), type);
 				registerVariable(variable);
 				variables.add(variable);
