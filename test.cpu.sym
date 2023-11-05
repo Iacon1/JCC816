@@ -9,7 +9,7 @@ al 004205 .__REG__WRDIVH
 al 004204 .__REG__WRDIVL
 al 004203 .__REG__WRMPYB
 al 004202 .__REG__WRMPYA
-al 7FFEFB .main__p
+al 7FFEFC .main__x
 al 7FFEFF .__callResult
 al 7FFF3F .__ScratchBase
 al 008000 .RESET

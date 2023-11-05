@@ -31,8 +31,8 @@ public class LANDExpressionNode extends BinaryExpressionNode
 	@Override
 	public Object getPropValue()
 	{
-		Boolean a = ((Boolean) x.getPropValue()).booleanValue();
-		Boolean b = ((Boolean) y.getPropValue()).booleanValue();
+		boolean a = x.getPropBool();
+		boolean b = y.getPropBool();
 		return a && b;
 	}
 	@Override

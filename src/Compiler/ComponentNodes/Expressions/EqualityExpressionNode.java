@@ -32,9 +32,16 @@ public class EqualityExpressionNode extends BinaryExpressionNode
 	{return new RelationalExpressionNode(this).interpret(node.relational_expression());}
 
 	@Override
-	public Object getPropValue() {
-		// TODO Auto-generated method stub
-		return null;
+	public Object getPropValue()
+	{
+		switch (operator)
+		{
+		case "==":
+			return x.getPropValue().equals(y.getPropValue());
+		case "!=":
+			return x.getPropValue().equals(y.getPropValue());
+		default: return null;
+		}
 	}
 	
 	public static String getIsZero(String whitespace, OperandSource destSource, ScratchManager scratchManager, OperandSource source)

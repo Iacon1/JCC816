@@ -1,4 +1,4 @@
 int main()
 {
-	volatile int* p;
+	int* x[*];
 }
