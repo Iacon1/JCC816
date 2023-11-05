@@ -2,7 +2,7 @@
 // Array
 package Compiler.ComponentNodes.Definitions;
 
-import Compiler.Utils.CompUtils;
+import Compiler.Utils.CompConfig;
 
 public class ArrayType extends Type
 {
@@ -24,7 +24,7 @@ public class ArrayType extends Type
 	@Override
 	public int getSize()
 	{
-		if (length == -1) return CompUtils.pointerSize;
+		if (length == -1) return CompConfig.pointerSize;
 		return type.getSize() * length;
 	}
 	
@@ -35,9 +35,11 @@ public class ArrayType extends Type
 	
 	@Override
 	public boolean isIncomplete() {return length == -1;}
-	
+
 	@Override
 	public boolean isArray() {return true;}
+	@Override
+	public boolean isPointer() {return true;}
 	
 	@Override
 	public String getSignature()
