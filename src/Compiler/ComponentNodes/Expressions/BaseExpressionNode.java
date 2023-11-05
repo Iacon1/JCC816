@@ -28,6 +28,8 @@ public abstract class BaseExpressionNode<C extends ParserRuleContext> extends In
 	public abstract boolean hasPropValue();
 	@Override
 	public abstract Object getPropValue();
+	public long getPropLong() {return ((Number) getPropValue()).longValue();}
+	public boolean getPropBool() {return ((Boolean) getPropValue());}
 	public abstract String getAssembly(int leadingWhitespace, OperandSource destSource, ScratchManager scratchManager) throws Exception;
 	public String getAssembly(int leadingWhitespace, OperandSource destSource) throws Exception
 	{

@@ -19,6 +19,11 @@ public class PointerType extends Type
 		this.pointerQualifiers = new HashSet<String>();
 		this.pointerQualifiers.addAll(pointerQualifiers);
 	}
+	public PointerType(Type type)
+	{
+		this.type = type;
+		this.pointerQualifiers = new HashSet<String>();
+	}
 	
 	@Override
 	public int getBaseSize()
