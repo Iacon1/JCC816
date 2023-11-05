@@ -53,7 +53,7 @@ public final class AssemblyUtils
 		
 		if (nBytes >= 2 && set16) assembly += whitespace + CompUtils.setAXY16 + "\n";
 		else if (!set16) assembly += whitespace + CompUtils.setAXY8 + "\n";
-		for (int i = 0; i < nBytes; i += (set16? 2 : 1))
+		for (int i = 0; i < nBytes - 1; i += (set16? 2 : 1))
 		{
 			int j = i;
 			if (reverse)
