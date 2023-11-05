@@ -12,10 +12,10 @@ import java.util.Set;
 import org.antlr.v4.runtime.Token;
 
 import Compiler.ComponentNodes.ComponentNode;
+import Compiler.ComponentNodes.Declarations.DeclarationSpecifiersNode;
+import Compiler.ComponentNodes.Declarations.DeclaratorNode;
+import Compiler.ComponentNodes.Declarations.DirectDeclaratorNode;
 import Compiler.ComponentNodes.Dummies.DummyType;
-import Compiler.ComponentNodes.UtilNodes.DeclarationSpecifiersNode;
-import Compiler.ComponentNodes.UtilNodes.DeclaratorNode;
-import Compiler.ComponentNodes.UtilNodes.DirectDeclaratorNode;
 import Compiler.Exceptions.ConstraintException;
 import Compiler.Exceptions.UnsupportedFeatureException;
 import Compiler.Utils.CompUtils;

@@ -6,13 +6,13 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 
 import Compiler.ComponentNodes.ComponentNode;
 import Compiler.ComponentNodes.FunctionDefinitionNode;
+import Compiler.ComponentNodes.Declarations.TypeNameNode;
 import Compiler.ComponentNodes.Definitions.Type;
 import Compiler.ComponentNodes.Dummies.DummyType;
 import Compiler.ComponentNodes.Definitions.PointerType;
 import Compiler.ComponentNodes.LVals.ImmediateLValNode;
 import Compiler.ComponentNodes.LVals.IndirectLValNode;
 import Compiler.ComponentNodes.LVals.LValueNode;
-import Compiler.ComponentNodes.UtilNodes.TypeNameNode;
 import Compiler.Exceptions.ConstraintException;
 import Compiler.Utils.AssemblyUtils;
 import Compiler.Utils.CompConfig;

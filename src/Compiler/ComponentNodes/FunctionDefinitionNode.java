@@ -12,6 +12,8 @@ import java.util.Set;
 
 import org.antlr.v4.runtime.tree.TerminalNode;
 
+import Compiler.ComponentNodes.Declarations.DeclarationSpecifiersNode;
+import Compiler.ComponentNodes.Declarations.DeclaratorNode;
 import Compiler.ComponentNodes.Definitions.Scope;
 import Compiler.ComponentNodes.Definitions.Type;
 import Compiler.ComponentNodes.Interfaces.AssemblableNode;
@@ -19,8 +21,6 @@ import Compiler.ComponentNodes.Interfaces.NamedNode;
 import Compiler.ComponentNodes.Interfaces.TypedNode;
 import Compiler.ComponentNodes.Statements.CompoundStatementNode;
 import Compiler.ComponentNodes.Statements.StatementNode;
-import Compiler.ComponentNodes.UtilNodes.DeclarationSpecifiersNode;
-import Compiler.ComponentNodes.UtilNodes.DeclaratorNode;
 import Compiler.Utils.AssemblyUtils;
 import Compiler.Utils.CompConfig;
 import Compiler.Utils.CompUtils;
