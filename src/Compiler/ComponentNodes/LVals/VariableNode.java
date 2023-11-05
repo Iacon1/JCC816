@@ -1,21 +1,21 @@
 // Created by Iacon1 on 10/19/2023.
 // Variable node
-package Compiler.ComponentNodes;
+package Compiler.ComponentNodes.LVals;
 
+import Compiler.ComponentNodes.ComponentNode;
 import Compiler.ComponentNodes.Definitions.Type;
 import Compiler.ComponentNodes.Interfaces.NamedNode;
-import Compiler.ComponentNodes.Interfaces.TypedNode;
+import Compiler.Utils.AssemblyUtils;
+import Compiler.Utils.OperandSource;
 
-public class VariableNode extends ComponentNode<VariableNode> implements NamedNode, TypedNode
+public class VariableNode extends LValNode<VariableNode> implements NamedNode
 {
 	private String name;
-	private Type type;
 	
 	public VariableNode(ComponentNode<?> parent, String name, Type type)
 	{
-		super(parent);
+		super(parent, type);
 		this.name = name;
-		this.type = type;
 	}
 	@Override
 	public String getName() {return name;}
@@ -28,5 +28,10 @@ public class VariableNode extends ComponentNode<VariableNode> implements NamedNo
 	public int getSize()
 	{
 		return type.getSize();
+	}
+	@Override
+	public OperandSource getSource()
+	{
+		return AssemblyUtils.addressSource(this.getFullName(), this.getSize());
 	}
 }

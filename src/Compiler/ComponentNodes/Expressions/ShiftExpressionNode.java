@@ -43,7 +43,7 @@ public class ShiftExpressionNode extends BinaryExpressionNode
 		default: return null;
 		}
 	}
-	public static String getShift(String whitespace, String destAddr, ScratchManager scratchManager, OperandSource sourceX, String operator, OperandSource sourceY) throws Exception
+	public static String getShift(String whitespace, OperandSource destSource, ScratchManager scratchManager, OperandSource sourceX, String operator, OperandSource sourceY) throws Exception
 	{
 		String assembly = "";
 		ScratchSource sourceI = null;
@@ -63,7 +63,7 @@ public class ShiftExpressionNode extends BinaryExpressionNode
 				{
 					"LDA\t" + sourceX.apply(i, is16Bit),
 					(i >= sourceX.getSize() - 2) ? "ASL" : "ROL",
-					"STA\t" + destAddr + " + " + i,
+					"STA\t" + destSource.apply(i, is16Bit),
 				};
 			});
 			break;
@@ -73,22 +73,22 @@ public class ShiftExpressionNode extends BinaryExpressionNode
 				{
 					"LDA\t" + sourceX.apply(i, is16Bit),
 					(i >= sourceX.getSize() - 2) ? "LSR" : "ROR",
-					"STA\t" + destAddr + " + " + i,
+					"STA\t" + destSource.apply(i, is16Bit),
 				};
 			}, true, true);
 			break;
 		}
 		if (!(sourceY.isLiteral() && sourceY.getSize() == 1 && sourceY.apply(0, true).equals("#$0001")))
 		{
-			assembly += AdditiveExpressionNode.getDecrementer(whitespace, sourceI.getAddress(), sourceI);
+			assembly += AdditiveExpressionNode.getDecrementer(whitespace, sourceI, sourceI);
 			assembly += whitespace + "BNE\t:-\n";
 			scratchManager.releaseScratchBlock(sourceI);
 		}
 		return assembly;
 	}
 	@Override
-	protected String getAssembly(String whitespace, String destAddr, ScratchManager scratchManager, OperandSource sourceX, OperandSource sourceY) throws Exception
+	protected String getAssembly(String whitespace, OperandSource destSource, ScratchManager scratchManager, OperandSource sourceX, OperandSource sourceY) throws Exception
 	{
-		return getShift(whitespace, destAddr, scratchManager, sourceX, operator, sourceY);
+		return getShift(whitespace, destSource, scratchManager, sourceX, operator, sourceY);
 	}
 }

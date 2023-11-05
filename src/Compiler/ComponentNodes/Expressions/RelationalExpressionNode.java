@@ -40,16 +40,16 @@ public class RelationalExpressionNode extends BinaryExpressionNode
 		// TODO Auto-generated method stub
 		return null;
 	}
-	public static String getComparison(String whitespace, String destAddr, ScratchManager scratchManager, OperandSource sourceX, String operator, OperandSource sourceY)
+	public static String getComparison(String whitespace, OperandSource destSource, ScratchManager scratchManager, OperandSource sourceX, String operator, OperandSource sourceY)
 	{
 		String assembly = "";
 
 		if (sourceX.isLiteral() && !sourceY.isLiteral()) switch (operator)
 		{
-			case "<": return getComparison(whitespace, destAddr, scratchManager, sourceY, ">=", sourceX);
-			case "<=": return getComparison(whitespace, destAddr, scratchManager, sourceY, ">", sourceX);
-			case ">": return getComparison(whitespace, destAddr, scratchManager, sourceY, "<=", sourceX);
-			case ">=": return getComparison(whitespace, destAddr, scratchManager, sourceY, "<", sourceX);
+			case "<": return getComparison(whitespace, destSource, scratchManager, sourceY, ">=", sourceX);
+			case "<=": return getComparison(whitespace, destSource, scratchManager, sourceY, ">", sourceX);
+			case ">": return getComparison(whitespace, destSource, scratchManager, sourceY, "<=", sourceX);
+			case ">=": return getComparison(whitespace, destSource, scratchManager, sourceY, "<", sourceX);
 		}
 
 		assembly += whitespace + CompUtils.setXY8 + "\n";
@@ -76,10 +76,10 @@ public class RelationalExpressionNode extends BinaryExpressionNode
 				{
 					lines.add("LDA\t" + sourceY.apply(i, is16Bit));					// Get Y
 					lines.add("EOR\t" + toXOR);										// Flip sign
-					lines.add("STA\t" + destAddr);									// Place Y in destAddr
+					lines.add("STA\t" + destSource.apply(0, is16Bit));				// Place Y in destSource temporarily
 					lines.add("LDA\t" + sourceX.apply(i, is16Bit));					// Get X
 					lines.add("EOR\t" + toXOR);										// Flip sign
-					lines.add("CMP\t" + destAddr);									// Cmp Y & X?
+					lines.add("CMP\t" + destSource.apply(0, is16Bit));				// Cmp Y & X?
 				}
 			}
 			else
@@ -112,13 +112,13 @@ public class RelationalExpressionNode extends BinaryExpressionNode
 		}
 		
 		assembly += whitespace + CompUtils.setA8 + "\n";
-		assembly += whitespace + "STA\t" + destAddr + "\n";
+		assembly += whitespace + "STA\t" + destSource.apply(0, false) + "\n";
 		
 		return assembly;
 	}
 	@Override
-	protected String getAssembly(String whitespace, String destAddr, ScratchManager scratchManager, OperandSource sourceX, OperandSource sourceY) throws Exception
+	protected String getAssembly(String whitespace, OperandSource destSource, ScratchManager scratchManager, OperandSource sourceX, OperandSource sourceY) throws Exception
 	{
-		return getComparison(whitespace, destAddr, scratchManager, sourceX, operator, sourceY);
+		return getComparison(whitespace, destSource, scratchManager, sourceX, operator, sourceY);
 	}
 }

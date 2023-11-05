@@ -9,8 +9,9 @@ import java.util.List;
 
 import Compiler.ComponentNodes.ComponentNode;
 import Compiler.ComponentNodes.FunctionDefinitionNode;
-import Compiler.ComponentNodes.VariableNode;
 import Compiler.ComponentNodes.Definitions.Type;
+import Compiler.ComponentNodes.LVals.LValNode;
+import Compiler.Utils.OperandSource;
 import Compiler.Utils.ScratchManager;
 import Grammar.C99.C99Parser.Assignment_expressionContext;
 import Grammar.C99.C99Parser.ExpressionContext;
@@ -48,9 +49,9 @@ public class ExpressionNode extends BaseExpressionNode<ExpressionContext>
 	}
 	
 	@Override
-	public VariableNode getVariable()
+	public LValNode<?> getLVal()
 	{
-		if (expressions.size() == 1) return expressions.get(0).getVariable();
+		if (expressions.size() == 1) return expressions.get(0).getLVal();
 		else return null;
 	}
 	@Override
@@ -73,12 +74,12 @@ public class ExpressionNode extends BaseExpressionNode<ExpressionContext>
 		return false;
 	}
 	@Override
-	public String getAssembly(int leadingWhitespace, String destAddr, ScratchManager scratchManager) throws Exception
+	public String getAssembly(int leadingWhitespace, OperandSource destSource, ScratchManager scratchManager) throws Exception
 	{
 		String assembly = "";
 		for (BaseExpressionNode<?> expression : expressions.subList(1, expressions.size()))
 			assembly += expression.getAssembly(leadingWhitespace,  scratchManager);
-		assembly += expressions.get(0).getAssembly(leadingWhitespace, destAddr, scratchManager);
+		assembly += expressions.get(0).getAssembly(leadingWhitespace, destSource, scratchManager);
 		
 		return assembly;
 	}

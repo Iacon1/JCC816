@@ -30,7 +30,7 @@ public class XOrExpressionNode extends BinaryExpressionNode
 	protected BaseExpressionNode<And_expressionContext> getPCNode(Xor_expressionContext node) throws Exception
 	{return new AndExpressionNode(this).interpret(node.and_expression());}
 
-	public static String getExclOr(String whitespace, String destAddr, OperandSource sourceX, OperandSource sourceY)
+	public static String getExclOr(String whitespace, OperandSource destSource, OperandSource sourceX, OperandSource sourceY)
 	{
 		String assembly = AssemblyUtils.bytewiseOperation(whitespace, sourceX.getSize(), (Integer i, Boolean is16Bit) ->
 		{
@@ -38,7 +38,7 @@ public class XOrExpressionNode extends BinaryExpressionNode
 			{
 				"LDA\t" + sourceX.apply(i, is16Bit),
 				"EOR\t" + sourceY.apply(i, is16Bit),
-				"STA\t" + destAddr + " + " + i,
+				"STA\t" + destSource.apply(i, is16Bit),
 			};
 		});
 		return assembly;
@@ -52,8 +52,8 @@ public class XOrExpressionNode extends BinaryExpressionNode
 		return Long.valueOf(a ^ b);
 	}
 	@Override
-	protected String getAssembly(String whitespace, String destAddr, ScratchManager scratchManager, OperandSource sourceX, OperandSource sourceY) throws Exception
+	protected String getAssembly(String whitespace, OperandSource destSource, ScratchManager scratchManager, OperandSource sourceX, OperandSource sourceY) throws Exception
 	{
-		return getExclOr(whitespace, destAddr, sourceX, sourceY);
+		return getExclOr(whitespace, destSource, sourceX, sourceY);
 	}
 }

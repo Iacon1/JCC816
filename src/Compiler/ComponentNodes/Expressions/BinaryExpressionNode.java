@@ -74,10 +74,10 @@ public abstract class BinaryExpressionNode<
 		return x.hasPropValue() && y.hasPropValue();
 	}
 	
-	protected String getAssembly(String whitespace, String destAddr, ScratchManager scratchManager, OperandSource sourceX, OperandSource sourceY) throws Exception
+	protected String getAssembly(String whitespace, OperandSource destSource, ScratchManager scratchManager, OperandSource sourceX, OperandSource sourceY) throws Exception
 	{return null;}
 	@Override
-	public String getAssembly(int leadingWhitespace, String destAddr, ScratchManager scratchManager) throws Exception
+	public String getAssembly(int leadingWhitespace, OperandSource destSource, ScratchManager scratchManager) throws Exception
 	{
 		String whitespace = AssemblyUtils.getWhitespace(leadingWhitespace);
 		ScratchSource scratchX = null, scratchY = null;
@@ -87,26 +87,26 @@ public abstract class BinaryExpressionNode<
 		if (y.hasAssembly())
 		{
 			scratchY = scratchManager.reserveScratchBlock(y.getType().getSize());
-			assembly += y.getAssembly(leadingWhitespace, scratchY.getAddress(), scratchManager);
+			assembly += y.getAssembly(leadingWhitespace, scratchY, scratchManager);
 			sourceY = scratchY;
 		}
 		else if (y.hasPropValue())
 			sourceY = AssemblyUtils.constantSource(y.getPropValue(), y.getType().getSize());
 		else
-			sourceY = AssemblyUtils.addressSource(y.getVariable().getFullName(), y.getType().getSize());
+			sourceY = y.getLVal().getSource();
 		// Now we figure out X
 		if (x.hasAssembly())
 		{
 			scratchX = scratchManager.reserveScratchBlock(y.getType().getSize());
-			assembly += x.getAssembly(leadingWhitespace, scratchX.getAddress(), scratchManager);
+			assembly += x.getAssembly(leadingWhitespace, scratchX, scratchManager);
 			sourceX = scratchX;
 		}
 		else if (x.hasPropValue())
 			sourceX = AssemblyUtils.constantSource(x.getPropValue(), x.getType().getSize());
 		else
-			sourceX = AssemblyUtils.addressSource(x.getVariable().getFullName(), x.getType().getSize());
+			sourceX = x.getLVal().getSource();
 		
-		assembly += getAssembly(whitespace, destAddr, scratchManager, sourceX, sourceY);
+		assembly += getAssembly(whitespace, destSource, scratchManager, sourceX, sourceY);
 		if (scratchX != null) scratchManager.releaseScratchBlock(scratchX);
 		if (scratchY != null) scratchManager.releaseScratchBlock(scratchY);
 		

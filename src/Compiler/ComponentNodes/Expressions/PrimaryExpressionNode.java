@@ -4,15 +4,13 @@ package Compiler.ComponentNodes.Expressions;
 
 import Compiler.ComponentNodes.ComponentNode;
 import Compiler.ComponentNodes.FunctionDefinitionNode;
-import Compiler.ComponentNodes.VariableNode;
 import Compiler.ComponentNodes.Definitions.Type;
+import Compiler.ComponentNodes.LVals.LValNode;
 import Compiler.Utils.CompUtils;
+import Compiler.Utils.OperandSource;
 import Compiler.Utils.ScratchManager;
 import Grammar.C99.C99Parser.Primary_expressionContext;
 
-/**
- * 
- */
 public class PrimaryExpressionNode extends BaseExpressionNode<Primary_expressionContext>
 {
 	private String identifier;
@@ -39,13 +37,13 @@ public class PrimaryExpressionNode extends BaseExpressionNode<Primary_expression
 	@Override
 	public Type getType()
 	{
-		if (identifier != null) return getVariable().getType();
+		if (identifier != null) return getLVal().getType();
 		else if (constant != null) return CompUtils.getSmallestType((Number) constant);
 		else return null;
 	}
 
 	@Override
-	public VariableNode getVariable()
+	public LValNode<?> getLVal()
 	{
 		if (identifier != null) return ComponentNode.resolveVariable(getScope().getPrefix() + identifier);
 		else return null;
@@ -63,10 +61,7 @@ public class PrimaryExpressionNode extends BaseExpressionNode<Primary_expression
 		if (stringLiteral == null) return constant;
 		else return stringLiteral;
 	}
-
+	
 	@Override
-	public String getAssembly(int leadingWhitespace, String writeAddr, ScratchManager scratchManager) throws Exception
-	{
-		return null;
-	}
+	public String getAssembly(int leadingWhitespace, OperandSource destSource, ScratchManager scratchManager) throws Exception {return null;}
 }

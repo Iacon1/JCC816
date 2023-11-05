@@ -4,20 +4,14 @@ package Compiler.ComponentNodes.Expressions;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.function.Function;
 
 import Compiler.ComponentNodes.ComponentNode;
-import Compiler.ComponentNodes.Interfaces.AssemblableNode;
 import Compiler.Utils.AssemblyUtils;
 import Compiler.Utils.CompUtils;
 import Compiler.Utils.OperandSource;
 import Compiler.Utils.ScratchManager;
 import Grammar.C99.C99Parser.Equality_expressionContext;
-import Grammar.C99.C99Parser.Land_expressionContext;
-import Grammar.C99.C99Parser.Lor_expressionContext;
-import Grammar.C99.C99Parser.Or_expressionContext;
 import Grammar.C99.C99Parser.Relational_expressionContext;
-import Grammar.C99.C99Parser.Xor_expressionContext;
 
 public class EqualityExpressionNode extends BinaryExpressionNode
 <Equality_expressionContext, Relational_expressionContext, Relational_expressionContext, Equality_expressionContext>
@@ -43,18 +37,18 @@ public class EqualityExpressionNode extends BinaryExpressionNode
 		return null;
 	}
 	
-	public static String getIsZero(String whitespace, String destAddr, ScratchManager scratchManager, OperandSource source)
+	public static String getIsZero(String whitespace, OperandSource destSource, ScratchManager scratchManager, OperandSource source)
 	{
 		String assembly = "";
 		assembly += CompUtils.setA8 + "\n";
 		assembly += whitespace + "LDA\t#$00\n";
 		assembly += AssemblyUtils.bytewiseOperation(whitespace, source.getSize(), (Integer i, Boolean is16Bit) -> {return new String[]{"ORA\t" + source.apply(i, is16Bit)};}, false, false);
-		assembly += whitespace + "STA\t" + destAddr + "\n";
+		assembly += whitespace + "STA\t" + destSource.apply(0, false) + "\n";
 		return assembly;
 	}
 	
 	@Override
-	protected String getAssembly(String whitespace, String destAddr, ScratchManager scratchManager, OperandSource sourceX, OperandSource sourceY) throws Exception
+	protected String getAssembly(String whitespace, OperandSource destSource, ScratchManager scratchManager, OperandSource sourceX, OperandSource sourceY) throws Exception
 	{
 		String assembly = "";
 		final String jumpOn;
@@ -76,7 +70,7 @@ public class EqualityExpressionNode extends BinaryExpressionNode
 		else if (operator.equals("!=")) assembly += whitespace + "DEX\n";
 		assembly += ":" + whitespace.substring(1) + "TXA\n";
 		assembly += whitespace + CompUtils.setA8 + "\n";
-		assembly += whitespace + "STA\t" + destAddr + "\n";
+		assembly += whitespace + "STA\t" + destSource + "\n";
 		
 		return assembly;
 	}

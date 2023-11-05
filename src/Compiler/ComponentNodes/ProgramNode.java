@@ -12,6 +12,7 @@ import java.util.Set;
 import Compiler.ComponentNodes.Expressions.MultiplicativeExpressionNode;
 import Compiler.ComponentNodes.Declarations.DeclarationNode;
 import Compiler.ComponentNodes.Interfaces.AssemblableNode;
+import Compiler.ComponentNodes.LVals.VariableNode;
 import Compiler.Utils.AssemblyUtils;
 import Compiler.Utils.CompConfig;
 import Compiler.Utils.CompUtils;
@@ -154,7 +155,7 @@ public class ProgramNode extends InterpretingNode<ProgramNode, ProgramContext> i
 
 			assembly += MultiplicativeExpressionNode.getMultiplier(
 					AssemblyUtils.getWhitespace(leadingWhitespace + CompConfig.indentSize),
-					CompConfig.callResult,
+					CompConfig.callResultSource(sourceX.getSize()),
 					sourceX,
 					sourceY);
 			assembly += whitespace + "RTL\n";
@@ -171,11 +172,11 @@ public class ProgramNode extends InterpretingNode<ProgramNode, ProgramContext> i
 			if (div.getValue() == 1) // Can use short divider
 				assembly += MultiplicativeExpressionNode.getShortDivider(
 					AssemblyUtils.getWhitespace(leadingWhitespace + CompConfig.indentSize),
-					CompConfig.callResult, scratchManager, sourceX, sourceY);
+					CompConfig.callResultSource(sourceX.getSize()), scratchManager, sourceX, sourceY);
 			else // Must use long divider
 				assembly += MultiplicativeExpressionNode.getLongDivider(
 					AssemblyUtils.getWhitespace(leadingWhitespace + CompConfig.indentSize),
-					CompConfig.callResult, scratchManager, sourceX, sourceY);
+					CompConfig.callResultSource(sourceX.getSize()), scratchManager, sourceX, sourceY);
 			assembly += whitespace + "RTL\n";
 		}
 		

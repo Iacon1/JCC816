@@ -103,7 +103,7 @@ public class Compiler
 	}
 		
 	
-	public static String compile(String mainFile) throws Exception
+	public static String compile(String mainFile, boolean debug) throws Exception
 	{ 
 		String assembly = "";
 
@@ -119,7 +119,7 @@ public class Compiler
 
 		ParseDouble parseDouble = parse(tokens);
 		printInfo("Parsed in " + (System.currentTimeMillis() - t) + " ms.");
-//		viewParseTree(parseDouble.parser, parseDouble.tree);
+		if (debug) viewParseTree(parseDouble.parser, parseDouble.tree);
 		t = System.currentTimeMillis();
 
 		assembly = emit(parseDouble);
