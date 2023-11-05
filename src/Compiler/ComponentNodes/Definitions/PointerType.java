@@ -26,7 +26,7 @@ public class PointerType extends Type
 	}
 	
 	@Override
-	public int getBaseSize()
+	public int getSize()
 	{
 		return CompUtils.pointerSize;
 	}
@@ -35,6 +35,9 @@ public class PointerType extends Type
 	{
 		return type;
 	}
+	
+	@Override
+	public boolean isPointer() {return true;}
 	
 	@Override
 	public String getSignature()

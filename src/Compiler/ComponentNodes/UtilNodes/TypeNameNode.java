@@ -24,7 +24,7 @@ public class TypeNameNode extends InterpretingNode<TypeNameNode, Type_nameContex
 		if (node.abstract_declarator() != null)
 			declarator = new DeclaratorNode(this).interpret(node.abstract_declarator());
 		
-		type = new Type(specifiers.getSpecifiers(), declarator, node.start);
+		type = Type.manufacture(specifiers.getSpecifiers(), declarator, node.start);
 		return this;
 	}
 

@@ -12,12 +12,14 @@ import Compiler.ComponentNodes.Expressions.BaseExpressionNode;
 import Compiler.ComponentNodes.Expressions.ExpressionNode;
 import Compiler.ComponentNodes.FunctionDefinitionNode;
 import Compiler.ComponentNodes.InterpretingNode;
+import Compiler.ComponentNodes.Definitions.ArrayType;
 import Compiler.ComponentNodes.Definitions.PointerType;
 import Compiler.ComponentNodes.Definitions.Type;
 import Compiler.ComponentNodes.Interfaces.AssemblableNode;
 import Compiler.ComponentNodes.LVals.VariableNode;
 import Compiler.ComponentNodes.UtilNodes.DeclarationSpecifiersNode;
 import Compiler.ComponentNodes.UtilNodes.DeclaratorNode;
+import Compiler.ComponentNodes.UtilNodes.DirectDeclaratorNode;
 import Compiler.Utils.AssemblyUtils;
 import Compiler.Utils.ScratchManager;
 import Grammar.C99.C99Parser.Abstract_declaratorContext;
@@ -53,10 +55,7 @@ public class DeclarationNode extends InterpretingNode<DeclarationNode, Declarati
 				}
 				else expressions.add(null);
 				DeclaratorNode declaratorNode = new DeclaratorNode(this).interpret(initDeclarator);
-				Type type = new Type(specifiers.getSpecifiers(), declaratorNode, initDeclarator.start);
-				if (declaratorNode.pointerQualifiers() != null)
-					for (int i = declaratorNode.pointerQualifiers().size() - 1; i >= 0; --i)
-						type = new PointerType(type, declaratorNode.pointerQualifiers().get(i));
+				Type type = Type.manufacture(specifiers.getSpecifiers(), declaratorNode, initDeclarator.start);
 				VariableNode variable = new VariableNode(this, declaratorNode.getIdentifier(), type);
 				registerVariable(variable);
 				variables.add(variable);
@@ -72,7 +71,7 @@ public class DeclarationNode extends InterpretingNode<DeclarationNode, Declarati
 		if (declarator != null)
 		{
 			DeclaratorNode declaratorNode = new DeclaratorNode(this).interpret(declarator);
-			Type type = new Type(specifiers.getSpecifiers(), declaratorNode, declarator.start);
+			Type type = Type.manufacture(specifiers.getSpecifiers(), declaratorNode, declarator.start);
 			VariableNode variable = new VariableNode(this, declaratorNode.getIdentifier(), type);
 			registerVariable(variable);
 			variables.add(variable);
@@ -80,7 +79,7 @@ public class DeclarationNode extends InterpretingNode<DeclarationNode, Declarati
 		else if (absDeclarator != null)
 		{
 			DeclaratorNode declaratorNode = new DeclaratorNode(this).interpret(absDeclarator);
-			Type type = new Type(specifiers.getSpecifiers(), declaratorNode, absDeclarator.start);
+			Type type = Type.manufacture(specifiers.getSpecifiers(), declaratorNode, absDeclarator.start);
 			VariableNode variable = new VariableNode(this, declaratorNode.getIdentifier(), type);
 			registerVariable(variable);
 			variables.add(variable);
