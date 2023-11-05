@@ -2,7 +2,7 @@
 // Created 05/11/2023
 // Defines a set of variables or types.
 
-package Compiler.ComponentNodes.UtilNodes;
+package Compiler.ComponentNodes.Declarations;
 
 
 import java.util.ArrayList;
@@ -13,7 +13,6 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import Compiler.ComponentNodes.ComponentNode;
 import Compiler.ComponentNodes.InterpretingNode;
 import Compiler.Exceptions.ConstraintException;
-import Grammar.C99.C99Parser.DeclarationContext;
 import Grammar.C99.C99Parser.Declaration_specifiersContext;
 import Grammar.C99.C99Parser.Function_specifierContext;
 import Grammar.C99.C99Parser.Specifier_qualifier_listContext;

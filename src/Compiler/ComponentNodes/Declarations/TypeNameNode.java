@@ -1,6 +1,6 @@
 // Created by Iacon1 on 10/20/2023.
 //
-package Compiler.ComponentNodes.UtilNodes;
+package Compiler.ComponentNodes.Declarations;
 
 import Compiler.ComponentNodes.ComponentNode;
 import Compiler.ComponentNodes.InterpretingNode;

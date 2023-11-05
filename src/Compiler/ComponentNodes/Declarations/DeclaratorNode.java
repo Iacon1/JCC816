@@ -1,6 +1,6 @@
 // Created by Iacon1 on 10/17/2023.
 //
-package Compiler.ComponentNodes.UtilNodes;
+package Compiler.ComponentNodes.Declarations;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -10,7 +10,7 @@ import java.util.Set;
 
 import Compiler.ComponentNodes.ComponentNode;
 import Compiler.ComponentNodes.InterpretingNode;
-import Compiler.ComponentNodes.UtilNodes.DirectDeclaratorNode.DirDeclaratorInfo;
+import Compiler.ComponentNodes.Declarations.DirectDeclaratorNode.DirDeclaratorInfo;
 import Grammar.C99.C99Parser.Abstract_declaratorContext;
 import Grammar.C99.C99Parser.DeclaratorContext;
 import Grammar.C99.C99Parser.Init_declaratorContext;

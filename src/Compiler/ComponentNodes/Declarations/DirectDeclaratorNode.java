@@ -1,15 +1,12 @@
 // Created by Iacon1 on 10/17/2023.
 //
-package Compiler.ComponentNodes.UtilNodes;
+package Compiler.ComponentNodes.Declarations;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.antlr.v4.runtime.Token;
-
 import Compiler.ComponentNodes.ComponentNode;
 import Compiler.ComponentNodes.InterpretingNode;
-import Compiler.ComponentNodes.Declarations.DeclarationNode;
 import Compiler.ComponentNodes.Expressions.AssignmentExpressionNode;
 import Compiler.ComponentNodes.Expressions.BaseExpressionNode;
 import Compiler.Exceptions.UnsupportedFeatureException;
@@ -100,7 +97,7 @@ public class DirectDeclaratorNode extends InterpretingNode<DirectDeclaratorNode,
 				info.typeQualifiers = typeQualifiers.toArray(new String[] {});
 			}
 			if (node.assignment_expression() != null)
-				info.assignExpr = (BaseExpressionNode) new AssignmentExpressionNode(this).interpret(node.assignment_expression());
+				info.assignExpr = (BaseExpressionNode<?>) new AssignmentExpressionNode(this).interpret(node.assignment_expression());
 			subDirDec = new DirectDeclaratorNode(this).interpret(node.direct_declarator());
 			if (type == Type.varLenArray) // VLA not supported
 				throw new UnsupportedFeatureException("Variable length arrays", false, node.start);

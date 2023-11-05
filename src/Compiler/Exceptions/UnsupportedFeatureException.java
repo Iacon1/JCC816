@@ -19,6 +19,6 @@ public class UnsupportedFeatureException extends TokenException
 	 */
 	public UnsupportedFeatureException(String feature, boolean useIs, Token location)
 	{
-		super(feature + " " + (useIs ? "is" : " are") + " not supported on version " + CompConfig.version + ".", location);
+		super(feature + " " + (useIs ? "is" : "are") + " not supported on version " + CompConfig.version + ".", location);
 	}
 }

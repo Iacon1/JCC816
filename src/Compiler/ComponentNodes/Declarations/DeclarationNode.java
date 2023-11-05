@@ -4,24 +4,16 @@ package Compiler.ComponentNodes.Declarations;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import Compiler.ComponentNodes.ComponentNode;
 import Compiler.ComponentNodes.Expressions.AssignmentExpressionNode;
 import Compiler.ComponentNodes.Expressions.BaseExpressionNode;
-import Compiler.ComponentNodes.Expressions.ExpressionNode;
 import Compiler.ComponentNodes.FunctionDefinitionNode;
 import Compiler.ComponentNodes.InterpretingNode;
-import Compiler.ComponentNodes.Definitions.ArrayType;
-import Compiler.ComponentNodes.Definitions.PointerType;
 import Compiler.ComponentNodes.Definitions.Type;
 import Compiler.ComponentNodes.Interfaces.AssemblableNode;
 import Compiler.ComponentNodes.LVals.VariableNode;
-import Compiler.ComponentNodes.UtilNodes.DeclarationSpecifiersNode;
-import Compiler.ComponentNodes.UtilNodes.DeclaratorNode;
-import Compiler.ComponentNodes.UtilNodes.DirectDeclaratorNode;
 import Compiler.Utils.AssemblyUtils;
-import Compiler.Utils.ScratchManager;
 import Grammar.C99.C99Parser.Abstract_declaratorContext;
 import Grammar.C99.C99Parser.DeclarationContext;
 import Grammar.C99.C99Parser.DeclaratorContext;

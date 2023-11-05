@@ -58,7 +58,6 @@ public class EqualityExpressionNode extends BinaryExpressionNode
 	protected String getAssembly(String whitespace, OperandSource destSource, ScratchManager scratchManager, OperandSource sourceX, OperandSource sourceY) throws Exception
 	{
 		String assembly = "";
-		final String jumpOn;
 
 		assembly += whitespace + CompUtils.setXY8 + "\n";
 		if (operator.equals("==")) assembly += whitespace + "LDX\t#$00\n";
