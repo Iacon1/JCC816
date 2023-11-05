@@ -5,7 +5,7 @@ package Compiler.ComponentNodes.Expressions;
 import Compiler.ComponentNodes.ComponentNode;
 import Compiler.ComponentNodes.FunctionDefinitionNode;
 import Compiler.ComponentNodes.Definitions.Type;
-import Compiler.ComponentNodes.LVals.LValueNode;
+import Compiler.ComponentNodes.LValues.LValueNode;
 import Compiler.Utils.CompUtils;
 import Compiler.Utils.OperandSource;
 import Compiler.Utils.ScratchManager;

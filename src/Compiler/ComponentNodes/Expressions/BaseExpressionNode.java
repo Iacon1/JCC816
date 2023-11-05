@@ -10,7 +10,7 @@ import Compiler.ComponentNodes.ComponentNode;
 import Compiler.ComponentNodes.InterpretingNode;
 import Compiler.ComponentNodes.Interfaces.AssemblableNode;
 import Compiler.ComponentNodes.Interfaces.TypedNode;
-import Compiler.ComponentNodes.LVals.LValueNode;
+import Compiler.ComponentNodes.LValues.LValueNode;
 import Compiler.Utils.CompConfig;
 import Compiler.Utils.OperandSource;
 import Compiler.Utils.ScratchManager;

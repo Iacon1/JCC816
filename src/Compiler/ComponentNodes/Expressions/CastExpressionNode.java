@@ -6,7 +6,7 @@ import Compiler.ComponentNodes.ComponentNode;
 import Compiler.ComponentNodes.FunctionDefinitionNode;
 import Compiler.ComponentNodes.Declarations.TypeNameNode;
 import Compiler.ComponentNodes.Definitions.Type;
-import Compiler.ComponentNodes.LVals.LValueNode;
+import Compiler.ComponentNodes.LValues.LValueNode;
 import Compiler.Utils.AssemblyUtils;
 import Compiler.Utils.OperandSource;
 import Compiler.Utils.ScratchManager;

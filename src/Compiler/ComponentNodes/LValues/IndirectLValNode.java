@@ -1,7 +1,7 @@
 // Created by Iacon1 on 11/02/2023.
 // A generic pointer IVal.
 
-package Compiler.ComponentNodes.LVals;
+package Compiler.ComponentNodes.LValues;
 
 import Compiler.ComponentNodes.Definitions.Type;
 import Compiler.ComponentNodes.Expressions.BaseExpressionNode;

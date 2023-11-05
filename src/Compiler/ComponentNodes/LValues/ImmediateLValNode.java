@@ -1,7 +1,7 @@
 // Created by Iacon1 on 11/04/2023.
 // IVal that returns an immediate version of the IVal provided to it.
 
-package Compiler.ComponentNodes.LVals;
+package Compiler.ComponentNodes.LValues;
 
 import Compiler.ComponentNodes.Definitions.Type;
 import Compiler.ComponentNodes.Expressions.BaseExpressionNode;

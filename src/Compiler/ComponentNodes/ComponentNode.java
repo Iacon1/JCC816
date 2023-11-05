@@ -14,7 +14,7 @@ import Compiler.ComponentNodes.Definitions.EnumDefinition;
 import Compiler.ComponentNodes.Definitions.Scope;
 import Compiler.ComponentNodes.Definitions.StructDefinition;
 import Compiler.ComponentNodes.Definitions.UnionDefinition;
-import Compiler.ComponentNodes.LVals.VariableNode;
+import Compiler.ComponentNodes.LValues.VariableNode;
 import Compiler.ComponentNodes.Statements.IterationStatementNode;
 import Compiler.ComponentNodes.Statements.SelectionStatementNode;
 
