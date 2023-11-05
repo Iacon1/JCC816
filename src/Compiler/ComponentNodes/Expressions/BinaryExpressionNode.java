@@ -3,19 +3,13 @@
 // A general expression node.
 package Compiler.ComponentNodes.Expressions;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.function.Function;
-
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import Compiler.ComponentNodes.ComponentNode;
 import Compiler.ComponentNodes.FunctionDefinitionNode;
 import Compiler.ComponentNodes.Definitions.Type;
-import Compiler.Exceptions.UndefinedOpException;
 import Compiler.Utils.AssemblyUtils;
-import Compiler.Utils.CompUtils;
 import Compiler.Utils.OperandSource;
 import Compiler.Utils.ScratchManager;
 import Compiler.Utils.ScratchManager.ScratchSource;

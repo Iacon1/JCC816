@@ -6,8 +6,6 @@ import Compiler.ComponentNodes.ComponentNode;
 import Compiler.Utils.AssemblyUtils;
 import Compiler.Utils.OperandSource;
 import Compiler.Utils.ScratchManager;
-import Grammar.C99.C99Parser.Land_expressionContext;
-import Grammar.C99.C99Parser.Lor_expressionContext;
 import Grammar.C99.C99Parser.Or_expressionContext;
 import Grammar.C99.C99Parser.Xor_expressionContext;
 
