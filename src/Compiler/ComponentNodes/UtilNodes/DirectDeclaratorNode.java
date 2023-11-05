@@ -12,7 +12,7 @@ import Compiler.ComponentNodes.InterpretingNode;
 import Compiler.ComponentNodes.Declarations.DeclarationNode;
 import Compiler.ComponentNodes.Expressions.AssignmentExpressionNode;
 import Compiler.ComponentNodes.Expressions.BaseExpressionNode;
-import Compiler.Exceptions.UnsupportedSyntaxException;
+import Compiler.Exceptions.UnsupportedFeatureException;
 import Grammar.C99.C99Parser.Direct_abstract_declaratorContext;
 import Grammar.C99.C99Parser.Direct_declaratorContext;
 import Grammar.C99.C99Parser.Parameter_declarationContext;
@@ -100,12 +100,12 @@ public class DirectDeclaratorNode extends InterpretingNode<DirectDeclaratorNode,
 				info.typeQualifiers = typeQualifiers.toArray(new String[] {});
 			}
 			if (node.assignment_expression() != null)
-				info.assignExpr = (AssignmentExpressionNode) new AssignmentExpressionNode(this).interpret(node.assignment_expression());
+				info.assignExpr = (BaseExpressionNode) new AssignmentExpressionNode(this).interpret(node.assignment_expression());
 			subDirDec = new DirectDeclaratorNode(this).interpret(node.direct_declarator());
 			if (type == Type.varLenArray) // VLA not supported
-				throw new UnsupportedSyntaxException("[...*]", node.start);
+				throw new UnsupportedFeatureException("Variable length arrays", false, node.start);
 			if (info.assignExpr != null && !info.assignExpr.hasPropValue()) // Static allocation can't handle arrays whose size is unknown at compile time
-				throw new UnsupportedSyntaxException("[...(variable / function call)...]", node.start);
+				throw new UnsupportedFeatureException("Arrays of non-constant length", false, node.start);
 		}
 		return this;
 	}
@@ -152,9 +152,9 @@ public class DirectDeclaratorNode extends InterpretingNode<DirectDeclaratorNode,
 				info.assignExpr = new AssignmentExpressionNode(this).interpret(node.assignment_expression());
 			subDirDec = new DirectDeclaratorNode(this).interpret(node.direct_abstract_declarator());
 			if (type == Type.varLenArray) // VLA not supported
-				throw new UnsupportedSyntaxException("[...*]", node.start);
+				throw new UnsupportedFeatureException("Variable length arrays", false, node.start);
 			if (info.assignExpr != null && !info.assignExpr.hasPropValue()) // Static allocation can't handle arrays whose size is unknown at compile time
-				throw new UnsupportedSyntaxException("[...(variable / function call)...]", node.start);
+				throw new UnsupportedFeatureException("Arrays of non-constant length", false, node.start);
 		}
 		return this;
 	}
