@@ -2,8 +2,6 @@
 //
 package Compiler.ComponentNodes.Expressions;
 
-import java.util.function.Function;
-
 import Compiler.ComponentNodes.ComponentNode;
 import Compiler.Utils.AssemblyUtils;
 import Compiler.Utils.CompConfig;
@@ -12,12 +10,8 @@ import Compiler.Utils.OperandSource;
 import Compiler.Utils.SNESRegisters;
 import Compiler.Utils.ScratchManager;
 import Compiler.Utils.ScratchManager.ScratchSource;
-import Grammar.C99.C99Parser.Additive_expressionContext;
 import Grammar.C99.C99Parser.Cast_expressionContext;
 import Grammar.C99.C99Parser.Multiplicative_expressionContext;
-import Grammar.C99.C99Parser.Or_expressionContext;
-import Grammar.C99.C99Parser.Shift_expressionContext;
-import Grammar.C99.C99Parser.Xor_expressionContext;
 
 public class MultiplicativeExpressionNode extends BinaryExpressionNode
 <Multiplicative_expressionContext, Cast_expressionContext, Cast_expressionContext, Multiplicative_expressionContext>

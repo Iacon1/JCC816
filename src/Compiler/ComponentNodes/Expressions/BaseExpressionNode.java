@@ -12,10 +12,8 @@ import Compiler.ComponentNodes.Interfaces.AssemblableNode;
 import Compiler.ComponentNodes.Interfaces.TypedNode;
 import Compiler.ComponentNodes.LVals.LValueNode;
 import Compiler.Utils.CompConfig;
-import Compiler.Utils.CompUtils;
 import Compiler.Utils.OperandSource;
 import Compiler.Utils.ScratchManager;
-import Compiler.Utils.ScratchManager.ScratchSource;
 
 public abstract class BaseExpressionNode<C extends ParserRuleContext> extends InterpretingNode<BaseExpressionNode<C>, C> implements AssemblableNode, TypedNode
 {

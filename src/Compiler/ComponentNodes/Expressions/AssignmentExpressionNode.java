@@ -4,15 +4,10 @@
 package Compiler.ComponentNodes.Expressions;
 
 import Compiler.ComponentNodes.ComponentNode;
-import Compiler.ComponentNodes.FunctionDefinitionNode;
-import Compiler.ComponentNodes.LVals.VariableNode;
 import Compiler.Exceptions.ConstraintException;
-import Compiler.Exceptions.TypeMismatchException;
 import Compiler.Utils.AssemblyUtils;
-import Compiler.Utils.CompUtils;
 import Compiler.Utils.OperandSource;
 import Compiler.Utils.ScratchManager;
-import Compiler.Utils.ScratchManager.ScratchSource;
 import Grammar.C99.C99Parser.Assignment_expressionContext;
 import Grammar.C99.C99Parser.Conditional_expressionContext;
 import Grammar.C99.C99Parser.Unary_expressionContext;

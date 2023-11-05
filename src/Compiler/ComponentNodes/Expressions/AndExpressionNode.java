@@ -8,10 +8,6 @@ import Compiler.Utils.OperandSource;
 import Compiler.Utils.ScratchManager;
 import Grammar.C99.C99Parser.And_expressionContext;
 import Grammar.C99.C99Parser.Equality_expressionContext;
-import Grammar.C99.C99Parser.Land_expressionContext;
-import Grammar.C99.C99Parser.Lor_expressionContext;
-import Grammar.C99.C99Parser.Or_expressionContext;
-import Grammar.C99.C99Parser.Xor_expressionContext;
 
 public class AndExpressionNode extends BinaryExpressionNode
 <Equality_expressionContext, And_expressionContext, Equality_expressionContext, And_expressionContext>
