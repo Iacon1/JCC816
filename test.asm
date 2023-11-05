@@ -20,7 +20,7 @@
 .res	48, 0;	HEADER_HERE
 __ScratchBase := $7fff3f
 __callResult  := $7ffeff
-main__p       := $7ffefb
+main__x       := $7ffefc
 __REG__WRMPYA := $004202
 __REG__WRMPYB := $004203
 __REG__WRDIVL := $004204

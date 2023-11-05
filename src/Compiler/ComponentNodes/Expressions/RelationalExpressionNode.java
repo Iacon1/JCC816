@@ -36,9 +36,18 @@ public class RelationalExpressionNode extends BinaryExpressionNode
 	{return new ShiftExpressionNode(this).interpret(node.shift_expression());}
 
 	@Override
-	public Object getPropValue() {
-		// TODO Auto-generated method stub
-		return null;
+	public Object getPropValue()
+	{
+		Long a = x.getPropLong();
+		Long b = y.getPropLong();
+		switch (operator)
+		{
+		case "<": return Boolean.valueOf(a < b);
+		case "<=": return Boolean.valueOf(a < b);
+		case ">": return Boolean.valueOf(a < b);
+		case ">=": return Boolean.valueOf(a < b);
+		default: return null;
+		}
 	}
 	public static String getComparison(String whitespace, OperandSource destSource, ScratchManager scratchManager, OperandSource sourceX, String operator, OperandSource sourceY)
 	{

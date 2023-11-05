@@ -60,8 +60,8 @@ public class XOrExpressionNode extends BinaryExpressionNode
 	@Override
 	public Object getPropValue()
 	{
-		Long a = ((Number) x.getPropValue()).longValue();
-		Long b = ((Number) y.getPropValue()).longValue();
+		Long a = x.getPropLong();
+		Long b = y.getPropLong();
 		return Long.valueOf(a ^ b);
 	}
 	@Override
