@@ -18,7 +18,22 @@ public class Header extends CartConfig
 	{
 		japan(0x00),
 		USA(0x01),
-		europe(0x02);
+		europe(0x02),
+		sweden(0x03),
+		finland(0x04),
+		denmark(0x05),
+		france(0x06),
+		netherlands(0x07),
+		spain(0x08),
+		germany(0x09),
+		italy(0x0A),
+		china(0x0B),
+		indonesia(0x0C),
+		southKorea(0x0D),
+		international(0x0E),
+		canada(0x0F),
+		brazil(0x10),
+		australia(0x11);
 		
 		private int number;
 		private DestinationCode(int number)
