@@ -9,7 +9,7 @@ import Compiler.ComponentNodes.FunctionDefinitionNode;
 import Compiler.ComponentNodes.Definitions.Type;
 import Compiler.ComponentNodes.LVals.ImmediateLValNode;
 import Compiler.ComponentNodes.LVals.IndirectLValNode;
-import Compiler.ComponentNodes.LVals.LValNode;
+import Compiler.ComponentNodes.LVals.LValueNode;
 import Compiler.ComponentNodes.UtilNodes.TypeNameNode;
 import Compiler.Utils.AssemblyUtils;
 import Compiler.Utils.OperandSource;
@@ -28,9 +28,9 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 	@Override
 	public BaseExpressionNode<Unary_expressionContext> interpret(Unary_expressionContext node) throws Exception
 	{
-		if (node.postfix_expression() != null) // Only one, just propagate it
+		if (node.postfix_expression() != null) // Propagate
 			return (BaseExpressionNode) new PostfixExpressionNode(this).interpret(node.postfix_expression());
-		else // Two
+		else
 		{
 			if (node.unary_expression() != null)
 				this.expr = new UnaryExpressionNode(this).interpret(node.unary_expression());
@@ -55,21 +55,21 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 	}
 	
 	@Override
-	public LValNode<?> getLVal()
+	public LValueNode<?> getLValue()
 	{
 		if (operator.equals("&"))
 		{
 			if (UnaryExpressionNode.class.isAssignableFrom(expr.getClass()) && ((UnaryExpressionNode) expr).operator.equals("*"))
-				return ((UnaryExpressionNode) expr).expr.getLVal(); // These two cancel each other out
+				return ((UnaryExpressionNode) expr).expr.getLValue(); // These two cancel each other out
 			else return new IndirectLValNode(expr);
 		}
 		else if (operator.equals("*"))
 		{
 			if (UnaryExpressionNode.class.isAssignableFrom(expr.getClass()) && ((UnaryExpressionNode) expr).operator.equals("&"))
-				return ((UnaryExpressionNode) expr).expr.getLVal(); // These two cancel each other out
-			else return new ImmediateLValNode(expr.getLVal());
+				return ((UnaryExpressionNode) expr).expr.getLValue(); // These two cancel each other out
+			else return new ImmediateLValNode(expr.getLValue());
 		}
-		return expr.getLVal();
+		return expr.getLValue();
 	}
 
 	@Override
@@ -109,7 +109,7 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 	public String getAssembly(int leadingWhitespace) throws Exception
 	{
 		if (operator.equals("++") || operator.equals("--"))
-			return getAssembly(leadingWhitespace, expr.getLVal().getSource(), new ScratchManager());
+			return getAssembly(leadingWhitespace, expr.getLValue().getSource(), new ScratchManager());
 		else return super.getAssembly(leadingWhitespace);
 	}
 

@@ -10,7 +10,7 @@ import java.util.List;
 import Compiler.ComponentNodes.ComponentNode;
 import Compiler.ComponentNodes.FunctionDefinitionNode;
 import Compiler.ComponentNodes.Definitions.Type;
-import Compiler.ComponentNodes.LVals.LValNode;
+import Compiler.ComponentNodes.LVals.LValueNode;
 import Compiler.Utils.OperandSource;
 import Compiler.Utils.ScratchManager;
 import Grammar.C99.C99Parser.Assignment_expressionContext;
@@ -49,9 +49,9 @@ public class ExpressionNode extends BaseExpressionNode<ExpressionContext>
 	}
 	
 	@Override
-	public LValNode<?> getLVal()
+	public LValueNode<?> getLValue()
 	{
-		if (expressions.size() == 1) return expressions.get(0).getLVal();
+		if (expressions.size() == 1) return expressions.get(0).getLValue();
 		else return null;
 	}
 	@Override

@@ -93,7 +93,7 @@ public abstract class BinaryExpressionNode<
 		else if (y.hasPropValue())
 			sourceY = AssemblyUtils.constantSource(y.getPropValue(), y.getType().getSize());
 		else
-			sourceY = y.getLVal().getSource();
+			sourceY = y.getLValue().getSource();
 		// Now we figure out X
 		if (x.hasAssembly())
 		{
@@ -104,7 +104,7 @@ public abstract class BinaryExpressionNode<
 		else if (x.hasPropValue())
 			sourceX = AssemblyUtils.constantSource(x.getPropValue(), x.getType().getSize());
 		else
-			sourceX = x.getLVal().getSource();
+			sourceX = x.getLValue().getSource();
 		
 		assembly += getAssembly(whitespace, destSource, scratchManager, sourceX, sourceY);
 		if (scratchX != null) scratchManager.releaseScratchBlock(scratchX);

@@ -8,10 +8,10 @@ import Compiler.ComponentNodes.Expressions.BaseExpressionNode;
 import Compiler.Utils.AssemblyUtils;
 import Compiler.Utils.OperandSource;
 
-public class ImmediateLValNode extends LValNode<ImmediateLValNode>
+public class ImmediateLValNode extends LValueNode<ImmediateLValNode>
 {
-	private LValNode<?> destination;
-	public ImmediateLValNode(LValNode<?> destination)
+	private LValueNode<?> destination;
+	public ImmediateLValNode(LValueNode<?> destination)
 	{
 		super(destination, destination.getType());
 	}

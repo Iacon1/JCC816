@@ -8,7 +8,7 @@ import Compiler.ComponentNodes.Expressions.BaseExpressionNode;
 import Compiler.Utils.AssemblyUtils;
 import Compiler.Utils.OperandSource;
 
-public class IndirectLValNode extends LValNode<IndirectLValNode>
+public class IndirectLValNode extends LValueNode<IndirectLValNode>
 {
 	private BaseExpressionNode<?> address;
 	public IndirectLValNode(BaseExpressionNode<?> address)
@@ -30,7 +30,7 @@ public class IndirectLValNode extends LValNode<IndirectLValNode>
 	{
 		final OperandSource addrSource;
 		if (address.hasPropValue()) addrSource = AssemblyUtils.numericSource(((Number) address.getPropValue()).longValue(), getSize());
-		else addrSource = address.getLVal().getSource();
+		else addrSource = address.getLValue().getSource();
 		
 		return new OperandSource((Integer i, Boolean use16) ->
 		{

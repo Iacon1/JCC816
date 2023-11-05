@@ -7,11 +7,11 @@ import Compiler.ComponentNodes.Definitions.Type;
 import Compiler.ComponentNodes.Interfaces.TypedNode;
 import Compiler.Utils.OperandSource;
 
-public abstract class LValNode<C extends LValNode<C>> extends ComponentNode<C> implements TypedNode
+public abstract class LValueNode<C extends LValueNode<C>> extends ComponentNode<C> implements TypedNode
 {
 	protected Type type;
 	
-	public LValNode(ComponentNode<?> parent, Type type)
+	public LValueNode(ComponentNode<?> parent, Type type)
 	{
 		super(parent);
 		this.type = type;

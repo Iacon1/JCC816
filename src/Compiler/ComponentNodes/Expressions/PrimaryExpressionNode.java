@@ -5,7 +5,7 @@ package Compiler.ComponentNodes.Expressions;
 import Compiler.ComponentNodes.ComponentNode;
 import Compiler.ComponentNodes.FunctionDefinitionNode;
 import Compiler.ComponentNodes.Definitions.Type;
-import Compiler.ComponentNodes.LVals.LValNode;
+import Compiler.ComponentNodes.LVals.LValueNode;
 import Compiler.Utils.CompUtils;
 import Compiler.Utils.OperandSource;
 import Compiler.Utils.ScratchManager;
@@ -37,13 +37,13 @@ public class PrimaryExpressionNode extends BaseExpressionNode<Primary_expression
 	@Override
 	public Type getType()
 	{
-		if (identifier != null) return getLVal().getType();
+		if (identifier != null) return getLValue().getType();
 		else if (constant != null) return CompUtils.getSmallestType((Number) constant);
 		else return null;
 	}
 
 	@Override
-	public LValNode<?> getLVal()
+	public LValueNode<?> getLValue()
 	{
 		if (identifier != null) return ComponentNode.resolveVariable(getScope().getPrefix() + identifier);
 		else return null;

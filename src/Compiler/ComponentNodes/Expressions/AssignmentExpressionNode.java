@@ -39,7 +39,7 @@ public class AssignmentExpressionNode extends BinaryExpressionNode
 		BaseExpressionNode sInt = super.interpret(node);
 		if (sInt != this) return sInt;
 		
-		if (x.getLVal() == null) throw new ConstraintException("6.5.16", 2, node.getStart());
+		if (x.getLValue() == null) throw new ConstraintException("6.5.16", 2, node.getStart());
 		BinaryExpressionNode<?,?,?,?> newY = null;
 		switch (operator)
 		{
@@ -103,6 +103,7 @@ public class AssignmentExpressionNode extends BinaryExpressionNode
 			newY.operator = "|";
 			newY.y = y;
 			break;
+		case "=": return this;
 		}
 		newY.interpret(null);
 		y = newY;
@@ -127,18 +128,19 @@ public class AssignmentExpressionNode extends BinaryExpressionNode
 		}
 		else if (y.hasPropValue())
 			sourceY = AssemblyUtils.constantSource(y.getPropValue(), y.getType().getSize());
-		else
-			sourceY = y.getLVal().getSource();
+		else if (y.hasLValue())
+			sourceY = y.getLValue().getSource();
+		else sourceY = null;
 		
-		if (!destSource.equals(x.getLVal().getSource()))
-			assembly += AssemblyUtils.byteCopier(whitespace, x.getLVal().getSize(), x.getLVal().getSource(), sourceY);
+		if (!destSource.equals(x.getLValue().getSource()))
+			assembly += AssemblyUtils.byteCopier(whitespace, x.getLValue().getSize(), x.getLValue().getSource(), sourceY);
 		
 		return assembly;
 	}
 	@Override
 	protected String getAssembly(int leadingWhitespace, ScratchManager scratchManager) throws Exception
 	{
-		return getAssembly(leadingWhitespace, x.getLVal().getSource(), scratchManager);
+		return getAssembly(leadingWhitespace, x.getLValue().getSource(), scratchManager);
 	}
 	
 	
