@@ -7,3 +7,4 @@ test.sfc
 test.asm
 test.cpu.sym
 test.sfc
+src/Executables/test.c
