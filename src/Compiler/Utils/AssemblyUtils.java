@@ -9,7 +9,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import Compiler.ComponentNodes.FunctionDefinitionNode;
-import Compiler.ComponentNodes.LVals.VariableNode;
+import Compiler.ComponentNodes.LValues.VariableNode;
 
 public final class AssemblyUtils
 {

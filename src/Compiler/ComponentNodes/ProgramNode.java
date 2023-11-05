@@ -12,7 +12,7 @@ import java.util.Set;
 import Compiler.ComponentNodes.Expressions.MultiplicativeExpressionNode;
 import Compiler.ComponentNodes.Declarations.DeclarationNode;
 import Compiler.ComponentNodes.Interfaces.AssemblableNode;
-import Compiler.ComponentNodes.LVals.VariableNode;
+import Compiler.ComponentNodes.LValues.VariableNode;
 import Compiler.Utils.AssemblyUtils;
 import Compiler.Utils.CompConfig;
 import Compiler.Utils.CompUtils;

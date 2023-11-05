@@ -1,6 +1,6 @@
 // Created by Iacon1 on 10/19/2023.
 // Variable node
-package Compiler.ComponentNodes.LVals;
+package Compiler.ComponentNodes.LValues;
 
 import Compiler.ComponentNodes.ComponentNode;
 import Compiler.ComponentNodes.Definitions.Type;
