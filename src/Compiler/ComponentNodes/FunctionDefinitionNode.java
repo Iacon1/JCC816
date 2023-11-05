@@ -50,7 +50,7 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 		specifiers = new DeclarationSpecifiersNode(this).interpret(node.declaration_specifiers()).getSpecifiers();
 		signature = new DeclaratorNode(this).interpret(node.declarator());
 
-		type = new Type(specifiers, signature, node.declaration_specifiers().start);
+		type = Type.manufacture(specifiers, signature, node.declaration_specifiers().start);
 		Logging.logNotice(signature.getIdentifier());
 
 		if (node.compound_statement() != null) code = new CompoundStatementNode(this).interpret(node.compound_statement());

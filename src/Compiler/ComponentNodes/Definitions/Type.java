@@ -12,10 +12,12 @@ import java.util.Set;
 import org.antlr.v4.runtime.Token;
 
 import Compiler.ComponentNodes.ComponentNode;
+import Compiler.ComponentNodes.Dummies.DummyType;
 import Compiler.ComponentNodes.UtilNodes.DeclarationSpecifiersNode;
 import Compiler.ComponentNodes.UtilNodes.DeclaratorNode;
 import Compiler.ComponentNodes.UtilNodes.DirectDeclaratorNode;
 import Compiler.Exceptions.ConstraintException;
+import Compiler.Exceptions.UnsupportedFeatureException;
 import Compiler.Utils.CompUtils;
 
 public class Type
@@ -24,7 +26,6 @@ public class Type
 	protected List<String> typeSpecifiers;
 	private Set<String> typeQualifiers;
 //	private Set<String> functionSpecifiers;
-	private List<Integer> dimensions;
 	
 	private static List<String> toList(String... members)
 	{
@@ -83,36 +84,17 @@ public class Type
 		return allowedLists;
 	}
 	
-	private boolean isStruct()
-	{
-		return typeSpecifiers.get(0).equals("struct");
-	}
-	private boolean isUnion()
-	{
-		return typeSpecifiers.get(0).equals("union");
-	}
-	private boolean isEnum()
-	{
-		return typeSpecifiers.get(0).equals("enum");
-	}
-	private String getStructUnionEnumType()
-	{
-		return typeSpecifiers.get(1);
-	}
-	
 	public Type()
 	{
 		typeSpecifiers = new LinkedList<String>();
 		typeQualifiers = new HashSet<String>();
-		dimensions = new LinkedList<Integer>();
 	}
-	public Type(DeclarationSpecifiersNode.DeclSpecifiers specifiers, DeclaratorNode declarator, Token start) throws Exception
+	public Type(DeclarationSpecifiersNode.DeclSpecifiers specifiers, Token start) throws Exception
 	{
 //		this.scope = declarator.getScope();
 		typeSpecifiers = new LinkedList<String>();
 		typeQualifiers = new HashSet<String>();
 //		functionSpecifiers = new HashSet<String>();
-		dimensions = new LinkedList<Integer>();
 		
 		if (specifiers.storageClassSpecifiers.length > 0)
 			storageClassSpecifier = specifiers.storageClassSpecifiers[0];
@@ -122,14 +104,6 @@ public class Type
 			typeQualifiers.add(qualifier);
 //		for (String qualifier : specifiers.functionSpecifiers)
 //			functionSpecifiers.add(qualifier);
-
-		for (DirectDeclaratorNode.DirDeclaratorInfo info : declarator.getInfo())
-		{
-			if (info == null) continue;
-			if (info.type != DirectDeclaratorNode.Type.array) continue;
-			if (info.assignExpr != null && Number.class.isAssignableFrom(info.assignExpr.getPropValue().getClass()))
-				dimensions.add(((Number) info.assignExpr.getPropValue()).intValue());
-		}
 		
 		// Check constraints
 		
@@ -153,14 +127,32 @@ public class Type
 		typeSpecifiers = new LinkedList<String>();
 		typeQualifiers = new HashSet<String>();
 //		functionSpecifiers = new HashSet<String>();
-		dimensions = new LinkedList<Integer>();
-		
+
 		storageClassSpecifier = other.storageClassSpecifier;
 		typeSpecifiers.addAll(other.typeSpecifiers);
 		typeQualifiers.addAll(other.typeQualifiers);
-		dimensions.addAll(other.dimensions);
 	}
-	public int getBaseSize()
+	
+	public static Type manufacture(DeclarationSpecifiersNode.DeclSpecifiers specifiers, DeclaratorNode declaratorNode, Token start) throws Exception
+	{
+		Type type = new Type(specifiers, start);
+		
+		if (declaratorNode.pointerQualifiers() != null) // Pointer
+			for (int i = declaratorNode.pointerQualifiers().size() - 1; i >= 0; --i)
+				type = new PointerType(type, declaratorNode.pointerQualifiers().get(i));
+		
+		for (DirectDeclaratorNode.DirDeclaratorInfo info : declaratorNode.getInfo()) // Array
+		{
+			if (info == null) continue;
+			if (info.type != DirectDeclaratorNode.Type.array) continue;
+			if (info.assignExpr != null && Number.class.isAssignableFrom(info.assignExpr.getPropValue().getClass()))
+				type = new ArrayType(type, (int) info.assignExpr.getPropLong());
+		}
+		
+		return type;
+	}
+	
+	public int getSize()
 	{
 		int baseSize;
 		if (isStruct()) baseSize = ComponentNode.resolveStruct(getStructUnionEnumType()).getSize();
@@ -169,36 +161,76 @@ public class Type
 		else baseSize = CompUtils.sizeOf(typeSpecifiers);
 		return baseSize;
 	}
-	public int getSize()
+	
+	private String getStructUnionEnumType()
 	{
-		int size = getBaseSize();
-		for (Integer d : dimensions) size *= d;
-		return size;
+		return typeSpecifiers.get(1);
+	}
+	
+	public boolean canCastTo(Type type) // Defined by 6.5.16.1
+	{
+		return type.canCastFrom(this);
+	}
+	public boolean canCastFrom(Type type)
+	{
+		return
+				isArithmetic() && type.isArithmetic() ||
+				isStruct() && type.isStruct() || // TODO
+				isUnion() && type.isUnion() || // TODO
+				isPointer() && type.isPointer() && ((PointerType) this).getType().canCastTo(((PointerType) type).getType()) ||
+				isPointer() && type.isPointer() && ((PointerType) this).getType().canCastTo("void") ||
+				isPointer() && type.isPointer() && ((PointerType) type).getType().canCastTo("void") ||
+				isPointer() && type.isConstant() && type.isInteger() ||
+				typeSpecifiers.contains("_Bool") && type.isPointer();
+	}
+	public boolean canCastTo(String... specifiers)
+	{
+		return canCastTo(new DummyType(specifiers));
+	}
+	public boolean canCastFrom(String...specifiers)
+	{
+		return canCastFrom(new DummyType(specifiers));
 	}
 	
 	public boolean isConstant()
 	{
 		return typeQualifiers.contains("const");
 	}
-	public boolean isArray()
+	public boolean isQualified()
 	{
-		return dimensions.size() != 0;
+		return typeQualifiers.size() != 0;
 	}
-	public boolean canCastTo(Type type)
+	
+	public boolean isArray() {return false;} // To be overriden
+	private boolean isStruct()
 	{
-		return true; // TODO
+		return typeSpecifiers.get(0).equals("struct");
 	}
-	public boolean canCastFrom(Type type)
+	private boolean isUnion()
 	{
-		return type.canCastTo(this);
+		return typeSpecifiers.get(0).equals("union");
 	}
-	public boolean canCastTo(String... specifiers)
+	private boolean isEnum()
 	{
-		return  false; // TODO
+		return typeSpecifiers.get(0).equals("enum");
 	}
-	public boolean canCastFrom(String...specifiers)
+	
+	public boolean isInteger()
 	{
-		return false; // TODO
+		return typeSpecifiers.contains("short") || typeSpecifiers.contains("long") || typeSpecifiers.contains("int");
+	}
+	public boolean isArithmetic()
+	{
+		return isInteger();
+	}
+	public boolean isPointer() {return false;} // To be overriden
+	public boolean isScalar()
+	{
+		return isInteger() || isPointer();
+	}
+	public boolean isAggregate()
+	{
+		return isArray() || isStruct() || isUnion();
 	}
 	
 	public boolean allowsOperator(String operator, Type other)
