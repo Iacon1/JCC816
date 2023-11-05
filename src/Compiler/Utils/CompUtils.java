@@ -22,20 +22,25 @@ public final class CompUtils
 		public static final String noISR = "no_isr";
 	}
 
-	public static String headerTag = "__HEADER_HERE";
+	public static final String headerTag = "__HEADER_HERE";
 	
-	private static final int intSize = 4;
-	public static final int pointerSize = 6;
+	private static final int charSize = 1;
+	private static final int shortSize = 2;
+	private static final int intSize = 3;
+	private static final int longSize = 4;
+	private static final int longLongSize = 8;
+	public static final int pointerSize = 3;
 	public static int sizeOf(List<String> typeSpecifiers)
 	{
-		if (typeSpecifiers.contains("char")) return 1;
+		if (typeSpecifiers.contains("char")) return charSize;
 		else if (typeSpecifiers.contains("int") || typeSpecifiers.contains("short") || typeSpecifiers.contains("long"))
 		{
 			int shortCount = 0, longCount = 0;
-			for (String specifier : typeSpecifiers) if (specifier.equals("short")) shortCount += 1;
-			if (shortCount > 0) return intSize / (int) Math.pow(2, shortCount);
+			for (String specifier : typeSpecifiers) if (specifier.equals("short")) return shortSize;
+			if (shortCount == 1) return shortSize;
 			for (String specifier : typeSpecifiers) if (specifier.equals("long")) longCount += 1;
-			if (longCount > 0) return intSize * (int) Math.pow(2, shortCount);
+			if (longCount == 1) return longSize;
+			else if (longCount == 2) return longLongSize;
 			return intSize;
 		}
 		else return 0;

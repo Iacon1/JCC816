@@ -23,7 +23,6 @@ public class Type
 	private String storageClassSpecifier;
 	protected List<String> typeSpecifiers;
 	private Set<String> typeQualifiers;
-	private List<Set<String>> pointerQualifiers;
 //	private Set<String> functionSpecifiers;
 	private List<Integer> dimensions;
 	
@@ -123,7 +122,6 @@ public class Type
 			typeQualifiers.add(qualifier);
 //		for (String qualifier : specifiers.functionSpecifiers)
 //			functionSpecifiers.add(qualifier);
-		this.pointerQualifiers = declarator.pointerQualifiers();
 
 		for (DirectDeclaratorNode.DirDeclaratorInfo info : declarator.getInfo())
 		{
@@ -145,14 +143,25 @@ public class Type
 		if (!isAllowed)
 			throw new ConstraintException("6.7.2", 2, start);
 	}
-	
+	public Type(Type other)
+	{
+//		this.scope = declarator.getScope();
+		typeSpecifiers = new LinkedList<String>();
+		typeQualifiers = new HashSet<String>();
+//		functionSpecifiers = new HashSet<String>();
+		dimensions = new LinkedList<Integer>();
+		
+		storageClassSpecifier = other.storageClassSpecifier;
+		typeSpecifiers.addAll(other.typeSpecifiers);
+		typeQualifiers.addAll(other.typeQualifiers);
+		dimensions.addAll(other.dimensions);
+	}
 	public int getBaseSize()
 	{
 		int baseSize;
 		if (isStruct()) baseSize = ComponentNode.resolveStruct(getStructUnionEnumType()).getSize();
 		else if (isUnion()) baseSize = ComponentNode.resolveUnion(getStructUnionEnumType()).getSize();
 		else if (isEnum()) baseSize = CompUtils.sizeOf("int");
-		else if (pointerQualifiers != null && !pointerQualifiers.isEmpty()) baseSize = CompUtils.pointerSize;
 		else baseSize = CompUtils.sizeOf(typeSpecifiers);
 		return baseSize;
 	}
@@ -203,12 +212,7 @@ public class Type
 		for (String specifier : typeSpecifiers) signature += specifier + " ";
 		for (String qualifier : typeQualifiers) signature += qualifier + " ";
 		for (String specifier : typeSpecifiers) signature += specifier + " ";
-		for (Set<String> qualifierSet : pointerQualifiers)
-		{
-			signature += "* ";
-			for (String qualifier : qualifierSet) signature += qualifier + " ";
-		}
-			
-		return signature;
+
+		return signature.substring(0, signature.length());
 	}
 }

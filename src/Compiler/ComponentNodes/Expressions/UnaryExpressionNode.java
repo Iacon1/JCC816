@@ -6,12 +6,15 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 
 import Compiler.ComponentNodes.ComponentNode;
 import Compiler.ComponentNodes.FunctionDefinitionNode;
-import Compiler.ComponentNodes.VariableNode;
 import Compiler.ComponentNodes.Definitions.Type;
+import Compiler.ComponentNodes.LVals.ImmediateLValNode;
+import Compiler.ComponentNodes.LVals.IndirectLValNode;
+import Compiler.ComponentNodes.LVals.LValNode;
 import Compiler.ComponentNodes.UtilNodes.TypeNameNode;
 import Compiler.Utils.AssemblyUtils;
 import Compiler.Utils.OperandSource;
 import Compiler.Utils.ScratchManager;
+
 import Grammar.C99.C99Parser.Unary_expressionContext;
 
 public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionContext>
@@ -52,39 +55,51 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 	}
 	
 	@Override
-	public VariableNode getVariable()
+	public LValNode<?> getLVal()
 	{
-		return expr.getVariable();
+		if (operator.equals("&"))
+		{
+			if (UnaryExpressionNode.class.isAssignableFrom(expr.getClass()) && ((UnaryExpressionNode) expr).operator.equals("*"))
+				return ((UnaryExpressionNode) expr).expr.getLVal(); // These two cancel each other out
+			else return new IndirectLValNode(expr);
+		}
+		else if (operator.equals("*"))
+		{
+			if (UnaryExpressionNode.class.isAssignableFrom(expr.getClass()) && ((UnaryExpressionNode) expr).operator.equals("&"))
+				return ((UnaryExpressionNode) expr).expr.getLVal(); // These two cancel each other out
+			else return new ImmediateLValNode(expr.getLVal());
+		}
+		return expr.getLVal();
 	}
 
 	@Override
-	public boolean canCall(FunctionDefinitionNode function) {
-		// TODO Auto-generated method stub
-		return false;
+	public boolean canCall(FunctionDefinitionNode function)
+	{
+		return expr.canCall(function);
 	}
 	@Override
 	public boolean hasPropValue()
 	{
-		// TODO Auto-generated method stub
-		return false;
+		if (operator.equals("sizeof")) return true;
+		else return expr.hasPropValue();
 	}
 	@Override
-	public Object getPropValue() {
-		// TODO Auto-generated method stub
-		return null;
+	public Object getPropValue()
+	{
+		if (operator.equals("sizeof")) return expr.getType().getSize();
+		else return expr.getPropValue();
 	}
 	@Override
-	public String getAssembly(int leadingWhitespace, String writeAddr, ScratchManager scratchManager) throws Exception
+	public String getAssembly(int leadingWhitespace, OperandSource writeAddr, ScratchManager scratchManager) throws Exception
 	{
 		String whitespace = AssemblyUtils.getWhitespace(leadingWhitespace);
 		String assembly = "";
 		switch (operator)
 		{
 		case "++":
-			OperandSource exprSource = AssemblyUtils.addressSource(expr.getVariable().getFullName(), expr.getVariable().getSize());
-			assembly += AdditiveExpressionNode.getIncrementer(whitespace, expr.getVariable().getFullName(), exprSource);
-			if (!writeAddr.equals(expr.getVariable().getFullName()))
-				assembly += AssemblyUtils.byteCopier(whitespace, expr.getVariable().getSize(), writeAddr, exprSource);
+			assembly += AdditiveExpressionNode.getIncrementer(whitespace, expr.getLVal().getSource(), expr.getLVal().getSource());
+			if (!writeAddr.equals(expr.getLVal().getSource()))
+				assembly += AssemblyUtils.byteCopier(whitespace, expr.getLVal().getSize(), writeAddr, expr.getLVal().getSource());
 			return assembly;
 		default: return "";
 		}
@@ -94,7 +109,7 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 	public String getAssembly(int leadingWhitespace) throws Exception
 	{
 		if (operator.equals("++") || operator.equals("--"))
-			return getAssembly(leadingWhitespace, expr.getVariable().getFullName(), new ScratchManager());
+			return getAssembly(leadingWhitespace, expr.getLVal().getSource(), new ScratchManager());
 		else return super.getAssembly(leadingWhitespace);
 	}
 
