@@ -36,7 +36,7 @@ public class LANDExpressionNode extends BinaryExpressionNode
 		return a && b;
 	}
 	@Override
-	protected String getAssembly(String whitespace, String destAddr, ScratchManager scratchManager, OperandSource sourceX, OperandSource sourceY) throws Exception
+	protected String getAssembly(String whitespace, OperandSource destSource, ScratchManager scratchManager, OperandSource sourceX, OperandSource sourceY) throws Exception
 	{
 		String assembly = whitespace + CompUtils.setXY8 + "\n";
 		assembly += whitespace + "LDX\t#$01\n";
@@ -51,7 +51,7 @@ public class LANDExpressionNode extends BinaryExpressionNode
 		});
 		assembly += whitespace + "DEX\n";
 		assembly += ":" + whitespace.substring(1) + "TXA\n";
-		assembly += whitespace + "STA\t" + destAddr + " + 0\n";
+		assembly += whitespace + "STA\t" + destSource + " + 0\n";
 		return assembly;
 	}
 }

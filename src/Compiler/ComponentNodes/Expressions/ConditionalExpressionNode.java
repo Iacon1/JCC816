@@ -6,6 +6,7 @@ import java.util.function.Function;
 
 import Compiler.ComponentNodes.ComponentNode;
 import Compiler.ComponentNodes.FunctionDefinitionNode;
+import Compiler.Utils.OperandSource;
 import Compiler.Utils.ScratchManager;
 import Grammar.C99.C99Parser.Conditional_expressionContext;
 import Grammar.C99.C99Parser.Lor_expressionContext;
@@ -60,7 +61,7 @@ public class ConditionalExpressionNode extends BinaryExpressionNode
 		else return y.getPropValue();
 	}
 	@Override
-	public String getAssembly(int leadingWhitespace, String writeAddr, ScratchManager scratchManager) throws Exception
+	public String getAssembly(int leadingWhitespace, OperandSource writeAddr, ScratchManager scratchManager) throws Exception
 	{
 		// TODO Auto-generated method stub
 		return null;

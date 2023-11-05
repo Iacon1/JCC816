@@ -9,7 +9,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import Compiler.ComponentNodes.FunctionDefinitionNode;
-import Compiler.ComponentNodes.VariableNode;
+import Compiler.ComponentNodes.LVals.VariableNode;
 
 public final class AssemblyUtils
 {
@@ -74,21 +74,15 @@ public final class AssemblyUtils
 	{
 		return bytewiseOperation(whitespace, nBytes, perIteration, true, false);
 	}
-	public static String byteCopier(String whitespace, int nBytes, String writeAddr, BiFunction<Integer, Boolean, String> readSource)
+	public static String byteCopier(String whitespace, int nBytes, BiFunction<Integer, Boolean, String> writeSource, BiFunction<Integer, Boolean, String> readSource)
 	{
 		return bytewiseOperation(whitespace, nBytes, (Integer i, Boolean is16Bit) -> 
 			{
-				return new String[] {
+				return new String[]
+						{
 						"LDA\t" + readSource.apply(i, is16Bit),
-						"STA\t" + writeAddr + " + " + (nBytes == 1? "" : i)};
-			}
-		);
-	}
-	public static String byteCopierAddr(String whitespace, int nBytes, String writeAddr, String readAddr)
-	{
-		return byteCopier(whitespace, nBytes, writeAddr, (Integer i, Boolean is16Bit) ->
-			{
-				return readAddr + " + " + i;
+						"STA\t" + writeSource.apply(i, is16Bit),
+						};
 			});
 	}
 	public static OperandSource byteStreamSource(byte[] bytes)

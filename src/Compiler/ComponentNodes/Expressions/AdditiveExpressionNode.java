@@ -2,8 +2,6 @@
 //
 package Compiler.ComponentNodes.Expressions;
 
-import java.util.function.Function;
-
 import Compiler.ComponentNodes.ComponentNode;
 import Compiler.Utils.AssemblyUtils;
 import Compiler.Utils.OperandSource;
@@ -41,51 +39,51 @@ public class AdditiveExpressionNode extends BinaryExpressionNode
 		default: return null;
 		}
 	}
-	public static String getAdder(String whitespace, String destAddr, OperandSource sourceX, OperandSource sourceY)
+	public static String getAdder(String whitespace, OperandSource destSource, OperandSource sourceX, OperandSource sourceY)
 	{
 		return whitespace + "CLC\n" + AssemblyUtils.bytewiseOperation(whitespace, sourceX.getSize(), (Integer i, Boolean is16Bit) -> 
 		{return new String[]
 			{
 				"LDA\t" + sourceX.apply(i, is16Bit),
 				"ADC\t" + sourceY.apply(i, is16Bit),
-				"STA\t" + destAddr + " + " + i,
+				"STA\t" + destSource.apply(i, is16Bit),
 			};
 		});
 	}
-	public static String getIncrementer(String whitespace, String destAddr, OperandSource sourceX)
+	public static String getIncrementer(String whitespace, OperandSource destSource, OperandSource sourceX)
 	{
 		OperandSource sourceY = AssemblyUtils.numericSource(1, sourceX.getSize());
-		return getAdder(whitespace, destAddr, sourceX, sourceY);
+		return getAdder(whitespace, destSource, sourceX, sourceY);
 	}
-	public static String getSubtractor(String whitespace, String destAddr, OperandSource sourceX, OperandSource sourceY)
+	public static String getSubtractor(String whitespace, OperandSource destSource, OperandSource sourceX, OperandSource sourceY)
 	{
 		return whitespace + "SEC\n" + AssemblyUtils.bytewiseOperation(whitespace, sourceX.getSize(), (Integer i, Boolean is16Bit) -> 
 		{return new String[]
 			{
 				"LDA\t" + sourceX.apply(i, is16Bit),
 				"SBC\t" + sourceY.apply(i, is16Bit),
-				"STA\t" + destAddr + " + " + (i),
+				"STA\t" + destSource.apply(i, is16Bit),
 			};
 		}, true, true);
 	}
-	public static String getDecrementer(String whitespace, String destAddr, OperandSource sourceX)
+	public static String getDecrementer(String whitespace, OperandSource destSource, OperandSource sourceX)
 	{
 		OperandSource sourceY = AssemblyUtils.numericSource(1, sourceX.getSize());
-		return getSubtractor(whitespace, destAddr, sourceX, sourceY);
+		return getSubtractor(whitespace, destSource, sourceX, sourceY);
 	}
 	
 	@Override
-	protected String getAssembly(String whitespace, String destAddr, ScratchManager scratchManager, OperandSource sourceX, OperandSource sourceY) throws Exception
+	protected String getAssembly(String whitespace, OperandSource destSource, ScratchManager scratchManager, OperandSource sourceX, OperandSource sourceY) throws Exception
 	{
 		String assembly = "";
 		
 		switch (operator)
 		{
 		case "+":
-			assembly += getAdder(whitespace, destAddr, sourceX, sourceY);
+			assembly += getAdder(whitespace, destSource, sourceX, sourceY);
 			break;
 		case "-":
-			assembly += getSubtractor(whitespace, destAddr, sourceX, sourceY);
+			assembly += getSubtractor(whitespace, destSource, sourceX, sourceY);
 			break;
 		}
 		return assembly;

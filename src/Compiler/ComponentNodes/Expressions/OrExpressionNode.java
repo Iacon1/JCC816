@@ -37,7 +37,7 @@ public class OrExpressionNode extends BinaryExpressionNode
 		return Long.valueOf(a | b);
 	}
 	@Override
-	protected String getAssembly(String whitespace, String destAddr, ScratchManager scratchManager, OperandSource sourceX, OperandSource sourceY) throws Exception
+	protected String getAssembly(String whitespace, OperandSource destSource, ScratchManager scratchManager, OperandSource sourceX, OperandSource sourceY) throws Exception
 	{
 		String assembly = AssemblyUtils.bytewiseOperation(whitespace, sourceX.getSize(), (Integer i, Boolean is16Bit) ->
 		{
@@ -45,7 +45,7 @@ public class OrExpressionNode extends BinaryExpressionNode
 			{
 				"LDA\t" + sourceX.apply(i, is16Bit),
 				"ORA\t" + sourceY.apply(i, is16Bit),
-				"STA\t" + destAddr + " + " + i,
+				"STA\t" + destSource + " + " + i,
 			};
 		});
 		return assembly;

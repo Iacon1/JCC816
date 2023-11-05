@@ -5,7 +5,7 @@ package Compiler.ComponentNodes.Expressions;
 
 import Compiler.ComponentNodes.ComponentNode;
 import Compiler.ComponentNodes.FunctionDefinitionNode;
-import Compiler.ComponentNodes.VariableNode;
+import Compiler.ComponentNodes.LVals.VariableNode;
 import Compiler.Exceptions.ConstraintException;
 import Compiler.Exceptions.TypeMismatchException;
 import Compiler.Utils.AssemblyUtils;
@@ -39,7 +39,7 @@ public class AssignmentExpressionNode extends BinaryExpressionNode
 		BaseExpressionNode sInt = super.interpret(node);
 		if (sInt != this) return sInt;
 		
-		if (x.getVariable() == null) throw new ConstraintException("6.5.16", 2, node.getStart());
+		if (x.getLVal() == null) throw new ConstraintException("6.5.16", 2, node.getStart());
 		BinaryExpressionNode<?,?,?,?> newY = null;
 		switch (operator)
 		{
@@ -114,7 +114,7 @@ public class AssignmentExpressionNode extends BinaryExpressionNode
 	public Object getPropValue() {return null;} // Should never happen
 	
 	@Override
-	public String getAssembly(int leadingWhitespace, String destAddr, ScratchManager scratchManager) throws Exception
+	public String getAssembly(int leadingWhitespace, OperandSource destSource, ScratchManager scratchManager) throws Exception
 	{
 		String whitespace = AssemblyUtils.getWhitespace(leadingWhitespace);
 		final OperandSource sourceY;
@@ -122,23 +122,23 @@ public class AssignmentExpressionNode extends BinaryExpressionNode
 		
 		if (y.hasAssembly())
 		{
-			assembly += y.getAssembly(leadingWhitespace, destAddr, scratchManager);
-			sourceY = AssemblyUtils.addressSource(destAddr, y.getType().getSize());
+			assembly += y.getAssembly(leadingWhitespace, destSource, scratchManager);
+			sourceY = destSource;
 		}
 		else if (y.hasPropValue())
 			sourceY = AssemblyUtils.constantSource(y.getPropValue(), y.getType().getSize());
 		else
-			sourceY = AssemblyUtils.addressSource(y.getVariable().getFullName(), y.getType().getSize());
+			sourceY = y.getLVal().getSource();
 		
-		if (!destAddr.equals(x.getVariable().getFullName()))
-			assembly += AssemblyUtils.byteCopier(whitespace, x.getVariable().getSize(), x.getVariable().getFullName(), sourceY);
+		if (!destSource.equals(x.getLVal().getSource()))
+			assembly += AssemblyUtils.byteCopier(whitespace, x.getLVal().getSize(), x.getLVal().getSource(), sourceY);
 		
 		return assembly;
 	}
 	@Override
 	protected String getAssembly(int leadingWhitespace, ScratchManager scratchManager) throws Exception
 	{
-		return getAssembly(leadingWhitespace, x.getVariable().getFullName(), scratchManager);
+		return getAssembly(leadingWhitespace, x.getLVal().getSource(), scratchManager);
 	}
 	
 	

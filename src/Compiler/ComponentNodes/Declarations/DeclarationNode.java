@@ -4,6 +4,7 @@ package Compiler.ComponentNodes.Declarations;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import Compiler.ComponentNodes.ComponentNode;
 import Compiler.ComponentNodes.Expressions.AssignmentExpressionNode;
@@ -11,9 +12,9 @@ import Compiler.ComponentNodes.Expressions.BaseExpressionNode;
 import Compiler.ComponentNodes.Expressions.ExpressionNode;
 import Compiler.ComponentNodes.FunctionDefinitionNode;
 import Compiler.ComponentNodes.InterpretingNode;
-import Compiler.ComponentNodes.VariableNode;
 import Compiler.ComponentNodes.Definitions.Type;
 import Compiler.ComponentNodes.Interfaces.AssemblableNode;
+import Compiler.ComponentNodes.LVals.VariableNode;
 import Compiler.ComponentNodes.UtilNodes.DeclarationSpecifiersNode;
 import Compiler.ComponentNodes.UtilNodes.DeclaratorNode;
 import Compiler.Utils.AssemblyUtils;
@@ -101,7 +102,7 @@ public class DeclarationNode extends InterpretingNode<DeclarationNode, Declarati
 		for (int i = 0; i < variables.size(); ++i)
 			if (expressions.get(i) != null)
 			{
-				if (!expressions.get(i).hasPropValue()) assembly += expressions.get(i).getAssembly(leadingWhitespace, variables.get(i).getFullName());
+				if (!expressions.get(i).hasPropValue()) assembly += expressions.get(i).getAssembly(leadingWhitespace, variables.get(i).getSource());
 				else assembly += AssemblyUtils.byteCopier(AssemblyUtils.getWhitespace(leadingWhitespace), variables.get(i).getSize(), variables.get(i).getFullName(), expressions.get(i).getPropValue());
 			}
 				
