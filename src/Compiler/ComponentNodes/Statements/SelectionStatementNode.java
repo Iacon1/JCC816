@@ -100,7 +100,7 @@ public class SelectionStatementNode extends StatementNode<Selection_statementCon
 				else if (expression.hasPropValue())
 					assembly += AssemblyUtils.byteCopier(whitespace, expression.getType().getSize(), CompConfig.callResult, expression.getPropValue());
 				else
-					assembly += AssemblyUtils.byteCopier(whitespace, expression.getType().getSize(), CompConfig.callResult, expression.getLVal().getSource());
+					assembly += AssemblyUtils.byteCopier(whitespace, expression.getType().getSize(), CompConfig.callResult, expression.getLValue().getSource());
 				// Make sure variable loaded.
 				assembly += whitespace + "BEQ\t" + skipName + "\n";
 				assembly += ifStm.getAssembly(leadingWhitespace + CompConfig.indentSize);

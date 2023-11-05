@@ -10,7 +10,7 @@ import Compiler.ComponentNodes.ComponentNode;
 import Compiler.ComponentNodes.InterpretingNode;
 import Compiler.ComponentNodes.Interfaces.AssemblableNode;
 import Compiler.ComponentNodes.Interfaces.TypedNode;
-import Compiler.ComponentNodes.LVals.LValNode;
+import Compiler.ComponentNodes.LVals.LValueNode;
 import Compiler.Utils.CompConfig;
 import Compiler.Utils.CompUtils;
 import Compiler.Utils.OperandSource;
@@ -22,8 +22,8 @@ public abstract class BaseExpressionNode<C extends ParserRuleContext> extends In
 
 	public BaseExpressionNode(ComponentNode<?> parent) {super(parent);}
 
-	public boolean hasLVal() {return false;}
-	public LValNode getLVal() {return null;}
+	public boolean hasLValue() {return false;}
+	public LValueNode<?> getLValue() {return null;}
 	@Override
 	public abstract boolean hasPropValue();
 	@Override

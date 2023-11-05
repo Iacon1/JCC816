@@ -8,7 +8,7 @@ import Compiler.ComponentNodes.Interfaces.NamedNode;
 import Compiler.Utils.AssemblyUtils;
 import Compiler.Utils.OperandSource;
 
-public class VariableNode extends LValNode<VariableNode> implements NamedNode
+public class VariableNode extends LValueNode<VariableNode> implements NamedNode
 {
 	private String name;
 	
