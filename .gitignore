@@ -4,3 +4,6 @@ test.cpu.sym
 test.cpu.sym
 test.asm
 test.sfc
+test.asm
+test.cpu.sym
+test.sfc
