@@ -8,6 +8,7 @@ import Compiler.ComponentNodes.Definitions.Type;
 public interface TypedNode
 {
 	public Type getType();
+	public default int getSize() {return getType().getSize();}
 	public default boolean canCastTo(Type type) {return getType().canCastTo(type);}
 	public default boolean canCastFrom(Type type) {return getType().canCastFrom(type);}
 	public default boolean canCastTo(TypedNode node) {return getType().canCastTo(node.getType());}

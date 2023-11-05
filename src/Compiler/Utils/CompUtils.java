@@ -4,7 +4,6 @@
 package Compiler.Utils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import Compiler.ComponentNodes.Definitions.Type;
@@ -24,31 +23,6 @@ public final class CompUtils
 
 	public static final String headerTag = "__HEADER_HERE";
 	
-	private static final int charSize = 1;
-	private static final int shortSize = 2;
-	private static final int intSize = 3;
-	private static final int longSize = 4;
-	private static final int longLongSize = 8;
-	public static final int pointerSize = 3;
-	public static int sizeOf(List<String> typeSpecifiers)
-	{
-		if (typeSpecifiers.contains("char")) return charSize;
-		else if (typeSpecifiers.contains("int") || typeSpecifiers.contains("short") || typeSpecifiers.contains("long"))
-		{
-			int shortCount = 0, longCount = 0;
-			for (String specifier : typeSpecifiers) if (specifier.equals("short")) return shortSize;
-			if (shortCount == 1) return shortSize;
-			for (String specifier : typeSpecifiers) if (specifier.equals("long")) longCount += 1;
-			if (longCount == 1) return longSize;
-			else if (longCount == 2) return longLongSize;
-			return intSize;
-		}
-		else return 0;
-	}
-	public static int sizeOf(String... typeSpecifiers)
-	{
-		return sizeOf(Arrays.asList(typeSpecifiers));
-	}
 	public static Type getSmallestType(long value)
 	{
 		List<String> specifiers = new ArrayList<String>();
@@ -57,25 +31,13 @@ public final class CompUtils
 			specifiers.add("signed");
 			value = 2 * Math.abs(value);
 		}
-		if (value < Math.pow(2, 8)) specifiers.add("char");
-		else
-		{
-			int s = intSize;
-			// How many long must we add?
-			while (value > Math.pow(2, 8 * s))
+		String[] options = new String[] {"char", "short", "int", "long", "long long"};
+		for (String option : options)
+			if (value < Math.pow(2, 8 * CompConfig.sizeOf(option.split(" "))))
 			{
-				s *= 2;
-				specifiers.add("long");
+				specifiers.add(option);
+				break;
 			}
-			// How many short can we add?
-			while (value < Math.pow(2, 8 * s) / 2)
-			{
-				s /= 2;
-				specifiers.add("short");
-				if (s == 0) break;
-			}
-			if (s == 0) specifiers.add("int");
-		}
 		return new DummyType(specifiers);
 	}
 	public static Type getSmallestType(Number value)
@@ -88,7 +50,6 @@ public final class CompUtils
 		
 	}
 	
-	public static int stackSize = 0x2000;
 	/** Maps a byte offset from the start of RAM to a memory address the CPU can understand.
 	 *  @param offset The offset from the start of RAM.
 	 */

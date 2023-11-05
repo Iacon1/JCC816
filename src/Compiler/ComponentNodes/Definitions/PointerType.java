@@ -6,7 +6,7 @@ package Compiler.ComponentNodes.Definitions;
 import java.util.HashSet;
 import java.util.Set;
 
-import Compiler.Utils.CompUtils;
+import Compiler.Utils.CompConfig;
 
 public class PointerType extends Type
 {
@@ -28,7 +28,7 @@ public class PointerType extends Type
 	@Override
 	public int getSize()
 	{
-		return CompUtils.pointerSize;
+		return CompConfig.pointerSize;
 	}
 	
 	public Type getType()

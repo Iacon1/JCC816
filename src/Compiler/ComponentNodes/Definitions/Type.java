@@ -18,7 +18,7 @@ import Compiler.ComponentNodes.Declarations.DirectDeclaratorNode;
 import Compiler.ComponentNodes.Dummies.DummyType;
 import Compiler.Exceptions.ConstraintException;
 import Compiler.Exceptions.UnsupportedFeatureException;
-import Compiler.Utils.CompUtils;
+import Compiler.Utils.CompConfig;
 
 public class Type
 {
@@ -161,8 +161,8 @@ public class Type
 		int baseSize;
 		if (isStruct()) baseSize = ComponentNode.resolveStruct(getStructUnionEnumType()).getSize();
 		else if (isUnion()) baseSize = ComponentNode.resolveUnion(getStructUnionEnumType()).getSize();
-		else if (isEnum()) baseSize = CompUtils.sizeOf("int");
-		else baseSize = CompUtils.sizeOf(typeSpecifiers);
+		else if (isEnum()) baseSize = CompConfig.sizeOf("int");
+		else baseSize = CompConfig.sizeOf(typeSpecifiers);
 		return baseSize;
 	}
 	
