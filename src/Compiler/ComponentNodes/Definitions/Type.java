@@ -142,6 +142,10 @@ public class Type
 				isAllowed = true;
 		if (!isAllowed)
 			throw new ConstraintException("6.7.2", 2, start);
+		if (typeSpecifiers.contains("double") || typeSpecifiers.contains("float")) // Floats not supported
+			throw new UnsupportedFeatureException("Floating-point numbers", false, start);
+		if (typeSpecifiers.contains("_Complex")) // Complex numbers not supported
+			throw new UnsupportedFeatureException("Complex numbers", false, start);
 	}
 	public Type(Type other)
 	{
