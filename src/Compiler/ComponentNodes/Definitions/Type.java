@@ -144,9 +144,13 @@ public class Type
 		for (DirectDeclaratorNode.DirDeclaratorInfo info : declaratorNode.getInfo()) // Array
 		{
 			if (info == null) continue;
-			if (info.type != DirectDeclaratorNode.Type.array) continue;
-			if (info.assignExpr != null && Number.class.isAssignableFrom(info.assignExpr.getPropValue().getClass()))
-				type = new ArrayType(type, (int) info.assignExpr.getPropLong());
+			if (info.type == DirectDeclaratorNode.Type.array)
+			{
+				if (info.assignExpr != null && Number.class.isAssignableFrom(info.assignExpr.getPropValue().getClass()))
+					type = new ArrayType(type, (int) info.assignExpr.getPropLong());
+				else
+					type = new ArrayType(type); // Incomplete array
+			}
 		}
 		
 		return type;
@@ -196,6 +200,7 @@ public class Type
 	{
 		return typeQualifiers.contains("const");
 	}
+	public boolean isIncomplete() {return false;} // To be overriden
 	public boolean isQualified()
 	{
 		return typeQualifiers.size() != 0;

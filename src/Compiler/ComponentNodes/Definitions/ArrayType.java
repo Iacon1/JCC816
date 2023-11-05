@@ -2,10 +2,12 @@
 // Array
 package Compiler.ComponentNodes.Definitions;
 
+import Compiler.Utils.CompUtils;
+
 public class ArrayType extends Type
 {
 	private Type type;
-	private int length;
+	private int length; // -1 marks incomplete
 	
 	public ArrayType(Type type, int length)
 	{
@@ -13,9 +15,16 @@ public class ArrayType extends Type
 		this.length = length;
 	}
 	
+	public ArrayType(Type type)
+	{
+		this.type = type;
+		this.length = -1;
+	}
+
 	@Override
 	public int getSize()
 	{
+		if (length == -1) return CompUtils.pointerSize;
 		return type.getSize() * length;
 	}
 	
@@ -25,11 +34,15 @@ public class ArrayType extends Type
 	}
 	
 	@Override
+	public boolean isIncomplete() {return length == -1;}
+	
+	@Override
 	public boolean isArray() {return true;}
 	
 	@Override
 	public String getSignature()
 	{
-		return type.getSignature() + "[" + length + "]";
+		if (length != -1) return type.getSignature() + "[" + length + "]";
+		else return type.getSignature() + "[]";
 	}
 }
