@@ -10,7 +10,7 @@ import Compiler.Utils.CompConfig;
 
 public class PointerType extends Type
 {
-	private Type type;
+	protected Type type;
 	private Set<String> pointerQualifiers;
 	
 	public PointerType(Type type, Set<String> pointerQualifiers)
