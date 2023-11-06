@@ -5,7 +5,7 @@ package Compiler.ComponentNodes.LValues;
 import Compiler.ComponentNodes.ComponentNode;
 import Compiler.ComponentNodes.Definitions.Type;
 import Compiler.ComponentNodes.Interfaces.TypedNode;
-import Compiler.Utils.OperandSource;
+import Compiler.Utils.OperandSources.OperandSource;
 
 public abstract class LValueNode<C extends LValueNode<C>> extends ComponentNode<C> implements TypedNode
 {

@@ -10,8 +10,9 @@ import Compiler.ComponentNodes.ComponentNode;
 import Compiler.ComponentNodes.FunctionDefinitionNode;
 import Compiler.ComponentNodes.Definitions.Type;
 import Compiler.Utils.AssemblyUtils;
-import Compiler.Utils.OperandSource;
 import Compiler.Utils.ScratchManager;
+import Compiler.Utils.OperandSources.ConstantSource;
+import Compiler.Utils.OperandSources.OperandSource;
 import Compiler.Utils.ScratchManager.ScratchSource;
 
 public abstract class BinaryExpressionNode<
@@ -82,23 +83,29 @@ public abstract class BinaryExpressionNode<
 		{
 			scratchY = scratchManager.reserveScratchBlock(y.getType().getSize());
 			assembly += y.getAssembly(leadingWhitespace, scratchY, scratchManager);
-			sourceY = scratchY;
+			if (y.hasLValue())
+				sourceY = y.getLValue().getSource();
+			else sourceY = scratchY;
 		}
 		else if (y.hasPropValue())
-			sourceY = AssemblyUtils.constantSource(y.getPropValue(), y.getType().getSize());
-		else
+			sourceY = new ConstantSource(y.getPropValue(), y.getType().getSize());
+		else if (y.hasLValue())
 			sourceY = y.getLValue().getSource();
+		else sourceY = null;
 		// Now we figure out X
 		if (x.hasAssembly())
 		{
 			scratchX = scratchManager.reserveScratchBlock(y.getType().getSize());
 			assembly += x.getAssembly(leadingWhitespace, scratchX, scratchManager);
-			sourceX = scratchX;
+			if (x.hasLValue())
+				sourceX = x.getLValue().getSource();
+			else sourceX = scratchX;
 		}
 		else if (x.hasPropValue())
-			sourceX = AssemblyUtils.constantSource(x.getPropValue(), x.getType().getSize());
-		else
+			sourceX = new ConstantSource(x.getPropValue(), x.getType().getSize());
+		else if (x.hasLValue())
 			sourceX = x.getLValue().getSource();
+		else sourceX = null;
 		
 		assembly += getAssembly(whitespace, destSource, scratchManager, sourceX, sourceY);
 		if (scratchX != null) scratchManager.releaseScratchBlock(scratchX);

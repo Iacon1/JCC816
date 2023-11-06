@@ -14,6 +14,8 @@ import Compiler.ComponentNodes.Definitions.Type;
 import Compiler.ComponentNodes.Interfaces.AssemblableNode;
 import Compiler.ComponentNodes.LValues.VariableNode;
 import Compiler.Utils.AssemblyUtils;
+import Compiler.Utils.OperandSources.ConstantSource;
+import Compiler.Utils.OperandSources.OperandSource;
 import Grammar.C99.C99Parser.Abstract_declaratorContext;
 import Grammar.C99.C99Parser.DeclarationContext;
 import Grammar.C99.C99Parser.DeclaratorContext;
@@ -98,7 +100,12 @@ public class DeclarationNode extends InterpretingNode<DeclarationNode, Declarati
 			if (expressions.get(i) != null)
 			{
 				if (!expressions.get(i).hasPropValue()) assembly += expressions.get(i).getAssembly(leadingWhitespace, variables.get(i).getSource());
-				else assembly += AssemblyUtils.byteCopier(AssemblyUtils.getWhitespace(leadingWhitespace), variables.get(i).getSize(), variables.get(i).getFullName(), expressions.get(i).getPropValue());
+				else
+				{	
+					OperandSource sourceN = new ConstantSource(expressions.get(i).getPropValue(), expressions.get(i).getSize());
+					assembly += AssemblyUtils.byteCopier(AssemblyUtils.getWhitespace(leadingWhitespace), variables.get(i).getSize(), variables.get(i).getSource(), sourceN);
+					
+				}
 			}
 				
 		return assembly;

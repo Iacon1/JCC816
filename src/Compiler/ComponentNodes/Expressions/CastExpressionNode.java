@@ -8,8 +8,9 @@ import Compiler.ComponentNodes.Declarations.TypeNameNode;
 import Compiler.ComponentNodes.Definitions.Type;
 import Compiler.ComponentNodes.LValues.LValueNode;
 import Compiler.Utils.AssemblyUtils;
-import Compiler.Utils.OperandSource;
 import Compiler.Utils.ScratchManager;
+import Compiler.Utils.OperandSources.ConstantSource;
+import Compiler.Utils.OperandSources.OperandSource;
 import Grammar.C99.C99Parser.Cast_expressionContext;
 
 public class CastExpressionNode extends BaseExpressionNode<Cast_expressionContext>
@@ -67,7 +68,7 @@ public class CastExpressionNode extends BaseExpressionNode<Cast_expressionContex
 		String whitespace = AssemblyUtils.getWhitespace(leadingWhitespace);
 		String assembly = "";
 		if (getType().getSize() > expr.getType().getSize()) // Need to make space
-			assembly += AssemblyUtils.byteCopier(whitespace, getType().getSize(), destSource, AssemblyUtils.constantSource(0, getType().getSize()));
+			assembly += AssemblyUtils.byteCopier(whitespace, getType().getSize(), destSource, new ConstantSource(0, getType().getSize()));
 		assembly += expr.getAssembly(leadingWhitespace, destSource, scratchManager);
 		
 		return assembly;

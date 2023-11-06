@@ -4,8 +4,8 @@ package Compiler.ComponentNodes.Expressions;
 
 import Compiler.ComponentNodes.ComponentNode;
 import Compiler.Utils.AssemblyUtils;
-import Compiler.Utils.OperandSource;
 import Compiler.Utils.ScratchManager;
+import Compiler.Utils.OperandSources.OperandSource;
 import Grammar.C99.C99Parser.Or_expressionContext;
 import Grammar.C99.C99Parser.Xor_expressionContext;
 

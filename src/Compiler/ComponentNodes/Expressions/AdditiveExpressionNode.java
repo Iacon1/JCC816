@@ -4,8 +4,9 @@ package Compiler.ComponentNodes.Expressions;
 
 import Compiler.ComponentNodes.ComponentNode;
 import Compiler.Utils.AssemblyUtils;
-import Compiler.Utils.OperandSource;
 import Compiler.Utils.ScratchManager;
+import Compiler.Utils.OperandSources.ConstantSource;
+import Compiler.Utils.OperandSources.OperandSource;
 import Grammar.C99.C99Parser.Additive_expressionContext;
 import Grammar.C99.C99Parser.Multiplicative_expressionContext;
 
@@ -52,7 +53,7 @@ public class AdditiveExpressionNode extends BinaryExpressionNode
 	}
 	public static String getIncrementer(String whitespace, OperandSource destSource, OperandSource sourceX)
 	{
-		OperandSource sourceY = AssemblyUtils.numericSource(1, sourceX.getSize());
+		OperandSource sourceY = new ConstantSource(1, sourceX.getSize());
 		return getAdder(whitespace, destSource, sourceX, sourceY);
 	}
 	public static String getSubtractor(String whitespace, OperandSource destSource, OperandSource sourceX, OperandSource sourceY)
@@ -68,7 +69,7 @@ public class AdditiveExpressionNode extends BinaryExpressionNode
 	}
 	public static String getDecrementer(String whitespace, OperandSource destSource, OperandSource sourceX)
 	{
-		OperandSource sourceY = AssemblyUtils.numericSource(1, sourceX.getSize());
+		OperandSource sourceY = new ConstantSource(1, sourceX.getSize());
 		return getSubtractor(whitespace, destSource, sourceX, sourceY);
 	}
 	

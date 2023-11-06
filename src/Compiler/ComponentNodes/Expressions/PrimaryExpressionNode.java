@@ -7,8 +7,8 @@ import Compiler.ComponentNodes.FunctionDefinitionNode;
 import Compiler.ComponentNodes.Definitions.Type;
 import Compiler.ComponentNodes.LValues.LValueNode;
 import Compiler.Utils.CompUtils;
-import Compiler.Utils.OperandSource;
 import Compiler.Utils.ScratchManager;
+import Compiler.Utils.OperandSources.OperandSource;
 import Grammar.C99.C99Parser.Primary_expressionContext;
 
 public class PrimaryExpressionNode extends BaseExpressionNode<Primary_expressionContext>

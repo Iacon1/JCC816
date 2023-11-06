@@ -6,8 +6,8 @@ import java.util.function.Function;
 
 import Compiler.ComponentNodes.ComponentNode;
 import Compiler.ComponentNodes.FunctionDefinitionNode;
-import Compiler.Utils.OperandSource;
 import Compiler.Utils.ScratchManager;
+import Compiler.Utils.OperandSources.OperandSource;
 import Grammar.C99.C99Parser.Conditional_expressionContext;
 import Grammar.C99.C99Parser.Lor_expressionContext;
 

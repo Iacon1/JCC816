@@ -17,9 +17,8 @@ import Compiler.Exceptions.ConstraintException;
 import Compiler.Utils.AssemblyUtils;
 import Compiler.Utils.CompConfig;
 import Compiler.Utils.CompUtils;
-import Compiler.Utils.OperandSource;
 import Compiler.Utils.ScratchManager;
-
+import Compiler.Utils.OperandSources.OperandSource;
 import Grammar.C99.C99Parser.Unary_expressionContext;
 
 public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionContext>

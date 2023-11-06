@@ -6,8 +6,8 @@ import Compiler.ComponentNodes.ComponentNode;
 import Compiler.ComponentNodes.FunctionDefinitionNode;
 import Compiler.ComponentNodes.Definitions.Type;
 import Compiler.Exceptions.ConstraintException;
-import Compiler.Utils.OperandSource;
 import Compiler.Utils.ScratchManager;
+import Compiler.Utils.OperandSources.OperandSource;
 import Grammar.C99.C99Parser.Constant_expressionContext;
 
 public class ConstantExpressionNode extends BaseExpressionNode<Constant_expressionContext>

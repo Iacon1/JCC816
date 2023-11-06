@@ -6,8 +6,9 @@ package Compiler.ComponentNodes.Expressions;
 import Compiler.ComponentNodes.ComponentNode;
 import Compiler.Exceptions.ConstraintException;
 import Compiler.Utils.AssemblyUtils;
-import Compiler.Utils.OperandSource;
 import Compiler.Utils.ScratchManager;
+import Compiler.Utils.OperandSources.ConstantSource;
+import Compiler.Utils.OperandSources.OperandSource;
 import Grammar.C99.C99Parser.Assignment_expressionContext;
 import Grammar.C99.C99Parser.Conditional_expressionContext;
 import Grammar.C99.C99Parser.Unary_expressionContext;
@@ -121,13 +122,18 @@ public class AssignmentExpressionNode extends BinaryExpressionNode
 			assembly += y.getAssembly(leadingWhitespace, destSource, scratchManager);
 			sourceY = destSource;
 		}
-		else if (y.hasPropValue())
-			sourceY = AssemblyUtils.constantSource(y.getPropValue(), y.getType().getSize());
-		else if (y.hasLValue())
-			sourceY = y.getLValue().getSource();
-		else sourceY = null;
+		else
+		{
+			if (y.hasPropValue())
+				sourceY = new ConstantSource(y.getPropValue(), y.getType().getSize());
+			else if (y.hasLValue())
+				sourceY = y.getLValue().getSource();
+			else sourceY = null;
 		
-		if (!destSource.equals(x.getLValue().getSource()))
+			if (x.hasAssembly()) assembly += x.getAssembly(leadingWhitespace, scratchManager);
+		}
+		
+		if (!y.hasAssembly() || !destSource.equals(x.getLValue().getSource()))
 			assembly += AssemblyUtils.byteCopier(whitespace, x.getLValue().getSize(), x.getLValue().getSource(), sourceY);
 		
 		return assembly;

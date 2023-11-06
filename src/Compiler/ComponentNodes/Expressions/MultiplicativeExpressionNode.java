@@ -6,9 +6,10 @@ import Compiler.ComponentNodes.ComponentNode;
 import Compiler.Utils.AssemblyUtils;
 import Compiler.Utils.CompConfig;
 import Compiler.Utils.CompUtils;
-import Compiler.Utils.OperandSource;
 import Compiler.Utils.SNESRegisters;
 import Compiler.Utils.ScratchManager;
+import Compiler.Utils.OperandSources.ConstantSource;
+import Compiler.Utils.OperandSources.OperandSource;
 import Compiler.Utils.ScratchManager.ScratchSource;
 import Grammar.C99.C99Parser.Cast_expressionContext;
 import Grammar.C99.C99Parser.Multiplicative_expressionContext;
@@ -82,7 +83,7 @@ public class MultiplicativeExpressionNode extends BinaryExpressionNode
 		return assembly;
 	}
 	// Handles negative numbers for division, stores 0, 1, or 2 in Y-register
-	private static String divisionHeader(String whitespace, ScratchManager scratchManager, ScratchSource sourceX, ScratchSource sourceY) throws Exception
+	private static String divisionHeader(String whitespace, OperandSource sourceX, OperandSource sourceY) throws Exception
 	{
 		String assembly = "";
 		
@@ -93,7 +94,7 @@ public class MultiplicativeExpressionNode extends BinaryExpressionNode
 		assembly += whitespace + "BPL\t:+\n";
 		// If it was negative we add one to the flag and then make it positive.
 		assembly += whitespace + "INY\n";
-		assembly += XOrExpressionNode.getExclOr(whitespace, sourceX, sourceX, AssemblyUtils.numericSource(-1, sourceX.getSize()));
+		assembly += XOrExpressionNode.getExclOr(whitespace, sourceX, sourceX, new ConstantSource(-1, sourceX.getSize()));
 		
 		// Then for Y
 		assembly += whitespace + CompUtils.setA8 + "\n";
@@ -102,7 +103,7 @@ public class MultiplicativeExpressionNode extends BinaryExpressionNode
 		// If it was negative we subtract one from the previous flag (making it not zero if it was zero and making it zero if it wasn't)
 		// and then make it positive.
 		assembly += whitespace + "DEY\n";
-		assembly += XOrExpressionNode.getExclOr(whitespace, sourceY, sourceY, AssemblyUtils.numericSource(-1, sourceY.getSize()));
+		assembly += XOrExpressionNode.getExclOr(whitespace, sourceY, sourceY, new ConstantSource(-1, sourceY.getSize()));
 		assembly += ":\n";
 		
 		return assembly;
@@ -114,16 +115,16 @@ public class MultiplicativeExpressionNode extends BinaryExpressionNode
 		assembly += whitespace + "TYA\n";
 		assembly += whitespace + "BEQ\t:+\n";
 		// If it was positive then only one of the operands was negative so the result is negative too.
-		assembly += XOrExpressionNode.getExclOr(whitespace, destSource, source, AssemblyUtils.numericSource(-0, source.getSize()));
+		assembly += XOrExpressionNode.getExclOr(whitespace, destSource, source, new ConstantSource(-0, source.getSize()));
 		assembly += ":\n";
 		
 		return assembly;
 	}
 	
 	// Uses hardware div registers, but only for 8-bit divisor
-	public static String getShortDivider(String whitespace, OperandSource destSource, ScratchManager scratchManager, ScratchSource sourceX, ScratchSource sourceY) throws Exception
+	public static String getShortDivider(String whitespace, OperandSource destSource, OperandSource sourceX, OperandSource sourceY) throws Exception
 	{
-		String assembly = divisionHeader(whitespace, scratchManager, sourceX, sourceY);
+		String assembly = divisionHeader(whitespace, sourceX, sourceY);
 		
 		assembly += AssemblyUtils.bytewiseOperation(whitespace, sourceX.getSize(), (Integer i, Boolean is16Bit) ->
 		{
@@ -201,24 +202,23 @@ public class MultiplicativeExpressionNode extends BinaryExpressionNode
 	}
 	// Does not use hardware div registers
 	// https://godbolt.org/z/Y8aM3o8eY
-	public static String getLongDivider(String whitespace, OperandSource destSource, ScratchManager scratchManager, ScratchSource sourceX, ScratchSource sourceY) throws Exception
+	public static String getLongDivider(String whitespace, OperandSource destSource, ScratchManager scratchManager, OperandSource sourceX, OperandSource sourceY) throws Exception
 	{
 		ScratchSource sourceI = scratchManager.reserveScratchBlock(sourceX.getSize());
 		ScratchSource sourceT = scratchManager.reserveScratchBlock(2);
 		
-		String assembly = divisionHeader(whitespace, scratchManager, sourceX, sourceY);
+		String assembly = divisionHeader(whitespace, sourceX, sourceY);
 
-		scratchManager.releaseScratchBlock(sourceY);
 		ScratchSource sourceB = scratchManager.reserveScratchBlock(sourceX.getSize() + sourceY.getSize());								//[x+y]sized B
-		OperandSource sourceN = AssemblyUtils.numericSource(0, sourceX.getSize());
-		assembly += AssemblyUtils.byteCopier(whitespace, sourceX.getSize(), sourceB.getAddress(), sourceN);								// B = ????...0000
-		assembly += AssemblyUtils.byteCopier(whitespace, sourceY.getSize(), sourceB.getAddress(sourceX.getSize()), sourceY); 			// B = Y << [sox]
+		OperandSource sourceN = new ConstantSource(0, sourceX.getSize());
+		assembly += AssemblyUtils.byteCopier(whitespace, sourceX.getSize(), sourceB, sourceN);			// B = ????...0000
+		assembly += AssemblyUtils.byteCopier(whitespace, sourceY.getSize(), sourceB, sourceY); 			// B = Y << [sox]
 		
-		sourceN = AssemblyUtils.numericSource(1, sourceB.getSize());
+		sourceN = new ConstantSource(1, sourceB.getSize());
 		assembly += ShiftExpressionNode.getShift(whitespace, sourceB, scratchManager, sourceB, ">>", sourceN);				// B = Y << [sox]-1
 		
-		sourceN = AssemblyUtils.numericSource(0x80 * (int) Math.pow(0x10, sourceX.getSize()), sourceI.getSize());						
-		assembly += AssemblyUtils.byteCopier(whitespace, sourceI.getSize(), sourceI.getAddress(), sourceN);								// I = 0x80...0
+		sourceN = new ConstantSource(0x80 * (int) Math.pow(0x10, sourceX.getSize()), sourceI.getSize());						
+		assembly += AssemblyUtils.byteCopier(whitespace, sourceI.getSize(), sourceI, sourceN);								// I = 0x80...0
 		
 		assembly += "@reiterate:\n";																									// Start of loop
 		
@@ -228,10 +228,10 @@ public class MultiplicativeExpressionNode extends BinaryExpressionNode
 		assembly += AdditiveExpressionNode.getSubtractor(whitespace, sourceX, sourceX, sourceB); 							// X = X - B
 		assembly += AdditiveExpressionNode.getAdder(whitespace, destSource, destSource, sourceI);											// Z += I
 		assembly += ":\n";
-		sourceN = AssemblyUtils.numericSource(1, sourceY.getSize());
+		sourceN = new ConstantSource(1, sourceY.getSize());
 		assembly += ShiftExpressionNode.getShift(whitespace, sourceB, scratchManager, sourceB, ">>", sourceN);				// B /= 2
 		assembly += ShiftExpressionNode.getShift(whitespace, sourceI, scratchManager, sourceI, ">>", sourceN);				// I /= 2
-		assembly += EqualityExpressionNode.getIsZero(whitespace, sourceT, scratchManager, sourceI);						// I = 0?
+		assembly += EqualityExpressionNode.getIsZero(whitespace, sourceT, scratchManager, sourceI);							// I = 0?
 		assembly += whitespace + "BEQ\t:+\n"; 																							// If so, end loop
 		assembly += whitespace + "JMP\t@reiterate\n";																					// Go back to start of loop
 		assembly += whitespace + ":\n";
@@ -242,32 +242,36 @@ public class MultiplicativeExpressionNode extends BinaryExpressionNode
 		return assembly;
 	}
 
+	public static String getMultCall(String whitespace, OperandSource destSource, ScratchManager scratchManager, OperandSource sourceX, OperandSource sourceY) throws Exception
+	{
+		String assembly = "";
+		if (sourceX.getSize() + sourceY.getSize() > multThreshold) // Set these to a different number to inline certain multipliers.
+		{	
+			assembly += AssemblyUtils.byteCopier(whitespace, sourceX.getSize(), CompConfig.multDivSource(true, sourceX.getSize()), sourceX);
+			assembly += AssemblyUtils.byteCopier(whitespace, sourceY.getSize(), CompConfig.multDivSource(true, sourceX.getSize()), sourceY);
+			assembly += whitespace + "JSL\t" + ComponentNode.registerMult(sourceX.getSize(), sourceY.getSize()) + "\n";
+			assembly += AssemblyUtils.byteCopier(whitespace, sourceX.getSize(), destSource, CompConfig.callResultSource(sourceX.getSize()));
+		}
+		else assembly += MultiplicativeExpressionNode.getMultiplier(whitespace, destSource, sourceX, sourceY);
+		return assembly;
+	}
+	public static String getDivCall(String whitespace, OperandSource destSource, ScratchManager scratchManager, OperandSource sourceX, OperandSource sourceY) throws Exception
+	{
+		String assembly = "";
+		assembly += AssemblyUtils.byteCopier(whitespace, sourceX.getSize(), CompConfig.multDivSource(true, sourceX.getSize()), sourceX);
+		assembly += AssemblyUtils.byteCopier(whitespace, sourceY.getSize(), CompConfig.multDivSource(true, sourceX.getSize()), sourceY);
+		assembly += whitespace + "JSL\t" + ComponentNode.registerDiv(sourceX.getSize(), sourceY.getSize()) + "\n";
+		assembly += AssemblyUtils.byteCopier(whitespace, sourceX.getSize(), destSource, CompConfig.callResultSource(sourceX.getSize()));
+		return assembly;
+	}
 	@Override
 	protected String getAssembly(String whitespace, OperandSource destSource, ScratchManager scratchManager, OperandSource sourceX, OperandSource sourceY) throws Exception
 	{
-		String assembly = "";
-		scratchManager = new ScratchManager(); // Since we're about to call a sub we need a blank scratch manager.
 		switch (operator)
 		{
-		case "*":
-			if (sourceX.getSize() + sourceY.getSize() > multThreshold) // Set these to a different number to inline certain multipliers.
-			{
-				
-				assembly += AssemblyUtils.byteCopier(whitespace, sourceX.getSize(), scratchManager.reserveScratchBlock(sourceX.getSize()).getAddress(), sourceX);
-				assembly += AssemblyUtils.byteCopier(whitespace, sourceY.getSize(), scratchManager.reserveScratchBlock(sourceY.getSize()).getAddress(), sourceY);
-				assembly += whitespace + "JSL\t" + ComponentNode.registerMult(sourceX.getSize(), sourceY.getSize());
-				assembly += AssemblyUtils.byteCopier(whitespace, sourceX.getSize(), destSource, CompConfig.callResultSource(sourceX.getSize()));
-			}
-			else assembly += MultiplicativeExpressionNode.getMultiplier(whitespace, destSource, sourceX, sourceY);
-			break;
-		case "/": // Never inline
-			assembly += AssemblyUtils.byteCopier(whitespace, sourceX.getSize(), scratchManager.reserveScratchBlock(sourceX.getSize()).getAddress(), sourceX);
-			assembly += AssemblyUtils.byteCopier(whitespace, sourceY.getSize(), scratchManager.reserveScratchBlock(sourceY.getSize()).getAddress(), sourceY);
-			assembly += whitespace + "JSL\t" + ComponentNode.registerDiv(sourceX.getSize(), sourceY.getSize()) + "\n";
-			assembly += AssemblyUtils.byteCopier(whitespace, sourceX.getSize(), destSource, CompConfig.callResultSource(sourceX.getSize()));
-			break;
+		case "*": return getMultCall(whitespace, destSource, scratchManager, sourceX, sourceY);
+		case "/": return getDivCall(whitespace, destSource, scratchManager, sourceX, sourceY);
+		default: return "";
 		}
-		
-		return assembly;
 	}
 }

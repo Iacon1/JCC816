@@ -18,6 +18,8 @@ import Compiler.Utils.CompConfig;
 import Compiler.Utils.CompUtils;
 import Compiler.Utils.SNESRegisters;
 import Compiler.Utils.ScratchManager;
+import Compiler.Utils.OperandSources.ConstantSource;
+import Compiler.Utils.OperandSources.OperandSource;
 import Compiler.Utils.ScratchManager.ScratchSource;
 import Grammar.C99.C99Parser.External_declarationContext;
 import Grammar.C99.C99Parser.ProgramContext;
@@ -32,26 +34,30 @@ public class ProgramNode extends InterpretingNode<ProgramNode, ProgramContext> i
 		Set<String> fullNames = new HashSet<String>();
 		for (VariableNode variable : variables)
 			fullNames.add(variable.getFullName());
+		for (VariableNode variable : variables)
+			fullNames.add(variable.getFullName());
 		
 		// Get longest variable name
-		int maxLength = Math.max(CompConfig.scratchBase.length(), CompConfig.callResult.length());
+		int maxLength = 0;
+		for (SimpleEntry<String, Integer> entry : CompConfig.reservedRAM())
+			maxLength = Math.max(entry.getKey().length(), maxLength);
 		for (String fullName: fullNames)
 			maxLength = Math.max(maxLength, fullName.length());
 		for (SNESRegisters register : SNESRegisters.values())
 			maxLength = Math.max(maxLength, register.toString().length());
 		
-		int basePosition = 0;
-		assembly += whitespace + AssemblyUtils.applyFiller(CompConfig.scratchBase, maxLength) + " := " +
-				CompUtils.mapOffset(basePosition, CompConfig.scratchSize) + "\n";
-		basePosition += CompConfig.scratchSize;
-		assembly += whitespace + AssemblyUtils.applyFiller(CompConfig.callResult, maxLength) + " := " +
-				CompUtils.mapOffset(basePosition, CompConfig.callResultSize) + "\n";
-		basePosition += CompConfig.callResultSize;
+		int offset = 0;
+		for (SimpleEntry<String, Integer> entry : CompConfig.reservedRAM())
+		{
+			assembly += whitespace + AssemblyUtils.applyFiller(entry.getKey(), maxLength) + " := $" +
+					String.format("%06x", offset + entry.getValue() - 1) + "\n";
+			offset += entry.getValue();
+		}
 		
 		// Declare variable locations
 		Map<String, Integer> positions = new HashMap<String, Integer>();
 		// Using dynamic programming to make sure two variables whose functions share the stack don't overlap in memory
-		for (String fullName: fullNames) positions.put(fullName, basePosition);
+		for (String fullName: fullNames) positions.put(fullName, 0);
 		for (String fullName: fullNames)
 		{
 			assembly += whitespace + AssemblyUtils.applyFiller(fullName, maxLength) + " := " + CompUtils.mapOffset(positions.get(fullName), resolveVariable(fullName).getSize()) + "\n";
@@ -62,7 +68,7 @@ public class ProgramNode extends InterpretingNode<ProgramNode, ProgramContext> i
 				FunctionDefinitionNode otherOwner = resolveVariable(otherFullName).getEnclosingFunction();
 				if ((owner == null && otherOwner == null) || owner.canCall(otherOwner) || otherOwner.isInterruptHandler())
 				{
-					int offset = positions.get(fullName) + resolveVariable(fullName).getSize();
+					offset = positions.get(fullName) + resolveVariable(fullName).getSize();
 					positions.put(otherFullName, Math.max(positions.get(otherFullName), offset));
 				}
 			}
@@ -70,7 +76,7 @@ public class ProgramNode extends InterpretingNode<ProgramNode, ProgramContext> i
 		}
 		
 		for (SNESRegisters register : SNESRegisters.values())
-			assembly += whitespace + AssemblyUtils.applyFiller(register.toString(), maxLength) + " := $" + String.format("%06x", register.address()) + "\n";
+			assembly += whitespace + AssemblyUtils.applyFiller(register.toString(), maxLength) + " = $" + String.format("%06x", register.address()) + "\n";
 		return assembly;
 	}
 	private String generateVectorTable(int leadingWhitespace)
@@ -149,9 +155,8 @@ public class ProgramNode extends InterpretingNode<ProgramNode, ProgramContext> i
 		for (SimpleEntry<Integer, Integer> mult : reqMultSubs)
 		{
 			assembly += whitespace + "__MULT_" + mult.getKey() + "_" + mult.getValue() + ":CLC\n";
-			ScratchManager scratchManager = new ScratchManager();
-			ScratchSource sourceX = scratchManager.reserveScratchBlock(mult.getKey());
-			ScratchSource sourceY = scratchManager.reserveScratchBlock(mult.getValue());
+			OperandSource sourceX = CompConfig.multDivSource(true, mult.getKey());
+			OperandSource sourceY = CompConfig.multDivSource(true, mult.getValue());
 
 			assembly += MultiplicativeExpressionNode.getMultiplier(
 					AssemblyUtils.getWhitespace(leadingWhitespace + CompConfig.indentSize),
@@ -165,18 +170,22 @@ public class ProgramNode extends InterpretingNode<ProgramNode, ProgramContext> i
 		for (SimpleEntry<Integer, Integer> div : reqDivSubs)
 		{	
 			assembly += whitespace + "__DIV_" + div.getKey() + "_" + div.getValue() + ":CLC\n";
-			ScratchManager scratchManager = new ScratchManager();
-			ScratchSource sourceX = scratchManager.reserveScratchBlock(div.getKey());
-			ScratchSource sourceY = scratchManager.reserveScratchBlock(div.getValue());
-			assembly += AssemblyUtils.byteCopier(whitespace, sourceX.getSize(), CompConfig.callResult, 0);
+			OperandSource sourceX = CompConfig.multDivSource(true, div.getKey());
+			OperandSource sourceY = CompConfig.multDivSource(true, div.getValue());
+			OperandSource sourceN = new ConstantSource(0, sourceX.getSize());
+			assembly += AssemblyUtils.byteCopier(whitespace, sourceX.getSize(), CompConfig.callResultSource(sourceX.getSize()), sourceN);
 			if (div.getValue() == 1) // Can use short divider
 				assembly += MultiplicativeExpressionNode.getShortDivider(
 					AssemblyUtils.getWhitespace(leadingWhitespace + CompConfig.indentSize),
-					CompConfig.callResultSource(sourceX.getSize()), scratchManager, sourceX, sourceY);
+					CompConfig.callResultSource(sourceX.getSize()), sourceX, sourceY);
 			else // Must use long divider
+			{
+				ScratchManager scratchManager = new ScratchManager();
+				scratchManager.reserveScratchBlock(CompConfig.scratchSize - 2 * div.getKey() - div.getValue() - 2); // Assume as little memory available as possible
 				assembly += MultiplicativeExpressionNode.getLongDivider(
 					AssemblyUtils.getWhitespace(leadingWhitespace + CompConfig.indentSize),
 					CompConfig.callResultSource(sourceX.getSize()), scratchManager, sourceX, sourceY);
+			}
 			assembly += whitespace + "RTL\n";
 		}
 		
