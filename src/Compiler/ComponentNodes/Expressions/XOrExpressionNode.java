@@ -4,8 +4,9 @@ package Compiler.ComponentNodes.Expressions;
 
 import Compiler.ComponentNodes.ComponentNode;
 import Compiler.Utils.AssemblyUtils;
-import Compiler.Utils.OperandSource;
 import Compiler.Utils.ScratchManager;
+import Compiler.Utils.OperandSources.ConstantSource;
+import Compiler.Utils.OperandSources.OperandSource;
 import Grammar.C99.C99Parser.And_expressionContext;
 import Grammar.C99.C99Parser.Land_expressionContext;
 import Grammar.C99.C99Parser.Lor_expressionContext;
@@ -45,7 +46,7 @@ public class XOrExpressionNode extends BinaryExpressionNode
 	}
 	public static String getComplementer(String whitespace, OperandSource destSource, OperandSource sourceX)
 	{
-		OperandSource sourceY = AssemblyUtils.constantSource(Long.valueOf("FF".repeat(sourceX.getSize())), sourceX.getSize()); // 0xFF...FF
+		OperandSource sourceY = new ConstantSource(Long.valueOf("FF".repeat(sourceX.getSize())), sourceX.getSize()); // 0xFF...FF
 		String assembly = AssemblyUtils.bytewiseOperation(whitespace, sourceX.getSize(), (Integer i, Boolean is16Bit) ->
 		{
 			return new String[]

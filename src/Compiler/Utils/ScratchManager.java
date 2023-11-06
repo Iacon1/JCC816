@@ -5,6 +5,9 @@ package Compiler.Utils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
+
+import Compiler.Utils.OperandSources.OperandSource;
+
 import java.util.AbstractMap.SimpleEntry;
 
 public class ScratchManager
@@ -22,14 +25,16 @@ public class ScratchManager
 		private int offset;
 		public ScratchSource(int offset, int size)
 		{
-			super((Integer i, Boolean is16Bit) ->
-			{
-				if (i >= size) return (is16Bit? "#$0000" : "#$00");
-				else return CompConfig.scratchBase + " + " + (offset + i);
-			}, size, false);
+			super(size, false);
 			this.offset = offset;
 		}
 		
+		@Override
+		public String apply(Integer i, Boolean is16Bit)
+		{
+			if (i >= size) return (is16Bit? "#$0000" : "#$00");
+			else return CompConfig.scratchBase + " + " + (offset + i);
+		}
 		public int getOffset() {return offset;}
 		public String getAddress(int mod) {return apply(mod, true);}
 		public String getAddress() {return apply(0, true);}
@@ -49,9 +54,9 @@ public class ScratchManager
 			}
 			else // Found a block that's too big, must be split
 			{
-				blockList.set(i, new SimpleEntry<Boolean, Integer>(false, blockList.get(i).getValue() - size));
-				offset += blockList.get(i).getValue();
-				blockList.add(i + 1, new SimpleEntry<Boolean, Integer>(true, size));
+				int oldSize = blockList.get(i).getValue();
+				blockList.set(i, new SimpleEntry<Boolean, Integer>(true, size));
+				blockList.add(i + 1, new SimpleEntry<Boolean, Integer>(false, oldSize));
 				return new ScratchSource(offset, size);
 			}
 		}

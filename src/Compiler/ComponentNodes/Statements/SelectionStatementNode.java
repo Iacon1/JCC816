@@ -13,6 +13,7 @@ import Compiler.ComponentNodes.Expressions.ExpressionNode;
 import Compiler.Utils.AssemblyUtils;
 import Compiler.Utils.CompConfig;
 import Compiler.Utils.CompUtils;
+import Compiler.Utils.OperandSources.ConstantSource;
 import Compiler.ComponentNodes.FunctionDefinitionNode;
 import Grammar.C99.C99Parser.Selection_statementContext;
 
@@ -98,9 +99,9 @@ public class SelectionStatementNode extends StatementNode<Selection_statementCon
 				if (expression.hasAssembly())
 					assembly += expression.getAssembly(leadingWhitespace);
 				else if (expression.hasPropValue())
-					assembly += AssemblyUtils.byteCopier(whitespace, expression.getType().getSize(), CompConfig.callResult, expression.getPropValue());
+					assembly += AssemblyUtils.byteCopier(whitespace, expression.getSize(), CompConfig.callResultSource(expression.getSize()), new ConstantSource(expression.getPropValue(), expression.getSize()));
 				else
-					assembly += AssemblyUtils.byteCopier(whitespace, expression.getType().getSize(), CompConfig.callResult, expression.getLValue().getSource());
+					assembly += AssemblyUtils.byteCopier(whitespace, expression.getSize(), CompConfig.callResultSource(expression.getSize()), expression.getLValue().getSource());
 				// Make sure variable loaded.
 				assembly += whitespace + "BEQ\t" + skipName + "\n";
 				assembly += ifStm.getAssembly(leadingWhitespace + CompConfig.indentSize);

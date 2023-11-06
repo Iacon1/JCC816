@@ -8,8 +8,8 @@ import java.util.List;
 import Compiler.ComponentNodes.ComponentNode;
 import Compiler.Utils.AssemblyUtils;
 import Compiler.Utils.CompUtils;
-import Compiler.Utils.OperandSource;
 import Compiler.Utils.ScratchManager;
+import Compiler.Utils.OperandSources.OperandSource;
 import Grammar.C99.C99Parser.Equality_expressionContext;
 import Grammar.C99.C99Parser.Relational_expressionContext;
 

@@ -5,8 +5,8 @@ package Compiler.ComponentNodes.Expressions;
 import Compiler.ComponentNodes.ComponentNode;
 import Compiler.Utils.AssemblyUtils;
 import Compiler.Utils.CompUtils;
-import Compiler.Utils.OperandSource;
 import Compiler.Utils.ScratchManager;
+import Compiler.Utils.OperandSources.OperandSource;
 import Compiler.Utils.ScratchManager.ScratchSource;
 import Grammar.C99.C99Parser.Additive_expressionContext;
 import Grammar.C99.C99Parser.Or_expressionContext;
@@ -50,7 +50,7 @@ public class ShiftExpressionNode extends BinaryExpressionNode
 		if (!(sourceY.isLiteral() && sourceY.getSize() == 1 && sourceY.apply(0, true).equals("#$0001")))
 		{
 			sourceI = scratchManager.reserveScratchBlock(sourceY.getSize());
-			assembly += AssemblyUtils.byteCopier(whitespace, sourceY.getSize(), sourceI.getAddress(), sourceY);
+			assembly += AssemblyUtils.byteCopier(whitespace, sourceY.getSize(), sourceI, sourceY);
 			assembly += ":\n"; // A loop
 		}
 		

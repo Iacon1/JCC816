@@ -6,7 +6,8 @@ import Compiler.ComponentNodes.ComponentNode;
 import Compiler.ComponentNodes.Definitions.Type;
 import Compiler.ComponentNodes.Interfaces.NamedNode;
 import Compiler.Utils.AssemblyUtils;
-import Compiler.Utils.OperandSource;
+import Compiler.Utils.OperandSources.AddressSource;
+import Compiler.Utils.OperandSources.OperandSource;
 
 public class VariableNode extends LValueNode<VariableNode> implements NamedNode
 {
@@ -32,6 +33,6 @@ public class VariableNode extends LValueNode<VariableNode> implements NamedNode
 	@Override
 	public OperandSource getSource()
 	{
-		return AssemblyUtils.addressSource(this.getFullName(), this.getSize());
+		return new AddressSource(this.getFullName(), this.getSize());
 	}
 }

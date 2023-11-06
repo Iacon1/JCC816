@@ -8,6 +8,7 @@ import Compiler.ComponentNodes.Expressions.BaseExpressionNode;
 import Compiler.ComponentNodes.Expressions.ExpressionNode;
 import Compiler.ComponentNodes.Interfaces.AssemblableNode;
 import Compiler.Utils.AssemblyUtils;
+import Compiler.Utils.OperandSources.ConstantSource;
 import Compiler.Utils.CompConfig;
 import Compiler.Utils.CompUtils;
 import Grammar.C99.C99Parser.Jump_statementContext;
@@ -88,7 +89,7 @@ public class JumpStatementNode extends StatementNode<Jump_statementContext> impl
 			break;
 		case returnM:
 			if (expr != null && expr.hasAssembly()) assembly += expr.getAssembly(leadingWhitespace, CompConfig.callResultSource(expr.getLValue().getSize()));
-			else if (expr != null && expr.hasPropValue()) assembly += AssemblyUtils.byteCopier(whitespace, funcNode.getType().getSize(), CompConfig.callResult, expr.getPropValue());
+			else if (expr != null && expr.hasPropValue()) assembly += AssemblyUtils.byteCopier(whitespace, funcNode.getSize(), CompConfig.callResultSource(funcNode.getSize()), new ConstantSource(expr.getPropLong(), funcNode.getSize()));
 			else if (expr != null) assembly += AssemblyUtils.byteCopier(whitespace, funcNode.getType().getSize(), CompConfig.callResultSource(expr.getLValue().getSize()), expr.getLValue().getSource());
 			assembly += whitespace + "JML\t" + funcNode.getEndLabel() + "\n";
 			break;
