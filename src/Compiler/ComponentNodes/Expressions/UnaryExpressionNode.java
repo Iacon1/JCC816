@@ -9,8 +9,8 @@ import Compiler.ComponentNodes.FunctionDefinitionNode;
 import Compiler.ComponentNodes.Declarations.TypeNameNode;
 import Compiler.ComponentNodes.Definitions.Type;
 import Compiler.ComponentNodes.Dummies.DummyType;
-import Compiler.ComponentNodes.LValues.ImmediateLValNode;
-import Compiler.ComponentNodes.LValues.IndirectLValNode;
+import Compiler.ComponentNodes.LValues.ImmediateLValueNode;
+import Compiler.ComponentNodes.LValues.IndirectLValueNode;
 import Compiler.ComponentNodes.LValues.LValueNode;
 import Compiler.ComponentNodes.Definitions.PointerType;
 import Compiler.Exceptions.ConstraintException;
@@ -68,13 +68,13 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 		{
 			if (UnaryExpressionNode.class.isAssignableFrom(expr.getClass()) && ((UnaryExpressionNode) expr).operator.equals("*"))
 				return ((UnaryExpressionNode) expr).expr.getLValue(); // These two cancel each other out
-			else return new IndirectLValNode(expr);
+			else return new IndirectLValueNode(this, expr.getLValue().getSource(), expr.getType());
 		}
 		else if (operator.equals("*"))
 		{
 			if (UnaryExpressionNode.class.isAssignableFrom(expr.getClass()) && ((UnaryExpressionNode) expr).operator.equals("&"))
 				return ((UnaryExpressionNode) expr).expr.getLValue(); // These two cancel each other out
-			else return new ImmediateLValNode(expr.getLValue());
+			else return new ImmediateLValueNode(expr.getLValue());
 		}
 		return expr.getLValue();
 	}
