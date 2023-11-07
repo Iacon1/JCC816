@@ -58,8 +58,10 @@ public class MultiplicativeExpressionNode extends BinaryExpressionNode
 				{
 					"LDA\t" + SNESRegisters.RDMPYH, 			// Load previous high byte as carryover
 					"TAX",										// Store in X
+					sourceX.prefaceAssembly(whitespace, ii, is16Bit),
 					"LDA\t" + sourceX.apply(ii, is16Bit),		// Load X-the-variable
 					"STA\t" + SNESRegisters.WRMPYA,				// Place in reg
+					sourceY.prefaceAssembly(whitespace, ii + j, is16Bit),
 					"LDA\t" + sourceY.apply(ii + j, is16Bit),	// Load Y-the-variable
 					"STA\t" + SNESRegisters.WRMPYB, 			// Place in reg, begin 8-cycle calc
 					"TXA",										// 2 cycles - 2
@@ -69,8 +71,10 @@ public class MultiplicativeExpressionNode extends BinaryExpressionNode
 				};
 				else return new String[]
 				{
+					sourceX.prefaceAssembly(whitespace, ii, is16Bit),
 					"LDA\t" + sourceX.apply(ii, is16Bit),		// Load X-the-variable
 					"STA\t" + SNESRegisters.WRMPYA,				// Place in reg
+					sourceY.prefaceAssembly(whitespace, ii + j, is16Bit),
 					"LDA\t" + sourceY.apply(ii + j, is16Bit),	// Load Y-the-variable
 					"STA\t" + SNESRegisters.WRMPYB, 			// Place in reg, begin 8-cycle calc
 					"NOP",										// 2 cycles - 2

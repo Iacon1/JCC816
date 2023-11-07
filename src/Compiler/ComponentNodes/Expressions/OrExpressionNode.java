@@ -41,9 +41,12 @@ public class OrExpressionNode extends BinaryExpressionNode
 		{
 			return new String[]
 			{
+				sourceX.prefaceAssembly(whitespace, i, is16Bit),
 				"LDA\t" + sourceX.apply(i, is16Bit),
+				sourceY.prefaceAssembly(whitespace, i, is16Bit),
 				"ORA\t" + sourceY.apply(i, is16Bit),
-				"STA\t" + destSource + " + " + i,
+				destSource.prefaceAssembly(whitespace, i, is16Bit),
+				"STA\t" + destSource.apply(i, is16Bit),
 			};
 		});
 		return assembly;

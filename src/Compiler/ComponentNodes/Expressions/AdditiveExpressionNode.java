@@ -45,8 +45,11 @@ public class AdditiveExpressionNode extends BinaryExpressionNode
 		return whitespace + "CLC\n" + AssemblyUtils.bytewiseOperation(whitespace, sourceX.getSize(), (Integer i, Boolean is16Bit) -> 
 		{return new String[]
 			{
+				sourceX.prefaceAssembly(whitespace, i, is16Bit),
 				"LDA\t" + sourceX.apply(i, is16Bit),
+				sourceY.prefaceAssembly(whitespace, i, is16Bit),
 				"ADC\t" + sourceY.apply(i, is16Bit),
+				destSource.prefaceAssembly(whitespace, i, is16Bit),
 				"STA\t" + destSource.apply(i, is16Bit),
 			};
 		});
@@ -61,8 +64,11 @@ public class AdditiveExpressionNode extends BinaryExpressionNode
 		return whitespace + "SEC\n" + AssemblyUtils.bytewiseOperation(whitespace, sourceX.getSize(), (Integer i, Boolean is16Bit) -> 
 		{return new String[]
 			{
+				sourceX.prefaceAssembly(whitespace, i, is16Bit),
 				"LDA\t" + sourceX.apply(i, is16Bit),
+				sourceY.prefaceAssembly(whitespace, i, is16Bit),
 				"SBC\t" + sourceY.apply(i, is16Bit),
+				destSource.prefaceAssembly(whitespace, i, is16Bit),
 				"STA\t" + destSource.apply(i, is16Bit),
 			};
 		}, true, true);

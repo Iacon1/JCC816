@@ -65,8 +65,9 @@ public class EqualityExpressionNode extends BinaryExpressionNode
 		assembly += AssemblyUtils.bytewiseOperation(whitespace, sourceX.getSize(), (Integer i, Boolean is16Bit) -> 
 		{	
 			List<String> lines = new LinkedList<String>();
-			
+			lines.add(whitespace + sourceX.prefaceAssembly(whitespace, i, is16Bit));
 			lines.add("LDA\t" + sourceX.apply(i, is16Bit));	// Get X
+			lines.add(whitespace + sourceY.prefaceAssembly(whitespace, i, is16Bit));
 			lines.add("CMP\t" + sourceY.apply(i, is16Bit));	// Cmp X & Y?
 			lines.add("BNE\t:+");							// if [not op] then no
 			// else maybe
@@ -76,7 +77,8 @@ public class EqualityExpressionNode extends BinaryExpressionNode
 		else if (operator.equals("!=")) assembly += whitespace + "DEX\n";
 		assembly += ":" + whitespace.substring(1) + "TXA\n";
 		assembly += whitespace + CompUtils.setA8 + "\n";
-		assembly += whitespace + "STA\t" + destSource + "\n";
+		assembly += whitespace + destSource.prefaceAssembly(whitespace, 0, false);
+		assembly += whitespace + "STA\t" + destSource.apply(0, false) + "\n";
 		
 		return assembly;
 	}

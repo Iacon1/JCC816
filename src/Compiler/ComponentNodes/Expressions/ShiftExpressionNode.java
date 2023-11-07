@@ -61,8 +61,10 @@ public class ShiftExpressionNode extends BinaryExpressionNode
 			{
 				return new String[]
 				{
+					sourceX.prefaceAssembly(whitespace, i, is16Bit),
 					"LDA\t" + sourceX.apply(i, is16Bit),
 					(i >= sourceX.getSize() - 2) ? "ASL" : "ROL",
+					destSource.prefaceAssembly(whitespace, i, is16Bit),
 					"STA\t" + destSource.apply(i, is16Bit),
 				};
 			});
@@ -71,8 +73,10 @@ public class ShiftExpressionNode extends BinaryExpressionNode
 			assembly += AssemblyUtils.bytewiseOperation(whitespace, sourceX.getSize(), (Integer i, Boolean is16Bit) -> 
 			{return new String[]
 				{
+					sourceX.prefaceAssembly(whitespace, i, is16Bit),
 					"LDA\t" + sourceX.apply(i, is16Bit),
 					(i >= sourceX.getSize() - 2) ? "LSR" : "ROR",
+					destSource.prefaceAssembly(whitespace, i, is16Bit),
 					"STA\t" + destSource.apply(i, is16Bit),
 				};
 			}, true, true);

@@ -10,12 +10,8 @@ import Compiler.Utils.AssemblyUtils;
 import Compiler.Utils.CompUtils;
 import Compiler.Utils.ScratchManager;
 import Compiler.Utils.OperandSources.OperandSource;
-import Grammar.C99.C99Parser.Land_expressionContext;
-import Grammar.C99.C99Parser.Lor_expressionContext;
-import Grammar.C99.C99Parser.Or_expressionContext;
 import Grammar.C99.C99Parser.Relational_expressionContext;
 import Grammar.C99.C99Parser.Shift_expressionContext;
-import Grammar.C99.C99Parser.Xor_expressionContext;
 
 public class RelationalExpressionNode extends BinaryExpressionNode
 <Relational_expressionContext, Shift_expressionContext, Shift_expressionContext, Relational_expressionContext>
@@ -74,26 +70,34 @@ public class RelationalExpressionNode extends BinaryExpressionNode
 				// Start at MSB
 				if (sourceY.isLiteral())
 				{
+					lines.add(sourceY.prefaceAssembly(whitespace, i, is16Bit));
 					String oldY = sourceY.apply(i, is16Bit).substring(2);
 					int yVal = Integer.valueOf(oldY, 16);
 					String newY = "#$" + String.format("%0" + (is16Bit? 4 : 0) + "x", yVal ^ (is16Bit? 0x8000 : 0x80));
+					lines.add(sourceX.prefaceAssembly(whitespace, i, is16Bit));
 					lines.add("LDA\t" + sourceX.apply(i, is16Bit));					// Get X
 					lines.add("EOR\t" + toXOR);										// Flip sign
 					lines.add("CMP\t" + newY);										// Cmp X & Y?
 				}
 				else
 				{
+					lines.add(sourceY.prefaceAssembly(whitespace, i, is16Bit));
 					lines.add("LDA\t" + sourceY.apply(i, is16Bit));					// Get Y
 					lines.add("EOR\t" + toXOR);										// Flip sign
+					lines.add(destSource.prefaceAssembly(whitespace, i, is16Bit));
 					lines.add("STA\t" + destSource.apply(0, is16Bit));				// Place Y in destSource temporarily
+					lines.add(sourceX.prefaceAssembly(whitespace, i, is16Bit));
 					lines.add("LDA\t" + sourceX.apply(i, is16Bit));					// Get X
 					lines.add("EOR\t" + toXOR);										// Flip sign
+					lines.add(destSource.prefaceAssembly(whitespace, i, is16Bit));
 					lines.add("CMP\t" + destSource.apply(0, is16Bit));				// Cmp Y & X?
 				}
 			}
 			else
 			{
+				lines.add(sourceX.prefaceAssembly(whitespace, i, is16Bit));
 				lines.add("LDA\t" + sourceX.apply(i, is16Bit));						// Get X
+				lines.add(sourceY.prefaceAssembly(whitespace, i, is16Bit));
 				lines.add("CMP\t" + sourceY.apply(i, is16Bit));						// Cmp X & Y?
 			}
 			lines.add("BCC\t:+");													// If x < y then yes
@@ -121,6 +125,7 @@ public class RelationalExpressionNode extends BinaryExpressionNode
 		}
 		
 		assembly += whitespace + CompUtils.setA8 + "\n";
+		assembly += whitespace + destSource.prefaceAssembly(whitespace, 0, false);
 		assembly += whitespace + "STA\t" + destSource.apply(0, false) + "\n";
 		
 		return assembly;
