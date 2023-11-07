@@ -17,7 +17,7 @@ public class ConstantSource extends OperandSource
 			bytes = Arrays.copyOfRange(ByteBuffer.allocate(Long.BYTES).putLong(((Number) constant).longValue()).array(), Long.BYTES - size, Long.BYTES);
 			// little-endian WRT words
 			if (bytes.length >= 4)
-				for (int i = 0; i < Math.floor(bytes.length / 2); i += 2)
+				for (int i = 0; i < bytes.length - 1; i += 2)
 				{
 					byte x = bytes[i];
 					byte y = bytes[i + 1];
@@ -44,9 +44,10 @@ public class ConstantSource extends OperandSource
 	@Override
 	public String apply(Integer i, Boolean is16Bit)
 	{
+		if (bytes.length <= i) return "#$" + String.format(is16Bit ? "%04x" : "%02x", 0);
 		if (is16Bit)
 			if (bytes.length == 1) return "#$" + String.format("%02x%02x", 0, bytes[0]);
-			else return "#$" + String.format("%02x%02x", bytes[Math.min(bytes.length - 2, i)], bytes[Math.min(bytes.length - 1, i + 1)]);
-		else return "#$" + String.format("%02x", bytes[Math.min(bytes.length - 1, i)]);
+			else return "#$" + String.format("%02x%02x", bytes[i], bytes[i + 1]);
+		else return "#$" + String.format("%02x", bytes[i]);
 	}
 }
