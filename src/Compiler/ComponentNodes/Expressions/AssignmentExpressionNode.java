@@ -120,7 +120,8 @@ public class AssignmentExpressionNode extends BinaryExpressionNode
 		if (y.hasAssembly())
 		{
 			assembly += y.getAssembly(leadingWhitespace, destSource, scratchManager);
-			sourceY = destSource;
+			if (!y.hasLValue()) sourceY = destSource;
+			else sourceY = y.getLValue().getSource();
 		}
 		else
 		{
