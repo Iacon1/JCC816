@@ -44,14 +44,18 @@ public class LANDExpressionNode extends BinaryExpressionNode
 		{
 			return new String[]
 			{
+				sourceX.prefaceAssembly(whitespace, i, is16Bit),
 				"LDA\t" + sourceX.apply(i, is16Bit),
+				sourceY.prefaceAssembly(whitespace, i, is16Bit),
 				"BIT\t" + sourceY.apply(i, is16Bit),
 				"BNE\t:+",
 			};
 		});
 		assembly += whitespace + "DEX\n";
 		assembly += ":" + whitespace.substring(1) + "TXA\n";
-		assembly += whitespace + "STA\t" + destSource + " + 0\n";
+		assembly += whitespace + CompUtils.setA8 + "\n";
+		assembly += whitespace + destSource.prefaceAssembly(whitespace, 0, false);
+		assembly += whitespace + "STA\t" + destSource.apply(0, false);
 		return assembly;
 	}
 }
