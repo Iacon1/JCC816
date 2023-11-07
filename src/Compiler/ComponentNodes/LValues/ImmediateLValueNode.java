@@ -22,7 +22,7 @@ public class ImmediateLValueNode extends LValueNode<ImmediateLValueNode>
 		@Override
 		public String apply(Integer i, Boolean is16Bit)
 		{
-			return "#" + destination.getSource().apply(i, is16Bit);
+			return "#" + (is16Bit ? ".loWord(" : ".bankByte(") + destination.getSource().apply(i, is16Bit) + ")";
 		}
 	}
 	
@@ -30,6 +30,7 @@ public class ImmediateLValueNode extends LValueNode<ImmediateLValueNode>
 	public ImmediateLValueNode(LValueNode<?> destination)
 	{
 		super(destination, destination.getType());
+		this.destination = destination;
 	}
 	@Override
 	public Type getType()
