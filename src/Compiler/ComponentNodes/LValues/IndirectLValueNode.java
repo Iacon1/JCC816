@@ -18,30 +18,30 @@ public class IndirectLValueNode extends LValueNode<IndirectLValueNode>
 {
 	private class IndirectOperandSource extends OperandSource
 	{
-		private int lastI = 0;
-
+		private int lastI = -1;
+		private String lastWhitespace;
+		
 		public IndirectOperandSource()
 		{
 			super(addrSource.getSize(), addrSource.isLiteral());
+			lastWhitespace = "";
 		}
 
 		@Override
 		public String apply(Integer i, Boolean is16Bit)
 		{
-			return "[" + addrSource.apply(0, is16Bit) + "]";
+			return "[" + addrSource.apply(0, is16Bit) + "],y\n" + lastWhitespace + "PLY";
 		}
 	
 		@Override
 		public String prefaceAssembly(String whitespace, Integer i, Boolean is16Bit)
 		{
 			String assembly = "";
-			
+			lastWhitespace = whitespace;
 			if (i != lastI)
 			{
-				assembly += "PHA\n";
-				assembly += AdditiveExpressionNode.getAdder(whitespace, addrSource, addrSource, new ConstantSource(i - lastI, addrSource.getSize()));
-				assembly += whitespace + "PLA\n";
-				assembly += whitespace + (is16Bit? CompUtils.setA16 : CompUtils.setA8) + "\n";
+				assembly += "PHY\n";
+				assembly += whitespace + "LDY\t#" + String.format(is16Bit? "%04x" : "%02x", i) + "\n";
 				lastI = i;
 			}
 
