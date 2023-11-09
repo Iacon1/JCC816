@@ -18,6 +18,7 @@ import Compiler.Utils.AssemblyUtils;
 import Compiler.Utils.CompConfig;
 import Compiler.Utils.CompUtils;
 import Compiler.Utils.ScratchManager;
+import Compiler.Utils.ScratchManager.ScratchSource;
 import Compiler.Utils.OperandSources.OperandSource;
 import Grammar.C99.C99Parser.Unary_expressionContext;
 
@@ -26,6 +27,7 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 	private BaseExpressionNode<?> expr;
 	private Type type;
 	private String operator;
+	private LValueNode pointerRef; // LValue if this is a pointer reference (*x)
 	
 	public UnaryExpressionNode(ComponentNode<?> parent) {super(parent);}
 	
@@ -62,15 +64,17 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 	}
 	
 	@Override
+	public boolean hasLValue() {return operator.equals("&") || operator.equals("*");}
+	@Override
 	public LValueNode<?> getLValue()
 	{
-		if (operator.equals("&"))
+		if (operator.equals("*"))
 		{
 			if (UnaryExpressionNode.class.isAssignableFrom(expr.getClass()) && ((UnaryExpressionNode) expr).operator.equals("*"))
 				return ((UnaryExpressionNode) expr).expr.getLValue(); // These two cancel each other out
-			else return new IndirectLValueNode(this, expr.getLValue().getSource(), expr.getType());
+			else return pointerRef;
 		}
-		else if (operator.equals("*"))
+		else if (operator.equals("&"))
 		{
 			if (UnaryExpressionNode.class.isAssignableFrom(expr.getClass()) && ((UnaryExpressionNode) expr).operator.equals("&"))
 				return ((UnaryExpressionNode) expr).expr.getLValue(); // These two cancel each other out
@@ -103,11 +107,13 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 		else if (operator.equals("!")) return Boolean.valueOf(expr.getPropBool());
 		else return expr.getPropValue();
 	}
+	
 	@Override
 	public String getAssembly(int leadingWhitespace, OperandSource destSource, ScratchManager scratchManager) throws Exception
 	{
 		String whitespace = AssemblyUtils.getWhitespace(leadingWhitespace);
 		String assembly = "";
+		if (expr.hasAssembly()) assembly += expr.getAssembly();
 		OperandSource sourceX = expr.getLValue().getSource();
 		switch (operator)
 		{
@@ -129,6 +135,11 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 			break;
 		case "!":
 			assembly += EqualityExpressionNode.getIsZero(whitespace, destSource, scratchManager, sourceX);
+			break;
+		case "*":
+			ScratchSource sourceI = scratchManager.reserveScratchBlock(CompConfig.pointerSize); // Never released, lasts until manager goes stale
+			assembly += AssemblyUtils.byteCopier(whitespace, CompConfig.pointerSize, sourceI, sourceX);
+			pointerRef = new IndirectLValueNode(this, sourceI, ((PointerType) expr.getType()).getType());
 			break;
 		default: return "";
 		}
