@@ -12,8 +12,7 @@ import java.util.AbstractMap.SimpleEntry;
 
 import Compiler.ComponentNodes.Definitions.EnumDefinition;
 import Compiler.ComponentNodes.Definitions.Scope;
-import Compiler.ComponentNodes.Definitions.StructDefinition;
-import Compiler.ComponentNodes.Definitions.UnionDefinition;
+import Compiler.ComponentNodes.Definitions.StructUnionDefinitionNode;
 import Compiler.ComponentNodes.LValues.VariableNode;
 import Compiler.ComponentNodes.Statements.IterationStatementNode;
 import Compiler.ComponentNodes.Statements.SelectionStatementNode;
@@ -25,8 +24,7 @@ public class ComponentNode<T extends ComponentNode<T>>
 	
 	protected static List<VariableNode> variables;
 	protected static List<FunctionDefinitionNode> functions;
-	protected static List<StructDefinition> structs;
-	protected static List<UnionDefinition> unions;
+	protected static List<StructUnionDefinitionNode> structs;
 	protected static List<EnumDefinition> enums;
 	
 	protected static Set<SimpleEntry<Integer, Integer>> reqMultSubs;
@@ -36,16 +34,14 @@ public class ComponentNode<T extends ComponentNode<T>>
 	{
 		variables = new LinkedList<VariableNode>();
 		functions = new LinkedList<FunctionDefinitionNode>();
-		structs = new LinkedList<StructDefinition>();
-		unions = new LinkedList<UnionDefinition>();
+		structs = new LinkedList<StructUnionDefinitionNode>();
 		enums = new LinkedList<EnumDefinition>();
 		reqMultSubs = new HashSet<SimpleEntry<Integer, Integer>>();
 		reqDivSubs = new HashSet<SimpleEntry<Integer, Integer>>();
 	}
 	protected static void registerVariable(VariableNode variable) {variables.add(variable);}
 	protected static void registerFunction(FunctionDefinitionNode function) {functions.add(function);}
-	protected static void registerStruct(StructDefinition struct) {structs.add(struct);}
-	protected static void registerUnion(UnionDefinition union) {unions.add(union);}
+	protected static void registerStructUnion(StructUnionDefinitionNode struct) {structs.add(struct);}
 	protected static void registerEnum(EnumDefinition enum_) {enums.add(enum_);}
 	
 	public ComponentNode(ComponentNode<?> parent)
@@ -87,20 +83,9 @@ public class ComponentNode<T extends ComponentNode<T>>
 	 * @param name The full name to look for.
 	 * @return The variable node in question, if present.
 	 */
-	public static StructDefinition resolveStruct(String fullName)
+	public static StructUnionDefinitionNode resolveStructOrUnion(String fullName)
 	{
-		for (StructDefinition definition : structs)
-			if (definition.getFullName().equals(fullName))
-				return definition;
-		return null;
-	}
-	/** Gets a variable's node using its full name.
-	 * @param name The full name to look for.
-	 * @return The variable node in question, if present.
-	 */
-	public static UnionDefinition resolveUnion(String fullName)
-	{
-		for (UnionDefinition definition : unions)
+		for (StructUnionDefinitionNode definition : structs)
 			if (definition.getFullName().equals(fullName))
 				return definition;
 		return null;

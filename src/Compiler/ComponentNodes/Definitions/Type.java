@@ -117,9 +117,16 @@ public class Type
 		if (!isAllowed)
 			throw new ConstraintException("6.7.2", 2, start);
 		if (typeSpecifiers.contains("double") || typeSpecifiers.contains("float")) // Floats not supported
-			throw new UnsupportedFeatureException("Floating-point numbers", false, start);
-		if (typeSpecifiers.contains("_Complex")) // Complex numbers not supported
-			throw new UnsupportedFeatureException("Complex numbers", false, start);
+		{
+			Exception e = new UnsupportedFeatureException("Floating-point numbers", false, start);
+			if (typeSpecifiers.contains("_Complex")) // Complex numbers not supported
+			{
+				e.addSuppressed(new UnsupportedFeatureException("Complex numbers", false, start));
+				e.addSuppressed(new ConstraintException("6.7.2", 3, start));
+			}
+			throw e;
+		}
+		
 	}
 	public Type(Type other)
 	{
@@ -159,16 +166,26 @@ public class Type
 	public int getSize()
 	{
 		int baseSize;
-		if (isStruct()) baseSize = ComponentNode.resolveStruct(getStructUnionEnumType()).getSize();
-		else if (isUnion()) baseSize = ComponentNode.resolveUnion(getStructUnionEnumType()).getSize();
+		if (isStructOrUnion()) baseSize = ComponentNode.resolveStructOrUnion(getSUEName()).getSize();
 		else if (isEnum()) baseSize = CompConfig.sizeOf("int");
 		else baseSize = CompConfig.sizeOf(typeSpecifiers);
 		return baseSize;
 	}
 	
-	private String getStructUnionEnumType()
+	public int getSizeBits()
 	{
-		return typeSpecifiers.get(1);
+		return getSize() * 8;
+	}
+	
+	/** Gets the name of the type's parent struct / union / enum, if any.
+	 * 
+	 * @return The name of the type's parent struct / union / enum, or null if it doesn't have one.
+	 */
+	public String getSUEName()
+	{
+		if (isStructOrUnion() || isEnum())
+			return typeSpecifiers.get(1);
+		else return null;
 	}
 	
 	public boolean canCastTo(Type type) // Defined by 6.5.16.1
@@ -179,8 +196,7 @@ public class Type
 	{
 		return
 				isArithmetic() && type.isArithmetic() ||
-				isStruct() && type.isStruct() || // TODO
-				isUnion() && type.isUnion() || // TODO
+				isStructOrUnion() && type.isStructOrUnion() || // TODO
 				isPointer() && type.isPointer() && ((PointerType) this).getType().canCastTo(((PointerType) type).getType()) ||
 				isPointer() && type.isPointer() && ((PointerType) this).getType().canCastTo("void") ||
 				isPointer() && type.isPointer() && ((PointerType) type).getType().canCastTo("void") ||
@@ -195,6 +211,11 @@ public class Type
 	{
 		return canCastFrom(new DummyType(specifiers));
 	}
+
+	public boolean containsSpecifier(String specifier)
+	{
+		return typeSpecifiers.contains(specifier);
+	}
 	
 	public boolean isConstant()
 	{
@@ -205,15 +226,10 @@ public class Type
 	{
 		return typeQualifiers.size() != 0;
 	}
-	
 	public boolean isArray() {return false;} // To be overriden
-	private boolean isStruct()
+	private boolean isStructOrUnion()
 	{
-		return typeSpecifiers.get(0).equals("struct");
-	}
-	private boolean isUnion()
-	{
-		return typeSpecifiers.get(0).equals("union");
+		return typeSpecifiers.get(0).equals("struct") || typeSpecifiers.get(0).equals("union");
 	}
 	private boolean isEnum()
 	{
@@ -235,7 +251,7 @@ public class Type
 	}
 	public boolean isAggregate()
 	{
-		return isArray() || isStruct() || isUnion();
+		return isArray() || isStructOrUnion();
 	}
 	
 	public boolean allowsOperator(String operator, Type other)

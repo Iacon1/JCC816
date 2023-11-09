@@ -12,6 +12,7 @@ import org.antlr.v4.runtime.tree.ParseTree;
 
 import Compiler.ComponentNodes.ComponentNode;
 import Compiler.ComponentNodes.InterpretingNode;
+import Compiler.ComponentNodes.Definitions.StructUnionDefinitionNode;
 import Compiler.Exceptions.ConstraintException;
 import Grammar.C99.C99Parser.Declaration_specifiersContext;
 import Grammar.C99.C99Parser.Function_specifierContext;
@@ -73,6 +74,14 @@ public class DeclarationSpecifiersNode extends InterpretingNode<DeclarationSpeci
 				storageClassSpecifiers.add(((Storage_class_specifierContext) r).getText());
 			else if (r.getClass().equals(Type_specifierContext.class))
 			{
+				Type_specifierContext typeSpecifier = (Type_specifierContext) r;
+				if (typeSpecifier.struct_or_union_specifier() != null)
+				{
+					StructUnionDefinitionNode definition = new StructUnionDefinitionNode(this).interpret(typeSpecifier.struct_or_union_specifier());
+					if (definition.isUnion()) typeSpecifiers.add("union");
+					else typeSpecifiers.add("struct");
+					typeSpecifiers.add(definition.getName());
+				}
 				typeSpecifiers.add(((Type_specifierContext) r).getText());
 			}
 			else if (r.getClass().equals(Type_qualifierContext.class))
