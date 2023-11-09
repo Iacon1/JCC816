@@ -13,6 +13,7 @@ import Compiler.ComponentNodes.InterpretingNode;
 import Compiler.ComponentNodes.Definitions.Type;
 import Compiler.ComponentNodes.Interfaces.AssemblableNode;
 import Compiler.ComponentNodes.LValues.VariableNode;
+import Compiler.Exceptions.ConstraintException;
 import Compiler.Utils.AssemblyUtils;
 import Compiler.Utils.OperandSources.ConstantSource;
 import Compiler.Utils.OperandSources.OperandSource;
@@ -22,6 +23,8 @@ import Grammar.C99.C99Parser.DeclaratorContext;
 import Grammar.C99.C99Parser.Assignment_expressionContext;
 import Grammar.C99.C99Parser.Init_declaratorContext;
 import Grammar.C99.C99Parser.Parameter_declarationContext;
+import Grammar.C99.C99Parser.Struct_declarationContext;
+import Grammar.C99.C99Parser.Struct_declaratorContext;
 
 public class DeclarationNode extends InterpretingNode<DeclarationNode, DeclarationContext> implements AssemblableNode
 {
@@ -54,7 +57,7 @@ public class DeclarationNode extends InterpretingNode<DeclarationNode, Declarati
 				registerVariable(variable);
 				variables.add(variable);
 			}
-		
+		else throw new ConstraintException("6.7", 2, node.start);
 		return this;
 	}
 	public DeclarationNode interpret(Parameter_declarationContext node) throws Exception
