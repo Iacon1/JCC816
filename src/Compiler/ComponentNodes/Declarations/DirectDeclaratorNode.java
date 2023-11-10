@@ -171,7 +171,7 @@ public class DirectDeclaratorNode extends InterpretingNode<DirectDeclaratorNode,
 			infoList = subDec.getInfo();
 		else
 			infoList = new ArrayList<DirDeclaratorInfo>();
-		infoList.add(info);
+		if (info != null) infoList.add(info);
 		return infoList;
 	}
 
