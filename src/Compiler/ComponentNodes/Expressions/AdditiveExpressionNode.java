@@ -31,13 +31,36 @@ public class AdditiveExpressionNode extends BinaryExpressionNode
 	@Override
 	public Object getPropValue()
 	{
-		Long a = x.getPropLong();
-		Long b = y.getPropLong();
-		switch (operator)
+		if (x.getPropPointer() != null)
 		{
-		case "+": return Long.valueOf(a + b);
-		case "-": return Long.valueOf(a - b);
-		default: return null;
+			Long b = y.getPropLong();
+			switch (operator)
+			{
+			case "+": return x.getPropPointer().addOffset(b.intValue());
+			case "-": return x.getPropPointer().addOffset(-b.intValue());
+			default: return null;
+			}
+		}
+		else if (y.getPropPointer() != null)
+		{
+			Long a = x.getPropLong();
+			switch (operator)
+			{
+			case "+": return x.getPropPointer().addOffset(a.intValue());
+			case "-": return x.getPropPointer().addOffset(-a.intValue());
+			default: return null;
+			}
+		}
+		else
+		{
+			Long a = x.getPropLong();
+			Long b = y.getPropLong();
+			switch (operator)
+			{
+			case "+": return Long.valueOf(a + b);
+			case "-": return Long.valueOf(a - b);
+			default: return null;
+			}
 		}
 	}
 	public static String getAdder(String whitespace, OperandSource destSource, OperandSource sourceX, OperandSource sourceY)

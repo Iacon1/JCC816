@@ -12,6 +12,7 @@ import Compiler.ComponentNodes.Interfaces.AssemblableNode;
 import Compiler.ComponentNodes.Interfaces.TypedNode;
 import Compiler.ComponentNodes.LValues.LValueNode;
 import Compiler.Utils.CompConfig;
+import Compiler.Utils.PropPointer;
 import Compiler.Utils.ScratchManager;
 import Compiler.Utils.OperandSources.OperandSource;
 
@@ -26,8 +27,21 @@ public abstract class BaseExpressionNode<C extends ParserRuleContext> extends In
 	public abstract boolean hasPropValue();
 	@Override
 	public abstract Object getPropValue();
-	public long getPropLong() {return ((Number) getPropValue()).longValue();}
-	public boolean getPropBool() {return ((Boolean) getPropValue());}
+	public long getPropLong()
+	{
+		try {return ((Number) getPropValue()).longValue();}
+		catch (Exception e) {return 0;}
+	}
+	public boolean getPropBool()
+	{
+		try {return (Boolean) getPropValue();}
+		catch (Exception e) {return false;}
+	}
+	public PropPointer getPropPointer()
+	{
+		try {return (PropPointer) getPropValue();}
+		catch (Exception e) {return null;}
+	}
 	public abstract String getAssembly(int leadingWhitespace, OperandSource destSource, ScratchManager scratchManager) throws Exception;
 	public String getAssembly(int leadingWhitespace, OperandSource destSource) throws Exception
 	{
