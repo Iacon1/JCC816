@@ -4,6 +4,7 @@
 
 package Compiler.ComponentNodes;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -101,6 +102,57 @@ public class ComponentNode<T extends ComponentNode<T>>
 			if (definition.getFullName().equals(fullName))
 				return definition;
 		return null;
+	}
+	/** Gets a variable's node using a partial name.
+	 * @param name The partial name to look for.
+	 * @return The variable node in question, if present.
+	 */
+	public VariableNode resolveVariableRelative(String name)
+	{
+		for (VariableNode variable : variables)
+			if (variable.getFullName().equals(getScope().getPrefix() + name))
+				return variable;
+		if (parent != null) return parent.resolveVariableRelative(name);
+		return null;
+	}
+	/** Gets a struct or union's node using a partial name.
+	 * @param name The partial name to look for.
+	 * @return The struct or union node in question, if present.
+	 */
+	public StructUnionDefinitionNode resolveStructOrUnionRelative(String name)
+	{
+		for (StructUnionDefinitionNode definition : structs)
+			if (definition.getFullName().equals(getScope().getPrefix() + name))
+				return definition;
+		if (parent != null) return parent.resolveStructOrUnionRelative(name);
+		return null;
+	}
+	/** Gets a function's node using a partial name.
+	 * @param name The partial name to look for.
+	 * @return The function node in question, if present.
+	 */
+	public FunctionDefinitionNode resolveFunctionRelative(String name)
+	{
+		for (FunctionDefinitionNode definition : functions)
+			if (definition.getFullName().equals(getScope().getPrefix() + name))
+				return definition;
+		if (parent != null) return parent.resolveFunctionRelative(name);
+		return null;
+	}
+
+	/** Gets the list of variables defined in this node or its subnodes.
+	 * 
+	 * @return The list of variables defined in this node or its subnodes.
+	 */
+	public List<VariableNode> getChildVariables()
+	{
+		List<VariableNode> childVariables = new ArrayList<VariableNode>();
+		for (ComponentNode<?> node : children)
+		{
+			if (VariableNode.class.equals(node.getClass())) childVariables.add((VariableNode) node);
+			childVariables.addAll(node.getChildVariables());
+		}
+		return childVariables;
 	}
 	
 	/** Gets the enclosing function, if any.
