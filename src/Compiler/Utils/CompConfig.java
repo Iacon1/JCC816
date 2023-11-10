@@ -15,19 +15,20 @@ public final class CompConfig
 {
 	public static final String version = "0.X";
 	
-	public static final String scopeDelimiter = "__";
+	public static final String scopeDelimiter = "@";
+	public static final String scopeDelimiterPermissor = "at_in_identifiers";
 	public static final int indentSize = 2;
 	
 	public static final int scratchBank = 0x7F;
 	public static final int scratchPage = 0xFF;
 	public static final int multDivSize = 16;
-	public static final String multDivX = "__multDivX";
-	public static final String multDivY = "__multDivY";
+	public static final String multDivX = "__@multDivX";
+	public static final String multDivY = "__@multDivY";
 	public static final int scratchSize = 160;
-	public static final String scratchBase = "__ScratchBase";
+	public static final String scratchBase = "__@ScratchBase";
 	public static final int callResultSize = 64;
 	// 16 + 16 + 160 + 64 = 256 = Just large enough to be a ZP!
-	public static final String callResult = "__callResult";
+	public static final String callResult = "__@callResult";
 	
 	public static final OperandSource callResultSource(int size)
 	{
