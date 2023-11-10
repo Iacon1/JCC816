@@ -3,6 +3,8 @@
 
 package Compiler.ComponentNodes.LValues;
 
+import java.util.Set;
+
 import Compiler.ComponentNodes.ComponentNode;
 import Compiler.ComponentNodes.Definitions.Type;
 import Compiler.ComponentNodes.Expressions.AdditiveExpressionNode;
@@ -48,10 +50,18 @@ public class IndirectLValueNode extends LValueNode<IndirectLValueNode>
 			return assembly;
 		}
 	}
-	private OperandSource addrSource;
+	private LValueNode<?> destination; // Just here for const-prop purposes
+	private OperandSource addrSource; // Not the same as destination.getSource(), since pointers must be copied to the DP.
+	public IndirectLValueNode(ComponentNode<?> parent, LValueNode<?> destination, OperandSource addrSource, Type type)
+	{
+		super(parent, type);
+		this.destination = destination;
+		this.addrSource = addrSource;
+	}
 	public IndirectLValueNode(ComponentNode<?> parent, OperandSource addrSource, Type type)
 	{
 		super(parent, type);
+		this.destination = null;
 		this.addrSource = addrSource;
 	}
 	@Override
@@ -69,5 +79,36 @@ public class IndirectLValueNode extends LValueNode<IndirectLValueNode>
 	{
 		if (addrSource != null) return new IndirectOperandSource();
 		else return null;
+	}
+	
+	@Override
+	public boolean hasPossibleValues()
+	{
+		if (destination != null) return destination.hasPossibleValues();
+		else return super.hasPossibleValues();
+	}
+	@Override
+	public Set<Object> getPossibleValues()
+	{
+		if (destination != null) return destination.getPossibleValues();
+		else return super.getPossibleValues();
+	}
+	@Override
+	public void clearPossibleValues()
+	{
+		if (destination != null) destination.clearPossibleValues();
+		else super.clearPossibleValues();
+	}
+	@Override
+	public void setPossibleValues(Set<Object> possibleValues)
+	{
+		if (destination != null) destination.setPossibleValues(possibleValues);
+		else super.setPossibleValues(possibleValues);
+	}
+	@Override
+	public void addPossibleValue(Object value)
+	{
+		if (destination != null) destination.addPossibleValue(value);
+		else super.addPossibleValue(value);
 	}
 }

@@ -137,6 +137,10 @@ public class AssignmentExpressionNode extends BinaryExpressionNode
 		if (!y.hasAssembly() || !destSource.equals(x.getLValue().getSource()))
 			assembly += AssemblyUtils.byteCopier(whitespace, x.getLValue().getSize(), x.getLValue().getSource(), sourceY);
 		
+		if (y.hasPropValue())
+			x.getLValue().setOnlyPossibleValue(y.getPropValue());
+		else if (y.hasLValue() && y.getLValue().hasPossibleValues())
+			x.getLValue().setPossibleValues(y.getLValue().getPossibleValues());
 		return assembly;
 	}
 	@Override
