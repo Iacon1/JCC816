@@ -54,34 +54,68 @@ public class MultiplicativeExpressionNode extends BinaryExpressionNode
 			final int ii = i;
 			assembly += AssemblyUtils.bytewiseOperation(whitespace, sourceX.getSize() - i, (Integer j, Boolean is16Bit) ->
 			{
-				if (j != 0) return new String[]
-				{
-					"LDA\t" + SNESRegisters.RDMPYH, 			// Load previous high byte as carryover
-					"TAX",										// Store in X
-					sourceX.prefaceAssembly(whitespace, ii, is16Bit),
-					"LDA\t" + sourceX.apply(ii, is16Bit),		// Load X-the-variable
-					"STA\t" + SNESRegisters.WRMPYA,				// Place in reg
-					sourceY.prefaceAssembly(whitespace, ii + j, is16Bit),
-					"LDA\t" + sourceY.apply(ii + j, is16Bit),	// Load Y-the-variable
-					"STA\t" + SNESRegisters.WRMPYB, 			// Place in reg, begin 8-cycle calc
-					"TXA",										// 2 cycles - 2
-					"NOP",										// 2 cycles - 4
-					"ADC\t" + SNESRegisters.RDMPYL,				// 5 cycles - 9, get result and add carryover 
-					"STA\t" + destSource.apply(ii + j, is16Bit),// Store result
-				};
-				else return new String[]
-				{
-					sourceX.prefaceAssembly(whitespace, ii, is16Bit),
-					"LDA\t" + sourceX.apply(ii, is16Bit),		// Load X-the-variable
-					"STA\t" + SNESRegisters.WRMPYA,				// Place in reg
-					sourceY.prefaceAssembly(whitespace, ii + j, is16Bit),
-					"LDA\t" + sourceY.apply(ii + j, is16Bit),	// Load Y-the-variable
-					"STA\t" + SNESRegisters.WRMPYB, 			// Place in reg, begin 8-cycle calc
-					"NOP",										// 2 cycles - 2
-					"NOP",										// 2 cycles - 4
-					"LDA\t" + SNESRegisters.RDMPYL,				// 5 cycles - 9, get result
-					"STA\t" + destSource.apply(ii + j, is16Bit),// Store result
-				};
+				if (j != 0)
+					if (ii != 0)
+						return new String[]
+						{
+							"LDA\t" + SNESRegisters.RDMPYH, 			// Load previous high byte as carryover
+							"TAX",										// Store in X
+							sourceX.prefaceAssembly(whitespace, ii, is16Bit),
+							"LDA\t" + sourceX.apply(ii, is16Bit),		// Load X-the-variable
+							"STA\t" + SNESRegisters.WRMPYA,				// Place in reg
+							sourceY.prefaceAssembly(whitespace, ii + j, is16Bit),
+							"LDA\t" + sourceY.apply(ii + j, is16Bit),	// Load Y-the-variable
+							"STA\t" + SNESRegisters.WRMPYB, 			// Place in reg, begin 8-cycle calc
+							"TXA",										// 2 cycles - 2
+							"LDA\t" + destSource.apply(ii + j, is16Bit),// 5 cycles - 7, add previous value of result
+							"ADC\t" + SNESRegisters.RDMPYL,				// 5 cycles - 12, get result and add carryover
+							"STA\t" + destSource.apply(ii + j, is16Bit),// Store result
+						};
+					else
+						return new String[]
+						{
+							"LDA\t" + SNESRegisters.RDMPYH, 			// Load previous high byte as carryover
+							"TAX",										// Store in X
+							sourceX.prefaceAssembly(whitespace, ii, is16Bit),
+							"LDA\t" + sourceX.apply(ii, is16Bit),		// Load X-the-variable
+							"STA\t" + SNESRegisters.WRMPYA,				// Place in reg
+							sourceY.prefaceAssembly(whitespace, ii + j, is16Bit),
+							"LDA\t" + sourceY.apply(ii + j, is16Bit),	// Load Y-the-variable
+							"STA\t" + SNESRegisters.WRMPYB, 			// Place in reg, begin 8-cycle calc
+							"TXA",										// 2 cycles - 2
+							"NOP",										// 2 cycles - 4
+							"LDA\t" + SNESRegisters.RDMPYL,				// 5 cycles - 9, get result and add carryover
+							"STA\t" + destSource.apply(ii + j, is16Bit),// Store result
+						};
+				else
+					if (ii != 0)
+						return new String[]
+						{
+							sourceX.prefaceAssembly(whitespace, ii, is16Bit),
+							"LDA\t" + sourceX.apply(ii, is16Bit),		// Load X-the-variable
+							"STA\t" + SNESRegisters.WRMPYA,				// Place in reg
+							sourceY.prefaceAssembly(whitespace, ii + j, is16Bit),
+							"LDA\t" + sourceY.apply(ii + j, is16Bit),	// Load Y-the-variable
+							"STA\t" + SNESRegisters.WRMPYB, 			// Place in reg, begin 8-cycle calc
+							"CLC",										// 2 cycles - 2
+							"LDA\t" + destSource.apply(ii + j, is16Bit),// 5 cycles - 7, add previous value of result
+							"ADC\t" + SNESRegisters.RDMPYL,				// 5 cycles - 12, get result
+							"STA\t" + destSource.apply(ii + j, is16Bit),// Store result
+						};
+					else
+						return new String[]
+						{
+							sourceX.prefaceAssembly(whitespace, ii, is16Bit),
+							"LDA\t" + sourceX.apply(ii, is16Bit),		// Load X-the-variable
+							"STA\t" + SNESRegisters.WRMPYA,				// Place in reg
+							sourceY.prefaceAssembly(whitespace, ii + j, is16Bit),
+							"LDA\t" + sourceY.apply(ii + j, is16Bit),	// Load Y-the-variable
+							"STA\t" + SNESRegisters.WRMPYB, 			// Place in reg, begin 8-cycle calc
+							"NOP",										// 2 cycles - 2
+							"NOP",										// 2 cycles - 4
+							"LDA\t" + SNESRegisters.RDMPYL,				// 5 cycles - 9, get result
+							"STA\t" + destSource.apply(ii + j, is16Bit),// Store result
+						};
 			}, false, false);
 		}
 		return assembly;
@@ -252,7 +286,7 @@ public class MultiplicativeExpressionNode extends BinaryExpressionNode
 		if (sourceX.getSize() + sourceY.getSize() > multThreshold) // Set these to a different number to inline certain multipliers.
 		{	
 			assembly += AssemblyUtils.byteCopier(whitespace, sourceX.getSize(), CompConfig.multDivSource(true, sourceX.getSize()), sourceX);
-			assembly += AssemblyUtils.byteCopier(whitespace, sourceY.getSize(), CompConfig.multDivSource(true, sourceX.getSize()), sourceY);
+			assembly += AssemblyUtils.byteCopier(whitespace, sourceY.getSize(), CompConfig.multDivSource(false, sourceX.getSize()), sourceY);
 			assembly += whitespace + "JSL\t" + ComponentNode.registerMult(sourceX.getSize(), sourceY.getSize()) + "\n";
 			assembly += AssemblyUtils.byteCopier(whitespace, sourceX.getSize(), destSource, CompConfig.callResultSource(sourceX.getSize()));
 		}
