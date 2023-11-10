@@ -50,7 +50,7 @@ public class ProgramNode extends InterpretingNode<ProgramNode, ProgramContext> i
 		for (SimpleEntry<String, Integer> entry : CompConfig.reservedRAM())
 		{
 			assembly += whitespace + AssemblyUtils.applyFiller(entry.getKey(), maxLength) + " := $" +
-					String.format("%06x", offset + entry.getValue() - 1) + "\n";
+					String.format("%06x", entry.getValue() - 1) + "\n";
 			offset += entry.getValue();
 		}
 		
@@ -131,8 +131,9 @@ public class ProgramNode extends InterpretingNode<ProgramNode, ProgramContext> i
 		String whitespace = AssemblyUtils.getWhitespace(leadingWhitespace);
 		String assembly = "";
 
-		assembly += whitespace + ".p816\n" + ".smart\t+\n";
-		
+		assembly += whitespace + ".p816\n" + whitespace + ".smart\t+\n";
+		if (CompConfig.scopeDelimiterPermissor != null)
+			assembly += whitespace + ".feature " + CompConfig.scopeDelimiterPermissor + "\n";
 		assembly += generateVectorTable(leadingWhitespace); // Vector table
 		
 		assembly += whitespace + ".segment \"HEADER\"\n"; // Declare header
