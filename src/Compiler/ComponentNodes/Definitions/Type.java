@@ -201,6 +201,7 @@ public class Type
 				isPointer() && type.isPointer() && ((PointerType) this).getType().canCastTo("void") ||
 				isPointer() && type.isPointer() && ((PointerType) type).getType().canCastTo("void") ||
 				isPointer() && type.isConstant() && type.isInteger() ||
+				isPointer() && type.isArithmetic() || // TODO only in some cases
 				typeSpecifiers.contains("_Bool") && type.isPointer();
 	}
 	public boolean canCastTo(String... specifiers)
@@ -214,6 +215,7 @@ public class Type
 
 	public boolean containsSpecifier(String specifier)
 	{
+		if (typeSpecifiers.size() == 0) return false;
 		return typeSpecifiers.contains(specifier);
 	}
 	
@@ -227,18 +229,23 @@ public class Type
 		return typeQualifiers.size() != 0;
 	}
 	public boolean isArray() {return false;} // To be overriden
+	public boolean isFunction() {return false;} // To be overriden
 	private boolean isStructOrUnion()
 	{
-		return typeSpecifiers.get(0).equals("struct") || typeSpecifiers.get(0).equals("union");
+		return containsSpecifier("struct") || containsSpecifier("union");
 	}
 	private boolean isEnum()
 	{
-		return typeSpecifiers.get(0).equals("enum");
+		return containsSpecifier("enum");
 	}
 	
+	public boolean isCharacter()
+	{
+		return containsSpecifier("char");
+	}
 	public boolean isInteger()
 	{
-		return typeSpecifiers.contains("short") || typeSpecifiers.contains("long") || typeSpecifiers.contains("int");
+		return isCharacter() || containsSpecifier("short") || containsSpecifier("long") || containsSpecifier("int");
 	}
 	public boolean isArithmetic()
 	{
