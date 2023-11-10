@@ -82,6 +82,17 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 		return null;
 	}
 	@Override
+	@Override
+	public boolean hasAssembly()
+	{
+		switch (type)
+		{
+		case arraySubscript: case funcCall: return true;
+		case structMember: case structMemberP: return expr.hasAssembly();
+		case incr: case decr: return true;
+		default: return false; // TODO
+		}
+	}
 	public String getAssembly(int leadingWhitespace, OperandSource destSource, ScratchManager scratchManager) throws Exception
 	{
 		// TODO Auto-generated method stub

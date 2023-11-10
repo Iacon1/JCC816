@@ -63,6 +63,11 @@ public class CastExpressionNode extends BaseExpressionNode<Cast_expressionContex
 		return expr.getPropValue();
 	}
 	@Override
+	public boolean hasAssembly()
+	{
+		return expr.hasAssembly() || !hasPropValue();
+	}
+	@Override
 	public String getAssembly(int leadingWhitespace, OperandSource destSource, ScratchManager scratchManager) throws Exception
 	{
 		String whitespace = AssemblyUtils.getWhitespace(leadingWhitespace);

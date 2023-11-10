@@ -193,6 +193,11 @@ public class ProgramNode extends InterpretingNode<ProgramNode, ProgramContext> i
 		return assembly;
 	}
 	@Override
+	public boolean hasAssembly()
+	{
+		return true;
+	}
+	@Override
 	public String getAssembly(int leadingWhitespace) throws Exception
 	{
 		String whitespace = AssemblyUtils.getWhitespace(leadingWhitespace);

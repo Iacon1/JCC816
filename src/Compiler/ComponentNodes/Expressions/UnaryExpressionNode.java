@@ -109,6 +109,13 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 	}
 	
 	@Override
+	public boolean hasAssembly()
+	{
+		if (!operator.equals("++") && !operator.equals("--"))
+			return expr.hasAssembly() || !hasPropValue();
+		else return true;
+	}
+	@Override
 	public String getAssembly(int leadingWhitespace, OperandSource destSource, ScratchManager scratchManager) throws Exception
 	{
 		String whitespace = AssemblyUtils.getWhitespace(leadingWhitespace);

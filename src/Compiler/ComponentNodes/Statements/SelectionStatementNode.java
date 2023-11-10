@@ -81,6 +81,19 @@ public class SelectionStatementNode extends StatementNode<Selection_statementCon
 	{
 		return expression.canCall(function) || (switchStm != null && switchStm.canCall(function)) || (ifStm != null && ifStm.canCall(function)) || (elseStm != null && elseStm.canCall(function));
 	}
+	
+	@Override
+	public boolean hasAssembly()
+	{
+		if (expression.hasAssembly()) return true;
+		if (!isSwitch)
+		{
+			if (expression.hasPropValue() && expression.getPropBool()) return ifStm.hasAssembly();
+			else if (expression.hasPropValue()) return elseStm.hasAssembly();
+			else return ifStm.hasAssembly() || elseStm.hasAssembly();
+		}
+		else return switchStm.hasAssembly();
+	}
 	@Override
 	public String getAssembly(int leadingWhitespace) throws Exception
 	{

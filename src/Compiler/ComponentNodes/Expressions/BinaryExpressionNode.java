@@ -69,6 +69,8 @@ public abstract class BinaryExpressionNode<
 		return x.hasPropValue() && y.hasPropValue();
 	}
 	
+	@Override
+	public boolean hasAssembly() {return x.hasAssembly() || y.hasAssembly() || !hasPropValue();}
 	protected String getAssembly(String whitespace, OperandSource destSource, ScratchManager scratchManager, OperandSource sourceX, OperandSource sourceY) throws Exception
 	{return null;}
 	@Override

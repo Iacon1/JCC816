@@ -7,6 +7,7 @@ import Compiler.ComponentNodes.ComponentNode;
 import Compiler.ComponentNodes.FunctionDefinitionNode;
 import Compiler.ComponentNodes.Expressions.BaseExpressionNode;
 import Compiler.ComponentNodes.Expressions.ExpressionNode;
+import Compiler.ComponentNodes.Interfaces.AssemblableNode;
 import Grammar.C99.C99Parser.Expression_statementContext;
 
 public class ExpressionStatementNode extends StatementNode<Expression_statementContext>
@@ -27,6 +28,11 @@ public class ExpressionStatementNode extends StatementNode<Expression_statementC
 		return expression.canCall(function);
 	}
 
+	@Override
+	public boolean hasAssembly()
+	{
+		return expression.hasAssembly();
+	}
 	@Override
 	public String getAssembly(int leadingWhitespace) throws Exception
 	{

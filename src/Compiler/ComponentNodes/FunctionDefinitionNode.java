@@ -95,6 +95,12 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 	{
 		return code.canCall(function) || (function == this);
 	}
+	
+	@Override
+	public boolean hasAssembly()
+	{
+		return true; // Always there as a label
+	}
 	@Override
 	public String getAssembly(int leadingWhitespace) throws Exception
 	{

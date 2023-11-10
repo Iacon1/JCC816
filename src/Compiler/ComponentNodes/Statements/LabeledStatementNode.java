@@ -42,6 +42,11 @@ public class LabeledStatementNode extends StatementNode<Labeled_statementContext
 	public boolean canCall(FunctionDefinitionNode function) {return statement.canCall(function);}
 
 	@Override
+	public boolean hasAssembly()
+	{
+		return true; // Always there as a label
+	}
+	@Override
 	public String getAssembly(int leadingWhitespace) throws Exception
 	{
 		return AssemblyUtils.getWhitespace(leadingWhitespace) + label + ":\n" + statement.getAssembly(leadingWhitespace);
