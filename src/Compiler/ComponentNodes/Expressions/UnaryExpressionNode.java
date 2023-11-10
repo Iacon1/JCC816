@@ -62,7 +62,15 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 	public Type getType()
 	{
 		if (type != null) return new PointerType(new DummyType("void")); // No object can have a greater size than a pointer
-		else return expr.getType(); 
+		else if (operator.equals("*"))
+		{
+			return ((PointerType) expr.getType()).getType(); 
+		}
+		else if (operator.equals("&"))
+		{
+			return new PointerType(expr.getType());
+		}
+		else return expr.getType();
 	}
 	
 	@Override
@@ -93,6 +101,15 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 	public boolean hasPropValue()
 	{
 		if (operator.equals("sizeof")) return true;
+		else if (operator.equals("*"))
+			if (pointerRef != null && pointerRef.hasPossibleValues() && pointerRef.getPossibleValues().size() == 1)
+			{
+				// if expr can only point to one thing...
+				VariableNode n = ((PropPointer) pointerRef.getPossibleValues().toArray()[0]).getNode();
+				if (n.hasPossibleValues() && n.getPossibleValues().size() == 1) return true;
+				else return false;
+			}
+			else return false;
 		else if (operator.equals("&"))
 		{
 			return expr.hasLValue() && VariableNode.class.isAssignableFrom(expr.getLValue().getClass());
