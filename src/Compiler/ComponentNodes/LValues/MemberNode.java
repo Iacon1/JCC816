@@ -8,31 +8,16 @@ import Compiler.ComponentNodes.Definitions.Type;
 import Compiler.Utils.OperandSources.AddressSource;
 import Compiler.Utils.OperandSources.OperandSource;
 
-public class MemberNode extends LValueNode<MemberNode>
+public class MemberNode extends VariableNode
 {
 	private StructUnionDefinitionNode owner;
-	private String name;
 	
 	public MemberNode(ComponentNode<?> parent, StructUnionDefinitionNode owner, String name, Type type)
 	{
-		super(parent, type);
+		super(parent, name, type);
 		this.owner = owner;
-		this.name = name;
 	}
-	@Override
-	public Type getType()
-	{
-		return type;
-	}
-	public String getName()
-	{
-		return name;
-	}
-	@Override
-	public int getSize()
-	{
-		return type.getSize();
-	}
+
 	@Override
 	public OperandSource getSource()
 	{

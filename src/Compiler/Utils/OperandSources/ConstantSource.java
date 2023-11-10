@@ -5,9 +5,12 @@ package Compiler.Utils.OperandSources;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
+import Compiler.Utils.PropPointer;
+
 public class ConstantSource extends OperandSource
 {
 	private byte[] bytes;
+	private PropPointer pointer;
 	
 	public ConstantSource(Object constant, int size)
 	{
@@ -39,11 +42,16 @@ public class ConstantSource extends OperandSource
 		{
 			bytes = new byte[] {(byte) ((Boolean) constant ? 0xFF : 0x00)};
 		}
+		else if (PropPointer.class.isAssignableFrom(constant.getClass()))
+		{
+			pointer = (PropPointer) constant;
+		}
 	}
 	
 	@Override
 	public String apply(Integer i, Boolean is16Bit)
 	{
+		if (pointer != null) return pointer.apply(i, is16Bit);
 		if (bytes.length <= i) return "#$" + String.format(is16Bit ? "%04x" : "%02x", 0);
 		if (is16Bit)
 			if (bytes.length == 1) return "#$" + String.format("%02x%02x", 0, bytes[0]);
