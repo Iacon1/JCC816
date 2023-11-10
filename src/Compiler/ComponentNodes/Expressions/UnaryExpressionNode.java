@@ -110,6 +110,18 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 		else if (operator.equals("-")) return Long.valueOf(-1 * expr.getPropLong());
 		else if (operator.equals("~")) return Long.valueOf(~expr.getPropLong());
 		else if (operator.equals("!")) return Boolean.valueOf(expr.getPropBool());
+		else if (operator.equals("*"))
+			if (pointerRef != null && pointerRef.hasPossibleValues() && pointerRef.getPossibleValues().size() == 1)
+			{
+				// if expr can only point to one thing...
+				VariableNode n = ((PropPointer) pointerRef.getPossibleValues().toArray()[0]).getNode();
+				if (n.hasPossibleValues() && n.getPossibleValues().size() == 1)
+				{
+					// And that thing can only have one value...
+					return n.getPossibleValues().toArray()[0]; // Then return that
+				}
+				else return null;
+			}
 			else return null;
 		else if (operator.equals("&"))
 		{

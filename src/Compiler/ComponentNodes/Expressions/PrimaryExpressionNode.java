@@ -44,11 +44,11 @@ public class PrimaryExpressionNode extends BaseExpressionNode<Primary_expression
 	}
 
 	@Override
-	public boolean hasLValue() {return identifier != null;}
+	public boolean hasLValue() {return identifier != null && resolveVariableRelative(identifier) != null;}
 	@Override
 	public LValueNode<?> getLValue()
 	{
-		if (identifier != null) return ComponentNode.resolveVariable(getScope().getPrefix() + identifier);
+		if (identifier != null) return resolveVariableRelative(identifier);
 		else return null;
 	}
 	
@@ -59,12 +59,16 @@ public class PrimaryExpressionNode extends BaseExpressionNode<Primary_expression
 	@Override
 	public boolean hasPropValue()
 	{
-		return constant != null || stringLiteral != null;
+		if (hasLValue() && getLValue().getPossibleValues() != null) return getLValue().getPossibleValues().size() == 1;
+		else if (identifier != null && resolveFunctionRelative(identifier) != null) return true;
+		else return constant != null || stringLiteral != null;
 	}
 	@Override
 	public Object getPropValue()
 	{
-		if (stringLiteral == null) return constant;
+		if (getLValue() != null) return getLValue().getPossibleValues().toArray()[0];
+		else if (identifier != null && resolveFunctionRelative(identifier) != null) return resolveFunctionRelative(identifier);
+		else if (stringLiteral == null) return constant;
 		else return stringLiteral;
 	}
 	

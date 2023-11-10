@@ -7,18 +7,23 @@ import Grammar.C99.C99Parser.Attributes_declarationContext;
 import Grammar.C99.C99Parser.Function_definitionContext;
 import Logging.Logging;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.antlr.v4.runtime.tree.TerminalNode;
 
+import Compiler.ComponentNodes.Declarations.DeclarationNode;
 import Compiler.ComponentNodes.Declarations.DeclarationSpecifiersNode;
 import Compiler.ComponentNodes.Declarations.DeclaratorNode;
+import Compiler.ComponentNodes.Definitions.FunctionType;
 import Compiler.ComponentNodes.Definitions.Scope;
 import Compiler.ComponentNodes.Definitions.Type;
 import Compiler.ComponentNodes.Interfaces.AssemblableNode;
 import Compiler.ComponentNodes.Interfaces.NamedNode;
 import Compiler.ComponentNodes.Interfaces.TypedNode;
+import Compiler.ComponentNodes.LValues.VariableNode;
 import Compiler.ComponentNodes.Statements.CompoundStatementNode;
 import Compiler.ComponentNodes.Statements.StatementNode;
 import Compiler.Utils.AssemblyUtils;
@@ -32,7 +37,7 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 	private Type type;
 	private DeclaratorNode signature;
 	
-	private StatementNode code;
+	private StatementNode<?> code;
 	
 	public FunctionDefinitionNode(ComponentNode<?> parent)
 	{
@@ -70,6 +75,11 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 	{
 		return super.getScope().getPrefix() + getName();
 	}
+
+	public List<VariableNode> getParameters()
+	{
+		return signature.getChildVariables();
+	}
 	public String getLabel(String gotoLabel)
 	{
 		return "__" + getFullName() + CompConfig.scopeDelimiter + gotoLabel;
@@ -85,9 +95,9 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 	}
 
 	@Override
-	public Type getType()
+	public FunctionType getType()
 	{
-		return type;
+		return new FunctionType(type);
 	}
 	
 	@Override
