@@ -83,4 +83,13 @@ public final class CompConfig
 	}
 	
 	public static final int stackSize = 0x2000;
+	
+	public static enum OptimizationLevel
+	{
+		low, // No aggressive (i. e. interline) constant propagation
+		medium, // No side-effect annihilation
+		all // All optimizations
+	}
+	public static OptimizationLevel optimizationLevel = OptimizationLevel.all;
+	
 }
