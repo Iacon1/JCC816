@@ -50,7 +50,7 @@ public class ProgramNode extends InterpretingNode<ProgramNode, ProgramContext> i
 		for (SimpleEntry<String, Integer> entry : CompConfig.reservedRAM())
 		{
 			assembly += whitespace + AssemblyUtils.applyFiller(entry.getKey(), maxLength) + " := $" +
-					String.format("%06x", entry.getValue() - 1) + "\n";
+					String.format("%06x", offset) + "\n";
 			offset += entry.getValue();
 		}
 		
@@ -157,7 +157,7 @@ public class ProgramNode extends InterpretingNode<ProgramNode, ProgramContext> i
 		{
 			assembly += whitespace + "__MULT_" + mult.getKey() + "_" + mult.getValue() + ":CLC\n";
 			OperandSource sourceX = CompConfig.multDivSource(true, mult.getKey());
-			OperandSource sourceY = CompConfig.multDivSource(true, mult.getValue());
+			OperandSource sourceY = CompConfig.multDivSource(false, mult.getValue());
 
 			assembly += MultiplicativeExpressionNode.getMultiplier(
 					AssemblyUtils.getWhitespace(leadingWhitespace + CompConfig.indentSize),
