@@ -87,13 +87,14 @@ public class DeclarationNode extends InterpretingNode<DeclarationNode, Declarati
 	@Override
 	public boolean canCall(FunctionDefinitionNode function)
 	{
-		for (BaseExpressionNode<?> expr : expressions) if (expr.canCall(function)) return true;
+		for (BaseExpressionNode<?> expr : expressions) if (expr != null && expr.canCall(function)) return true;
 		return false;
 	}
 	@Override
 	public boolean hasAssembly()
 	{
-		return expressions.size() != 0;
+		for (BaseExpressionNode<?> expr : expressions) if (expr != null) return true;
+		return false;
 	}
 	@Override
 	public String getAssembly(int leadingWhitespace) throws Exception

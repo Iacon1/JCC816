@@ -8,6 +8,7 @@ import Compiler.ComponentNodes.Declarations.DeclarationNode;
 import Compiler.ComponentNodes.Expressions.BaseExpressionNode;
 import Compiler.ComponentNodes.Expressions.EqualityExpressionNode;
 import Compiler.ComponentNodes.Expressions.ExpressionNode;
+import Compiler.ComponentNodes.Interfaces.AssemblableNode;
 import Compiler.Utils.AssemblyUtils;
 import Compiler.Utils.CompConfig;
 import Compiler.Utils.ScratchManager;
@@ -102,6 +103,24 @@ public class IterationStatementNode extends StatementNode<Iteration_statementCon
 		return "__ITER__END__" + iterId;
 	}
 
+	@Override
+	public boolean hasAssembly()
+	{
+		switch (iterType)
+		{
+		case while_:
+			if (condExpNode.hasPropValue())
+				return condExpNode.getPropBool() || condExpNode.hasAssembly();
+				// Is this a forever loop or a never loop? Even if never, still need to run ASM for the check.
+		case doWhile:
+			return stmNode.hasAssembly() || condExpNode.hasAssembly(); // Runs ASM for both at least once.
+		case for_:
+			if (initExpNode == null) return true; // Another forever-loop case
+			else return stmNode.hasAssembly() || condExpNode.hasAssembly() || initExpNode.hasAssembly() || iterExpNode.hasAssembly();
+		default: return false;
+		}
+	}
+	
 	@Override
 	public String getAssembly(int leadingWhitespace) throws Exception
 	{

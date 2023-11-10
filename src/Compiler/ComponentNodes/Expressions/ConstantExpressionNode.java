@@ -33,5 +33,7 @@ public class ConstantExpressionNode extends BaseExpressionNode<Constant_expressi
 	@Override
 	public Object getPropValue() {return null;}
 	@Override
+	public boolean hasAssembly() {return false;}
+	@Override
 	public String getAssembly(int leadingWhitespace, OperandSource writeAddr, ScratchManager scratchManager) throws Exception {return null;}
 }

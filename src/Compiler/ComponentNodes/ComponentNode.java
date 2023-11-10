@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.AbstractMap.SimpleEntry;
 
+import Compiler.ComponentNodes.Declarations.DeclarationNode;
 import Compiler.ComponentNodes.Definitions.EnumDefinition;
 import Compiler.ComponentNodes.Definitions.Scope;
 import Compiler.ComponentNodes.Definitions.StructUnionDefinitionNode;

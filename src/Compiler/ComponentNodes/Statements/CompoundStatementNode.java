@@ -37,10 +37,18 @@ public class CompoundStatementNode extends StatementNode<Compound_statementConte
 	@Override
 	public boolean canCall(FunctionDefinitionNode function)
 	{
-		// TODO Auto-generated method stub
+		for (AssemblableNode assemblable : assemblables)
+			if (assemblable.canCall(function)) return true;
 		return false;
 	}
 
+	@Override
+	public boolean hasAssembly()
+	{
+		for (AssemblableNode assemblable : assemblables)
+			if (assemblable.hasAssembly()) return true;
+		return false;
+	}
 	@Override
 	public String getAssembly(int leadingWhitespace) throws Exception
 	{

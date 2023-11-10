@@ -67,6 +67,12 @@ public class JumpStatementNode extends StatementNode<Jump_statementContext> impl
 	{
 		return expr.canCall(function);
 	}
+	
+	@Override
+	public boolean hasAssembly()
+	{
+		return true; // Always does *something*
+	}
 	@Override
 	public String getAssembly(int leadingWhitespace) throws Exception
 	{
