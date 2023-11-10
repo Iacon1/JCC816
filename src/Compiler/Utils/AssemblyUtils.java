@@ -21,33 +21,6 @@ public final class AssemblyUtils
 		return string + filler;
 	}
 	public static String getWhitespace(int leadingWhitespace) {return new String(new char[leadingWhitespace]).replace('\0', ' ');}
-	public static String getVariableBlock(String whitespace, Collection<VariableNode> vars)
-	{
-		String assembly = "";
-		int maxLength = 0;
-		for (VariableNode variable: vars)
-			maxLength = Math.max(maxLength, variable.getFullName().length()); // 4 because we're assume nothing is more than 9999 bytes long
-		
-		for (VariableNode variable: vars)
-		{
-			String suffix = null;
-				
-			if (variable.getTypeName() == null && variable.getType() != null)	// Dummy type
-				suffix = ".res " + String.format("%04d", variable.getType().getSize()) + ", $00";
-			else
-			{
-				if (CompUtils.Primitive.isBasic(variable.getTypeName()))
-					suffix = ".res " + String.format("%04d", variable.getType().getSize()) + ", $00";
-				else if (variable.getTypeName().endsWith("*"))
-					suffix = ".res " + String.format("%04d", CompConfig.CompUtils.t_pointer.getSize()) + ", $00";
-				else suffix = ".tag " + variable.getType().getFullName();
-			}
-			String filler = new String(new char[maxLength - variable.getFullName().length()]).replace('\0', ' ');
-			assembly += whitespace + variable.getFullName() + ": " + filler + suffix + "\n";
-		}
-		
-		return assembly;
-	}
 	public static String bytewiseOperation(String whitespace, int nBytes, BiFunction<Integer, Boolean, String[]> perIteration, boolean set16, boolean reverse)
 	{
 		String assembly = "";
