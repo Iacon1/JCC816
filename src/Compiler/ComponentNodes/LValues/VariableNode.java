@@ -11,11 +11,12 @@ import Compiler.Utils.OperandSources.OperandSource;
 public class VariableNode extends LValueNode<VariableNode> implements NamedNode
 {
 	protected String name;
-	
+	private AddressSource source;
 	public VariableNode(ComponentNode<?> parent, String name, Type type)
 	{
 		super(parent, type);
 		this.name = name;
+		source = new AddressSource(this.getFullName(), this.getSize());
 	}
 	@Override
 	public String getName() {return name;}
@@ -23,7 +24,7 @@ public class VariableNode extends LValueNode<VariableNode> implements NamedNode
 	@Override
 	public OperandSource getSource()
 	{
-		return new AddressSource(this.getFullName(), this.getSize());
+		return source;
 	}
 	
 	
