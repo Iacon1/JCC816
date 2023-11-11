@@ -59,7 +59,7 @@ public class PrimaryExpressionNode extends BaseExpressionNode<Primary_expression
 	@Override
 	public boolean hasPropValue()
 	{
-		if (hasLValue() && getLValue().getPossibleValues() != null) return getLValue().getPossibleValues().size() == 1;
+		if (hasLValue() && getLValue().hasPossibleValues()) return getLValue().getPossibleValues().size() == 1;
 		else if (identifier != null && resolveFunctionRelative(identifier) != null) return true;
 		else return constant != null || stringLiteral != null;
 	}
