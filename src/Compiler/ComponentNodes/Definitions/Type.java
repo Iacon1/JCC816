@@ -83,7 +83,15 @@ public class Type
 		
 		return allowedLists;
 	}
-	
+	private static boolean isAllowed(List<String> typeSpecifiers)
+	{
+		for (List<String> allowedList : allowedTypeSpecLists())
+			if (typeSpecifiers.containsAll(allowedList) && allowedList.containsAll(typeSpecifiers))
+				return true;
+		if (typeSpecifiers.contains("struct"))
+			return true;
+		return false;
+	}
 	public Type()
 	{
 		typeSpecifiers = new LinkedList<String>();
@@ -110,11 +118,7 @@ public class Type
 		if (specifiers.storageClassSpecifiers.length > 1)
 			throw new ConstraintException("6.7.1", 1, start);
 			
-		boolean isAllowed = false;
-		for (List<String> allowedList : allowedTypeSpecLists())
-			if (typeSpecifiers.containsAll(allowedList) && allowedList.containsAll(typeSpecifiers))
-				isAllowed = true;
-		if (!isAllowed)
+		if (!isAllowed(typeSpecifiers))
 			throw new ConstraintException("6.7.2", 2, start);
 		if (typeSpecifiers.contains("double") || typeSpecifiers.contains("float")) // Floats not supported
 		{
