@@ -3,8 +3,9 @@
 package Compiler.Utils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.function.Function;
+import java.util.Map;
 
 import Compiler.Utils.OperandSources.OperandSource;
 
@@ -13,11 +14,16 @@ import java.util.AbstractMap.SimpleEntry;
 public class ScratchManager
 {
 	private List<SimpleEntry<Boolean, Integer>> blockList;
+	private static Map<OperandSource, ScratchSource> reservedPointers = new HashMap<OperandSource, ScratchSource>();
 	
 	public ScratchManager()
 	{
 		blockList = new ArrayList<SimpleEntry<Boolean, Integer>>();
 		blockList.add(new SimpleEntry<Boolean, Integer>(false, CompConfig.scratchSize));
+		
+		for (ScratchSource pointer : reservedPointers.values())
+			try {reserveScratchBlock(pointer.getSize(), pointer.getOffset());}
+			catch (Exception e) {} // Impossible
 	}
 	
 	public static class ScratchSource extends OperandSource
@@ -40,12 +46,12 @@ public class ScratchManager
 		public String getAddress() {return apply(0, true);}
 	}
 	
-	public ScratchSource reserveScratchBlock(int size) throws Exception
+	private ScratchSource reserveScratchBlock(int size, int initOffset) throws Exception
 	{
 		int offset = 0;
 		for (int i = 0; i < blockList.size(); ++i) // Get each block
 		{
-			if (blockList.get(i).getKey()) {offset += blockList.get(i).getValue(); continue;} // This block's in use
+			if (blockList.get(i).getKey() || offset < initOffset) {offset += blockList.get(i).getValue(); continue;} // This block's in use or it's not where we want it
 			else if (blockList.get(i).getValue() < size) {offset += blockList.get(i).getValue(); continue;} // This block's too small
 			else if (blockList.get(i).getValue() == size) // Found a block that's just the right size
 			{
@@ -64,10 +70,16 @@ public class ScratchManager
 		// Found no block
 		throw new Exception(); // TODO new exception
 	}
+	public ScratchSource reserveScratchBlock(int size) throws Exception
+	{
+		return reserveScratchBlock(size, 0);
+	}
 	public void releaseScratchBlock(ScratchSource s)
 	{
 		int i = -1;
-		
+		// Remove from reserved pointers if it was one
+		for (OperandSource key : reservedPointers.keySet())
+			if (reservedPointers.get(key).equals(s)) reservedPointers.remove(key);
 		// Find the block
 		int offset = 0;
 		for (int j = 0; j < blockList.size(); ++j)
@@ -95,5 +107,36 @@ public class ScratchManager
 		}
 			
 		blockList.set(i, new SimpleEntry<Boolean, Integer>(false, size));
+	}
+	public ScratchSource reservePointer(OperandSource sourceFrom) throws Exception
+	{
+		ScratchSource s = reserveScratchBlock(CompConfig.pointerSize);
+		reservedPointers.put(sourceFrom, s);
+		return s;
+	}
+	public boolean hasPointer(OperandSource sourceFrom)
+	{
+		return reservedPointers.containsKey(sourceFrom);
+	}
+	public ScratchSource getPointer(OperandSource sourceFrom) throws Exception
+	{
+		if (reservedPointers.containsKey(sourceFrom))
+			return reservedPointers.get(sourceFrom);
+		else return reservePointer(sourceFrom);
+	}
+	public void releasePointer(OperandSource sourceFrom)
+	{
+		if (reservedPointers.containsKey(sourceFrom))
+			releaseScratchBlock(reservedPointers.get(sourceFrom));
+	}
+	public void demotePointer(OperandSource sourceFrom)
+	{
+		if (reservedPointers.containsKey(sourceFrom))
+			reservedPointers.remove(sourceFrom);
+	}
+	public void releasePointers()
+	{
+		for (OperandSource key : reservedPointers.keySet())
+			releaseScratchBlock(reservedPointers.get(key));
 	}
 }
