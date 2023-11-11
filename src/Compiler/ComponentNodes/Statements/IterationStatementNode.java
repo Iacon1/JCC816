@@ -131,9 +131,18 @@ public class IterationStatementNode extends StatementNode<Iteration_statementCon
 		{
 		case while_:
 			assembly += whitespace + getStartLabel() + ":\n";
-			assembly += condExpNode.getAssembly(leadingWhitespace, CompConfig.callResultSource(condExpNode.getLValue().getSize()));
-			assembly += EqualityExpressionNode.getIsZero(whitespace, CompConfig.callResultSource(condExpNode.getLValue().getSize()), new ScratchManager(), CompConfig.callResultSource(condExpNode.getType().getSize()));
-			assembly += whitespace + "BEQ\t" + getEndLabel() + "\n";
+			
+			if (condExpNode.hasPropValue()); // We wouldn't be making this assembly if it was assumed to be 0.
+			else
+			{
+				if (condExpNode.hasAssembly())
+				{
+					assembly += condExpNode.getAssembly(leadingWhitespace, CompConfig.callResultSource(condExpNode.getSize()));
+					assembly += EqualityExpressionNode.getIsZero(whitespace, CompConfig.callResultSource(condExpNode.getSize()), new ScratchManager(), CompConfig.callResultSource(condExpNode.getSize()));
+				}
+				else assembly += EqualityExpressionNode.getIsZero(whitespace, CompConfig.callResultSource(condExpNode.getSize()), new ScratchManager(), condExpNode.getLValue().getSource());
+				assembly += whitespace + "BEQ\t" + getEndLabel() + "\n";
+			}
 			assembly += stmNode.getAssembly(leadingWhitespace + CompConfig.indentSize);
 			assembly += whitespace + "JMP\t" + getStartLabel() + "\n";
 			assembly += whitespace + getEndLabel() + ":\n";
@@ -142,7 +151,7 @@ public class IterationStatementNode extends StatementNode<Iteration_statementCon
 			assembly += whitespace + getStartLabel() + ":\n";
 			assembly += stmNode.getAssembly(leadingWhitespace + CompConfig.indentSize);
 			assembly += condExpNode.getAssembly(leadingWhitespace, CompConfig.callResultSource(condExpNode.getLValue().getSize()));
-			assembly += EqualityExpressionNode.getIsZero(whitespace, CompConfig.callResultSource(condExpNode.getLValue().getSize()), new ScratchManager(), CompConfig.callResultSource(condExpNode.getType().getSize()));
+			assembly += EqualityExpressionNode.getIsZero(whitespace, CompConfig.callResultSource(condExpNode.getSize()), new ScratchManager(), CompConfig.callResultSource(condExpNode.getSize()));
 			assembly += whitespace + "BNE\t" + getStartLabel() + "\n";
 			assembly += whitespace + getEndLabel() + ":\n";
 			break;
@@ -156,10 +165,10 @@ public class IterationStatementNode extends StatementNode<Iteration_statementCon
 				if (condExpNode.hasPropValue() && ((Number) condExpNode.getPropValue()).equals(0)) return ""; // Don't run if 0, otherwise run forever
 				else if (!condExpNode.hasPropValue())
 				{
-					if (condExpNode.hasAssembly()) assembly += condExpNode.getAssembly(leadingWhitespace, CompConfig.callResultSource(condExpNode.getLValue().getSize()));
-					else assembly += AssemblyUtils.byteCopier(whitespace, condExpNode.getType().getSize(), CompConfig.callResultSource(condExpNode.getLValue().getSize()), condExpNode.getLValue().getSource());
+					if (condExpNode.hasAssembly()) assembly += condExpNode.getAssembly(leadingWhitespace, CompConfig.callResultSource(condExpNode.getSize()));
+					else assembly += AssemblyUtils.byteCopier(whitespace, condExpNode.getSize(), CompConfig.callResultSource(condExpNode.getSize()), condExpNode.getLValue().getSource());
 					
-					assembly += EqualityExpressionNode.getIsZero(whitespace, CompConfig.callResultSource(2), new ScratchManager(), CompConfig.callResultSource(condExpNode.getType().getSize()));
+					assembly += EqualityExpressionNode.getIsZero(whitespace, CompConfig.callResultSource(2), new ScratchManager(), CompConfig.callResultSource(condExpNode.getSize()));
 					assembly += whitespace + "BEQ\t" + getEndLabel() + "\n";
 				}
 			}
