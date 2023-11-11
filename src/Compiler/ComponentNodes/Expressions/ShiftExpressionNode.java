@@ -4,6 +4,7 @@ package Compiler.ComponentNodes.Expressions;
 
 import Compiler.ComponentNodes.ComponentNode;
 import Compiler.Utils.AssemblyUtils;
+import Compiler.Utils.CompConfig;
 import Compiler.Utils.CompUtils;
 import Compiler.Utils.ScratchManager;
 import Compiler.Utils.OperandSources.OperandSource;
@@ -46,18 +47,29 @@ public class ShiftExpressionNode extends BinaryExpressionNode
 	public static String getShift(String whitespace, OperandSource destSource, ScratchManager scratchManager, OperandSource sourceX, String operator, OperandSource sourceY) throws Exception
 	{
 		String assembly = "";
-		ScratchSource sourceI = null;
-		if (!(sourceY.isLiteral() && sourceY.getSize() == 1 && sourceY.apply(0, true).equals("#$0001")))
+		if (sourceY.getSize() >= 2)
 		{
-			sourceI = scratchManager.reserveScratchBlock(sourceY.getSize());
-			assembly += AssemblyUtils.byteCopier(whitespace, sourceY.getSize(), sourceI, sourceY);
-			assembly += ":\n"; // A loop
+			assembly += whitespace + CompUtils.setA16;
+			assembly += whitespace + sourceY.prefaceAssembly(whitespace, 0, true) + "\n";
+			assembly += whitespace + "LDA\t" + sourceY.apply(0, true) + "\n";
+			assembly += whitespace + "BEQ\t:++\n";
+			assembly += whitespace + "TAX\t\n";
 		}
+		else if (sourceY.getSize() == 1)
+		{
+			assembly += whitespace + CompUtils.setA8;
+			assembly += whitespace + sourceY.prefaceAssembly(whitespace, 0, false) + "\n";
+			assembly += whitespace + "LDA\t" + sourceY.apply(0, false) + "\n";
+			assembly += whitespace + "BEQ\t:++\n";
+			assembly += whitespace + "TAX\t\n";
+		}
+		
+		assembly += whitespace.substring(1) + ":\n"; // A loop
 		
 		switch (operator)
 		{
 		case "<<":
-			assembly += AssemblyUtils.bytewiseOperation(whitespace, sourceX.getSize(), (Integer i, Boolean is16Bit) ->
+			assembly += AssemblyUtils.bytewiseOperation(whitespace + AssemblyUtils.getWhitespace(CompConfig.indentSize), sourceX.getSize(), (Integer i, Boolean is16Bit) ->
 			{
 				return new String[]
 				{
@@ -70,7 +82,7 @@ public class ShiftExpressionNode extends BinaryExpressionNode
 			});
 			break;
 		case ">>":
-			assembly += AssemblyUtils.bytewiseOperation(whitespace, sourceX.getSize(), (Integer i, Boolean is16Bit) -> 
+			assembly += AssemblyUtils.bytewiseOperation(whitespace + AssemblyUtils.getWhitespace(CompConfig.indentSize), sourceX.getSize(), (Integer i, Boolean is16Bit) -> 
 			{return new String[]
 				{
 					sourceX.prefaceAssembly(whitespace, i, is16Bit),
@@ -82,12 +94,9 @@ public class ShiftExpressionNode extends BinaryExpressionNode
 			}, true, true);
 			break;
 		}
-		if (!(sourceY.isLiteral() && sourceY.getSize() == 1 && sourceY.apply(0, true).equals("#$0001")))
-		{
-			assembly += AdditiveExpressionNode.getDecrementer(whitespace, sourceI, sourceI);
-			assembly += whitespace + "BNE\t:-\n";
-			scratchManager.releaseScratchBlock(sourceI);
-		}
+		assembly += whitespace + AssemblyUtils.getWhitespace(CompConfig.indentSize) + "DEX\n";
+		assembly += whitespace + AssemblyUtils.getWhitespace(CompConfig.indentSize) + "BNE\t:-\n";
+		assembly += whitespace.substring(1) + ":\n"; // A loop
 		return assembly;
 	}
 	@Override
