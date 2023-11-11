@@ -75,14 +75,19 @@ public class DeclarationSpecifiersNode extends InterpretingNode<DeclarationSpeci
 			else if (r.getClass().equals(Type_specifierContext.class))
 			{
 				Type_specifierContext typeSpecifier = (Type_specifierContext) r;
-				if (typeSpecifier.struct_or_union_specifier() != null)
+				if (typeSpecifier.struct_or_union_specifier() != null && typeSpecifier.struct_or_union_specifier().struct_declaration_list() != null) // Struct declaration
 				{
 					StructUnionDefinitionNode definition = new StructUnionDefinitionNode(this).interpret(typeSpecifier.struct_or_union_specifier());
 					if (definition.isUnion()) typeSpecifiers.add("union");
 					else typeSpecifiers.add("struct");
 					typeSpecifiers.add(definition.getName());
 				}
-				typeSpecifiers.add(((Type_specifierContext) r).getText());
+				else if (typeSpecifier.struct_or_union_specifier() != null)
+				{
+					typeSpecifiers.add(typeSpecifier.struct_or_union_specifier().getChild(0).getText());
+					typeSpecifiers.add(typeSpecifier.struct_or_union_specifier().getChild(1).getText());
+				}
+				else typeSpecifiers.add(((Type_specifierContext) r).getText());
 			}
 			else if (r.getClass().equals(Type_qualifierContext.class))
 				typeQualifiers.add(((Type_qualifierContext) r).getText());

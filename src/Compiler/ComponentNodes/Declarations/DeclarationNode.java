@@ -57,7 +57,12 @@ public class DeclarationNode extends InterpretingNode<DeclarationNode, Declarati
 				registerVariable(variable);
 				variables.add(variable);
 			}
-		else throw new ConstraintException("6.7", 2, node.start);
+		else
+		{
+			Type type = new Type(specifiers.getSpecifiers(), node.start);
+			if (type.getSUEName() == null) // No tag
+				throw new ConstraintException("6.7", 2, node.start);
+		}
 		return this;
 	}
 	public DeclarationNode interpret(Parameter_declarationContext node) throws Exception
