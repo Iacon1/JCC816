@@ -63,7 +63,7 @@ public class StructUnionDefinitionNode extends InterpretingNode<StructUnionDefin
 	{
 		return isUnion;
 	}
-	public int getOffset(String memberName)
+	public int getOffsetBits(String memberName)
 	{
 		if (isUnion) return 0;
 		int offset = 0;
@@ -72,6 +72,10 @@ public class StructUnionDefinitionNode extends InterpretingNode<StructUnionDefin
 				return offset;
 			else offset += members.get(i).getSizeBits();
 		return 0;
+	}
+	public int getOffset(String memberName)
+	{
+		return (int) Math.floor( getOffsetBits(memberName) / 8);
 	}
 	public MemberNode getMember(String memberName)
 	{
