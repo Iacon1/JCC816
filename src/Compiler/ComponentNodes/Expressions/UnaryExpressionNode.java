@@ -19,6 +19,7 @@ import Compiler.Utils.CompConfig;
 import Compiler.Utils.PropPointer;
 import Compiler.Utils.ScratchManager;
 import Compiler.Utils.ScratchManager.ScratchSource;
+import Compiler.Utils.OperandSources.ConstantSource;
 import Compiler.Utils.OperandSources.OperandSource;
 import Grammar.C99.C99Parser.Unary_expressionContext;
 
@@ -155,6 +156,7 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 	@Override
 	public boolean hasAssembly()
 	{
+		if (operator.equals("*")) return true;
 		if (!operator.equals("++") && !operator.equals("--"))
 			return expr.hasAssembly() || !hasPropValue();
 		else return true;
@@ -174,12 +176,12 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 				assembly += AssemblyUtils.byteCopier(whitespace, sourceX.getSize(), destSource, sourceX);
 			break;
 		case "--":
-			assembly += AdditiveExpressionNode.getDecrementer(whitespace, sourceX, sourceX);
+			assembly += AdditiveExpressionNode.getDecrementer(whitespace, sourceX);
 			if (!destSource.equals(sourceX))
 				assembly += AssemblyUtils.byteCopier(whitespace, sourceX.getSize(), destSource, sourceX);
 			break;
 		case "-": // -x = ~(x-1)
-			assembly += AdditiveExpressionNode.getDecrementer(whitespace, destSource, sourceX);
+			assembly += AdditiveExpressionNode.getSubtractor(whitespace, destSource, sourceX, new ConstantSource(1, sourceX.getSize()));
 			sourceX = destSource;
 		case "~":
 			assembly += XOrExpressionNode.getComplementer(whitespace, destSource, sourceX);
@@ -188,8 +190,14 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 			assembly += EqualityExpressionNode.getIsZero(whitespace, destSource, scratchManager, sourceX);
 			break;
 		case "*":
-			ScratchSource sourceI = scratchManager.reserveScratchBlock(CompConfig.pointerSize); // Never released, lasts until manager goes stale
-			assembly += AssemblyUtils.byteCopier(whitespace, CompConfig.pointerSize, sourceI, sourceX);
+			ScratchSource sourceI;
+			if (!scratchManager.hasPointer(sourceX))
+			{
+				sourceI = scratchManager.reservePointer(sourceX);
+				assembly += AssemblyUtils.byteCopier(whitespace, CompConfig.pointerSize, sourceI, sourceX);
+			}
+			else sourceI = scratchManager.getPointer(sourceX);
+			
 			pointerRef = new IndirectLValueNode(this, expr.getLValue(), sourceI, ((PointerType) expr.getType()).getType());
 			break;
 		default: return "";

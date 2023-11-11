@@ -43,13 +43,15 @@ public class IndirectLValueNode extends LValueNode<IndirectLValueNode>
 			if (i != lastI)
 			{
 				assembly += "PHY\n";
-				assembly += whitespace + "LDY\t#" + String.format(is16Bit? "%04x" : "%02x", i) + "\n";
+				assembly += whitespace + "LDY\t#$" + String.format(is16Bit? "%04x" : "%02x", i) + "\n";
 				lastI = i;
 			}
 
 			return assembly;
 		}
 	}
+	private IndirectOperandSource source;
+	
 	private LValueNode<?> destination; // Just here for const-prop purposes
 	private OperandSource addrSource; // Not the same as destination.getSource(), since pointers must be copied to the DP.
 	public IndirectLValueNode(ComponentNode<?> parent, LValueNode<?> destination, OperandSource addrSource, Type type)
@@ -57,12 +59,16 @@ public class IndirectLValueNode extends LValueNode<IndirectLValueNode>
 		super(parent, type);
 		this.destination = destination;
 		this.addrSource = addrSource;
+		if (addrSource != null) source = new IndirectOperandSource();
+		this.type = type;
 	}
 	public IndirectLValueNode(ComponentNode<?> parent, OperandSource addrSource, Type type)
 	{
 		super(parent, type);
 		this.destination = null;
 		this.addrSource = addrSource;
+		if (addrSource != null) source = new IndirectOperandSource();
+		this.type = type;
 	}
 	@Override
 	public Type getType()
@@ -77,7 +83,7 @@ public class IndirectLValueNode extends LValueNode<IndirectLValueNode>
 	@Override
 	public OperandSource getSource()
 	{
-		if (addrSource != null) return new IndirectOperandSource();
+		if (addrSource != null) return source;
 		else return null;
 	}
 	

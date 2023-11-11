@@ -39,6 +39,8 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 	private List<BaseExpressionNode<?>> params;
 	
 	private OperandSource destSource;
+	
+	private LValueNode<?> pointerRef; // For arrays and pointers to structs
 	String memberName;
 	
 	private FunctionDefinitionNode getReferencedFunction()
@@ -77,8 +79,14 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 				for (Assignment_expressionContext expr : node.argument_expression_list().assignment_expression())
 					params.add(new AssignmentExpressionNode(this).interpret(expr));
 			break;
-		case ".": case "->": // Struct member
+		case ".":
+			type = PFType.structMember;
 			memberName = node.Identifier().getText();
+			break;
+		case "->": // Struct member
+			type = PFType.structMemberP;
+			memberName = node.Identifier().getText();
+			pointerRef = new IndirectLValueNode(this, expr.getLValue(), null, null); // For const prop purposes
 			break;
 		case "++":
 			type = PFType.incr;
@@ -97,6 +105,10 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 			return ((PointerType) expr.getType()).getType();
 		case funcCall:
 			return ((FunctionType) getReferencedFunction().getType()).getType();
+		case structMember:
+			return ComponentNode.resolveStructOrUnion(expr.getType().getSUEName()).getMember(memberName).getType();
+		case structMemberP:
+			return ComponentNode.resolveStructOrUnion(((PointerType) expr.getType()).getType().getSUEName()).getMember(memberName).getType();	
 		default:
 			return null;
 		}
@@ -128,9 +140,9 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 		case arraySubscript:
 			return new IndirectLValueNode(this, destSource, getType());
 		case structMember:
-			return ComponentNode.resolveStructOrUnion(expr.getType().getSUEName()).getMember(memberName);
+			return ComponentNode.resolveStructOrUnion(expr.getType().getSUEName()).getMember(memberName).getInstance(expr.getLValue());
 		case structMemberP:
-			return ComponentNode.resolveStructOrUnion(expr.getType().getSUEName()).getMember(memberName);	
+			return ComponentNode.resolveStructOrUnion(((PointerType) expr.getType()).getType().getSUEName()).getMember(memberName).getInstance(pointerRef);	
 		default:
 			return null;
 		}
@@ -141,7 +153,8 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 		switch (type)
 		{
 		case arraySubscript: case funcCall: return true;
-		case structMember: case structMemberP: return expr.hasAssembly();
+		case structMember: return expr.hasAssembly();
+		case structMemberP: return true;
 		case incr: case decr: return true;
 		default: return false; // TODO
 		}
@@ -192,8 +205,17 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 			
 			break;
 		case structMember:
+			if (expr.hasAssembly()) assembly += expr.getAssembly(leadingWhitespace, scratchManager);
 			break;
 		case structMemberP:
+			ScratchSource sourceP;
+			if (!scratchManager.hasPointer(expr.getLValue().getSource()))
+			{
+				sourceP = scratchManager.reservePointer(expr.getLValue().getSource());
+				assembly += AssemblyUtils.byteCopier(whitespace, CompConfig.pointerSize, sourceP, expr.getLValue().getSource());
+			}
+			else sourceP = scratchManager.getPointer(expr.getLValue().getSource());
+			pointerRef = new IndirectLValueNode(this, expr.getLValue(), sourceP, ((PointerType) expr.getType()).getType());
 			break;
 		default:
 			break;
