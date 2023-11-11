@@ -96,10 +96,36 @@ public class AdditiveExpressionNode extends BinaryExpressionNode
 			};
 		}, true, true);
 	}
-	public static String getDecrementer(String whitespace, OperandSource destSource, OperandSource sourceX)
+	public static String getDecrementer(String whitespace, OperandSource source)
 	{
-		OperandSource sourceY = new ConstantSource(1, sourceX.getSize());
-		return getSubtractor(whitespace, destSource, sourceX, sourceY);
+		String assembly = "";
+		if (source.getSize() >= 2)
+		{
+			assembly += whitespace + source.prefaceAssembly(whitespace, source.getSize() - 2, true) + "\n";
+			assembly += whitespace + "DEC\t" + source.apply(source.getSize() - 2, true) + "\n";
+			if (source.getSize() > 2)
+			{
+				assembly = whitespace + "SEC\n";
+				assembly += whitespace + AssemblyUtils.bytewiseOperation(whitespace, source.getSize() - 2, (Integer i, Boolean is16Bit) -> 
+				{return new String[]
+					{
+						source.prefaceAssembly(whitespace, i + 1, is16Bit),
+						"LDA\t" + source.apply(i + 1, is16Bit),
+						source.prefaceAssembly(whitespace, i + 1, is16Bit),
+						"SBC\t" + (is16Bit ? "#$0000" : "#$00"),
+						source.prefaceAssembly(whitespace, i + 1, is16Bit),
+						"STA\t" + source.apply(i + 1, is16Bit),
+					};
+				}, true, true);
+			}
+		}
+		else
+		{
+			assembly += whitespace + source.prefaceAssembly(whitespace, source.getSize() - 1, false) + "\n";
+			assembly += whitespace + "LDA\t" + source.apply(source.getSize() - 1, false) + "\n";
+		}
+		
+		return assembly;
 	}
 	
 	@Override
