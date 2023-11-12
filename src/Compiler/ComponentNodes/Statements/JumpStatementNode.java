@@ -95,9 +95,9 @@ public class JumpStatementNode extends StatementNode<Jump_statementContext> impl
 				assembly += whitespace + "JML\t" + iterNode.getEndLabel() + "\n";
 			break;
 		case returnM:
-			if (expr != null && expr.hasAssembly()) assembly += expr.getAssembly(leadingWhitespace, CompConfig.callResultSource(expr.getLValue().getSize()));
+			if (expr != null && expr.hasAssembly()) assembly += expr.getAssembly(leadingWhitespace, CompConfig.callResultSource(expr.getSize()));
 			else if (expr != null && expr.hasPropValue()) assembly += AssemblyUtils.byteCopier(whitespace, funcNode.getSize(), CompConfig.callResultSource(funcNode.getSize()), new ConstantSource(expr.getPropLong(), funcNode.getSize()));
-			else if (expr != null) assembly += AssemblyUtils.byteCopier(whitespace, funcNode.getType().getSize(), CompConfig.callResultSource(expr.getLValue().getSize()), expr.getLValue().getSource());
+			else if (expr != null && expr.hasLValue()) assembly += AssemblyUtils.byteCopier(whitespace, funcNode.getType().getSize(), CompConfig.callResultSource(expr.getLValue().getSize()), expr.getLValue().getSource());
 			assembly += whitespace + "JML\t" + funcNode.getEndLabel() + "\n";
 			break;
 		}
