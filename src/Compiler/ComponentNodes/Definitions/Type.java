@@ -279,8 +279,8 @@ public class Type
 		if (storageClassSpecifier != null) signature += storageClassSpecifier + " ";
 		for (String specifier : typeSpecifiers) signature += specifier + " ";
 		for (String qualifier : typeQualifiers) signature += qualifier + " ";
-		for (String specifier : typeSpecifiers) signature += specifier + " ";
+//		for (String specifier : typeSpecifiers) signature += specifier + " ";
 
-		return signature.substring(0, signature.length());
+		return signature.substring(0, signature.length() - 1);
 	}
 }

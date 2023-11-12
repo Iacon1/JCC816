@@ -46,6 +46,6 @@ public class PointerType extends Type
 		signature += "* ";
 		for (String qualifier : pointerQualifiers) signature += qualifier + " ";
 		
-		return signature.substring(0, signature.length());
+		return signature.substring(0, signature.length() - 1);
 	}
 }
