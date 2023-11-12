@@ -109,12 +109,17 @@ public class DeclarationNode extends InterpretingNode<DeclarationNode, Declarati
 		for (int i = 0; i < variables.size(); ++i)
 			if (expressions.get(i) != null)
 			{
-				if (!expressions.get(i).hasPropValue()) assembly += expressions.get(i).getAssembly(leadingWhitespace, variables.get(i).getSource(), new DetailsTicket());
+				if (!expressions.get(i).hasPropValue())
+				{
+					assembly += expressions.get(i).getAssembly(leadingWhitespace, variables.get(i).getSource(), new DetailsTicket());
+					if (expressions.get(i).hasLValue() && expressions.get(i).getLValue().hasPossibleValues())
+						variables.get(i).setPossibleValues(expressions.get(i).getLValue().getPossibleValues());
+				}
 				else
 				{	
 					OperandSource sourceN = new ConstantSource(expressions.get(i).getPropValue(), expressions.get(i).getSize());
 					assembly += AssemblyUtils.byteCopier(AssemblyUtils.getWhitespace(leadingWhitespace), variables.get(i).getSize(), variables.get(i).getSource(), sourceN);
-					
+					variables.get(i).setOnlyPossibleValue(expressions.get(i).getPropValue());
 				}
 			}
 				
