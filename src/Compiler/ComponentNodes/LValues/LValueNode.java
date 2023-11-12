@@ -9,6 +9,7 @@ import Compiler.ComponentNodes.ComponentNode;
 import Compiler.ComponentNodes.Definitions.Type;
 import Compiler.ComponentNodes.Interfaces.TypedNode;
 import Compiler.Utils.CompConfig;
+import Compiler.Utils.CompConfig.OptimizationLevel;
 import Compiler.Utils.OperandSources.OperandSource;
 
 public abstract class LValueNode<C extends LValueNode<C>> extends ComponentNode<C> implements TypedNode
@@ -45,7 +46,7 @@ public abstract class LValueNode<C extends LValueNode<C>> extends ComponentNode<
 	 */
 	public boolean hasPossibleValues()
 	{
-		return (CompConfig.optimizationLevel.compareTo(CompConfig.OptimizationLevel.low) > 0) && hasPossibleValues;
+		return OptimizationLevel.isAtLeast(OptimizationLevel.medium) && hasPossibleValues;
 	}
 	/** Returns the set of RValues this could be equivalent to, or null if that's unknown.
 	 * 
