@@ -32,8 +32,7 @@ public class ScratchManager
 
 		for (ScratchSource pointer : reservedPointers.values())
 			reserveScratchBlock(pointer.getSize(), pointer.getOffset());
-		
-		Logging.logNotice("Pointers: " + reservedPointers.size());
+
 		assert totalSize() == CompConfig.scratchSize;
 	}
 	
