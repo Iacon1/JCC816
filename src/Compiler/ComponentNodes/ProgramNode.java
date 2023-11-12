@@ -15,6 +15,7 @@ import Compiler.ComponentNodes.Interfaces.AssemblableNode;
 import Compiler.ComponentNodes.LValues.VariableNode;
 import Compiler.Utils.AssemblyUtils;
 import Compiler.Utils.AssemblyUtils.DetailsTicket;
+import Compiler.Utils.CompConfig.DebugLevel;
 import Compiler.Utils.CompConfig;
 import Compiler.Utils.CompUtils;
 import Compiler.Utils.SNESRegisters;
@@ -61,7 +62,12 @@ public class ProgramNode extends InterpretingNode<ProgramNode, ProgramContext> i
 		for (String fullName: fullNames) positions.put(fullName, 0);
 		for (String fullName: fullNames)
 		{
-			assembly += whitespace + AssemblyUtils.applyFiller(fullName, maxLength) + " := " + CompUtils.mapOffset(positions.get(fullName), resolveVariable(fullName).getSize()) + "\n";
+			assembly +=
+					whitespace + AssemblyUtils.applyFiller(fullName, maxLength) +
+					(DebugLevel.isAtLeast(DebugLevel.low) ? " := " : " = ") + 
+					CompUtils.mapOffset(positions.get(fullName), resolveVariable(fullName).getSize()) +
+					(DebugLevel.isAtLeast(DebugLevel.medium) ? "\t; " + resolveVariable(fullName).getType().getSignature() + " (" + resolveVariable(fullName).getSize() + " bytes)": "") + 
+					"\n";
 			FunctionDefinitionNode owner = resolveVariable(fullName).getEnclosingFunction();
 			for (String otherFullName: fullNames)
 			{
