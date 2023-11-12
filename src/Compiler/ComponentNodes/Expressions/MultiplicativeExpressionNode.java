@@ -319,7 +319,7 @@ public class MultiplicativeExpressionNode extends BinaryExpressionNode
 	{
 		String assembly = "";
 		assembly += AssemblyUtils.byteCopier(whitespace, sourceX.getSize(), CompConfig.multDivSource(true, sourceX.getSize()), sourceX, ticket);
-		assembly += AssemblyUtils.byteCopier(whitespace, sourceY.getSize(), CompConfig.multDivSource(true, sourceX.getSize()), sourceY, ticket);
+		assembly += AssemblyUtils.byteCopier(whitespace, sourceY.getSize(), CompConfig.multDivSource(false, sourceY.getSize()), sourceY, ticket);
 		assembly += whitespace + "JSL\t" + ComponentNode.registerDiv(sourceX.getSize(), sourceY.getSize()) + "\n";
 		assembly += AssemblyUtils.byteCopier(whitespace, sourceX.getSize(), destSource, CompConfig.callResultSource(sourceX.getSize()), ticket);
 		return assembly;
