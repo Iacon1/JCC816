@@ -98,7 +98,7 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 	@Override
 	public FunctionType getType()
 	{
-		return new FunctionType(type);
+		return new FunctionType(type, getParameters());
 	}
 	
 	@Override
