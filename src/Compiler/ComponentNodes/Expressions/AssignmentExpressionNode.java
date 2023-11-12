@@ -145,6 +145,8 @@ public class AssignmentExpressionNode extends BinaryExpressionNode
 			x.getLValue().setOnlyPossibleValue(y.getPropValue());
 		else if (y.hasLValue() && y.getLValue().hasPossibleValues())
 			x.getLValue().setPossibleValues(y.getLValue().getPossibleValues());
+		
+		scratchManager.demotePointer(destSource); // A copy of the destination, if it's a pointer, has gone stale
 		return assembly;
 	}
 	@Override

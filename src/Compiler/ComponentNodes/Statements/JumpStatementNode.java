@@ -11,6 +11,7 @@ import Compiler.Utils.AssemblyUtils;
 import Compiler.Utils.OperandSources.ConstantSource;
 import Compiler.Utils.CompConfig;
 import Compiler.Utils.CompUtils;
+import Compiler.Utils.ScratchManager;
 import Grammar.C99.C99Parser.Jump_statementContext;
 
 public class JumpStatementNode extends StatementNode<Jump_statementContext> implements AssemblableNode
@@ -101,6 +102,7 @@ public class JumpStatementNode extends StatementNode<Jump_statementContext> impl
 			break;
 		}
 			
+		ScratchManager.clearPointers();
 		return assembly;
 		
 	}

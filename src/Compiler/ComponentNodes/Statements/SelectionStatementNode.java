@@ -13,6 +13,7 @@ import Compiler.ComponentNodes.Expressions.ExpressionNode;
 import Compiler.Utils.AssemblyUtils;
 import Compiler.Utils.CompConfig;
 import Compiler.Utils.CompUtils;
+import Compiler.Utils.ScratchManager;
 import Compiler.Utils.OperandSources.ConstantSource;
 import Compiler.ComponentNodes.FunctionDefinitionNode;
 import Grammar.C99.C99Parser.Selection_statementContext;
@@ -132,6 +133,8 @@ public class SelectionStatementNode extends StatementNode<Selection_statementCon
 			
 			assembly += switchStm.getAssembly(leadingWhitespace + CompConfig.indentSize);
 		}
+		
+		ScratchManager.clearPointers();
 		return assembly;
 	}	
 }

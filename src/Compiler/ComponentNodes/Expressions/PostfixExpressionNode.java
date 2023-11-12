@@ -222,6 +222,7 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 			break;
 		}
 		
+		scratchManager.demotePointer(destSource); // A copy of the destination, if it's a pointer, has gone stale
 		return assembly;
 	}
 	@Override
