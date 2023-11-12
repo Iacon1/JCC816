@@ -7,14 +7,7 @@ import java.util.Set;
 
 import Compiler.ComponentNodes.ComponentNode;
 import Compiler.ComponentNodes.Definitions.Type;
-import Compiler.ComponentNodes.Expressions.AdditiveExpressionNode;
-import Compiler.ComponentNodes.Expressions.BaseExpressionNode;
-import Compiler.Utils.AssemblyUtils;
 import Compiler.Utils.AssemblyUtils.DetailsTicket;
-import Compiler.Utils.CompConfig;
-import Compiler.Utils.CompUtils;
-import Compiler.Utils.ScratchManager;
-import Compiler.Utils.OperandSources.ConstantSource;
 import Compiler.Utils.OperandSources.OperandSource;
 
 public class IndirectLValueNode extends LValueNode<IndirectLValueNode>
@@ -26,7 +19,7 @@ public class IndirectLValueNode extends LValueNode<IndirectLValueNode>
 		
 		public IndirectOperandSource()
 		{
-			super(addrSource.getSize(), addrSource.isLiteral());
+			super(type.getSize(), addrSource.isLiteral());
 			lastWhitespace = "";
 		}
 
