@@ -8,6 +8,7 @@ import Grammar.C99.C99Parser.Function_definitionContext;
 import Logging.Logging;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -30,6 +31,7 @@ import Compiler.Utils.AssemblyUtils;
 import Compiler.Utils.CompConfig;
 import Compiler.Utils.CompUtils;
 import Compiler.Utils.ScratchManager;
+import Compiler.Utils.CompConfig.DebugLevel;
 
 public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionNode, Function_definitionContext> implements NamedNode, TypedNode, AssemblableNode
 {
@@ -40,10 +42,13 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 	
 	private StatementNode<?> code;
 	
+	private boolean requiresStackLoader; // Do we need a stack-loading foreword?
+	
 	public FunctionDefinitionNode(ComponentNode<?> parent)
 	{
 		super(parent);
 		attributes = new HashSet<String>();
+		requiresStackLoader = false;
 	}
 
 	@Override
@@ -81,6 +86,10 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 	{
 		return signature.getChildVariables();
 	}
+	public String getLoaderLabel()
+	{
+		return "__" + getFullName() + "_LOAD";
+	}
 	public String getLabel(String gotoLabel)
 	{
 		return "__" + getFullName() + CompConfig.scopeDelimiter + gotoLabel;
@@ -93,6 +102,11 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 	public boolean isInterruptHandler()
 	{
 		return attributes.contains(CompUtils.Attributes.interrupt);
+	}
+	
+	public void requireStackLoader()
+	{
+		requiresStackLoader = true;
 	}
 
 	@Override
@@ -112,12 +126,21 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 	{
 		return true; // Always there as a label at least
 	}
+
 	@Override
 	public String getAssembly(int leadingWhitespace) throws Exception
 	{
 		String whitespace = AssemblyUtils.getWhitespace(leadingWhitespace);
 		String assembly = "";
 	
+		if (requiresStackLoader)
+		{
+			assembly += whitespace + getLoaderLabel() + ":\n";
+			List<VariableNode> parameters = getParameters();
+			Collections.reverse(parameters);
+			for (VariableNode parameter : parameters)
+				assembly += AssemblyUtils.stackLoader(whitespace, leadingWhitespace, parameter.getSource());
+		}
 		assembly += whitespace + getFullName() + ":" +
 				(DebugLevel.isAtLeast(DebugLevel.medium) ? "\t; " + getType().getSignature() : "") + 
 				"\n";
