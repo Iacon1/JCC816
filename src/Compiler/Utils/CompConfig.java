@@ -86,10 +86,28 @@ public final class CompConfig
 	
 	public static enum OptimizationLevel
 	{
-		low, // No aggressive (i. e. interline) constant propagation
-		medium, // No side-effect annihilation
-		all // All optimizations
+		low, // + Basic (intra-expression) constant propagation
+		medium, // + Aggressive (inter-line) constant propagation
+		all, // + Side-effect annihilation
+		;
+		public static boolean isAtLeast(OptimizationLevel level)
+		{
+			return CompConfig.optimizationLevel.compareTo(level) >= 0;
+		}
 	}
-	public static OptimizationLevel optimizationLevel = OptimizationLevel.all;
+	public static OptimizationLevel optimizationLevel = OptimizationLevel.medium;
+	
+	public static enum DebugLevel
+	{
+		none, // None
+		low, // + Output symbols
+		medium, // + Comments
+		;
+		public static boolean isAtLeast(DebugLevel level)
+		{
+			return CompConfig.debugLevel.compareTo(level) >= 0;
+		}
+	}
+	public static DebugLevel debugLevel = DebugLevel.medium;
 	
 }

@@ -110,7 +110,7 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 	@Override
 	public boolean hasAssembly()
 	{
-		return true; // Always there as a label
+		return true; // Always there as a label at least
 	}
 	@Override
 	public String getAssembly(int leadingWhitespace) throws Exception
@@ -118,7 +118,9 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 		String whitespace = AssemblyUtils.getWhitespace(leadingWhitespace);
 		String assembly = "";
 	
-		assembly += whitespace + getFullName() + ":\n";
+		assembly += whitespace + getFullName() + ":" +
+				(DebugLevel.isAtLeast(DebugLevel.medium) ? "\t; " + getType().getSignature() : "") + 
+				"\n";
 		if (code != null) assembly += code.getAssembly(leadingWhitespace + CompConfig.indentSize);
 		assembly += whitespace + getEndLabel() + ": " + (isInterruptHandler() && attributes.contains(CompUtils.Attributes.noISR) ? "RTI\n" : "RTL") + "\n";
 		
