@@ -10,6 +10,7 @@ import Compiler.ComponentNodes.Definitions.Type;
 import Compiler.ComponentNodes.Expressions.AdditiveExpressionNode;
 import Compiler.ComponentNodes.Expressions.BaseExpressionNode;
 import Compiler.Utils.AssemblyUtils;
+import Compiler.Utils.AssemblyUtils.DetailsTicket;
 import Compiler.Utils.CompConfig;
 import Compiler.Utils.CompUtils;
 import Compiler.Utils.ScratchManager;
@@ -30,20 +31,20 @@ public class IndirectLValueNode extends LValueNode<IndirectLValueNode>
 		}
 
 		@Override
-		public String apply(Integer i, Boolean is16Bit)
+		public String apply(Integer i, DetailsTicket ticket)
 		{
-			return "[" + addrSource.apply(0, is16Bit) + "],y\n" + lastWhitespace + "PLY";
+			return "[" + addrSource.apply(0, ticket) + "],y" + ((ticket.flags & DetailsTicket.saveY) != 0 ? "\n" + lastWhitespace + "PLY" : "");
 		}
 	
 		@Override
-		public String prefaceAssembly(String whitespace, Integer i, Boolean is16Bit)
+		public String prefaceAssembly(String whitespace, Integer i, DetailsTicket ticket)
 		{
 			String assembly = "";
 			lastWhitespace = whitespace;
 			if (i != lastI)
 			{
-				assembly += "PHY\n";
-				assembly += whitespace + "LDY\t#$" + String.format(is16Bit? "%04x" : "%02x", i) + "\n";
+				if ((ticket.flags & DetailsTicket.saveY) != 0) assembly += "PHY\n" + whitespace;
+				assembly += "LDY\t#$" + String.format(ticket.is16Bit() ? "%04x" : "%02x", i) + "\n";
 				lastI = i;
 			}
 

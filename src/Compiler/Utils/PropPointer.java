@@ -3,9 +3,12 @@
 
 package Compiler.Utils;
 
-import Compiler.ComponentNodes.LValues.VariableNode;
+import java.util.function.BiFunction;
 
-public class PropPointer
+import Compiler.ComponentNodes.LValues.VariableNode;
+import Compiler.Utils.AssemblyUtils.DetailsTicket;
+
+public class PropPointer implements BiFunction<Integer, DetailsTicket, String>
 {
 	private VariableNode node;
 	private long offset;
@@ -27,11 +30,11 @@ public class PropPointer
 	{
 		return node;
 	}
-	public String apply(Integer i, Boolean is16Bit)
+	public String apply(Integer i, DetailsTicket ticket)
 	{
 		String address = null;
 		if (offset != 0) address = node.getFullName() + " + " + offset;
 		else if (offset == 0) address = node.getFullName();
-		return "#" + (is16Bit ? ".loWord(" : ".bankByte(") + address + ")";
+		return "#" + (ticket.is16Bit() ? ".loWord(" : ".bankByte(") + address + ")";
 	}
 }

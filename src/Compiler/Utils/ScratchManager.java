@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import Compiler.Utils.AssemblyUtils.DetailsTicket;
 import Compiler.Utils.OperandSources.OperandSource;
 
 import java.util.AbstractMap.SimpleEntry;
@@ -36,14 +37,14 @@ public class ScratchManager
 		}
 		
 		@Override
-		public String apply(Integer i, Boolean is16Bit)
+		public String apply(Integer i, DetailsTicket ticket)
 		{
-			if (i >= size) return (is16Bit? "#$0000" : "#$00");
+			if (i >= size) return (ticket.is16Bit() ? "#$0000" : "#$00");
 			else return CompConfig.scratchBase + " + " + (offset + i);
 		}
 		public int getOffset() {return offset;}
-		public String getAddress(int mod) {return apply(mod, true);}
-		public String getAddress() {return apply(0, true);}
+		public String getAddress(int mod) {return apply(mod, new DetailsTicket());}
+		public String getAddress() {return apply(0, new DetailsTicket());}
 	}
 	
 	private ScratchSource reserveScratchBlock(int size, int initOffset) throws Exception

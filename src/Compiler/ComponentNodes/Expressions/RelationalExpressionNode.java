@@ -9,6 +9,7 @@ import Compiler.ComponentNodes.ComponentNode;
 import Compiler.Utils.AssemblyUtils;
 import Compiler.Utils.CompUtils;
 import Compiler.Utils.ScratchManager;
+import Compiler.Utils.AssemblyUtils.DetailsTicket;
 import Compiler.Utils.OperandSources.OperandSource;
 import Grammar.C99.C99Parser.Relational_expressionContext;
 import Grammar.C99.C99Parser.Shift_expressionContext;
@@ -45,22 +46,25 @@ public class RelationalExpressionNode extends BinaryExpressionNode
 		default: return null;
 		}
 	}
-	public static String getComparison(String whitespace, OperandSource destSource, ScratchManager scratchManager, OperandSource sourceX, String operator, OperandSource sourceY)
+	public static String getComparison(String whitespace, OperandSource destSource, ScratchManager scratchManager, OperandSource sourceX, String operator, OperandSource sourceY, DetailsTicket ticket)
 	{
-		String assembly = "";
-
 		if (sourceX.isLiteral() && !sourceY.isLiteral()) switch (operator)
 		{
-			case "<": return getComparison(whitespace, destSource, scratchManager, sourceY, ">=", sourceX);
-			case "<=": return getComparison(whitespace, destSource, scratchManager, sourceY, ">", sourceX);
-			case ">": return getComparison(whitespace, destSource, scratchManager, sourceY, "<=", sourceX);
-			case ">=": return getComparison(whitespace, destSource, scratchManager, sourceY, "<", sourceX);
+			case "<": return getComparison(whitespace, destSource, scratchManager, sourceY, ">=", sourceX, ticket);
+			case "<=": return getComparison(whitespace, destSource, scratchManager, sourceY, ">", sourceX, ticket);
+			case ">": return getComparison(whitespace, destSource, scratchManager, sourceY, "<=", sourceX, ticket);
+			case ">=": return getComparison(whitespace, destSource, scratchManager, sourceY, "<", sourceX, ticket);
 		}
 
+		String assembly = "";
+
+		assembly += ticket.save(whitespace, DetailsTicket.saveA | DetailsTicket.saveX);
+		
+		DetailsTicket innerTicket = new DetailsTicket(ticket, DetailsTicket.saveX, DetailsTicket.saveA);
 		assembly += whitespace + CompUtils.setXY8 + "\n";
 		assembly += whitespace + "LDX\t#$00\n";
 		assembly += whitespace + "CLC\n";
-		assembly += AssemblyUtils.bytewiseOperation(whitespace, Math.max(sourceX.getSize(), sourceY.getSize()), (Integer i, Boolean is16Bit) -> 
+		assembly += AssemblyUtils.bytewiseOperation(whitespace, Math.max(sourceX.getSize(), sourceY.getSize()), (Integer i, DetailsTicket ticket2) -> 
 		{	
 			List<String> lines = new LinkedList<String>();
 			if (i >= Math.max(sourceX.getSize(), sourceY.getSize()) - 2)
@@ -70,35 +74,35 @@ public class RelationalExpressionNode extends BinaryExpressionNode
 				// Start at MSB
 				if (sourceY.isLiteral())
 				{
-					lines.add(sourceY.prefaceAssembly(whitespace, i, is16Bit));
-					String oldY = sourceY.apply(i, is16Bit).substring(2);
+					lines.add(sourceY.prefaceAssembly(whitespace, i, ticket2));
+					String oldY = sourceY.apply(i, ticket2).substring(2);
 					int yVal = Integer.valueOf(oldY, 16);
-					String newY = "#$" + String.format("%0" + (is16Bit? 4 : 0) + "x", yVal ^ (is16Bit? 0x8000 : 0x80));
-					lines.add(sourceX.prefaceAssembly(whitespace, i, is16Bit));
-					lines.add("LDA\t" + sourceX.apply(i, is16Bit));					// Get X
+					String newY = "#$" + String.format("%0" + (ticket2.is16Bit() ? 4 : 0) + "x", yVal ^ (ticket2.is16Bit() ? 0x8000 : 0x80));
+					lines.add(sourceX.prefaceAssembly(whitespace, i, ticket2));
+					lines.add("LDA\t" + sourceX.apply(i, ticket2));					// Get X
 					lines.add("EOR\t" + toXOR);										// Flip sign
 					lines.add("CMP\t" + newY);										// Cmp X & Y?
 				}
 				else
 				{
-					lines.add(sourceY.prefaceAssembly(whitespace, i, is16Bit));
-					lines.add("LDA\t" + sourceY.apply(i, is16Bit));					// Get Y
+					lines.add(sourceY.prefaceAssembly(whitespace, i, ticket2));
+					lines.add("LDA\t" + sourceY.apply(i, ticket2));					// Get Y
 					lines.add("EOR\t" + toXOR);										// Flip sign
-					lines.add(destSource.prefaceAssembly(whitespace, i, is16Bit));
-					lines.add("STA\t" + destSource.apply(0, is16Bit));				// Place Y in destSource temporarily
-					lines.add(sourceX.prefaceAssembly(whitespace, i, is16Bit));
-					lines.add("LDA\t" + sourceX.apply(i, is16Bit));					// Get X
+					lines.add(destSource.prefaceAssembly(whitespace, i, ticket2));
+					lines.add("STA\t" + destSource.apply(0, ticket2));				// Place Y in destSource temporarily
+					lines.add(sourceX.prefaceAssembly(whitespace, i, ticket2));
+					lines.add("LDA\t" + sourceX.apply(i, ticket2));					// Get X
 					lines.add("EOR\t" + toXOR);										// Flip sign
-					lines.add(destSource.prefaceAssembly(whitespace, i, is16Bit));
-					lines.add("CMP\t" + destSource.apply(0, is16Bit));				// Cmp Y & X?
+					lines.add(destSource.prefaceAssembly(whitespace, i, ticket2));
+					lines.add("CMP\t" + destSource.apply(0, ticket2));				// Cmp Y & X?
 				}
 			}
 			else
 			{
-				lines.add(sourceX.prefaceAssembly(whitespace, i, is16Bit));
-				lines.add("LDA\t" + sourceX.apply(i, is16Bit));						// Get X
-				lines.add(sourceY.prefaceAssembly(whitespace, i, is16Bit));
-				lines.add("CMP\t" + sourceY.apply(i, is16Bit));						// Cmp X & Y?
+				lines.add(sourceX.prefaceAssembly(whitespace, i, ticket2));
+				lines.add("LDA\t" + sourceX.apply(i, ticket2));						// Get X
+				lines.add(sourceY.prefaceAssembly(whitespace, i, ticket2));
+				lines.add("CMP\t" + sourceY.apply(i, ticket2));						// Cmp X & Y?
 			}
 			lines.add("BCC\t:+");													// If x < y then yes
 			lines.add("BNE\t:++");													// If x >= y then no
@@ -125,14 +129,16 @@ public class RelationalExpressionNode extends BinaryExpressionNode
 		}
 		
 		assembly += whitespace + CompUtils.setA8 + "\n";
-		assembly += whitespace + destSource.prefaceAssembly(whitespace, 0, false);
-		assembly += whitespace + "STA\t" + destSource.apply(0, false) + "\n";
+		assembly += whitespace + destSource.prefaceAssembly(whitespace, 0, innerTicket);
+		assembly += whitespace + "STA\t" + destSource.apply(0, innerTicket) + "\n";
+		
+		assembly += ticket.restore(whitespace, DetailsTicket.saveA | DetailsTicket.saveX);
 		
 		return assembly;
 	}
 	@Override
-	protected String getAssembly(String whitespace, OperandSource destSource, ScratchManager scratchManager, OperandSource sourceX, OperandSource sourceY) throws Exception
+	protected String getAssembly(String whitespace, OperandSource destSource, ScratchManager scratchManager, OperandSource sourceX, OperandSource sourceY, DetailsTicket ticket) throws Exception
 	{
-		return getComparison(whitespace, destSource, scratchManager, sourceX, operator, sourceY);
+		return getComparison(whitespace, destSource, scratchManager, sourceX, operator, sourceY, ticket);
 	}
 }

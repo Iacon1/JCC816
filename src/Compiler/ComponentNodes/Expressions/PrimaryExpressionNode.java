@@ -7,6 +7,7 @@ import Compiler.ComponentNodes.FunctionDefinitionNode;
 import Compiler.ComponentNodes.Definitions.Type;
 import Compiler.ComponentNodes.LValues.LValueNode;
 import Compiler.ComponentNodes.LValues.VariableNode;
+import Compiler.Utils.AssemblyUtils.DetailsTicket;
 import Compiler.Utils.CompUtils;
 import Compiler.Utils.ScratchManager;
 import Compiler.Utils.OperandSources.OperandSource;
@@ -73,5 +74,5 @@ public class PrimaryExpressionNode extends BaseExpressionNode<Primary_expression
 	}
 	
 	@Override
-	public String getAssembly(int leadingWhitespace, OperandSource destSource, ScratchManager scratchManager) throws Exception {return null;}
+	public String getAssembly(int leadingWhitespace, OperandSource destSource, ScratchManager scratchManager, DetailsTicket ticket) throws Exception {return null;}
 }

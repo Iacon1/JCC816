@@ -5,6 +5,7 @@ package Compiler.ComponentNodes.LValues;
 import Compiler.ComponentNodes.ComponentNode;
 import Compiler.ComponentNodes.Definitions.StructUnionDefinitionNode;
 import Compiler.ComponentNodes.Definitions.Type;
+import Compiler.Utils.AssemblyUtils.DetailsTicket;
 import Compiler.Utils.OperandSources.AddressSource;
 import Compiler.Utils.OperandSources.OperandSource;
 
@@ -27,14 +28,14 @@ public class MemberNode extends VariableNode
 			}
 
 			@Override
-			public String prefaceAssembly(String whitespace, Integer i, Boolean is16Bit)
+			public String prefaceAssembly(String whitespace, Integer i, DetailsTicket ticket)
 			{
-				return getParent().getSource().prefaceAssembly(whitespace, i + owner.getOffset(name), is16Bit);
+				return getParent().getSource().prefaceAssembly(whitespace, i + owner.getOffset(name), ticket);
 			}
 			@Override
-			public String apply(Integer i, Boolean is16Bit)
+			public String apply(Integer i, DetailsTicket ticket)
 			{
-				return getParent().getSource().apply(i + owner.getOffset(name), is16Bit);
+				return getParent().getSource().apply(i + owner.getOffset(name), ticket);
 			}
 		}
 		private MemberSource source = new MemberSource();

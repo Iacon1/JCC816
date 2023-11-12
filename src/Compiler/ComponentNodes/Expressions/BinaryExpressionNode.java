@@ -10,6 +10,7 @@ import Compiler.ComponentNodes.ComponentNode;
 import Compiler.ComponentNodes.FunctionDefinitionNode;
 import Compiler.ComponentNodes.Definitions.Type;
 import Compiler.Utils.AssemblyUtils;
+import Compiler.Utils.AssemblyUtils.DetailsTicket;
 import Compiler.Utils.ScratchManager;
 import Compiler.Utils.OperandSources.ConstantSource;
 import Compiler.Utils.OperandSources.OperandSource;
@@ -71,10 +72,9 @@ public abstract class BinaryExpressionNode<
 	
 	@Override
 	public boolean hasAssembly() {return x.hasAssembly() || y.hasAssembly() || !hasPropValue();}
-	protected String getAssembly(String whitespace, OperandSource destSource, ScratchManager scratchManager, OperandSource sourceX, OperandSource sourceY) throws Exception
-	{return null;}
+	protected abstract String getAssembly(String whitespace, OperandSource destSource, ScratchManager scratchManager, OperandSource sourceX, OperandSource sourceY, DetailsTicket ticket) throws Exception;
 	@Override
-	public String getAssembly(int leadingWhitespace, OperandSource destSource, ScratchManager scratchManager) throws Exception
+	public String getAssembly(int leadingWhitespace, OperandSource destSource, ScratchManager scratchManager, DetailsTicket ticket) throws Exception
 	{
 		String whitespace = AssemblyUtils.getWhitespace(leadingWhitespace);
 		ScratchSource scratchX = null, scratchY = null;
@@ -84,7 +84,7 @@ public abstract class BinaryExpressionNode<
 		if (y.hasAssembly())
 		{
 			scratchY = scratchManager.reserveScratchBlock(y.getType().getSize());
-			assembly += y.getAssembly(leadingWhitespace, scratchY, scratchManager);
+			assembly += y.getAssembly(leadingWhitespace, scratchY, scratchManager, ticket);
 			if (y.hasLValue())
 				sourceY = y.getLValue().getSource();
 			else sourceY = scratchY;
@@ -98,7 +98,7 @@ public abstract class BinaryExpressionNode<
 		if (x.hasAssembly())
 		{
 			scratchX = scratchManager.reserveScratchBlock(y.getType().getSize());
-			assembly += x.getAssembly(leadingWhitespace, scratchX, scratchManager);
+			assembly += x.getAssembly(leadingWhitespace, scratchX, scratchManager, ticket);
 			if (x.hasLValue())
 				sourceX = x.getLValue().getSource();
 			else sourceX = scratchX;
@@ -109,7 +109,7 @@ public abstract class BinaryExpressionNode<
 			sourceX = x.getLValue().getSource();
 		else sourceX = null;
 		
-		assembly += getAssembly(whitespace, destSource, scratchManager, sourceX, sourceY);
+		assembly += getAssembly(whitespace, destSource, scratchManager, sourceX, sourceY, null);
 		if (scratchX != null) scratchManager.releaseScratchBlock(scratchX);
 		if (scratchY != null) scratchManager.releaseScratchBlock(scratchY);
 		

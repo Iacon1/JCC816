@@ -8,6 +8,7 @@ import Compiler.ComponentNodes.Declarations.TypeNameNode;
 import Compiler.ComponentNodes.Definitions.Type;
 import Compiler.ComponentNodes.LValues.LValueNode;
 import Compiler.Utils.AssemblyUtils;
+import Compiler.Utils.AssemblyUtils.DetailsTicket;
 import Compiler.Utils.ScratchManager;
 import Compiler.Utils.OperandSources.ConstantSource;
 import Compiler.Utils.OperandSources.OperandSource;
@@ -68,13 +69,13 @@ public class CastExpressionNode extends BaseExpressionNode<Cast_expressionContex
 		return expr.hasAssembly() || !hasPropValue();
 	}
 	@Override
-	public String getAssembly(int leadingWhitespace, OperandSource destSource, ScratchManager scratchManager) throws Exception
+	public String getAssembly(int leadingWhitespace, OperandSource destSource, ScratchManager scratchManager, DetailsTicket ticket) throws Exception
 	{
 		String whitespace = AssemblyUtils.getWhitespace(leadingWhitespace);
 		String assembly = "";
 		if (getType().getSize() > expr.getType().getSize()) // Need to make space
 			assembly += AssemblyUtils.byteCopier(whitespace, getType().getSize(), destSource, new ConstantSource(0, getType().getSize()));
-		assembly += expr.getAssembly(leadingWhitespace, destSource, scratchManager);
+		assembly += expr.getAssembly(leadingWhitespace, destSource, scratchManager, ticket);
 		
 		return assembly;
 	}

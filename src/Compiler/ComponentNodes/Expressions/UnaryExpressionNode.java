@@ -15,6 +15,7 @@ import Compiler.ComponentNodes.LValues.VariableNode;
 import Compiler.ComponentNodes.Definitions.PointerType;
 import Compiler.Exceptions.ConstraintException;
 import Compiler.Utils.AssemblyUtils;
+import Compiler.Utils.AssemblyUtils.DetailsTicket;
 import Compiler.Utils.CompConfig;
 import Compiler.Utils.PropPointer;
 import Compiler.Utils.ScratchManager;
@@ -75,7 +76,25 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 	}
 	
 	@Override
-	public boolean hasLValue() {return operator.equals("&") || operator.equals("*");}
+
+	public boolean actsUpon(VariableNode variable)
+	{
+		if (super.actsUpon(variable)) return true;
+		else return (operator.equals("++") || operator.equals("--") && expr.getLValue().equals(variable));
+	}
+
+	public boolean hasLValue()
+	{
+		if (operator.equals("*")) return true;
+		else if (operator.equals("&"))
+		{
+			if (UnaryExpressionNode.class.isAssignableFrom(expr.getClass()) && ((UnaryExpressionNode) expr).operator.equals("&"))
+				return ((UnaryExpressionNode) expr).expr.hasLValue();
+			else return false;
+		}
+		else return expr.hasLValue();
+	}
+
 	@Override
 	public LValueNode<?> getLValue()
 	{
@@ -162,7 +181,7 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 		else return true;
 	}
 	@Override
-	public String getAssembly(int leadingWhitespace, OperandSource destSource, ScratchManager scratchManager) throws Exception
+	public String getAssembly(int leadingWhitespace, OperandSource destSource, ScratchManager scratchManager, DetailsTicket ticket) throws Exception
 	{
 		String whitespace = AssemblyUtils.getWhitespace(leadingWhitespace);
 		String assembly = "";
@@ -171,30 +190,30 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 		switch (operator)
 		{
 		case "++":
-			assembly += AdditiveExpressionNode.getIncrementer(whitespace, sourceX, sourceX);
+			assembly += AdditiveExpressionNode.getIncrementer(whitespace, sourceX, sourceX, ticket);
 			if (!destSource.equals(sourceX))
 				assembly += AssemblyUtils.byteCopier(whitespace, sourceX.getSize(), destSource, sourceX);
 			break;
 		case "--":
-			assembly += AdditiveExpressionNode.getDecrementer(whitespace, sourceX);
+			assembly += AdditiveExpressionNode.getDecrementer(whitespace, sourceX, ticket);
 			if (!destSource.equals(sourceX))
 				assembly += AssemblyUtils.byteCopier(whitespace, sourceX.getSize(), destSource, sourceX);
 			break;
 		case "-": // -x = ~(x-1)
-			assembly += AdditiveExpressionNode.getSubtractor(whitespace, destSource, sourceX, new ConstantSource(1, sourceX.getSize()));
+			assembly += AdditiveExpressionNode.getSubtractor(whitespace, destSource, sourceX, new ConstantSource(1, sourceX.getSize()), ticket);
 			sourceX = destSource;
 		case "~":
-			assembly += XOrExpressionNode.getComplementer(whitespace, destSource, sourceX);
+			assembly += XOrExpressionNode.getComplementer(whitespace, destSource, sourceX, ticket);
 			break;
 		case "!":
-			assembly += EqualityExpressionNode.getIsZero(whitespace, destSource, scratchManager, sourceX);
+			assembly += EqualityExpressionNode.getIsZero(whitespace, destSource, scratchManager, sourceX, ticket);
 			break;
 		case "*":
 			ScratchSource sourceI;
 			if (!scratchManager.hasPointer(sourceX))
 			{
 				sourceI = scratchManager.reservePointer(sourceX);
-				assembly += AssemblyUtils.byteCopier(whitespace, CompConfig.pointerSize, sourceI, sourceX);
+				assembly += AssemblyUtils.byteCopier(whitespace, CompConfig.pointerSize, sourceI, sourceX, ticket);
 			}
 			else sourceI = scratchManager.getPointer(sourceX);
 			
@@ -210,7 +229,7 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 	public String getAssembly(int leadingWhitespace) throws Exception
 	{
 		if (operator.equals("++") || operator.equals("--"))
-			return getAssembly(leadingWhitespace, expr.getLValue().getSource(), new ScratchManager());
+			return getAssembly(leadingWhitespace, expr.getLValue().getSource(), new ScratchManager(), new DetailsTicket());
 		else return super.getAssembly(leadingWhitespace);
 	}
 

@@ -5,6 +5,7 @@ package Compiler.Utils.OperandSources;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
+import Compiler.Utils.AssemblyUtils.DetailsTicket;
 import Compiler.Utils.PropPointer;
 
 public class ConstantSource extends OperandSource
@@ -49,11 +50,11 @@ public class ConstantSource extends OperandSource
 	}
 	
 	@Override
-	public String apply(Integer i, Boolean is16Bit)
+	public String apply(Integer i, DetailsTicket ticket)
 	{
-		if (pointer != null) return pointer.apply(i, is16Bit);
-		if (bytes.length <= i) return "#$" + String.format(is16Bit ? "%04x" : "%02x", 0);
-		if (is16Bit)
+		if (pointer != null) return pointer.apply(i, ticket);
+		if (bytes.length <= i) return "#$" + String.format(ticket.is16Bit() ? "%04x" : "%02x", 0);
+		if (ticket.is16Bit())
 			if (bytes.length == 1) return "#$" + String.format("%02x%02x", 0, bytes[0]);
 			else return "#$" + String.format("%02x%02x", bytes[i], bytes[i + 1]);
 		else return "#$" + String.format("%02x", bytes[i]);

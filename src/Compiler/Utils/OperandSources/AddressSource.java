@@ -2,6 +2,8 @@
 //
 package Compiler.Utils.OperandSources;
 
+import Compiler.Utils.AssemblyUtils.DetailsTicket;
+
 public class AddressSource extends OperandSource
 {
 	private String address;
@@ -13,7 +15,7 @@ public class AddressSource extends OperandSource
 	}
 
 	@Override
-	public String apply(Integer i, Boolean is16Bit)
+	public String apply(Integer i, DetailsTicket ticket)
 	{
 		return address + " + " + i;
 	}

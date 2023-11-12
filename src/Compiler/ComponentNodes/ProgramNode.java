@@ -14,6 +14,7 @@ import Compiler.ComponentNodes.Declarations.DeclarationNode;
 import Compiler.ComponentNodes.Interfaces.AssemblableNode;
 import Compiler.ComponentNodes.LValues.VariableNode;
 import Compiler.Utils.AssemblyUtils;
+import Compiler.Utils.AssemblyUtils.DetailsTicket;
 import Compiler.Utils.CompConfig;
 import Compiler.Utils.CompUtils;
 import Compiler.Utils.SNESRegisters;
@@ -163,7 +164,7 @@ public class ProgramNode extends InterpretingNode<ProgramNode, ProgramContext> i
 					AssemblyUtils.getWhitespace(leadingWhitespace + CompConfig.indentSize),
 					CompConfig.callResultSource(sourceX.getSize()),
 					sourceX,
-					sourceY);
+					sourceY, new DetailsTicket());
 			assembly += whitespace + "RTL\n";
 		}
 		
@@ -178,14 +179,14 @@ public class ProgramNode extends InterpretingNode<ProgramNode, ProgramContext> i
 			if (div.getValue() == 1) // Can use short divider
 				assembly += MultiplicativeExpressionNode.getShortDivider(
 					AssemblyUtils.getWhitespace(leadingWhitespace + CompConfig.indentSize),
-					CompConfig.callResultSource(sourceX.getSize()), sourceX, sourceY);
+					CompConfig.callResultSource(sourceX.getSize()), sourceX, sourceY, new DetailsTicket());
 			else // Must use long divider
 			{
 				ScratchManager scratchManager = new ScratchManager();
 				scratchManager.reserveScratchBlock(CompConfig.scratchSize - 2 * div.getKey() - div.getValue() - 2); // Assume as little memory available as possible
 				assembly += MultiplicativeExpressionNode.getLongDivider(
 					AssemblyUtils.getWhitespace(leadingWhitespace + CompConfig.indentSize),
-					CompConfig.callResultSource(sourceX.getSize()), scratchManager, sourceX, sourceY);
+					CompConfig.callResultSource(sourceX.getSize()), scratchManager, sourceX, sourceY, new DetailsTicket());
 			}
 			assembly += whitespace + "RTL\n";
 		}

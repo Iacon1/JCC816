@@ -7,6 +7,7 @@ import java.util.List;
 
 import Compiler.ComponentNodes.ComponentNode;
 import Compiler.Utils.AssemblyUtils;
+import Compiler.Utils.AssemblyUtils.DetailsTicket;
 import Compiler.Utils.CompUtils;
 import Compiler.Utils.ScratchManager;
 import Compiler.Utils.OperandSources.OperandSource;
@@ -44,41 +45,43 @@ public class EqualityExpressionNode extends BinaryExpressionNode
 		}
 	}
 	
-	public static String getIsZero(String whitespace, OperandSource destSource, ScratchManager scratchManager, OperandSource source)
+	public static String getIsZero(String whitespace, OperandSource destSource, ScratchManager scratchManager, OperandSource source, DetailsTicket ticket)
 	{
 		String assembly = "";
-		assembly += CompUtils.setA8 + "\n";
-		assembly += whitespace + "LDA\t#$00\n";
-		assembly += AssemblyUtils.bytewiseOperation(whitespace, source.getSize(), (Integer i, Boolean is16Bit) -> {return new String[]{"ORA\t" + source.apply(i, is16Bit)};}, false, false);
-		assembly += whitespace + "STA\t" + destSource.apply(0, false) + "\n";
+		assembly += whitespace + "LDA\t" + ((ticket.flags & DetailsTicket.isA16Bit) != 0 ? "#$00" : "#$00") + "\n";
+		assembly += AssemblyUtils.bytewiseOperation(whitespace, source.getSize(), (Integer i, DetailsTicket ticket2) -> {return new String[]{"ORA\t" + source.apply(i, ticket2)};});
+		assembly += whitespace + "STA\t" + destSource.apply(0, ticket) + "\n";
 		return assembly;
 	}
 	
 	@Override
-	protected String getAssembly(String whitespace, OperandSource destSource, ScratchManager scratchManager, OperandSource sourceX, OperandSource sourceY) throws Exception
+	protected String getAssembly(String whitespace, OperandSource destSource, ScratchManager scratchManager, OperandSource sourceX, OperandSource sourceY, DetailsTicket ticket) throws Exception
 	{
 		String assembly = "";
 
 		assembly += whitespace + CompUtils.setXY8 + "\n";
+		assembly += ticket.save(whitespace, DetailsTicket.saveA | DetailsTicket.saveX);
 		if (operator.equals("==")) assembly += whitespace + "LDX\t#$00\n";
 		else if (operator.equals("!=")) assembly += whitespace + "LDX\t#$01\n";
-		assembly += AssemblyUtils.bytewiseOperation(whitespace, sourceX.getSize(), (Integer i, Boolean is16Bit) -> 
+		DetailsTicket innerTicket = new DetailsTicket(ticket, DetailsTicket.saveX, DetailsTicket.saveA);
+		assembly += AssemblyUtils.bytewiseOperation(whitespace, sourceX.getSize(), (Integer i, DetailsTicket ticket2) -> 
 		{	
 			List<String> lines = new LinkedList<String>();
-			lines.add(whitespace + sourceX.prefaceAssembly(whitespace, i, is16Bit));
-			lines.add("LDA\t" + sourceX.apply(i, is16Bit));	// Get X
-			lines.add(whitespace + sourceY.prefaceAssembly(whitespace, i, is16Bit));
-			lines.add("CMP\t" + sourceY.apply(i, is16Bit));	// Cmp X & Y?
+			lines.add(whitespace + sourceX.prefaceAssembly(whitespace, i, ticket2));
+			lines.add("LDA\t" + sourceX.apply(i, ticket2));	// Get X
+			lines.add(whitespace + sourceY.prefaceAssembly(whitespace, i, ticket2));
+			lines.add("CMP\t" + sourceY.apply(i, ticket2));	// Cmp X & Y?
 			lines.add("BNE\t:+");							// if [not op] then no
 			// else maybe
 			return lines.toArray(new String[] {});
-		});
+		}, innerTicket);
 		if (operator.equals("==")) assembly += whitespace + "INX\n";
 		else if (operator.equals("!=")) assembly += whitespace + "DEX\n";
 		assembly += ":" + whitespace.substring(1) + "TXA\n";
 		assembly += whitespace + CompUtils.setA8 + "\n";
-		assembly += whitespace + destSource.prefaceAssembly(whitespace, 0, false);
-		assembly += whitespace + "STA\t" + destSource.apply(0, false) + "\n";
+		assembly += whitespace + destSource.prefaceAssembly(whitespace, 0, ticket);
+		assembly += whitespace + "STA\t" + destSource.apply(0, ticket) + "\n";
+		assembly += ticket.restore(whitespace, DetailsTicket.saveA | DetailsTicket.saveX);
 		
 		return assembly;
 	}

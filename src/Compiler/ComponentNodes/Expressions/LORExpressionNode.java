@@ -4,6 +4,7 @@ package Compiler.ComponentNodes.Expressions;
 
 import Compiler.ComponentNodes.ComponentNode;
 import Compiler.Utils.AssemblyUtils;
+import Compiler.Utils.AssemblyUtils.DetailsTicket;
 import Compiler.Utils.CompUtils;
 import Compiler.Utils.ScratchManager;
 import Compiler.Utils.OperandSources.OperandSource;
@@ -36,27 +37,33 @@ public class LORExpressionNode extends BinaryExpressionNode
 		return a || b;
 	}
 	@Override
-	protected String getAssembly(String whitespace, OperandSource destSource, ScratchManager scratchManager, OperandSource sourceX, OperandSource sourceY) throws Exception
+	protected String getAssembly(String whitespace, OperandSource destSource, ScratchManager scratchManager, OperandSource sourceX, OperandSource sourceY, DetailsTicket ticket) throws Exception
 	{
-		String assembly = whitespace + CompUtils.setXY8 + "\n";
+		String assembly = "";
+		assembly += ticket.save(whitespace, DetailsTicket.saveA | DetailsTicket.saveX);
+		assembly += whitespace + CompUtils.setXY8 + "\n";
+		if (operator.equals("==")) assembly += whitespace + "LDX\t#$00\n";
+		else if (operator.equals("!=")) assembly += whitespace + "LDX\t#$01\n";
+		DetailsTicket innerTicket = new DetailsTicket(ticket, DetailsTicket.saveX, DetailsTicket.saveA); // All of our uses of A are LDA so it's fine
 		assembly += whitespace + "LDX\t#$01\n";
-		assembly += AssemblyUtils.bytewiseOperation(whitespace, sourceX.getSize(), (Integer i, Boolean is16Bit) ->
+		assembly += AssemblyUtils.bytewiseOperation(whitespace, sourceX.getSize(), (Integer i, DetailsTicket ticket2) ->
 		{
 			return new String[]
 			{
-				sourceX.prefaceAssembly(whitespace, i, is16Bit),
-				"LDA\t" + sourceX.apply(i, is16Bit),
+				sourceX.prefaceAssembly(whitespace, i, ticket2),
+				"LDA\t" + sourceX.apply(i, ticket2),
 				"BNE\t:+",
-				sourceY.prefaceAssembly(whitespace, i, is16Bit),
-				"LDA\t" + sourceY.apply(i, is16Bit),
+				sourceY.prefaceAssembly(whitespace, i, ticket2),
+				"LDA\t" + sourceY.apply(i, ticket2),
 				"BNE\t:+",
 			};
-		});
+		}, ticket);
 		assembly += whitespace + "DEX\n";
 		assembly += ":" + whitespace.substring(1) + "TXA\n";
 		assembly += whitespace + CompUtils.setA8 + "\n";
-		assembly += whitespace + destSource.prefaceAssembly(whitespace, 0, false);
-		assembly += whitespace + "STA\t" + destSource.apply(0, false);
+		assembly += whitespace + destSource.prefaceAssembly(whitespace, 0, innerTicket);
+		assembly += whitespace + "STA\t" + destSource.apply(0, innerTicket);
+		assembly += ticket.restore(whitespace, DetailsTicket.saveA | DetailsTicket.saveX);
 		return assembly;
 	}
 }

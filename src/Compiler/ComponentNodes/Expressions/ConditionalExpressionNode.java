@@ -2,10 +2,9 @@
 // 
 package Compiler.ComponentNodes.Expressions;
 
-import java.util.function.Function;
-
 import Compiler.ComponentNodes.ComponentNode;
 import Compiler.ComponentNodes.FunctionDefinitionNode;
+import Compiler.Utils.AssemblyUtils.DetailsTicket;
 import Compiler.Utils.ScratchManager;
 import Compiler.Utils.OperandSources.OperandSource;
 import Grammar.C99.C99Parser.Conditional_expressionContext;
@@ -61,9 +60,11 @@ public class ConditionalExpressionNode extends BinaryExpressionNode
 		else return y.getPropValue();
 	}
 	@Override
-	public String getAssembly(int leadingWhitespace, OperandSource writeAddr, ScratchManager scratchManager) throws Exception
+	protected String getAssembly(String whitespace, OperandSource destSource, ScratchManager scratchManager,
+			OperandSource sourceX, OperandSource sourceY, DetailsTicket ticket) throws Exception
 	{
 		// TODO Auto-generated method stub
 		return null;
 	}
+	
 }
