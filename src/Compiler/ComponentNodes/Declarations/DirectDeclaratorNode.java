@@ -23,8 +23,7 @@ public class DirectDeclaratorNode extends InterpretingNode<DirectDeclaratorNode,
 		declarator,
 		array,
 		varLenArray,
-		funcParam,
-		idList,
+		funcParam;
 	}
 	public static class DirDeclaratorInfo
 	{
@@ -64,7 +63,7 @@ public class DirectDeclaratorNode extends InterpretingNode<DirectDeclaratorNode,
 			type = Type.declarator;
 			subDec = new DeclaratorNode(this).interpret(node.declarator());
 		}
-		else if (node.parameter_type_list() != null) // Parameter list
+		else if (node.getChild(1).getText().equals("(")) // Parameter list
 		{
 			type = Type.funcParam;
 			info = new DirDeclaratorInfo(type);
@@ -77,14 +76,11 @@ public class DirectDeclaratorNode extends InterpretingNode<DirectDeclaratorNode,
 			info.paramDecls = parameters.toArray(new DeclarationNode[] {});
 			subDirDec = new DirectDeclaratorNode(this).interpret(node.direct_declarator());
 		}
-		else if (node.identifier_list() != null) // Parameter list
-		{
-			type = Type.idList;
-			subDirDec = new DirectDeclaratorNode(this).interpret(node.direct_declarator());
-		}
-		else // Array
+		else if (node.getChild(1).getText().equals("["))// Array
 		{
 			type = Type.array;
+			
+			if (node.getText().endsWith("*]")) // VLA
 			
 			if ((node.getChild(node.getChildCount() - 2).getText() + node.getChild(node.getChildCount() - 1).getText()).equals("*]")) // VLA
 				type = Type.varLenArray;
@@ -113,7 +109,7 @@ public class DirectDeclaratorNode extends InterpretingNode<DirectDeclaratorNode,
 			type = Type.declarator;
 			subDec = new DeclaratorNode(this).interpret(node.declarator());
 		}
-		else if (node.parameter_type_list() != null) // Parameter list
+		else if (node.getChild(1).getText().equals("(")) // Parameter list
 		{
 			type = Type.funcParam;
 			info = new DirDeclaratorInfo(type);
@@ -126,16 +122,11 @@ public class DirectDeclaratorNode extends InterpretingNode<DirectDeclaratorNode,
 			info.paramDecls = parameters.toArray(new DeclarationNode[] {});
 			subDirDec = new DirectDeclaratorNode(this).interpret(node.direct_abstract_declarator());
 		}
-		else if (node.identifier_list() != null) // Parameter list
-		{
-			type = Type.idList;
-			subDirDec = new DirectDeclaratorNode(this).interpret(node.direct_abstract_declarator());
-		}
-		else // Array
+		else if (node.getChild(1).getText().equals("["))// Array
 		{
 			type = Type.array;
 			
-			if ((node.getChild(node.getChildCount() - 2).getText() + node.getChild(node.getChildCount() - 1).getText()).equals("*]")) // VLA
+			if (node.getText().endsWith("*]")) // VLA
 				type = Type.varLenArray;
 			info = new DirDeclaratorInfo(type);
 			if (node.type_qualifier_list() != null)
