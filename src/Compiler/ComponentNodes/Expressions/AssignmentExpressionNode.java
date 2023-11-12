@@ -4,8 +4,10 @@
 package Compiler.ComponentNodes.Expressions;
 
 import Compiler.ComponentNodes.ComponentNode;
+import Compiler.ComponentNodes.LValues.VariableNode;
 import Compiler.Exceptions.ConstraintException;
 import Compiler.Utils.AssemblyUtils;
+import Compiler.Utils.AssemblyUtils.DetailsTicket;
 import Compiler.Utils.ScratchManager;
 import Compiler.Utils.OperandSources.ConstantSource;
 import Compiler.Utils.OperandSources.OperandSource;
@@ -111,7 +113,10 @@ public class AssignmentExpressionNode extends BinaryExpressionNode
 	public Object getPropValue() {return null;} // Should never happen
 	
 	@Override
-	public String getAssembly(int leadingWhitespace, OperandSource destSource, ScratchManager scratchManager) throws Exception
+	protected String getAssembly(String whitespace, OperandSource destSource, ScratchManager scratchManager, OperandSource sourceX, OperandSource sourceY, DetailsTicket ticket) throws Exception
+	{throw new UnsupportedOperationException();} // This is never directly called.
+	@Override
+	public String getAssembly(int leadingWhitespace, OperandSource destSource, ScratchManager scratchManager, DetailsTicket ticket) throws Exception
 	{
 		String whitespace = AssemblyUtils.getWhitespace(leadingWhitespace);
 		final OperandSource sourceY;
@@ -119,7 +124,7 @@ public class AssignmentExpressionNode extends BinaryExpressionNode
 		
 		if (y.hasAssembly())
 		{
-			assembly += y.getAssembly(leadingWhitespace, destSource, scratchManager);
+			assembly += y.getAssembly(leadingWhitespace, destSource, scratchManager, ticket);
 			if (!y.hasLValue()) sourceY = destSource;
 			else sourceY = y.getLValue().getSource();
 		}
@@ -130,12 +135,11 @@ public class AssignmentExpressionNode extends BinaryExpressionNode
 			else if (y.hasLValue())
 				sourceY = y.getLValue().getSource();
 			else sourceY = null;
-		
-			if (x.hasAssembly()) assembly += x.getAssembly(leadingWhitespace, scratchManager);
 		}
+		if (x.hasAssembly()) assembly += x.getAssembly(leadingWhitespace, scratchManager, ticket);
 		
 		if (!y.hasAssembly() || !destSource.equals(x.getLValue().getSource()))
-			assembly += AssemblyUtils.byteCopier(whitespace, x.getLValue().getSize(), x.getLValue().getSource(), sourceY);
+			assembly += AssemblyUtils.byteCopier(whitespace, x.getLValue().getSize(), x.getLValue().getSource(), sourceY, ticket);
 		
 		if (y.hasPropValue())
 			x.getLValue().setOnlyPossibleValue(y.getPropValue());
@@ -144,9 +148,9 @@ public class AssignmentExpressionNode extends BinaryExpressionNode
 		return assembly;
 	}
 	@Override
-	protected String getAssembly(int leadingWhitespace, ScratchManager scratchManager) throws Exception
+	protected String getAssembly(int leadingWhitespace, ScratchManager scratchManager, DetailsTicket ticket) throws Exception
 	{
-		return getAssembly(leadingWhitespace, x.getLValue().getSource(), scratchManager);
+		return getAssembly(leadingWhitespace, x.getLValue().getSource(), scratchManager, ticket);
 	}
 	
 	

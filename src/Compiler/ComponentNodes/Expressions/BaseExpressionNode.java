@@ -11,6 +11,7 @@ import Compiler.ComponentNodes.InterpretingNode;
 import Compiler.ComponentNodes.Interfaces.AssemblableNode;
 import Compiler.ComponentNodes.Interfaces.TypedNode;
 import Compiler.ComponentNodes.LValues.LValueNode;
+import Compiler.Utils.AssemblyUtils.DetailsTicket;
 import Compiler.Utils.CompConfig;
 import Compiler.Utils.PropPointer;
 import Compiler.Utils.ScratchManager;
@@ -42,20 +43,24 @@ public abstract class BaseExpressionNode<C extends ParserRuleContext> extends In
 		try {return (PropPointer) getPropValue();}
 		catch (Exception e) {return null;}
 	}
-	public abstract String getAssembly(int leadingWhitespace, OperandSource destSource, ScratchManager scratchManager) throws Exception;
+	public abstract String getAssembly(int leadingWhitespace, OperandSource destSource, ScratchManager scratchManager, DetailsTicket ticket) throws Exception;
+	public String getAssembly(int leadingWhitespace, OperandSource destSource, DetailsTicket ticket) throws Exception
+	{
+		return getAssembly(leadingWhitespace, destSource, new ScratchManager(), ticket);
+	}
 	public String getAssembly(int leadingWhitespace, OperandSource destSource) throws Exception
 	{
-		return getAssembly(leadingWhitespace, destSource, new ScratchManager());
+		return getAssembly(leadingWhitespace, destSource, new ScratchManager(), new DetailsTicket());
 	}
-	protected String getAssembly(int leadingWhitespace, ScratchManager scratchManager) throws Exception
+	protected String getAssembly(int leadingWhitespace, ScratchManager scratchManager, DetailsTicket ticket) throws Exception
 	{
-		return getAssembly(leadingWhitespace, CompConfig.callResultSource(getType().getSize()),  scratchManager);
+		return getAssembly(leadingWhitespace, CompConfig.callResultSource(getType().getSize()),  scratchManager, ticket);
 	}
 	@Override
 	public String getAssembly(int leadingWhitespace) throws Exception
 	{
 		ScratchManager scratchManager = new ScratchManager();
-		return getAssembly(leadingWhitespace, scratchManager);
+		return getAssembly(leadingWhitespace, scratchManager, new DetailsTicket());
 	}
 
 	

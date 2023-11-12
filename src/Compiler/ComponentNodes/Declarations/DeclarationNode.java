@@ -15,6 +15,7 @@ import Compiler.ComponentNodes.Interfaces.AssemblableNode;
 import Compiler.ComponentNodes.LValues.VariableNode;
 import Compiler.Exceptions.ConstraintException;
 import Compiler.Utils.AssemblyUtils;
+import Compiler.Utils.AssemblyUtils.DetailsTicket;
 import Compiler.Utils.OperandSources.ConstantSource;
 import Compiler.Utils.OperandSources.OperandSource;
 import Grammar.C99.C99Parser.Abstract_declaratorContext;
@@ -108,7 +109,7 @@ public class DeclarationNode extends InterpretingNode<DeclarationNode, Declarati
 		for (int i = 0; i < variables.size(); ++i)
 			if (expressions.get(i) != null)
 			{
-				if (!expressions.get(i).hasPropValue()) assembly += expressions.get(i).getAssembly(leadingWhitespace, variables.get(i).getSource());
+				if (!expressions.get(i).hasPropValue()) assembly += expressions.get(i).getAssembly(leadingWhitespace, variables.get(i).getSource(), new DetailsTicket());
 				else
 				{	
 					OperandSource sourceN = new ConstantSource(expressions.get(i).getPropValue(), expressions.get(i).getSize());

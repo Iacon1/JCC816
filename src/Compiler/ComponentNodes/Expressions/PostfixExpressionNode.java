@@ -13,6 +13,7 @@ import Compiler.ComponentNodes.Definitions.Type;
 import Compiler.ComponentNodes.LValues.IndirectLValueNode;
 import Compiler.ComponentNodes.LValues.LValueNode;
 import Compiler.Utils.AssemblyUtils;
+import Compiler.Utils.AssemblyUtils.DetailsTicket;
 import Compiler.Utils.CompConfig;
 import Compiler.Utils.ScratchManager;
 import Compiler.Utils.OperandSources.ConstantSource;
@@ -160,7 +161,7 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 		}
 	}
 	@Override
-	public String getAssembly(int leadingWhitespace, OperandSource destSource, ScratchManager scratchManager) throws Exception
+	public String getAssembly(int leadingWhitespace, OperandSource destSource, ScratchManager scratchManager, DetailsTicket ticket) throws Exception
 	{
 		String whitespace = AssemblyUtils.getWhitespace(leadingWhitespace);
 		String assembly = "";
@@ -172,13 +173,13 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 			// An array normal has a size representing its memory footprint, we just need the size of the actual address here
 			ScratchSource sourceI = scratchManager.reserveScratchBlock(CompConfig.pointerSize);
 			OperandSource sourceS = new ConstantSource(indexExpr.getType().getSize(), CompConfig.pointerSize);
-			if (indexExpr.hasAssembly()) assembly += indexExpr.getAssembly(leadingWhitespace, sourceI, scratchManager);
-			assembly += MultiplicativeExpressionNode.getMultCall(whitespace, sourceI, scratchManager, sourceI, sourceS); // Multiply by size of type
-			assembly += AdditiveExpressionNode.getAdder(whitespace, destSource, sourceA, sourceI);
+			if (indexExpr.hasAssembly()) assembly += indexExpr.getAssembly(leadingWhitespace, sourceI, scratchManager, ticket);
+			assembly += MultiplicativeExpressionNode.getMultCall(whitespace, sourceI, scratchManager, sourceI, sourceS, ticket); // Multiply by size of type
+			assembly += AdditiveExpressionNode.getAdder(whitespace, destSource, sourceA, sourceI, ticket);
 			scratchManager.releaseScratchBlock(sourceI);
 			break;
 		case funcCall:
-			if (expr.hasAssembly()) assembly += expr.getAssembly(leadingWhitespace, scratchManager);
+			if (expr.hasAssembly()) assembly += expr.getAssembly(leadingWhitespace, scratchManager, ticket);
 			
 			if (getReferencedFunction() != null && !getReferencedFunction().canCall(getEnclosingFunction())) // We can know the variables to copy parameters to
 			{
@@ -186,7 +187,7 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 				for (int i = 0; i < params.size(); ++i)
 				{
 					OperandSource sourceV = func.getParameters().get(i).getSource();
-					if (params.get(i).hasAssembly()) assembly += params.get(i).getAssembly(leadingWhitespace, sourceV, scratchManager);
+					if (params.get(i).hasAssembly()) assembly += params.get(i).getAssembly(leadingWhitespace, sourceV, scratchManager, ticket);
 					else
 					{
 						OperandSource sourceP = null;
@@ -199,13 +200,13 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 			}
 			else // TODO Unpredictable function pointer or recursion, need to use the stack
 			{
-				if (expr.hasPropValue()) assembly += whitespace + "JSL\t" + new ConstantSource(expr.getPropValue(), CompConfig.pointerSize).apply(0, true) + "\n";
-				else if (expr.hasLValue()) assembly += whitespace + "JSL\t" + expr.getLValue().getSource().apply(0, true) + "\n";
+				if (expr.hasPropValue()) assembly += whitespace + "JSL\t" + new ConstantSource(expr.getPropValue(), CompConfig.pointerSize).apply(0, ticket) + "\n";
+				else if (expr.hasLValue()) assembly += whitespace + "JSL\t" + expr.getLValue().getSource().apply(0, ticket) + "\n";
 			}
 			
 			break;
 		case structMember:
-			if (expr.hasAssembly()) assembly += expr.getAssembly(leadingWhitespace, scratchManager);
+			if (expr.hasAssembly()) assembly += expr.getAssembly(leadingWhitespace, scratchManager, ticket);
 			break;
 		case structMemberP:
 			ScratchSource sourceP;
@@ -227,7 +228,7 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 	public String getAssembly(int leadingWhitespace) throws Exception
 	{
 		if (type == PFType.incr || type == PFType.decr)
-			return getAssembly(leadingWhitespace, expr.getLValue().getSource(), new ScratchManager());
+			return getAssembly(leadingWhitespace, expr.getLValue().getSource(), new ScratchManager(), new DetailsTicket());
 		else return super.getAssembly(leadingWhitespace);
 	}
 }

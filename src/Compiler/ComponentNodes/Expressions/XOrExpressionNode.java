@@ -5,6 +5,7 @@ package Compiler.ComponentNodes.Expressions;
 import Compiler.ComponentNodes.ComponentNode;
 import Compiler.Utils.AssemblyUtils;
 import Compiler.Utils.ScratchManager;
+import Compiler.Utils.AssemblyUtils.DetailsTicket;
 import Compiler.Utils.OperandSources.ConstantSource;
 import Compiler.Utils.OperandSources.OperandSource;
 import Grammar.C99.C99Parser.And_expressionContext;
@@ -31,37 +32,49 @@ public class XOrExpressionNode extends BinaryExpressionNode
 	protected BaseExpressionNode<And_expressionContext> getPCNode(Xor_expressionContext node) throws Exception
 	{return new AndExpressionNode(this).interpret(node.and_expression());}
 
-	public static String getExclOr(String whitespace, OperandSource destSource, OperandSource sourceX, OperandSource sourceY)
+	public static String getExclOr(String whitespace, OperandSource destSource, OperandSource sourceX, OperandSource sourceY, DetailsTicket ticket)
 	{
-		String assembly = AssemblyUtils.bytewiseOperation(whitespace, sourceX.getSize(), (Integer i, Boolean is16Bit) ->
+		String assembly = "";
+		assembly += ticket.save(whitespace, DetailsTicket.saveA);
+		DetailsTicket innerTicket = new DetailsTicket(ticket, DetailsTicket.saveA, 0);
+		
+		assembly += AssemblyUtils.bytewiseOperation(whitespace, sourceX.getSize(), (Integer i, DetailsTicket ticket2) ->
 		{
 			return new String[]
 			{
-				sourceX.prefaceAssembly(whitespace, i, is16Bit),
-				"LDA\t" + sourceX.apply(i, is16Bit),
-				sourceY.prefaceAssembly(whitespace, i, is16Bit),
-				"EOR\t" + sourceY.apply(i, is16Bit),
-				destSource.prefaceAssembly(whitespace, i, is16Bit),
-				"STA\t" + destSource.apply(i, is16Bit),
+				sourceX.prefaceAssembly(whitespace, i, ticket2),
+				"LDA\t" + sourceX.apply(i, ticket2),
+				sourceY.prefaceAssembly(whitespace, i, ticket2),
+				"EOR\t" + sourceY.apply(i, ticket2),
+				destSource.prefaceAssembly(whitespace, i, ticket2),
+				"STA\t" + destSource.apply(i, ticket2),
 			};
-		});
+		}, innerTicket);
+		
+		assembly += ticket.restore(whitespace, DetailsTicket.saveA);
 		return assembly;
 	}
-	public static String getComplementer(String whitespace, OperandSource destSource, OperandSource sourceX)
+	public static String getComplementer(String whitespace, OperandSource destSource, OperandSource sourceX, DetailsTicket ticket)
 	{
+		String assembly = "";
+		assembly += ticket.save(whitespace, DetailsTicket.saveA);
+		DetailsTicket innerTicket = new DetailsTicket(ticket, DetailsTicket.saveA, 0);
+		
 		OperandSource sourceY = new ConstantSource(Long.valueOf("FF".repeat(sourceX.getSize())), sourceX.getSize()); // 0xFF...FF
-		String assembly = AssemblyUtils.bytewiseOperation(whitespace, sourceX.getSize(), (Integer i, Boolean is16Bit) ->
+		assembly += AssemblyUtils.bytewiseOperation(whitespace, sourceX.getSize(), (Integer i, DetailsTicket ticket2) ->
 		{
 			return new String[]
 			{
-				sourceX.prefaceAssembly(whitespace, i, is16Bit),
-				"LDA\t" + sourceX.apply(i, is16Bit),
-				sourceY.prefaceAssembly(whitespace, i, is16Bit),
-				"EOR\t" + sourceY.apply(i, is16Bit),
-				destSource.prefaceAssembly(whitespace, i, is16Bit),
-				"STA\t" + destSource.apply(i, is16Bit),
+				sourceX.prefaceAssembly(whitespace, i, ticket2),
+				"LDA\t" + sourceX.apply(i, ticket2),
+				sourceY.prefaceAssembly(whitespace, i, ticket2),
+				"EOR\t" + sourceY.apply(i, ticket2),
+				destSource.prefaceAssembly(whitespace, i, ticket2),
+				"STA\t" + destSource.apply(i, ticket2),
 			};
-		});
+		}, innerTicket);
+		
+		assembly += ticket.restore(whitespace, DetailsTicket.saveA);
 		return assembly;
 	}
 	@Override
@@ -72,8 +85,8 @@ public class XOrExpressionNode extends BinaryExpressionNode
 		return Long.valueOf(a ^ b);
 	}
 	@Override
-	protected String getAssembly(String whitespace, OperandSource destSource, ScratchManager scratchManager, OperandSource sourceX, OperandSource sourceY) throws Exception
+	protected String getAssembly(String whitespace, OperandSource destSource, ScratchManager scratchManager, OperandSource sourceX, OperandSource sourceY, DetailsTicket ticket) throws Exception
 	{
-		return getExclOr(whitespace, destSource, sourceX, sourceY);
+		return getExclOr(whitespace, destSource, sourceX, sourceY, ticket);
 	}
 }

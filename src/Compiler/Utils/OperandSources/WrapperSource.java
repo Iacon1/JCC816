@@ -2,6 +2,8 @@
 // Source with adjustable size
 package Compiler.Utils.OperandSources;
 
+import Compiler.Utils.AssemblyUtils.DetailsTicket;
+
 /**
  * 
  */
@@ -16,9 +18,9 @@ public class WrapperSource extends OperandSource
 	}
 
 	@Override
-	public String apply(Integer i, Boolean is16Bit)
+	public String apply(Integer i, DetailsTicket ticket)
 	{
-		return source.apply(i, is16Bit);
+		return source.apply(i, ticket);
 	}
 
 }

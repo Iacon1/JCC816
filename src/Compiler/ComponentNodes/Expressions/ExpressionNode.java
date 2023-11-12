@@ -11,6 +11,7 @@ import Compiler.ComponentNodes.ComponentNode;
 import Compiler.ComponentNodes.FunctionDefinitionNode;
 import Compiler.ComponentNodes.Definitions.Type;
 import Compiler.ComponentNodes.LValues.LValueNode;
+import Compiler.Utils.AssemblyUtils.DetailsTicket;
 import Compiler.Utils.ScratchManager;
 import Compiler.Utils.OperandSources.OperandSource;
 import Grammar.C99.C99Parser.Assignment_expressionContext;
@@ -74,12 +75,12 @@ public class ExpressionNode extends BaseExpressionNode<ExpressionContext>
 		return false;
 	}
 	@Override
-	public String getAssembly(int leadingWhitespace, OperandSource destSource, ScratchManager scratchManager) throws Exception
+	public String getAssembly(int leadingWhitespace, OperandSource destSource, ScratchManager scratchManager, DetailsTicket ticket) throws Exception
 	{
 		String assembly = "";
 		for (BaseExpressionNode<?> expression : expressions.subList(1, expressions.size()))
-			assembly += expression.getAssembly(leadingWhitespace,  scratchManager);
-		assembly += expressions.get(0).getAssembly(leadingWhitespace, destSource, scratchManager);
+			assembly += expression.getAssembly(leadingWhitespace,  scratchManager, ticket);
+		assembly += expressions.get(0).getAssembly(leadingWhitespace, destSource, scratchManager, ticket);
 		
 		return assembly;
 	}

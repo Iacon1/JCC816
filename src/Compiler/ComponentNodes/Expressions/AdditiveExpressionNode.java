@@ -4,6 +4,7 @@ package Compiler.ComponentNodes.Expressions;
 
 import Compiler.ComponentNodes.ComponentNode;
 import Compiler.Utils.AssemblyUtils;
+import Compiler.Utils.AssemblyUtils.DetailsTicket;
 import Compiler.Utils.ScratchManager;
 import Compiler.Utils.OperandSources.ConstantSource;
 import Compiler.Utils.OperandSources.OperandSource;
@@ -63,83 +64,101 @@ public class AdditiveExpressionNode extends BinaryExpressionNode
 			}
 		}
 	}
-	public static String getAdder(String whitespace, OperandSource destSource, OperandSource sourceX, OperandSource sourceY)
-	{
-		return whitespace + "CLC\n" + AssemblyUtils.bytewiseOperation(whitespace, sourceX.getSize(), (Integer i, Boolean is16Bit) -> 
-		{return new String[]
-			{
-				sourceX.prefaceAssembly(whitespace, i, is16Bit),
-				"LDA\t" + sourceX.apply(i, is16Bit),
-				sourceY.prefaceAssembly(whitespace, i, is16Bit),
-				"ADC\t" + sourceY.apply(i, is16Bit),
-				destSource.prefaceAssembly(whitespace, i, is16Bit),
-				"STA\t" + destSource.apply(i, is16Bit),
-			};
-		});
-	}
-	public static String getIncrementer(String whitespace, OperandSource destSource, OperandSource sourceX)
-	{
-		OperandSource sourceY = new ConstantSource(1, sourceX.getSize());
-		return getAdder(whitespace, destSource, sourceX, sourceY);
-	}
-	public static String getSubtractor(String whitespace, OperandSource destSource, OperandSource sourceX, OperandSource sourceY)
-	{
-		return whitespace + "SEC\n" + AssemblyUtils.bytewiseOperation(whitespace, sourceX.getSize(), (Integer i, Boolean is16Bit) -> 
-		{return new String[]
-			{
-				sourceX.prefaceAssembly(whitespace, i, is16Bit),
-				"LDA\t" + sourceX.apply(i, is16Bit),
-				sourceY.prefaceAssembly(whitespace, i, is16Bit),
-				"SBC\t" + sourceY.apply(i, is16Bit),
-				destSource.prefaceAssembly(whitespace, i, is16Bit),
-				"STA\t" + destSource.apply(i, is16Bit),
-			};
-		}, true, true);
-	}
-	public static String getDecrementer(String whitespace, OperandSource source)
+	public static String getAdder(String whitespace, OperandSource destSource, OperandSource sourceX, OperandSource sourceY, DetailsTicket ticket)
 	{
 		String assembly = "";
+		assembly += ticket.save(whitespace, DetailsTicket.saveA);
+		DetailsTicket innerTicket = new DetailsTicket(ticket, DetailsTicket.saveA, 0);
+		
+		assembly += whitespace + "CLC\n" + AssemblyUtils.bytewiseOperation(whitespace, sourceX.getSize(), (Integer i, DetailsTicket ticket2) -> 
+		{return new String[]
+			{
+				sourceX.prefaceAssembly(whitespace, i, ticket2),
+				"LDA\t" + sourceX.apply(i, ticket2),
+				sourceY.prefaceAssembly(whitespace, i, ticket2),
+				"ADC\t" + sourceY.apply(i, ticket2),
+				destSource.prefaceAssembly(whitespace, i, ticket2),
+				"STA\t" + destSource.apply(i, ticket2),
+			};
+		}, innerTicket);
+		
+		assembly += ticket.restore(whitespace, DetailsTicket.saveA);
+		return assembly;
+	}
+	public static String getIncrementer(String whitespace, OperandSource destSource, OperandSource sourceX, DetailsTicket ticket)
+	{
+		OperandSource sourceY = new ConstantSource(1, sourceX.getSize());
+		return getAdder(whitespace, destSource, sourceX, sourceY, ticket);
+	}
+	public static String getSubtractor(String whitespace, OperandSource destSource, OperandSource sourceX, OperandSource sourceY, DetailsTicket ticket)
+	{
+		String assembly = "";
+		assembly += ticket.save(whitespace, DetailsTicket.saveA);
+		DetailsTicket innerTicket = new DetailsTicket(ticket, DetailsTicket.saveA, 0);
+		
+		assembly += whitespace + "SEC\n" + AssemblyUtils.bytewiseOperation(whitespace, sourceX.getSize(), (Integer i, DetailsTicket ticket2) -> 
+		{return new String[]
+			{
+				sourceX.prefaceAssembly(whitespace, i, ticket2),
+				"LDA\t" + sourceX.apply(i, ticket2),
+				sourceY.prefaceAssembly(whitespace, i, ticket2),
+				"SBC\t" + sourceY.apply(i, ticket2),
+				destSource.prefaceAssembly(whitespace, i, ticket2),
+				"STA\t" + destSource.apply(i, ticket2),
+			};
+		}, true, true, innerTicket);
+		
+		assembly += ticket.restore(whitespace, DetailsTicket.saveA);
+		return assembly;
+	}
+	public static String getDecrementer(String whitespace, OperandSource source, DetailsTicket ticket)
+	{
+		String assembly = "";
+		assembly += ticket.save(whitespace, DetailsTicket.saveA);
+		DetailsTicket innerTicket = new DetailsTicket(ticket, DetailsTicket.saveA, 0);
+		
 		if (source.getSize() >= 2)
 		{
-			assembly += whitespace + source.prefaceAssembly(whitespace, source.getSize() - 2, true) + "\n";
-			assembly += whitespace + "DEC\t" + source.apply(source.getSize() - 2, true) + "\n";
+			assembly += whitespace + source.prefaceAssembly(whitespace, source.getSize() - 2, innerTicket) + "\n";
+			assembly += whitespace + "DEC\t" + source.apply(source.getSize() - 2, innerTicket) + "\n";
 			if (source.getSize() > 2)
 			{
 				assembly = whitespace + "SEC\n";
-				assembly += whitespace + AssemblyUtils.bytewiseOperation(whitespace, source.getSize() - 2, (Integer i, Boolean is16Bit) -> 
+				assembly += whitespace + AssemblyUtils.bytewiseOperation(whitespace, source.getSize() - 2, (Integer i, DetailsTicket ticket2) -> 
 				{return new String[]
 					{
-						source.prefaceAssembly(whitespace, i + 1, is16Bit),
-						"LDA\t" + source.apply(i + 1, is16Bit),
-						source.prefaceAssembly(whitespace, i + 1, is16Bit),
-						"SBC\t" + (is16Bit ? "#$0000" : "#$00"),
-						source.prefaceAssembly(whitespace, i + 1, is16Bit),
-						"STA\t" + source.apply(i + 1, is16Bit),
+						source.prefaceAssembly(whitespace, i + 1, ticket2),
+						"LDA\t" + source.apply(i + 1, ticket2),
+						source.prefaceAssembly(whitespace, i + 1, ticket2),
+						"SBC\t" + (ticket2.is16Bit() ? "#$0000" : "#$00"),
+						source.prefaceAssembly(whitespace, i + 1, ticket2),
+						"STA\t" + source.apply(i + 1, ticket2),
 					};
-				}, true, true);
+				}, true, true, innerTicket);
 			}
 		}
 		else
 		{
-			assembly += whitespace + source.prefaceAssembly(whitespace, source.getSize() - 1, false) + "\n";
-			assembly += whitespace + "LDA\t" + source.apply(source.getSize() - 1, false) + "\n";
+			assembly += whitespace + source.prefaceAssembly(whitespace, source.getSize() - 1, ticket) + "\n";
+			assembly += whitespace + "LDA\t" + source.apply(source.getSize() - 1, ticket) + "\n";
 		}
 		
+		assembly += ticket.restore(whitespace, DetailsTicket.saveA);	
 		return assembly;
 	}
 	
 	@Override
-	protected String getAssembly(String whitespace, OperandSource destSource, ScratchManager scratchManager, OperandSource sourceX, OperandSource sourceY) throws Exception
+	protected String getAssembly(String whitespace, OperandSource destSource, ScratchManager scratchManager, OperandSource sourceX, OperandSource sourceY, DetailsTicket ticket) throws Exception
 	{
 		String assembly = "";
 		
 		switch (operator)
 		{
 		case "+":
-			assembly += getAdder(whitespace, destSource, sourceX, sourceY);
+			assembly += getAdder(whitespace, destSource, sourceX, sourceY, ticket);
 			break;
 		case "-":
-			assembly += getSubtractor(whitespace, destSource, sourceX, sourceY);
+			assembly += getSubtractor(whitespace, destSource, sourceX, sourceY, ticket);
 			break;
 		}
 		return assembly;

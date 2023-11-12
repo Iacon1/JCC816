@@ -4,6 +4,7 @@ package Compiler.ComponentNodes.Expressions;
 
 import Compiler.ComponentNodes.ComponentNode;
 import Compiler.Utils.AssemblyUtils;
+import Compiler.Utils.AssemblyUtils.DetailsTicket;
 import Compiler.Utils.ScratchManager;
 import Compiler.Utils.OperandSources.OperandSource;
 import Grammar.C99.C99Parser.Or_expressionContext;
@@ -35,20 +36,25 @@ public class OrExpressionNode extends BinaryExpressionNode
 		return Long.valueOf(a | b);
 	}
 	@Override
-	protected String getAssembly(String whitespace, OperandSource destSource, ScratchManager scratchManager, OperandSource sourceX, OperandSource sourceY) throws Exception
+	protected String getAssembly(String whitespace, OperandSource destSource, ScratchManager scratchManager, OperandSource sourceX, OperandSource sourceY, DetailsTicket ticket) throws Exception
 	{
-		String assembly = AssemblyUtils.bytewiseOperation(whitespace, sourceX.getSize(), (Integer i, Boolean is16Bit) ->
+		
+		String assembly = "";
+		assembly += ticket.save(whitespace, DetailsTicket.saveA);
+		DetailsTicket innerTicket = new DetailsTicket(ticket);
+		AssemblyUtils.bytewiseOperation(whitespace, sourceX.getSize(), (Integer i, DetailsTicket ticket2) ->
 		{
 			return new String[]
 			{
-				sourceX.prefaceAssembly(whitespace, i, is16Bit),
-				"LDA\t" + sourceX.apply(i, is16Bit),
-				sourceY.prefaceAssembly(whitespace, i, is16Bit),
-				"ORA\t" + sourceY.apply(i, is16Bit),
-				destSource.prefaceAssembly(whitespace, i, is16Bit),
-				"STA\t" + destSource.apply(i, is16Bit),
+				sourceX.prefaceAssembly(whitespace, i, ticket2),
+				"LDA\t" + sourceX.apply(i, ticket2),
+				sourceY.prefaceAssembly(whitespace, i, ticket2),
+				"ORA\t" + sourceY.apply(i, ticket2),
+				destSource.prefaceAssembly(whitespace, i, ticket2),
+				"STA\t" + destSource.apply(i, ticket2),
 			};
-		});
+		}, innerTicket);
+		assembly += ticket.restore(whitespace, DetailsTicket.saveA);
 		return assembly;
 	}
 }
