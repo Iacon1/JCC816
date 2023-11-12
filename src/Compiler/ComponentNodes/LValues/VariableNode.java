@@ -16,7 +16,6 @@ public class VariableNode extends LValueNode<VariableNode> implements NamedNode
 	{
 		super(parent, type);
 		this.name = name;
-		source = new AddressSource(this.getFullName(), this.getSize());
 	}
 	@Override
 	public String getName() {return name;}
@@ -24,6 +23,7 @@ public class VariableNode extends LValueNode<VariableNode> implements NamedNode
 	@Override
 	public OperandSource getSource()
 	{
+		if (source == null) source = new AddressSource(this.getFullName(), this.getSize()); // We can't find our name and size until assembly time
 		return source;
 	}
 	
