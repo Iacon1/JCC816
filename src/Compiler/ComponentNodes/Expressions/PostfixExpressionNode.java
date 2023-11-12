@@ -12,6 +12,7 @@ import Compiler.ComponentNodes.Definitions.FunctionType;
 import Compiler.ComponentNodes.Definitions.Type;
 import Compiler.ComponentNodes.LValues.IndirectLValueNode;
 import Compiler.ComponentNodes.LValues.LValueNode;
+import Compiler.ComponentNodes.LValues.VariableNode;
 import Compiler.Utils.AssemblyUtils;
 import Compiler.Utils.AssemblyUtils.DetailsTicket;
 import Compiler.Utils.CompConfig;
@@ -200,6 +201,22 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 			}
 			else // TODO Unpredictable function pointer or recursion, need to use the stack
 			{
+				for (BaseExpressionNode<?> param : params)
+				{
+					OperandSource sourceP = null;
+					ScratchSource sourceV = null;
+					if (param.hasPropValue()) sourceP = new ConstantSource(param.getPropValue(), param.getSize());
+					else if (param.hasLValue()) sourceP = param.getLValue().getSource();
+					if (param.hasAssembly())
+					{
+						sourceV = scratchManager.reserveScratchBlock(param.getSize());
+						assembly += param.getAssembly(leadingWhitespace, sourceV, scratchManager, ticket);
+						if (!param.hasLValue()) sourceP = sourceV;
+					}
+					assembly += AssemblyUtils.stackPusher(whitespace, leadingWhitespace, sourceP);
+					scratchManager.releaseScratchBlock(sourceV);
+				}
+
 				if (expr.hasPropValue()) assembly += whitespace + "JSL\t" + new ConstantSource(expr.getPropValue(), CompConfig.pointerSize).apply(0, ticket) + "\n";
 				else if (expr.hasLValue()) assembly += whitespace + "JSL\t" + expr.getLValue().getSource().apply(0, ticket) + "\n";
 			}

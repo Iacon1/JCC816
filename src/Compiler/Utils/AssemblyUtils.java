@@ -147,8 +147,7 @@ public final class AssemblyUtils
 	{
 		String assembly = "";
 		assembly += ticket.save(whitespace, DetailsTicket.saveA);
-		DetailsTicket innerTicket = new DetailsTicket(ticket);
-		innerTicket.flags &= ~ DetailsTicket.saveA;
+		DetailsTicket innerTicket = new DetailsTicket(ticket, 0, DetailsTicket.saveA);
 		assembly += bytewiseOperation(whitespace, nBytes, (Integer i, DetailsTicket ticket2) -> 
 			{
 				return new String[]
@@ -165,5 +164,47 @@ public final class AssemblyUtils
 	public static String byteCopier(String whitespace, int nBytes, OperandSource writeSource, OperandSource readSource)
 	{
 		return byteCopier(whitespace, nBytes, writeSource, readSource, new DetailsTicket());
+	}
+	public static String stackPusher(String whitespace, int nBytes, OperandSource readSource, DetailsTicket ticket)
+	{
+		String assembly = "";
+		assembly += ticket.save(whitespace, DetailsTicket.saveA);
+		DetailsTicket innerTicket = new DetailsTicket(ticket, 0, DetailsTicket.saveA);
+		assembly += bytewiseOperation(whitespace, nBytes, (Integer i, DetailsTicket ticket2) -> 
+			{
+				return new String[]
+						{
+						readSource.prefaceAssembly(whitespace, i, ticket2),
+						"LDA\t" + readSource.apply(i, ticket2),
+						"PHA"
+						};
+			}, true, false, innerTicket);
+		assembly += ticket.save(whitespace, DetailsTicket.saveA);
+		return assembly;
+	}
+	public static String stackPusher(String whitespace, int nBytes, OperandSource readSource)
+	{
+		return stackPusher(whitespace, nBytes, readSource, new DetailsTicket());
+	}
+	public static String stackLoader(String whitespace, int nBytes, OperandSource writeSource, DetailsTicket ticket)
+	{
+		String assembly = "";
+		assembly += ticket.save(whitespace, DetailsTicket.saveA);
+		DetailsTicket innerTicket = new DetailsTicket(ticket, 0, DetailsTicket.saveA);
+		assembly += bytewiseOperation(whitespace, nBytes, (Integer i, DetailsTicket ticket2) -> 
+			{
+				return new String[]
+						{
+						"PLA",
+						writeSource.prefaceAssembly(whitespace, i, ticket2),
+						"STA\t" + writeSource.apply(i, ticket2),
+						};
+			}, true, true, innerTicket);
+		assembly += ticket.save(whitespace, DetailsTicket.saveA);
+		return assembly;
+	}
+	public static String stackLoader(String whitespace, int nBytes, OperandSource writeSource)
+	{
+		return stackPusher(whitespace, nBytes, writeSource, new DetailsTicket());
 	}
 }
