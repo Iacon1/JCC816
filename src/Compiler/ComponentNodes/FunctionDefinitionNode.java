@@ -29,6 +29,7 @@ import Compiler.ComponentNodes.Statements.StatementNode;
 import Compiler.Utils.AssemblyUtils;
 import Compiler.Utils.CompConfig;
 import Compiler.Utils.CompUtils;
+import Compiler.Utils.ScratchManager;
 
 public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionNode, Function_definitionContext> implements NamedNode, TypedNode, AssemblableNode
 {
@@ -120,6 +121,8 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 		assembly += whitespace + getFullName() + ":\n";
 		if (code != null) assembly += code.getAssembly(leadingWhitespace + CompConfig.indentSize);
 		assembly += whitespace + getEndLabel() + ": " + (isInterruptHandler() && attributes.contains(CompUtils.Attributes.noISR) ? "RTI\n" : "RTL") + "\n";
+		
+		ScratchManager.clearPointers();
 		return assembly;
 	}
 

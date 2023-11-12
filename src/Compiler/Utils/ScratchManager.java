@@ -166,7 +166,7 @@ public class ScratchManager
 		reservedPointers.put(sourceFrom, s);
 		return s;
 	}
-	public boolean hasPointer(OperandSource sourceFrom)
+	public static boolean hasPointer(OperandSource sourceFrom)
 	{
 		return reservedPointers.containsKey(sourceFrom);
 	}
@@ -181,11 +181,11 @@ public class ScratchManager
 		if (reservedPointers.containsKey(sourceFrom))
 			releaseScratchBlock(reservedPointers.get(sourceFrom));
 	}
-	public void promoteToPointer(OperandSource sourceFrom, ScratchSource source)
+	public static void promoteToPointer(OperandSource sourceFrom, ScratchSource source)
 	{
 		reservedPointers.put(sourceFrom, source);
 	}
-	public void demotePointer(OperandSource sourceFrom)
+	public static void demotePointer(OperandSource sourceFrom)
 	{
 		if (reservedPointers.containsKey(sourceFrom))
 			reservedPointers.remove(sourceFrom);
@@ -194,5 +194,9 @@ public class ScratchManager
 	{
 		for (OperandSource key : reservedPointers.keySet())
 			releaseScratchBlock(reservedPointers.get(key));
+	}
+	public static void clearPointers()
+	{
+		reservedPointers.clear();
 	}
 }

@@ -218,10 +218,12 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 			else sourceI = scratchManager.getPointer(sourceX);
 			
 			pointerRef = new IndirectLValueNode(this, expr.getLValue(), sourceI, ((PointerType) expr.getType()).getType());
+			assembly += AssemblyUtils.byteCopier(whitespace, ((PointerType) expr.getType()).getType().getSize(), destSource, pointerRef.getSource(), ticket);
 			break;
 		default: return "";
 		}
-		
+
+		scratchManager.demotePointer(destSource); // A copy of the destination, if it's a pointer, has gone stale
 		return assembly;
 	}
 	

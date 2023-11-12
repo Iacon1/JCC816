@@ -109,10 +109,11 @@ public abstract class BinaryExpressionNode<
 			sourceX = x.getLValue().getSource();
 		else sourceX = null;
 		
-		assembly += getAssembly(whitespace, destSource, scratchManager, sourceX, sourceY, null);
+		assembly += getAssembly(whitespace, destSource, scratchManager, sourceX, sourceY, ticket);
 		if (scratchX != null) scratchManager.releaseScratchBlock(scratchX);
 		if (scratchY != null) scratchManager.releaseScratchBlock(scratchY);
 		
+		scratchManager.demotePointer(destSource); // A copy of the destination, if it's a pointer, has gone stale
 		return assembly;
 	}
 }

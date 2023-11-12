@@ -128,6 +128,8 @@ public class IterationStatementNode extends StatementNode<Iteration_statementCon
 		String whitespace = AssemblyUtils.getWhitespace(leadingWhitespace);
 		String assembly = "";
 		
+		ScratchManager.clearPointers();
+		
 		switch (iterType)
 		{
 		case while_:
