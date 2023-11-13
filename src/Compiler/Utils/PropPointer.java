@@ -5,31 +5,33 @@ package Compiler.Utils;
 
 import java.util.function.BiFunction;
 
-import Compiler.ComponentNodes.LValues.VariableNode;
+import Compiler.ComponentNodes.Interfaces.NamedNode;
+import Compiler.ComponentNodes.Interfaces.TypedNode;
 import Compiler.Utils.AssemblyUtils.DetailsTicket;
 
-public class PropPointer implements BiFunction<Integer, DetailsTicket, String>
+public class PropPointer<T extends NamedNode & TypedNode> implements BiFunction<Integer, DetailsTicket, String>
 {
-	private VariableNode node;
+	private T node;
 	private long offset;
 
-	public PropPointer(VariableNode node, int offset)
+	public PropPointer(T node, int offset)
 	{
 		this.node = node;
 		this.offset = offset * node.getType().getSize();
 	}
 	
-	public PropPointer addOffset(int offset)
+	public PropPointer<T> addOffset(int offset)
 	{
-		PropPointer p = new PropPointer(node, offset);
+		PropPointer<T> p = new PropPointer<T>(node, offset);
 		p.offset += this.offset;
 		return p;
 	}
 	
-	public VariableNode getNode()
+	public T getNode()
 	{
 		return node;
 	}
+	
 	public String apply(Integer i, DetailsTicket ticket)
 	{
 		String address = null;
