@@ -152,9 +152,9 @@ public class ProgramNode extends InterpretingNode<ProgramNode, ProgramContext> i
 		assembly +=
 				whitespace + "SEI\n" +
 				whitespace + "CLC\n" +
-				whitespace + "XCE\n" +
-				whitespace + "REP\t#$08\n";
-		assembly += whitespace + CompUtils.setA16 + "\n";
+				whitespace + "REP\t#$08\n" + 
+				whitespace + CompUtils.setA16 + "\n" +
+				whitespace + "XCE\n";
 		assembly += whitespace + "LDA\t#$" + String.format("%04x", CompConfig.stackSize - 1) + "\n";
 		assembly += whitespace + "TCS\n";
 		assembly += whitespace + "JML\tmain\n";
