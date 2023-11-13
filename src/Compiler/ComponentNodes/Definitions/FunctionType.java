@@ -17,8 +17,8 @@ public class FunctionType extends Type
 	public FunctionType(List<Type> parameterTypes, Type type)
 	{
 		this.type = type;
-		parameterTypes = new ArrayList<Type>();
-		parameterTypes.addAll(parameterTypes);
+		this.parameterTypes = new ArrayList<Type>();
+		this.parameterTypes.addAll(parameterTypes);
 	}
 	public FunctionType(Type type, List<? extends TypedNode> parameters) // Annoyingly, these have to be in a different order
 	{
@@ -46,7 +46,7 @@ public class FunctionType extends Type
 	{
 		String signature = type.getSignature();
 		signature += "(";
-		for (Type parameterType : parameterTypes) signature += type.getSignature() + ", ";
+		for (Type parameterType : parameterTypes) signature += parameterType.getSignature() + ", ";
 		if (parameterTypes.size() != 0) signature = signature.substring(0, signature.length() - 2);
 		signature += ")";
 		return signature;

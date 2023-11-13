@@ -8,12 +8,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.tree.ParseTree;
-
 import Compiler.ComponentNodes.ComponentNode;
 import Compiler.ComponentNodes.InterpretingNode;
-import Compiler.ComponentNodes.Declarations.DirectDeclaratorNode.DirDeclaratorInfo;
+import Compiler.ComponentNodes.Expressions.BaseExpressionNode;
 import Grammar.C99.C99Parser.Abstract_declaratorContext;
 import Grammar.C99.C99Parser.DeclaratorContext;
 import Grammar.C99.C99Parser.Init_declaratorContext;
@@ -22,6 +19,32 @@ import Grammar.C99.C99Parser.Type_qualifier_listContext;
 
 public class DeclaratorNode extends InterpretingNode<DeclaratorNode, DeclaratorContext>
 {
+	public static enum DeclaratorType
+	{
+		identifier,
+		declarator,
+		array,
+		varLenArray,
+		funcParam,
+		
+		pointer;
+	}
+	public static class DeclaratorInfo
+	{
+		public final DeclaratorType type;
+		
+		public DeclaratorInfo(DeclaratorType type)
+		{
+			this.type = type;
+		}
+		
+		public Set<String> pointerQualifiers;
+		public String[] typeQualifiers;
+		public BaseExpressionNode<?> assignExpr;
+		public ParameterDeclarationNode[] paramDecls;
+		public String[] idens;
+	}
+	
 	private List<Set<String>> pointerQualifiers;
 	private DirectDeclaratorNode directDeclarator;
 	
@@ -85,9 +108,18 @@ public class DeclaratorNode extends InterpretingNode<DeclaratorNode, DeclaratorC
 			qualifiers.add(new HashSet<String>(qualSet));
 		return qualifiers;
 	}
-	public List<DirDeclaratorInfo> getInfo()
+	public List<DeclaratorInfo> getInfo()
 	{
-		return directDeclarator.getInfo();
+		List<DeclaratorInfo> info = directDeclarator.getInfo();
+		for (Set<String> set : pointerQualifiers)
+		{
+			DeclaratorInfo newInfo = new DeclaratorInfo(DeclaratorType.pointer);
+			newInfo.pointerQualifiers = new HashSet<String>();
+			newInfo.pointerQualifiers.addAll(set);
+			info.add(0, newInfo);
+		}
+		
+		return info;
 	}
 
 }

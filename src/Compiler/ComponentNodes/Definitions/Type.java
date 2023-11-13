@@ -16,6 +16,8 @@ import Compiler.ComponentNodes.Declarations.DeclarationSpecifiersNode;
 import Compiler.ComponentNodes.Declarations.DeclaratorNode;
 import Compiler.ComponentNodes.Declarations.DirectDeclaratorNode;
 import Compiler.ComponentNodes.Dummies.DummyType;
+import Compiler.ComponentNodes.Interfaces.TypedNode;
+import Compiler.ComponentNodes.LValues.VariableNode;
 import Compiler.Exceptions.ConstraintException;
 import Compiler.Exceptions.UnsupportedFeatureException;
 import Compiler.Utils.CompConfig;
@@ -143,24 +145,42 @@ public class Type
 		typeSpecifiers.addAll(other.typeSpecifiers);
 		typeQualifiers.addAll(other.typeQualifiers);
 	}
-	
+
 	public static Type manufacture(DeclarationSpecifiersNode.DeclSpecifiers specifiers, DeclaratorNode declaratorNode, Token start) throws Exception
 	{
 		Type type = new Type(specifiers, start);
 		
-		if (declaratorNode.pointerQualifiers() != null) // Pointer
-			for (int i = declaratorNode.pointerQualifiers().size() - 1; i >= 0; --i)
-				type = new PointerType(type, declaratorNode.pointerQualifiers().get(i));
-		
-		for (DirectDeclaratorNode.DirDeclaratorInfo info : declaratorNode.getInfo()) // Array
+		for (DeclaratorNode.DeclaratorInfo info : declaratorNode.getInfo()) // Array
 		{
 			if (info == null) continue;
-			if (info.type == DirectDeclaratorNode.Type.array)
+			if (info.type == DeclaratorNode.DeclaratorType.pointer)
+			{
+				type = new PointerType(type, info.pointerQualifiers);
+			}
+			if (info.type == DeclaratorNode.DeclaratorType.array)
 			{
 				if (info.assignExpr != null && Number.class.isAssignableFrom(info.assignExpr.getPropValue().getClass()))
 					type = new ArrayType(type, (int) info.assignExpr.getPropLong());
 				else
 					type = new ArrayType(type); // Incomplete array
+			}
+			else if (info.type == DeclaratorNode.DeclaratorType.funcParam) // Function
+			{
+				if (type.isFunction() || type.isArray())
+					throw new ConstraintException("6.7.5.3", 1, start);
+				List<Type> paramTypes = new ArrayList<Type>();
+				for (int i = 0; i < info.paramDecls.length; ++i)
+				{
+					for (VariableNode variable : info.paramDecls[i].getChildVariables(false))
+					{
+						Type paramType = variable.getType();
+						if (paramType.isExtern() | paramType.isAuto() | paramType.isStatic())
+							throw new ConstraintException("6.7.5.3", 2, start);
+						paramTypes.add(paramType);
+					}
+				}
+
+				type = new FunctionType(paramTypes, type);
 			}
 		}
 		
@@ -222,6 +242,24 @@ public class Type
 		if (typeSpecifiers.size() == 0) return false;
 		return typeSpecifiers.contains(specifier);
 	}
+	
+	public boolean isExtern()
+	{
+		return storageClassSpecifier != null && storageClassSpecifier.equals("extern");
+	}
+	public boolean isStatic()
+	{
+		return storageClassSpecifier != null && storageClassSpecifier.equals("static");
+	}
+	public boolean isAuto()
+	{
+		return storageClassSpecifier != null && storageClassSpecifier.equals("auto");
+	}
+	public boolean isRegister()
+	{
+		return storageClassSpecifier != null && storageClassSpecifier.equals("register");
+	}
+	
 	
 	public boolean isConstant()
 	{
