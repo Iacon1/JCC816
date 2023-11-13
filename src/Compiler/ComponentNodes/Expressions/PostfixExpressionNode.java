@@ -3,6 +3,7 @@
 package Compiler.ComponentNodes.Expressions;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import Compiler.ComponentNodes.ComponentNode;
@@ -106,7 +107,7 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 		case arraySubscript:
 			return ((PointerType) expr.getType()).getType();
 		case funcCall:
-			return ((FunctionType) getReferencedFunction().getType()).getType();
+			return ((FunctionType) expr.getType()).getType();
 		case structMember:
 			return ComponentNode.resolveStructOrUnion(expr.getType().getSUEName()).getMember(memberName).getType();
 		case structMemberP:
@@ -185,6 +186,14 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 			if (getReferencedFunction() != null && !getReferencedFunction().canCall(getEnclosingFunction())) // We can know the variables to copy parameters to
 			{
 				FunctionDefinitionNode func = getReferencedFunction();
+				
+				if (func.canCall(getEnclosingFunction())) // Prepare for possible recursion
+				{
+					List<VariableNode> variables = getEnclosingFunction().getChildVariables();
+					for (VariableNode parameter : variables)
+						assembly += AssemblyUtils.stackLoader(whitespace, leadingWhitespace, parameter.getSource());
+				}
+				
 				for (int i = 0; i < params.size(); ++i)
 				{
 					OperandSource sourceV = func.getParameters().get(i).getSource();
@@ -198,9 +207,21 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 					}
 				}
 				assembly += whitespace + "JSL\t" + func.getFullName() + "\n";
+				
+				if (func.canCall(getEnclosingFunction())) // Finish possible recursion
+				{
+					List<VariableNode> variables = getEnclosingFunction().getChildVariables();
+					Collections.reverse(variables);
+					for (VariableNode parameter : variables)
+						assembly += AssemblyUtils.stackLoader(whitespace, leadingWhitespace, parameter.getSource());
+				}
 			}
 			else // TODO Unpredictable function pointer or recursion, need to use the stack
 			{
+				List<VariableNode> variables = getEnclosingFunction().getChildVariables(); // Prepare for possible recursion
+				for (VariableNode parameter : variables)
+					assembly += AssemblyUtils.stackLoader(whitespace, leadingWhitespace, parameter.getSource());
+
 				for (BaseExpressionNode<?> param : params)
 				{
 					OperandSource sourceP = null;
@@ -214,20 +235,25 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 						if (!param.hasLValue()) sourceP = sourceV;
 					}
 					assembly += AssemblyUtils.stackPusher(whitespace, leadingWhitespace, sourceP);
-					scratchManager.releaseScratchBlock(sourceV);
+					if (sourceV != null) scratchManager.releaseScratchBlock(sourceV);
 				}
 
 				if (expr.hasPropValue()) assembly += whitespace + "JSL\t" + new ConstantSource(expr.getPropValue(), CompConfig.pointerSize).apply(0, ticket) + "\n";
 				else if (expr.hasLValue()) assembly += whitespace + "JSL\t" + expr.getLValue().getSource().apply(0, ticket) + "\n";
+				
+				Collections.reverse(variables);
+				for (VariableNode parameter : variables)
+					assembly += AssemblyUtils.stackLoader(whitespace, leadingWhitespace, parameter.getSource());
 			}
 			
+			if (destSource != null) assembly += AssemblyUtils.byteCopier(whitespace, destSource.getSize(), destSource, CompConfig.callResultSource(destSource.getSize()));
 			break;
 		case structMember:
 			if (expr.hasAssembly()) assembly += expr.getAssembly(leadingWhitespace, scratchManager, ticket);
 			break;
 		case structMemberP:
 			ScratchSource sourceP;
-			if (!scratchManager.hasPointer(expr.getLValue().getSource()))
+			if (!ScratchManager.hasPointer(expr.getLValue().getSource()))
 			{
 				sourceP = scratchManager.reservePointer(expr.getLValue().getSource());
 				assembly += AssemblyUtils.byteCopier(whitespace, CompConfig.pointerSize, sourceP, expr.getLValue().getSource());
@@ -239,7 +265,7 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 			break;
 		}
 		
-		scratchManager.demotePointer(destSource); // A copy of the destination, if it's a pointer, has gone stale
+		ScratchManager.demotePointer(destSource); // A copy of the destination, if it's a pointer, has gone stale
 		return assembly;
 	}
 	@Override

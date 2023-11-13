@@ -83,6 +83,7 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 		else return (operator.equals("++") || operator.equals("--") && expr.getLValue().equals(variable));
 	}
 
+	@Override
 	public boolean hasLValue()
 	{
 		if (operator.equals("*")) return true;
@@ -108,8 +109,9 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 		{
 			if (UnaryExpressionNode.class.isAssignableFrom(expr.getClass()) && ((UnaryExpressionNode) expr).operator.equals("&"))
 				return ((UnaryExpressionNode) expr).expr.getLValue(); // These two cancel each other out
+			else return null;
 		}
-		return expr.getLValue();
+		else return expr.getLValue();
 	}
 
 	@Override
@@ -125,14 +127,19 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 			if (pointerRef != null && pointerRef.hasPossibleValues() && pointerRef.getPossibleValues().size() == 1)
 			{
 				// if expr can only point to one thing...
-				VariableNode n = ((PropPointer) pointerRef.getPossibleValues().toArray()[0]).getNode();
-				if (n.hasPossibleValues() && n.getPossibleValues().size() == 1) return true;
+				if (VariableNode.class.isAssignableFrom(((PropPointer<?>) pointerRef.getPossibleValues().toArray()[0]).getNode().getClass()))
+				{
+					VariableNode n = ((PropPointer<VariableNode>) pointerRef.getPossibleValues().toArray()[0]).getNode();
+					if (n.hasPossibleValues() && n.getPossibleValues().size() == 1)
+						return true;
+					else return false;
+				}
 				else return false;
 			}
 			else return false;
 		else if (operator.equals("&"))
 		{
-			return expr.hasLValue() && VariableNode.class.isAssignableFrom(expr.getLValue().getClass());
+			return expr.hasPropValue() || (expr.hasLValue() && VariableNode.class.isAssignableFrom(expr.getLValue().getClass()));
 		}
 		else return expr.hasPropValue();
 	}
@@ -151,12 +158,22 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 			if (pointerRef != null && pointerRef.hasPossibleValues() && pointerRef.getPossibleValues().size() == 1)
 			{
 				// if expr can only point to one thing...
-				VariableNode n = ((PropPointer) pointerRef.getPossibleValues().toArray()[0]).getNode();
-				if (n.hasPossibleValues() && n.getPossibleValues().size() == 1)
+				if (VariableNode.class.isAssignableFrom(((PropPointer<?>) pointerRef.getPossibleValues().toArray()[0]).getNode().getClass()))
 				{
-					// And that thing can only have one value...
-					return n.getPossibleValues().toArray()[0]; // Then return that
+					VariableNode node = ((PropPointer<VariableNode>) pointerRef.getPossibleValues().toArray()[0]).getNode();
+					if (node.hasPossibleValues() && node.getPossibleValues().size() == 1)
+					{
+						// And that thing can only have one value...
+						return node.getPossibleValues().toArray()[0]; // Then return that
+					}
+					else return null;
 				}
+				else if (FunctionDefinitionNode.class.isAssignableFrom(((PropPointer<?>) pointerRef.getPossibleValues().toArray()[0]).getNode().getClass()))
+				{
+					FunctionDefinitionNode node = ((PropPointer<FunctionDefinitionNode>) pointerRef.getPossibleValues().toArray()[0]).getNode();
+					return node;
+				}
+				
 				else return null;
 			}
 			else return null;
@@ -165,9 +182,13 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 			if (expr.hasLValue() && VariableNode.class.isAssignableFrom(expr.getLValue().getClass()))
 			{
 				VariableNode var = (VariableNode) expr.getLValue();
-				return new PropPointer(var, 0);
+				return new PropPointer<VariableNode>(var, 0);
 			}
-			return null;
+			else // Probably function pointer
+			{
+				FunctionDefinitionNode func = (FunctionDefinitionNode) expr.getPropValue();
+				return new PropPointer<FunctionDefinitionNode>(func, 0);
+			}
 		}
 		else return expr.getPropValue();
 	}
@@ -176,7 +197,8 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 	public boolean hasAssembly()
 	{
 		if (operator.equals("*")) return true;
-		if (!operator.equals("++") && !operator.equals("--"))
+		else if (operator.equals("&")) return false;
+		else if (!operator.equals("++") && !operator.equals("--"))
 			return expr.hasAssembly() || !hasPropValue();
 		else return true;
 	}
@@ -185,8 +207,22 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 	{
 		String whitespace = AssemblyUtils.getWhitespace(leadingWhitespace);
 		String assembly = "";
-		if (expr.hasAssembly()) assembly += expr.getAssembly();
-		OperandSource sourceX = expr.getLValue().getSource();
+		OperandSource sourceX;
+		ScratchSource scratchX;
+		if (expr.hasAssembly())
+		{
+			scratchX = scratchManager.reserveScratchBlock(expr.getSize());
+			assembly += expr.getAssembly(leadingWhitespace, scratchX, scratchManager, ticket);
+			if (expr.hasLValue())
+				sourceX = expr.getLValue().getSource();
+			else sourceX = scratchX;
+		}
+		else if (expr.hasPropValue())
+			sourceX = new ConstantSource(expr.getPropValue(), expr.getType().getSize());
+		else if (expr.hasLValue())
+			sourceX = expr.getLValue().getSource();
+		else sourceX = null;
+		
 		switch (operator)
 		{
 		case "++":
@@ -210,7 +246,7 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 			break;
 		case "*":
 			ScratchSource sourceI;
-			if (!scratchManager.hasPointer(sourceX))
+			if (!ScratchManager.hasPointer(sourceX))
 			{
 				sourceI = scratchManager.reservePointer(sourceX);
 				assembly += AssemblyUtils.byteCopier(whitespace, CompConfig.pointerSize, sourceI, sourceX, ticket);
@@ -218,12 +254,13 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 			else sourceI = scratchManager.getPointer(sourceX);
 			
 			pointerRef = new IndirectLValueNode(this, expr.getLValue(), sourceI, ((PointerType) expr.getType()).getType());
-			assembly += AssemblyUtils.byteCopier(whitespace, ((PointerType) expr.getType()).getType().getSize(), destSource, pointerRef.getSource(), ticket);
+			if (destSource != null) // Was this just a calc or did we need to put this somewhere?
+				assembly += AssemblyUtils.byteCopier(whitespace, ((PointerType) expr.getType()).getType().getSize(), destSource, pointerRef.getSource(), ticket);
 			break;
 		default: return "";
 		}
 
-		scratchManager.demotePointer(destSource); // A copy of the destination, if it's a pointer, has gone stale
+		ScratchManager.demotePointer(destSource); // A copy of the destination, if it's a pointer, has gone stale
 		return assembly;
 	}
 	

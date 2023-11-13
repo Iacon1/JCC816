@@ -39,7 +39,10 @@ public class PrimaryExpressionNode extends BaseExpressionNode<Primary_expression
 	@Override
 	public Type getType()
 	{
-		if (identifier != null) return getLValue().getType();
+		if (identifier != null)
+			if (hasLValue()) return getLValue().getType();
+			else // Probably function pointer
+				return resolveFunctionRelative(identifier).getType();
 		else if (constant != null) return CompUtils.getSmallestType((Number) constant);
 		else return null;
 	}

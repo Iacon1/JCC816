@@ -50,6 +50,12 @@ public class ExpressionNode extends BaseExpressionNode<ExpressionContext>
 	}
 	
 	@Override
+	public boolean hasLValue()
+	{
+		if (expressions.size() == 1) return expressions.get(0).hasLValue();
+		else return false;
+	}
+	@Override
 	public LValueNode<?> getLValue()
 	{
 		if (expressions.size() == 1) return expressions.get(0).getLValue();
