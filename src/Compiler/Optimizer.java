@@ -3,75 +3,127 @@
 
 package Compiler;
 
+import java.util.HashMap;
 import java.util.List;
-
-import Compiler.Utils.CompUtils;
+import java.util.Map;
 
 public final class Optimizer
 {
-	private static List<String> minimizeModeSwitches(List<String> lines)
+	private static List<String> verbosifyFlagToggles(List<String> lines)
 	{
-		int aMode = 0, xyMode = 0; // 0 = 8-bit, 1 = 16-bit, -1 = unknown
+		Map<String, String> replacements = new HashMap<String, String>();
+		replacements.put("CLC", "REP\t#$01");
+		replacements.put("CLI", "REP\t#$04");
+		replacements.put("CLD", "REP\t#$08");
+		replacements.put("CLV", "REP\t#$40");
+		replacements.put("SEC", "SEP\t#$01");
+		replacements.put("SEI", "SEP\t#$04");
+		replacements.put("SED", "SEP\t#$08");
+		replacements.put("SEV", "SEP\t#$40");
+		
+		for (int i = 0; i < lines.size(); ++i)
+		{
+			String line = lines.get(i).trim();
+			if (replacements.get(line) != null)
+				lines.set(i, lines.get(i).replace(line, replacements.get(line)));
+		}
+		
+		return lines;
+	}
+	
+	private static List<String> combineFlagToggles(List<String> lines)
+	{
 		for (int i = 0; i < lines.size(); ++i)
 		{
 			String line = lines.get(i);
-			String prevLine = (i == 0) ? "" : lines.get(i - 1);
-			if (line.matches("[^:\s]*:.*") || prevLine.contains("JSL")) // At a label or a JSL return point lose all assumptions of mode
+			String prevLine = (i == 0 ? "" : lines.get(i - 1));
+			
+			if (line.contains("REP\t#$") && prevLine.contains("REP\t#$"))
 			{
-				aMode = -1;
-				xyMode = -1;
+				byte a = Byte.valueOf(line.replace("REP\t#$", "").trim(), 16);
+				byte b = Byte.valueOf(prevLine.replace("REP\t#$", "").trim(), 16);
+				{
+					lines.set(i, line.replace(String.format("%02x", a), String.format("%02x", a | b)));
+					lines.set(i - 1, "");
+				}
 			}
-				
-			if (line.contains(CompUtils.setAXY8))
+			else if (line.contains("SEP\t#$") && prevLine.contains("SEP\t#$"))
 			{
-				if (aMode == 0 && xyMode == 0) lines.set(i, line.replace(CompUtils.setAXY8, ""));
-				else if (aMode == 0) lines.set(i, line.replace(CompUtils.setAXY8, CompUtils.setXY8));
-				else if (xyMode == 0) lines.set(i, line.replace(CompUtils.setAXY8, CompUtils.setA8));
-				
-				aMode = 0;
-				xyMode = 0;
+				byte a = Byte.valueOf(line.replace("SEP\t#$", "").trim(), 16);
+				byte b = Byte.valueOf(prevLine.replace("SEP\t#$", "").trim(), 16);
+				{
+					lines.set(i, line.replace(String.format("%02x", a), String.format("%02x", a | b)));
+					lines.set(i - 1, "");
+				}
 			}
-			else if (line.contains(CompUtils.setAXY16))
+			else if (line.contains("SEP\t#$") && prevLine.contains("REP\t#$"))
 			{
-				if (aMode == 1 && xyMode == 1) lines.set(i, line.replace(CompUtils.setAXY16, ""));
-				else if (aMode == 1) lines.set(i, line.replace(CompUtils.setAXY16, CompUtils.setXY16));
-				else if (xyMode == 1) lines.set(i, line.replace(CompUtils.setAXY16, CompUtils.setA16));
-				
-				aMode = 1;
-				xyMode = 1;
+				byte a = Byte.valueOf(line.replace("SEP\t#$", "").trim(), 16);
+				byte b = Byte.valueOf(prevLine.replace("REP\t#$", "").trim(), 16);
+				{
+					if ((a & ~b) != 0)
+						lines.set(i, line.replace(String.format("%02x", a), String.format("%02x", a & ~b)));
+					else lines.set(i, "");
+					if ((b & ~a) != 0)
+						lines.set(i - 1, prevLine.replace(String.format("%02x", a), String.format("%02x", b & ~a)));
+					else lines.set(i - 1, "");
+				}
 			}
-			else if (line.contains(CompUtils.setA8))
+			else if (line.contains("REP\t#$") && prevLine.contains("SEP\t#$"))
 			{
-				if (aMode == 0) lines.set(i, line.replace(CompUtils.setA8, ""));
-				aMode = 0;
-			}
-			else if (line.contains(CompUtils.setA16))
-			{
-				if (aMode == 1) lines.set(i, line.replace(CompUtils.setA16, ""));
-				aMode = 1;
-			}
-			else if (line.contains(CompUtils.setXY8))
-			{
-				if (xyMode == 0) lines.set(i, line.replace(CompUtils.setXY8, ""));
-				xyMode = 0;
-			}
-			else if (line.contains(CompUtils.setXY16))
-			{
-				if (xyMode == 1) lines.set(i, line.replace(CompUtils.setXY16, ""));
-				xyMode = 1;
+				byte a = Byte.valueOf(line.replace("REP\t#$", "").trim(), 16);
+				byte b = Byte.valueOf(prevLine.replace("SEP\t#$", "").trim(), 16);
+				{
+					if ((a & ~b) != 0)
+						lines.set(i, line.replace(String.format("%02x", a), String.format("%02x", a & ~b)));
+					else lines.set(i, "");
+					if ((b & ~a) != 0)
+						lines.set(i - 1, prevLine.replace(String.format("%02x", a), String.format("%02x", b & ~a)));
+					else lines.set(i - 1, "");
+				}
 			}
 		}
 		
 		return lines;
 	}
 	
-	private static List<String> mergeREPs(List<String> lines)
+	private static List<String> deRedundateFlagToggles(List<String> lines)
 	{
+		byte currFlags = 0;
+		byte prevFlags = 0;
+		byte knownFlags = 0; // Whether we currently know each flag
 		for (int i = 0; i < lines.size(); ++i)
 		{
-			String prevLine = (i == 0) ? "" : lines.get(i - 1);
 			String line = lines.get(i);
+			String prevLine = (i == 0 ? "" : lines.get(i - 1));
+			if (line.matches("[^:\s]*:.*") || prevLine.contains("JSL")) // At a label or a JSL return point lose all assumptions of mode
+				knownFlags = 0;
+
+			prevFlags = currFlags;
 			
+			if (line.contains("EP\t#$"))
+			{
+				byte newFlags = 0;
+				if (line.contains("REP\t#$"))
+				{
+					newFlags = Byte.valueOf(line.replace("REP\t#$", "").trim(), 16);
+					currFlags &= ~newFlags;
+				}
+				else if (line.contains("SEP\t#$"))
+				{
+					newFlags = Byte.valueOf(line.replace("SEP\t#$", "").trim(), 16);
+					currFlags |= newFlags;
+				}
+				
+				byte prevKnownFlags = knownFlags;
+				knownFlags |= newFlags;
+				
+				byte delta = (byte) ((currFlags ^ prevFlags) | (knownFlags ^ prevKnownFlags));
+				
+				if (delta == 0)
+					lines.set(i, "");
+				else lines.set(i, line.replace(String.format("%02x", newFlags), String.format("%02x", delta)));
+			}
 		}
 		
 		return lines;
@@ -79,7 +131,9 @@ public final class Optimizer
 	
 	public static List<String> getOptimized(List<String> lines)
 	{
-		lines = minimizeModeSwitches(lines);
+		lines = verbosifyFlagToggles(lines);
+		lines = combineFlagToggles(lines);
+		lines = deRedundateFlagToggles(lines);
 		
 		return lines;
 	}
