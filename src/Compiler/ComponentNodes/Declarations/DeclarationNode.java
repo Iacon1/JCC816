@@ -66,29 +66,6 @@ public class DeclarationNode extends InterpretingNode<DeclarationNode, Declarati
 		}
 		return this;
 	}
-	public DeclarationNode interpret(Parameter_declarationContext node) throws Exception
-	{
-		DeclarationSpecifiersNode specifiers = new DeclarationSpecifiersNode(this).interpret(node.declaration_specifiers());
-		DeclaratorContext declarator = node.declarator();
-		Abstract_declaratorContext absDeclarator = node.abstract_declarator();
-		if (declarator != null)
-		{
-			DeclaratorNode declaratorNode = new DeclaratorNode(this).interpret(declarator);
-			Type type = Type.manufacture(specifiers.getSpecifiers(), declaratorNode, declarator.start);
-			VariableNode variable = new VariableNode(this, declaratorNode.getIdentifier(), type);
-			registerVariable(variable);
-			variables.add(variable);
-		}
-		else if (absDeclarator != null)
-		{
-			DeclaratorNode declaratorNode = new DeclaratorNode(this).interpret(absDeclarator);
-			Type type = Type.manufacture(specifiers.getSpecifiers(), declaratorNode, absDeclarator.start);
-			VariableNode variable = new VariableNode(this, declaratorNode.getIdentifier(), type);
-			registerVariable(variable);
-			variables.add(variable);
-		}
-		return this;
-	}
 	
 	@Override
 	public boolean canCall(FunctionDefinitionNode function)

@@ -7,6 +7,8 @@ import java.util.List;
 
 import Compiler.ComponentNodes.ComponentNode;
 import Compiler.ComponentNodes.InterpretingNode;
+import Compiler.ComponentNodes.Declarations.DeclaratorNode.DeclaratorInfo;
+import Compiler.ComponentNodes.Declarations.DeclaratorNode.DeclaratorType;
 import Compiler.ComponentNodes.Expressions.AssignmentExpressionNode;
 import Compiler.ComponentNodes.Expressions.BaseExpressionNode;
 import Compiler.Exceptions.UnsupportedFeatureException;
@@ -16,32 +18,9 @@ import Grammar.C99.C99Parser.Parameter_declarationContext;
 import Grammar.C99.C99Parser.Type_qualifierContext;
 
 public class DirectDeclaratorNode extends InterpretingNode<DirectDeclaratorNode, Direct_declaratorContext>
-{
-	public static enum Type
-	{
-		identifier,
-		declarator,
-		array,
-		varLenArray,
-		funcParam;
-	}
-	public static class DirDeclaratorInfo
-	{
-		public final Type type;
-		
-		public DirDeclaratorInfo(Type type)
-		{
-			this.type = type;
-		}
-		
-		public String[] typeQualifiers;
-		public BaseExpressionNode<?> assignExpr;
-		public DeclarationNode[] paramDecls;
-		public String[] idens;
-	}
-	
-	private Type type;
-	private DirDeclaratorInfo info;
+{	
+	private DeclaratorType type;
+	private DeclaratorInfo info;
 	private DirectDeclaratorNode subDirDec;
 	private DeclaratorNode subDec;
 	
@@ -55,36 +34,36 @@ public class DirectDeclaratorNode extends InterpretingNode<DirectDeclaratorNode,
 	{
 		if (node.Identifier() != null) // id
 		{
-			type = Type.identifier;
+			type = DeclaratorType.identifier;
 			identifier = node.Identifier().getText();
 		}
 		else if (node.declarator() != null) // dec
 		{
-			type = Type.declarator;
+			type = DeclaratorType.declarator;
 			subDec = new DeclaratorNode(this).interpret(node.declarator());
 		}
 		else if (node.getChild(1).getText().equals("(")) // Parameter list
 		{
-			type = Type.funcParam;
-			info = new DirDeclaratorInfo(type);
-			List<DeclarationNode> parameters = new ArrayList<DeclarationNode>();
+			type = DeclaratorType.funcParam;
+			info = new DeclaratorInfo(type);
+			List<ParameterDeclarationNode> parameters = new ArrayList<ParameterDeclarationNode>();
 			if (node.parameter_type_list() != null && node.parameter_type_list().parameter_list() != null)
 			{
 				for (Parameter_declarationContext paramDecl : node.parameter_type_list().parameter_list().parameter_declaration())
-					parameters.add(new DeclarationNode(this).interpret(paramDecl));
+					parameters.add(new ParameterDeclarationNode(this).interpret(paramDecl));
 			}
-			info.paramDecls = parameters.toArray(new DeclarationNode[] {});
+			info.paramDecls = parameters.toArray(new ParameterDeclarationNode[] {});
 			subDirDec = new DirectDeclaratorNode(this).interpret(node.direct_declarator());
 		}
 		else if (node.getChild(1).getText().equals("["))// Array
 		{
-			type = Type.array;
+			type = DeclaratorType.array;
 			
 			if (node.getText().endsWith("*]")) // VLA
 			
 			if ((node.getChild(node.getChildCount() - 2).getText() + node.getChild(node.getChildCount() - 1).getText()).equals("*]")) // VLA
-				type = Type.varLenArray;
-			info = new DirDeclaratorInfo(type);
+				type = DeclaratorType.varLenArray;
+			info = new DeclaratorInfo(type);
 			if (node.type_qualifier_list() != null)
 			{
 				List<String> typeQualifiers = new ArrayList<String>();
@@ -95,7 +74,7 @@ public class DirectDeclaratorNode extends InterpretingNode<DirectDeclaratorNode,
 			if (node.assignment_expression() != null)
 				info.assignExpr = (BaseExpressionNode<?>) new AssignmentExpressionNode(this).interpret(node.assignment_expression());
 			subDirDec = new DirectDeclaratorNode(this).interpret(node.direct_declarator());
-			if (type == Type.varLenArray) // VLA not supported
+			if (type == DeclaratorType.varLenArray) // VLA not supported
 				throw new UnsupportedFeatureException("Variable length arrays", false, node.start);
 			if (info.assignExpr != null && !info.assignExpr.hasPropValue()) // Static allocation can't handle arrays whose size is unknown at compile time
 				throw new UnsupportedFeatureException("Arrays of non-constant length", false, node.start);
@@ -106,29 +85,29 @@ public class DirectDeclaratorNode extends InterpretingNode<DirectDeclaratorNode,
 	{
 		if (node.declarator() != null) // dec
 		{
-			type = Type.declarator;
+			type = DeclaratorType.declarator;
 			subDec = new DeclaratorNode(this).interpret(node.declarator());
 		}
 		else if (node.getChild(1).getText().equals("(")) // Parameter list
 		{
-			type = Type.funcParam;
-			info = new DirDeclaratorInfo(type);
-			List<DeclarationNode> parameters = new ArrayList<DeclarationNode>();
+			type = DeclaratorType.funcParam;
+			info = new DeclaratorInfo(type);
+			List<ParameterDeclarationNode> parameters = new ArrayList<ParameterDeclarationNode>();
 			if (node.parameter_type_list() != null && node.parameter_type_list().parameter_list() != null)
 			{
 				for (Parameter_declarationContext paramDecl : node.parameter_type_list().parameter_list().parameter_declaration())
-					parameters.add(new DeclarationNode(this).interpret(paramDecl));
+					parameters.add(new ParameterDeclarationNode(this).interpret(paramDecl));
 			}
-			info.paramDecls = parameters.toArray(new DeclarationNode[] {});
+			info.paramDecls = parameters.toArray(new ParameterDeclarationNode[] {});
 			subDirDec = new DirectDeclaratorNode(this).interpret(node.direct_abstract_declarator());
 		}
 		else if (node.getChild(1).getText().equals("["))// Array
 		{
-			type = Type.array;
+			type = DeclaratorType.array;
 			
 			if (node.getText().endsWith("*]")) // VLA
-				type = Type.varLenArray;
-			info = new DirDeclaratorInfo(type);
+				type = DeclaratorType.varLenArray;
+			info = new DeclaratorInfo(type);
 			if (node.type_qualifier_list() != null)
 			{
 				List<String> typeQualifiers = new ArrayList<String>();
@@ -139,7 +118,7 @@ public class DirectDeclaratorNode extends InterpretingNode<DirectDeclaratorNode,
 			if (node.assignment_expression() != null)
 				info.assignExpr = new AssignmentExpressionNode(this).interpret(node.assignment_expression());
 			subDirDec = new DirectDeclaratorNode(this).interpret(node.direct_abstract_declarator());
-			if (type == Type.varLenArray) // VLA not supported
+			if (type == DeclaratorType.varLenArray) // VLA not supported
 				throw new UnsupportedFeatureException("Variable length arrays", false, node.start);
 			if (info.assignExpr != null && !info.assignExpr.hasPropValue()) // Static allocation can't handle arrays whose size is unknown at compile time
 				throw new UnsupportedFeatureException("Arrays of non-constant length", false, node.start);
@@ -153,16 +132,15 @@ public class DirectDeclaratorNode extends InterpretingNode<DirectDeclaratorNode,
 		else return identifier;
 	}
 	
-	public List<DirDeclaratorInfo> getInfo()
+	public List<DeclaratorInfo> getInfo()
 	{
-		List<DirDeclaratorInfo> infoList = null;
+		List<DeclaratorInfo> infoList = new ArrayList<DeclaratorInfo>();
 		if (subDirDec != null)
-			infoList = subDirDec.getInfo();
-		else if (subDec != null)
-			infoList = subDec.getInfo();
-		else
-			infoList = new ArrayList<DirDeclaratorInfo>();
-		if (info != null) infoList.add(info);
+			infoList.addAll(subDirDec.getInfo());
+		if (subDec != null)
+			infoList.addAll(subDec.getInfo());
+		if (info != null) infoList.add(0, info);
+		
 		return infoList;
 	}
 
