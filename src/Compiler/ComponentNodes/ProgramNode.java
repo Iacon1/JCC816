@@ -62,20 +62,21 @@ public class ProgramNode extends InterpretingNode<ProgramNode, ProgramContext> i
 		for (String fullName: fullNames) positions.put(fullName, 0);
 		for (String fullName: fullNames)
 		{
+			VariableNode var = resolveVariable(fullName);
 			assembly +=
 					whitespace + AssemblyUtils.applyFiller(fullName, maxLength) +
 					(DebugLevel.isAtLeast(DebugLevel.low) ? " := " : " = ") + 
-					CompUtils.mapOffset(positions.get(fullName), resolveVariable(fullName).getSize()) +
-					(DebugLevel.isAtLeast(DebugLevel.medium) ? "\t; " + resolveVariable(fullName).getType().getSignature() + " (" + resolveVariable(fullName).getSize() + " bytes)": "") + 
+					CompUtils.mapOffset(positions.get(fullName), var.getSize()) +
+					(DebugLevel.isAtLeast(DebugLevel.medium) ? "\t; " + var.getType().getSignature() + " (" + var.getSize() + " bytes)": "") + 
 					"\n";
-			FunctionDefinitionNode owner = resolveVariable(fullName).getEnclosingFunction();
+			FunctionDefinitionNode owner = var.getEnclosingFunction();
 			for (String otherFullName: fullNames)
 			{
 				if (otherFullName.equals(fullName) || positions.get(otherFullName) == -1) continue;
-				FunctionDefinitionNode otherOwner = resolveVariable(otherFullName).getEnclosingFunction();
+				FunctionDefinitionNode otherOwner = var.getEnclosingFunction();
 				if ((owner == null && otherOwner == null) || owner.canCall(otherOwner) || otherOwner.isInterruptHandler())
 				{
-					offset = positions.get(fullName) + resolveVariable(fullName).getSize();
+					offset = positions.get(fullName) + var.getSize();
 					positions.put(otherFullName, Math.max(positions.get(otherFullName), offset));
 				}
 			}
