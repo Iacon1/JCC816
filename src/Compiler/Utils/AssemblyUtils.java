@@ -205,6 +205,6 @@ public final class AssemblyUtils
 	}
 	public static String stackLoader(String whitespace, int nBytes, OperandSource writeSource)
 	{
-		return stackPusher(whitespace, nBytes, writeSource, new DetailsTicket());
+		return stackLoader(whitespace, nBytes, writeSource, new DetailsTicket());
 	}
 }
