@@ -83,22 +83,22 @@ public class JumpStatementNode extends StatementNode<Jump_statementContext> impl
 		switch (mode)
 		{
 		case gotoM:
-			assembly += whitespace + "JML\t" + funcNode.getLabel(gotoLabel) + "\n";
+			assembly += whitespace + "JMP\t" + funcNode.getLabel(gotoLabel) + "\n";
 			break;
 		case continueM:
-			assembly += whitespace + "JML\t" + iterNode.getStartLabel() + "\n";
+			assembly += whitespace + "JMP\t" + iterNode.getStartLabel() + "\n";
 			break;
 		case breakM:
 			if (selNode != null)
-				assembly += whitespace + "JML\t" + selNode.getEndLabel() + "\n";
+				assembly += whitespace + "JMP\t" + selNode.getEndLabel() + "\n";
 			else if (iterNode != null)
-				assembly += whitespace + "JML\t" + iterNode.getEndLabel() + "\n";
+				assembly += whitespace + "JMP\t" + iterNode.getEndLabel() + "\n";
 			break;
 		case returnM:
 			if (expr != null && expr.hasAssembly()) assembly += expr.getAssembly(leadingWhitespace, CompConfig.callResultSource(expr.getSize()));
 			else if (expr != null && expr.hasPropValue()) assembly += AssemblyUtils.byteCopier(whitespace, funcNode.getSize(), CompConfig.callResultSource(funcNode.getSize()), new ConstantSource(expr.getPropLong(), funcNode.getSize()));
 			else if (expr != null && expr.hasLValue()) assembly += AssemblyUtils.byteCopier(whitespace, funcNode.getType().getSize(), CompConfig.callResultSource(expr.getLValue().getSize()), expr.getLValue().getSource());
-			assembly += whitespace + "JML\t" + funcNode.getEndLabel() + "\n";
+			assembly += whitespace + "JMP\t" + funcNode.getEndLabel() + "\n";
 			break;
 		}
 			
