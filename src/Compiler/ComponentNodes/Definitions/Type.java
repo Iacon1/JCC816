@@ -19,6 +19,7 @@ import Compiler.ComponentNodes.Dummies.DummyType;
 import Compiler.ComponentNodes.Interfaces.TypedNode;
 import Compiler.ComponentNodes.LValues.VariableNode;
 import Compiler.Exceptions.ConstraintException;
+import Compiler.Exceptions.UndefinedTypeException;
 import Compiler.Exceptions.UnsupportedFeatureException;
 import Compiler.Utils.CompConfig;
 
@@ -35,6 +36,7 @@ public class Type
 		for (String member : members) list.add(member);
 		return list;
 	}
+	private static final List<String> recognizedStrings = toList("unsigned", "signed", "void", "char", "short", "int", "long", "float", "double", "_Bool", "struct", "union", "enum", "_Complex");
 	private static List<List<String>> allowedTypeSpecLists() // As per 6.7.2.2
 	{
 		List<List<String>> allowedLists = new ArrayList<List<String>>();
@@ -121,7 +123,18 @@ public class Type
 			throw new ConstraintException("6.7.1", 1, start);
 			
 		if (!isAllowed(typeSpecifiers))
+		{
+			for (String spec : typeSpecifiers)
+				if (!recognizedStrings.contains(spec))
+				{
+					Exception e = new UndefinedTypeException(spec, start);
+					e.addSuppressed(new ConstraintException("6.7.2", 2, start));
+					throw e;
+				}
+			// Otherwise it's the right parts, just in the wrong order
 			throw new ConstraintException("6.7.2", 2, start);
+		}
+			
 		if (typeSpecifiers.contains("double") || typeSpecifiers.contains("float")) // Floats not supported
 		{
 			Exception e = new UnsupportedFeatureException("Floating-point numbers", false, start);
