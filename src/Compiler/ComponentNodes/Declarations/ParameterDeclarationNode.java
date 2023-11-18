@@ -10,6 +10,7 @@ import Compiler.ComponentNodes.Expressions.AssignmentExpressionNode;
 import Compiler.ComponentNodes.Expressions.BaseExpressionNode;
 import Compiler.ComponentNodes.FunctionDefinitionNode;
 import Compiler.ComponentNodes.InterpretingNode;
+import Compiler.ComponentNodes.Definitions.Scope;
 import Compiler.ComponentNodes.Definitions.Type;
 import Compiler.ComponentNodes.Dummies.DummyVariableNode;
 import Compiler.ComponentNodes.Interfaces.AssemblableNode;
@@ -31,13 +32,20 @@ import Grammar.C99.C99Parser.Struct_declaratorContext;
 public class ParameterDeclarationNode extends InterpretingNode<ParameterDeclarationNode, Parameter_declarationContext>
 {
 	private List<VariableNode> variables;
+	private String scope;
 	
+	public ParameterDeclarationNode(ComponentNode<?> parent, String scope)
+	{
+		super(parent);
+		variables = new ArrayList<VariableNode>();
+		this.scope = scope;
+	}
 	public ParameterDeclarationNode(ComponentNode<?> parent)
 	{
 		super(parent);
 		variables = new ArrayList<VariableNode>();
 	}
-
+	
 	public ParameterDeclarationNode interpret(Parameter_declarationContext node) throws Exception
 	{
 		DeclarationSpecifiersNode specifiers = new DeclarationSpecifiersNode(this).interpret(node.declaration_specifiers());
@@ -66,5 +74,13 @@ public class ParameterDeclarationNode extends InterpretingNode<ParameterDeclarat
 			variables.add(variable);
 		}
 		return this;
+	}
+	
+	@Override
+	public Scope getScope()
+	{
+		if (scope != null && parent != null) return parent.getScope().append(scope);
+		else if (scope != null) return new Scope().append(scope);
+		else return super.getScope();
 	}
 }

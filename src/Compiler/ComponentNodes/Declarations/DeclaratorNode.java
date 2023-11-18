@@ -47,9 +47,25 @@ public class DeclaratorNode extends InterpretingNode<DeclaratorNode, DeclaratorC
 	
 	private List<Set<String>> pointerQualifiers;
 	private DirectDeclaratorNode directDeclarator;
+	private String scopeOverride;
 	
-	public DeclaratorNode(ComponentNode<?> parent) {super(parent); pointerQualifiers = new LinkedList<Set<String>>();}
-	public DeclaratorNode() {super(); pointerQualifiers = new LinkedList<Set<String>>();}
+	/**
+	 * 
+	 * @param parent
+	 * @param scopeOverride If any parameters are defined in this, this determines what scope to give them (in addition to this node's scope)
+	 */
+	public DeclaratorNode(ComponentNode<?> parent, String scopeOverride)
+	{
+		super(parent);
+		pointerQualifiers = new LinkedList<Set<String>>();
+		this.scopeOverride = scopeOverride;
+	}
+	public DeclaratorNode(ComponentNode<?> parent)
+	{
+		super(parent);
+		pointerQualifiers = new LinkedList<Set<String>>();
+		this.scopeOverride = null;
+	}
 	
 	@Override
 	public DeclaratorNode interpret(DeclaratorContext node) throws Exception
@@ -69,7 +85,7 @@ public class DeclaratorNode extends InterpretingNode<DeclaratorNode, DeclaratorC
 						else pointerQualifiers.add(new HashSet<String>());
 					else pointerQualifiers.add(new HashSet<String>());	
 		
-		directDeclarator = new DirectDeclaratorNode(this).interpret(node.direct_declarator());
+		directDeclarator = new DirectDeclaratorNode(this, scopeOverride).interpret(node.direct_declarator());
 		
 		return this;
 	}
@@ -91,7 +107,7 @@ public class DeclaratorNode extends InterpretingNode<DeclaratorNode, DeclaratorC
 			}
 		}
 		
-		directDeclarator = new DirectDeclaratorNode(this).interpret(node.direct_abstract_declarator());
+		directDeclarator = new DirectDeclaratorNode(this, scopeOverride).interpret(node.direct_abstract_declarator());
 		
 		return this;
 	}
