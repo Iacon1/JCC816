@@ -76,14 +76,6 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 	}
 	
 	@Override
-
-	public boolean actsUpon(VariableNode variable)
-	{
-		if (super.actsUpon(variable)) return true;
-		else return (operator.equals("++") || operator.equals("--") && expr.getLValue().equals(variable));
-	}
-
-	@Override
 	public boolean hasLValue()
 	{
 		if (operator.equals("*")) return true;
