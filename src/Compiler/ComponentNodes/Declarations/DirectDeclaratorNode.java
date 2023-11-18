@@ -25,10 +25,19 @@ public class DirectDeclaratorNode extends InterpretingNode<DirectDeclaratorNode,
 	private DeclaratorNode subDec;
 	
 	private String identifier;
+	private String scopeOverride;
 	
-	public DirectDeclaratorNode(ComponentNode<?> parent) {super(parent);}
-	public DirectDeclaratorNode() {super();}
-	
+	/**
+	 * 
+	 * @param parent
+	 * @param scopeOverride If any parameters are defined in this, this determines what scope to give them (in addition to this node's scope)
+	 */
+	public DirectDeclaratorNode(ComponentNode<?> parent, String scopeOverride)
+	{
+		super(parent);
+		this.scopeOverride = scopeOverride;
+	}
+
 	@Override
 	public DirectDeclaratorNode interpret(Direct_declaratorContext node) throws Exception
 	{
@@ -40,7 +49,7 @@ public class DirectDeclaratorNode extends InterpretingNode<DirectDeclaratorNode,
 		else if (node.declarator() != null) // dec
 		{
 			type = DeclaratorType.declarator;
-			subDec = new DeclaratorNode(this).interpret(node.declarator());
+			subDec = new DeclaratorNode(this, scopeOverride).interpret(node.declarator());
 		}
 		else if (node.getChild(1).getText().equals("(")) // Parameter list
 		{
@@ -53,7 +62,7 @@ public class DirectDeclaratorNode extends InterpretingNode<DirectDeclaratorNode,
 					parameters.add(new ParameterDeclarationNode(this).interpret(paramDecl));
 			}
 			info.paramDecls = parameters.toArray(new ParameterDeclarationNode[] {});
-			subDirDec = new DirectDeclaratorNode(this).interpret(node.direct_declarator());
+			subDirDec = new DirectDeclaratorNode(this, scopeOverride).interpret(node.direct_declarator());
 		}
 		else if (node.getChild(1).getText().equals("["))// Array
 		{
@@ -73,7 +82,7 @@ public class DirectDeclaratorNode extends InterpretingNode<DirectDeclaratorNode,
 			}
 			if (node.assignment_expression() != null)
 				info.assignExpr = (BaseExpressionNode<?>) new AssignmentExpressionNode(this).interpret(node.assignment_expression());
-			subDirDec = new DirectDeclaratorNode(this).interpret(node.direct_declarator());
+			subDirDec = new DirectDeclaratorNode(this, scopeOverride).interpret(node.direct_declarator());
 			if (type == DeclaratorType.varLenArray) // VLA not supported
 				throw new UnsupportedFeatureException("Variable length arrays", false, node.start);
 			if (info.assignExpr != null && !info.assignExpr.hasPropValue()) // Static allocation can't handle arrays whose size is unknown at compile time
@@ -86,7 +95,7 @@ public class DirectDeclaratorNode extends InterpretingNode<DirectDeclaratorNode,
 		if (node.declarator() != null) // dec
 		{
 			type = DeclaratorType.declarator;
-			subDec = new DeclaratorNode(this).interpret(node.declarator());
+			subDec = new DeclaratorNode(this, scopeOverride).interpret(node.declarator());
 		}
 		else if (node.getChild(1).getText().equals("(")) // Parameter list
 		{
@@ -96,10 +105,10 @@ public class DirectDeclaratorNode extends InterpretingNode<DirectDeclaratorNode,
 			if (node.parameter_type_list() != null && node.parameter_type_list().parameter_list() != null)
 			{
 				for (Parameter_declarationContext paramDecl : node.parameter_type_list().parameter_list().parameter_declaration())
-					parameters.add(new ParameterDeclarationNode(this).interpret(paramDecl));
+					parameters.add(new ParameterDeclarationNode(this, scopeOverride).interpret(paramDecl));
 			}
 			info.paramDecls = parameters.toArray(new ParameterDeclarationNode[] {});
-			subDirDec = new DirectDeclaratorNode(this).interpret(node.direct_abstract_declarator());
+			subDirDec = new DirectDeclaratorNode(this, scopeOverride).interpret(node.direct_abstract_declarator());
 		}
 		else if (node.getChild(1).getText().equals("["))// Array
 		{
@@ -117,7 +126,7 @@ public class DirectDeclaratorNode extends InterpretingNode<DirectDeclaratorNode,
 			}
 			if (node.assignment_expression() != null)
 				info.assignExpr = new AssignmentExpressionNode(this).interpret(node.assignment_expression());
-			subDirDec = new DirectDeclaratorNode(this).interpret(node.direct_abstract_declarator());
+			subDirDec = new DirectDeclaratorNode(this, scopeOverride).interpret(node.direct_abstract_declarator());
 			if (type == DeclaratorType.varLenArray) // VLA not supported
 				throw new UnsupportedFeatureException("Variable length arrays", false, node.start);
 			if (info.assignExpr != null && !info.assignExpr.hasPropValue()) // Static allocation can't handle arrays whose size is unknown at compile time

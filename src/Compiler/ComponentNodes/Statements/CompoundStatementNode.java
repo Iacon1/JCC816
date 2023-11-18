@@ -9,6 +9,7 @@ import Compiler.ComponentNodes.ComponentNode;
 import Compiler.ComponentNodes.FunctionDefinitionNode;
 import Compiler.ComponentNodes.InterpretingNode;
 import Compiler.ComponentNodes.Declarations.DeclarationNode;
+import Compiler.ComponentNodes.Definitions.Scope;
 import Compiler.ComponentNodes.Interfaces.AssemblableNode;
 import Grammar.C99.C99Parser.Block_itemContext;
 import Grammar.C99.C99Parser.Compound_statementContext;
@@ -16,11 +17,19 @@ import Grammar.C99.C99Parser.Compound_statementContext;
 public class CompoundStatementNode extends StatementNode<Compound_statementContext> implements AssemblableNode
 {
 	List<AssemblableNode> assemblables;
+	private String scope;
 	
+	public CompoundStatementNode(ComponentNode<?> parent, String scope)
+	{
+		super(parent);
+		assemblables = new LinkedList<AssemblableNode>();
+		this.scope = scope;
+	}
 	public CompoundStatementNode(ComponentNode<?> parent)
 	{
 		super(parent);
 		assemblables = new LinkedList<AssemblableNode>();
+		scope = null;
 	}
 	@Override
 	public CompoundStatementNode interpret(Compound_statementContext node) throws Exception
@@ -34,6 +43,13 @@ public class CompoundStatementNode extends StatementNode<Compound_statementConte
 		return this;
 	}
 	
+	@Override
+	public Scope getScope()
+	{
+		if (scope != null && parent != null) return parent.getScope().append(scope);
+		else if (scope != null) return new Scope().append(scope);
+		else return super.getScope();
+	}
 	@Override
 	public boolean canCall(FunctionDefinitionNode function)
 	{

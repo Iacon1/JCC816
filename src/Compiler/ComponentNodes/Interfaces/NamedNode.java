@@ -12,7 +12,9 @@ public interface NamedNode
 	
 	public default String getFullName()
 	{
-		if (getScope() != null) return getScope().getPrefix() + getName();
-		else return getName();
+		String fullName = null;
+		if (getScope() != null) fullName = getScope().getPrefix() + getName();
+		else fullName = getName();
+		return (fullName.length() == 1 ? "__" : "") + fullName;
 	}
 }

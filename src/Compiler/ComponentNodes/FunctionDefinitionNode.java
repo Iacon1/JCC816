@@ -5,7 +5,6 @@ package Compiler.ComponentNodes;
 
 import Grammar.C99.C99Parser.Attributes_declarationContext;
 import Grammar.C99.C99Parser.Function_definitionContext;
-import Logging.Logging;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -15,11 +14,8 @@ import java.util.Set;
 
 import org.antlr.v4.runtime.tree.TerminalNode;
 
-import Compiler.ComponentNodes.Declarations.DeclarationNode;
 import Compiler.ComponentNodes.Declarations.DeclarationSpecifiersNode;
 import Compiler.ComponentNodes.Declarations.DeclaratorNode;
-import Compiler.ComponentNodes.Definitions.FunctionType;
-import Compiler.ComponentNodes.Definitions.Scope;
 import Compiler.ComponentNodes.Definitions.Type;
 import Compiler.ComponentNodes.Interfaces.AssemblableNode;
 import Compiler.ComponentNodes.Interfaces.NamedNode;
@@ -31,6 +27,7 @@ import Compiler.Utils.AssemblyUtils;
 import Compiler.Utils.CompConfig;
 import Compiler.Utils.CompUtils;
 import Compiler.Utils.ScratchManager;
+import Compiler.Utils.ScratchManager.ScratchSource;
 import Compiler.Utils.CompConfig.DebugLevel;
 
 public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionNode, Function_definitionContext> implements NamedNode, TypedNode, AssemblableNode
@@ -56,32 +53,24 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 	{
 		for (Attributes_declarationContext attributes_declaration : node.attributes_declaration())
 			for (TerminalNode attribute : attributes_declaration.identifier_list().Identifier())
-				attributes.add(attribute.toString());
+				attributes.add(attribute.getText());
 
 		specifiers = new DeclarationSpecifiersNode(this).interpret(node.declaration_specifiers()).getSpecifiers();
 		signature = new DeclaratorNode(this).interpret(node.declarator());
 
 		type = Type.manufacture(specifiers, signature, node.declaration_specifiers().start);
-		Logging.logNotice(signature.getIdentifier());
 
-		if (node.compound_statement() != null) code = new CompoundStatementNode(this).interpret(node.compound_statement());
+		if (node.compound_statement() != null) code = new CompoundStatementNode(this, getName()).interpret(node.compound_statement());
 		registerFunction(this);
 		return this;
 	}
 
 	@Override
 	public String getName() {return signature.getIdentifier();}
-	@Override
-	public Scope getScope()
+	public boolean isMain()
 	{
-		return super.getScope().append(getName());
+		return getName().equals("main");
 	}
-	@Override
-	public String getFullName()
-	{
-		return super.getScope().getPrefix() + getName();
-	}
-
 	public List<VariableNode> getParameters()
 	{
 		return signature.getChildVariables();
@@ -102,6 +91,14 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 	public boolean isInterruptHandler()
 	{
 		return attributes.contains(CompUtils.Attributes.interrupt);
+	}
+	private boolean isISR()
+	{
+		return !attributes.contains(CompUtils.Attributes.noISR1) && !attributes.contains(CompUtils.Attributes.noISR2);
+	}
+	public boolean isSA1()
+	{
+		return attributes.contains(CompUtils.Attributes.SA1);
 	}
 	
 	public void requireStackLoader()
@@ -127,13 +124,24 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 		return true; // Always there as a label at least
 	}
 
+	private List<VariableNode> interruptRequirements(boolean reverse) // The variables an interrupt needs to preserve
+	{
+		List<VariableNode> variables = new ArrayList<VariableNode>();
+		
+		for (VariableNode var : ComponentNode.variables)
+			if (var.getEnclosingFunction() == null || canCall(var.getEnclosingFunction()))
+				variables.add(var);
+		
+		if (reverse) Collections.reverse(variables);
+		return variables;
+	}
 	@Override
 	public String getAssembly(int leadingWhitespace) throws Exception
 	{
 		String whitespace = AssemblyUtils.getWhitespace(leadingWhitespace);
 		String assembly = "";
 	
-		if (requiresStackLoader)
+		if (requiresStackLoader) // Need to sometimes get arguments from the stack
 		{
 			assembly += whitespace + getLoaderLabel() + ":\n";
 			List<VariableNode> parameters = getParameters();
@@ -144,8 +152,34 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 		assembly += whitespace + getFullName() + ":" +
 				(DebugLevel.isAtLeast(DebugLevel.medium) ? "\t; " + getType().getSignature() : "") + 
 				"\n";
+		if (isInterruptHandler() && isISR()) // Have to push *everything* to the stack
+		{
+			assembly += AssemblyUtils.stackPusher(whitespace, CompConfig.scratchSize, new ScratchSource(0, CompConfig.scratchSize));
+			assembly += AssemblyUtils.stackPusher(whitespace, CompConfig.multDivSize, CompConfig.multDivSource(true, CompConfig.multDivSize));
+			assembly += AssemblyUtils.stackPusher(whitespace, CompConfig.multDivSize, CompConfig.multDivSource(false, CompConfig.multDivSize));
+			assembly += AssemblyUtils.stackPusher(whitespace, CompConfig.callResultSize, CompConfig.callResultSource(CompConfig.callResultSize));
+			
+			
+			for (VariableNode variable : interruptRequirements(false))
+				assembly += AssemblyUtils.stackPusher(whitespace, leadingWhitespace, variable.getSource());
+		}
+		
 		if (code != null) assembly += code.getAssembly(leadingWhitespace + CompConfig.indentSize);
-		assembly += whitespace + getEndLabel() + ": " + (isInterruptHandler() && attributes.contains(CompUtils.Attributes.noISR) ? "RTI\n" : "RTL") + "\n";
+		
+		if (isInterruptHandler() && isISR()) // Have to load *everything* to the stack
+		{
+			List<VariableNode> variables = getChildVariables();
+			Collections.reverse(variables);
+			for (VariableNode variable : interruptRequirements(true))
+				assembly += AssemblyUtils.stackLoader(whitespace, leadingWhitespace, variable.getSource());
+			
+			assembly += AssemblyUtils.stackLoader(whitespace, CompConfig.callResultSize, new ScratchSource(0, CompConfig.scratchSize));
+			assembly += AssemblyUtils.stackLoader(whitespace, CompConfig.multDivSize, CompConfig.multDivSource(false, CompConfig.multDivSize));
+			assembly += AssemblyUtils.stackLoader(whitespace, CompConfig.multDivSize, CompConfig.multDivSource(true, CompConfig.multDivSize));
+			assembly += AssemblyUtils.stackLoader(whitespace, CompConfig.scratchSize, CompConfig.callResultSource(CompConfig.callResultSize));
+		}
+		
+		assembly += whitespace + getEndLabel() + ": " + (isInterruptHandler() && !attributes.contains(CompUtils.Attributes.noISR2) ? "RTI\n" : "RTL") + "\n";
 		
 		ScratchManager.clearPointers();
 		return assembly;
