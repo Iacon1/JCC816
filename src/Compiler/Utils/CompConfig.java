@@ -84,9 +84,20 @@ public final class CompConfig
 	
 	public static final int stackSize = 0x2000;
 	
+	public static enum DefinableInterrupt // Interrupts the user is allowed to assign functions to
+	{
+		COP,
+		BRK,
+		ABORT,
+		NMI,
+		RESET,
+		IRQ
+	}
+	
 	public static enum OptimizationLevel
 	{
-		low, // + Basic (intra-expression) constant propagation
+		min, // + Basic (intra-expression) constant propagation
+		low, // + REP/SEP optimization
 		medium, // + Aggressive (inter-line) constant propagation
 		all, // + Side-effect annihilation
 		;
@@ -95,7 +106,7 @@ public final class CompConfig
 			return CompConfig.optimizationLevel.compareTo(level) >= 0;
 		}
 	}
-	public static OptimizationLevel optimizationLevel = OptimizationLevel.medium;
+	public static OptimizationLevel optimizationLevel = OptimizationLevel.all;
 	
 	public static enum DebugLevel
 	{
