@@ -14,6 +14,7 @@ import Compiler.ComponentNodes.Definitions.Type;
 import Compiler.ComponentNodes.LValues.IndirectLValueNode;
 import Compiler.ComponentNodes.LValues.LValueNode;
 import Compiler.ComponentNodes.LValues.VariableNode;
+import Compiler.Exceptions.UnsupportedFeatureException;
 import Compiler.Utils.AssemblyUtils;
 import Compiler.Utils.AssemblyUtils.DetailsTicket;
 import Compiler.Utils.CompConfig;
@@ -81,6 +82,10 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 			if (node.argument_expression_list() != null)
 				for (Assignment_expressionContext expr : node.argument_expression_list().assignment_expression())
 					params.add(new AssignmentExpressionNode(this).interpret(expr));
+			if (getReferencedFunction().isSA1() && !getEnclosingFunction().isSA1())
+				throw new UnsupportedFeatureException("Calling an SA1 function outside an SA1 context", true, node.start);
+			else if (!getReferencedFunction().isSA1() && getEnclosingFunction().isSA1())
+				throw new UnsupportedFeatureException("Calling a non-SA1 function inside an SA1 context", true, node.start);
 			break;
 		case ".":
 			type = PFType.structMember;
