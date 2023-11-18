@@ -16,13 +16,13 @@ import Compiler.ComponentNodes.LValues.VariableNode;
 import Compiler.Utils.AssemblyUtils;
 import Compiler.Utils.AssemblyUtils.DetailsTicket;
 import Compiler.Utils.CompConfig.DebugLevel;
+import Compiler.Utils.CompConfig.DefinableInterrupt;
 import Compiler.Utils.CompConfig;
 import Compiler.Utils.CompUtils;
 import Compiler.Utils.SNESRegisters;
 import Compiler.Utils.ScratchManager;
 import Compiler.Utils.OperandSources.ConstantSource;
 import Compiler.Utils.OperandSources.OperandSource;
-import Compiler.Utils.ScratchManager.ScratchSource;
 import Grammar.C99.C99Parser.External_declarationContext;
 import Grammar.C99.C99Parser.ProgramContext;
 
@@ -95,12 +95,12 @@ public class ProgramNode extends InterpretingNode<ProgramNode, ProgramContext> i
 		// Native
 		assembly += whitespace + ".word\tRESET\n"; // Unused
 		assembly += whitespace + ".word\tRESET\n"; // Unused
-		assembly += whitespace + ".word\tRESET\n"; // COP
-		assembly += whitespace + ".word\tRESET\n"; // BRK
-		assembly += whitespace + ".word\tRESET\n"; // ABORT
-		assembly += whitespace + ".word\tRESET\n"; // NMI
-		assembly += whitespace + ".word\tRESET\n"; // RESET
-		assembly += whitespace + ".word\tRESET\n"; // IRQ
+		assembly += whitespace + ".word\t" + interrupts.get(DefinableInterrupt.COP) + "\n";		// COP
+		assembly += whitespace + ".word\t" + interrupts.get(DefinableInterrupt.BRK) + "\n"; 	// BRK
+		assembly += whitespace + ".word\t" + interrupts.get(DefinableInterrupt.ABORT) + "\n"; 	// ABORT
+		assembly += whitespace + ".word\t" + interrupts.get(DefinableInterrupt.NMI) + "\n"; 	// NMI
+		assembly += whitespace + ".word\tRESET\n"; 												// RESET
+		assembly += whitespace + ".word\t" + interrupts.get(DefinableInterrupt.IRQ) + "\n"; 	// IRQ
 		// Emulation
 		assembly += whitespace + ".word\tRESET\n"; // Unused
 		assembly += whitespace + ".word\tRESET\n"; // Unused
@@ -123,7 +123,7 @@ public class ProgramNode extends InterpretingNode<ProgramNode, ProgramContext> i
 		{
 			if (extDec.declaration() != null) new DeclarationNode(this).interpret(extDec.declaration());
 			else new FunctionDefinitionNode(this).interpret(extDec.function_definition());
-		}	
+		}
 
 		return this;
 	}
@@ -133,6 +133,7 @@ public class ProgramNode extends InterpretingNode<ProgramNode, ProgramContext> i
 	{
 		return true;
 	}
+	
 	
 	private String getAssemblyPreface(int leadingWhitespace) throws Exception
 	{

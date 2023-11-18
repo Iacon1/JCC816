@@ -5,9 +5,11 @@
 package Compiler.ComponentNodes;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.AbstractMap.SimpleEntry;
 
@@ -18,6 +20,7 @@ import Compiler.ComponentNodes.Definitions.StructUnionDefinitionNode;
 import Compiler.ComponentNodes.LValues.VariableNode;
 import Compiler.ComponentNodes.Statements.IterationStatementNode;
 import Compiler.ComponentNodes.Statements.SelectionStatementNode;
+import Compiler.Utils.CompConfig.DefinableInterrupt;
 
 public class ComponentNode<T extends ComponentNode<T>>
 {
@@ -32,6 +35,8 @@ public class ComponentNode<T extends ComponentNode<T>>
 	protected static Set<SimpleEntry<Integer, Integer>> reqMultSubs;
 	protected static Set<SimpleEntry<Integer, Integer>> reqDivSubs;
 	
+	protected static Map<DefinableInterrupt, String> interrupts;
+	
 	private void resetReferences()
 	{
 		variables = new LinkedList<VariableNode>();
@@ -40,6 +45,10 @@ public class ComponentNode<T extends ComponentNode<T>>
 		enums = new LinkedList<EnumDefinition>();
 		reqMultSubs = new HashSet<SimpleEntry<Integer, Integer>>();
 		reqDivSubs = new HashSet<SimpleEntry<Integer, Integer>>();
+		interrupts = new HashMap<DefinableInterrupt, String>();
+		
+		for (DefinableInterrupt definableInterrupt : DefinableInterrupt.values())
+			interrupts.put(definableInterrupt, "RESET");
 	}
 	protected static void registerVariable(VariableNode variable) {variables.add(variable);}
 	protected static void registerFunction(FunctionDefinitionNode function) {functions.add(function);}
@@ -109,8 +118,10 @@ public class ComponentNode<T extends ComponentNode<T>>
 	 */
 	public VariableNode resolveVariableRelative(String name)
 	{
+		String fullName = getScope().getPrefix() + name;
+		if (fullName.length() == 1) fullName = "__" + fullName;
 		for (VariableNode variable : variables)
-			if (variable.getFullName().equals(getScope().getPrefix() + name))
+			if (variable.getFullName().equals(fullName))
 				return variable;
 		if (parent != null) return parent.resolveVariableRelative(name);
 		return null;
@@ -121,8 +132,10 @@ public class ComponentNode<T extends ComponentNode<T>>
 	 */
 	public StructUnionDefinitionNode resolveStructOrUnionRelative(String name)
 	{
+		String fullName = getScope().getPrefix() + name;
+		if (fullName.length() == 1) fullName = "__" + fullName;
 		for (StructUnionDefinitionNode definition : structs)
-			if (definition.getFullName().equals(getScope().getPrefix() + name))
+			if (definition.getFullName().equals(fullName))
 				return definition;
 		if (parent != null) return parent.resolveStructOrUnionRelative(name);
 		return null;
@@ -133,8 +146,10 @@ public class ComponentNode<T extends ComponentNode<T>>
 	 */
 	public FunctionDefinitionNode resolveFunctionRelative(String name)
 	{
+		String fullName = getScope().getPrefix() + name;
+		if (fullName.length() == 1) fullName = "__" + fullName;
 		for (FunctionDefinitionNode definition : functions)
-			if (definition.getFullName().equals(getScope().getPrefix() + name))
+			if (definition.getFullName().equals(fullName))
 				return definition;
 		if (parent != null) return parent.resolveFunctionRelative(name);
 		return null;
@@ -211,5 +226,10 @@ public class ComponentNode<T extends ComponentNode<T>>
 	{
 		reqDivSubs.add(new SimpleEntry<Integer, Integer>(xSize, ySize));
 		return "__DIV_" + xSize + "_" + ySize;
+	}
+	
+	public static void registerInterrupt(DefinableInterrupt interrupt, FunctionDefinitionNode function)
+	{
+		interrupts.put(interrupt, function.getFullName());
 	}
 }
