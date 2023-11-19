@@ -6,8 +6,8 @@ package Compiler.ComponentNodes.Definitions;
 import java.util.ArrayList;
 import java.util.List;
 
+import Compiler.CompConfig;
 import Compiler.ComponentNodes.Interfaces.TypedNode;
-import Compiler.Utils.CompConfig;
 
 public class FunctionType extends Type
 {

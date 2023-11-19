@@ -14,6 +14,9 @@ import java.util.Set;
 
 import org.antlr.v4.runtime.tree.TerminalNode;
 
+import Compiler.CompConfig;
+import Compiler.CompConfig.DebugLevel;
+import Compiler.CompConfig.OptimizationLevel;
 import Compiler.ComponentNodes.Declarations.DeclarationSpecifiersNode;
 import Compiler.ComponentNodes.Declarations.DeclaratorNode;
 import Compiler.ComponentNodes.Definitions.Type;
@@ -24,11 +27,9 @@ import Compiler.ComponentNodes.LValues.VariableNode;
 import Compiler.ComponentNodes.Statements.CompoundStatementNode;
 import Compiler.ComponentNodes.Statements.StatementNode;
 import Compiler.Utils.AssemblyUtils;
-import Compiler.Utils.CompConfig;
 import Compiler.Utils.CompUtils;
 import Compiler.Utils.ScratchManager;
 import Compiler.Utils.ScratchManager.ScratchSource;
-import Compiler.Utils.CompConfig.DebugLevel;
 
 public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionNode, Function_definitionContext> implements NamedNode, TypedNode, AssemblableNode
 {

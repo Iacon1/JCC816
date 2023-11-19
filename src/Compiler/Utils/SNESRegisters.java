@@ -2,6 +2,8 @@
 //
 package Compiler.Utils;
 
+import Compiler.CompConfig;
+
 public enum SNESRegisters
 {
 	WRMPYA(0x004202),

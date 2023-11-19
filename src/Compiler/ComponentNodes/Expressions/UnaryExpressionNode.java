@@ -4,6 +4,7 @@ package Compiler.ComponentNodes.Expressions;
 
 import org.antlr.v4.runtime.tree.TerminalNode;
 
+import Compiler.CompConfig;
 import Compiler.ComponentNodes.ComponentNode;
 import Compiler.ComponentNodes.FunctionDefinitionNode;
 import Compiler.ComponentNodes.Declarations.TypeNameNode;
@@ -16,7 +17,6 @@ import Compiler.ComponentNodes.Definitions.PointerType;
 import Compiler.Exceptions.ConstraintException;
 import Compiler.Utils.AssemblyUtils;
 import Compiler.Utils.AssemblyUtils.DetailsTicket;
-import Compiler.Utils.CompConfig;
 import Compiler.Utils.PropPointer;
 import Compiler.Utils.ScratchManager;
 import Compiler.Utils.ScratchManager.ScratchSource;

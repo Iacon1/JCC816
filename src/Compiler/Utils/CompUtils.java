@@ -6,6 +6,7 @@ package Compiler.Utils;
 import java.util.ArrayList;
 import java.util.List;
 
+import Compiler.CompConfig;
 import Compiler.ComponentNodes.Definitions.Type;
 import Compiler.ComponentNodes.Dummies.DummyType;
 

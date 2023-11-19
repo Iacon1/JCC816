@@ -6,7 +6,7 @@ package Compiler.Exceptions;
 
 import org.antlr.v4.runtime.Token;
 
-import Compiler.Utils.CompConfig;
+import Compiler.CompConfig;
 
 @SuppressWarnings("serial")
 public class UnsupportedFeatureException extends TokenException

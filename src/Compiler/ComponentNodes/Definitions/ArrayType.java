@@ -2,7 +2,7 @@
 // Array
 package Compiler.ComponentNodes.Definitions;
 
-import Compiler.Utils.CompConfig;
+import Compiler.CompConfig;
 
 public class ArrayType extends PointerType
 {

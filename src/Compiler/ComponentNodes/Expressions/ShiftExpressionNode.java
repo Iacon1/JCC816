@@ -2,9 +2,9 @@
 //
 package Compiler.ComponentNodes.Expressions;
 
+import Compiler.CompConfig;
 import Compiler.ComponentNodes.ComponentNode;
 import Compiler.Utils.AssemblyUtils;
-import Compiler.Utils.CompConfig;
 import Compiler.Utils.CompUtils;
 import Compiler.Utils.ScratchManager;
 import Compiler.Utils.AssemblyUtils.DetailsTicket;
