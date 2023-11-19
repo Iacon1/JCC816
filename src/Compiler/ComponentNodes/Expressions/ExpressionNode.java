@@ -4,8 +4,10 @@
 
 package Compiler.ComponentNodes.Expressions;
 
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import Compiler.ComponentNodes.ComponentNode;
 import Compiler.ComponentNodes.FunctionDefinitionNode;
@@ -98,4 +100,12 @@ public class ExpressionNode extends BaseExpressionNode<ExpressionContext>
 			assembly += expression.getAssembly(leadingWhitespace);
 		return assembly;
 	}	
+	
+	@Override
+	public Set<LValueNode<?>> influences()
+	{
+		Set<LValueNode<?>> influences = new HashSet<LValueNode<?>>();
+		if (hasLValue()) influences.add(getLValue());
+		return influences;
+	}
 }

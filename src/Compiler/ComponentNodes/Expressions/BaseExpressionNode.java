@@ -4,6 +4,8 @@
 
 package Compiler.ComponentNodes.Expressions;
 
+import java.util.Set;
+
 import org.antlr.v4.runtime.ParserRuleContext;
 
 import Compiler.CompConfig;
@@ -54,7 +56,7 @@ public abstract class BaseExpressionNode<C extends ParserRuleContext> extends In
 	}
 	protected String getAssembly(int leadingWhitespace, ScratchManager scratchManager, DetailsTicket ticket) throws Exception
 	{
-		return getAssembly(leadingWhitespace, CompConfig.callResultSource(getType().getSize()),  scratchManager, ticket);
+		return getAssembly(leadingWhitespace, null,  scratchManager, ticket);
 	}
 	@Override
 	public String getAssembly(int leadingWhitespace) throws Exception
@@ -63,5 +65,9 @@ public abstract class BaseExpressionNode<C extends ParserRuleContext> extends In
 		return getAssembly(leadingWhitespace, scratchManager, new DetailsTicket());
 	}
 
-	
+	/** Lists all the nodes that influence this one's eventual value.
+	 * 
+	 * @return A List of all the nodes that influence this one's eventual value.
+	 */
+	public abstract Set<LValueNode<?>> influences();
 }
