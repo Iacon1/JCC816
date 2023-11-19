@@ -2,9 +2,13 @@
 //
 package Compiler.ComponentNodes.Expressions;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import Compiler.ComponentNodes.ComponentNode;
 import Compiler.ComponentNodes.FunctionDefinitionNode;
 import Compiler.ComponentNodes.Definitions.Type;
+import Compiler.ComponentNodes.LValues.LValueNode;
 import Compiler.Exceptions.ConstraintException;
 import Compiler.Utils.AssemblyUtils.DetailsTicket;
 import Compiler.Utils.ScratchManager;
@@ -36,4 +40,7 @@ public class ConstantExpressionNode extends BaseExpressionNode<Constant_expressi
 	public boolean hasAssembly() {throw new UnsupportedOperationException();}
 	@Override
 	public String getAssembly(int leadingWhitespace, OperandSource destSource, ScratchManager scratchManager, DetailsTicket ticket) throws Exception {throw new UnsupportedOperationException();}
+
+	@Override
+	public Set<LValueNode<?>> influences() {throw new UnsupportedOperationException();}
 }

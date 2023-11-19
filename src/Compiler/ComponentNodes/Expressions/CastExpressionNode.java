@@ -2,6 +2,9 @@
 //
 package Compiler.ComponentNodes.Expressions;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import Compiler.ComponentNodes.ComponentNode;
 import Compiler.ComponentNodes.FunctionDefinitionNode;
 import Compiler.ComponentNodes.Declarations.TypeNameNode;
@@ -47,6 +50,7 @@ public class CastExpressionNode extends BaseExpressionNode<Cast_expressionContex
 	@Override
 	public boolean hasLValue()
 	{
+		if (expr == null) return false;
 		return expr.hasLValue();
 	}
 	public LValueNode<?> getLValue()
@@ -78,5 +82,11 @@ public class CastExpressionNode extends BaseExpressionNode<Cast_expressionContex
 		assembly += expr.getAssembly(leadingWhitespace, destSource, scratchManager, ticket);
 		
 		return assembly;
+	}
+	
+	@Override
+	public Set<LValueNode<?>> influences()
+	{
+		return expr.influences();
 	}
 }
