@@ -6,7 +6,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-import Compiler.Utils.CompConfig;
+import Compiler.CompConfig;
 
 public class Scope
 {

@@ -6,13 +6,13 @@ package Compiler.ComponentNodes.Expressions;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 
+import Compiler.CompConfig;
 import Compiler.ComponentNodes.ComponentNode;
 import Compiler.ComponentNodes.InterpretingNode;
 import Compiler.ComponentNodes.Interfaces.AssemblableNode;
 import Compiler.ComponentNodes.Interfaces.TypedNode;
 import Compiler.ComponentNodes.LValues.LValueNode;
 import Compiler.Utils.AssemblyUtils.DetailsTicket;
-import Compiler.Utils.CompConfig;
 import Compiler.Utils.PropPointer;
 import Compiler.Utils.ScratchManager;
 import Compiler.Utils.OperandSources.OperandSource;

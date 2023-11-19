@@ -2,6 +2,7 @@
 //
 package Compiler.ComponentNodes.Statements;
 
+import Compiler.CompConfig;
 import Compiler.ComponentNodes.ComponentNode;
 import Compiler.ComponentNodes.FunctionDefinitionNode;
 import Compiler.ComponentNodes.Declarations.DeclarationNode;
@@ -11,7 +12,6 @@ import Compiler.ComponentNodes.Expressions.ExpressionNode;
 import Compiler.ComponentNodes.Interfaces.AssemblableNode;
 import Compiler.Utils.AssemblyUtils;
 import Compiler.Utils.AssemblyUtils.DetailsTicket;
-import Compiler.Utils.CompConfig;
 import Compiler.Utils.ScratchManager;
 import Grammar.C99.C99Parser.Iteration_statementContext;
 

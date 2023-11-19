@@ -11,6 +11,7 @@ import java.util.Set;
 
 import org.antlr.v4.runtime.Token;
 
+import Compiler.CompConfig;
 import Compiler.ComponentNodes.ComponentNode;
 import Compiler.ComponentNodes.Declarations.DeclarationSpecifiersNode;
 import Compiler.ComponentNodes.Declarations.DeclaratorNode;
@@ -21,7 +22,6 @@ import Compiler.ComponentNodes.LValues.VariableNode;
 import Compiler.Exceptions.ConstraintException;
 import Compiler.Exceptions.UndefinedTypeException;
 import Compiler.Exceptions.UnsupportedFeatureException;
-import Compiler.Utils.CompConfig;
 
 public class Type
 {

@@ -2,6 +2,7 @@
 // 
 package Compiler.ComponentNodes.Statements;
 
+import Compiler.CompConfig;
 import Compiler.ComponentNodes.ComponentNode;
 import Compiler.ComponentNodes.FunctionDefinitionNode;
 import Compiler.ComponentNodes.Expressions.BaseExpressionNode;
@@ -9,7 +10,6 @@ import Compiler.ComponentNodes.Expressions.ExpressionNode;
 import Compiler.ComponentNodes.Interfaces.AssemblableNode;
 import Compiler.Utils.AssemblyUtils;
 import Compiler.Utils.OperandSources.ConstantSource;
-import Compiler.Utils.CompConfig;
 import Compiler.Utils.CompUtils;
 import Compiler.Utils.ScratchManager;
 import Grammar.C99.C99Parser.Jump_statementContext;

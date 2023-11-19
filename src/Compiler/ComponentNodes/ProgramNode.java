@@ -10,14 +10,14 @@ import java.util.Map;
 import java.util.Set;
 
 import Compiler.ComponentNodes.Expressions.MultiplicativeExpressionNode;
+import Compiler.CompConfig;
+import Compiler.CompConfig.DebugLevel;
+import Compiler.CompConfig.DefinableInterrupt;
 import Compiler.ComponentNodes.Declarations.DeclarationNode;
 import Compiler.ComponentNodes.Interfaces.AssemblableNode;
 import Compiler.ComponentNodes.LValues.VariableNode;
 import Compiler.Utils.AssemblyUtils;
 import Compiler.Utils.AssemblyUtils.DetailsTicket;
-import Compiler.Utils.CompConfig.DebugLevel;
-import Compiler.Utils.CompConfig.DefinableInterrupt;
-import Compiler.Utils.CompConfig;
 import Compiler.Utils.CompUtils;
 import Compiler.Utils.SNESRegisters;
 import Compiler.Utils.ScratchManager;

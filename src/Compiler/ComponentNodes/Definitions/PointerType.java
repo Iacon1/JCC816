@@ -6,7 +6,7 @@ package Compiler.ComponentNodes.Definitions;
 import java.util.HashSet;
 import java.util.Set;
 
-import Compiler.Utils.CompConfig;
+import Compiler.CompConfig;
 
 public class PointerType extends Type
 {

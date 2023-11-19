@@ -1,6 +1,6 @@
 // Created by Iacon1 on 10/26/2023.
 // Constants for the compiler.
-package Compiler.Utils;
+package Compiler;
 
 import java.util.AbstractMap.SimpleEntry;
 

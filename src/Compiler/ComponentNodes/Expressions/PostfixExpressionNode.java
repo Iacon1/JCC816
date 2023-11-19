@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import Compiler.CompConfig;
 import Compiler.ComponentNodes.ComponentNode;
 import Compiler.ComponentNodes.FunctionDefinitionNode;
 import Compiler.ComponentNodes.Definitions.PointerType;
@@ -17,7 +18,6 @@ import Compiler.ComponentNodes.LValues.VariableNode;
 import Compiler.Exceptions.UnsupportedFeatureException;
 import Compiler.Utils.AssemblyUtils;
 import Compiler.Utils.AssemblyUtils.DetailsTicket;
-import Compiler.Utils.CompConfig;
 import Compiler.Utils.ScratchManager;
 import Compiler.Utils.OperandSources.ConstantSource;
 import Compiler.Utils.OperandSources.OperandSource;
