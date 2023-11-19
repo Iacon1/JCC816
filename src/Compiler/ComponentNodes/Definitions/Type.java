@@ -278,6 +278,10 @@ public class Type
 	{
 		return typeQualifiers.contains("const");
 	}
+	public boolean isVolatile()
+	{
+		return typeQualifiers.contains("volatile");
+	}
 	public boolean isIncomplete() {return false;} // To be overriden
 	public boolean isQualified()
 	{
