@@ -4,6 +4,7 @@
 package Compiler.ComponentNodes.Expressions;
 
 import Compiler.ComponentNodes.ComponentNode;
+import Compiler.ComponentNodes.LValues.LValueNode;
 import Compiler.ComponentNodes.LValues.VariableNode;
 import Compiler.Exceptions.ConstraintException;
 import Compiler.Utils.AssemblyUtils;
@@ -112,6 +113,18 @@ public class AssignmentExpressionNode extends BinaryExpressionNode
 	@Override
 	public Object getPropValue() {return null;} // Should never happen
 	
+	public static void equateLValue(LValueNode<?> x, BaseExpressionNode<?> y) // Binds tracking data from y to x for optimization purposes
+	{
+		if (y.hasPropValue())
+			x.setOnlyPossibleValue(y.getPropValue());
+		else if (y.hasLValue() && y.getLValue().hasPossibleValues())
+		{
+			x.setPossibleValues(y.getLValue().getPossibleValues());
+			x.setOnlyInfluence(y.getLValue());
+		}
+		else x.setInfluences(y.influences());
+	}
+	
 	@Override
 	protected String getAssembly(String whitespace, OperandSource destSource, ScratchManager scratchManager, OperandSource sourceX, OperandSource sourceY, DetailsTicket ticket) throws Exception
 	{throw new UnsupportedOperationException();} // This is never directly called.
@@ -141,12 +154,9 @@ public class AssignmentExpressionNode extends BinaryExpressionNode
 		if (!y.hasAssembly() || !destSource.equals(x.getLValue().getSource()))
 			assembly += AssemblyUtils.byteCopier(whitespace, x.getLValue().getSize(), x.getLValue().getSource(), sourceY, ticket);
 		
-		if (y.hasPropValue())
-			x.getLValue().setOnlyPossibleValue(y.getPropValue());
-		else if (y.hasLValue() && y.getLValue().hasPossibleValues())
-			x.getLValue().setPossibleValues(y.getLValue().getPossibleValues());
+		equateLValue(x.getLValue(), y);
 		
-		scratchManager.demotePointer(destSource); // A copy of the destination, if it's a pointer, has gone stale
+		ScratchManager.demotePointer(destSource); // A copy of the destination, if it's a pointer, has gone stale
 		return assembly;
 	}
 	@Override

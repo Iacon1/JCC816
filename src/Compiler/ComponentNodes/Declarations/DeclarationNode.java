@@ -87,21 +87,15 @@ public class DeclarationNode extends InterpretingNode<DeclarationNode, Declarati
 			if (expressions.get(i) != null)
 			{
 				if (expressions.get(i).hasAssembly())
-				{
 					assembly += expressions.get(i).getAssembly(leadingWhitespace, variables.get(i).getSource(), new DetailsTicket());
-					if (expressions.get(i).hasLValue())
-						assembly += AssemblyUtils.byteCopier(AssemblyUtils.getWhitespace(leadingWhitespace), variables.get(i).getSize(), variables.get(i).getSource(), expressions.get(i).getLValue().getSource());
-					if (expressions.get(i).hasLValue() && expressions.get(i).getLValue().hasPossibleValues())
-						variables.get(i).setPossibleValues(expressions.get(i).getLValue().getPossibleValues());
-				}
 				else if (expressions.get(i).hasLValue())
 					assembly += AssemblyUtils.byteCopier(AssemblyUtils.getWhitespace(leadingWhitespace), variables.get(i).getSize(), variables.get(i).getSource(), expressions.get(i).getLValue().getSource());
 				else if (expressions.get(i).hasPropValue())
 				{	
 					OperandSource sourceN = new ConstantSource(expressions.get(i).getPropValue(), expressions.get(i).getSize());
 					assembly += AssemblyUtils.byteCopier(AssemblyUtils.getWhitespace(leadingWhitespace), variables.get(i).getSize(), variables.get(i).getSource(), sourceN);
-					variables.get(i).setOnlyPossibleValue(expressions.get(i).getPropValue());
 				}
+				AssignmentExpressionNode.equateLValue(variables.get(i), expressions.get(i));
 			}
 				
 		return assembly;
