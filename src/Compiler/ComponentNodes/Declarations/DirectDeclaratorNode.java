@@ -59,7 +59,7 @@ public class DirectDeclaratorNode extends InterpretingNode<DirectDeclaratorNode,
 			if (node.parameter_type_list() != null && node.parameter_type_list().parameter_list() != null)
 			{
 				for (Parameter_declarationContext paramDecl : node.parameter_type_list().parameter_list().parameter_declaration())
-					parameters.add(new ParameterDeclarationNode(this).interpret(paramDecl));
+					parameters.add(new ParameterDeclarationNode(this, scopeOverride).interpret(paramDecl));
 			}
 			info.paramDecls = parameters.toArray(new ParameterDeclarationNode[] {});
 			subDirDec = new DirectDeclaratorNode(this, scopeOverride).interpret(node.direct_declarator());
