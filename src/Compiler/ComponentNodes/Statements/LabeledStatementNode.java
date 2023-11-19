@@ -29,9 +29,9 @@ public class LabeledStatementNode extends StatementNode<Labeled_statementContext
 			if (node.constant_expression() != null)
 			{
 				BaseExpressionNode<?> constExpr = new ConstantExpressionNode(this).interpret(node.constant_expression());
-				label = getEnclosingSelection().getLabel(constExpr);
+				label = getEnclosingSelection().getCaseLabel(constExpr);
 			}
-			else label = getEnclosingSelection().getDefaultLabel();
+			else label = getEnclosingSelection().getDefaultLabel(true);
 		}
 		else label = getEnclosingFunction().getScope().getPrefix() + node.Identifier().getText();
 		

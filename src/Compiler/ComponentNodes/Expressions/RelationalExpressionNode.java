@@ -88,13 +88,13 @@ public class RelationalExpressionNode extends BinaryExpressionNode
 					lines.add(sourceY.prefaceAssembly(whitespace, i, ticket2));
 					lines.add("LDA\t" + sourceY.apply(i, ticket2));					// Get Y
 					lines.add("EOR\t" + toXOR);										// Flip sign
-					lines.add(destSource.prefaceAssembly(whitespace, i, ticket2));
-					lines.add("STA\t" + destSource.apply(0, ticket2));				// Place Y in destSource temporarily
+					if (destSource != null) lines.add(destSource.prefaceAssembly(whitespace, i, ticket2));
+					if (destSource != null) lines.add("STA\t" + destSource.apply(0, ticket2));				// Place Y in destSource temporarily
 					lines.add(sourceX.prefaceAssembly(whitespace, i, ticket2));
 					lines.add("LDA\t" + sourceX.apply(i, ticket2));					// Get X
 					lines.add("EOR\t" + toXOR);										// Flip sign
-					lines.add(destSource.prefaceAssembly(whitespace, i, ticket2));
-					lines.add("CMP\t" + destSource.apply(0, ticket2));				// Cmp Y & X?
+					if (destSource != null) lines.add(destSource.prefaceAssembly(whitespace, i, ticket2));
+					if (destSource != null) lines.add("CMP\t" + destSource.apply(0, ticket2));				// Cmp Y & X?
 				}
 			}
 			else
@@ -129,8 +129,8 @@ public class RelationalExpressionNode extends BinaryExpressionNode
 		}
 		
 		assembly += whitespace + CompUtils.setA8 + "\n";
-		assembly += whitespace + destSource.prefaceAssembly(whitespace, 0, innerTicket);
-		assembly += whitespace + "STA\t" + destSource.apply(0, innerTicket) + "\n";
+		if (destSource != null) assembly += whitespace + destSource.prefaceAssembly(whitespace, 0, innerTicket);
+		if (destSource != null) assembly += whitespace + "STA\t" + destSource.apply(0, innerTicket) + "\n";
 		
 		assembly += ticket.restore(whitespace, DetailsTicket.saveA | DetailsTicket.saveX);
 		
