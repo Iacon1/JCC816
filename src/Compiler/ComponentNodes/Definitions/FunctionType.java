@@ -30,7 +30,7 @@ public class FunctionType extends Type
 	@Override
 	public int getSize()
 	{
-		return CompConfig.pointerSize;
+		return type.getSize();
 	}
 	
 	public Type getType()
