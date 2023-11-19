@@ -66,6 +66,7 @@ public class JumpStatementNode extends StatementNode<Jump_statementContext> impl
 	@Override
 	public boolean canCall(FunctionDefinitionNode function)
 	{
+		if (expr == null) return false;
 		return expr.canCall(function);
 	}
 	
