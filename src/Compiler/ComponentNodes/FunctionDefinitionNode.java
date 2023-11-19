@@ -4,6 +4,8 @@
 package Compiler.ComponentNodes;
 
 import Grammar.C99.C99Parser.Attributes_declarationContext;
+import Grammar.C99.C99Parser.DeclaratorContext;
+import Grammar.C99.C99Parser.Direct_declaratorContext;
 import Grammar.C99.C99Parser.Function_definitionContext;
 
 import java.util.ArrayList;
@@ -19,12 +21,19 @@ import Compiler.CompConfig.DebugLevel;
 import Compiler.CompConfig.OptimizationLevel;
 import Compiler.ComponentNodes.Declarations.DeclarationSpecifiersNode;
 import Compiler.ComponentNodes.Declarations.DeclaratorNode;
+import Compiler.ComponentNodes.Definitions.PointerType;
 import Compiler.ComponentNodes.Definitions.Type;
+import Compiler.ComponentNodes.Expressions.BaseExpressionNode;
+import Compiler.ComponentNodes.Expressions.PostfixExpressionNode;
 import Compiler.ComponentNodes.Interfaces.AssemblableNode;
 import Compiler.ComponentNodes.Interfaces.NamedNode;
 import Compiler.ComponentNodes.Interfaces.TypedNode;
+import Compiler.ComponentNodes.LValues.LValueNode;
 import Compiler.ComponentNodes.LValues.VariableNode;
+import Compiler.ComponentNodes.Statements.AssemblyStatementNode;
 import Compiler.ComponentNodes.Statements.CompoundStatementNode;
+import Compiler.ComponentNodes.Statements.JumpStatementNode;
+import Compiler.ComponentNodes.Statements.LabeledStatementNode;
 import Compiler.ComponentNodes.Statements.StatementNode;
 import Compiler.Utils.AssemblyUtils;
 import Compiler.Utils.CompUtils;
@@ -42,13 +51,24 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 	
 	private boolean requiresStackLoader; // Do we need a stack-loading foreword?
 	
+	private List<LValueNode<?>> possibleReturns;
+	private boolean requiresAll; // Turned on during first pass of assembly, turned off for second one
+	
 	public FunctionDefinitionNode(ComponentNode<?> parent)
 	{
 		super(parent);
 		attributes = new HashSet<String>();
+		possibleReturns = new ArrayList<LValueNode<?>>();
 		requiresStackLoader = false;
+		requiresAll = false;
 	}
 
+	private String getName(Direct_declaratorContext node)
+	{
+		while (node.Identifier() == null)
+			node = node.direct_declarator();
+		return node.Identifier().getText();
+	}
 	@Override
 	public FunctionDefinitionNode interpret(Function_definitionContext node) throws Exception
 	{
@@ -57,15 +77,13 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 				attributes.add(attribute.getText());
 
 		specifiers = new DeclarationSpecifiersNode(this).interpret(node.declaration_specifiers()).getSpecifiers();
-		signature = new DeclaratorNode(this).interpret(node.declarator());
-
+		signature = new DeclaratorNode(this, getName(node.declarator().direct_declarator())).interpret(node.declarator());
 		type = Type.manufacture(specifiers, signature, node.declaration_specifiers().start);
 
 		if (node.compound_statement() != null) code = new CompoundStatementNode(this, getName()).interpret(node.compound_statement());
 		registerFunction(this);
 		return this;
 	}
-
 	@Override
 	public String getName() {return signature.getIdentifier();}
 	public boolean isMain()
@@ -136,8 +154,66 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 		if (reverse) Collections.reverse(variables);
 		return variables;
 	}
-	@Override
-	public String getAssembly(int leadingWhitespace) throws Exception
+	private List<LValueNode<?>> getExports()
+	{
+		List<LValueNode<?>> exports = new ArrayList<LValueNode<?>>();
+		for (VariableNode variable : getChildVariables())
+			if (variable.getType().isVolatile())
+				exports.add(variable);
+		for (LValueNode<?> LValue : possibleReturns)
+			exports.add(LValue);
+		return exports;
+	}
+	private boolean requiresLVal(LValueNode<?> node)
+	{
+		if (requiresAll) return true; // Are we currently pretending we need to evaluate everything?
+		if (node.getEnclosingFunction() != this) return true;
+		if (getExports().contains(node)) return true; // This is something we have to preserve
+		if (node.getType().isPointer() && ((PointerType) node.getType()).isFunction()) return true; // Gotta preserve function pointers
+		
+		for (LValueNode<?> export : getExports())
+			if (export.isInfluencedBy(node)) return true;
+		
+		return false;
+	}
+	public boolean requires(ComponentNode<?> node)
+	{
+		if (requiresAll) return true; // Are we currently pretending we need to evaluate everything?
+		
+		for (ComponentNode<?> child : node.children)
+			if (requires(child)) return true;
+		
+		if (AssemblyStatementNode.class.isAssignableFrom(node.getClass()))
+			return true;
+		else if (LabeledStatementNode.class.isAssignableFrom(node.getClass()))
+			return true;
+		else if (JumpStatementNode.class.isAssignableFrom(node.getClass()))
+			return true;
+		else if (PostfixExpressionNode.class.isAssignableFrom(node.getClass()))
+		{
+			PostfixExpressionNode expr = (PostfixExpressionNode) node;
+			if (expr.isFuncCall()) return true; // Always keep calls to functions
+			if (expr.hasLValue() && requiresLVal(expr.getLValue())) return true;
+		}
+		else if (BaseExpressionNode.class.isAssignableFrom(node.getClass()))
+		{
+			BaseExpressionNode<?> expr = (BaseExpressionNode<?>) node;
+			if (expr.hasLValue() && requiresLVal(expr.getLValue())) return true;
+		}
+		else if (VariableNode.class.isAssignableFrom(node.getClass()))
+		{
+			VariableNode var = (VariableNode) node;
+			if (requiresLVal(var)) return true;
+		}
+		
+		return false;
+	}
+	public void addPossibleReturn(LValueNode<?> value)
+	{
+		possibleReturns.add(value);
+	}
+
+	private String getAssemblyPass(int leadingWhitespace) throws Exception
 	{
 		String whitespace = AssemblyUtils.getWhitespace(leadingWhitespace);
 		String assembly = "";
@@ -186,5 +262,16 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 		return assembly;
 	}
 
-	
+	@Override
+	public String getAssembly(int leadingWhitespace) throws Exception
+	{
+		requiresAll = true;
+		if (OptimizationLevel.isAtLeast(OptimizationLevel.all))
+		{
+			getAssemblyPass(leadingWhitespace); // Scan for influence and such
+			requiresAll = false;
+			return getAssemblyPass(leadingWhitespace); // Return actual assembly
+		}
+		else return getAssemblyPass(leadingWhitespace);
+	}
 }

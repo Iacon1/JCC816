@@ -7,7 +7,6 @@ import java.util.List;
 
 import Compiler.ComponentNodes.ComponentNode;
 import Compiler.ComponentNodes.FunctionDefinitionNode;
-import Compiler.ComponentNodes.InterpretingNode;
 import Compiler.ComponentNodes.Declarations.DeclarationNode;
 import Compiler.ComponentNodes.Definitions.Scope;
 import Compiler.ComponentNodes.Interfaces.AssemblableNode;
@@ -70,7 +69,14 @@ public class CompoundStatementNode extends StatementNode<Compound_statementConte
 	{
 		String assembly = "";
 		for (AssemblableNode assemblable : assemblables)
-			assembly += assemblable.getAssembly(leadingWhitespace);
+		{
+			if (																	 // assemble if and only if
+					!ComponentNode.class.isAssignableFrom(assemblable.getClass()) || // assemblable's somehow not actually a componentnode
+					getEnclosingFunction() == null ||								 // OR it's not in a function 
+					getEnclosingFunction().requires((ComponentNode<?>) assemblable)	 // OR it's required by the function
+				)
+				assembly += assemblable.getAssembly(leadingWhitespace);
+		}
 		return assembly;
 	}
 }
