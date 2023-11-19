@@ -133,8 +133,7 @@ public class ProgramNode extends InterpretingNode<ProgramNode, ProgramContext> i
 	{
 		return true;
 	}
-	
-	
+		
 	private String getAssemblyPreface(int leadingWhitespace) throws Exception
 	{
 		String whitespace = AssemblyUtils.getWhitespace(leadingWhitespace);
@@ -154,9 +153,9 @@ public class ProgramNode extends InterpretingNode<ProgramNode, ProgramContext> i
 		assembly +=
 				whitespace + "SEI\n" +
 				whitespace + "CLC\n" +
+				whitespace + "XCE\n" +
 				whitespace + "REP\t#$08\n" + 
-				whitespace + CompUtils.setA16 + "\n" +
-				whitespace + "XCE\n";
+				whitespace + CompUtils.setA16 + "\n";
 		assembly += whitespace + "LDA\t#$" + String.format("%04x", CompConfig.stackSize - 1) + "\n";
 		assembly += whitespace + "TCS\n";
 		assembly += whitespace + "JML\tmain\n";
