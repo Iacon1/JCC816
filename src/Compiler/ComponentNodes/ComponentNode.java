@@ -13,14 +13,16 @@ import java.util.Map;
 import java.util.Set;
 import java.util.AbstractMap.SimpleEntry;
 
+import Compiler.CompConfig.DefinableInterrupt;
 import Compiler.ComponentNodes.Declarations.DeclarationNode;
 import Compiler.ComponentNodes.Definitions.EnumDefinition;
 import Compiler.ComponentNodes.Definitions.Scope;
 import Compiler.ComponentNodes.Definitions.StructUnionDefinitionNode;
+import Compiler.ComponentNodes.Expressions.BinaryExpressionNode;
+import Compiler.ComponentNodes.LValues.LValueNode;
 import Compiler.ComponentNodes.LValues.VariableNode;
 import Compiler.ComponentNodes.Statements.IterationStatementNode;
 import Compiler.ComponentNodes.Statements.SelectionStatementNode;
-import Compiler.Utils.CompConfig.DefinableInterrupt;
 
 public class ComponentNode<T extends ComponentNode<T>>
 {
@@ -68,6 +70,10 @@ public class ComponentNode<T extends ComponentNode<T>>
 		this.parent = null;
 		reqMultSubs = new HashSet<SimpleEntry<Integer, Integer>>();
 		reqDivSubs = new HashSet<SimpleEntry<Integer, Integer>>();
+	}
+	public void removeChild(ComponentNode<?> child)
+	{
+		children.remove(child);
 	}
 	
 	/**
