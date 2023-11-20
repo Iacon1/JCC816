@@ -1,12 +1,12 @@
 // Created by Iacon1 on 10/22/2023.
-//
+// A way of accessing and operating on a value or region of memory.
 package Compiler.Utils.OperandSources;
 
 import java.util.function.BiFunction;
 
 import Compiler.Utils.AssemblyUtils.DetailsTicket;
 
-public abstract class OperandSource implements BiFunction<Integer, DetailsTicket, String>
+public abstract class OperandSource
 {
 	private boolean isLiteral;
 	protected int size;
@@ -19,17 +19,78 @@ public abstract class OperandSource implements BiFunction<Integer, DetailsTicket
 	public boolean isLiteral() {return isLiteral;}
 	public int getSize() {return size;}
 	
-	@Override
-	public abstract String apply(Integer i, DetailsTicket ticket);
-	
-	/** An assembly preface that must be run before the source can be applied. 
-	 * Usually not needed.
-	 * @param whitespace The whitespace to put before each line.
-	 * @param scratchManager The current scratch manager.
-	 * @return The assembly required before the source can be applied.
+	/** Returns the "base" value of the source, i. e. what would come after the operation if the byte offset is 0.
+	 * 
+	 * @return The "base" value of the source, e. g. a variable's address
 	 */
-	public String prefaceAssembly(String whitespace, Integer i, DetailsTicket ticket)
+	public abstract String getBase();
+	
+	/** Returns assembly to perform the specified operation on the value or region represented by the source.
+	 * 
+	 * @param whitespace The whitespace to place before each line
+	 * @param operation The operation to perform
+	 * @param i	The byte offset from the first byte of the source
+	 * @param ticket The details on what registers must be preserved by the access
+	 * @return The assembly to perform the specified operation on the value or region represented by the source
+	 */
+	public abstract String getInstruction(String whitespace, String operation, Integer i, DetailsTicket ticket);
+	/** Returns assembly to perform the specified operation on the value or region represented by the source.
+	 * 
+	 * @param operation The operation to perform
+	 * @param i	The byte offset from the first byte of the source
+	 * @param ticket The details on what registers must be preserved by the access
+	 * @return The assembly to perform the specified operation on the value or region represented by the source
+	 */
+	public String getInstruction(String operation, Integer i, DetailsTicket ticket)
 	{
-		return "";
+		return getInstruction("", operation, i, ticket);
+	}
+	
+	/** Returns assembly to load the the value or region represented by the source into the A register.
+	 * 
+	 * @param whitespace The whitespace to place before each line
+	 * @param i	The byte offset from the first byte of the source
+	 * @param ticket The details on what registers must be preserved by the access
+	 * @return The assembly to perform the specified operation on the value or region represented by the source
+	 */
+	public String getLDA(String whitespace, Integer i, DetailsTicket ticket)
+	{
+		assert (ticket.flags & DetailsTicket.saveA) == 0; // We can't do this if we need to save A
+		return getInstruction(whitespace, "LDA", i, ticket);
+	}
+	/** Returns assembly to load the the value or region represented by the source into the A register.
+	 * 
+	 * @param whitespace The whitespace to place before each line
+	 * @param i	The byte offset from the first byte of the source
+	 * @param ticket The details on what registers must be preserved by the access
+	 * @return The assembly to perform the specified operation on the value or region represented by the source
+	 */
+	public String getLDA(Integer i, DetailsTicket ticket)
+	{
+		return getLDA("", i, ticket);
+	}
+	
+	/** Returns assembly to store the value of the A register into the region represented by the source.
+	 * 
+	 * @param whitespace The whitespace to place before each line
+	 * @param i	The byte offset from the first byte of the source
+	 * @param ticket The details on what registers must be preserved by the access
+	 * @return The assembly to perform the specified operation on the value or region represented by the source
+	 */
+	public String getSTA(String whitespace, Integer i, DetailsTicket ticket)
+	{
+		assert !isLiteral; // Can't store into numbers
+		return getInstruction(whitespace, "STA", i, ticket);
+	}
+	/** Returns assembly to store the value of the A register into the region represented by the source.
+	 * 
+	 * @param whitespace The whitespace to place before each line
+	 * @param i	The byte offset from the first byte of the source
+	 * @param ticket The details on what registers must be preserved by the access
+	 * @return The assembly to perform the specified operation on the value or region represented by the source
+	 */
+	public String getSTA(Integer i, DetailsTicket ticket)
+	{
+		return getSTA("", i, ticket);
 	}
 }

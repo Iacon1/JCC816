@@ -42,12 +42,9 @@ public class XOrExpressionNode extends BinaryExpressionNode
 		{
 			return new String[]
 			{
-				sourceX.prefaceAssembly(whitespace, i, ticket2),
-				"LDA\t" + sourceX.apply(i, ticket2),
-				sourceY.prefaceAssembly(whitespace, i, ticket2),
-				"EOR\t" + sourceY.apply(i, ticket2),
-				destSource.prefaceAssembly(whitespace, i, ticket2),
-				"STA\t" + destSource.apply(i, ticket2),
+				sourceX.getLDA(i, ticket2),
+				sourceY.getInstruction("EOR", i, ticket2),
+				destSource.getSTA(i, ticket2),
 			};
 		}, innerTicket);
 		
@@ -65,12 +62,9 @@ public class XOrExpressionNode extends BinaryExpressionNode
 		{
 			return new String[]
 			{
-				sourceX.prefaceAssembly(whitespace, i, ticket2),
-				"LDA\t" + sourceX.apply(i, ticket2),
-				sourceY.prefaceAssembly(whitespace, i, ticket2),
-				"EOR\t" + sourceY.apply(i, ticket2),
-				destSource.prefaceAssembly(whitespace, i, ticket2),
-				"STA\t" + destSource.apply(i, ticket2),
+				sourceX.getLDA(i, ticket2),
+				sourceY.getInstruction("EOR", i, ticket2),
+				destSource.getSTA(i, ticket2),
 			};
 		}, innerTicket);
 		

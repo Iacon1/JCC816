@@ -73,12 +73,9 @@ public class AdditiveExpressionNode extends BinaryExpressionNode
 		assembly += whitespace + "CLC\n" + AssemblyUtils.bytewiseOperation(whitespace, sourceX.getSize(), (Integer i, DetailsTicket ticket2) -> 
 		{return new String[]
 			{
-				sourceX.prefaceAssembly(whitespace, i, ticket2),
-				"LDA\t" + sourceX.apply(i, ticket2),
-				sourceY.prefaceAssembly(whitespace, i, ticket2),
-				"ADC\t" + sourceY.apply(i, ticket2),
-				destSource.prefaceAssembly(whitespace, i, ticket2),
-				"STA\t" + destSource.apply(i, ticket2),
+				sourceX.getLDA(i, ticket2),
+				sourceY.getInstruction("ADC", i, ticket2),
+				destSource.getSTA(i, ticket2)
 			};
 		}, innerTicket);
 		
@@ -99,12 +96,9 @@ public class AdditiveExpressionNode extends BinaryExpressionNode
 		assembly += whitespace + "SEC\n" + AssemblyUtils.bytewiseOperation(whitespace, sourceX.getSize(), (Integer i, DetailsTicket ticket2) -> 
 		{return new String[]
 			{
-				sourceX.prefaceAssembly(whitespace, i, ticket2),
-				"LDA\t" + sourceX.apply(i, ticket2),
-				sourceY.prefaceAssembly(whitespace, i, ticket2),
-				"SBC\t" + sourceY.apply(i, ticket2),
-				destSource.prefaceAssembly(whitespace, i, ticket2),
-				"STA\t" + destSource.apply(i, ticket2),
+				sourceX.getLDA(i, ticket2),
+				sourceY.getInstruction("SBC", i, ticket2),
+				destSource.getSTA(i, ticket2)
 			};
 		}, true, true, innerTicket);
 		
@@ -119,29 +113,22 @@ public class AdditiveExpressionNode extends BinaryExpressionNode
 		
 		if (source.getSize() >= 2)
 		{
-			assembly += whitespace + source.prefaceAssembly(whitespace, source.getSize() - 2, innerTicket) + "\n";
-			assembly += whitespace + "DEC\t" + source.apply(source.getSize() - 2, innerTicket) + "\n";
+			assembly += source.getInstruction(whitespace, "DEC", source.getSize() - 2, innerTicket);
 			if (source.getSize() > 2)
 			{
 				assembly = whitespace + "SEC\n";
 				assembly += whitespace + AssemblyUtils.bytewiseOperation(whitespace, source.getSize() - 2, (Integer i, DetailsTicket ticket2) -> 
 				{return new String[]
 					{
-						source.prefaceAssembly(whitespace, i + 1, ticket2),
-						"LDA\t" + source.apply(i + 1, ticket2),
-						source.prefaceAssembly(whitespace, i + 1, ticket2),
+						source.getLDA(i + 1, ticket2),
 						"SBC\t" + (ticket2.is16Bit() ? "#$0000" : "#$00"),
-						source.prefaceAssembly(whitespace, i + 1, ticket2),
-						"STA\t" + source.apply(i + 1, ticket2),
+						source.getSTA(i + 1, ticket2),
 					};
 				}, true, true, innerTicket);
 			}
 		}
 		else
-		{
-			assembly += whitespace + source.prefaceAssembly(whitespace, source.getSize() - 1, ticket) + "\n";
-			assembly += whitespace + "LDA\t" + source.apply(source.getSize() - 1, ticket) + "\n";
-		}
+			assembly += whitespace + source.getLDA(whitespace, source.getSize() - 1, ticket) + "\n";
 		
 		assembly += ticket.restore(whitespace, DetailsTicket.saveA);	
 		return assembly;

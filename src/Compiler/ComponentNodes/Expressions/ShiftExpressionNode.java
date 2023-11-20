@@ -52,16 +52,15 @@ public class ShiftExpressionNode extends BinaryExpressionNode
 		DetailsTicket innerTicket = new DetailsTicket(ticket, DetailsTicket.saveA | DetailsTicket.saveX, 0);
 		if (sourceY.getSize() >= 2)
 		{
-			assembly += whitespace + CompUtils.setA16;
+			assembly += whitespace + CompUtils.setA16 + "\n";
 			innerTicket.flags |= DetailsTicket.isA16Bit | DetailsTicket.isXY16Bit;
 		}
 		else if (sourceY.getSize() == 1)
 		{
-			assembly += whitespace + CompUtils.setA8;
+			assembly += whitespace + CompUtils.setA8 + "\n";
 			innerTicket.flags &= ~(DetailsTicket.isA16Bit | DetailsTicket.isXY16Bit);
 		}
-		assembly += whitespace + sourceY.prefaceAssembly(whitespace, 0, innerTicket) + "\n";
-		assembly += whitespace + "LDA\t" + sourceY.apply(0, innerTicket) + "\n";
+		assembly += sourceY.getLDA(whitespace, 0, innerTicket) + "\n";
 		assembly += whitespace + "BEQ\t:++\n";
 		assembly += whitespace + "TAX\t\n";
 		
@@ -74,11 +73,9 @@ public class ShiftExpressionNode extends BinaryExpressionNode
 			{
 				return new String[]
 				{
-					sourceX.prefaceAssembly(whitespace, i, ticket2),
-					"LDA\t" + sourceX.apply(i, ticket2),
-					(i >= sourceX.getSize() - 2) ? "ASL" : "ROL",
-					destSource.prefaceAssembly(whitespace, i, ticket2),
-					"STA\t" + destSource.apply(i, ticket2),
+						sourceX.getLDA(i, ticket2),
+						(i >= sourceX.getSize() - 2) ? "ASL" : "ROL",
+						(destSource == null) ? "" : destSource.getSTA(i, ticket2),
 				};
 			});
 			break;
@@ -86,11 +83,9 @@ public class ShiftExpressionNode extends BinaryExpressionNode
 			assembly += AssemblyUtils.bytewiseOperation(whitespace + AssemblyUtils.getWhitespace(CompConfig.indentSize), sourceX.getSize(), (Integer i, DetailsTicket ticket2) -> 
 			{return new String[]
 				{
-					sourceX.prefaceAssembly(whitespace, i, ticket2),
-					"LDA\t" + sourceX.apply(i, ticket2),
+					sourceX.getLDA(i, ticket2),
 					(i >= sourceX.getSize() - 2) ? "LSR" : "ROR",
-					destSource.prefaceAssembly(whitespace, i, ticket2),
-					"STA\t" + destSource.apply(i, ticket2),
+					(destSource == null) ? "" : destSource.getSTA(i, ticket2),
 				};
 			}, true, true);
 			break;
@@ -116,11 +111,9 @@ public class ShiftExpressionNode extends BinaryExpressionNode
 			{
 				return new String[]
 				{
-					sourceX.prefaceAssembly(whitespace, i, ticket2),
-					"LDA\t" + sourceX.apply(i, ticket2),
+					sourceX.getLDA(i, ticket2),
 					(i >= sourceX.getSize() - 2) ? "ASL" : "ROL",
-					(destSource == null) ? "" : destSource.prefaceAssembly(whitespace, i, ticket2),
-					(destSource == null) ? "" : "STA\t" + destSource.apply(i, ticket2),
+					(destSource == null) ? "" : destSource.getSTA(i, ticket2),
 				};
 			});
 			break;
@@ -128,11 +121,9 @@ public class ShiftExpressionNode extends BinaryExpressionNode
 			assembly += AssemblyUtils.bytewiseOperation(whitespace, sourceX.getSize(), (Integer i, DetailsTicket ticket2) -> 
 			{return new String[]
 				{
-					sourceX.prefaceAssembly(whitespace, i, ticket2),
-					"LDA\t" + sourceX.apply(i, ticket2),
+					sourceX.getLDA(i, ticket2),
 					(i >= sourceX.getSize() - 2) ? "LSR" : "ROR",
-					destSource.prefaceAssembly(whitespace, i, ticket2),
-					"STA\t" + destSource.apply(i, ticket2),
+					(destSource == null) ? "" : destSource.getSTA(i, ticket2),
 				};
 			}, true, true);
 			break;

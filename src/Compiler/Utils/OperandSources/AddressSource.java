@@ -15,8 +15,16 @@ public class AddressSource extends OperandSource
 	}
 
 	@Override
-	public String apply(Integer i, DetailsTicket ticket)
+	public String getInstruction(String whitespace, String operation, Integer i, DetailsTicket ticket)
 	{
-		return address + " + " + i;
+		if (i >= size)
+			return whitespace + operation + "\t" + (ticket.is16Bit() ? "#$0000" : "#$00") + "\n";
+		return whitespace + operation + "\t" + address + " + " + i + "\n";
+	}
+	
+	@Override
+	public String getBase()
+	{
+		return address;
 	}
 }

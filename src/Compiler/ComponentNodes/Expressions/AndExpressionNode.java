@@ -46,12 +46,9 @@ public class AndExpressionNode extends BinaryExpressionNode
 		{
 			return new String[]
 			{
-				sourceX.prefaceAssembly(whitespace, i, ticket2),
-				"LDA\t" + sourceX.apply(i, ticket2),
-				sourceY.prefaceAssembly(whitespace, i, ticket2),
-				"AND\t" + sourceY.apply(i, ticket2),
-				destSource.prefaceAssembly(whitespace, i, ticket2),
-				"STA\t" + destSource.apply(i, ticket2),
+				sourceX.getLDA(i, ticket2),
+				sourceY.getInstruction("AND", i, ticket2),
+				destSource.getSTA(i, ticket2),
 			};
 		}, innerTicket);
 		

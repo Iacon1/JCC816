@@ -14,32 +14,29 @@ public class IndirectLValueNode extends LValueNode<IndirectLValueNode>
 {
 	private class IndirectOperandSource extends OperandSource
 	{
-		private int lastI = -1;
-		private String lastWhitespace;
-		
 		public IndirectOperandSource()
 		{
 			super(type.getSize(), addrSource.isLiteral());
-			lastWhitespace = "";
 		}
 
 		@Override
-		public String apply(Integer i, DetailsTicket ticket)
+		public String getBase()
 		{
-			return "[" + addrSource.apply(0, ticket) + "],y" + ((ticket.flags & DetailsTicket.saveY) != 0 ? "\n" + lastWhitespace + "PLY" : "");
+			return "[" + addrSource.getBase() + "]";
 		}
-	
+		
 		@Override
-		public String prefaceAssembly(String whitespace, Integer i, DetailsTicket ticket)
+		public String getInstruction(String whitespace, String operation, Integer i, DetailsTicket ticket)
 		{
 			String assembly = "";
-			lastWhitespace = whitespace;
-			if (i != lastI)
-			{
-				if ((ticket.flags & DetailsTicket.saveY) != 0) assembly += "PHY\n" + whitespace;
-				assembly += "LDY\t#$" + String.format(ticket.is16Bit() ? "%04x" : "%02x", i) + "\n";
-				lastI = i;
-			}
+
+			if ((ticket.flags & DetailsTicket.saveY) != 0)
+				assembly += whitespace + "PHY\n";
+			assembly += whitespace + "LDY\t#$" + String.format(ticket.is16Bit() ? "%04x" : "%02x", i) + "\n";
+
+			assembly += whitespace + operation + "[" + addrSource.getBase() + "],y" + "\n";
+			if ((ticket.flags & DetailsTicket.saveY) != 0)
+				assembly += whitespace + "PLY\n";
 
 			return assembly;
 		}

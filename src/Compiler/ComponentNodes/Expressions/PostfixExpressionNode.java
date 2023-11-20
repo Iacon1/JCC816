@@ -245,8 +245,8 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 					if (sourceV != null) scratchManager.releaseScratchBlock(sourceV);
 				}
 
-				if (expr.hasPropValue()) assembly += whitespace + "JSL\t" + new ConstantSource(expr.getPropValue(), CompConfig.pointerSize).apply(0, ticket) + "\n";
-				else if (expr.hasLValue()) assembly += whitespace + "JSL\t" + expr.getLValue().getSource().apply(0, ticket) + "\n";
+				if (expr.hasPropValue()) assembly += new ConstantSource(expr.getPropValue(), CompConfig.pointerSize).getInstruction("JSL", 0, ticket);
+				else if (expr.hasLValue()) assembly += expr.getLValue().getSource().getInstruction(whitespace, "JSL", 0, ticket);
 				
 				Collections.reverse(variables);
 				for (VariableNode parameter : variables)

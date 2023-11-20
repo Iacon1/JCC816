@@ -47,18 +47,15 @@ public class LANDExpressionNode extends BinaryExpressionNode
 		{
 			return new String[]
 			{
-				sourceX.prefaceAssembly(whitespace, i, ticket2),
-				"LDA\t" + sourceX.apply(i, ticket2),
-				sourceY.prefaceAssembly(whitespace, i, ticket2),
-				"BIT\t" + sourceY.apply(i, ticket2),
+				sourceX.getLDA(i, ticket2),
+				sourceY.getInstruction("BIT", i, ticket2),
 				"BNE\t:+",
 			};
 		}, innerTicket);
 		assembly += whitespace + "DEX\n";
 		assembly += ":" + whitespace.substring(1) + "TXA\n";
 		assembly += whitespace + CompUtils.setA8 + "\n";
-		assembly += whitespace + destSource.prefaceAssembly(whitespace, 0, innerTicket);
-		assembly += whitespace + "STA\t" + destSource.apply(0, innerTicket);
+		assembly += destSource.getSTA(whitespace, 0, innerTicket);
 		assembly += whitespace + ticket.restore(whitespace, DetailsTicket.saveA | DetailsTicket.saveX);
 		return assembly;
 	}

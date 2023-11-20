@@ -65,66 +65,53 @@ public class MultiplicativeExpressionNode extends BinaryExpressionNode
 						{
 							"LDA\t" + SNESRegisters.RDMPYH, 			// Load previous high byte as carryover
 							"TAX",										// Store in X
-							sourceX.prefaceAssembly(whitespace, ii, ticket2),
-							"LDA\t" + sourceX.apply(ii, ticket2),		// Load X-the-variable
+							sourceX.getLDA(ii, ticket2),				// Load X-the-variable
 							"STA\t" + SNESRegisters.WRMPYA,				// Place in reg
-							sourceY.prefaceAssembly(whitespace, ii + j, ticket2),
-							"LDA\t" + sourceY.apply(ii + j, ticket2),	// Load Y-the-variable
+							sourceY.getLDA(ii + j, ticket2),			// Load Y-the-variable
 							"STA\t" + SNESRegisters.WRMPYB, 			// Place in reg, begin 8-cycle calc
 							"TXA",										// 2 cycles - 2
-							destSource.prefaceAssembly(whitespace, ii + j, ticket2),
-							"LDA\t" + destSource.apply(ii + j, ticket2),// 5 cycles - 7, add previous value of result
+							destSource.getLDA(ii + j, ticket2),			// >=5 cycles - 7, add previous value of result
 							"ADC\t" + SNESRegisters.RDMPYL,				// 5 cycles - 12, get result and add carryover
-							destSource.prefaceAssembly(whitespace, ii + j, ticket2),
-							"STA\t" + destSource.apply(ii + j, ticket2),// Store result
+							destSource.getSTA(ii + j, ticket2), 		// Store result
 						};
 					else
 						return new String[]
 						{
 							"LDA\t" + SNESRegisters.RDMPYH, 			// Load previous high byte as carryover
 							"TAX",										// Store in X
-							sourceX.prefaceAssembly(whitespace, ii, ticket2),
-							"LDA\t" + sourceX.apply(ii, ticket2),		// Load X-the-variable
+							sourceX.getLDA(ii, ticket2),				// Load X-the-variable
 							"STA\t" + SNESRegisters.WRMPYA,				// Place in reg
-							sourceY.prefaceAssembly(whitespace, ii + j, ticket2),
-							"LDA\t" + sourceY.apply(ii + j, ticket2),	// Load Y-the-variable
+							sourceY.getLDA(ii + j, ticket2),			// Load Y-the-variable
 							"STA\t" + SNESRegisters.WRMPYB, 			// Place in reg, begin 8-cycle calc
 							"TXA",										// 2 cycles - 2
 							"NOP",										// 2 cycles - 4
 							"LDA\t" + SNESRegisters.RDMPYL,				// 5 cycles - 9, get result and add carryover
-							destSource.prefaceAssembly(whitespace, ii + j, ticket2),
-							"STA\t" + destSource.apply(ii + j, ticket2),// Store result
+							destSource.getSTA(ii + j, ticket2),			// Store result
 						};
 				else
 					if (ii != 0)
 						return new String[]
 						{
-							sourceX.prefaceAssembly(whitespace, ii, ticket2),
-							"LDA\t" + sourceX.apply(ii, ticket2),		// Load X-the-variable
+							sourceX.getLDA(ii, ticket2),				// Load X-the-variable
 							"STA\t" + SNESRegisters.WRMPYA,				// Place in reg
-							sourceY.prefaceAssembly(whitespace, ii + j, ticket2),
-							"LDA\t" + sourceY.apply(ii + j, ticket2),	// Load Y-the-variable
+							sourceY.getLDA(ii + j, ticket2),	// Load Y-the-variable
 							"STA\t" + SNESRegisters.WRMPYB, 			// Place in reg, begin 8-cycle calc
 							"CLC",										// 2 cycles - 2
-							"LDA\t" + destSource.apply(ii + j, ticket2),// 5 cycles - 7, add previous value of result
+							destSource.getLDA(ii + j, ticket2),			// >=5 cycles - 7, add previous value of result
 							"ADC\t" + SNESRegisters.RDMPYL,				// 5 cycles - 12, get result
-							destSource.prefaceAssembly(whitespace, ii + j, ticket2),
-							"STA\t" + destSource.apply(ii + j, ticket2),// Store result
+							destSource.getSTA(ii + j, ticket2),// Store result
 						};
 					else
 						return new String[]
 						{
-							sourceX.prefaceAssembly(whitespace, ii, ticket2),
-							"LDA\t" + sourceX.apply(ii, ticket2),		// Load X-the-variable
-							"STA\t" + SNESRegisters.WRMPYA,				// Place in reg
-							sourceY.prefaceAssembly(whitespace, ii + j, ticket2),
-							"LDA\t" + sourceY.apply(ii + j, ticket2),	// Load Y-the-variable
-							"STA\t" + SNESRegisters.WRMPYB, 			// Place in reg, begin 8-cycle calc
-							"NOP",										// 2 cycles - 2
-							"NOP",										// 2 cycles - 4
-							"LDA\t" + SNESRegisters.RDMPYL,				// 5 cycles - 9, get result
-							destSource.prefaceAssembly(whitespace, ii + j, ticket2),
-							"STA\t" + destSource.apply(ii + j, ticket2),// Store result
+							sourceX.getLDA(ii, ticket2),		// Load X-the-variable
+							"STA\t" + SNESRegisters.WRMPYA,		// Place in reg
+							sourceY.getLDA(ii + j, ticket2),	// Load Y-the-variable
+							"STA\t" + SNESRegisters.WRMPYB, 	// Place in reg, begin 8-cycle calc
+							"NOP",								// 2 cycles - 2
+							"NOP",								// 2 cycles - 4
+							"LDA\t" + SNESRegisters.RDMPYL,		// 5 cycles - 9, get result
+							destSource.getSTA(ii + j, ticket2),	// Store result
 						};
 			}, false, false, innerTicket);
 		}
@@ -138,7 +125,7 @@ public class MultiplicativeExpressionNode extends BinaryExpressionNode
 		// First, check negative for X
 		assembly += whitespace + CompUtils.setAXY8 + "\n";
 		assembly += whitespace + "LDY\t#$00\n";
-		assembly += whitespace + "LDA\t" + sourceX.apply(sourceX.getSize() - 1, ticket) + "\n";
+		assembly += sourceX.getLDA(whitespace, sourceX.getSize() - 1, ticket);
 		assembly += whitespace + "BPL\t:+\n";
 		// If it was negative we add one to the flag and then make it positive.
 		assembly += whitespace + "INY\n";
@@ -146,7 +133,7 @@ public class MultiplicativeExpressionNode extends BinaryExpressionNode
 		
 		// Then for Y
 		assembly += whitespace + CompUtils.setA8 + "\n";
-		assembly += whitespace + "LDA\t" + sourceY.apply(sourceY.getSize() - 1, ticket) + "\n";
+		assembly += sourceY.getLDA(whitespace, sourceY.getSize() - 1, ticket);
 		assembly += whitespace + "BPL\t:+\n";
 		// If it was negative we subtract one from the previous flag (making it not zero if it was zero and making it zero if it wasn't)
 		// and then make it positive.
@@ -184,17 +171,17 @@ public class MultiplicativeExpressionNode extends BinaryExpressionNode
 				if (i == 0) // First iteration
 					return new String[]
 					{
-						"LDA\t" + sourceX.apply(i, ticket2),	// Load X-the-variable
-						"STA\t" + SNESRegisters.WRDIVL,			// Place in reg
+						sourceX.getLDA(i, ticket2),		// Load X-the-variable
+						"STA\t" + SNESRegisters.WRDIVL,	// Place in reg
 						CompUtils.setA8,
-						"LDA\t" + sourceY.apply(0, ticket2),	// Load Y-the-variable
-						"STA\t" + SNESRegisters.WRDIVB, 		// Place in reg, begin 16-cycle calc
-						"LDA\t" + sourceX.apply(i, ticket2),	// 6 cycles,- 6 Load X-the-variable for next iteration
-						"TAX",									// 2 cycles - 8
-						"NOP",									// 2 cycles - 10
-						CompUtils.setA16,						// 3 cycles - 13
-						"LDA\t" + SNESRegisters.RDDIVL,			// 6 cycles - 17, get result
-						"STA\t" + destSource.apply(i, ticket2),	// Store result
+						sourceY.getLDA(0, ticket2),		// Load Y-the-variable
+						"STA\t" + SNESRegisters.WRDIVB, // Place in reg, begin 16-cycle calc
+						sourceX.getLDA(i, ticket2),		// 6 cycles,- 6 Load X-the-variable for next iteration
+						"TAX",							// 2 cycles - 8
+						"NOP",							// 2 cycles - 10
+						CompUtils.setA16,				// 3 cycles - 13
+						"LDA\t" + SNESRegisters.RDDIVL,	// 6 cycles - 17, get result
+						destSource.getSTA(i, ticket2),	// Store result
 					};
 				if (i != sourceX.getSize() - 1) // Not the last iteration
 					return new String[]
@@ -202,14 +189,14 @@ public class MultiplicativeExpressionNode extends BinaryExpressionNode
 						"TXA",									// Recover X-the-variable from last iteration.
 						"STA\t" + SNESRegisters.WRDIVL,			// Place in reg
 						CompUtils.setA8,
-						"LDA\t" + sourceY.apply(0, ticket2),	// Load Y-the-variable
+						sourceY.getLDA(0, ticket2),				// Load Y-the-variable
 						"STA\t" + SNESRegisters.WRDIVB, 		// Place in reg, begin 16-cycle calc
-						"LDA\t" + sourceX.apply(i, ticket2),	// 6 cycles,- 6 Load X-the-variable for next iteration
+						sourceX.getLDA(i, ticket2),				// 6 cycles,- 6 Load X-the-variable for next iteration
 						"TAX",									// 2 cycles - 8
 						"NOP",									// 2 cycles - 10
 						CompUtils.setA16,						// 3 cycles - 13
 						"LDA\t" + SNESRegisters.RDDIVL,			// 6 cycles - 17, get result
-						"STA\t" + destSource.apply(i, ticket2),	// Store result
+						destSource.getLDA(i, ticket2),			// Store result
 					};
 				else // Last iteration
 					return new String[]
@@ -217,7 +204,7 @@ public class MultiplicativeExpressionNode extends BinaryExpressionNode
 						"TXA",									// Recover X-the-variable from last iteration.
 						"STA\t" + SNESRegisters.WRDIVL,			// Place in reg
 						CompUtils.setA8,
-						"LDA\t" + sourceY.apply(0, ticket2),	// Load Y-the-variable
+						sourceY.getLDA(0, ticket2),				// Load Y-the-variable
 						"STA\t" + SNESRegisters.WRDIVB, 		// Place in reg, begin 16-cycle calc
 						"NOP",									// 2 cycles - 2
 						"NOP",									// 2 cycles - 4
@@ -226,15 +213,15 @@ public class MultiplicativeExpressionNode extends BinaryExpressionNode
 						"NOP",									// 2 cycles - 10
 						CompUtils.setA16,						// 3 cycles - 13
 						"LDA\t" + SNESRegisters.RDDIVL,			// 6 cycles - 17, get result
-						"STA\t" + destSource.apply(i, ticket2),	// Store result
+						destSource.getSTA(i, ticket2),			// Store result
 					};
 			}
 			else // We start in 8-bit mode
 				return new String[]
 				{
-					"LDA\t" + sourceX.apply(i, ticket2),	// Load X-the-variable
+					sourceX.getLDA(i, ticket2),	// Load X-the-variable
 					"STA\t" + SNESRegisters.WRDIVL,			// Place in reg
-					"LDA\t" + sourceY.apply(0, ticket2),	// Load Y-the-variable
+					sourceY.getLDA(0, ticket2),				// Load Y-the-variable
 					"STA\t" + SNESRegisters.WRDIVB, 		// Place in reg, begin 16-cycle calc
 					"NOP",									// 2 cycles - 2
 					"NOP",									// 2 cycles - 4
@@ -244,7 +231,7 @@ public class MultiplicativeExpressionNode extends BinaryExpressionNode
 					"NOP",									// 2 cycles - 11
 					"NOP",									// 2 cycles - 12
 					"LDA\t" + SNESRegisters.RDDIVL,			// 5 cycles - 17, get result
-					"STA\t" + destSource.apply(i, ticket2),	// Store result
+					destSource.getSTA(i, ticket2),			// Store result
 				};
 		}, innerTicket);
 		assembly += divisionFooter(whitespace, destSource, destSource, ticket);
@@ -260,7 +247,7 @@ public class MultiplicativeExpressionNode extends BinaryExpressionNode
 		assembly += ticket.save(whitespace, DetailsTicket.saveA | DetailsTicket.saveX | DetailsTicket.saveY); // All three modified hereafter
 		DetailsTicket innerTicket = new DetailsTicket(ticket, DetailsTicket.saveY, DetailsTicket.saveA); // "Please don't break these"
 
-		divisionHeader(whitespace, sourceX, sourceY, innerTicket);
+		assembly += divisionHeader(whitespace, sourceX, sourceY, innerTicket);
 
 		ScratchSource sourceI = scratchManager.reserveScratchBlock(sourceX.getSize());
 		ScratchSource sourceT = scratchManager.reserveScratchBlock(2);
