@@ -6,7 +6,6 @@ import Compiler.ComponentNodes.ComponentNode;
 import Compiler.ComponentNodes.Definitions.StructUnionDefinitionNode;
 import Compiler.ComponentNodes.Definitions.Type;
 import Compiler.Utils.AssemblyUtils.DetailsTicket;
-import Compiler.Utils.OperandSources.AddressSource;
 import Compiler.Utils.OperandSources.OperandSource;
 
 public class MemberNode extends VariableNode
@@ -28,14 +27,15 @@ public class MemberNode extends VariableNode
 			}
 
 			@Override
-			public String prefaceAssembly(String whitespace, Integer i, DetailsTicket ticket)
+			public String getInstruction(String whitespace, String operation, Integer i, DetailsTicket ticket)
 			{
-				return getParent().getSource().prefaceAssembly(whitespace, i + owner.getOffset(name), ticket);
+				return getParent().getSource().getInstruction(whitespace, operation, i + owner.getOffset(name), ticket);
 			}
+
 			@Override
-			public String apply(Integer i, DetailsTicket ticket)
+			public String getBase()
 			{
-				return getParent().getSource().apply(i + owner.getOffset(name), ticket);
+				return getParent().getSource().getBase() + " + " + owner.getOffset(name);
 			}
 		}
 		private MemberSource source = new MemberSource();

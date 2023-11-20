@@ -74,35 +74,29 @@ public class RelationalExpressionNode extends BinaryExpressionNode
 				// Start at MSB
 				if (sourceY.isLiteral())
 				{
-					lines.add(sourceY.prefaceAssembly(whitespace, i, ticket2));
-					String oldY = sourceY.apply(i, ticket2).substring(2);
+					String oldY = sourceY.getBase().substring(2);
 					int yVal = Integer.valueOf(oldY, 16);
 					String newY = "#$" + String.format("%0" + (ticket2.is16Bit() ? 4 : 0) + "x", yVal ^ (ticket2.is16Bit() ? 0x8000 : 0x80));
-					lines.add(sourceX.prefaceAssembly(whitespace, i, ticket2));
-					lines.add("LDA\t" + sourceX.apply(i, ticket2));					// Get X
-					lines.add("EOR\t" + toXOR);										// Flip sign
-					lines.add("CMP\t" + newY);										// Cmp X & Y?
+					lines.add(sourceX.getLDA(i, ticket2));	// Get X
+					lines.add("EOR\t" + toXOR);				// Flip sign
+					lines.add("CMP\t" + newY);				// Cmp X & Y?
 				}
 				else
 				{
-					lines.add(sourceY.prefaceAssembly(whitespace, i, ticket2));
-					lines.add("LDA\t" + sourceY.apply(i, ticket2));					// Get Y
+					lines.add(sourceY.getLDA(i, ticket2));							// Get Y
 					lines.add("EOR\t" + toXOR);										// Flip sign
-					if (destSource != null) lines.add(destSource.prefaceAssembly(whitespace, i, ticket2));
-					if (destSource != null) lines.add("STA\t" + destSource.apply(0, ticket2));				// Place Y in destSource temporarily
-					lines.add(sourceX.prefaceAssembly(whitespace, i, ticket2));
-					lines.add("LDA\t" + sourceX.apply(i, ticket2));					// Get X
+					if (destSource != null)
+						lines.add(destSource.getSTA(0, ticket2));
+					lines.add(sourceX.getLDA(i, ticket2));							// Get X
 					lines.add("EOR\t" + toXOR);										// Flip sign
-					if (destSource != null) lines.add(destSource.prefaceAssembly(whitespace, i, ticket2));
-					if (destSource != null) lines.add("CMP\t" + destSource.apply(0, ticket2));				// Cmp Y & X?
+					if (destSource != null)
+						lines.add(destSource.getInstruction("CMP", 0, ticket2));	// Cmp Y & X?
 				}
 			}
 			else
 			{
-				lines.add(sourceX.prefaceAssembly(whitespace, i, ticket2));
-				lines.add("LDA\t" + sourceX.apply(i, ticket2));						// Get X
-				lines.add(sourceY.prefaceAssembly(whitespace, i, ticket2));
-				lines.add("CMP\t" + sourceY.apply(i, ticket2));						// Cmp X & Y?
+				lines.add(sourceX.getLDA(i, ticket2)); 					// Get X
+				lines.add(sourceY.getInstruction("CMP", i, ticket2));	// Cmp X & Y?
 			}
 			lines.add("BCC\t:+");													// If x < y then yes
 			lines.add("BNE\t:++");													// If x >= y then no
@@ -129,8 +123,7 @@ public class RelationalExpressionNode extends BinaryExpressionNode
 		}
 		
 		assembly += whitespace + CompUtils.setA8 + "\n";
-		if (destSource != null) assembly += whitespace + destSource.prefaceAssembly(whitespace, 0, innerTicket);
-		if (destSource != null) assembly += whitespace + "STA\t" + destSource.apply(0, innerTicket) + "\n";
+		if (destSource != null) assembly += destSource.getSTA(whitespace, 0, innerTicket);
 		
 		assembly += ticket.restore(whitespace, DetailsTicket.saveA | DetailsTicket.saveX);
 		

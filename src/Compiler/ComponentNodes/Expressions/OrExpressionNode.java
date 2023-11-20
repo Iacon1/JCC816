@@ -46,12 +46,10 @@ public class OrExpressionNode extends BinaryExpressionNode
 		{
 			return new String[]
 			{
-				sourceX.prefaceAssembly(whitespace, i, ticket2),
-				"LDA\t" + sourceX.apply(i, ticket2),
-				sourceY.prefaceAssembly(whitespace, i, ticket2),
-				"ORA\t" + sourceY.apply(i, ticket2),
-				destSource.prefaceAssembly(whitespace, i, ticket2),
-				"STA\t" + destSource.apply(i, ticket2),
+				sourceX.getLDA(i, ticket2),
+				sourceY.getSTA(i, ticket2),
+				sourceY.getInstruction("ORA", i, ticket2),
+				destSource.getSTA(i, ticket2),
 			};
 		}, innerTicket);
 		assembly += ticket.restore(whitespace, DetailsTicket.saveA);

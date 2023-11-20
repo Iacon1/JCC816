@@ -118,7 +118,8 @@ public final class AssemblyUtils
 			if (reverse)
 				j = (nBytes % 2 == 1) ? nBytes - 1 - i : nBytes - 2 - i;
 			for (String opLine : perIteration.apply(j, innerTicket))
-				assembly += whitespace + opLine + "\n";
+				for (String subLine : opLine.split("\n"))
+						assembly += whitespace + subLine + "\n";
 		}
 		if (nBytes % 2 == 1 && set16)
 		{
@@ -126,7 +127,8 @@ public final class AssemblyUtils
 			innerTicket.flags &= ~DetailsTicket.isXY16Bit;
 			assembly += whitespace + CompUtils.setAXY8 + "\n";
 			for (String opLine : perIteration.apply(reverse? 0 : nBytes - 1, innerTicket))
-				assembly += whitespace + opLine + "\n";
+				for (String subLine : opLine.split("\n"))
+					assembly += whitespace + subLine + "\n";
 		}
 		assembly += ticket.restore(whitespace, DetailsTicket.saveABit | DetailsTicket.saveXYBit);
 		return assembly;
@@ -152,10 +154,8 @@ public final class AssemblyUtils
 			{
 				return new String[]
 						{
-						readSource.prefaceAssembly(whitespace, i, ticket2),
-						"LDA\t" + readSource.apply(i, ticket2),
-						writeSource.prefaceAssembly(whitespace, i, ticket2),
-						"STA\t" + writeSource.apply(i, ticket2),
+						readSource.getLDA(i, ticket2),
+						writeSource.getSTA(i, ticket2)
 						};
 			}, innerTicket);
 		assembly += ticket.save(whitespace, DetailsTicket.saveA);
@@ -174,8 +174,7 @@ public final class AssemblyUtils
 			{
 				return new String[]
 						{
-						readSource.prefaceAssembly(whitespace, i, ticket2),
-						"LDA\t" + readSource.apply(i, ticket2),
+						readSource.getLDA(i, ticket2),
 						"PHA"
 						};
 			}, true, false, innerTicket);
@@ -196,8 +195,7 @@ public final class AssemblyUtils
 				return new String[]
 						{
 						"PLA",
-						writeSource.prefaceAssembly(whitespace, i, ticket2),
-						"STA\t" + writeSource.apply(i, ticket2),
+						writeSource.getSTA(i, ticket2),
 						};
 			}, true, true, innerTicket);
 		assembly += ticket.save(whitespace, DetailsTicket.saveA);

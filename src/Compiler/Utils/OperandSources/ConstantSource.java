@@ -11,7 +11,7 @@ import Compiler.Utils.PropPointer;
 public class ConstantSource extends OperandSource
 {
 	private byte[] bytes;
-	private PropPointer pointer;
+	private PropPointer<?> pointer;
 	
 	public ConstantSource(Object constant, int size)
 	{
@@ -45,12 +45,11 @@ public class ConstantSource extends OperandSource
 		}
 		else if (PropPointer.class.isAssignableFrom(constant.getClass()))
 		{
-			pointer = (PropPointer) constant;
+			pointer = (PropPointer<?>) constant;
 		}
 	}
-	
-	@Override
-	public String apply(Integer i, DetailsTicket ticket)
+
+	public String getBase(int i, DetailsTicket ticket)
 	{
 		if (pointer != null) return pointer.apply(i, ticket);
 		if (bytes.length <= i) return "#$" + String.format(ticket.is16Bit() ? "%04x" : "%02x", 0);
@@ -58,5 +57,16 @@ public class ConstantSource extends OperandSource
 			if (bytes.length == 1) return "#$" + String.format("%02x%02x", 0, bytes[0]);
 			else return "#$" + String.format("%02x%02x", bytes[i], bytes[i + 1]);
 		else return "#$" + String.format("%02x", bytes[i]);
+	}
+	@Override
+	public String getBase()
+	{
+		return getBase(0, new DetailsTicket());
+	}
+	
+	@Override
+	public String getInstruction(String whitespace, String operation, Integer i, DetailsTicket ticket)
+	{
+		return whitespace + operation + "\t" + getBase(i, ticket) + "\n";
 	}
 }

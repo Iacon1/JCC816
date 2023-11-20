@@ -9,6 +9,7 @@ import java.util.Map;
 
 import Compiler.CompConfig;
 import Compiler.Utils.AssemblyUtils.DetailsTicket;
+import Compiler.Utils.OperandSources.AddressSource;
 import Compiler.Utils.OperandSources.OperandSource;
 import Logging.Logging;
 
@@ -37,24 +38,26 @@ public class ScratchManager
 		assert totalSize() == CompConfig.scratchSize;
 	}
 	
-	public static class ScratchSource extends OperandSource
+	public static class ScratchSource extends AddressSource
 	{
 		private int offset;
 		public ScratchSource(int offset, int size)
 		{
-			super(size, false);
+			super(CompConfig.scratchBase, size);
 			this.offset = offset;
 		}
 		
 		@Override
-		public String apply(Integer i, DetailsTicket ticket)
+		public String getInstruction(String whitespace, String operation, Integer i, DetailsTicket ticket)
 		{
-			if (i >= size) return (ticket.is16Bit() ? "#$0000" : "#$00");
-			else return CompConfig.scratchBase + " + " + (offset + i);
+			if (i >= size)
+				return whitespace + operation + "\t" + (ticket.is16Bit() ? "#$0000" : "#$00") + "\n";
+			return whitespace + operation + "\t" + super.getBase() + " + " + (offset + i) + "\n";
 		}
 		public int getOffset() {return offset;}
-		public String getAddress(int mod) {return apply(mod, new DetailsTicket());}
-		public String getAddress() {return apply(0, new DetailsTicket());}
+		public String getBase(int mod) {return super.getBase() + " + " + (offset + mod);}
+		@Override
+		public String getBase() {return getBase(0);}
 	}
 	
 	public ScratchSource reserveScratchBlock(int size, int offset) throws Exception
