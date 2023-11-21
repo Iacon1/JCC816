@@ -37,7 +37,7 @@ public class LORExpressionNode extends BinaryExpressionNode
 		return a || b;
 	}
 	@Override
-	protected String getAssembly(String whitespace, OperandSource destSource, ScratchManager scratchManager, OperandSource sourceX, OperandSource sourceY, DetailsTicket ticket) throws Exception
+	protected String getAssembly(String whitespace, OperandSource destSource, OperandSource sourceX, OperandSource sourceY, ScratchManager scratchManager, DetailsTicket ticket) throws Exception
 	{
 		String assembly = "";
 		assembly += ticket.save(whitespace, DetailsTicket.saveA | DetailsTicket.saveX);

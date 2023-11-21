@@ -106,7 +106,7 @@ public final class CompConfig
 			return CompConfig.optimizationLevel.compareTo(level) >= 0;
 		}
 	}
-	public static OptimizationLevel optimizationLevel = OptimizationLevel.all;
+	public static OptimizationLevel optimizationLevel = OptimizationLevel.min;
 	
 	public static enum DebugLevel
 	{

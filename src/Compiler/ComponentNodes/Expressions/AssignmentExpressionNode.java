@@ -126,7 +126,7 @@ public class AssignmentExpressionNode extends BinaryExpressionNode
 	}
 	
 	@Override
-	protected String getAssembly(String whitespace, OperandSource destSource, ScratchManager scratchManager, OperandSource sourceX, OperandSource sourceY, DetailsTicket ticket) throws Exception
+	protected String getAssembly(String whitespace, OperandSource destSource, OperandSource sourceX, OperandSource sourceY, ScratchManager scratchManager, DetailsTicket ticket) throws Exception
 	{throw new UnsupportedOperationException();} // This is never directly called.
 	@Override
 	public String getAssembly(int leadingWhitespace, OperandSource destSource, ScratchManager scratchManager, DetailsTicket ticket) throws Exception

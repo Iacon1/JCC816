@@ -60,8 +60,8 @@ public class ConditionalExpressionNode extends BinaryExpressionNode
 		else return y.getPropValue();
 	}
 	@Override
-	protected String getAssembly(String whitespace, OperandSource destSource, ScratchManager scratchManager,
-			OperandSource sourceX, OperandSource sourceY, DetailsTicket ticket) throws Exception
+	protected String getAssembly(String whitespace, OperandSource destSource, OperandSource sourceX,
+			OperandSource sourceY, ScratchManager scratchManager, DetailsTicket ticket) throws Exception
 	{
 		// TODO Auto-generated method stub
 		return null;

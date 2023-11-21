@@ -76,7 +76,7 @@ public abstract class BinaryExpressionNode<
 	
 	@Override
 	public boolean hasAssembly() {return x.hasAssembly() || y.hasAssembly() || !hasPropValue();}
-	protected abstract String getAssembly(String whitespace, OperandSource destSource, ScratchManager scratchManager, OperandSource sourceX, OperandSource sourceY, DetailsTicket ticket) throws Exception;
+	protected abstract String getAssembly(String whitespace, OperandSource destSource, OperandSource sourceX, OperandSource sourceY, ScratchManager scratchManager, DetailsTicket ticket) throws Exception;
 	@Override
 	public String getAssembly(int leadingWhitespace, OperandSource destSource, ScratchManager scratchManager, DetailsTicket ticket) throws Exception
 	{
@@ -113,7 +113,7 @@ public abstract class BinaryExpressionNode<
 			sourceX = x.getLValue().getSource();
 		else sourceX = null;
 		
-		assembly += getAssembly(whitespace, destSource, scratchManager, sourceX, sourceY, ticket);
+		assembly += getAssembly(whitespace, destSource, sourceX, sourceY, scratchManager, ticket);
 		if (scratchX != null) scratchManager.releaseScratchBlock(scratchX);
 		if (scratchY != null) scratchManager.releaseScratchBlock(scratchY);
 		
