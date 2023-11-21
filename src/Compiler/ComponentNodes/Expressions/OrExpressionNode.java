@@ -10,7 +10,7 @@ import Compiler.Utils.OperandSources.OperandSource;
 import Grammar.C99.C99Parser.Or_expressionContext;
 import Grammar.C99.C99Parser.Xor_expressionContext;
 
-public class OrExpressionNode extends BinaryExpressionNode
+public class OrExpressionNode extends ArithmeticBinaryExpressionNode
 <Xor_expressionContext, Or_expressionContext, Xor_expressionContext, Or_expressionContext>
 {
 
@@ -29,30 +29,27 @@ public class OrExpressionNode extends BinaryExpressionNode
 	{return new XOrExpressionNode(this).interpret(node.xor_expression());}
 
 	@Override
-	public Object getPropValue()
+	protected long doOperation(long x, long y)
 	{
-		Long a = x.getPropLong();
-		Long b = y.getPropLong();
-		return Long.valueOf(a | b);
+		return x | y;
 	}
+
 	@Override
-	protected String getAssembly(String whitespace, OperandSource destSource, OperandSource sourceX, OperandSource sourceY, ScratchManager scratchManager, DetailsTicket ticket) throws Exception
+	protected String getPreface()
 	{
-		
-		String assembly = "";
-		assembly += ticket.save(whitespace, DetailsTicket.saveA);
-		DetailsTicket innerTicket = new DetailsTicket(ticket);
-		AssemblyUtils.bytewiseOperation(whitespace, sourceX.getSize(), (Integer i, DetailsTicket ticket2) ->
-		{
-			return new String[]
-			{
-				sourceX.getLDA(i, ticket2),
-				sourceY.getSTA(i, ticket2),
-				sourceY.getInstruction("ORA", i, ticket2),
-				destSource.getSTA(i, ticket2),
-			};
-		}, innerTicket);
-		assembly += ticket.restore(whitespace, DetailsTicket.saveA);
-		return assembly;
+		return "";
 	}
+
+	@Override
+	protected String getInstruction()
+	{
+		return "ORA";
+	}
+
+	@Override
+	protected boolean isReversed()
+	{
+		return false;
+	}
+
 }

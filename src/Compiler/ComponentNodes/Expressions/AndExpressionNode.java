@@ -10,7 +10,7 @@ import Compiler.Utils.OperandSources.OperandSource;
 import Grammar.C99.C99Parser.And_expressionContext;
 import Grammar.C99.C99Parser.Equality_expressionContext;
 
-public class AndExpressionNode extends BinaryExpressionNode
+public class AndExpressionNode extends ArithmeticBinaryExpressionNode
 <Equality_expressionContext, And_expressionContext, Equality_expressionContext, And_expressionContext>
 {
 
@@ -29,30 +29,26 @@ public class AndExpressionNode extends BinaryExpressionNode
 	{return new EqualityExpressionNode(this).interpret(node.equality_expression());}
 
 	@Override
-	public Object getPropValue()
+	protected long doOperation(long x, long y)
 	{
-		Long a = x.getPropLong();
-		Long b = y.getPropLong();
-		return Long.valueOf(a & b);
+		return x & y;
 	}
+
 	@Override
-	protected String getAssembly(String whitespace, OperandSource destSource, OperandSource sourceX, OperandSource sourceY, ScratchManager scratchManager, DetailsTicket ticket) throws Exception
+	protected String getPreface()
 	{
-		String assembly = "";
-		assembly += ticket.save(whitespace, DetailsTicket.saveA);
-		DetailsTicket innerTicket = new DetailsTicket(ticket, DetailsTicket.saveA, 0);
-		
-		assembly += AssemblyUtils.bytewiseOperation(whitespace, sourceX.getSize(), (Integer i, DetailsTicket ticket2) ->
-		{
-			return new String[]
-			{
-				sourceX.getLDA(i, ticket2),
-				sourceY.getInstruction("AND", i, ticket2),
-				destSource.getSTA(i, ticket2),
-			};
-		}, innerTicket);
-		
-		assembly += ticket.restore(whitespace, DetailsTicket.saveA);
-		return assembly;
+		return "";
+	}
+
+	@Override
+	protected String getInstruction()
+	{
+		return "AND";
+	}
+
+	@Override
+	protected boolean isReversed()
+	{
+		return false;
 	}
 }
