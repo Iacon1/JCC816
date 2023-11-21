@@ -25,7 +25,7 @@ public class Test
 
 		CartConfig cartConfig = new CartConfig(ROMType.loROM, AddonChip.none, false, false, 0);
 		
-		String c = Compiler.compile(main, true);
+		String c = Compiler.compile(main, false);
 		Logging.logNotice("\n" + c);
 		
 		byte[] sfc = Assembler.assemble("test", cartConfig, c, "loROM", true);
