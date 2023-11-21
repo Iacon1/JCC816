@@ -11,11 +11,16 @@ import Compiler.Utils.OperandSources.OperandSource;
 import Grammar.C99.C99Parser.Additive_expressionContext;
 import Grammar.C99.C99Parser.Multiplicative_expressionContext;
 
-public class AdditiveExpressionNode extends BinaryExpressionNode
+public class AdditiveExpressionNode extends ArithmeticBinaryExpressionNode
 <Additive_expressionContext, Multiplicative_expressionContext, Multiplicative_expressionContext, Additive_expressionContext>
 {
 
 	public AdditiveExpressionNode(ComponentNode<?> parent) {super(parent);}
+
+	private AdditiveExpressionNode(String operator)
+	{
+		super(operator);
+	}
 
 	@Override
 	protected BaseExpressionNode<Additive_expressionContext> getC1Node(Additive_expressionContext node) throws Exception
@@ -52,35 +57,11 @@ public class AdditiveExpressionNode extends BinaryExpressionNode
 			default: return null;
 			}
 		}
-		else
-		{
-			Long a = x.getPropLong();
-			Long b = y.getPropLong();
-			switch (operator)
-			{
-			case "+": return Long.valueOf(a + b);
-			case "-": return Long.valueOf(a - b);
-			default: return null;
-			}
-		}
+		else return super.getPropValue();
 	}
 	public static String getAdder(String whitespace, OperandSource destSource, OperandSource sourceX, OperandSource sourceY, DetailsTicket ticket)
 	{
-		String assembly = "";
-		assembly += ticket.save(whitespace, DetailsTicket.saveA);
-		DetailsTicket innerTicket = new DetailsTicket(ticket, DetailsTicket.saveA, 0);
-		
-		assembly += whitespace + "CLC\n" + AssemblyUtils.bytewiseOperation(whitespace, sourceX.getSize(), (Integer i, DetailsTicket ticket2) -> 
-		{return new String[]
-			{
-				sourceX.getLDA(i, ticket2),
-				sourceY.getInstruction("ADC", i, ticket2),
-				destSource.getSTA(i, ticket2)
-			};
-		}, innerTicket);
-		
-		assembly += ticket.restore(whitespace, DetailsTicket.saveA);
-		return assembly;
+		return new AdditiveExpressionNode("+").getAssembly(whitespace, destSource, sourceX, sourceY, ticket);
 	}
 	public static String getIncrementer(String whitespace, OperandSource destSource, OperandSource sourceX, DetailsTicket ticket)
 	{
@@ -89,21 +70,7 @@ public class AdditiveExpressionNode extends BinaryExpressionNode
 	}
 	public static String getSubtractor(String whitespace, OperandSource destSource, OperandSource sourceX, OperandSource sourceY, DetailsTicket ticket)
 	{
-		String assembly = "";
-		assembly += ticket.save(whitespace, DetailsTicket.saveA);
-		DetailsTicket innerTicket = new DetailsTicket(ticket, DetailsTicket.saveA, 0);
-		
-		assembly += whitespace + "SEC\n" + AssemblyUtils.bytewiseOperation(whitespace, sourceX.getSize(), (Integer i, DetailsTicket ticket2) -> 
-		{return new String[]
-			{
-				sourceX.getLDA(i, ticket2),
-				sourceY.getInstruction("SBC", i, ticket2),
-				destSource.getSTA(i, ticket2)
-			};
-		}, true, true, innerTicket);
-		
-		assembly += ticket.restore(whitespace, DetailsTicket.saveA);
-		return assembly;
+		return new AdditiveExpressionNode("-").getAssembly(whitespace, destSource, sourceX, sourceY, ticket);
 	}
 	public static String getDecrementer(String whitespace, OperandSource source, DetailsTicket ticket)
 	{
@@ -133,21 +100,56 @@ public class AdditiveExpressionNode extends BinaryExpressionNode
 		assembly += ticket.restore(whitespace, DetailsTicket.saveA);	
 		return assembly;
 	}
-	
+
 	@Override
-	protected String getAssembly(String whitespace, OperandSource destSource, OperandSource sourceX, OperandSource sourceY, ScratchManager scratchManager, DetailsTicket ticket) throws Exception
+	public long doOperation(long x, long y)
 	{
-		String assembly = "";
-		
 		switch (operator)
 		{
 		case "+":
-			assembly += getAdder(whitespace, destSource, sourceX, sourceY, ticket);
-			break;
+			return x + y;
 		case "-":
-			assembly += getSubtractor(whitespace, destSource, sourceX, sourceY, ticket);
-			break;
+			return x - y;
+		default: return 0;
 		}
-		return assembly;
+	}
+
+	@Override
+	public String getPreface()
+	{
+		switch (operator)
+		{
+		case "+":
+			return "CLC";
+		case "-":
+			return "SEC";
+		default: return null;
+		}
+	}
+
+	@Override
+	public String getInstruction()
+	{
+		switch (operator)
+		{
+		case "+":
+			return "ADC";
+		case "-":
+			return "SBC";
+		default: return null;
+		}
+	}
+
+	@Override
+	public boolean isReversed()
+	{
+		switch (operator)
+		{
+		case "+":
+			return false;
+		case "-":
+			return true;
+		default: return false;
+		}
 	}
 }
