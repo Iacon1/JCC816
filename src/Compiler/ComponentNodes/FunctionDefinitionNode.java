@@ -224,7 +224,7 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 			List<VariableNode> parameters = getParameters();
 			Collections.reverse(parameters);
 			for (VariableNode parameter : parameters)
-				assembly += AssemblyUtils.stackLoader(whitespace, leadingWhitespace, parameter.getSource());
+				assembly += AssemblyUtils.stackLoader(whitespace, parameter.getSize(), parameter.getSource());
 		}
 		assembly += whitespace + getFullName() + ":" +
 				(DebugLevel.isAtLeast(DebugLevel.medium) ? "\t; " + getType().getSignature() : "") + 
