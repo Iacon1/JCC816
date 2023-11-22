@@ -37,7 +37,7 @@ public class Compiler
 		JFrame frame = new JFrame("Antlr");
 		JPanel panel = new JPanel();
 		TreeViewer viewer = new TreeViewer(Arrays.asList(parser.getRuleNames()), tree);
-		viewer.setScale(1.0);
+		viewer.setScale(.75);
 		panel.add(viewer);
 		frame.add(panel);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -95,7 +95,7 @@ public class Compiler
 	{
 		List<String> lines = Arrays.asList(assembly.split("\n"));
 
-		lines = Optimizer.getOptimized(lines);
+		lines = AssemblyOptimizer.optimizeAssembly(lines);
 		
 		assembly = "";
 		for (String line : lines) if (!line.matches("\s*")) assembly += line + "\n";
