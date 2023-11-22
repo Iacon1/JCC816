@@ -8,6 +8,7 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import Compiler.ComponentNodes.ComponentNode;
 import Compiler.ComponentNodes.InterpretingNode;
 import Compiler.ComponentNodes.Interfaces.AssemblableNode;
+import Compiler.ComponentNodes.LValues.VariableNode;
 import Grammar.C99.C99Parser.StatementContext;
 
 public abstract class StatementNode<C extends ParserRuleContext> extends InterpretingNode<StatementNode<C>, C> implements AssemblableNode
@@ -31,5 +32,11 @@ public abstract class StatementNode<C extends ParserRuleContext> extends Interpr
 		else if (node.asm_statement() != null)
 			return new AssemblyStatementNode(parent).interpret(node.asm_statement());
 		else return null;
+	}
+	
+	public void clearPossibleValues()
+	{
+		for (VariableNode var : getReferencedVariables())
+			var.clearPossibleValues();
 	}
 }
