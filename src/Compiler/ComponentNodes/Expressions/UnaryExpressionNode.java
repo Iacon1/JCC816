@@ -183,6 +183,7 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 			else // Probably function pointer
 			{
 				FunctionDefinitionNode func = (FunctionDefinitionNode) expr.getPropValue();
+				func.requireStackLoader();
 				return new PropPointer<FunctionDefinitionNode>(func, 0);
 			}
 		}

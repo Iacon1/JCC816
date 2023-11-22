@@ -84,9 +84,9 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 			if (node.argument_expression_list() != null)
 				for (Assignment_expressionContext expr : node.argument_expression_list().assignment_expression())
 					params.add(new AssignmentExpressionNode(this).interpret(expr));
-			if (getReferencedFunction().isSA1() && !getEnclosingFunction().isSA1())
+			if (getReferencedFunction() != null && getReferencedFunction().isSA1() && !getEnclosingFunction().isSA1())
 				throw new UnsupportedFeatureException("Calling an SA1 function outside an SA1 context", true, node.start);
-			else if (!getReferencedFunction().isSA1() && getEnclosingFunction().isSA1())
+			else if (getReferencedFunction() != null && !getReferencedFunction().isSA1() && getEnclosingFunction().isSA1())
 				throw new UnsupportedFeatureException("Calling a non-SA1 function inside an SA1 context", true, node.start);
 			break;
 		case ".":

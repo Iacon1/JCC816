@@ -65,6 +65,7 @@ public class Compiler
 	private static String emit(ParseDouble parseDouble) throws Exception
 	{
 		ProgramNode program = new ProgramNode().interpret((ProgramContext) parseDouble.tree);
+		program.getAssembly();
 		return program.getAssembly();
 
 	}
