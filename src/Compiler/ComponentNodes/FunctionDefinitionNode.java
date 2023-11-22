@@ -18,6 +18,7 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import Compiler.CompConfig;
 import Compiler.CompConfig.DebugLevel;
 import Compiler.CompConfig.OptimizationLevel;
+import Compiler.SimOptimizer;
 import Compiler.ComponentNodes.Declarations.DeclarationSpecifiersNode;
 import Compiler.ComponentNodes.Declarations.DeclaratorNode;
 import Compiler.ComponentNodes.Definitions.Type;
@@ -173,7 +174,13 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 				assembly += AssemblyUtils.stackPusher(whitespace, leadingWhitespace, variable.getSource());
 		}
 		
-		if (code != null) assembly += code.getAssembly(leadingWhitespace + CompConfig.indentSize);
+		if (code != null)
+		{
+			if (OptimizationLevel.isAtLeast(OptimizationLevel.all))
+				assembly += SimOptimizer.clearDeadCode(code.getAssembly(leadingWhitespace + CompConfig.indentSize), getChildVariables());
+			else
+				assembly += code.getAssembly(leadingWhitespace + CompConfig.indentSize);
+		}
 		
 		if (isInterruptHandler() && isISR()) // Have to load *everything* to the stack
 		{
