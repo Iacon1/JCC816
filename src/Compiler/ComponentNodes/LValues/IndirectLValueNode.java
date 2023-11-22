@@ -108,23 +108,4 @@ public class IndirectLValueNode extends LValueNode<IndirectLValueNode>
 		if (destination != null) destination.addPossibleValue(value);
 		else super.addPossibleValue(value);
 	}
-	
-	@Override
-	public Set<LValueNode<?>> getInfluences()
-	{
-		if (destination != null) return destination.getInfluences();
-		else return super.getInfluences();
-	}
-	@Override
-	public void clearInfluences()
-	{
-		if (destination != null) destination.clearInfluences();
-		else super.clearInfluences();
-	}
-	@Override
-	public void addInfluence(LValueNode<?> node)
-	{
-		if (destination != null) destination.addInfluence(node);
-		else super.addInfluence(node);
-	}
 }

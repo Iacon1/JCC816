@@ -17,7 +17,6 @@ public abstract class LValueNode<C extends LValueNode<C>> extends ComponentNode<
 	
 	private boolean hasPossibleValues;
 	private Set<Object> possibleValues;
-	private Set<LValueNode<?>> influences;
 	
 	public LValueNode(ComponentNode<?> parent, Type type)
 	{
@@ -26,7 +25,6 @@ public abstract class LValueNode<C extends LValueNode<C>> extends ComponentNode<
 		
 		hasPossibleValues = false;
 		this.possibleValues = new HashSet<Object>();
-		this.influences = new HashSet<LValueNode<?>>();
 	}
 	@Override
 	public Type getType()
@@ -78,40 +76,5 @@ public abstract class LValueNode<C extends LValueNode<C>> extends ComponentNode<
 	{
 		clearPossibleValues();
 		addPossibleValue(value);
-	}
-	
-	/** Returns the set of LValues that influence this one.
-	 * 
-	 * @return The set of LValues that influence this one.
-	 */
-	public Set<LValueNode<?>> getInfluences()
-	{
-		return influences;
-	}
-	public boolean isInfluencedBy(LValueNode<?> node)
-	{
-		if (influences.contains(node)) return true;
-		for (LValueNode<?> influence : influences)
-			if (influence.isInfluencedBy(node)) return true;
-		return false;
-	}
-	
-	public void clearInfluences()
-	{
-		influences.clear();
-	}
-	public void addInfluence(LValueNode<?> node)
-	{
-		influences.add(node);
-	}
-	public void setInfluences(Set<LValueNode<?>> influences)
-	{
-		clearInfluences();
-		this.influences.addAll(influences);
-	}
-	public void setOnlyInfluence(LValueNode<?> node)
-	{
-		clearInfluences();
-		addInfluence(node);
 	}
 }
