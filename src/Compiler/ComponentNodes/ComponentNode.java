@@ -185,6 +185,30 @@ public class ComponentNode<T extends ComponentNode<T>>
 	{
 		return getChildVariables(true);
 	}
+	/** Gets the list of variables referenced in this node or its subnodes.
+	 * 
+	 * @param strict Whether to only get variables, or subclasses of variables.
+	 * @return The list of variables referenced in this node or its subnodes.
+	 */
+	public List<VariableNode> getReferencedVariables(boolean strict)
+	{
+		List<VariableNode> referencedVariables = new ArrayList<VariableNode>();
+		for (ComponentNode<?> node : children)
+		{
+			if (VariableNode.class.equals(node.getClass())) referencedVariables.add((VariableNode) node);
+			else if (!strict && VariableNode.class.isAssignableFrom(node.getClass())) referencedVariables.add((VariableNode) node);
+			referencedVariables.addAll(node.getChildVariables(strict));
+		}
+		return referencedVariables;
+	}
+	/** Gets the list of variables referenced in this node or its subnodes.
+	 * 
+	 * @return The list of variables referenced in this node or its subnodes.
+	 */
+	public List<VariableNode> getReferencedVariables()
+	{
+		return getChildVariables(true);
+	}
 	
 	/** Gets the enclosing function, if any.
 	 * @return The variable node in question, if present.

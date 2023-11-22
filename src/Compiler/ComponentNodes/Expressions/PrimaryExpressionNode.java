@@ -2,6 +2,9 @@
 //
 package Compiler.ComponentNodes.Expressions;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import Compiler.ComponentNodes.ComponentNode;
 import Compiler.ComponentNodes.FunctionDefinitionNode;
 import Compiler.ComponentNodes.Definitions.Type;
@@ -54,6 +57,15 @@ public class PrimaryExpressionNode extends BaseExpressionNode<Primary_expression
 	{
 		if (identifier != null) return resolveVariableRelative(identifier);
 		else return null;
+	}
+	
+	@Override
+	public List<VariableNode> getReferencedVariables(boolean strict)
+	{
+		List<VariableNode> referencedVariables = super.getReferencedVariables();
+		if (identifier != null && resolveVariableRelative(identifier) != null)
+			referencedVariables.add(resolveVariableRelative(identifier));
+		return referencedVariables;
 	}
 	
 	@Override

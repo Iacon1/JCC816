@@ -193,6 +193,7 @@ public class SelectionStatementNode extends StatementNode<Selection_statementCon
 				else assembly += whitespace + ".word\t" + getDefaultLabel(false) + "\n";
 			}
 			assembly += switchStm.getAssembly(leadingWhitespace + CompConfig.indentSize);
+			switchStm.clearPossibleValues();
 			if (!hasDefault) assembly += whitespace + getDefaultLabel(false) + ":\n";
 			assembly += whitespace + getEndLabel() + ":\n";
 		}
