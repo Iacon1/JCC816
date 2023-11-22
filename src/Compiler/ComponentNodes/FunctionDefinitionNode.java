@@ -4,6 +4,7 @@
 package Compiler.ComponentNodes;
 
 import Grammar.C99.C99Parser.Attributes_declarationContext;
+import Grammar.C99.C99Parser.Direct_declaratorContext;
 import Grammar.C99.C99Parser.Function_definitionContext;
 
 import java.util.ArrayList;
@@ -57,7 +58,7 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 				attributes.add(attribute.getText());
 
 		specifiers = new DeclarationSpecifiersNode(this).interpret(node.declaration_specifiers()).getSpecifiers();
-		signature = new DeclaratorNode(this).interpret(node.declarator());
+		signature = new DeclaratorNode(this, getName(node.declarator().direct_declarator())).interpret(node.declarator());
 
 		type = Type.manufacture(specifiers, signature, node.declaration_specifiers().start);
 
@@ -66,6 +67,13 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 		return this;
 	}
 
+	private String getName(Direct_declaratorContext node)
+	{
+		while (node.Identifier() == null)
+			node = node.direct_declarator();
+		return node.Identifier().getText();
+	}
+	
 	@Override
 	public String getName() {return signature.getIdentifier();}
 	public boolean isMain()
