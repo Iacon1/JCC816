@@ -3,16 +3,12 @@
 // A general expression node.
 package Compiler.ComponentNodes.Expressions;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import Compiler.ComponentNodes.ComponentNode;
 import Compiler.ComponentNodes.FunctionDefinitionNode;
 import Compiler.ComponentNodes.Definitions.Type;
-import Compiler.ComponentNodes.LValues.LValueNode;
 import Compiler.Utils.AssemblyUtils;
 import Compiler.Utils.AssemblyUtils.DetailsTicket;
 import Compiler.Utils.ScratchManager;
@@ -117,17 +113,7 @@ public abstract class BinaryExpressionNode<
 		if (scratchX != null) scratchManager.releaseScratchBlock(scratchX);
 		if (scratchY != null) scratchManager.releaseScratchBlock(scratchY);
 		
-		ScratchManager.demotePointer(destSource); // A copy of the destination, if it's a pointer, has gone stale
+		scratchManager.demotePointer(destSource); // A copy of the destination, if it's a pointer, has gone stale
 		return assembly;
-	}
-	
-	@Override
-	public Set<LValueNode<?>> influences()
-	{
-		Set<LValueNode<?>> influences = new HashSet<LValueNode<?>>();
-		if (x.hasLValue()) influences.add(x.getLValue());
-		if (y.hasLValue()) influences.add(y.getLValue());
-		
-		return influences;
 	}
 }

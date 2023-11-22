@@ -2,9 +2,6 @@
 //
 package Compiler.ComponentNodes.Expressions;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import Compiler.CompConfig;
@@ -81,7 +78,6 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 	@Override
 	public boolean hasLValue()
 	{
-		if (operator == null) return false;
 		if (operator.equals("*")) return true;
 		else if (operator.equals("&"))
 		{
@@ -262,15 +258,6 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 	}
 	
 	@Override
-	protected String getAssembly(int leadingWhitespace, ScratchManager scratchManager, DetailsTicket ticket) throws Exception
-	{
-		if (!operator.equals("*"))
-			return getAssembly(leadingWhitespace, CompConfig.callResultSource(getType().getSize()),  scratchManager, ticket);
-		else
-			return getAssembly(leadingWhitespace, null,  scratchManager, ticket);
-	}
-	
-	@Override
 	public String getAssembly(int leadingWhitespace) throws Exception
 	{
 		if (operator.equals("++") || operator.equals("--"))
@@ -278,10 +265,6 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 		else return super.getAssembly(leadingWhitespace);
 	}
 
-	@Override
-	public Set<LValueNode<?>> influences()
-	{
-		return expr.influences();
-	}
+	
 
 }

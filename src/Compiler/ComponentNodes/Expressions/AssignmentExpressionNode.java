@@ -118,11 +118,7 @@ public class AssignmentExpressionNode extends BinaryExpressionNode
 		if (y.hasPropValue())
 			x.setOnlyPossibleValue(y.getPropValue());
 		else if (y.hasLValue() && y.getLValue().hasPossibleValues())
-		{
 			x.setPossibleValues(y.getLValue().getPossibleValues());
-			x.setOnlyInfluence(y.getLValue());
-		}
-		else x.setInfluences(y.influences());
 	}
 	
 	@Override

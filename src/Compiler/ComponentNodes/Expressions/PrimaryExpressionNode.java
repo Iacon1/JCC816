@@ -2,9 +2,6 @@
 //
 package Compiler.ComponentNodes.Expressions;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import Compiler.ComponentNodes.ComponentNode;
 import Compiler.ComponentNodes.FunctionDefinitionNode;
 import Compiler.ComponentNodes.Definitions.Type;
@@ -80,15 +77,5 @@ public class PrimaryExpressionNode extends BaseExpressionNode<Primary_expression
 	}
 	
 	@Override
-	public String getAssembly(int leadingWhitespace, OperandSource destSource, ScratchManager scratchManager, DetailsTicket ticket) throws Exception
-	{return null;}
-
-	@Override
-	public Set<LValueNode<?>> influences()
-	{
-		Set<LValueNode<?>> influences = new HashSet<LValueNode<?>>();
-		if (hasLValue()) influences.add(getLValue());
-		
-		return influences;
-	}
+	public String getAssembly(int leadingWhitespace, OperandSource destSource, ScratchManager scratchManager, DetailsTicket ticket) throws Exception {return null;}
 }

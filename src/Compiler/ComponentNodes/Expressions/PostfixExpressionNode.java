@@ -4,9 +4,7 @@ package Compiler.ComponentNodes.Expressions;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import Compiler.CompConfig;
 import Compiler.ComponentNodes.ComponentNode;
@@ -275,24 +273,11 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 		ScratchManager.demotePointer(destSource); // A copy of the destination, if it's a pointer, has gone stale
 		return assembly;
 	}
-	
-	public boolean isFuncCall()
-	{
-		return type == PFType.funcCall;
-	}
-	
 	@Override
 	public String getAssembly(int leadingWhitespace) throws Exception
 	{
 		if (type == PFType.incr || type == PFType.decr)
 			return getAssembly(leadingWhitespace, expr.getLValue().getSource(), new ScratchManager(), new DetailsTicket());
 		else return super.getAssembly(leadingWhitespace);
-	}
-	
-	@Override
-	public Set<LValueNode<?>> influences()
-	{
-		Set<LValueNode<?>> influences = new HashSet<LValueNode<?>>();
-		return expr.influences();
 	}
 }
