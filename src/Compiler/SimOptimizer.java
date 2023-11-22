@@ -165,7 +165,7 @@ public final class SimOptimizer
 			case load:
 				if (traceInfo.importantRegs.contains(line.getRegister())) // Loads to a register we were looking for the source of
 					{
-					traceInfo.recentExport = true;
+						traceInfo.recentExport = true;
 						line.isNeeded |= true;
 						traceInfo.importantRegs.remove(line.getRegister()); // Value before this unneeded
 						if (line.isAddress())
@@ -196,12 +196,14 @@ public final class SimOptimizer
 			case flag:
 				if ((traceInfo.importantFlags & line.getFlags()) != 0)
 				{
-					traceInfo.recentExport = false;
+					traceInfo.recentExport = true;
 					line.isNeeded |= true;
 					traceInfo.importantFlags &= ~line.getFlags(); // Now we know where those flags came from
 				}
+				break;
 			case branch:
 				traceInfo.importantRegs.add('A');
+				traceInfo.recentExport = true;
 				line.isNeeded |= true;
 				break;
 			default:
