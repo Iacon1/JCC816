@@ -6,6 +6,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 import Compiler.ComponentNodes.ComponentNode;
+import Compiler.ComponentNodes.Definitions.Type;
+import Compiler.ComponentNodes.Dummies.DummyType;
 import Compiler.Utils.AssemblyUtils;
 import Compiler.Utils.AssemblyUtils.DetailsTicket;
 import Compiler.Utils.CompUtils;
@@ -32,6 +34,11 @@ public class EqualityExpressionNode extends BinaryExpressionNode
 	protected BaseExpressionNode<Relational_expressionContext> getPCNode(Equality_expressionContext node) throws Exception
 	{return new RelationalExpressionNode(this).interpret(node.relational_expression());}
 
+	@Override
+	public Type getType()
+	{
+		return new DummyType("char");
+	}
 	@Override
 	public Object getPropValue()
 	{
