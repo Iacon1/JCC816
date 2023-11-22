@@ -64,7 +64,7 @@ public final class CompConfig
 	
 	public static int sizeOf(List<String> typeSpecifiers)
 	{
-		if (typeSpecifiers.contains("char")) return charSize;
+		if (typeSpecifiers.contains("char") || typeSpecifiers.contains("_Bool")) return charSize;
 		else if (typeSpecifiers.contains("int") || typeSpecifiers.contains("short") || typeSpecifiers.contains("long"))
 		{
 			int shortCount = 0, longCount = 0;
@@ -106,7 +106,7 @@ public final class CompConfig
 			return CompConfig.optimizationLevel.compareTo(level) >= 0;
 		}
 	}
-	public static OptimizationLevel optimizationLevel = OptimizationLevel.min;
+	public static OptimizationLevel optimizationLevel = OptimizationLevel.all;
 	
 	public static enum DebugLevel
 	{
