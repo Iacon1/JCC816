@@ -17,6 +17,7 @@ import Compiler.Utils.AssemblyUtils.DetailsTicket;
 import Compiler.Utils.ScratchManager;
 import Compiler.Utils.OperandSources.OperandSource;
 import Grammar.C99.C99Parser.Assignment_expressionContext;
+import Grammar.C99.C99Parser.Conditional_expressionContext;
 import Grammar.C99.C99Parser.ExpressionContext;
 
 public class ExpressionNode extends BaseExpressionNode<ExpressionContext>
@@ -29,19 +30,16 @@ public class ExpressionNode extends BaseExpressionNode<ExpressionContext>
 	}
 
 	@Override
-	public ExpressionNode interpret(ExpressionContext node) throws Exception
+	public BaseExpressionNode<ExpressionContext> interpret(ExpressionContext node) throws Exception
 	{
 		for (Assignment_expressionContext assignment : node.assignment_expression())
 			expressions.add((BaseExpressionNode<?>) new AssignmentExpressionNode(this).interpret(assignment));
+		if (expressions.size() == 1) return (BaseExpressionNode) expressions.get(0);
 		return this;
 	}
 	
 	@Override
-	public Type getType()
-	{
-		if (expressions.size() == 1) return expressions.get(0).getType();
-		else return null; // TODO
-	}
+	public Type getType() {return null;}
 	
 	@Override
 	public boolean canCall(FunctionDefinitionNode function)
@@ -52,29 +50,13 @@ public class ExpressionNode extends BaseExpressionNode<ExpressionContext>
 	}
 	
 	@Override
-	public boolean hasLValue()
-	{
-		if (expressions.size() == 1) return expressions.get(0).hasLValue();
-		else return false;
-	}
+	public boolean hasLValue() {return false;}
 	@Override
-	public LValueNode<?> getLValue()
-	{
-		if (expressions.size() == 1) return expressions.get(0).getLValue();
-		else return null;
-	}
+	public LValueNode<?> getLValue() {return null;}
 	@Override
-	public boolean hasPropValue()
-	{
-		if (expressions.size() == 1) return expressions.get(0).hasPropValue();
-		else return false;
-	}
+	public boolean hasPropValue() {return false;}
 	@Override
-	public Object getPropValue()
-	{
-		if (expressions.size() == 1) return expressions.get(0).getPropValue();
-		else return null;
-	}
+	public Object getPropValue() {return null;}
 	@Override
 	public boolean hasAssembly()
 	{

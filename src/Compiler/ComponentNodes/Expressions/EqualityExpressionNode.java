@@ -50,7 +50,7 @@ public class EqualityExpressionNode extends BinaryExpressionNode
 		String assembly = "";
 		assembly += whitespace + "LDA\t" + ((ticket.flags & DetailsTicket.isA16Bit) != 0 ? "#$00" : "#$00") + "\n";
 		assembly += AssemblyUtils.bytewiseOperation(whitespace, source.getSize(), (Integer i, DetailsTicket ticket2) -> {return new String[]{source.getInstruction("ORA", i, ticket2)};});
-		assembly += destSource.getSTA(whitespace, 0, ticket);
+		if (destSource != null) assembly += destSource.getSTA(whitespace, 0, ticket);
 		return assembly;
 	}
 	
@@ -67,8 +67,8 @@ public class EqualityExpressionNode extends BinaryExpressionNode
 		assembly += AssemblyUtils.bytewiseOperation(whitespace, sourceX.getSize(), (Integer i, DetailsTicket ticket2) -> 
 		{	
 			List<String> lines = new LinkedList<String>();
-			lines.add(sourceX.getLDA(whitespace, i, ticket2));	// Get X
-			lines.add(sourceY.getInstruction(whitespace, "CMP", i, ticket2)); // Cmp X & Y?
+			lines.add(sourceX.getLDA(i, ticket2));	// Get X
+			lines.add(sourceY.getInstruction("CMP", i, ticket2)); // Cmp X & Y?
 			lines.add("BNE\t:+");							// if [not op] then no
 			// else maybe
 			return lines.toArray(new String[] {});
@@ -77,7 +77,7 @@ public class EqualityExpressionNode extends BinaryExpressionNode
 		else if (operator.equals("!=")) assembly += whitespace + "DEX\n";
 		assembly += ":" + whitespace.substring(1) + "TXA\n";
 		assembly += whitespace + CompUtils.setA8 + "\n";
-		assembly += destSource.getSTA(whitespace, 0, ticket);
+		if (destSource != null) assembly += destSource.getSTA(whitespace, 0, ticket);
 		assembly += ticket.restore(whitespace, DetailsTicket.saveA | DetailsTicket.saveX);
 		
 		return assembly;
