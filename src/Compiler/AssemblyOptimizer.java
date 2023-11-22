@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public final class Optimizer
+public final class AssemblyOptimizer
 {
 	private static List<String> verbosifyFlagToggles(List<String> lines)
 	{
@@ -129,7 +129,7 @@ public final class Optimizer
 		return lines;
 	}
 	
-	public static List<String> getOptimized(List<String> lines)
+	public static List<String> optimizeAssembly(List<String> lines)
 	{
 		lines = verbosifyFlagToggles(lines);
 		lines = combineFlagToggles(lines);
