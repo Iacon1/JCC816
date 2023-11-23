@@ -76,7 +76,7 @@ public class RelationalExpressionNode extends BinaryExpressionNode
 				{
 					String oldY = sourceY.getBase().substring(2);
 					int yVal = Integer.valueOf(oldY, 16);
-					String newY = "#$" + String.format("%0" + (ticket2.is16Bit() ? 4 : 0) + "x", yVal ^ (ticket2.is16Bit() ? 0x8000 : 0x80));
+					String newY = "#$" + String.format("%0" + (ticket2.is16Bit() ? 4 : 2) + "x", yVal ^ (ticket2.is16Bit() ? 0x8000 : 0x80));
 					lines.add(sourceX.getLDA(i, ticket2));	// Get X
 					lines.add("EOR\t" + toXOR);				// Flip sign
 					lines.add("CMP\t" + newY);				// Cmp X & Y?
