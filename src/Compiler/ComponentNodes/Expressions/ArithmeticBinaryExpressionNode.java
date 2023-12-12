@@ -5,10 +5,15 @@ package Compiler.ComponentNodes.Expressions;
 import org.antlr.v4.runtime.ParserRuleContext;
 
 import Compiler.ComponentNodes.ComponentNode;
+import Compiler.ComponentNodes.Definitions.Type;
 import Compiler.Utils.AssemblyUtils.DetailsTicket;
+import Compiler.Utils.CompUtils;
 import Compiler.Utils.AssemblyUtils;
 import Compiler.Utils.ScratchManager;
+import Compiler.Utils.OperandSources.ConstantSource;
 import Compiler.Utils.OperandSources.OperandSource;
+import Compiler.Utils.OperandSources.WrapperSource;
+import Compiler.Utils.ScratchManager.ScratchSource;
 
 public abstract class ArithmeticBinaryExpressionNode<
 C1 extends ParserRuleContext,
@@ -49,7 +54,8 @@ CC extends ParserRuleContext
 		DetailsTicket innerTicket = new DetailsTicket(ticket, DetailsTicket.saveA, 0);
 
 		assembly += whitespace + getPreface() + "\n";
-		assembly += AssemblyUtils.bytewiseOperation(whitespace, sourceX.getSize(), (Integer i, DetailsTicket ticket2) -> 
+		int size = Math.min(destSource.getSize(), Math.max(sourceX.getSize(), sourceY.getSize()));
+		assembly += AssemblyUtils.bytewiseOperation(whitespace, size, (Integer i, DetailsTicket ticket2) -> 
 		{return new String[]
 			{
 				sourceX.getLDA(i, ticket2),
@@ -66,6 +72,22 @@ CC extends ParserRuleContext
 	protected String getAssembly(String whitespace, OperandSource destSource, OperandSource sourceX,
 			OperandSource sourceY, ScratchManager scratchManager, DetailsTicket ticket)
 	{
+		Type fittedTypeX, fittedTypeY;
+		
+		if (y.hasLValue() && y.getLValue().hasPossibleValues())
+		{
+			fittedTypeY = CompUtils.getSmallestType(Math.max(-y.getLValue().getSmallestPossibleLong(), y.getLValue().getLargestPossibleLong()));
+			if (y.getLValue().getSize() > fittedTypeY.getSize())
+				sourceY = new WrapperSource(y.getLValue().getSource(), fittedTypeY.getSize());
+		}
+
+		if (x.hasLValue() && x.getLValue().hasPossibleValues())
+		{
+			fittedTypeX = CompUtils.getSmallestType(Math.max(-x.getLValue().getSmallestPossibleLong(), x.getLValue().getLargestPossibleLong()));
+			if (x.getLValue().getSize() > fittedTypeX.getSize())
+				sourceX = new WrapperSource(x.getLValue().getSource(), fittedTypeX.getSize());
+		}
+
 		return getAssembly(whitespace, destSource, sourceX, sourceY, ticket);
 	}
 }

@@ -117,8 +117,19 @@ public class AssignmentExpressionNode extends BinaryExpressionNode
 	{
 		if (y.hasPropValue())
 			x.setOnlyPossibleValue(y.getPropValue());
+		else if (ConditionalExpressionNode.class.equals(y.getClass()))
+		{
+			ConditionalExpressionNode condExp = (ConditionalExpressionNode) y;
+			if (condExp.x.hasPropValue() && condExp.y.hasPropValue())
+			{
+				x.setOnlyPossibleValue(condExp.x.getPropValue());
+				x.addPossibleValue(condExp.y.getPropValue());
+			}
+		}
 		else if (y.hasLValue() && y.getLValue().hasPossibleValues())
 			x.setPossibleValues(y.getLValue().getPossibleValues());
+		else // We simply can't know what y might be
+			x.clearPossibleValues();
 	}
 	
 	@Override
