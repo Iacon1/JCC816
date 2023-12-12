@@ -45,7 +45,7 @@ public abstract class LValueNode<C extends LValueNode<C>> extends ComponentNode<
 	 */
 	public boolean hasPossibleValues()
 	{
-		return OptimizationLevel.isAtLeast(OptimizationLevel.medium) && hasPossibleValues;
+		return hasPossibleValues;
 	}
 	/** Returns the set of RValues this could be equivalent to, or null if that's unknown.
 	 * 
