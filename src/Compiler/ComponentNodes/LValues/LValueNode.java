@@ -77,4 +77,28 @@ public abstract class LValueNode<C extends LValueNode<C>> extends ComponentNode<
 		clearPossibleValues();
 		addPossibleValue(value);
 	}
+	
+	public long getSmallestPossibleLong()
+	{
+		long l = Long.MAX_VALUE;
+		for (Object obj : possibleValues)
+		{
+			if (Number.class.isAssignableFrom(obj.getClass()))
+				l = Math.min(l, ((Number) obj).longValue());
+		}
+		
+		return l;
+	}
+	
+	public long getLargestPossibleLong()
+	{
+		long l = Long.MIN_VALUE;
+		for (Object obj : possibleValues)
+		{
+			if (Number.class.isAssignableFrom(obj.getClass()))
+				l = Math.max(l, ((Number) obj).longValue());
+		}
+		
+		return l;
+	}
 }
