@@ -99,7 +99,7 @@ public final class CompConfig
 		min, // + Basic (intra-expression) constant propagation
 		low, // + REP/SEP optimization
 		medium, // + Aggressive (inter-line) constant propagation
-		all, // + Side-effect annihilation
+		all, // + Dependency graph optimization
 		;
 		public static boolean isAtLeast(OptimizationLevel level)
 		{

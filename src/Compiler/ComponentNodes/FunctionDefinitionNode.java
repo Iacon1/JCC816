@@ -19,6 +19,7 @@ import Compiler.CompConfig;
 import Compiler.CompConfig.DebugLevel;
 import Compiler.CompConfig.OptimizationLevel;
 import Compiler.SimOptimizer;
+import Compiler.ASMGrapher.ASMGraphBuilder;
 import Compiler.ComponentNodes.Declarations.DeclarationSpecifiersNode;
 import Compiler.ComponentNodes.Declarations.DeclaratorNode;
 import Compiler.ComponentNodes.Definitions.Type;
@@ -150,7 +151,7 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 	{
 		String whitespace = AssemblyUtils.getWhitespace(leadingWhitespace);
 		String assembly = "";
-	
+		
 		if (requiresStackLoader) // Need to sometimes get arguments from the stack
 		{
 			assembly += whitespace + getLoaderLabel() + ":\n";
@@ -167,8 +168,7 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 			assembly += AssemblyUtils.stackPusher(whitespace, CompConfig.scratchSize, new ScratchSource(0, CompConfig.scratchSize));
 			assembly += AssemblyUtils.stackPusher(whitespace, CompConfig.multDivSize, CompConfig.multDivSource(true, CompConfig.multDivSize));
 			assembly += AssemblyUtils.stackPusher(whitespace, CompConfig.multDivSize, CompConfig.multDivSource(false, CompConfig.multDivSize));
-			assembly += AssemblyUtils.stackPusher(whitespace, CompConfig.callResultSize, CompConfig.callResultSource(CompConfig.callResultSize));
-			
+			assembly += AssemblyUtils.stackPusher(whitespace, CompConfig.callResultSize, CompConfig.callResultSource(CompConfig.callResultSize));		
 			
 			for (VariableNode variable : interruptRequirements(false))
 				assembly += AssemblyUtils.stackPusher(whitespace, leadingWhitespace, variable.getSource());
@@ -176,10 +176,11 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 		
 		if (code != null)
 		{
+			String codeAssembly = code.getAssembly(leadingWhitespace + CompConfig.indentSize);
 			if (OptimizationLevel.isAtLeast(OptimizationLevel.all))
-				assembly += SimOptimizer.clearDeadCode(code.getAssembly(leadingWhitespace + CompConfig.indentSize), getChildVariables());
+				assembly += new ASMGraphBuilder(codeAssembly).clearDeadCode(getChildVariables());
 			else
-				assembly += code.getAssembly(leadingWhitespace + CompConfig.indentSize);
+				assembly += codeAssembly;
 		}
 		
 		if (isInterruptHandler() && isISR()) // Have to load *everything* to the stack
