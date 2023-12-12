@@ -10,6 +10,7 @@ import java.util.Set;
 import Compiler.CompConfig;
 import Compiler.ComponentNodes.ComponentNode;
 import Compiler.ComponentNodes.Expressions.BaseExpressionNode;
+import Compiler.ComponentNodes.Expressions.EqualityExpressionNode;
 import Compiler.ComponentNodes.Expressions.ExpressionNode;
 import Compiler.ComponentNodes.Expressions.RelationalExpressionNode;
 import Compiler.ComponentNodes.Expressions.ShiftExpressionNode;
@@ -70,7 +71,7 @@ public class SelectionStatementNode extends StatementNode<Selection_statementCon
 		if (value < 0)
 			return "__CASE_" + selId + "_N" + -value;
 		else
-			return "__CASE_" + selId + "_N" + value;
+			return "__CASE_" + selId + "_" + value;
 	}
 	public String getCaseLabel(BaseExpressionNode<?> constExpr)
 	{
@@ -121,7 +122,7 @@ public class SelectionStatementNode extends StatementNode<Selection_statementCon
 		
 		if (!isSwitch)
 		{
-			if (expression.hasPropValue() && (((Number) expression.getPropValue()).longValue() != 0)) // Always true
+			if (expression.hasPropValue() && expression.getPropBool() || expression.getPropLong() != 0) // Always true
 				assembly += ifStm.getAssembly(leadingWhitespace);
 			else if (expression.hasPropValue() && elseStm != null) // Always false
 				assembly += elseStm.getAssembly(leadingWhitespace);
@@ -133,19 +134,22 @@ public class SelectionStatementNode extends StatementNode<Selection_statementCon
 				else if (expression.hasPropValue())
 					assembly += AssemblyUtils.byteCopier(whitespace, expression.getSize(), CompConfig.callResultSource(expression.getSize()), new ConstantSource(expression.getPropValue(), expression.getSize()));
 				else
-					assembly += AssemblyUtils.byteCopier(whitespace, expression.getSize(), CompConfig.callResultSource(expression.getSize()), expression.getLValue().getSource());
+					assembly += EqualityExpressionNode.getIsZero(whitespace, null, new ScratchManager(), expression.getLValue().getSource(), new DetailsTicket());
 				// Make sure variable loaded.
 				assembly += whitespace + "BEQ\t" + skipName + "\n";
 				assembly += ifStm.getAssembly(leadingWhitespace + CompConfig.indentSize);
+				ifStm.clearPossibleValues();
 				if (elseStm != null)
 				{
 					assembly += AssemblyUtils.getWhitespace(leadingWhitespace + CompConfig.indentSize) + "JML\t" + getEndLabel() + "\n";
 					assembly += whitespace + skipName + ":\n";
 					assembly += elseStm.getAssembly(leadingWhitespace + CompConfig.indentSize);
+					elseStm.clearPossibleValues();
 				}
 				assembly += whitespace + getEndLabel() + ":\n";
 			}
 		}
+		else
 		{
 			switchStm.getAssembly(leadingWhitespace + CompConfig.indentSize);
 			
