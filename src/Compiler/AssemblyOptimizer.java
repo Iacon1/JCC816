@@ -1,6 +1,8 @@
 // Created by Iacon1 on 10/26/2023.
 // handles optimizing the ASM.
 
+// TODO use ASM parser
+
 package Compiler;
 
 import java.util.HashMap;
@@ -20,6 +22,27 @@ public final class AssemblyOptimizer
 		replacements.put("SEI", "SEP\t#$04");
 		replacements.put("SED", "SEP\t#$08");
 		replacements.put("SEV", "SEP\t#$40");
+		
+		for (int i = 0; i < lines.size(); ++i)
+		{
+			String line = lines.get(i).trim();
+			if (replacements.get(line) != null)
+				lines.set(i, lines.get(i).replace(line, replacements.get(line)));
+		}
+		
+		return lines;
+	}
+	private static List<String> deVerbosifyFlagToggles(List<String> lines)
+	{
+		Map<String, String> replacements = new HashMap<String, String>();
+		replacements.put("REP\t#$01", "CLC");
+		replacements.put("REP\t#$04", "CLI");
+		replacements.put("REP\t#$08", "CLD");
+		replacements.put("REP\t#$40", "CLV");
+		replacements.put("SEP\t#$01", "SEC");
+		replacements.put("SEP\t#$04", "SEI");
+		replacements.put("SEP\t#$08", "SED");
+		replacements.put("SEP\t#$40", "SEV");
 		
 		for (int i = 0; i < lines.size(); ++i)
 		{
@@ -131,9 +154,11 @@ public final class AssemblyOptimizer
 	
 	public static List<String> optimizeAssembly(List<String> lines)
 	{
+		
 		lines = verbosifyFlagToggles(lines);
 		lines = combineFlagToggles(lines);
 		lines = deRedundateFlagToggles(lines);
+		lines = deVerbosifyFlagToggles(lines);
 		
 		return lines;
 	}
