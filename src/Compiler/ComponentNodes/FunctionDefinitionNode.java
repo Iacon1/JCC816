@@ -18,7 +18,6 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import Compiler.CompConfig;
 import Compiler.CompConfig.DebugLevel;
 import Compiler.CompConfig.OptimizationLevel;
-import Compiler.SimOptimizer;
 import Compiler.ASMGrapher.ASMGraphBuilder;
 import Compiler.ComponentNodes.Declarations.DeclarationSpecifiersNode;
 import Compiler.ComponentNodes.Declarations.DeclaratorNode;
@@ -65,7 +64,7 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 		type = Type.manufacture(specifiers, signature, node.declaration_specifiers().start);
 
 		if (node.compound_statement() != null) code = new CompoundStatementNode(this, getName()).interpret(node.compound_statement());
-		registerFunction(this);
+		Globals.registerFunction(this);
 		return this;
 	}
 
@@ -139,7 +138,7 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 	{
 		List<VariableNode> variables = new ArrayList<VariableNode>();
 		
-		for (VariableNode var : ComponentNode.variables)
+		for (VariableNode var : Globals.variables)
 			if (var.getEnclosingFunction() == null || canCall(var.getEnclosingFunction()))
 				variables.add(var);
 		
