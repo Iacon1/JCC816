@@ -32,15 +32,22 @@ public class XOrExpressionNode extends ArithmeticBinaryExpressionNode
 	protected BaseExpressionNode<And_expressionContext> getPCNode(Xor_expressionContext node) throws Exception
 	{return new AndExpressionNode(this).interpret(node.and_expression());}
 
-	public static String getExclOr(String whitespace, OperandSource destSource, OperandSource sourceX, OperandSource sourceY, DetailsTicket ticket)
+	public static String getExclOr(String whitespace, OperandSource destSource, OperandSource sourceX, OperandSource sourceY, DetailsTicket ticket) throws Exception
 	{
 		return new XOrExpressionNode(null).getAssembly(whitespace, destSource, sourceX, sourceY, ticket);
 	}
-	public static String getComplementer(String whitespace, OperandSource destSource, OperandSource sourceX, DetailsTicket ticket)
+	public static String getComplementer(String whitespace, OperandSource destSource, OperandSource sourceX, DetailsTicket ticket) throws Exception
 	{
 		OperandSource sourceY = new ConstantSource(Long.valueOf("FF".repeat(sourceX.getSize())), sourceX.getSize()); // 0xFF...FF
 		
 		return new XOrExpressionNode(null).getAssembly(whitespace, destSource, sourceX, sourceY, ticket);
+	}
+	public static String getNegator(String whitespace, OperandSource destSource, OperandSource sourceX, DetailsTicket ticket) throws Exception
+	{
+		String assembly = "";
+		assembly += getComplementer(whitespace, destSource, sourceX, ticket);
+		assembly += AdditiveExpressionNode.getDecrementer(whitespace, destSource, ticket);
+		return assembly;
 	}
 
 	@Override

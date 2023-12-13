@@ -36,6 +36,10 @@ CC extends ParserRuleContext
 	protected abstract String getPreface();
 	protected abstract String getInstruction();
 	protected abstract boolean isReversed();
+	protected int getRetSize(int sizeX, int sizeY)
+	{
+		return Math.max(sizeX, sizeY);
+	}
 	
 	@Override
 	public Object getPropValue()
@@ -47,14 +51,14 @@ CC extends ParserRuleContext
 	}	
 	
 	protected String getAssembly(String whitespace, OperandSource destSource, OperandSource sourceX,
-			OperandSource sourceY, DetailsTicket ticket)
+			OperandSource sourceY, DetailsTicket ticket) throws Exception
 	{
 		String assembly = "";
 		assembly += ticket.save(whitespace, DetailsTicket.saveA);
 		DetailsTicket innerTicket = new DetailsTicket(ticket, DetailsTicket.saveA, 0);
 
 		assembly += whitespace + getPreface() + "\n";
-		int size = Math.min(destSource.getSize(), Math.max(sourceX.getSize(), sourceY.getSize()));
+		int size = Math.min(destSource.getSize(), getRetSize(sourceX.getSize(), sourceY.getSize()));
 		assembly += AssemblyUtils.bytewiseOperation(whitespace, size, (Integer i, DetailsTicket ticket2) -> 
 		{return new String[]
 			{
@@ -70,23 +74,10 @@ CC extends ParserRuleContext
 	
 	@Override
 	protected String getAssembly(String whitespace, OperandSource destSource, OperandSource sourceX,
-			OperandSource sourceY, ScratchManager scratchManager, DetailsTicket ticket)
+			OperandSource sourceY, ScratchManager scratchManager, DetailsTicket ticket) throws Exception
 	{
-		Type fittedTypeX, fittedTypeY;
-		
-		if (y.hasLValue() && y.getLValue().hasPossibleValues())
-		{
-			fittedTypeY = CompUtils.getSmallestType(Math.max(-y.getLValue().getSmallestPossibleLong(), y.getLValue().getLargestPossibleLong()));
-			if (y.getLValue().getSize() > fittedTypeY.getSize())
-				sourceY = new WrapperSource(y.getLValue().getSource(), fittedTypeY.getSize());
-		}
-
-		if (x.hasLValue() && x.getLValue().hasPossibleValues())
-		{
-			fittedTypeX = CompUtils.getSmallestType(Math.max(-x.getLValue().getSmallestPossibleLong(), x.getLValue().getLargestPossibleLong()));
-			if (x.getLValue().getSize() > fittedTypeX.getSize())
-				sourceX = new WrapperSource(x.getLValue().getSource(), fittedTypeX.getSize());
-		}
+		if (y.hasLValue()) sourceY = AssemblyUtils.getShrinkWrapped(y.getLValue());
+		if (x.hasLValue()) sourceX = AssemblyUtils.getShrinkWrapped(x.getLValue());
 
 		return getAssembly(whitespace, destSource, sourceX, sourceY, ticket);
 	}

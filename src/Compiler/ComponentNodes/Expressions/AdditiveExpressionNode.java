@@ -59,16 +59,16 @@ public class AdditiveExpressionNode extends ArithmeticBinaryExpressionNode
 		}
 		else return super.getPropValue();
 	}
-	public static String getAdder(String whitespace, OperandSource destSource, OperandSource sourceX, OperandSource sourceY, DetailsTicket ticket)
+	public static String getAdder(String whitespace, OperandSource destSource, OperandSource sourceX, OperandSource sourceY, DetailsTicket ticket) throws Exception
 	{
 		return new AdditiveExpressionNode("+").getAssembly(whitespace, destSource, sourceX, sourceY, ticket);
 	}
-	public static String getIncrementer(String whitespace, OperandSource destSource, OperandSource sourceX, DetailsTicket ticket)
+	public static String getIncrementer(String whitespace, OperandSource destSource, OperandSource sourceX, DetailsTicket ticket) throws Exception
 	{
 		OperandSource sourceY = new ConstantSource(1, sourceX.getSize());
 		return getAdder(whitespace, destSource, sourceX, sourceY, ticket);
 	}
-	public static String getSubtractor(String whitespace, OperandSource destSource, OperandSource sourceX, OperandSource sourceY, DetailsTicket ticket)
+	public static String getSubtractor(String whitespace, OperandSource destSource, OperandSource sourceX, OperandSource sourceY, DetailsTicket ticket) throws Exception
 	{
 		return new AdditiveExpressionNode("-").getAssembly(whitespace, destSource, sourceX, sourceY, ticket);
 	}
