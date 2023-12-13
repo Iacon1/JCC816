@@ -4,7 +4,10 @@ package Compiler.Utils;
 
 import java.util.function.BiFunction;
 
+import Compiler.ComponentNodes.Definitions.Type;
+import Compiler.ComponentNodes.LValues.LValueNode;
 import Compiler.Utils.OperandSources.OperandSource;
+import Compiler.Utils.OperandSources.WrapperSource;
 
 public final class AssemblyUtils
 {
@@ -204,5 +207,16 @@ public final class AssemblyUtils
 	public static String stackLoader(String whitespace, int nBytes, OperandSource writeSource)
 	{
 		return stackLoader(whitespace, nBytes, writeSource, new DetailsTicket());
+	}
+	
+	public static OperandSource getShrinkWrapped(LValueNode<?> x)
+	{
+		if (x.hasPossibleValues())
+		{
+			Type fittedTypeX = CompUtils.getSmallestType(Math.max(-x.getSmallestPossibleLong(), x.getLargestPossibleLong()));
+			if (x.getSize() > fittedTypeX.getSize())
+				return new WrapperSource(x.getSource(), fittedTypeX.getSize());
+		}
+		return x.getSource();
 	}
 }
