@@ -181,7 +181,7 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 			ScratchSource sourceI = scratchManager.reserveScratchBlock(CompConfig.pointerSize);
 			OperandSource sourceS = new ConstantSource(indexExpr.getType().getSize(), CompConfig.pointerSize);
 			if (indexExpr.hasAssembly()) assembly += indexExpr.getAssembly(leadingWhitespace, sourceI, scratchManager, ticket);
-			assembly += MultiplicativeExpressionNode.getMultCall(whitespace, sourceI, scratchManager, sourceI, sourceS, ticket); // Multiply by size of type
+			assembly += new MultiplicativeExpressionNode(null).getAssembly(whitespace, sourceI, sourceI, sourceS, ticket); // Multiply by size of type
 			assembly += AdditiveExpressionNode.getAdder(whitespace, destSource, sourceA, sourceI, ticket);
 			scratchManager.releaseScratchBlock(sourceI);
 			break;
