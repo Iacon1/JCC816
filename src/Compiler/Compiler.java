@@ -15,6 +15,7 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.Parser;
 import org.antlr.v4.runtime.tree.ParseTree;
 
+import Compiler.ComponentNodes.Globals;
 import Compiler.ComponentNodes.ProgramNode;
 import Grammar.C99.C99Lexer;
 import Grammar.C99.C99Parser;
@@ -64,6 +65,7 @@ public class Compiler
 	
 	private static String emit(ParseDouble parseDouble) throws Exception
 	{
+		Globals.reset();
 		ProgramNode program = new ProgramNode().interpret((ProgramContext) parseDouble.tree);
 		program.getAssembly();
 		return program.getAssembly();

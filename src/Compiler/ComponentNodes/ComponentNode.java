@@ -29,37 +29,8 @@ public class ComponentNode<T extends ComponentNode<T>>
 	protected ComponentNode<?> parent;
 	protected List<ComponentNode<?>> children;
 	
-	protected static List<VariableNode> variables;
-	protected static List<FunctionDefinitionNode> functions;
-	protected static List<StructUnionDefinitionNode> structs;
-	protected static List<EnumDefinition> enums;
-	
-	protected static Set<SimpleEntry<Integer, Integer>> reqMultSubs;
-	protected static Set<SimpleEntry<Integer, Integer>> reqDivSubs;
-	
-	protected static Map<DefinableInterrupt, String> interrupts;
-	
-	private void resetReferences()
-	{
-		variables = new LinkedList<VariableNode>();
-		functions = new LinkedList<FunctionDefinitionNode>();
-		structs = new LinkedList<StructUnionDefinitionNode>();
-		enums = new LinkedList<EnumDefinition>();
-		reqMultSubs = new HashSet<SimpleEntry<Integer, Integer>>();
-		reqDivSubs = new HashSet<SimpleEntry<Integer, Integer>>();
-		interrupts = new HashMap<DefinableInterrupt, String>();
-		
-		for (DefinableInterrupt definableInterrupt : DefinableInterrupt.values())
-			interrupts.put(definableInterrupt, "RESET");
-	}
-	protected static void registerVariable(VariableNode variable) {variables.add(variable);}
-	protected static void registerFunction(FunctionDefinitionNode function) {functions.add(function);}
-	protected static void registerStructUnion(StructUnionDefinitionNode struct) {structs.add(struct);}
-	protected static void registerEnum(EnumDefinition enum_) {enums.add(enum_);}
-	
 	public ComponentNode(ComponentNode<?> parent)
 	{
-		if (variables == null) resetReferences();
 		this.children = new LinkedList<ComponentNode<?>>();
 		this.parent = parent;
 		this.parent.children.add(this);
@@ -68,8 +39,6 @@ public class ComponentNode<T extends ComponentNode<T>>
 	{
 		this.children = new LinkedList<ComponentNode<?>>();
 		this.parent = null;
-		reqMultSubs = new HashSet<SimpleEntry<Integer, Integer>>();
-		reqDivSubs = new HashSet<SimpleEntry<Integer, Integer>>();
 	}
 	public void removeChild(ComponentNode<?> child)
 	{
@@ -91,7 +60,7 @@ public class ComponentNode<T extends ComponentNode<T>>
 	 */
 	public static VariableNode resolveVariable(String fullName)
 	{
-		for (VariableNode variable : variables)
+		for (VariableNode variable : Globals.variables)
 			if (variable.getFullName().equals(fullName))
 				return variable;
 		return null;
@@ -102,7 +71,7 @@ public class ComponentNode<T extends ComponentNode<T>>
 	 */
 	public static StructUnionDefinitionNode resolveStructOrUnion(String fullName)
 	{
-		for (StructUnionDefinitionNode definition : structs)
+		for (StructUnionDefinitionNode definition : Globals.structs)
 			if (definition.getFullName().equals(fullName))
 				return definition;
 		return null;
@@ -113,7 +82,7 @@ public class ComponentNode<T extends ComponentNode<T>>
 	 */
 	public static FunctionDefinitionNode resolveFunction(String fullName)
 	{
-		for (FunctionDefinitionNode definition : functions)
+		for (FunctionDefinitionNode definition : Globals.functions)
 			if (definition.getFullName().equals(fullName))
 				return definition;
 		return null;
@@ -126,7 +95,7 @@ public class ComponentNode<T extends ComponentNode<T>>
 	{
 		String fullName = getScope().getPrefix() + name;
 		if (fullName.length() == 1) fullName = "__" + fullName;
-		for (VariableNode variable : variables)
+		for (VariableNode variable : Globals.variables)
 			if (variable.getFullName().equals(fullName))
 				return variable;
 		if (parent != null) return parent.resolveVariableRelative(name);
@@ -140,7 +109,7 @@ public class ComponentNode<T extends ComponentNode<T>>
 	{
 		String fullName = getScope().getPrefix() + name;
 		if (fullName.length() == 1) fullName = "__" + fullName;
-		for (StructUnionDefinitionNode definition : structs)
+		for (StructUnionDefinitionNode definition : Globals.structs)
 			if (definition.getFullName().equals(fullName))
 				return definition;
 		if (parent != null) return parent.resolveStructOrUnionRelative(name);
@@ -154,7 +123,7 @@ public class ComponentNode<T extends ComponentNode<T>>
 	{
 		String fullName = getScope().getPrefix() + name;
 		if (fullName.length() == 1) fullName = "__" + fullName;
-		for (FunctionDefinitionNode definition : functions)
+		for (FunctionDefinitionNode definition : Globals.functions)
 			if (definition.getFullName().equals(fullName))
 				return definition;
 		if (parent != null) return parent.resolveFunctionRelative(name);
@@ -241,25 +210,6 @@ public class ComponentNode<T extends ComponentNode<T>>
 		else if (parent != null) return parent.getEnclosingIteration();
 		else return null;
 	}
-	/** Registers a multiplier combination as needed.
-	 * @return The name of the multiplier.
-	 */
-	public static String registerMult(int xSize, int ySize)
-	{
-		reqMultSubs.add(new SimpleEntry<Integer, Integer>(xSize, ySize));
-		return "__MULT_" + xSize + "_" + ySize;
-	}
-	/** Registers a multiplier combination as needed.
-	 * @return The name of the multiplier.
-	 */
-	public static String registerDiv(int xSize, int ySize)
-	{
-		reqDivSubs.add(new SimpleEntry<Integer, Integer>(xSize, ySize));
-		return "__DIV_" + xSize + "_" + ySize;
-	}
+
 	
-	public static void registerInterrupt(DefinableInterrupt interrupt, FunctionDefinitionNode function)
-	{
-		interrupts.put(interrupt, function.getFullName());
-	}
 }

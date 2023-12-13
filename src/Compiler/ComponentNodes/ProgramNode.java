@@ -34,9 +34,9 @@ public class ProgramNode extends InterpretingNode<ProgramNode, ProgramContext> i
 		String assembly = "";
 		
 		Set<String> fullNames = new HashSet<String>();
-		for (VariableNode variable : variables)
+		for (VariableNode variable : Globals.variables)
 			fullNames.add(variable.getFullName());
-		for (VariableNode variable : variables)
+		for (VariableNode variable : Globals.variables)
 			fullNames.add(variable.getFullName());
 		
 		// Get longest variable name
@@ -51,7 +51,7 @@ public class ProgramNode extends InterpretingNode<ProgramNode, ProgramContext> i
 		int offset = 0;
 		for (SimpleEntry<String, Integer> entry : CompConfig.reservedRAM())
 		{
-			assembly += whitespace + AssemblyUtils.applyFiller(entry.getKey(), maxLength) + " := $" +
+			assembly += whitespace + AssemblyUtils.applyFiller(entry.getKey(), maxLength) + " = $" +
 					String.format("%06x", offset) + "\n";
 			offset += entry.getValue();
 		}
@@ -65,7 +65,7 @@ public class ProgramNode extends InterpretingNode<ProgramNode, ProgramContext> i
 			VariableNode var = resolveVariable(fullName);
 			assembly +=
 					whitespace + AssemblyUtils.applyFiller(fullName, maxLength) +
-					(DebugLevel.isAtLeast(DebugLevel.low) ? " := " : " = ") + 
+					" = " + // (DebugLevel.isAtLeast(DebugLevel.low) ? " := " : " = ") + 
 					CompUtils.mapOffset(positions.get(fullName), var.getSize()) +
 					(DebugLevel.isAtLeast(DebugLevel.medium) ? "\t; " + var.getType().getSignature() + " (" + var.getSize() + " bytes)": "") + 
 					"\n";
@@ -95,12 +95,12 @@ public class ProgramNode extends InterpretingNode<ProgramNode, ProgramContext> i
 		// Native
 		assembly += whitespace + ".word\tRESET\n"; // Unused
 		assembly += whitespace + ".word\tRESET\n"; // Unused
-		assembly += whitespace + ".word\t" + interrupts.get(DefinableInterrupt.COP) + "\n";		// COP
-		assembly += whitespace + ".word\t" + interrupts.get(DefinableInterrupt.BRK) + "\n"; 	// BRK
-		assembly += whitespace + ".word\t" + interrupts.get(DefinableInterrupt.ABORT) + "\n"; 	// ABORT
-		assembly += whitespace + ".word\t" + interrupts.get(DefinableInterrupt.NMI) + "\n"; 	// NMI
+		assembly += whitespace + ".word\t" + Globals.interrupts.get(DefinableInterrupt.COP) + "\n";		// COP
+		assembly += whitespace + ".word\t" + Globals.interrupts.get(DefinableInterrupt.BRK) + "\n"; 	// BRK
+		assembly += whitespace + ".word\t" + Globals.interrupts.get(DefinableInterrupt.ABORT) + "\n"; 	// ABORT
+		assembly += whitespace + ".word\t" + Globals.interrupts.get(DefinableInterrupt.NMI) + "\n"; 	// NMI
 		assembly += whitespace + ".word\tRESET\n"; 												// RESET
-		assembly += whitespace + ".word\t" + interrupts.get(DefinableInterrupt.IRQ) + "\n"; 	// IRQ
+		assembly += whitespace + ".word\t" + Globals.interrupts.get(DefinableInterrupt.IRQ) + "\n"; 	// IRQ
 		// Emulation
 		assembly += whitespace + ".word\tRESET\n"; // Unused
 		assembly += whitespace + ".word\tRESET\n"; // Unused
@@ -159,43 +159,11 @@ public class ProgramNode extends InterpretingNode<ProgramNode, ProgramContext> i
 		assembly += whitespace + "LDA\t#$" + String.format("%04x", CompConfig.stackSize - 1) + "\n";
 		assembly += whitespace + "TCS\n";
 		assembly += whitespace + "JML\tmain\n";
-		
-		// Required multiplier subs
-		for (SimpleEntry<Integer, Integer> mult : reqMultSubs)
-		{
-			assembly += whitespace + "__MULT_" + mult.getKey() + "_" + mult.getValue() + ":CLC\n";
-			OperandSource sourceX = CompConfig.multDivSource(true, mult.getKey());
-			OperandSource sourceY = CompConfig.multDivSource(false, mult.getValue());
 
-			assembly += MultiplicativeExpressionNode.getMultiplier(
-					AssemblyUtils.getWhitespace(leadingWhitespace + CompConfig.indentSize),
-					CompConfig.callResultSource(sourceX.getSize()),
-					sourceX,
-					sourceY, new DetailsTicket());
-			assembly += whitespace + "RTL\n";
-		}
-		
-		// Required divison subs
-		for (SimpleEntry<Integer, Integer> div : reqDivSubs)
+		// Required special subs
+		for (String sub : Globals.requiredSubs.values())
 		{	
-			assembly += whitespace + "__DIV_" + div.getKey() + "_" + div.getValue() + ":CLC\n";
-			OperandSource sourceX = CompConfig.multDivSource(true, div.getKey());
-			OperandSource sourceY = CompConfig.multDivSource(true, div.getValue());
-			OperandSource sourceN = new ConstantSource(0, sourceX.getSize());
-			assembly += AssemblyUtils.byteCopier(whitespace, sourceX.getSize(), CompConfig.callResultSource(sourceX.getSize()), sourceN);
-			if (div.getValue() == 1) // Can use short divider
-				assembly += MultiplicativeExpressionNode.getShortDivider(
-					AssemblyUtils.getWhitespace(leadingWhitespace + CompConfig.indentSize),
-					CompConfig.callResultSource(sourceX.getSize()), sourceX, sourceY, new DetailsTicket());
-			else // Must use long divider
-			{
-				ScratchManager scratchManager = new ScratchManager();
-				scratchManager.reserveScratchBlock(CompConfig.scratchSize - 2 * div.getKey() - div.getValue() - 2); // Assume as little memory available as possible
-				assembly += MultiplicativeExpressionNode.getLongDivider(
-					AssemblyUtils.getWhitespace(leadingWhitespace + CompConfig.indentSize),
-					CompConfig.callResultSource(sourceX.getSize()), scratchManager, sourceX, sourceY, new DetailsTicket());
-			}
-			assembly += whitespace + "RTL\n";
+			assembly += sub;
 		}
 		
 		return assembly;
@@ -212,7 +180,7 @@ public class ProgramNode extends InterpretingNode<ProgramNode, ProgramContext> i
 		String assembly = "";
 		
 		// Get assembly from functions
-		for (FunctionDefinitionNode funcNode : functions)
+		for (FunctionDefinitionNode funcNode : Globals.functions)
 		{
 			assembly += funcNode.getAssembly(leadingWhitespace);
 		}
