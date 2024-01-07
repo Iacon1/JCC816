@@ -4,6 +4,7 @@ package Compiler.ComponentNodes.Expressions;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 
+import Compiler.CompConfig.OptimizationLevel;
 import Compiler.ComponentNodes.ComponentNode;
 import Compiler.ComponentNodes.Definitions.Type;
 import Compiler.Utils.AssemblyUtils.DetailsTicket;
@@ -28,7 +29,7 @@ CC extends ParserRuleContext
 	}
 	protected ArithmeticBinaryExpressionNode(String operator)
 	{
-		super(null);
+		super();
 		this.operator = operator;
 	}
 
@@ -76,8 +77,8 @@ CC extends ParserRuleContext
 	protected String getAssembly(String whitespace, OperandSource destSource, OperandSource sourceX,
 			OperandSource sourceY, ScratchManager scratchManager, DetailsTicket ticket) throws Exception
 	{
-		if (y.hasLValue()) sourceY = AssemblyUtils.getShrinkWrapped(y.getLValue());
-		if (x.hasLValue()) sourceX = AssemblyUtils.getShrinkWrapped(x.getLValue());
+		if (y.hasLValue() && OptimizationLevel.isAtLeast(OptimizationLevel.medium)) sourceY = AssemblyUtils.getShrinkWrapped(y.getLValue());
+		if (x.hasLValue() && OptimizationLevel.isAtLeast(OptimizationLevel.medium)) sourceX = AssemblyUtils.getShrinkWrapped(x.getLValue());
 
 		return getAssembly(whitespace, destSource, sourceX, sourceY, ticket);
 	}
