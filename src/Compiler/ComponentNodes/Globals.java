@@ -47,4 +47,9 @@ public class Globals
 	{
 		interrupts.put(interrupt, function.getFullName());
 	}
+
+	public static void requireSub(String subName, String subAssembly)
+	{
+		requiredSubs.put(subName, subAssembly);
+	}
 }
