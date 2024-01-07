@@ -16,6 +16,7 @@ public abstract class ASMNode<C extends ParserRuleContext>
 	{
 		label,
 		jump,
+		jumpSub, // Always assume important
 		branch,
 		preproc,
 		load,

@@ -103,7 +103,8 @@ public class InstructionNode extends ASMNode<InstructionContext>
 	{
 		switch (operation)
 		{
-		case JMP: case JML: case JSL: case JSR: case BRA: case BRL: return ASMType.jump;
+		case JMP: case JML: case BRA: case BRL: return ASMType.jump;
+		case JSL: case JSR: return ASMType.jumpSub;
 		case BEQ: case BNE: case BCC: case BCS: return ASMType.branch;
 		case REP: case SEP: return ASMType.REPSEP;
 		case LDA: case LDX: case LDY: return ASMType.load;
