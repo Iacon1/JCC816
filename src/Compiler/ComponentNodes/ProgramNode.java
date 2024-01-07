@@ -185,6 +185,8 @@ public class ProgramNode extends InterpretingNode<ProgramNode, ProgramContext> i
 			assembly += funcNode.getAssembly(leadingWhitespace);
 		}
 		
+		if (resolveFunction("main") == null)
+			throw new Exception("Program must have \"" + CompConfig.mainName + "\" function.");
 		return getAssemblyPreface(leadingWhitespace) + assembly;
 	}	
 }

@@ -28,6 +28,8 @@ import Compiler.ComponentNodes.Interfaces.TypedNode;
 import Compiler.ComponentNodes.LValues.VariableNode;
 import Compiler.ComponentNodes.Statements.CompoundStatementNode;
 import Compiler.ComponentNodes.Statements.StatementNode;
+import Compiler.Exceptions.ConstraintException;
+import Compiler.Exceptions.UnsupportedFeatureException;
 import Compiler.Utils.AssemblyUtils;
 import Compiler.Utils.CompUtils;
 import Compiler.Utils.ScratchManager;
@@ -63,11 +65,15 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 
 		type = Type.manufacture(specifiers, signature, node.declaration_specifiers().start);
 
+		if (type.isArray()) throw new ConstraintException("6.9.1", 3, node.start);
+		if (getName().equals(CompConfig.mainName)) // If main
+			if (!getType().getSignature().equals("void()")) // Must be void with no arguments
+				throw new UnsupportedFeatureException("Function \"main\" having a signature other than \"void()\"", true, node.start);
 		if (node.compound_statement() != null) code = new CompoundStatementNode(this, getName()).interpret(node.compound_statement());
 		Globals.registerFunction(this);
 		return this;
 	}
-
+	
 	private String getName(Direct_declaratorContext node)
 	{
 		while (node.Identifier() == null)
@@ -210,7 +216,5 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 		for (VariableNode var : getReferencedVariables())
 			var.clearPossibleValues();
 		return assembly;
-	}
-
-	
+	}	
 }

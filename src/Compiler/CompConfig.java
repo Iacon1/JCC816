@@ -14,7 +14,8 @@ import java.util.List;
 public final class CompConfig
 {
 	public static final String version = "0.X";
-	
+
+	public static final String mainName = "main";
 	public static final String scopeDelimiter = "@";
 	public static final String scopeDelimiterPermissor = "at_in_identifiers";
 	public static final int indentSize = 2;
