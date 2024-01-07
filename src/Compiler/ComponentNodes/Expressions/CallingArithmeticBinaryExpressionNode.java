@@ -6,8 +6,8 @@ import org.antlr.v4.runtime.ParserRuleContext;
 
 import Compiler.CompConfig;
 import Compiler.ComponentNodes.ComponentNode;
+import Compiler.ComponentNodes.Globals;
 import Compiler.Utils.AssemblyUtils.DetailsTicket;
-import Compiler.Utils.CompUtils;
 import Compiler.Utils.AssemblyUtils;
 import Compiler.Utils.OperandSources.OperandSource;
 
@@ -31,7 +31,7 @@ CC extends ParserRuleContext
 	@Override
 	protected abstract int getRetSize(int sizeX, int sizeY);
 	
-	public abstract String getSubroutine(int sizeX, int sizeY) throws Exception;
+	public abstract String getSubAssembly(int sizeX, int sizeY) throws Exception;
 	public abstract String getSubName(int sizeX, int sizeY);
 	
 	@Override
@@ -42,11 +42,11 @@ CC extends ParserRuleContext
 		assembly += ticket.save(whitespace, 0xFF);
 		DetailsTicket innerTicket = new DetailsTicket(ticket, 0, 0xFF);
 		assembly += AssemblyUtils.byteCopier(whitespace, sourceX.getSize(), CompConfig.multDivSource(true, sourceX.getSize()), sourceX, innerTicket);
-		assembly += AssemblyUtils.byteCopier(whitespace, sourceY.getSize(), CompConfig.multDivSource(true, sourceX.getSize()), sourceX, innerTicket);
+		assembly += AssemblyUtils.byteCopier(whitespace, sourceY.getSize(), CompConfig.multDivSource(false, sourceY.getSize()), sourceY, innerTicket);
 		assembly += whitespace + "JSL\t" + getSubName(sourceX.getSize(), sourceY.getSize()) + "\n";
 		int retSize = Math.min(destSource.getSize(), getRetSize(sourceX.getSize(), sourceY.getSize()));
 		assembly += AssemblyUtils.byteCopier(whitespace, retSize, destSource, CompConfig.callResultSource(retSize), innerTicket);
-		
+		Globals.requireSub(getSubName(sourceX.getSize(), sourceY.getSize()), getSubAssembly(sourceX.getSize(), sourceY.getSize()));
 		assembly += ticket.restore(whitespace, 0xFF);
 		return assembly;
 	}
