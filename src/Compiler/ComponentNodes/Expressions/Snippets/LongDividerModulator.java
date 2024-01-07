@@ -8,15 +8,54 @@ import Compiler.ComponentNodes.Expressions.EqualityExpressionNode;
 import Compiler.ComponentNodes.Expressions.RelationalExpressionNode;
 import Compiler.ComponentNodes.Expressions.ShiftExpressionNode;
 import Compiler.Utils.AssemblyUtils;
+import Compiler.Utils.CompUtils;
 import Compiler.Utils.ScratchManager;
 import Compiler.Utils.AssemblyUtils.DetailsTicket;
 import Compiler.Utils.OperandSources.ConstantSource;
 import Compiler.Utils.OperandSources.OperandSource;
 import Compiler.Utils.ScratchManager.ScratchSource;
 
-public class LongDividerModulator extends ShortDividerModulator
+public class LongDividerModulator
 {
-	private LongDividerModulator() {super();}
+	private LongDividerModulator() {}
+	
+	protected static String divisionHeader(String whitespace, OperandSource sourceX, OperandSource sourceY, DetailsTicket ticket) throws Exception
+	{
+		String assembly = "";
+		
+		// First, check negative for X
+		assembly += whitespace + CompUtils.setAXY8 + "\n";
+		assembly += whitespace + "LDY\t#$00\n";
+		assembly += sourceX.getLDA(whitespace, sourceX.getSize() - 1, ticket);
+		assembly += whitespace + "BPL\t:+\n";
+		// If it was negative we add one to the flag and then make it positive.
+		assembly += whitespace + "INY\n";
+//		assembly += XOrExpressionNode.getExclOr(whitespace, sourceX, sourceX, new ConstantSource(-1, sourceX.getSize())); // TODO this is wrong, not how you negative it
+		
+		// Then for Y
+		assembly += whitespace + CompUtils.setA8 + "\n";
+		assembly += sourceY.getLDA(whitespace, sourceY.getSize() - 1, ticket);
+		assembly += whitespace + "BPL\t:+\n";
+		// If it was negative we subtract one from the previous flag (making it not zero if it was zero and making it zero if it wasn't)
+		// and then make it positive.
+		assembly += whitespace + "DEY\n";
+//		assembly += XOrExpressionNode.getExclOr(whitespace, sourceY, sourceY, new ConstantSource(-1, sourceY.getSize())); // TODO this is wrong, not how you negative it
+		assembly += ":\n";
+		
+		return assembly;
+	}
+	protected static String divisionFooter(String whitespace, OperandSource destSource, OperandSource source, DetailsTicket ticket)
+	{
+		String assembly = "";
+		// First, check flag from header
+		assembly += whitespace + "TYA\n";
+		assembly += whitespace + "BEQ\t:+\n";
+		// If it was positive then only one of the operands was negative so the result is negative too.
+//		assembly += XOrExpressionNode.getExclOr(whitespace, destSource, source, new ConstantSource(-0, source.getSize())); // TODO this is wrong
+		assembly += ":\n";
+		
+		return assembly;
+	}
 	
 	public static String generate(String whitespace, OperandSource destSource, OperandSource sourceX, OperandSource sourceY, boolean isModulo, DetailsTicket ticket) throws Exception
 	{
