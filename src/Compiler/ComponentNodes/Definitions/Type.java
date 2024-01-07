@@ -13,6 +13,7 @@ import org.antlr.v4.runtime.Token;
 
 import Compiler.CompConfig;
 import Compiler.ComponentNodes.ComponentNode;
+import Compiler.ComponentNodes.Globals;
 import Compiler.ComponentNodes.Declarations.DeclarationSpecifiersNode;
 import Compiler.ComponentNodes.Declarations.DeclaratorNode;
 import Compiler.ComponentNodes.Declarations.DirectDeclaratorNode;
@@ -25,6 +26,8 @@ import Compiler.Exceptions.UnsupportedFeatureException;
 
 public class Type
 {
+	private ComponentNode<?> context; // The node this was defined under
+	
 	private String storageClassSpecifier;
 	protected List<String> typeSpecifiers;
 	private Set<String> typeQualifiers;
@@ -101,17 +104,25 @@ public class Type
 		typeSpecifiers = new LinkedList<String>();
 		typeQualifiers = new HashSet<String>();
 	}
-	public Type(DeclarationSpecifiersNode.DeclSpecifiers specifiers, Token start) throws Exception
+	public Type(DeclarationSpecifiersNode.DeclSpecifiers specifiers, ComponentNode<?> context, Token start) throws Exception
 	{
 //		this.scope = declarator.getScope();
 		typeSpecifiers = new LinkedList<String>();
 		typeQualifiers = new HashSet<String>();
 //		functionSpecifiers = new HashSet<String>();
-		
+
 		if (specifiers.storageClassSpecifiers.length > 0)
 			storageClassSpecifier = specifiers.storageClassSpecifiers[0];
 		for (String specifier : specifiers.typeSpecifiers)
-			typeSpecifiers.add(specifier);
+		{
+			if (context.resolveTypedefRelative(specifier) != null)
+			{
+				Type t = context.resolveTypedefRelative(specifier);
+				typeSpecifiers.addAll(t.typeSpecifiers);
+				typeQualifiers.addAll(t.typeQualifiers);
+			}
+			else typeSpecifiers.add(specifier);
+		}
 		for (String qualifier : specifiers.typeQualifiers)
 			typeQualifiers.add(qualifier);
 //		for (String qualifier : specifiers.functionSpecifiers)
@@ -121,7 +132,7 @@ public class Type
 		
 		if (specifiers.storageClassSpecifiers.length > 1)
 			throw new ConstraintException("6.7.1", 1, start);
-			
+		
 		if (!isAllowed(typeSpecifiers))
 		{
 			for (String spec : typeSpecifiers)
@@ -146,6 +157,7 @@ public class Type
 			throw e;
 		}
 		
+		this.context = context;
 	}
 	public Type(Type other)
 	{
@@ -161,7 +173,7 @@ public class Type
 
 	public static Type manufacture(DeclarationSpecifiersNode.DeclSpecifiers specifiers, DeclaratorNode declaratorNode, Token start) throws Exception
 	{
-		Type type = new Type(specifiers, start);
+		Type type = new Type(specifiers, declaratorNode, start);
 		if (declaratorNode == null) return type;
 		
 		for (DeclaratorNode.DeclaratorInfo info : declaratorNode.getInfo()) // Array
@@ -204,7 +216,13 @@ public class Type
 	public int getSize()
 	{
 		int baseSize;
-		if (isStructOrUnion()) baseSize = ComponentNode.resolveStructOrUnion(getSUEName()).getSize();
+		if (isStructOrUnion())
+		{
+			if (context != null)
+				baseSize = context.resolveStructOrUnionRelative(getSUEName()).getSize();
+			else
+				baseSize = ComponentNode.resolveStructOrUnion(getSUEName()).getSize();
+			}
 		else if (isEnum()) baseSize = CompConfig.sizeOf("int");
 		else baseSize = CompConfig.sizeOf(typeSpecifiers);
 		return baseSize;

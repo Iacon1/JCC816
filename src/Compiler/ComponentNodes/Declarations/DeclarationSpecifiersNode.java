@@ -125,4 +125,9 @@ public class DeclarationSpecifiersNode extends InterpretingNode<DeclarationSpeci
 		
 		return this;
 	}
+	
+	public boolean isTypedef()
+	{
+		return storageClassSpecifiers.contains("typedef");
+	}
 }

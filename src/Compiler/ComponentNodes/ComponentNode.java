@@ -1,25 +1,16 @@
 // By Iacon1
 // Created 05/11/2023
-// An interpreted component node
+// A component node
 
 package Compiler.ComponentNodes;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.AbstractMap.SimpleEntry;
 
-import Compiler.CompConfig.DefinableInterrupt;
-import Compiler.ComponentNodes.Declarations.DeclarationNode;
-import Compiler.ComponentNodes.Definitions.EnumDefinition;
 import Compiler.ComponentNodes.Definitions.Scope;
 import Compiler.ComponentNodes.Definitions.StructUnionDefinitionNode;
-import Compiler.ComponentNodes.Expressions.BinaryExpressionNode;
-import Compiler.ComponentNodes.LValues.LValueNode;
+import Compiler.ComponentNodes.Definitions.Type;
 import Compiler.ComponentNodes.LValues.VariableNode;
 import Compiler.ComponentNodes.Statements.IterationStatementNode;
 import Compiler.ComponentNodes.Statements.SelectionStatementNode;
@@ -129,7 +120,28 @@ public class ComponentNode<T extends ComponentNode<T>>
 		if (parent != null) return parent.resolveFunctionRelative(name);
 		return null;
 	}
-
+	/** Gets a Typedef's true type using its full name.
+	 * @param name The full name to look for.
+	 * @return The variable node in question, if present.
+	 */
+	public static Type resolveTypedef(String fullName)
+	{
+		return Globals.typedefs.get(fullName);
+	}
+	/** Gets a Typedef's true type using a partial name.
+	 * @param name The partial name to look for.
+	 * @return The function node in question, if present.
+	 */
+	public Type resolveTypedefRelative(String name)
+	{
+		String fullName = getScope().getPrefix() + name;
+		if (fullName.length() == 1) fullName = "__" + fullName;
+		if (Globals.typedefs.get(fullName) != null)
+			return Globals.typedefs.get(fullName);
+		if (parent != null) return parent.resolveTypedefRelative(name);
+		return null;
+	}
+	
 	/** Gets the list of variables defined in this node or its subnodes.
 	 * 
 	 * @param strict Whether to only get variables, or subclasses of variables.
@@ -210,6 +222,5 @@ public class ComponentNode<T extends ComponentNode<T>>
 		else if (parent != null) return parent.getEnclosingIteration();
 		else return null;
 	}
-
 	
 }
