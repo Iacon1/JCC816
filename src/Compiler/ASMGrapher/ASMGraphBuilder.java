@@ -126,7 +126,7 @@ public class ASMGraphBuilder
 					prevLine.require(lines.get(k));
 					buildGraph(k, internalAddresses, importantAddresses, importantRegisters, importantFlags);
 				}
-			case preproc:
+			case preproc: case jumpSub:
 				required = true;
 				break;
 			}
