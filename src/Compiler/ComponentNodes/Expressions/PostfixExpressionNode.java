@@ -211,7 +211,7 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 						assembly += AssemblyUtils.byteCopier(whitespace, sourceV.getSize(), sourceV, sourceP);
 					}
 				}
-				assembly += whitespace + "JSL\t" + func.getFullName() + "\n";
+				assembly += whitespace + "JSL\t" + func.getStartLabel() + "\n";
 				
 				if (func.canCall(getEnclosingFunction())) // Finish possible recursion
 				{
