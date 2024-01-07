@@ -4,15 +4,21 @@
 package Compiler;
 
 import java.util.Arrays;
+import java.util.BitSet;
 import java.util.List;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import org.antlr.v4.gui.TreeViewer;
+import org.antlr.v4.runtime.ANTLRErrorListener;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.Parser;
+import org.antlr.v4.runtime.RecognitionException;
+import org.antlr.v4.runtime.Recognizer;
+import org.antlr.v4.runtime.atn.ATNConfigSet;
+import org.antlr.v4.runtime.dfa.DFA;
 import org.antlr.v4.runtime.tree.ParseTree;
 
 import Compiler.ComponentNodes.Globals;
@@ -54,12 +60,16 @@ public class Compiler
 	}
 
 	
-	private static ParseDouble parse(CommonTokenStream tokens)
+	private static ParseDouble parse(CommonTokenStream tokens) throws Exception
 	{
+		SyntaxErrorCollector collector = new SyntaxErrorCollector();
 		ParseDouble parseDouble = new ParseDouble();
 		parseDouble.parser = new C99Parser(tokens);
+		parseDouble.parser.removeErrorListeners(); // Removes default error listener
+		parseDouble.parser.addErrorListener(collector);
 		parseDouble.tree = parseDouble.parser.program();
 		
+		if (collector.getException() != null) throw collector.getException();
 		return parseDouble;
 	}
 	
