@@ -52,7 +52,7 @@ public class MultiplicativeExpressionNode extends CallingArithmeticBinaryExpress
 		switch (operator)
 		{
 		case "*": return sizeX + sizeY;
-		case "/": return sizeX - sizeY;
+		case "/": return sizeX;
 		case "%": return sizeY;
 		default: return 0;
 		}
@@ -70,7 +70,7 @@ public class MultiplicativeExpressionNode extends CallingArithmeticBinaryExpress
 		}
 	}
 	@Override
-	public String getSubroutine(int sizeX, int sizeY) throws Exception
+	public String getSubAssembly(int sizeX, int sizeY) throws Exception
 	{
 		String assembly = "";
 		
@@ -85,6 +85,7 @@ public class MultiplicativeExpressionNode extends CallingArithmeticBinaryExpress
 					CompConfig.callResultSource(getRetSize(sizeX, sizeY)),
 					CompConfig.multDivSource(true, sizeX),
 					CompConfig.multDivSource(false, sizeY), new DetailsTicket());
+			break;
 		case "%":
 			isModulo = true;
 		case "/":
