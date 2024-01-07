@@ -25,7 +25,7 @@ public class StructUnionDefinitionNode extends InterpretingNode<StructUnionDefin
 	private boolean isUnion;
 	private String name;
 	private List<MemberNode> members;
-	
+	static int unnamedStructs = 0;
 	public StructUnionDefinitionNode(ComponentNode<?> parent)
 	{
 		super(parent);
@@ -39,8 +39,12 @@ public class StructUnionDefinitionNode extends InterpretingNode<StructUnionDefin
 		if (node.getChild(0).getText().equals("union")) isUnion = true;
 		else isUnion = false;
 		
-		name = node.Identifier().getText();
-		
+		if (node.Identifier() != null) name = node.Identifier().getText();
+		else
+		{
+			name = "__" + unnamedStructs + "struct";
+			unnamedStructs = 1;
+		}
 		for (Struct_declarationContext decl : node.struct_declaration_list().struct_declaration())
 			members.addAll(new StructDeclarationNode(this).interpret(decl).getMembers());
 		
