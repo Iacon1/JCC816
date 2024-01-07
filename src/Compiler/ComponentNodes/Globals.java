@@ -11,6 +11,7 @@ import java.util.Map;
 import Compiler.CompConfig.DefinableInterrupt;
 import Compiler.ComponentNodes.Definitions.EnumDefinition;
 import Compiler.ComponentNodes.Definitions.StructUnionDefinitionNode;
+import Compiler.ComponentNodes.Definitions.Type;
 import Compiler.ComponentNodes.LValues.VariableNode;
 
 public class Globals
@@ -19,6 +20,7 @@ public class Globals
 	static List<FunctionDefinitionNode> functions = new LinkedList<FunctionDefinitionNode>();
 	static List<StructUnionDefinitionNode> structs = new LinkedList<StructUnionDefinitionNode>();
 	static List<EnumDefinition> enums = new LinkedList<EnumDefinition>();
+	static Map<String, Type> typedefs = new HashMap<String, Type>();
 	
 	static Map<String, String> requiredSubs = new HashMap<String, String>(); // Special subroutines, like multipliers and dividers
 	
@@ -32,6 +34,8 @@ public class Globals
 		functions = new LinkedList<FunctionDefinitionNode>();
 		structs = new LinkedList<StructUnionDefinitionNode>();
 		enums = new LinkedList<EnumDefinition>();
+		typedefs = new HashMap<String, Type>();
+		
 		requiredSubs = new HashMap<String, String>();
 		interrupts = new HashMap<DefinableInterrupt, String>();
 		
@@ -47,7 +51,11 @@ public class Globals
 	{
 		interrupts.put(interrupt, function.getFullName());
 	}
-
+	public static void registerTypedef(String identifier, Type type)
+	{
+		typedefs.put(identifier, type);
+	}
+	
 	public static void requireSub(String subName, String subAssembly)
 	{
 		requiredSubs.put(subName, subAssembly);

@@ -12,5 +12,4 @@ public abstract class InterpretingNode<T extends InterpretingNode<T, C>, C exten
 	public InterpretingNode() {super();}
 
 	public abstract T interpret(C node) throws Exception;
-
 }

@@ -70,7 +70,7 @@ public class ParameterDeclarationNode extends InterpretingNode<ParameterDeclarat
 		}
 		else // No actual variables
 		{
-			Type type = new Type(specifiers.getSpecifiers(), node.start);
+			Type type = new Type(specifiers.getSpecifiers(), this, node.start);
 			DummyVariableNode variable = new DummyVariableNode(this, type);
 			variables.add(variable);
 		}

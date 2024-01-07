@@ -19,15 +19,9 @@ import Compiler.Utils.AssemblyUtils;
 import Compiler.Utils.AssemblyUtils.DetailsTicket;
 import Compiler.Utils.OperandSources.ConstantSource;
 import Compiler.Utils.OperandSources.OperandSource;
-import Grammar.C99.C99Parser.Abstract_declaratorContext;
 import Grammar.C99.C99Parser.DeclarationContext;
-import Grammar.C99.C99Parser.DeclaratorContext;
 import Grammar.C99.C99Parser.Assignment_expressionContext;
 import Grammar.C99.C99Parser.Init_declaratorContext;
-import Grammar.C99.C99Parser.Parameter_declarationContext;
-import Grammar.C99.C99Parser.Struct_declarationContext;
-import Grammar.C99.C99Parser.Struct_declaratorContext;
-
 public class DeclarationNode extends InterpretingNode<DeclarationNode, DeclarationContext> implements AssemblableNode
 {
 	private List<VariableNode> variables;
@@ -54,14 +48,24 @@ public class DeclarationNode extends InterpretingNode<DeclarationNode, Declarati
 				}
 				else expressions.add(null);
 				DeclaratorNode declaratorNode = new DeclaratorNode(this).interpret(initDeclarator);
+				
 				Type type = Type.manufacture(specifiers.getSpecifiers(), declaratorNode, initDeclarator.start);
-				VariableNode variable = new VariableNode(this, declaratorNode.getIdentifier(), type);
-				Globals.registerVariable(variable);
-				variables.add(variable);
+				
+				if (specifiers.isTypedef())
+				{
+					Globals.registerTypedef(getScope().getPrefix() + declaratorNode.getIdentifier(), type);
+				}
+				else
+				{
+					VariableNode variable = new VariableNode(this, declaratorNode.getIdentifier(), type);
+					Globals.registerVariable(variable);
+					variables.add(variable);
+				}
+				
 			}
 		else
 		{
-			Type type = new Type(specifiers.getSpecifiers(), node.start);
+			Type type = new Type(specifiers.getSpecifiers(), this, node.start);
 			if (type.getSUEName() == null) // No tag
 				throw new ConstraintException("6.7", 2, node.start);
 		}
