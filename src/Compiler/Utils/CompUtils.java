@@ -49,7 +49,10 @@ public final class CompUtils
 	}
 	public static Object parseLiteral(String literal)
 	{
-		return Long.valueOf(literal); // TODO
+		if (literal.startsWith("0x")) // Hex;
+			return Long.valueOf(literal.substring(2), 16);
+		else
+			return Long.valueOf(literal); // TODO
 		
 	}
 	
