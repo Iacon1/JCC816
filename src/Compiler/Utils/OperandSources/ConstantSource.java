@@ -18,7 +18,10 @@ public class ConstantSource extends OperandSource
 		super(size, true);
 		if (Number.class.isAssignableFrom(constant.getClass()))
 		{
-			bytes = Arrays.copyOfRange(ByteBuffer.allocate(Long.BYTES).putLong(((Number) constant).longValue()).array(), Long.BYTES - size, Long.BYTES);
+			bytes = Arrays.copyOfRange(
+					ByteBuffer.allocate(Math.max(size, Long.BYTES)).
+					putLong(Math.max(size - Long.BYTES, 0), ((Number) constant).longValue()).
+					array(), Math.max(Long.BYTES - size, 0), Long.BYTES);
 			// little-endian WRT words
 			if (bytes.length >= 4)
 				for (int i = 0; i < bytes.length - 1; i += 2)
