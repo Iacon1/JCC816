@@ -89,6 +89,14 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 	{
 		return "__" + getFullName() + "_LOAD";
 	}
+	public String getStartLabel()
+	{
+		String label = getFullName();
+		for (int i = 0; i < getParameters().size(); ++i)
+			label += (i == 0 ? CompConfig.scopeDelimiter : "__") + getParameters().get(i).getType().getSignature().replaceAll(" ", "_");
+		
+		return label;
+	}
 	public String getLabel(String gotoLabel)
 	{
 		return "__" + getFullName() + CompConfig.scopeDelimiter + gotoLabel;
@@ -159,7 +167,7 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 			for (VariableNode parameter : parameters)
 				assembly += AssemblyUtils.stackLoader(whitespace, parameter.getSize(), parameter.getSource());
 		}
-		assembly += whitespace + getFullName() + ":" +
+		assembly += whitespace + getStartLabel() + ":" +
 				(DebugLevel.isAtLeast(DebugLevel.medium) ? "\t; " + getType().getSignature() : "") + 
 				"\n";
 		if (isInterruptHandler() && isISR()) // Have to push *everything* to the stack
