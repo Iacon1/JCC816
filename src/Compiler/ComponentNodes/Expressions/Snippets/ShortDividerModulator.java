@@ -12,7 +12,7 @@ import Compiler.Utils.AssemblyUtils.DetailsTicket;
 //Uses hardware div registers, but only for 8-bit divisor
 public class ShortDividerModulator
 {
-	protected ShortDividerModulator() {}
+	private ShortDividerModulator() {}
 	// Handles negative numbers for division, stores 0, 1, or 2 in Y-register
 	protected static String divisionHeader(String whitespace, OperandSource sourceX, OperandSource sourceY, DetailsTicket ticket) throws Exception
 	{
@@ -55,8 +55,19 @@ public class ShortDividerModulator
 	public static String generate(String whitespace, OperandSource destSource, OperandSource sourceX, OperandSource sourceY, boolean isModulo, DetailsTicket ticket) throws Exception
 	{
 		String assembly = "";
-		SNESRegisters RRegL = isModulo? SNESRegisters.RDMPYL : SNESRegisters.RDDIVL;
-		SNESRegisters RRegH = isModulo? SNESRegisters.RDMPYH : SNESRegisters.RDDIVH;
+		SNESRegisters RRegL;
+		SNESRegisters RRegH;
+		if (isModulo)
+		{
+			RRegL = SNESRegisters.RDMPYL;
+			RRegH = SNESRegisters.RDMPYH;
+		}
+		else
+		{
+			RRegL = SNESRegisters.RDDIVL;
+			RRegH = SNESRegisters.RDDIVH;
+		}
+		
 		assembly += ticket.save(whitespace, DetailsTicket.saveA | DetailsTicket.saveX | DetailsTicket.saveY); // All three modified hereafter
 		DetailsTicket innerTicket = new DetailsTicket(ticket, DetailsTicket.saveA | DetailsTicket.saveX | DetailsTicket.saveY, 0); // "Please don't break these"
 
@@ -73,10 +84,12 @@ public class ShortDividerModulator
 						CompUtils.setA8,
 						sourceY.getLDA(0, ticket2),		// Load Y-the-variable
 						"STA\t" + SNESRegisters.WRDIVB, // Place in reg, begin 16-cycle calc
-						sourceX.getLDA(i, ticket2),		// 6 cycles,- 6 Load X-the-variable for next iteration
-						"TAX",							// 2 cycles - 8
-						CompUtils.setA16,				// 3 cycles - 11
-						"LDA\t" + RRegL,				// 6 cycles - 17, get result
+						CompUtils.setA16,				// 3 cycles - 3
+						sourceX.getLDA(i, ticket2),		// 4-6 cycles - 7-9 Load X-the-variable for next iteration
+						"TAX",							// 2 cycles - 9-11
+						"NOP",							// 2 cycles - 11-13
+						"NOP",							// 2 cycles - 13-15
+						"LDA\t" + RRegL,				// 4-6 cycles - 17-21, get result
 						destSource.getSTA(i, ticket2),	// Store result
 						"TXA",							// Swap X-the-variable back in
 					};
@@ -89,9 +102,11 @@ public class ShortDividerModulator
 						sourceY.getLDA(0, ticket2),				// Load Y-the-variable
 						"STA\t" + SNESRegisters.WRDIVB, 		// Place in reg, begin 16-cycle calc
 						CompUtils.setA16,						// 3 cycles - 3
-						"LDA\t" + RRegH,						// 6 cycles - 9, Get high byte of previous iteration
-						"NOP",									// 2 cycles - 11
-						"ADC\t" + RRegL,						// 6 cycles - 17, Add result
+						"LDA\t" + RRegH,						// 4-6 cycles - 7-9, Get high byte of previous iteration
+						"NOP",									// 2 cycles - 9-11
+						"NOP",									// 2 cycles - 11-13
+						"NOP",									// 2 cycles - 13-15
+						"ADC\t" + RRegL,						// 4-6 cycles - 17-21, Add result
 						destSource.getSTA(i, ticket2),			// Store result
 						sourceX.getLDA(i, ticket2),				// 6 cycles,- 8 Load X-the-variable for next iteration
 					};
@@ -104,10 +119,11 @@ public class ShortDividerModulator
 						"CLC",									// For addition later
 						sourceY.getLDA(0, ticket2),				// Load Y-the-variable
 						"STA\t" + SNESRegisters.WRDIVB, 		// Place in reg, begin 16-cycle calc
-						"NOP",									// 2 cycles - 2
-						"LDA\t" + RRegH,						// 6 cycles - 10, get high byte of previous iteration
-						CompUtils.setA16,						// 3 cycles - 13
-						"ADC\t" + RRegL,						// 6 cycles - 17, add new result
+						"LDA\t" + RRegH,						// 4-6 cycles - 6-8, get high byte of previous iteration
+						CompUtils.setA16,						// 3 cycles - 9-11
+						"NOP",									// 2 cycles - 11-13
+						"NOP",									// 2 cycles - 13-15
+						"ADC\t" + RRegL,						// 4-6 cycles - 17-21, add new result
 						destSource.getSTA(i, ticket2),			// Store result
 					};
 			}
