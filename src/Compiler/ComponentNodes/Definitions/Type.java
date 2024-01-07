@@ -162,6 +162,7 @@ public class Type
 	public static Type manufacture(DeclarationSpecifiersNode.DeclSpecifiers specifiers, DeclaratorNode declaratorNode, Token start) throws Exception
 	{
 		Type type = new Type(specifiers, start);
+		if (declaratorNode == null) return type;
 		
 		for (DeclaratorNode.DeclaratorInfo info : declaratorNode.getInfo()) // Array
 		{
