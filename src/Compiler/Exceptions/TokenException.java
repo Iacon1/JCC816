@@ -12,4 +12,9 @@ public class TokenException extends Exception
 		super("At " + location.getLine() + ":" + location.getCharPositionInLine() + "\n" +
 				message);
 	}
+	public TokenException(String message, int line, int charPositionInLine)
+	{
+		super("At " + line + ":" + charPositionInLine + "\n" +
+				message);
+	}
 }
