@@ -32,6 +32,10 @@ public abstract class BinaryExpressionNode<
 	
 	public BinaryExpressionNode(ComponentNode<?> parent) {super(parent);}
 	
+	public BinaryExpressionNode()
+	{
+		super();
+	}
 	@Override
 	public BaseExpressionNode<CC> interpret(CC node) throws Exception
 	{

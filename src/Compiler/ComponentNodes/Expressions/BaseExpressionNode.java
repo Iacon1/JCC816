@@ -21,6 +21,7 @@ public abstract class BaseExpressionNode<C extends ParserRuleContext> extends In
 {
 
 	public BaseExpressionNode(ComponentNode<?> parent) {super(parent);}
+	public BaseExpressionNode() {super();}
 
 	public boolean hasLValue() {return false;}
 	public LValueNode<?> getLValue() {return null;}

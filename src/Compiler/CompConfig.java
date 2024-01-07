@@ -98,7 +98,7 @@ public final class CompConfig
 	{
 		min, // + Basic (intra-expression) constant propagation
 		low, // + REP/SEP optimization
-		medium, // + Aggressive (inter-line) constant propagation
+		medium, // + Aggressive (inter-line) constant propagation and shrinkwrapping
 		all, // + Dependency graph optimization
 		;
 		public static boolean isAtLeast(OptimizationLevel level)
@@ -106,7 +106,7 @@ public final class CompConfig
 			return CompConfig.optimizationLevel.compareTo(level) >= 0;
 		}
 	}
-	public static OptimizationLevel optimizationLevel = OptimizationLevel.all;
+	public static OptimizationLevel optimizationLevel = OptimizationLevel.min;
 	
 	public static enum DebugLevel
 	{
