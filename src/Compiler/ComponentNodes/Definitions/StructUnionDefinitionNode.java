@@ -2,21 +2,15 @@
 //
 package Compiler.ComponentNodes.Definitions;
 
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import Compiler.ComponentNodes.ComponentNode;
 import Compiler.ComponentNodes.Globals;
 import Compiler.ComponentNodes.InterpretingNode;
-import Compiler.ComponentNodes.Declarations.DeclarationNode;
 import Compiler.ComponentNodes.Declarations.StructDeclarationNode;
 import Compiler.ComponentNodes.Interfaces.NamedNode;
-import Compiler.ComponentNodes.Interfaces.TypedNode;
-import Compiler.ComponentNodes.LValues.LValueNode;
 import Compiler.ComponentNodes.LValues.MemberNode;
-import Compiler.ComponentNodes.LValues.VariableNode;
 import Grammar.C99.C99Parser.Struct_declarationContext;
 import Grammar.C99.C99Parser.Struct_or_union_specifierContext;
 
@@ -43,7 +37,7 @@ public class StructUnionDefinitionNode extends InterpretingNode<StructUnionDefin
 		else
 		{
 			name = "__" + unnamedStructs + "struct";
-			unnamedStructs = 1;
+			unnamedStructs += 1;
 		}
 		for (Struct_declarationContext decl : node.struct_declaration_list().struct_declaration())
 			members.addAll(new StructDeclarationNode(this).interpret(decl).getMembers());
