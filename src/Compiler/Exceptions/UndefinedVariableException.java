@@ -6,12 +6,12 @@ package Compiler.Exceptions;
 import org.antlr.v4.runtime.Token;
 
 @SuppressWarnings("serial")
-public class UndefinedTypeException extends TokenException
+public class UndefinedVariableException extends TokenException
 {
 
-	public UndefinedTypeException(String type, Token location)
+	public UndefinedVariableException(String type, Token location)
 	{
-		super("The type " + type + " is not defined.", location);
+		super("The variable " + type + " is not defined.", location);
 	}
 
 }

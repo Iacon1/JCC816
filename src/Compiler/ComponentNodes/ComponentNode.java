@@ -8,9 +8,11 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+import Compiler.ComponentNodes.Definitions.EnumDefinitionNode;
 import Compiler.ComponentNodes.Definitions.Scope;
 import Compiler.ComponentNodes.Definitions.StructUnionDefinitionNode;
 import Compiler.ComponentNodes.Definitions.Type;
+import Compiler.ComponentNodes.Dummies.EnumeratorNode;
 import Compiler.ComponentNodes.LValues.VariableNode;
 import Compiler.ComponentNodes.Statements.IterationStatementNode;
 import Compiler.ComponentNodes.Statements.SelectionStatementNode;
@@ -56,13 +58,24 @@ public class ComponentNode<T extends ComponentNode<T>>
 				return variable;
 		return null;
 	}
-	/** Gets a variable's node using its full name.
+	/** Gets a struct/union's node using its full name.
 	 * @param name The full name to look for.
-	 * @return The variable node in question, if present.
+	 * @return The struct/union node in question, if present.
 	 */
 	public static StructUnionDefinitionNode resolveStructOrUnion(String fullName)
 	{
 		for (StructUnionDefinitionNode definition : Globals.structs)
+			if (definition.getFullName().equals(fullName))
+				return definition;
+		return null;
+	}
+	/** Gets a enum's node using its full name.
+	 * @param name The full name to look for.
+	 * @return The enum node in question, if present.
+	 */
+	public static EnumDefinitionNode resolveEnum(String fullName)
+	{
+		for (EnumDefinitionNode definition : Globals.enums)
 			if (definition.getFullName().equals(fullName))
 				return definition;
 		return null;
@@ -104,6 +117,34 @@ public class ComponentNode<T extends ComponentNode<T>>
 			if (definition.getFullName().equals(fullName))
 				return definition;
 		if (parent != null) return parent.resolveStructOrUnionRelative(name);
+		return null;
+	}
+	/** Gets a enum's node using a partial name.
+	 * @param name The full name to look for.
+	 * @return The enum node in question, if present.
+	 */
+	public EnumDefinitionNode resolveEnumRelative(String name)
+	{
+		String fullName = getScope().getPrefix() + name;
+		if (fullName.length() == 1) fullName = "__" + fullName;
+		for (EnumDefinitionNode definition : Globals.enums)
+			if (definition.getFullName().equals(fullName))
+				return definition;
+		if (parent != null) return parent.resolveEnumRelative(name);
+		return null;
+	}
+	/** Gets a enumerator's node using a partial name.
+	 * @param name The full name to look for.
+	 * @return The enum node in question, if present.
+	 */
+	public EnumeratorNode resolveEnumeratorRelative(String name)
+	{
+		String fullName = getScope().getPrefix() + name;
+		if (fullName.length() == 1) fullName = "__" + fullName;
+		for (EnumeratorNode enumerator : Globals.enumerators)
+			if (enumerator.getFullName().equals(fullName))
+				return enumerator;
+		if (parent != null) return parent.resolveEnumeratorRelative(name);
 		return null;
 	}
 	/** Gets a function's node using a partial name.

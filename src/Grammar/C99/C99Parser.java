@@ -30,7 +30,7 @@ public class C99Parser extends Parser {
 		T__73=74, T__74=75, T__75=76, T__76=77, T__77=78, T__78=79, T__79=80, 
 		T__80=81, T__81=82, T__82=83, T__83=84, T__84=85, WS=86, Keyword=87, Identifier=88, 
 		Constant=89, String_literal=90, Punctuator=91, Header_name=92, Pp_number=93, 
-		Pp_token=94, Enumeration_constant=95;
+		Pp_token=94;
 	public static final int
 		RULE_program = 0, RULE_primary_expression = 1, RULE_postfix_expression = 2, 
 		RULE_argument_expression_list = 3, RULE_unary_expression = 4, RULE_cast_expression = 5, 
@@ -105,7 +105,7 @@ public class C99Parser extends Parser {
 			null, null, null, null, null, null, null, null, null, null, null, null, 
 			null, null, null, null, null, null, null, null, null, null, null, null, 
 			null, null, "WS", "Keyword", "Identifier", "Constant", "String_literal", 
-			"Punctuator", "Header_name", "Pp_number", "Pp_token", "Enumeration_constant"
+			"Punctuator", "Header_name", "Pp_number", "Pp_token"
 		};
 	}
 	private static final String[] _SYMBOLIC_NAMES = makeSymbolicNames();
@@ -2713,7 +2713,7 @@ public class C99Parser extends Parser {
 
 	@SuppressWarnings("CheckReturnValue")
 	public static class EnumeratorContext extends ParserRuleContext {
-		public TerminalNode Enumeration_constant() { return getToken(C99Parser.Enumeration_constant, 0); }
+		public TerminalNode Identifier() { return getToken(C99Parser.Identifier, 0); }
 		public Constant_expressionContext constant_expression() {
 			return getRuleContext(Constant_expressionContext.class,0);
 		}
@@ -2736,7 +2736,7 @@ public class C99Parser extends Parser {
 			enterOuterAlt(_localctx, 1);
 			{
 			setState(461);
-			match(Enumeration_constant);
+			match(Identifier);
 			setState(464);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
@@ -5343,7 +5343,7 @@ public class C99Parser extends Parser {
 	}
 
 	public static final String _serializedATN =
-		"\u0004\u0001_\u0343\u0002\u0000\u0007\u0000\u0002\u0001\u0007\u0001\u0002"+
+		"\u0004\u0001^\u0343\u0002\u0000\u0007\u0000\u0002\u0001\u0007\u0001\u0002"+
 		"\u0002\u0007\u0002\u0002\u0003\u0007\u0003\u0002\u0004\u0007\u0004\u0002"+
 		"\u0005\u0007\u0005\u0002\u0006\u0007\u0006\u0002\u0007\u0007\u0007\u0002"+
 		"\b\u0007\b\u0002\t\u0007\t\u0002\n\u0007\n\u0002\u000b\u0007\u000b\u0002"+
@@ -5663,7 +5663,7 @@ public class C99Parser extends Parser {
 		"F#\u0000\u01c8\u01c6\u0001\u0000\u0000\u0000\u01c9\u01cc\u0001\u0000\u0000"+
 		"\u0000\u01ca\u01c8\u0001\u0000\u0000\u0000\u01ca\u01cb\u0001\u0000\u0000"+
 		"\u0000\u01cbE\u0001\u0000\u0000\u0000\u01cc\u01ca\u0001\u0000\u0000\u0000"+
-		"\u01cd\u01d0\u0005_\u0000\u0000\u01ce\u01cf\u0005#\u0000\u0000\u01cf\u01d1"+
+		"\u01cd\u01d0\u0005X\u0000\u0000\u01ce\u01cf\u0005#\u0000\u0000\u01cf\u01d1"+
 		"\u0003&\u0013\u0000\u01d0\u01ce\u0001\u0000\u0000\u0000\u01d0\u01d1\u0001"+
 		"\u0000\u0000\u0000\u01d1G\u0001\u0000\u0000\u0000\u01d2\u01d3\u0007\n"+
 		"\u0000\u0000\u01d3I\u0001\u0000\u0000\u0000\u01d4\u01d6\u0003N\'\u0000"+
