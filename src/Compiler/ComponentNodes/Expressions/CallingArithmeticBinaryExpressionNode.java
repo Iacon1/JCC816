@@ -41,8 +41,8 @@ CC extends ParserRuleContext
 		String assembly = "";
 		assembly += ticket.save(whitespace, 0xFF);
 		DetailsTicket innerTicket = new DetailsTicket(ticket, 0, 0xFF);
-		assembly += AssemblyUtils.byteCopier(whitespace, sourceX.getSize(), CompConfig.multDivSource(true, sourceX.getSize()), sourceX, innerTicket);
-		assembly += AssemblyUtils.byteCopier(whitespace, sourceY.getSize(), CompConfig.multDivSource(false, sourceY.getSize()), sourceY, innerTicket);
+		assembly += AssemblyUtils.byteCopier(whitespace, sourceX.getSize(), CompConfig.specSubSource(true, sourceX.getSize()), sourceX, innerTicket);
+		assembly += AssemblyUtils.byteCopier(whitespace, sourceY.getSize(), CompConfig.specSubSource(false, sourceY.getSize()), sourceY, innerTicket);
 		assembly += whitespace + "JSL\t" + getSubName(sourceX.getSize(), sourceY.getSize()) + "\n";
 		int retSize = Math.min(destSource.getSize(), getRetSize(sourceX.getSize(), sourceY.getSize()));
 		assembly += AssemblyUtils.byteCopier(whitespace, retSize, destSource, CompConfig.callResultSource(retSize), innerTicket);

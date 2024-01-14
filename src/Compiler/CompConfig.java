@@ -22,23 +22,24 @@ public final class CompConfig
 	
 	public static final int scratchBank = 0x7F;
 	public static final int scratchPage = 0xFF;
-	public static final int multDivSize = 16;
-	public static final String multDivX = "__@multDivX";
-	public static final String multDivY = "__@multDivY";
+	public static final int specSubSize = 16;
+	public static final String specSubX = "__@specSubX";
+	public static final String specSubY = "__@specSubY";
 	public static final int scratchSize = 160;
-	public static final String scratchBase = "__@ScratchBase";
+	public static final String scratchBase = "__@scratchBase";
 	public static final int callResultSize = 64;
 	// 16 + 16 + 160 + 64 = 256 = Just large enough to be a ZP!
 	public static final String callResult = "__@callResult";
+	public static final String functionTag = "@func";
 	
 	public static final OperandSource callResultSource(int size)
 	{
 		if (size <= callResultSize) return new AddressSource(callResult, size);
 		else return null;
 	}
-	public static final OperandSource multDivSource(boolean isX, int size)
+	public static final OperandSource specSubSource(boolean isX, int size)
 	{
-		if (size <= multDivSize) return new AddressSource((isX ? multDivX : multDivY), size);
+		if (size <= specSubSize) return new AddressSource((isX ? specSubX : specSubY), size);
 		else return null;
 	}
 	public static final OperandSource callResultSource()
@@ -50,8 +51,8 @@ public final class CompConfig
 	{
 		List<SimpleEntry<String, Integer>> list = new LinkedList<SimpleEntry<String, Integer>>();
 		list.add(new SimpleEntry<String, Integer>(callResult, callResultSize));
-		list.add(new SimpleEntry<String, Integer>(multDivY, multDivSize));
-		list.add(new SimpleEntry<String, Integer>(multDivX, multDivSize));
+		list.add(new SimpleEntry<String, Integer>(specSubY, specSubSize));
+		list.add(new SimpleEntry<String, Integer>(specSubX, specSubSize));
 		list.add(new SimpleEntry<String, Integer>(scratchBase, scratchSize));
 		return list;
 	};
@@ -121,5 +122,4 @@ public final class CompConfig
 		}
 	}
 	public static DebugLevel debugLevel = DebugLevel.medium;
-	
 }
