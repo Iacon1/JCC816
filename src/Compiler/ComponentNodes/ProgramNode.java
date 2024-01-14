@@ -148,7 +148,7 @@ public class ProgramNode extends InterpretingNode<ProgramNode, ProgramContext> i
 		assembly += whitespace + ".res\t48, 0;\tHEADER_HERE\n";
 		assembly += mapMemory(leadingWhitespace);
 		
-		assembly += ".segment \"CODE\"\n"; // Begins runnable code
+		assembly += ".segment \"" + CompConfig.bankName(0) + "\"\n"; // Begins runnable code
 		assembly += whitespace + "RESET:\n";
 		assembly +=
 				whitespace + "SEI\n" +

@@ -30,6 +30,7 @@ public final class CompConfig
 	public static final int callResultSize = 64;
 	// 16 + 16 + 160 + 64 = 256 = Just large enough to be a ZP!
 	public static final String callResult = "__@callResult";
+	public static final String bankRootName = "ROMBANK";
 	public static final String functionTag = "@func";
 	
 	public static final OperandSource callResultSource(int size)
@@ -45,6 +46,11 @@ public final class CompConfig
 	public static final OperandSource callResultSource()
 	{
 		return callResultSource(callResultSize);
+	}
+	
+	public static String bankName(int i)
+	{
+		return bankRootName + i;
 	}
 	
 	public static List<SimpleEntry<String, Integer>> reservedRAM() 

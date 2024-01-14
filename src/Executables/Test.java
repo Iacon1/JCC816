@@ -28,7 +28,7 @@ public class Test
 		String c = Compiler.compile(main, false);
 		Logging.logNotice("\n" + c);
 		
-		byte[] sfc = Assembler.assemble("test", cartConfig, c, "loROM", true);
+		byte[] sfc = Assembler.assemble("test", cartConfig, c, true);
 		
 		File f = new File("./test.sfc");
 		f.createNewFile();

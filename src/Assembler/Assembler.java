@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 
 import Assembler.Header.DestinationCode;
+import Assembler.Configs.Configurer;
 import Compiler.CartConfig;
 import Logging.Logging;
 
@@ -31,7 +32,7 @@ public class Assembler
 		else outStream.write(new String(chars).replaceAll("\\n", "\r\n").getBytes());
 		outStream.close();
 	}
-	public static byte[] assemble(String name, CartConfig cartConfig, String assembly, String cfgType, boolean debug) throws IOException
+	public static byte[] assemble(String name, CartConfig cartConfig, String assembly, boolean debug) throws IOException
 	{
 		File cfgFile, asmFile, sfcFile, dbgFile;
 		cfgFile = new File(name + ".cfg");
@@ -41,8 +42,7 @@ public class Assembler
 		FileOutputStream asmStream = new FileOutputStream(asmFile);
 		FileInputStream sfcStream;
 		
-		String config = new String(ClassLoader.getSystemResourceAsStream("Assembler/Configs/" + cfgType + ".cfg").readAllBytes());
-		configStream.write(config.getBytes());
+		Configurer.selectConfig(cartConfig).writeConfig(configStream, 2);
 		configStream.close();
 		
 		asmStream.write(assembly.getBytes());
