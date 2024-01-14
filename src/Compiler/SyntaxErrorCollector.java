@@ -61,7 +61,7 @@ public class SyntaxErrorCollector implements ANTLRErrorListener
 		Exception e = exceptions.get(0);
 		
 		for (int i = 1; i < exceptions.size(); ++i)
-			e.addSuppressed(e);
+			e.addSuppressed(exceptions.get(i));
 		
 		return e;
 	}
