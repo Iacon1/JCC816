@@ -83,8 +83,8 @@ public class MultiplicativeExpressionNode extends CallingArithmeticBinaryExpress
 			assembly += Multiplier.generate(
 					AssemblyUtils.getWhitespace(CompConfig.indentSize),
 					CompConfig.callResultSource(getRetSize(sizeX, sizeY)),
-					CompConfig.multDivSource(true, sizeX),
-					CompConfig.multDivSource(false, sizeY), new DetailsTicket());
+					CompConfig.specSubSource(true, sizeX),
+					CompConfig.specSubSource(false, sizeY), new DetailsTicket());
 			break;
 		case "%":
 			isModulo = true;
@@ -93,14 +93,14 @@ public class MultiplicativeExpressionNode extends CallingArithmeticBinaryExpress
 				assembly += LongDividerModulator.generate(
 					AssemblyUtils.getWhitespace(CompConfig.indentSize),
 					CompConfig.callResultSource(getRetSize(sizeX, sizeY)),
-					CompConfig.multDivSource(true, sizeX),
-					CompConfig.multDivSource(false, sizeY), isModulo, new DetailsTicket());
+					CompConfig.specSubSource(true, sizeX),
+					CompConfig.specSubSource(false, sizeY), isModulo, new DetailsTicket());
 			else
 				assembly += ShortDividerModulator.generate(
 						AssemblyUtils.getWhitespace(CompConfig.indentSize),
 						CompConfig.callResultSource(getRetSize(sizeX, sizeY)),
-						CompConfig.multDivSource(true, sizeX),
-						CompConfig.multDivSource(false, sizeY), isModulo, new DetailsTicket());
+						CompConfig.specSubSource(true, sizeX),
+						CompConfig.specSubSource(false, sizeY), isModulo, new DetailsTicket());
 				break;
 		}		
 		assembly += "RTL\n";

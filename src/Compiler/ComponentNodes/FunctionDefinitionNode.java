@@ -167,20 +167,20 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 		
 		if (requiresStackLoader) // Need to sometimes get arguments from the stack
 		{
-			assembly += whitespace + getLoaderLabel() + ":\n";
+			assembly += whitespace + getLoaderLabel() + ":\t; " + CompConfig.functionTag + "\n";
 			List<VariableNode> parameters = getParameters();
 			Collections.reverse(parameters);
 			for (VariableNode parameter : parameters)
 				assembly += AssemblyUtils.stackLoader(whitespace, parameter.getSize(), parameter.getSource());
 		}
-		assembly += whitespace + getStartLabel() + ":" +
-				(DebugLevel.isAtLeast(DebugLevel.medium) ? "\t; " + getType().getSignature() : "") + 
+		assembly += whitespace + getStartLabel() + ":" + "\t; " + CompConfig.functionTag + 
+				(DebugLevel.isAtLeast(DebugLevel.medium) ? " " + getType().getSignature() : "") + 
 				"\n";
 		if (isInterruptHandler() && isISR()) // Have to push *everything* to the stack
 		{
 			assembly += AssemblyUtils.stackPusher(whitespace, CompConfig.scratchSize, new ScratchSource(0, CompConfig.scratchSize));
-			assembly += AssemblyUtils.stackPusher(whitespace, CompConfig.multDivSize, CompConfig.multDivSource(true, CompConfig.multDivSize));
-			assembly += AssemblyUtils.stackPusher(whitespace, CompConfig.multDivSize, CompConfig.multDivSource(false, CompConfig.multDivSize));
+			assembly += AssemblyUtils.stackPusher(whitespace, CompConfig.specSubSize, CompConfig.specSubSource(true, CompConfig.specSubSize));
+			assembly += AssemblyUtils.stackPusher(whitespace, CompConfig.specSubSize, CompConfig.specSubSource(false, CompConfig.specSubSize));
 			assembly += AssemblyUtils.stackPusher(whitespace, CompConfig.callResultSize, CompConfig.callResultSource(CompConfig.callResultSize));		
 			
 			for (VariableNode variable : interruptRequirements(false))
@@ -204,8 +204,8 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 				assembly += AssemblyUtils.stackLoader(whitespace, leadingWhitespace, variable.getSource());
 			
 			assembly += AssemblyUtils.stackLoader(whitespace, CompConfig.callResultSize, new ScratchSource(0, CompConfig.scratchSize));
-			assembly += AssemblyUtils.stackLoader(whitespace, CompConfig.multDivSize, CompConfig.multDivSource(false, CompConfig.multDivSize));
-			assembly += AssemblyUtils.stackLoader(whitespace, CompConfig.multDivSize, CompConfig.multDivSource(true, CompConfig.multDivSize));
+			assembly += AssemblyUtils.stackLoader(whitespace, CompConfig.specSubSize, CompConfig.specSubSource(false, CompConfig.specSubSize));
+			assembly += AssemblyUtils.stackLoader(whitespace, CompConfig.specSubSize, CompConfig.specSubSource(true, CompConfig.specSubSize));
 			assembly += AssemblyUtils.stackLoader(whitespace, CompConfig.scratchSize, CompConfig.callResultSource(CompConfig.callResultSize));
 		}
 		
