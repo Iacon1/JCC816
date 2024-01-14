@@ -12,6 +12,7 @@ import org.antlr.v4.runtime.tree.ParseTree;
 
 import Compiler.ComponentNodes.ComponentNode;
 import Compiler.ComponentNodes.InterpretingNode;
+import Compiler.ComponentNodes.Definitions.EnumDefinitionNode;
 import Compiler.ComponentNodes.Definitions.StructUnionDefinitionNode;
 import Compiler.Exceptions.ConstraintException;
 import Grammar.C99.C99Parser.Declaration_specifiersContext;
@@ -82,10 +83,21 @@ public class DeclarationSpecifiersNode extends InterpretingNode<DeclarationSpeci
 					else typeSpecifiers.add("struct");
 					typeSpecifiers.add(definition.getName());
 				}
+				else if (typeSpecifier.enum_specifier() != null && typeSpecifier.enum_specifier().enumerator_list() != null) // Enum declaration
+				{
+					EnumDefinitionNode definition = new EnumDefinitionNode(this).interpret(typeSpecifier.enum_specifier());
+					typeSpecifiers.add("enum");
+					typeSpecifiers.add(definition.getName());
+				}
 				else if (typeSpecifier.struct_or_union_specifier() != null)
 				{
 					typeSpecifiers.add(typeSpecifier.struct_or_union_specifier().getChild(0).getText());
 					typeSpecifiers.add(typeSpecifier.struct_or_union_specifier().getChild(1).getText());
+				}
+				else if (typeSpecifier.enum_specifier() != null)
+				{
+					typeSpecifiers.add(typeSpecifier.enum_specifier().getChild(0).getText());
+					typeSpecifiers.add(typeSpecifier.enum_specifier().getChild(1).getText());
 				}
 				else typeSpecifiers.add(((Type_specifierContext) r).getText());
 			}

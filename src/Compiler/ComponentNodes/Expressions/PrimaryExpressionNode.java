@@ -10,6 +10,7 @@ import Compiler.ComponentNodes.FunctionDefinitionNode;
 import Compiler.ComponentNodes.Definitions.Type;
 import Compiler.ComponentNodes.LValues.LValueNode;
 import Compiler.ComponentNodes.LValues.VariableNode;
+import Compiler.Exceptions.UndefinedVariableException;
 import Compiler.Utils.AssemblyUtils.DetailsTicket;
 import Compiler.Utils.CompUtils;
 import Compiler.Utils.ScratchManager;
@@ -30,7 +31,14 @@ public class PrimaryExpressionNode extends BaseExpressionNode<Primary_expression
 		if (node.expression() != null)
 			return (BaseExpressionNode) new ExpressionNode(this).interpret(node.expression());
 		else if (node.Identifier() != null)
+		{
 			identifier = node.Identifier().getText();
+			// Valid uses of identifier
+			if (resolveEnumeratorRelative(identifier) != null); // Enumerator
+			else if (hasLValue()); // Variable
+			else if (resolveFunctionRelative(identifier) != null); // Function
+			else throw new UndefinedVariableException(identifier, node.start);
+		}
 		else if (node.Constant() != null)
 			constant = CompUtils.parseLiteral(node.Constant().getText());
 		else if (node.String_literal() != null)
@@ -43,7 +51,9 @@ public class PrimaryExpressionNode extends BaseExpressionNode<Primary_expression
 	public Type getType()
 	{
 		if (identifier != null)
-			if (hasLValue()) return getLValue().getType();
+			if (resolveEnumeratorRelative(identifier) != null)
+				return resolveEnumeratorRelative(identifier).getType();
+			else if (hasLValue()) return getLValue().getType();
 			else // Probably function pointer
 				return resolveFunctionRelative(identifier).getType();
 		else if (constant != null) return CompUtils.getSmallestType((Number) constant);
@@ -75,16 +85,33 @@ public class PrimaryExpressionNode extends BaseExpressionNode<Primary_expression
 	@Override
 	public boolean hasPropValue()
 	{
-		if (hasLValue() && getLValue().hasPossibleValues() && OptimizationLevel.isAtLeast(OptimizationLevel.medium))
-			return getLValue().getPossibleValues().size() == 1;
-		else if (identifier != null && resolveFunctionRelative(identifier) != null) return true;
+		if (identifier != null)
+		{
+			if (resolveEnumeratorRelative(identifier) != null)
+				return true; // Enumerator
+			else if (hasLValue() && getLValue().hasPossibleValues() && OptimizationLevel.isAtLeast(OptimizationLevel.medium))
+				return getLValue().getPossibleValues().size() == 1;
+			else if (resolveFunctionRelative(identifier) != null)
+				return true;
+			else
+				return false;
+		}
 		else return constant != null || stringLiteral != null;
 	}
 	@Override
 	public Object getPropValue()
 	{
-		if (getLValue() != null) return getLValue().getPossibleValues().toArray()[0];
-		else if (identifier != null && resolveFunctionRelative(identifier) != null) return resolveFunctionRelative(identifier);
+		if (identifier != null)
+		{
+			if (resolveEnumeratorRelative(identifier) != null)
+				return resolveEnumeratorRelative(identifier).getValue();
+			else if (getLValue() != null)
+				return getLValue().getPossibleValues().toArray()[0];
+			else if (resolveFunctionRelative(identifier) != null)
+				return resolveFunctionRelative(identifier);
+			else
+				return null;
+		}
 		else if (stringLiteral == null) return constant;
 		else return stringLiteral;
 	}

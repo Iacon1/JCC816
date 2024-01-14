@@ -92,7 +92,6 @@ Punctuator=91
 Header_name=92
 Pp_number=93
 Pp_token=94
-Enumeration_constant=95
 '('=1
 ')'=2
 '['=3

@@ -100,7 +100,7 @@ enum_specifier
 	: 'enum' Identifier? '{' enumerator_list ','? '}'
 	| 'enum' Identifier ;
 enumerator_list : enumerator (',' enumerator)* ;
-enumerator : Enumeration_constant ('=' constant_expression)? ;
+enumerator : Identifier ('=' constant_expression)? ;
 type_qualifier : ('const'|'restrict'|'volatile') ;
 declarator : pointer? direct_declarator ;
 direct_declarator

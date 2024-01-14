@@ -10,10 +10,10 @@ public class TypeMismatchException extends Exception
 {
 	public TypeMismatchException(String t1, String t2)
 	{
-		super("The type \"" + t1 + "\" can not be cast to " + t2);
+		super("The type \"" + t1 + "\" can not be cast to \"" + t2 + "\"");
 	}
 	public TypeMismatchException(Type t1, Type t2)
 	{
-		super("The type \"" + t1.getSignature() + "\" can not be cast to " + t2.getSignature());
+		super("The type \"" + t1.getSignature() + "\" can not be cast to \"" + t2.getSignature() + "\"");
 	}
 }

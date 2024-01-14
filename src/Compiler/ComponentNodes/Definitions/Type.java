@@ -95,7 +95,7 @@ public class Type
 		for (List<String> allowedList : allowedTypeSpecLists())
 			if (typeSpecifiers.containsAll(allowedList) && allowedList.containsAll(typeSpecifiers))
 				return true;
-		if (typeSpecifiers.contains("struct"))
+		if (typeSpecifiers.contains("struct") || typeSpecifiers.contains("union") || typeSpecifiers.contains("enum"))
 			return true;
 		return false;
 	}
@@ -223,7 +223,7 @@ public class Type
 			else
 				baseSize = ComponentNode.resolveStructOrUnion(getSUEName()).getSize();
 			}
-		else if (isEnum()) baseSize = CompConfig.sizeOf("int");
+		else if (isEnum()) baseSize = CompConfig.sizeOf("char");
 		else baseSize = CompConfig.sizeOf(typeSpecifiers);
 		return baseSize;
 	}
@@ -252,7 +252,8 @@ public class Type
 	{
 		return
 				isArithmetic() && type.isArithmetic() ||
-				isStructOrUnion() && type.isStructOrUnion() || // TODO
+				(isStructOrUnion() && type.isStructOrUnion() && getSUEName().equals(type.getSUEName())) ||
+				(isEnum() && type.isEnum() && getSUEName().equals(type.getSUEName())) ||
 				isPointer() && type.isPointer() && ((PointerType) this).getType().canCastTo(((PointerType) type).getType()) ||
 				isPointer() && type.isPointer() && ((PointerType) this).getType().canCastTo("void") ||
 				isPointer() && type.isPointer() && ((PointerType) type).getType().canCastTo("void") ||
@@ -356,5 +357,14 @@ public class Type
 //		for (String specifier : typeSpecifiers) signature += specifier + " ";
 
 		return signature.substring(0, signature.length() - 1);
+	}
+	
+	public StructUnionDefinitionNode getStruct()
+	{
+		return context.resolveStructOrUnionRelative(getSUEName());
+	}
+	public EnumDefinitionNode getEnum()
+	{
+		return context.resolveEnumRelative(getSUEName());
 	}
 }
