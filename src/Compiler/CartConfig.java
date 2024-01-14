@@ -80,4 +80,9 @@ public class CartConfig
 	{
 		return addonChip.equals(addonChip);
 	}
+	
+	public ROMType getType()
+	{
+		return ROMType;
+	}
 }
