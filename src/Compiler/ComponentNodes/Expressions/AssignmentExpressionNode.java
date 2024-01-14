@@ -7,6 +7,7 @@ import Compiler.ComponentNodes.ComponentNode;
 import Compiler.ComponentNodes.LValues.LValueNode;
 import Compiler.ComponentNodes.LValues.VariableNode;
 import Compiler.Exceptions.ConstraintException;
+import Compiler.Exceptions.TypeMismatchException;
 import Compiler.Utils.AssemblyUtils;
 import Compiler.Utils.AssemblyUtils.DetailsTicket;
 import Compiler.Utils.ScratchManager;
@@ -142,6 +143,8 @@ public class AssignmentExpressionNode extends BinaryExpressionNode
 		final OperandSource sourceY;
 		String assembly = "";
 		
+		if (!y.getType().canCastTo(x.getType()))
+			throw new TypeMismatchException(y.getType(), x.getType());
 		if (y.hasAssembly())
 		{
 			assembly += y.getAssembly(leadingWhitespace, destSource, scratchManager, ticket);
