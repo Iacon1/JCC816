@@ -3,6 +3,7 @@
 
 package Compiler;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.List;
@@ -92,11 +93,12 @@ public class Compiler
 	}
 	
 	
-	private  static String postprocess(String assembly)
+	private  static String postprocess(String assembly) throws Exception
 	{
-		List<String> lines = Arrays.asList(assembly.split("\n"));
+		ArrayList<String> lines = new ArrayList<String>(Arrays.asList(assembly.split("\n")));
 
-		lines = AssemblyOptimizer.optimizeAssembly(lines);
+		lines = (ArrayList<String>) AssemblyOptimizer.optimizeAssembly((List<String>) lines);
+		int banks = Banker.splitBanks(lines);
 		
 		assembly = "";
 		for (String line : lines) if (!line.matches("\s*")) assembly += line + "\n";

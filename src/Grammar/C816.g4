@@ -17,7 +17,7 @@ Operation
 	| 'PEA'	| 'PEI'	| 'PER'	| 'PHA'	| 'PHD'	| 'PHK'	| 'PHX'	| 'PHY'	| 'PLA'	| 'PLD'	| 'PLP'	| 'PLX' | 'PLY'
 	| 'REP' | 'ROL' | 'ROR' | 'RTI' | 'RTS' | 'RTL'
 	| 'SBC' | 'SEC' | 'SED' | 'SEI' | 'SEP' | 'STA' | 'STX' | 'STY' | 'STP' | 'STZ'
-	| 'TAX' | 'TAY' | 'TCD' | 'TDC' | 'TSC' | 'TSX' | 'TXA' | 'TXS' | 'TXY' | 'TYA' | 'TYX' | 'TRB' | 'TSB'
+	| 'TAX' | 'TAY' | 'TCD' | 'TCS' | 'TDC' | 'TSC' | 'TSX' | 'TXA' | 'TXS' | 'TXY' | 'TYA' | 'TYX' | 'TRB' | 'TSB'
 	| 'WAI' | 'XCE'
 	;
 Symbol : [a-zA-Z_] [0-9a-zA-Z@_]* ;
@@ -26,7 +26,9 @@ Number
 	|  '$' [0-9a-fA-F]+ 
 	;
 Comment : ';' ~[\n]* ;
-Preproc : '.' ~[\n]* ; 
+Preproc
+	: '.' ~[\n]* 
+	| ~[\n=]+ '=' ~[\n]+; 
 parameter
 	: '(' address ')'  (',' 'x'|'y')?
 	| '(' address ',' ('x'|'y') ')'
@@ -50,8 +52,8 @@ label : Symbol? ':' Comment? ;
 
 program
 	: (( label
-	   | instruction
-	   | preprocInstruction
+	   | label? instruction
+	   | label? preprocInstruction
 	   ) Comment? '\n'
 	  )+
 	;

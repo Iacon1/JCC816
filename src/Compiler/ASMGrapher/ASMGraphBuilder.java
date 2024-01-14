@@ -27,6 +27,7 @@ import Grammar.C816.C816Parser;
 import Grammar.C816.C816Parser.ProgramContext;
 import Logging.Logging;
 import Compiler.ASMGrapher.Nodes.LabelNode;
+import Compiler.ASMGrapher.Nodes.PreprocNode;
 
 public class ASMGraphBuilder
 {
@@ -149,13 +150,13 @@ public class ASMGraphBuilder
 		textLines = new ArrayList<String>();
 
 		assembly = assembly.replace("\n:", "\n:\n ");
+		assembly = assembly.replaceAll("\n+", "\n");
 		for (String line : assembly.split("\n"))
 			textLines.add(line);
-
 		C816Lexer lexer = new C816Lexer(CharStreams.fromString(assembly));
 		C816Parser parser = new C816Parser(new CommonTokenStream(lexer));
 		ProgramContext context = parser.program();
-		Logging.logNotice(context.toStringTree(Arrays.asList(C816Parser.ruleNames)));
+//		Logging.viewParseTree(parser, context);
 		int labels = 0, instrs = 0, preprocs = 0;
 		for (int i = 0; i < context.getChildCount(); ++i)
 		{
@@ -166,7 +167,7 @@ public class ASMGraphBuilder
 			else if (context.instruction().size() > 0 && context.instruction(instrs) == context.getChild(i))
 				node = new InstructionNode(i).interpret(context.instruction(instrs++));
 			else if (context.preprocInstruction().size() > 0 &&context.preprocInstruction(preprocs) == context.getChild(i))
-				node = null; // TODO new InstructionNode(i).interpret(context.preprocInstruction(preprocs++));
+				node = new PreprocNode(i).interpret(context.preprocInstruction(preprocs++));
 			if (node != null)
 				lines.add(node);
 		}
@@ -175,7 +176,6 @@ public class ASMGraphBuilder
 	
 	/** Creates an assembly-level call graph and uses it to remove dead code
 	 * 
-	 * @param functionAssembly The function's un-optimized (internal) assembly
 	 * @param internalVariables All variables only accessible within the function
 	 * @return The function's assembly, free of (at least most) dead code
 	 */
@@ -264,7 +264,19 @@ public class ASMGraphBuilder
 				functionAssembly += textLines.get(i) + "\n";
 		
 		functionAssembly = functionAssembly.replace("\n:\n ", "\n:");
-		
 		return functionAssembly;
+	}
+	
+	/** Finds the size of the graph's assembled form.
+	 * 
+	 * @return The function's assembly, free of (at least most) dead code
+	 */
+	public long getSize()
+	{
+		long size = 0;
+		for (ASMNode<?> line : lines)
+			size += line.getSize();
+			
+		return size;
 	}
 }
