@@ -4,20 +4,19 @@ package Compiler.ASMGrapher.Nodes;
 
 import Compiler.ASMGrapher.Address;
 import Grammar.C816.C816Parser.LabelContext;
-public class LabelNode extends ASMNode<LabelContext>
+import Grammar.C816.C816Parser.PreprocInstructionContext;
+public class PreprocNode extends ASMNode<PreprocInstructionContext>
 {
-	private String name;
-	public LabelNode(int lineNumber)
+	private String[] words;
+	public PreprocNode(int lineNumber)
 	{
 		super(lineNumber);
 	}
 
 	@Override
-	public ASMNode<LabelContext> interpret(LabelContext node) throws Exception
+	public ASMNode<PreprocInstructionContext> interpret(PreprocInstructionContext node) throws Exception
 	{
-		if (node.Symbol() != null)
-			name = node.Symbol().getText();
-		else name = ":";
+		words = node.Preproc().getText().split("[,\s\t]");
 		return this;
 	}
 
@@ -40,13 +39,21 @@ public class LabelNode extends ASMNode<LabelContext>
 	public boolean affectsParameter() {return false;}
 
 	@Override
-	public Address getAddress() {return new Address(name, 0);}
+	public Address getAddress() {return null;}
 	@Override
 	public int getImmediate() {return 0;}
 	
 	@Override
-	public ASMType getType() {return ASMType.label;}
+	public ASMType getType() {return ASMType.preproc;}
 
 	@Override
-	public int getSize() {return 0;} // DOesn't actually compile
+	public int getSize()
+	{
+		switch (words[0])
+		{
+		case ".res": return procNumber(words[1]);
+		case ".word": return 2;
+		default: return 0;
+		}
+	}
 }

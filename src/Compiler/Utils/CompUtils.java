@@ -3,6 +3,7 @@
 // Stores data used by other parts of the compiler.
 package Compiler.Utils;
 
+import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -69,5 +70,13 @@ public final class CompUtils
 			return "$" + bank + addr;
 		}
 		else return null;
+	}
+	
+	public static final boolean isInZeroPage(String label)
+	{
+		for (SimpleEntry<String, Integer> entry : CompConfig.reservedRAM())
+			if (label.equals(entry))
+				return true;
+		return false;
 	}
 }

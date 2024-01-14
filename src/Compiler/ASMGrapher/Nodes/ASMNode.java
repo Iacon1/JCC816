@@ -32,12 +32,23 @@ public abstract class ASMNode<C extends ParserRuleContext>
 	private boolean is16XY = false;
 	private boolean hidden = false;
 	
+	protected static int procNumber(String text)
+	{
+		if (text.contains("$"))
+			return Integer.valueOf(text.replace("$", ""), 16);
+		else
+			return Integer.valueOf(text, 10);
+	}
 	protected static int procNumber(TerminalNode node)
 	{
-		if (node.getText().contains("$"))
-			return Integer.valueOf(node.getText().replace("$", ""), 16);
-		else
-			return Integer.valueOf(node.getText(), 10);
+		return procNumber(node.getText());
+	}
+	protected static int sizeOfNumber(TerminalNode node) // Size of number in bytes
+	{
+		if (node.getText().contains("$")) // Hex
+			return node.getText().replace("$", "").length() / 2;
+		else // Decimal
+			return ((int) (Math.log(procNumber(node))/Math.log(16)) + 1)/2; // (Log16 + 1)/2
 	}
 	public ASMNode(int lineNumber)
 	{
@@ -87,4 +98,6 @@ public abstract class ASMNode<C extends ParserRuleContext>
 	public boolean is16XY() {return is16XY;}
 	
 	public void hide() {hidden = true;}
+	
+	public abstract int getSize(); // Size in bytes of assembled form
 }

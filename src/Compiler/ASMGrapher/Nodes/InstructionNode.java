@@ -113,5 +113,11 @@ public class InstructionNode extends ASMNode<InstructionContext>
 		}
 	}
 
+	@Override
+	public int getSize()
+	{
+		if (parameter != null) return 1 + parameter.getSize();
+		else return 1;
+	}
 
 }

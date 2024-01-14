@@ -4,6 +4,7 @@
 package Compiler.ASMGrapher.Nodes;
 
 import Compiler.ASMGrapher.Address;
+import Compiler.Utils.CompUtils;
 import Grammar.C816.C816Parser.AddressContext;
 import Grammar.C816.C816Parser.ParameterContext;
 import Logging.Logging;
@@ -14,6 +15,7 @@ public class ParameterNode extends ASMNode<ParameterContext>
 	private boolean isImmediate;
 	private Address address;
 	private int immValue;
+	private int size;
 	
 	public ParameterNode()
 	{
@@ -39,21 +41,28 @@ public class ParameterNode extends ASMNode<ParameterContext>
 			if (c.Symbol() != null)
 			{
 				String symbol = c.Symbol().getText();
+				size = CompUtils.isInZeroPage(symbol) ? 1 : 3; // Todo 2-byte address?
 				int offset = 0;
 				if (c.Number() != null)
+				{
 					offset = procNumber(c.Number());
+					size = Math.max(size, sizeOfNumber(c.Number()));
+				}
 				address = new Address(symbol, offset);
 			}
 			else if (c.Number() != null)
 			{
 				int addr = procNumber(c.Number());
-				
+				size = sizeOfNumber(c.Number());
 				address = new Address(addr);
 				if (isImmediate)
 					immValue = addr;
 			}
 			else
+			{
 				address = new Address(c.getText());
+				size = CompUtils.isInZeroPage(c.getText()) ? 1 : 3; // Todo 2-byte address?
+			}
 		}
 		return this;
 	}
@@ -104,6 +113,10 @@ public class ParameterNode extends ASMNode<ParameterContext>
 	{
 		return immValue;
 	}
-	
-	
+
+	@Override
+	public int getSize()
+	{
+		return size;
+	}
 }
