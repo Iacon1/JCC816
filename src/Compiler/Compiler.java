@@ -39,18 +39,6 @@ public class Compiler
 	{
 		for (int i = 0; i < info.length; ++i) Logging.logNotice(info[i].toString() + (i == info.length - 1 ? "" : ", ") + "\n");
 	}
-	private static void viewParseTree(Parser parser, ParseTree tree)
-	{
-		JFrame frame = new JFrame("Antlr");
-		JPanel panel = new JPanel();
-		TreeViewer viewer = new TreeViewer(Arrays.asList(parser.getRuleNames()), tree);
-		viewer.setScale(.75);
-		panel.add(viewer);
-		frame.add(panel);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.pack();
-		frame.setVisible(true);
-	}
 	
 	private static CommonTokenStream lex(String source)
 	{
@@ -132,7 +120,7 @@ public class Compiler
 
 		ParseDouble parseDouble = parse(tokens);
 		printInfo("Parsed in " + (System.currentTimeMillis() - t) + " ms.");
-		if (debug) viewParseTree(parseDouble.parser, parseDouble.tree);
+		if (debug) Logging.viewParseTree(parseDouble.parser, parseDouble.tree);
 		t = System.currentTimeMillis();
 
 		assembly = emit(parseDouble);

@@ -4,6 +4,15 @@
 
 package Logging;
 
+import java.util.Arrays;
+
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+
+import org.antlr.v4.gui.TreeViewer;
+import org.antlr.v4.runtime.Parser;
+import org.antlr.v4.runtime.tree.ParseTree;
+
 public final class Logging
 {
 	private static volatile Logger logger;
@@ -44,5 +53,18 @@ public final class Logging
 			return;
 		else
 			logger.logException(exception);
+	}
+	
+	public static void viewParseTree(Parser parser, ParseTree tree)
+	{
+		JFrame frame = new JFrame("Antlr");
+		JPanel panel = new JPanel();
+		TreeViewer viewer = new TreeViewer(Arrays.asList(parser.getRuleNames()), tree);
+		viewer.setScale(1);
+		panel.add(viewer);
+		frame.add(panel);
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.pack();
+		frame.setVisible(true);
 	}
 }
