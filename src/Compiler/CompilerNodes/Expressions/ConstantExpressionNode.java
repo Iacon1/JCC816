@@ -15,6 +15,8 @@ public class ConstantExpressionNode extends BaseExpressionNode<Constant_expressi
 {
 	public ConstantExpressionNode(ComponentNode<?> parent) {super(parent);}
 	
+	public ConstantExpressionNode() {super();}
+
 	public BaseExpressionNode<Constant_expressionContext> interpret(Constant_expressionContext node) throws Exception
 	{
 		BaseExpressionNode<?> expr = new ConditionalExpressionNode(this).interpret(node.conditional_expression());

@@ -25,10 +25,10 @@ public class Test
 
 		CartConfig cartConfig = new CartConfig(ROMType.loROM, AddonChip.none, false, false, 0);
 		
-		String c = Compiler.compile(main, false);
+		String c = Compiler.compile("test.c", main, true);
 		Logging.logNotice("\n" + c);
 		
-		byte[] sfc = Assembler.assemble("test", cartConfig, c, true);
+		byte[] sfc = Assembler.assemble("test", cartConfig, c, false);
 		
 		File f = new File("./test.sfc");
 		f.createNewFile();
