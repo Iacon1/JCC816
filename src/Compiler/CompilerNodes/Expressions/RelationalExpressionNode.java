@@ -40,9 +40,9 @@ public class RelationalExpressionNode extends BinaryExpressionNode
 		switch (operator)
 		{
 		case "<": return Boolean.valueOf(a < b);
-		case "<=": return Boolean.valueOf(a < b);
-		case ">": return Boolean.valueOf(a < b);
-		case ">=": return Boolean.valueOf(a < b);
+		case "<=": return Boolean.valueOf(a <= b);
+		case ">": return Boolean.valueOf(a > b);
+		case ">=": return Boolean.valueOf(a >= b);
 		default: return null;
 		}
 	}
