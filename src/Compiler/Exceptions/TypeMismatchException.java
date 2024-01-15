@@ -3,7 +3,7 @@
 //
 package Compiler.Exceptions;
 
-import Compiler.ComponentNodes.Definitions.Type;
+import Compiler.CompilerNodes.Definitions.Type;
 
 @SuppressWarnings("serial")
 public class TypeMismatchException extends Exception

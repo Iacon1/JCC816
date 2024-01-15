@@ -21,7 +21,7 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import Compiler.ASMGrapher.Nodes.ASMNode;
 import Compiler.ASMGrapher.Nodes.ASMNode.ASMType;
 import Compiler.ASMGrapher.Nodes.InstructionNode;
-import Compiler.ComponentNodes.LValues.VariableNode;
+import Compiler.CompilerNodes.LValues.VariableNode;
 import Grammar.C816.C816Lexer;
 import Grammar.C816.C816Parser;
 import Grammar.C816.C816Parser.ProgramContext;
