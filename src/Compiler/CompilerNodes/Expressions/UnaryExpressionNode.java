@@ -15,6 +15,7 @@ import Compiler.CompilerNodes.LValues.LValueNode;
 import Compiler.CompilerNodes.LValues.VariableNode;
 import Compiler.CompilerNodes.Definitions.PointerType;
 import Compiler.Exceptions.ConstraintException;
+import Compiler.PreprocNodes.PreProcComponentNode;
 import Compiler.Utils.AssemblyUtils;
 import Compiler.Utils.AssemblyUtils.DetailsTicket;
 import Compiler.Utils.PropPointer;
@@ -29,6 +30,7 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 	private BaseExpressionNode<?> expr;
 	private Type type;
 	private String operator;
+	private String defName; // Only useful in preproc mode
 	private LValueNode<?> pointerRef; // LValue if this is a pointer reference (*x)
 	
 	public UnaryExpressionNode(ComponentNode<?> parent) {super(parent);}
@@ -46,11 +48,9 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 				this.expr = new CastExpressionNode(this).interpret(node.cast_expression());
 			else if (node.type_name() != null)
 				type = new TypeNameNode(this).interpret(node.type_name()).getType();
-			
-			operator = "";
-			for (int i = 0; i < node.getChildCount(); ++i)
-				if (TerminalNode.class.isAssignableFrom(node.getChild(i).getClass()))
-					operator += node.getChild(i).getText();
+			else if (node.Identifier() != null)
+				this.defName = node.Identifier().getText();
+			operator = node.getChild(0).getText();
 			
 			if ((operator.equals("++") || operator.equals("--")) && !expr.hasLValue())
 				throw new ConstraintException("6.5.3.1", 1, node.start);
@@ -114,7 +114,7 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 	@Override
 	public boolean hasPropValue()
 	{
-		if (operator.equals("sizeof")) return true;
+		if (operator.equals("sizeof") || operator.equals("defined")) return true;
 		else if (operator.equals("*"))
 			if (pointerRef != null && pointerRef.hasPossibleValues() && pointerRef.getPossibleValues().size() == 1)
 			{
@@ -142,6 +142,10 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 		{
 			if (type != null) return type.getSize();
 			else return expr.getType().getSize();
+		}
+		else if (operator.equals("defined")) // Only useful in preproc mode
+		{
+			return PreProcComponentNode.defines.containsKey(defName) ? Long.valueOf(1) : Long.valueOf(0);
 		}
 		else if (operator.equals("-")) return Long.valueOf(-1 * expr.getPropLong());
 		else if (operator.equals("~")) return Long.valueOf(~expr.getPropLong());

@@ -40,16 +40,18 @@ keyword
 	| Complex
 	| Imaginary
 	| Asm
-	| Define
-	| Ifdef
-	| Ifndef
-	| Elif
-	| Endif
-	| Include
-	| Undef
-	| Line
-	| Error
-	| Pragma
+	
+	| Defined {Grammar.GrammarFlags.isPreproc}?
+	| Define {Grammar.GrammarFlags.isPreproc}?
+	| Ifdef {Grammar.GrammarFlags.isPreproc}?
+	| Ifndef {Grammar.GrammarFlags.isPreproc}?
+	| Elif {Grammar.GrammarFlags.isPreproc}?
+	| Endif {Grammar.GrammarFlags.isPreproc}?
+	| Include {Grammar.GrammarFlags.isPreproc}?
+	| Undef {Grammar.GrammarFlags.isPreproc}?
+	| Line {Grammar.GrammarFlags.isPreproc}?
+	| Error {Grammar.GrammarFlags.isPreproc}?
+	| Pragma {Grammar.GrammarFlags.isPreproc}?
 	;
 	
 punctuator

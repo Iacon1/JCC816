@@ -41,12 +41,6 @@ public interface C99A3Visitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitIf_group(C99A3Parser.If_groupContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link C99A3Parser#elif_groups}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitElif_groups(C99A3Parser.Elif_groupsContext ctx);
-	/**
 	 * Visit a parse tree produced by {@link C99A3Parser#elif_group}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
