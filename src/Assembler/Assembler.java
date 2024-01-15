@@ -2,16 +2,15 @@
 // Assembles assembly into a ROM by calling CA65.
 package Assembler;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 
 import Assembler.Header.DestinationCode;
 import Assembler.Configs.Configurer;
 import Compiler.CartConfig;
+import Compiler.Utils.FileIO;
 import Logging.Logging;
 
 public class Assembler
@@ -20,12 +19,7 @@ public class Assembler
 	private static void convertNewline(String filename, boolean toLinux) throws IOException
 	{
 		File file = new File(filename);
-		FileInputStream inStream = new FileInputStream(file);
-		char[] chars = new char[(int) file.length()];
-		BufferedReader reader = new BufferedReader(new InputStreamReader(inStream, "UTF-8"));
-		reader.read(chars);
-		reader.close();
-		inStream.close();
+		char[] chars = FileIO.readFile(file).toCharArray();
 		file.delete();
 		FileOutputStream outStream = new FileOutputStream(file);
 		if (toLinux) outStream.write(new String(chars).replaceAll("\\r\\n?", "\n").getBytes());
