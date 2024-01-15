@@ -11,6 +11,9 @@ public class ConstraintException extends TokenException
 	{
 		switch (section + "." + number)
 		{
+		case "6.5.3.1.1": return
+				"The operand of the prefix increment or decrement operator shall have qualified or " +
+				"unqualified real or pointer type and shall be a modifiable lvalue";
 		case "6.6.4": return
 				"Each constant expression shall evaluate to a constant that is in the range of representable values for its type.";
 		case "6.7.2": return
