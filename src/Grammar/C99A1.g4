@@ -3,68 +3,15 @@
 // Note: Rules that are capitalized are lexical, rules that aren't are parsed.
 
 lexer grammar C99A1;
-tokens {Pp_token}
+// import C99A11, C99A17;
 
-WS : [ \t\r\n]+ -> skip ; // skip spaces, tabs, newlines
+tokens {Asm}
 
-/*
-// A.1.1 Lexical elements
-CToken
-	: Keyword 
-	| Identifier
-	| Constant
-	| String_literal
-	| Punctuator ;	
-Pp_Token
-	: Header_name
-	| Identifier
-	| Pp_number
-	| Character_constant
-	| String_literal
-	| Punctuator ;
-*/
+WS : [ \t\r]+ -> skip ; // skip spaces, tabs
+NL : [\n]+ {!Grammar.GrammarFlags.isPreproc}? -> skip ; // Skip newlines
 
-// A.1.2 Keywords
-Keyword
-	: 'auto'
-	| 'break'
-	| 'case'
-	| 'char'
-	| 'const'
-	| 'continue'
-	| 'default'
-	| 'do'
-	| 'double'
-	| 'else'
-	| 'enum'
-	| 'extern'
-	| 'float'
-	| 'for'
-	| 'goto'
-	| 'if'
-	| 'inline'
-	| 'int'
-	| 'long'
-	| 'register'
-	| 'restrict'
-	| 'return'
-	| 'short'
-	| 'signed'
-	| 'sizeof'
-	| 'static'
-	| 'struct'
-	| 'switch'
-	| 'typedef'
-	| 'union'
-	| 'unsigned'
-	| 'void'
-	| 'volatile'
-	| 'while'
-	| '_Bool'
-	| '_Complex'
-	| '_Imaginary'
-	| 'asm'	;			// As per J.5.10
-	
+Pp_number: '.'? [0-9] ([0-9]|[a-zA-Z_]|Universal_character_name|[eEpP][+-]|'.')* {Grammar.GrammarFlags.isPreproc}? ;
+
 // A.1.3 Identifiers
 Identifier : ([a-zA-Z_]|Universal_character_name) ([0-9a-zA-Z_]|Universal_character_name)* ;
 
@@ -95,7 +42,7 @@ fragment Hexadecimal_fractional_constant : [0-9a-fA-F]+ '.' | [0-9a-fA-F]* '.' [
 fragment Exponent_part : [eE] [+-]? [0-9]+ ;
 fragment Binary_exponent_part : 'p' [+-]? [0-9]+ ;
 fragment Enumeration_constant : Identifier;
-fragment Character_constant : 'L'? '\'' (~('\''|'\\'|'\n')|Escape_sequence)+ '\'';
+Character_constant : 'L'? '\'' (~('\''|'\\'|'\n')|Escape_sequence)+ '\'';
 fragment Escape_sequence
 	: ('\\\''|'\\"'|'\\?'|'\\\\'|'\\a'|'\\b'|'\\f'|'\\n'|'\\r'|'\\t'|'\\v')
 	| '\\' [0-7][0-7]?[0-7]?
@@ -103,18 +50,8 @@ fragment Escape_sequence
 
 // A.1.6 String literals
 String_literal : 'L'? '"' (~('"'|'\\'|'\n')|Escape_sequence)+ '"' ;
-
-// A.1.7 Punctuators
-Punctuator
-	: '[' | ']' | '(' | ')' | '{' | '}' | '.' | '->' | '++' | '--' | '&' | '*'
-	| '+' | '-' | '~' | '!' | '/' | '%' | '<<' | '>>' | '<' | '>' | '<=' | '>='
-	| '==' | '!=' | '^' | '|' | '&&' | '||' | '?' | ':' | ';' | '...' | '=' | '*='
-	| '/=' | '%=' | '+=' | '-=' | '<<=' | '>>=' | '&=' | '^=' | '|=' | ',' | '#'
-	| '##' | '<:' | ':>' | '<%' | '%>' | '%:' | '%:%:' 
-	| '[[' | ']]' ; // These two are not C99-compliant and were added for the attribute functionality
 	
 // A.1.8 Header names
 Header_name
 	: '<' ~[\n>]+ '>'
-	| '"' ~[\n>]+ '"' ;
-Pp_number: '.'? [0-9] ([0-9]|[a-zA-Z_]|Universal_character_name|[eEpP][+-]|'.')* ;
+	| '"' ~[\n"]+ '"' ;

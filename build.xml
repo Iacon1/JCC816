@@ -15,15 +15,25 @@
 			<arg value = "${src}/Grammar/C99/"/>
 		</exec>
 		<exec executable="java">
-					<arg value = "org.antlr.v4.Tool"/>
-					<arg value = "-no-listener"/>
-					<arg value = "-visitor"/>
-					<arg value = "${src}/Grammar/C816.g4"/>
-					<arg value = "-package"/>
-					<arg value = "Grammar.C816"/>
-					<arg value = "-o"/>
-					<arg value = "${src}/Grammar/C816/"/>
-				</exec>
+			<arg value = "org.antlr.v4.Tool"/>
+			<arg value = "-no-listener"/>
+			<arg value = "-visitor"/>
+			<arg value = "${src}/Grammar/C816.g4"/>
+			<arg value = "-package"/>
+			<arg value = "Grammar.C816"/>
+			<arg value = "-o"/>
+			<arg value = "${src}/Grammar/C816/"/>
+		</exec>
+		<exec executable="java">
+			<arg value = "org.antlr.v4.Tool"/>
+			<arg value = "-no-listener"/>
+			<arg value = "-visitor"/>
+			<arg value = "${src}/Grammar/C99A3.g4"/>
+			<arg value = "-package"/>
+			<arg value = "Grammar.C99A3"/>
+			<arg value = "-o"/>
+			<arg value = "${src}/Grammar/C99A3/"/>
+		</exec>
 		<javac srcdir="${src}" destdir="${bin}" debug="on"/>
 	</target>
 </project>
