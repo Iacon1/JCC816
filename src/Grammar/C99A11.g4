@@ -43,3 +43,14 @@ Bool : '_Bool' ;
 Complex : '_Complex' ; 
 Imaginary : '_Imaginary' ; 
 Asm : 'asm' ; // As per J.5.10
+
+Define : 'define' {Grammar.GrammarFlags.isPreproc}? ;
+Ifdef : 'ifdef' {Grammar.GrammarFlags.isPreproc}? ;
+Ifndef : 'ifndef' {Grammar.GrammarFlags.isPreproc}? ;
+Elif : 'elif' {Grammar.GrammarFlags.isPreproc}? ;
+Endif : 'endif' {Grammar.GrammarFlags.isPreproc}? ;
+Include : 'include' {Grammar.GrammarFlags.isPreproc}? ;
+Undef : 'undef' {Grammar.GrammarFlags.isPreproc}? ;
+Line : 'line' {Grammar.GrammarFlags.isPreproc}? ;
+Error : 'error' {Grammar.GrammarFlags.isPreproc}? ;
+Pragma : 'pragma' {Grammar.GrammarFlags.isPreproc}? ;

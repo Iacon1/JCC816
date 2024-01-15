@@ -10,29 +10,29 @@ group_part
 	: if_section
 	| control_line
 	| text_line
-	| '#' non_directive ;
+	| HashTg non_directive ;
 if_section : if_group elif_groups? else_group? endif_line ;
 if_group
-	: '#' 'if' constant_expression '\n' group?
-	| '#' 'ifdef' Identifier '\n' group?
-	| '#' 'ifndef' Identifier '\n' group? ;
+	: HashTg If constant_expression NL group?
+	| HashTg Ifdef Identifier NL group?
+	| HashTg Ifndef Identifier NL group? ;
 elif_groups: elif_group+ ;
-elif_group : '#' 'elif' constant_expression '\n' group? ;
-else_group : '#' 'else' '\n' group? ;
-endif_line : '#' 'endif' '\n' ;
+elif_group : HashTg Elif constant_expression NL group? ;
+else_group : HashTg Else NL group? ;
+endif_line : HashTg Endif NL ;
 control_line
-	: '#' 'include' pp_token+ '\n'
-	| '#' 'define' Identifier pp_token* '\n'
-	| '#' 'define' Identifier '(' identifier_list? ')' '\n' pp_token* '\n'
-	| '#' 'define' Identifier '(' '...' ')' '\n' pp_token* '\n'
-	| '#' 'define' Identifier '(' identifier_list ',' '...' ')' '\n' pp_token* '\n'
-	| '#' 'undef' Identifier '\n'
-	| '#' 'line' pp_token* '\n'
-	| '#' 'error' pp_token* '\n'
-	| '#' 'pragma' pp_token* '\n'
-	| '#' '\n' ;
-text_line : pp_token* '\n' ;
-non_directive : pp_token+ '\n' ;
+	: HashTg Include pp_token+ NL
+	| HashTg Define Identifier pp_token* NL
+	| HashTg Define Identifier LeRoBr identifier_list? RiRoBr NL pp_token* NL
+	| HashTg Define Identifier LeRoBr ThreeP RiRoBr NL pp_token* NL
+	| HashTg Define Identifier LeRoBr identifier_list Comma ThreeP RiRoBr NL pp_token* NL
+	| HashTg Undef Identifier NL
+	| HashTg Line pp_token* NL
+	| HashTg Error pp_token* NL
+	| HashTg Pragma pp_token* NL
+	| HashTg NL ;
+text_line : pp_token* NL ;
+non_directive : pp_token+ NL ;
 
 pp_token
 	: Header_name
