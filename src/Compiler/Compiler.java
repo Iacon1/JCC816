@@ -27,6 +27,8 @@ import Compiler.CompilerNodes.ProgramNode;
 import Grammar.C99.C99Lexer;
 import Grammar.C99.C99Parser;
 import Grammar.C99.C99Parser.ProgramContext;
+import Grammar.C99A3.C99A3Lexer;
+import Grammar.C99A3.C99A3Parser;
 import Logging.Logging;
 
 public class Compiler
@@ -47,8 +49,6 @@ public class Compiler
 		
 		return new CommonTokenStream(lexer);
 	}
-
-	
 	private static ParseDouble parse(CommonTokenStream tokens) throws Exception
 	{
 		SyntaxErrorCollector collector = new SyntaxErrorCollector();
@@ -61,7 +61,6 @@ public class Compiler
 		if (collector.getException() != null) throw collector.getException();
 		return parseDouble;
 	}
-	
 	private static String emit(ParseDouble parseDouble) throws Exception
 	{
 		Globals.reset();
@@ -70,28 +69,10 @@ public class Compiler
 		return program.getAssembly();
 
 	}
-	private static String precompile(String mainFile)
+	private static String precompile(String filename, String mainFile) throws Exception
 	{
-		// Not using a language-based approach because ANTLR doesn't like the one they had in the C docs for preprocessing
-		String[] lines = mainFile.split("\n");
-		String source = "";
-		boolean bigComment = false;
-		for (String line : lines)
-		{
-			if (bigComment && line.contains("*/"))
-			{
-				line = line.replaceFirst(".*\\*/", "");
-				bigComment = false;
-			}
-			else if (bigComment) continue;
-			line = line.replaceFirst("//.*", "");
-			if (line.contains("/*")) bigComment = true;
-			if (!line.isEmpty()) source += line + "\n";
-		}
-		
-		return source;
+		return Preprocessor.preprocess(filename, mainFile);
 	}
-	
 	
 	private  static String postprocess(String assembly) throws Exception
 	{
@@ -105,17 +86,20 @@ public class Compiler
 		return assembly;
 	}
 		
-	
-	public static String compile(String mainFile, boolean debug) throws Exception
+	public static void procPragma(List<String> parameters)
+	{
+		// TODO
+	}
+	public static String compile(String filename, String mainFile, boolean debug) throws Exception
 	{ 
 		String assembly = "";
 
 		long t = System.currentTimeMillis();
 
-		String source = precompile(mainFile);
+		String source = precompile(filename, mainFile);
 		printInfo("Precompiled in " + (System.currentTimeMillis() - t) + " ms. Source length: " + source.length() + ".");
 		t = System.currentTimeMillis();
-//		Logging.logNotice(source);
+		Logging.logNotice(source);
 		CommonTokenStream tokens = lex(source);
 		printInfo("Lexed in " + (System.currentTimeMillis() - t) + " ms. Tokens: " + tokens.getNumberOfOnChannelTokens() + ".");
 		t = System.currentTimeMillis();
