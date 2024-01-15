@@ -4,8 +4,8 @@ package Compiler.Utils;
 
 import java.util.function.BiFunction;
 
-import Compiler.ComponentNodes.Definitions.Type;
-import Compiler.ComponentNodes.LValues.LValueNode;
+import Compiler.CompilerNodes.Definitions.Type;
+import Compiler.CompilerNodes.LValues.LValueNode;
 import Compiler.Utils.OperandSources.OperandSource;
 import Compiler.Utils.OperandSources.WrapperSource;
 

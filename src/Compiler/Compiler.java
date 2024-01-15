@@ -22,8 +22,8 @@ import org.antlr.v4.runtime.atn.ATNConfigSet;
 import org.antlr.v4.runtime.dfa.DFA;
 import org.antlr.v4.runtime.tree.ParseTree;
 
-import Compiler.ComponentNodes.Globals;
-import Compiler.ComponentNodes.ProgramNode;
+import Compiler.CompilerNodes.Globals;
+import Compiler.CompilerNodes.ProgramNode;
 import Grammar.C99.C99Lexer;
 import Grammar.C99.C99Parser;
 import Grammar.C99.C99Parser.ProgramContext;

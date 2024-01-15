@@ -1,0 +1,92 @@
+// Created by Iacon1 on 10/19/2023.
+//
+package Compiler.CompilerNodes.Definitions;
+
+import java.util.LinkedList;
+import java.util.List;
+
+import Compiler.CompilerNodes.ComponentNode;
+import Compiler.CompilerNodes.Globals;
+import Compiler.CompilerNodes.InterpretingNode;
+import Compiler.CompilerNodes.Declarations.StructDeclarationNode;
+import Compiler.CompilerNodes.Interfaces.NamedNode;
+import Compiler.CompilerNodes.LValues.MemberNode;
+import Grammar.C99.C99Parser.Struct_declarationContext;
+import Grammar.C99.C99Parser.Struct_or_union_specifierContext;
+
+public class StructUnionDefinitionNode extends InterpretingNode<StructUnionDefinitionNode, Struct_or_union_specifierContext> implements NamedNode
+{
+	private boolean isUnion;
+	private String name;
+	private List<MemberNode> members;
+	static int unnamedStructs = 0;
+	public StructUnionDefinitionNode(ComponentNode<?> parent)
+	{
+		super(parent);
+		isUnion = false;
+		name = null;
+		members = new LinkedList<MemberNode>();
+	}
+	@Override
+	public StructUnionDefinitionNode interpret(Struct_or_union_specifierContext node) throws Exception
+	{
+		if (node.getChild(0).getText().equals("union")) isUnion = true;
+		else isUnion = false;
+		
+		if (node.Identifier() != null) name = node.Identifier().getText();
+		else
+		{
+			name = "__" + unnamedStructs + "struct";
+			unnamedStructs += 1;
+		}
+		for (Struct_declarationContext decl : node.struct_declaration_list().struct_declaration())
+			members.addAll(new StructDeclarationNode(this).interpret(decl).getMembers());
+		
+		Globals.registerStructUnion(this);
+		return this;
+	}
+
+	public int getSize()
+	{
+		return (int) Math.ceil(getSizeBits() / 8);
+	}
+	public int getSizeBits()
+	{
+		int sizeBits = 0;
+		for (int i = 0; i < members.size(); ++i)
+			if (isUnion) sizeBits = Math.max(sizeBits, members.get(i).getSizeBits());
+			else sizeBits += members.get(i).getSizeBits();
+		return sizeBits;
+	}
+	public boolean isUnion()
+	{
+		return isUnion;
+	}
+	public int getOffsetBits(String memberName)
+	{
+		if (isUnion) return 0;
+		int offset = 0;
+		for (int i = 0; i < members.size(); ++i)
+			if (members.get(i).getName().equals(memberName))
+				return offset;
+			else offset += members.get(i).getSizeBits();
+		return 0;
+	}
+	public int getOffset(String memberName)
+	{
+		return (int) Math.floor( getOffsetBits(memberName) / 8);
+	}
+	public MemberNode getMember(String memberName)
+	{
+		for (int i = 0; i < members.size(); ++i)
+			if (members.get(i).getName().equals(memberName)) return members.get(i);
+		return null;
+	}
+	
+	@Override
+	public String getName()
+	{
+		return name;
+	}
+	
+}

@@ -5,8 +5,8 @@ package Compiler.Utils;
 
 import java.util.function.BiFunction;
 
-import Compiler.ComponentNodes.Interfaces.NamedNode;
-import Compiler.ComponentNodes.Interfaces.TypedNode;
+import Compiler.CompilerNodes.Interfaces.NamedNode;
+import Compiler.CompilerNodes.Interfaces.TypedNode;
 import Compiler.Utils.AssemblyUtils.DetailsTicket;
 
 public class PropPointer<T extends NamedNode & TypedNode> implements BiFunction<Integer, DetailsTicket, String>
