@@ -2,180 +2,181 @@
 // Defines the C99 phrase grammar.
 // Note: Rules that are capitalized are lexical, rules that aren't are parsed.
 
-grammar C99A2;
-import C99A1;
+parser grammar C99A2;
+// import C99A1, C99A11, C99A17;
 
 // A.2.1 Expressions
 primary_expression
 	: Identifier
 	| Constant
 	| String_literal
-	| '(' expression ')' ;	
+	| LeRoBr expression RiRoBr ;	
 postfix_expression
 	: primary_expression
-	| postfix_expression '[' expression ']'
-	| postfix_expression '(' argument_expression_list? ')'
-	| postfix_expression '.' Identifier
-	| postfix_expression '->' Identifier
-	| postfix_expression '++'
-	| postfix_expression '--'
-	| '(' type_name ')' '{' initializer_list ','? '}' ;	
-argument_expression_list : assignment_expression (',' assignment_expression)* ;	
+	| postfix_expression LeSqBr expression RiSqBr
+	| postfix_expression LeRoBr argument_expression_list? RiRoBr
+	| postfix_expression Period Identifier
+	| postfix_expression Arrow Identifier
+	| postfix_expression Incrmn
+	| postfix_expression Decrmn
+	| LeRoBr type_name RiRoBr LeCuBr initializer_list Comma? RiCuBr ;	
+argument_expression_list : assignment_expression (Comma assignment_expression)* ;	
 unary_expression
 	: postfix_expression
-	| '++' unary_expression
-	| '--' unary_expression
-	| ('&'|'*'|'+'|'-'|'~'|'!') cast_expression
-	| 'sizeof' unary_expression
-	| 'sizeof' '(' type_name ')' ;	
+	| Incrmn unary_expression
+	| Decrmn unary_expression
+	| (Amper|Star|Plus|Minus|Tilde|Excla) cast_expression
+	| Sizeof unary_expression
+	| Sizeof LeRoBr type_name RiRoBr ;	
 cast_expression
 	: unary_expression
-	| '(' type_name ')' cast_expression ;	
+	| LeRoBr type_name RiRoBr cast_expression ;	
 multiplicative_expression
 	: cast_expression
-	| multiplicative_expression ('*'|'/'|'%') cast_expression ;	
+	| multiplicative_expression (Star|BckSla|Percnt) cast_expression ;	
 additive_expression
 	: multiplicative_expression
-	| additive_expression ('+'|'-') multiplicative_expression ;
+	| additive_expression (Plus|Minus) multiplicative_expression ;
 shift_expression
 	: additive_expression
-	| shift_expression ('<<'|'>>') additive_expression ;	
+	| shift_expression (LssLss|GrtGrt) additive_expression ;	
 relational_expression
 	: shift_expression
-	| relational_expression ('<'|'>'|'<='|'>=') shift_expression ;	
+	| relational_expression (LessTh|GretTh|LessEq|GretEq) shift_expression ;	
 equality_expression
 	: relational_expression
-	| equality_expression ('=='|'!=') relational_expression ;
+	| equality_expression (Equal|NotEql) relational_expression ;
 and_expression
 	: equality_expression
-	| and_expression '&' equality_expression ;	
+	| and_expression Amper equality_expression ;	
 xor_expression
 	: and_expression
-	| xor_expression '^' and_expression ;
+	| xor_expression Xor and_expression ;
 or_expression
 	: xor_expression
-	| or_expression '|' xor_expression ;	
+	| or_expression Or xor_expression ;	
 land_expression
 	: or_expression
-	| land_expression '&&' or_expression ;	
+	| land_expression AmpAmp or_expression ;	
 lor_expression
 	: land_expression
-	| lor_expression '||' land_expression ;
+	| lor_expression OrOr land_expression ;
 conditional_expression
 	: lor_expression
-	| lor_expression '?' expression ':' conditional_expression ;
+	| lor_expression Questi expression Colon conditional_expression ;
 assignment_expression
 	: conditional_expression
-	| unary_expression ('='|'*='|'/='|'%='|'+='|'-='|'<<='|'>>='|'&='|'^='|'|=') assignment_expression ;
-expression : assignment_expression (',' assignment_expression)* ;
+	| unary_expression (Assign|MulAsg|DivAsg|ModAsg|PluAsg|SubAsg|LShAsg|RShAsg|AndAsg|XorAsg|OrAsg) assignment_expression ;
+expression : assignment_expression (Comma assignment_expression)* ;
 constant_expression : conditional_expression ;
 
 // A.2.2 Declarations
-declaration : declaration_specifiers init_declarator_list? ';' ;
+declaration : declaration_specifiers init_declarator_list? Semico ;
 declaration_specifiers
 	: (storage_class_specifier
 	| type_specifier
 	| type_qualifier
 	| function_specifier)+? ;
-storage_class_specifier:'typedef'|'extern'|'static'|'auto'|'register';
-function_specifier : 'inline' ;
-init_declarator_list : init_declarator (',' init_declarator)* ;
-init_declarator: declarator ('=' initializer)? ;
+storage_class_specifier:Typedef|Extern|Static|Auto|Register;
+function_specifier : Inline ;
+init_declarator_list : init_declarator (Comma init_declarator)* ;
+init_declarator: declarator (Assign initializer)? ;
 type_specifier
-	: ('void'|'char'|'short'|'int'|'long'|'float'|'double'|'signed'|'unsigned'|'_Bool'|'_Complex')
+	: (Void|Char|Short|Int|Long|Float|Double|Signed|Unsigned|Bool|Complex)
 	| struct_or_union_specifier
 	| enum_specifier
 	| typedef_name ;
 struct_or_union_specifier
-	: ('struct'|'union') Identifier? '{' struct_declaration_list '}'
-	| ('struct'|'union') Identifier ;
+	: (Struct|Union) Identifier? LeCuBr struct_declaration_list RiCuBr
+	| (Struct|Union) Identifier ;
 struct_declaration_list : struct_declaration+ ;
-struct_declaration : specifier_qualifier_list struct_declarator_list ';' ;
+struct_declaration : specifier_qualifier_list struct_declarator_list Semico ;
 specifier_qualifier_list : (type_specifier|type_qualifier) specifier_qualifier_list? ;
-struct_declarator_list : struct_declarator (',' struct_declarator)* ;
+struct_declarator_list : struct_declarator (Comma struct_declarator)* ;
 struct_declarator
 	: declarator
-	| declarator? ':' constant_expression ;
+	| declarator? Colon constant_expression ;
 enum_specifier
-	: 'enum' Identifier? '{' enumerator_list ','? '}'
-	| 'enum' Identifier ;
-enumerator_list : enumerator (',' enumerator)* ;
-enumerator : Identifier ('=' constant_expression)? ;
-type_qualifier : ('const'|'restrict'|'volatile') ;
+	: Enum Identifier? LeSqBr enumerator_list Comma? RiCuBr
+	| Enum Identifier ;
+enumerator_list : enumerator (Comma enumerator)* ;
+enumerator : Identifier (Assign constant_expression)? ;
+type_qualifier : (Const|Restrict|Volatile) ;
 declarator : pointer? direct_declarator ;
 direct_declarator
 	: Identifier
-	| '(' declarator ')'
-	| direct_declarator '[' type_qualifier_list? assignment_expression? ']'
-	| direct_declarator '[' 'static' type_qualifier_list? assignment_expression ']'
-	| direct_declarator '[' type_qualifier_list 'static' assignment_expression ']'
-	| direct_declarator '[' type_qualifier_list? '*' ']'
-	| direct_declarator '(' parameter_type_list ')'
-	| direct_declarator '(' identifier_list? ')' ;
-pointer : ('*' type_qualifier_list?)+ ;
+	| LeRoBr declarator RiRoBr
+	| direct_declarator LeSqBr type_qualifier_list? assignment_expression? RiSqBr
+	| direct_declarator LeSqBr Static type_qualifier_list? assignment_expression RiSqBr
+	| direct_declarator LeSqBr type_qualifier_list Static assignment_expression RiSqBr
+	| direct_declarator LeSqBr type_qualifier_list? Star RiSqBr
+	| direct_declarator LeRoBr parameter_type_list RiRoBr
+	| direct_declarator LeRoBr identifier_list? RiRoBr ;
+pointer : (Star type_qualifier_list?)+ ;
 type_qualifier_list : type_qualifier+ ;
-parameter_type_list : parameter_list (',' '...')? ;
-parameter_list : parameter_declaration (',' parameter_declaration)* ;
+parameter_type_list : parameter_list (Comma ThreeP)? ;
+parameter_list : parameter_declaration (Comma parameter_declaration)* ;
 parameter_declaration : declaration_specifiers (declarator|abstract_declarator?) ;
-identifier_list : Identifier (',' Identifier)* ;
+identifier_list : Identifier (Comma Identifier)* ;
 type_name : specifier_qualifier_list abstract_declarator? ;
 abstract_declarator
 	: pointer
 	| pointer? direct_abstract_declarator ;
 direct_abstract_declarator
-	: '(' declarator ')'
-	| direct_abstract_declarator '[' type_qualifier_list? assignment_expression? ']'
-	| direct_abstract_declarator '[' 'static' type_qualifier_list? assignment_expression ']'
-	| direct_abstract_declarator '[' type_qualifier_list 'static' assignment_expression ']'
-	| direct_abstract_declarator '[' type_qualifier_list? '*' ']'
-	| direct_abstract_declarator '(' parameter_type_list ')'
-	| direct_abstract_declarator '(' identifier_list? ')' ;
+	: LeRoBr declarator RiRoBr
+	| direct_abstract_declarator LeSqBr type_qualifier_list? assignment_expression? RiSqBr
+	| direct_abstract_declarator LeSqBr Static type_qualifier_list? assignment_expression RiSqBr
+	| direct_abstract_declarator LeSqBr type_qualifier_list Static assignment_expression RiSqBr
+	| direct_abstract_declarator LeSqBr type_qualifier_list? Star RiSqBr
+	| direct_abstract_declarator LeRoBr parameter_type_list RiRoBr
+	| direct_abstract_declarator LeRoBr identifier_list? RiRoBr ;
 typedef_name : Identifier ;
 initializer
 	: assignment_expression
-	| '{' initializer_list ','? '}' ;
-initializer_list : designation? initializer (',' designation? initializer)+ ;
-designation : designator_list '=' ;
+	| LeCuBr initializer_list Comma? RiCuBr ;
+initializer_list : designation? initializer (Comma designation? initializer)+ ;
+designation : designator_list Assign ;
 designator_list : designator+ ;
 designator
-	: '[' constant_expression ']'
-	| '.' Identifier ;
-attributes_declaration : '[[' identifier_list ']]' ;
+	: LeSqBr constant_expression RiSqBr
+	| Period Identifier ;
+attributes_declaration : TwoLSB identifier_list TwoRSB ;
 
 // A.2.3 Statements
 statement
-	: labeled_statement
+	: asm_statement
+	| labeled_statement
 	| compound_statement
 	| expression_statement
 	| selection_statement
 	| iteration_statement
 	| jump_statement 
-	| asm_statement ;
+	;
 labeled_statement
-	: Identifier ':' statement
-	| 'case' constant_expression ':' statement
-	| 'default' ':' statement ;
-compound_statement : '{' block_item_list? '}' ;
+	: Identifier Colon statement
+	| Case constant_expression Colon statement
+	| Default Colon statement ;
+compound_statement : LeCuBr block_item_list? RiCuBr ;
 block_item_list : block_item+ ;
 block_item
 	: statement
 	| declaration ;
-expression_statement : expression? ';' ;
+expression_statement : expression? Semico ;
 selection_statement
-	: 'if' '(' expression ')' statement
-	| 'if' '(' expression ')' statement 'else' statement
-	| 'switch' '(' expression ')' statement ;
+	: If LeRoBr expression RiRoBr statement
+	| If LeRoBr expression RiRoBr statement Else statement
+	| Switch LeRoBr expression RiRoBr statement ;
 iteration_statement
-	: 'while' '(' expression ')' statement
-	| 'do' statement 'while' '(' expression ')' ';'
-	| 'for' '(' expression? ';' expression? ';' expression? ')' statement
-	| 'for' '(' declaration expression? ';' expression? ')' statement ;
+	: While LeRoBr expression RiRoBr statement
+	| Do statement While LeRoBr expression RiRoBr Semico
+	| For LeRoBr expression? Semico expression? Semico expression? RiRoBr statement
+	| For LeRoBr declaration expression? Semico expression? RiRoBr statement ;
 jump_statement
-	: 'goto' Identifier ';'
-	| 'continue' ';'
-	| 'break' ';'
-	| 'return' expression? ';' ;
-asm_statement : 'asm' '(' String_literal ')' ';' ; // As per J.5.10
+	: Goto Identifier Semico
+	| Continue Semico
+	| Break Semico
+	| Return expression? Semico ;
+asm_statement : Asm LeRoBr String_literal RiRoBr Semico ; // As per J.5.10
 
 // A.2.4 External definitions 
 translation_unit: external_declaration+ ;
@@ -184,3 +185,4 @@ external_declaration
 	| declaration ;
 function_definition : attributes_declaration* declaration_specifiers declarator declaration_list? compound_statement ;
 declaration_list : declaration+ ;
+	
