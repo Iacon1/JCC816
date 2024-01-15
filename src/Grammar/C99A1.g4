@@ -8,7 +8,8 @@ lexer grammar C99A1;
 tokens {Asm}
 
 WS : [ \t\r]+ -> skip ; // skip spaces, tabs
-NL : [\n]+ {!Grammar.GrammarFlags.isPreproc}? -> skip ; // Skip newlines
+NLS : [\n]+ {!Grammar.GrammarFlags.isPreproc}? -> skip ; // Skip newlines
+NL : '\n' {Grammar.GrammarFlags.isPreproc}? ; // Preproc newline
 
 Pp_number: '.'? [0-9] ([0-9]|[a-zA-Z_]|Universal_character_name|[eEpP][+-]|'.')* {Grammar.GrammarFlags.isPreproc}? ;
 

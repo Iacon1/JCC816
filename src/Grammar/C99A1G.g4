@@ -40,6 +40,16 @@ keyword
 	| Complex
 	| Imaginary
 	| Asm
+	| Define
+	| Ifdef
+	| Ifndef
+	| Elif
+	| Endif
+	| Include
+	| Undef
+	| Line
+	| Error
+	| Pragma
 	;
 	
 punctuator
