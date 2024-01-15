@@ -5,13 +5,9 @@
 lexer grammar C99A1;
 // import C99A11, C99A17;
 
-tokens {Asm}
-
 WS : [ \t\r]+ -> skip ; // skip spaces, tabs
 NLS : [\n]+ {!Grammar.GrammarFlags.isPreproc}? -> skip ; // Skip newlines
 NL : '\n' {Grammar.GrammarFlags.isPreproc}? ; // Preproc newline
-
-Pp_number: '.'? [0-9] ([0-9]|[a-zA-Z_]|Universal_character_name|[eEpP][+-]|'.')* {Grammar.GrammarFlags.isPreproc}? ;
 
 // A.1.3 Identifiers
 Identifier : ([a-zA-Z_]|Universal_character_name) ([0-9a-zA-Z_]|Universal_character_name)* ;
@@ -25,7 +21,7 @@ fragment Universal_character_name
 Constant
 	: Integer_constant
 	| Floating_constant
-	| Enumeration_constant
+	| Enumeration_constant {!Grammar.GrammarFlags.isPreproc}?
 	| Character_constant ;
 fragment Integer_constant : ([1-9][0-9]* | '0' [0-7]* | ('0x'|'0X') [0-9a-fA-F]+) Integer_suffix?;
 fragment Integer_suffix : [uU] ([lL]|'ll'|'LL')? | ([lL]|'ll'|'LL') ;

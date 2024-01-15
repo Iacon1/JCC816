@@ -44,6 +44,7 @@ Complex : '_Complex' ;
 Imaginary : '_Imaginary' ; 
 Asm : 'asm' ; // As per J.5.10
 
+Defined : 'defined' {Grammar.GrammarFlags.isPreproc}? ;
 Define : 'define' {Grammar.GrammarFlags.isPreproc}? ;
 Ifdef : 'ifdef' {Grammar.GrammarFlags.isPreproc}? ;
 Ifndef : 'ifndef' {Grammar.GrammarFlags.isPreproc}? ;

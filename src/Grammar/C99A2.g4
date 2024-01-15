@@ -27,7 +27,10 @@ unary_expression
 	| Decrmn unary_expression
 	| (Amper|Star|Plus|Minus|Tilde|Excla) cast_expression
 	| Sizeof unary_expression
-	| Sizeof LeRoBr type_name RiRoBr ;	
+	| Sizeof LeRoBr type_name RiRoBr
+	| Defined Identifier
+	| Defined LeRoBr Identifier RiRoBr
+	;
 cast_expression
 	: unary_expression
 	| LeRoBr type_name RiRoBr cast_expression ;	
