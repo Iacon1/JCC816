@@ -104,10 +104,10 @@ public final class CompConfig
 	
 	public static enum OptimizationLevel
 	{
-		min, // + Basic (intra-expression) constant propagation
-		low, // + REP/SEP optimization
+		min, 	// + Basic (intra-expression) constant propagation
+		low, 	// + REP/SEP optimization
 		medium, // + Aggressive (inter-line) constant propagation and shrinkwrapping
-		all, // + Dependency graph optimization
+		all, 	// + Dependency graph optimization
 		;
 		public static boolean isAtLeast(OptimizationLevel level)
 		{
@@ -118,8 +118,8 @@ public final class CompConfig
 	
 	public static enum DebugLevel
 	{
-		none, // None
-		low, // + Output symbols
+		none, 	// None
+		low, 	// + Output symbols
 		medium, // + Comments
 		;
 		public static boolean isAtLeast(DebugLevel level)
@@ -128,4 +128,16 @@ public final class CompConfig
 		}
 	}
 	public static DebugLevel debugLevel = DebugLevel.medium;
+	
+	public static enum VerbosityLevel
+	{
+		none, 	// None
+		medium, // + Timing data
+		;
+		public static boolean isAtLeast(VerbosityLevel level)
+		{
+			return CompConfig.verbosityLevel.compareTo(level) >= 0;
+		}
+	}
+	public static VerbosityLevel verbosityLevel = VerbosityLevel.medium;
 }

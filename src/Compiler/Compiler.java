@@ -8,7 +8,7 @@ import java.util.List;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 
-import Compiler.CompilerNodes.Globals;
+import Compiler.CompConfig.VerbosityLevel;
 import Compiler.CompilerNodes.TranslationUnitNode;
 import Grammar.C99.C99Lexer;
 import Grammar.C99.C99Parser;
@@ -56,24 +56,24 @@ public class Compiler
 	{ 
 		long t = System.currentTimeMillis();
 
-		String source = precompile(filename, mainFile);
-		printInfo("Precompiled in " + (System.currentTimeMillis() - t) + " ms. Source length: " + source.length() + ".");
+		if (VerbosityLevel.isAtLeast(VerbosityLevel.medium))
 			printInfo("Compiling " + filename + "...");
+		
 		String source = precompile(filename, file);
+		if (VerbosityLevel.isAtLeast(VerbosityLevel.medium))
 			printInfo("Precompiled in " + (System.currentTimeMillis() - t) + " ms. Source length: " + source.length() + ".");
 		t = System.currentTimeMillis();
 		Logging.logNotice(source);
 		
 		CommonTokenStream tokens = lex(source);
-		printInfo("Lexed in " + (System.currentTimeMillis() - t) + " ms. Tokens: " + tokens.getNumberOfOnChannelTokens() + ".");
+		if (VerbosityLevel.isAtLeast(VerbosityLevel.medium))
+			printInfo("Lexed in " + (System.currentTimeMillis() - t) + " ms. Tokens: " + tokens.getNumberOfOnChannelTokens() + ".");
 		t = System.currentTimeMillis();
 
-		ParseDouble parseDouble = parse(tokens);
-		printInfo("Parsed in " + (System.currentTimeMillis() - t) + " ms.");
-		if (debug) Logging.viewParseTree(parseDouble.parser, parseDouble.tree);
-		t = System.currentTimeMillis();
 		TranslationUnitNode unit = parse(tokens);
+		if (VerbosityLevel.isAtLeast(VerbosityLevel.medium))
 			printInfo("Parsed in " + (System.currentTimeMillis() - t) + " ms.");
+		if (VerbosityLevel.isAtLeast(VerbosityLevel.medium))
 			printInfo("Compilation done.");
 
 		return unit;
