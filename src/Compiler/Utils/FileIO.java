@@ -5,6 +5,7 @@ package Compiler.Utils;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
@@ -30,5 +31,14 @@ public final class FileIO
 	public static final String readFile(String filename) throws IOException
 	{
 		return readFile(new File(filename));
+	}
+	
+	public static final void writeFile(String filename, byte[] bytes) throws IOException
+	{
+		File f = new File(filename);
+		f.createNewFile();
+		FileOutputStream fo = new FileOutputStream(f);
+		fo.write(bytes);
+		fo.close();
 	}
 }

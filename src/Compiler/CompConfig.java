@@ -114,7 +114,7 @@ public final class CompConfig
 			return CompConfig.optimizationLevel.compareTo(level) >= 0;
 		}
 	}
-	public static OptimizationLevel optimizationLevel = OptimizationLevel.min;
+	public static OptimizationLevel optimizationLevel = OptimizationLevel.all;
 	
 	public static enum DebugLevel
 	{
@@ -127,7 +127,7 @@ public final class CompConfig
 			return CompConfig.debugLevel.compareTo(level) >= 0;
 		}
 	}
-	public static DebugLevel debugLevel = DebugLevel.medium;
+	public static DebugLevel debugLevel = DebugLevel.none;
 	
 	public static enum VerbosityLevel
 	{
@@ -139,5 +139,5 @@ public final class CompConfig
 			return CompConfig.verbosityLevel.compareTo(level) >= 0;
 		}
 	}
-	public static VerbosityLevel verbosityLevel = VerbosityLevel.medium;
+	public static VerbosityLevel verbosityLevel = VerbosityLevel.none;
 }
