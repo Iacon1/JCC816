@@ -38,7 +38,7 @@ public final class Banker
 				if (!blockAssembly.isEmpty())
 				{
 					long blockSize = new ASMGraphBuilder(blockAssembly).getSize();
-					Logging.logNotice(String.valueOf(blockSize));
+//					Logging.logNotice(String.valueOf(blockSize));
 					if (blockSize >= bankSize)
 						throw new UnsupportedFeatureException("Functions larger than " + bankSizeKB() + " KB", false, i, 0);
 					if (lastBank + blockSize >= bankSize) // Need to make new bank

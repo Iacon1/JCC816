@@ -69,7 +69,7 @@ public final class Preprocessor
 		if (collector.getException() != null) throw collector.getException();
 
 		GroupContext group = parser.group();
-		Logging.viewParseTree(parser, group);
+//		Logging.viewParseTree(parser, group);
 		return group;
 	}
 	
