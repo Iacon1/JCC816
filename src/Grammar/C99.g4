@@ -5,4 +5,4 @@
 grammar C99;
 import C99A11, C99A17, C99A1, C99A2;
 
-program : translation_unit ;
+dummy: translation_unit; // Just to get this to compile

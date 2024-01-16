@@ -114,9 +114,9 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 		case funcCall:
 			return ((FunctionType) expr.getType()).getType();
 		case structMember:
-			return ComponentNode.resolveStructOrUnion(expr.getType().getSUEName()).getMember(memberName).getType();
+			return getTranslationUnit().resolveStructOrUnion(expr.getType().getSUEName()).getMember(memberName).getType();
 		case structMemberP:
-			return ComponentNode.resolveStructOrUnion(((PointerType) expr.getType()).getType().getSUEName()).getMember(memberName).getType();	
+			return getTranslationUnit().resolveStructOrUnion(((PointerType) expr.getType()).getType().getSUEName()).getMember(memberName).getType();	
 		default:
 			return null;
 		}
@@ -148,9 +148,9 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 		case arraySubscript:
 			return new IndirectLValueNode(this, destSource, getType());
 		case structMember:
-			return ComponentNode.resolveStructOrUnion(expr.getType().getSUEName()).getMember(memberName).getInstance(expr.getLValue());
+			return getTranslationUnit().resolveStructOrUnion(expr.getType().getSUEName()).getMember(memberName).getInstance(expr.getLValue());
 		case structMemberP:
-			return ComponentNode.resolveStructOrUnion(((PointerType) expr.getType()).getType().getSUEName()).getMember(memberName).getInstance(pointerRef);	
+			return getTranslationUnit().resolveStructOrUnion(((PointerType) expr.getType()).getType().getSUEName()).getMember(memberName).getInstance(pointerRef);	
 		default:
 			return null;
 		}

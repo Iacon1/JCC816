@@ -35,7 +35,7 @@ public class C99Parser extends Parser {
 		Identifier=109, Constant=110, Character_constant=111, String_literal=112, 
 		Header_name=113;
 	public static final int
-		RULE_program = 0, RULE_primary_expression = 1, RULE_postfix_expression = 2, 
+		RULE_dummy = 0, RULE_primary_expression = 1, RULE_postfix_expression = 2, 
 		RULE_argument_expression_list = 3, RULE_unary_expression = 4, RULE_cast_expression = 5, 
 		RULE_multiplicative_expression = 6, RULE_additive_expression = 7, RULE_shift_expression = 8, 
 		RULE_relational_expression = 9, RULE_equality_expression = 10, RULE_and_expression = 11, 
@@ -61,7 +61,7 @@ public class C99Parser extends Parser {
 		RULE_declaration_list = 68;
 	private static String[] makeRuleNames() {
 		return new String[] {
-			"program", "primary_expression", "postfix_expression", "argument_expression_list", 
+			"dummy", "primary_expression", "postfix_expression", "argument_expression_list", 
 			"unary_expression", "cast_expression", "multiplicative_expression", "additive_expression", 
 			"shift_expression", "relational_expression", "equality_expression", "and_expression", 
 			"xor_expression", "or_expression", "land_expression", "lor_expression", 
@@ -172,24 +172,24 @@ public class C99Parser extends Parser {
 	}
 
 	@SuppressWarnings("CheckReturnValue")
-	public static class ProgramContext extends ParserRuleContext {
+	public static class DummyContext extends ParserRuleContext {
 		public Translation_unitContext translation_unit() {
 			return getRuleContext(Translation_unitContext.class,0);
 		}
-		public ProgramContext(ParserRuleContext parent, int invokingState) {
+		public DummyContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
-		@Override public int getRuleIndex() { return RULE_program; }
+		@Override public int getRuleIndex() { return RULE_dummy; }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof C99Visitor ) return ((C99Visitor<? extends T>)visitor).visitProgram(this);
+			if ( visitor instanceof C99Visitor ) return ((C99Visitor<? extends T>)visitor).visitDummy(this);
 			else return visitor.visitChildren(this);
 		}
 	}
 
-	public final ProgramContext program() throws RecognitionException {
-		ProgramContext _localctx = new ProgramContext(_ctx, getState());
-		enterRule(_localctx, 0, RULE_program);
+	public final DummyContext dummy() throws RecognitionException {
+		DummyContext _localctx = new DummyContext(_ctx, getState());
+		enterRule(_localctx, 0, RULE_dummy);
 		try {
 			enterOuterAlt(_localctx, 1);
 			{

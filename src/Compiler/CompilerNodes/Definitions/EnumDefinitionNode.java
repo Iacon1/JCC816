@@ -5,7 +5,6 @@ package Compiler.CompilerNodes.Definitions;
 
 import Compiler.CompConfig;
 import Compiler.CompilerNodes.ComponentNode;
-import Compiler.CompilerNodes.Globals;
 import Compiler.CompilerNodes.InterpretingNode;
 import Compiler.CompilerNodes.Dummies.EnumeratorNode;
 import Compiler.CompilerNodes.Expressions.BaseExpressionNode;
@@ -46,10 +45,9 @@ public class EnumDefinitionNode extends InterpretingNode<EnumDefinitionNode, Enu
 			}
 			else value++; // If value not specified, use value of previous + 1
 			
-			Globals.registerEnumerator(new EnumeratorNode(this, enumerator.Identifier().getText(), value));
+			new EnumeratorNode(this, enumerator.Identifier().getText(), value);
 		}
 		
-		Globals.registerEnum(this);
 		return this;
 	}
 	@Override

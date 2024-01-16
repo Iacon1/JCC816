@@ -9,7 +9,6 @@ import Compiler.CompilerNodes.Expressions.AssignmentExpressionNode;
 import Compiler.CompilerNodes.Expressions.BaseExpressionNode;
 import Compiler.CompilerNodes.ComponentNode;
 import Compiler.CompilerNodes.FunctionDefinitionNode;
-import Compiler.CompilerNodes.Globals;
 import Compiler.CompilerNodes.InterpretingNode;
 import Compiler.CompilerNodes.Definitions.Scope;
 import Compiler.CompilerNodes.Definitions.Type;
@@ -57,7 +56,6 @@ public class ParameterDeclarationNode extends InterpretingNode<ParameterDeclarat
 			DeclaratorNode declaratorNode = new DeclaratorNode(this).interpret(declarator);
 			Type type = Type.manufacture(specifiers.getSpecifiers(), declaratorNode, declarator.start);
 			VariableNode variable = new VariableNode(this, declaratorNode.getIdentifier(), type);
-			Globals.registerVariable(variable);
 			variables.add(variable);
 		}
 		else if (absDeclarator != null)

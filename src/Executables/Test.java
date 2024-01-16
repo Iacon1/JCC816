@@ -8,6 +8,8 @@ import Compiler.CartConfig;
 import Compiler.CartConfig.AddonChip;
 import Compiler.CartConfig.ROMType;
 import Compiler.Compiler;
+import Compiler.Linker;
+import Compiler.CompilerNodes.TranslationUnitNode;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -25,7 +27,10 @@ public class Test
 
 		CartConfig cartConfig = new CartConfig(ROMType.loROM, AddonChip.none, false, false, 0);
 		
-		String c = Compiler.compile("test.c", main, true);
+		TranslationUnitNode unit = Compiler.compile("test.c", main);
+		Linker l = new Linker();
+		l.addUnit(unit);
+		String c = l.link();
 		Logging.logNotice("\n" + c);
 		
 		byte[] sfc = Assembler.assemble("test", cartConfig, c, false);
