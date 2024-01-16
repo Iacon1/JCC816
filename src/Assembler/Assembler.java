@@ -10,6 +10,8 @@ import java.io.IOException;
 import Assembler.Header.DestinationCode;
 import Assembler.Configs.Configurer;
 import Compiler.CartConfig;
+import Compiler.CompConfig.DebugLevel;
+import Compiler.CompConfig.VerbosityLevel;
 import Compiler.Utils.FileIO;
 import Logging.Logging;
 
@@ -26,7 +28,7 @@ public class Assembler
 		else outStream.write(new String(chars).replaceAll("\\n", "\r\n").getBytes());
 		outStream.close();
 	}
-	public static byte[] assemble(String name, CartConfig cartConfig, String assembly, boolean debug) throws IOException
+	public static byte[] assemble(String name, CartConfig cartConfig, String assembly) throws IOException
 	{
 		File cfgFile, asmFile, sfcFile, dbgFile;
 		cfgFile = new File(name + ".cfg");
@@ -43,7 +45,7 @@ public class Assembler
 		asmStream.close();
 		
 		Process proc;
-		if (debug)
+		if (VerbosityLevel.isAtLeast(VerbosityLevel.medium))
 			proc = Runtime.getRuntime().exec(new String[] {"cl65", "--verbose", "-g", "-C", cfgFile.getAbsolutePath(), "-o", sfcFile.getAbsolutePath(), asmFile.getAbsolutePath(), "-Wl", "--dbgfile", "-Wl", name + ".dbg"});
 		else
 			proc = Runtime.getRuntime().exec(new String[] {"cl65", "--verbose", "-C", cfgFile.getAbsolutePath(), "-o", sfcFile.getAbsolutePath(), asmFile.getAbsolutePath()});
@@ -65,7 +67,7 @@ public class Assembler
 		headerBytes = header.asBytes();
 		for (int i = header.getOffset(); i < header.getOffset() + header.getSize(); ++i) bytes[i] = headerBytes[i - header.getOffset()];
 		
-		if (debug)
+		if (DebugLevel.isAtLeast(DebugLevel.medium))
 		{
 			dbgFile = new File(name + ".dbg");
 			convertNewline(dbgFile.getAbsolutePath(), true);
