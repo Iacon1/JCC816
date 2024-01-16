@@ -72,7 +72,7 @@ public class PrimaryExpressionNode extends BaseExpressionNode<Primary_expression
 	@Override
 	public List<VariableNode> getReferencedVariables(boolean strict)
 	{
-		List<VariableNode> referencedVariables = super.getReferencedVariables();
+		List<VariableNode> referencedVariables = super.getReferencedVariables(strict);
 		if (identifier != null && resolveVariableRelative(identifier) != null)
 			referencedVariables.add(resolveVariableRelative(identifier));
 		return referencedVariables;
