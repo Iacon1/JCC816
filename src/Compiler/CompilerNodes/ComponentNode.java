@@ -4,6 +4,7 @@
 
 package Compiler.CompilerNodes;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -17,7 +18,7 @@ import Compiler.CompilerNodes.LValues.VariableNode;
 import Compiler.CompilerNodes.Statements.IterationStatementNode;
 import Compiler.CompilerNodes.Statements.SelectionStatementNode;
 
-public class ComponentNode<T extends ComponentNode<T>>
+public class ComponentNode<T extends ComponentNode<T>> implements Serializable
 {
 	protected ComponentNode<?> parent;
 	protected List<ComponentNode<?>> children;

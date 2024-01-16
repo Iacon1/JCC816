@@ -2,6 +2,8 @@
 //
 package Compiler.CompilerNodes.Statements;
 
+import java.util.UUID;
+
 import Compiler.CompConfig;
 import Compiler.CompilerNodes.ComponentNode;
 import Compiler.CompilerNodes.FunctionDefinitionNode;
@@ -24,9 +26,7 @@ public class IterationStatementNode extends StatementNode<Iteration_statementCon
 		for_,
 	}
 	private IterType iterType;
-	
-	private static int iterCount = 0;
-	private int iterId;
+	private UUID iterId;
 	
 	private StatementNode<?> stmNode;
 	private BaseExpressionNode<?> condExpNode;
@@ -36,8 +36,7 @@ public class IterationStatementNode extends StatementNode<Iteration_statementCon
 	public IterationStatementNode(ComponentNode<?> parent)
 	{
 		super(parent);
-		iterId = iterCount;
-		iterCount += 1;
+		iterId = UUID.randomUUID();
 		
 		stmNode = null;
 		condExpNode = null;
@@ -45,8 +44,6 @@ public class IterationStatementNode extends StatementNode<Iteration_statementCon
 		iterExpNode = null;
 		declNode = null;
 	}
-	@Override
-	public void finalize() {iterCount -= 1;}
 
 	@Override
 	public boolean canCall(FunctionDefinitionNode function)

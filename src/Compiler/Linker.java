@@ -245,7 +245,7 @@ public final class Linker implements Catalogger
 	
 	public String getAssemblyRaw() throws Exception
 	{
-String assembly = "";
+		String assembly = "";
 		
 		// Get assembly from functions
 		for (FunctionDefinitionNode funcNode : getFunctions())

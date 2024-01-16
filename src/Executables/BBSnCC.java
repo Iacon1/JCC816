@@ -46,6 +46,7 @@ public class BBSnCC
 	public static void main(String[] args) throws Exception
 	{
 		CartConfig cartConfig = new CartConfig(ROMType.loROM, AddonChip.none, false, false, 0); // Default ROM config
+		Linker linker = new Linker();
 		
 		Logging.setLogger(new DebugLogger());
 		
@@ -80,28 +81,37 @@ public class BBSnCC
 			
 		}
 		
-		List<TranslationUnitNode> translationUnits = new LinkedList<TranslationUnitNode>();
-		for (String parameter : commandLine.getArgList())
+		if (commandLine.hasOption("l")) // Link to executable
 		{
-			if (parameter.endsWith(".c") || parameter.endsWith(".h")) // C file
+			List<TranslationUnitNode> translationUnits = new LinkedList<TranslationUnitNode>();
+			for (String parameter : commandLine.getArgList()) // Read all input files
 			{
-				String fileText = FileIO.readFile(parameter);
-				translationUnits.add(Compiler.compile(parameter, fileText));
+				if (parameter.endsWith(".c") || parameter.endsWith(".h")) // C file
+				{
+					String fileText = FileIO.readFile(parameter);
+					translationUnits.add(Compiler.compile(parameter, fileText));
+				}
+				else if (parameter.endsWith(".o"))
+				{
+					byte[] bytes = FileIO.readFileBytes(parameter);
+					translationUnits.add(FileIO.deserialize(bytes));
+				}
 			}
-			else if (parameter.endsWith(".o")) // TODO Object file
-			{
-				String fileText = FileIO.readFile(parameter);
-				translationUnits.add(Compiler.compile(parameter, fileText));
-			}
-		}
-		if (commandLine.hasOption("l"))
-		{
-			String name = commandLine.getOptionValue("l");
 			
-			Linker linker = new Linker();
+			String name = commandLine.getOptionValue("l");
+
 			linker.addUnits(translationUnits);
 			Assembler.Assembler.assemble(name, cartConfig, linker.link());
 		}
+		else // Save to .o files
+			for (String parameter : commandLine.getArgList())
+				if (parameter.endsWith(".c") || parameter.endsWith(".h")) // C file
+				{
+					String fileText = FileIO.readFile(parameter);
+					TranslationUnitNode node = Compiler.compile(parameter, fileText);
+					byte[] fileBytes = FileIO.serialize(node);
+					FileIO.writeFile(parameter.replaceAll("\\.[ch]", ".o"), fileBytes);
+				}
 	}
 
 }

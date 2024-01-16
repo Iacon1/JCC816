@@ -3,6 +3,8 @@
 
 package Compiler.CompilerNodes.Definitions;
 
+import java.util.UUID;
+
 import Compiler.CompConfig;
 import Compiler.CompilerNodes.ComponentNode;
 import Compiler.CompilerNodes.InterpretingNode;
@@ -18,7 +20,6 @@ public class EnumDefinitionNode extends InterpretingNode<EnumDefinitionNode, Enu
 {
 	private String name;
 	
-	static int unnamedEnums = 0;
 	public EnumDefinitionNode(ComponentNode<?> parent)
 	{
 		super(parent);
@@ -29,10 +30,7 @@ public class EnumDefinitionNode extends InterpretingNode<EnumDefinitionNode, Enu
 	{
 		if (node.Identifier() != null) name = node.Identifier().getText();
 		else
-		{
-			name = "__" + unnamedEnums + "enum";
-			unnamedEnums += 1;
-		}
+			name = "__" + UUID.randomUUID() + "enum";
 		int value = -1;
 		for (EnumeratorContext enumerator : node.enumerator_list().enumerator())
 		{
