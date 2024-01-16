@@ -3,41 +3,20 @@
 
 package Compiler;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.BitSet;
 import java.util.List;
 
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-
-import org.antlr.v4.gui.TreeViewer;
-import org.antlr.v4.runtime.ANTLRErrorListener;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.Parser;
-import org.antlr.v4.runtime.RecognitionException;
-import org.antlr.v4.runtime.Recognizer;
-import org.antlr.v4.runtime.atn.ATNConfigSet;
-import org.antlr.v4.runtime.dfa.DFA;
-import org.antlr.v4.runtime.tree.ParseTree;
 
 import Compiler.CompilerNodes.Globals;
-import Compiler.CompilerNodes.ProgramNode;
+import Compiler.CompilerNodes.TranslationUnitNode;
 import Grammar.C99.C99Lexer;
 import Grammar.C99.C99Parser;
-import Grammar.C99.C99Parser.ProgramContext;
-import Grammar.C99A3.C99A3Lexer;
-import Grammar.C99A3.C99A3Parser;
+import Grammar.C99.C99Parser.Translation_unitContext;
 import Logging.Logging;
 
 public class Compiler
 {
-	private static class ParseDouble
-	{
-		public C99Parser parser;
-		public ParseTree tree;
-	}
 	private static void printInfo(Object... info)
 	{
 		for (int i = 0; i < info.length; ++i) Logging.logNotice(info[i].toString() + (i == info.length - 1 ? "" : ", ") + "\n");
@@ -49,57 +28,42 @@ public class Compiler
 		
 		return new CommonTokenStream(lexer);
 	}
-	private static ParseDouble parse(CommonTokenStream tokens) throws Exception
+	private static TranslationUnitNode parse(CommonTokenStream tokens) throws Exception
 	{
 		SyntaxErrorCollector collector = new SyntaxErrorCollector();
-		ParseDouble parseDouble = new ParseDouble();
-		parseDouble.parser = new C99Parser(tokens);
-		parseDouble.parser.removeErrorListeners(); // Removes default error listener
-		parseDouble.parser.addErrorListener(collector);
-		parseDouble.tree = parseDouble.parser.program();
+		C99Parser parser = new C99Parser(tokens);
+		parser.removeErrorListeners(); // Removes default error listener
+		parser.addErrorListener(collector);
+		
+		Translation_unitContext tree = parser.translation_unit();
 		
 		if (collector.getException() != null) throw collector.getException();
-		return parseDouble;
+		return new TranslationUnitNode().interpret(tree);
 	}
-	private static String emit(ParseDouble parseDouble) throws Exception
-	{
-		Globals.reset();
-		ProgramNode program = new ProgramNode().interpret((ProgramContext) parseDouble.tree);
-		program.getAssembly();
-		return program.getAssembly();
 
-	}
 	private static String precompile(String filename, String mainFile) throws Exception
 	{
 		return Preprocessor.preprocess(filename, mainFile);
 	}
 	
-	private  static String postprocess(String assembly) throws Exception
-	{
-		ArrayList<String> lines = new ArrayList<String>(Arrays.asList(assembly.split("\n")));
-
-		lines = (ArrayList<String>) AssemblyOptimizer.optimizeAssembly((List<String>) lines);
-		int banks = Banker.splitBanks(lines);
-		
-		assembly = "";
-		for (String line : lines) if (!line.matches("\s*")) assembly += line + "\n";
-		return assembly;
-	}
+	
 		
 	public static void procPragma(List<String> parameters)
 	{
 		// TODO
 	}
-	public static String compile(String filename, String mainFile, boolean debug) throws Exception
+	public static TranslationUnitNode compile(String filename, String file) throws Exception
 	{ 
-		String assembly = "";
-
 		long t = System.currentTimeMillis();
 
 		String source = precompile(filename, mainFile);
 		printInfo("Precompiled in " + (System.currentTimeMillis() - t) + " ms. Source length: " + source.length() + ".");
+			printInfo("Compiling " + filename + "...");
+		String source = precompile(filename, file);
+			printInfo("Precompiled in " + (System.currentTimeMillis() - t) + " ms. Source length: " + source.length() + ".");
 		t = System.currentTimeMillis();
 		Logging.logNotice(source);
+		
 		CommonTokenStream tokens = lex(source);
 		printInfo("Lexed in " + (System.currentTimeMillis() - t) + " ms. Tokens: " + tokens.getNumberOfOnChannelTokens() + ".");
 		t = System.currentTimeMillis();
@@ -108,16 +72,11 @@ public class Compiler
 		printInfo("Parsed in " + (System.currentTimeMillis() - t) + " ms.");
 		if (debug) Logging.viewParseTree(parseDouble.parser, parseDouble.tree);
 		t = System.currentTimeMillis();
+		TranslationUnitNode unit = parse(tokens);
+			printInfo("Parsed in " + (System.currentTimeMillis() - t) + " ms.");
+			printInfo("Compilation done.");
 
-		assembly = emit(parseDouble);
-		printInfo("Emitted in " + (System.currentTimeMillis() - t) + " ms. Assembly length: " + assembly.length() + ".");
-		t = System.currentTimeMillis();
-
-		assembly = postprocess(assembly);
-		printInfo("Postprocessed in " + (System.currentTimeMillis() - t) + " ms. New assembly length: " + assembly.length() + ".");
-		t = System.currentTimeMillis();
-		
-		return assembly;
+		return unit;
 	}
 	
 }

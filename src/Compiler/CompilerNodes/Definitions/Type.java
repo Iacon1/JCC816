@@ -13,7 +13,6 @@ import org.antlr.v4.runtime.Token;
 
 import Compiler.CompConfig;
 import Compiler.CompilerNodes.ComponentNode;
-import Compiler.CompilerNodes.Globals;
 import Compiler.CompilerNodes.Declarations.DeclarationSpecifiersNode;
 import Compiler.CompilerNodes.Declarations.DeclaratorNode;
 import Compiler.CompilerNodes.Declarations.DirectDeclaratorNode;
@@ -218,11 +217,8 @@ public class Type
 		int baseSize;
 		if (isStructOrUnion())
 		{
-			if (context != null)
-				baseSize = context.resolveStructOrUnionRelative(getSUEName()).getSize();
-			else
-				baseSize = ComponentNode.resolveStructOrUnion(getSUEName()).getSize();
-			}
+			baseSize = context.resolveStructOrUnionRelative(getSUEName()).getSize();
+		}
 		else if (isEnum()) baseSize = CompConfig.sizeOf("char");
 		else baseSize = CompConfig.sizeOf(typeSpecifiers);
 		return baseSize;

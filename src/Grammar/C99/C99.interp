@@ -231,7 +231,7 @@ String_literal
 Header_name
 
 rule names:
-program
+dummy
 primary_expression
 postfix_expression
 argument_expression_list

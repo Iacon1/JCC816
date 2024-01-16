@@ -6,7 +6,6 @@ import org.antlr.v4.runtime.ParserRuleContext;
 
 import Compiler.CompConfig;
 import Compiler.CompilerNodes.ComponentNode;
-import Compiler.CompilerNodes.Globals;
 import Compiler.Utils.AssemblyUtils.DetailsTicket;
 import Compiler.Utils.AssemblyUtils;
 import Compiler.Utils.OperandSources.OperandSource;
@@ -46,7 +45,7 @@ CC extends ParserRuleContext
 		assembly += whitespace + "JSL\t" + getSubName(sourceX.getSize(), sourceY.getSize()) + "\n";
 		int retSize = Math.min(destSource.getSize(), getRetSize(sourceX.getSize(), sourceY.getSize()));
 		assembly += AssemblyUtils.byteCopier(whitespace, retSize, destSource, CompConfig.callResultSource(retSize), innerTicket);
-		Globals.requireSub(getSubName(sourceX.getSize(), sourceY.getSize()), getSubAssembly(sourceX.getSize(), sourceY.getSize()));
+		getTranslationUnit().requireSub(getSubName(sourceX.getSize(), sourceY.getSize()), getSubAssembly(sourceX.getSize(), sourceY.getSize()));
 		assembly += ticket.restore(whitespace, 0xFF);
 		return assembly;
 	}

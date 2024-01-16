@@ -11,11 +11,11 @@ import org.antlr.v4.runtime.tree.ParseTreeVisitor;
  */
 public interface C99Visitor<T> extends ParseTreeVisitor<T> {
 	/**
-	 * Visit a parse tree produced by {@link C99Parser#program}.
+	 * Visit a parse tree produced by {@link C99Parser#dummy}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitProgram(C99Parser.ProgramContext ctx);
+	T visitDummy(C99Parser.DummyContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link C99Parser#primary_expression}.
 	 * @param ctx the parse tree

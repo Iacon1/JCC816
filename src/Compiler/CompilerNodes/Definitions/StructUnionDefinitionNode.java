@@ -6,7 +6,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import Compiler.CompilerNodes.ComponentNode;
-import Compiler.CompilerNodes.Globals;
 import Compiler.CompilerNodes.InterpretingNode;
 import Compiler.CompilerNodes.Declarations.StructDeclarationNode;
 import Compiler.CompilerNodes.Interfaces.NamedNode;
@@ -41,8 +40,7 @@ public class StructUnionDefinitionNode extends InterpretingNode<StructUnionDefin
 		}
 		for (Struct_declarationContext decl : node.struct_declaration_list().struct_declaration())
 			members.addAll(new StructDeclarationNode(this).interpret(decl).getMembers());
-		
-		Globals.registerStructUnion(this);
+
 		return this;
 	}
 

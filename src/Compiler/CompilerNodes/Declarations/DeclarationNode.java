@@ -9,7 +9,6 @@ import Compiler.CompilerNodes.Expressions.AssignmentExpressionNode;
 import Compiler.CompilerNodes.Expressions.BaseExpressionNode;
 import Compiler.CompilerNodes.ComponentNode;
 import Compiler.CompilerNodes.FunctionDefinitionNode;
-import Compiler.CompilerNodes.Globals;
 import Compiler.CompilerNodes.InterpretingNode;
 import Compiler.CompilerNodes.Definitions.Type;
 import Compiler.CompilerNodes.Interfaces.AssemblableNode;
@@ -53,12 +52,11 @@ public class DeclarationNode extends InterpretingNode<DeclarationNode, Declarati
 				
 				if (specifiers.isTypedef())
 				{
-					Globals.registerTypedef(getScope().getPrefix() + declaratorNode.getIdentifier(), type);
+					getTranslationUnit().registerTypedef(getScope().getPrefix() + declaratorNode.getIdentifier(), type);
 				}
 				else
 				{
 					VariableNode variable = new VariableNode(this, declaratorNode.getIdentifier(), type);
-					Globals.registerVariable(variable);
 					variables.add(variable);
 				}
 				

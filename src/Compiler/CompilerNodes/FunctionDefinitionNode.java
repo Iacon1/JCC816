@@ -70,7 +70,6 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 			if (!getType().getSignature().equals("void()")) // Must be void with no arguments
 				throw new UnsupportedFeatureException("Function \"main\" having a signature other than \"void()\"", true, node.start);
 		if (node.compound_statement() != null) code = new CompoundStatementNode(this, getName()).interpret(node.compound_statement());
-		Globals.registerFunction(this);
 		return this;
 	}
 	
@@ -152,7 +151,7 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 	{
 		List<VariableNode> variables = new ArrayList<VariableNode>();
 		
-		for (VariableNode var : Globals.variables)
+		for (VariableNode var : getTranslationUnit().getVariables())
 			if (var.getEnclosingFunction() == null || canCall(var.getEnclosingFunction()))
 				variables.add(var);
 		
