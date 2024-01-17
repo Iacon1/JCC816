@@ -6,7 +6,7 @@ package Compiler.Exceptions;
 import Compiler.CompilerNodes.Definitions.Type;
 
 @SuppressWarnings("serial")
-public class TypeMismatchException extends Exception
+public class TypeMismatchException extends CompilerException
 {
 	public TypeMismatchException(String t1, String t2)
 	{
