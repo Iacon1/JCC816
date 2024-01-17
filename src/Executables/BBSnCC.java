@@ -56,23 +56,23 @@ public class BBSnCC
 		if (commandLine.hasOption("o"))
 			switch (commandLine.getOptionValue("o"))
 			{
-			case "0" : CompConfig.optimizationLevel = OptimizationLevel.min;
-			case "1" : CompConfig.optimizationLevel = OptimizationLevel.low;
-			case "2" : CompConfig.optimizationLevel = OptimizationLevel.medium;
-			case "3" : CompConfig.optimizationLevel = OptimizationLevel.all;
+			case "0" : CompConfig.optimizationLevel = OptimizationLevel.min; break;
+			case "1" : CompConfig.optimizationLevel = OptimizationLevel.low; break;
+			case "2" : CompConfig.optimizationLevel = OptimizationLevel.medium; break;
+			case "3" : CompConfig.optimizationLevel = OptimizationLevel.all; break;
 			}
 		if (commandLine.hasOption("d"))
 			switch (commandLine.getOptionValue("d"))
 			{
-			case "0" : CompConfig.debugLevel = DebugLevel.none;
-			case "1" : CompConfig.debugLevel = DebugLevel.low;
-			case "2" : CompConfig.debugLevel = DebugLevel.medium;
+			case "0" : CompConfig.debugLevel = DebugLevel.none; break;
+			case "1" : CompConfig.debugLevel = DebugLevel.low; break;
+			case "2" : CompConfig.debugLevel = DebugLevel.medium; break;
 			}
 		if (commandLine.hasOption("v"))
 			switch (commandLine.getOptionValue("v"))
 			{
-			case "0" : CompConfig.verbosityLevel = VerbosityLevel.none;
-			case "1" : CompConfig.verbosityLevel = VerbosityLevel.medium;
+			case "0" : CompConfig.verbosityLevel = VerbosityLevel.none; break;
+			case "1" : CompConfig.verbosityLevel = VerbosityLevel.medium; break;
 			}
 		
 		

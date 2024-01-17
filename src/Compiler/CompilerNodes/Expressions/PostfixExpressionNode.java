@@ -4,6 +4,8 @@ package Compiler.CompilerNodes.Expressions;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 
 import Compiler.CompConfig;
@@ -194,7 +196,7 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 				
 				if (func.canCall(getEnclosingFunction())) // Prepare for possible recursion
 				{
-					List<VariableNode> variables = getEnclosingFunction().getChildVariables();
+					List<VariableNode> variables = new LinkedList<VariableNode>(getEnclosingFunction().getChildVariables().values());
 					for (VariableNode parameter : variables)
 						assembly += AssemblyUtils.stackLoader(whitespace, leadingWhitespace, parameter.getSource());
 				}
@@ -215,7 +217,7 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 				
 				if (func.canCall(getEnclosingFunction())) // Finish possible recursion
 				{
-					List<VariableNode> variables = getEnclosingFunction().getChildVariables();
+					List<VariableNode> variables = new LinkedList<VariableNode>(getEnclosingFunction().getChildVariables().values());
 					Collections.reverse(variables);
 					for (VariableNode parameter : variables)
 						assembly += AssemblyUtils.stackLoader(whitespace, leadingWhitespace, parameter.getSource());
@@ -223,7 +225,7 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 			}
 			else // TODO Unpredictable function pointer or recursion, need to use the stack
 			{
-				List<VariableNode> variables = getEnclosingFunction().getChildVariables(); // Prepare for possible recursion
+				List<VariableNode> variables = new LinkedList<VariableNode>(getEnclosingFunction().getChildVariables().values()); // Prepare for possible recursion
 				for (VariableNode parameter : variables)
 					assembly += AssemblyUtils.stackLoader(whitespace, leadingWhitespace, parameter.getSource());
 

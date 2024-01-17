@@ -6,19 +6,23 @@ package Compiler.CompilerNodes;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import Compiler.CompilerNodes.Definitions.EnumDefinitionNode;
 import Compiler.CompilerNodes.Definitions.Scope;
 import Compiler.CompilerNodes.Definitions.StructUnionDefinitionNode;
 import Compiler.CompilerNodes.Definitions.Type;
 import Compiler.CompilerNodes.Dummies.EnumeratorNode;
+import Compiler.CompilerNodes.Interfaces.NamedNode;
 import Compiler.CompilerNodes.LValues.VariableNode;
 import Compiler.CompilerNodes.Statements.IterationStatementNode;
 import Compiler.CompilerNodes.Statements.SelectionStatementNode;
 
-public class ComponentNode<T extends ComponentNode<T>> implements Serializable
+public class ComponentNode<C extends ComponentNode<C>> implements Serializable
 {
 	protected ComponentNode<?> parent;
 	protected List<ComponentNode<?>> children;
@@ -55,14 +59,16 @@ public class ComponentNode<T extends ComponentNode<T>> implements Serializable
 	 * @return The list of Ts defined in this node or its subnodes.
 	 */
 	@SuppressWarnings("unchecked")
-	private <T extends ComponentNode<?>> List<T> getChildTs(Class<T> tClass, boolean strict)
+	private <T extends ComponentNode<?> & NamedNode> LinkedHashMap<String, T> getChildTs(Class<T> tClass, boolean strict)
 	{
-		List<T> childTs = new ArrayList<T>();
+		LinkedHashMap<String, T> childTs = new LinkedHashMap<String, T>();
 		for (ComponentNode<?> node : children)
 		{
-			if (tClass.equals(node.getClass())) childTs.add((T) node);
-			else if (!strict && VariableNode.class.isAssignableFrom(node.getClass())) childTs.add((T) node);
-			childTs.addAll(node.getChildTs(tClass, strict));
+			if (tClass.equals(node.getClass()))
+				childTs.put(((T) node).getFullName(), (T) node);
+			else if (!strict && VariableNode.class.isAssignableFrom(node.getClass()))
+				childTs.put(((T) node).getFullName(), (T) node);
+			childTs.putAll(node.getChildTs(tClass, strict));
 		}
 		return childTs;
 	}
@@ -71,31 +77,29 @@ public class ComponentNode<T extends ComponentNode<T>> implements Serializable
 	 * @param strict Whether to only get variables, or subclasses of variables.
 	 * @return The list of variables defined in this node or its subnodes.
 	 */
-	public List<VariableNode> getChildVariables(boolean strict)
-	{
-		return getChildTs(VariableNode.class, strict);
-	}
+	public LinkedHashMap<String, VariableNode> getChildVariables(boolean strict)
+	{return getChildTs(VariableNode.class, strict);}
 	/** Gets the list of variables defined in this node or its subnodes.
 	 * 
 	 * @return The list of variables defined in this node or its subnodes.
 	 */
-	public List<VariableNode> getChildVariables()
-	{
-		return getChildVariables(true);
-	}
+	public LinkedHashMap<String, VariableNode> getChildVariables()
+	{return getChildVariables(true);}
 	/** Gets the list of variables referenced in this node or its subnodes.
 	 * 
 	 * @param strict Whether to only get variables, or subclasses of variables.
 	 * @return The list of variables referenced in this node or its subnodes.
 	 */
-	public List<VariableNode> getReferencedVariables(boolean strict)
+	public LinkedHashMap<String, VariableNode> getReferencedVariables(boolean strict)
 	{
-		List<VariableNode> referencedVariables = new ArrayList<VariableNode>();
+		LinkedHashMap<String, VariableNode> referencedVariables = new LinkedHashMap<String, VariableNode>();
 		for (ComponentNode<?> node : children)
 		{
-			if (VariableNode.class.equals(node.getClass())) referencedVariables.add((VariableNode) node);
-			else if (!strict && VariableNode.class.isAssignableFrom(node.getClass())) referencedVariables.add((VariableNode) node);
-			referencedVariables.addAll(node.getReferencedVariables(strict));
+			if (VariableNode.class.equals(node.getClass()))
+				referencedVariables.put(((VariableNode) node).getFullName(), (VariableNode) node);
+			else if (!strict && VariableNode.class.isAssignableFrom(node.getClass()))
+				referencedVariables.put(((VariableNode) node).getFullName(), (VariableNode) node);
+			referencedVariables.putAll(node.getReferencedVariables(strict));
 		}
 		return referencedVariables;
 	}
@@ -103,42 +107,32 @@ public class ComponentNode<T extends ComponentNode<T>> implements Serializable
 	 * 
 	 * @return The list of variables referenced in this node or its subnodes.
 	 */
-	public List<VariableNode> getReferencedVariables()
-	{
-		return getReferencedVariables(true);
-	}
+	public LinkedHashMap<String, VariableNode> getReferencedVariables()
+	{return getReferencedVariables(true);}
 	/** Gets the list of structs or unions defined in this node or its subnodes.
 	 * 
 	 * @return The list of structs or unions referenced in this node or its subnodes.
 	 */
-	public List<StructUnionDefinitionNode> getChildStructs()
-	{
-		return getChildTs(StructUnionDefinitionNode.class, true);
-	}
+	public LinkedHashMap<String, StructUnionDefinitionNode> getChildStructs()
+	{return getChildTs(StructUnionDefinitionNode.class, true);}
 	/** Gets the list of enums defined in this node or its subnodes.
 	 * 
 	 * @return The list of enums referenced in this node or its subnodes.
 	 */
-	public List<EnumDefinitionNode> getChildEnums()
-	{
-		return getChildTs(EnumDefinitionNode.class, true);
-	}
+	public LinkedHashMap<String, EnumDefinitionNode> getChildEnums()
+	{return getChildTs(EnumDefinitionNode.class, true);}
 	/** Gets the list of enumerators defined in this node or its subnodes.
 	 * 
 	 * @return The list of enumerators referenced in this node or its subnodes.
 	 */
-	public List<EnumeratorNode> getChildEnumerators()
-	{
-		return getChildTs(EnumeratorNode.class, true);
-	}
+	public LinkedHashMap<String, EnumeratorNode> getChildEnumerators()
+	{return getChildTs(EnumeratorNode.class, true);}
 	/** Gets the list of functions defined in this node or its subnodes.
 	 * 
 	 * @return The list of functions referenced in this node or its subnodes.
 	 */
-	public List<FunctionDefinitionNode> getChildFunctions()
-	{
-		return getChildTs(FunctionDefinitionNode.class, true);
-	}
+	public LinkedHashMap<String, FunctionDefinitionNode> getChildFunctions()
+	{return getChildTs(FunctionDefinitionNode.class, true);}
 	
 	/** Gets a variable's node using a partial name.
 	 * @param name The partial name to look for.

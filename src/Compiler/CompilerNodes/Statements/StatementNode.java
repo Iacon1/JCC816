@@ -36,7 +36,7 @@ public abstract class StatementNode<C extends ParserRuleContext> extends Interpr
 	
 	public void clearPossibleValues()
 	{
-		for (VariableNode var : getReferencedVariables())
+		for (VariableNode var : getReferencedVariables().values())
 			var.clearPossibleValues();
 	}
 }

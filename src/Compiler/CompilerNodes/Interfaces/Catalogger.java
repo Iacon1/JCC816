@@ -3,8 +3,7 @@
 
 package Compiler.CompilerNodes.Interfaces;
 
-import java.util.List;
-import java.util.Map;
+import java.util.LinkedHashMap;
 
 import Compiler.CompConfig.DefinableInterrupt;
 import Compiler.CompilerNodes.FunctionDefinitionNode;
@@ -16,78 +15,61 @@ import Compiler.CompilerNodes.LValues.VariableNode;
 
 public interface Catalogger
 {
-	public List<VariableNode> getVariables();
-	public List<StructUnionDefinitionNode> getStructs();
-	public List<EnumDefinitionNode> getEnums();
-	public List<EnumeratorNode> getEnumerators();
-	public List<FunctionDefinitionNode> getFunctions();
-	public Map<String, Type> getTypedefs();
-	public Map<String, String> getRequiredSubs();
-	public Map<DefinableInterrupt, String> getInterrupts();
+	public LinkedHashMap<String, VariableNode> getVariables();
+	public LinkedHashMap<String, StructUnionDefinitionNode> getStructs();
+	public LinkedHashMap<String ,EnumDefinitionNode> getEnums();
+	public LinkedHashMap<String, EnumeratorNode> getEnumerators();
+	public LinkedHashMap<String, FunctionDefinitionNode> getFunctions();
+	public LinkedHashMap<String, Type> getTypedefs();
+	public LinkedHashMap<String, String> getRequiredSubs();
+	public LinkedHashMap<DefinableInterrupt, String> getInterrupts();
 	
+	/** Gets a T's node using its full name.
+	 * @param name The full name to look for.
+	 * @return The T node in question, if present.
+	 */
+	private <T> T resolveT(String fullName, LinkedHashMap<String, T> map)
+	{
+		T t = map.get(fullName);
+		if (t != null) return t;
+		else return null;
+	}
 	/** Gets a variable's node using its full name.
 	 * @param name The full name to look for.
 	 * @return The variable node in question, if present.
 	 */
 	public default VariableNode resolveVariable(String fullName)
-	{
-		for (VariableNode variable : getVariables())
-			if (variable.getFullName().equals(fullName))
-				return variable;
-		return null;
-	}
+	{return resolveT(fullName, getVariables());}
 	/** Gets a struct/union's node using its full name.
 	 * @param name The full name to look for.
 	 * @return The struct/union node in question, if present.
 	 */
 	public default StructUnionDefinitionNode resolveStructOrUnion(String fullName)
-	{
-		for (StructUnionDefinitionNode definition : getStructs())
-			if (definition.getFullName().equals(fullName))
-				return definition;
-		return null;
-	}
+	{return resolveT(fullName, getStructs());}
 	/** Gets a enum's node using its full name.
 	 * @param name The full name to look for.
 	 * @return The enum node in question, if present.
 	 */
 	public default EnumDefinitionNode resolveEnum(String fullName)
-	{
-		for (EnumDefinitionNode definition : getEnums())
-			if (definition.getFullName().equals(fullName))
-				return definition;
-		return null;
-	}
+	{return resolveT(fullName, getEnums());}
 	/** Gets a enumerator's node using its full name.
 	 * @param name The full name to look for.
 	 * @return The enum node in question, if present.
 	 */
 	public default EnumeratorNode resolveEnumerator(String fullName)
-	{
-		for (EnumeratorNode enumerator : getEnumerators())
-			if (enumerator.getFullName().equals(fullName))
-				return enumerator;
-		return null;
-	}
+	{return resolveT(fullName, getEnumerators());}
 	/** Gets a function's node using its full name.
 	 * @param name The full name to look for.
 	 * @return The variable node in question, if present.
 	 */
 	public default FunctionDefinitionNode resolveFunction(String fullName)
-	{
-		for (FunctionDefinitionNode definition : getFunctions())
-			if (definition.getFullName().equals(fullName))
-				return definition;
-		return null;
-	}
+	{return resolveT(fullName, getFunctions());}
 	/** Gets a Typedef's true type using its full name.
 	 * @param name The full name to look for.
 	 * @return The variable node in question, if present.
 	 */
 	public default Type resolveTypedef(String fullName)
-	{
-		return getTypedefs().get(fullName);
-	}
+	{return resolveT(fullName, getTypedefs());}
 	
 	/** Gets an interrupt label, defaulting to RESET if none is found.
 	 * @param interrupt the interrupt to look for.
@@ -95,8 +77,8 @@ public interface Catalogger
 	 */
 	public default String getInterrupt(DefinableInterrupt interrupt)
 	{
-		if (getInterrupts().get(interrupt) != null)
-			return getInterrupts().get(interrupt);
+		String label = getInterrupts().get(interrupt);
+		if (label != null) return label;
 		else return "RESET";
 	}
 }

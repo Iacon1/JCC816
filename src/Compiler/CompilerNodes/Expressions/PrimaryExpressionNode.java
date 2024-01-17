@@ -2,6 +2,7 @@
 //
 package Compiler.CompilerNodes.Expressions;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 
 import Compiler.CompConfig.OptimizationLevel;
@@ -70,11 +71,12 @@ public class PrimaryExpressionNode extends BaseExpressionNode<Primary_expression
 	}
 	
 	@Override
-	public List<VariableNode> getReferencedVariables(boolean strict)
+	public LinkedHashMap<String, VariableNode> getReferencedVariables(boolean strict)
 	{
-		List<VariableNode> referencedVariables = super.getReferencedVariables(strict);
-		if (identifier != null && resolveVariableRelative(identifier) != null)
-			referencedVariables.add(resolveVariableRelative(identifier));
+		LinkedHashMap<String, VariableNode> referencedVariables = super.getReferencedVariables(strict);
+		VariableNode v = resolveVariableRelative(identifier);
+		if (identifier != null && v != null)
+			referencedVariables.put(v.getFullName(), v);
 		return referencedVariables;
 	}
 	

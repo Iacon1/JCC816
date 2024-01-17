@@ -4,6 +4,7 @@
 package Compiler.CompilerNodes;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -20,33 +21,33 @@ import Grammar.C99.C99Parser.Translation_unitContext;
 
 public class TranslationUnitNode extends InterpretingNode<TranslationUnitNode, Translation_unitContext> implements Catalogger
 {	
-	private Map<DefinableInterrupt, String> interrupts;
-	private Map<String, Type> typedefs;
-	private Map<String, String> requiredSubs;
+	private LinkedHashMap<DefinableInterrupt, String> interrupts;
+	private LinkedHashMap<String, Type> typedefs;
+	private LinkedHashMap<String, String> requiredSubs;
 	
 	public TranslationUnitNode(ComponentNode<?> parent)
 	{
 		super(parent);
-		interrupts = new HashMap<DefinableInterrupt, String>();
-		typedefs = new HashMap<String, Type>();
-		requiredSubs = new HashMap<String, String>();
+		interrupts = new LinkedHashMap<DefinableInterrupt, String>();
+		typedefs = new LinkedHashMap<String, Type>();
+		requiredSubs = new LinkedHashMap<String, String>();
 	}
 	public TranslationUnitNode()
 	{
 		super();
-		interrupts = new HashMap<DefinableInterrupt, String>();
-		typedefs = new HashMap<String, Type>();
-		requiredSubs = new HashMap<String, String>();
+		interrupts = new LinkedHashMap<DefinableInterrupt, String>();
+		typedefs = new LinkedHashMap<String, Type>();
+		requiredSubs = new LinkedHashMap<String, String>();
 	}
 	
-	@Override public List<VariableNode> getVariables() {return getChildVariables();}
-	@Override public List<StructUnionDefinitionNode> getStructs() {return getChildStructs();}
-	@Override public List<EnumDefinitionNode> getEnums() {return getChildEnums();}
-	@Override public List<EnumeratorNode> getEnumerators() {return getChildEnumerators();}
-	@Override public List<FunctionDefinitionNode> getFunctions() {return getChildFunctions();}
-	@Override public Map<String, Type> getTypedefs() {return typedefs;}
-	@Override public Map<String, String> getRequiredSubs() {return requiredSubs;}
-	@Override public Map<DefinableInterrupt, String> getInterrupts() {return interrupts;}
+	@Override public LinkedHashMap<String, VariableNode> getVariables() {return getChildVariables();}
+	@Override public LinkedHashMap<String, StructUnionDefinitionNode> getStructs() {return getChildStructs();}
+	@Override public LinkedHashMap<String, EnumDefinitionNode> getEnums() {return getChildEnums();}
+	@Override public LinkedHashMap<String, EnumeratorNode> getEnumerators() {return getChildEnumerators();}
+	@Override public LinkedHashMap<String, FunctionDefinitionNode> getFunctions() {return getChildFunctions();}
+	@Override public LinkedHashMap<String, Type> getTypedefs() {return typedefs;}
+	@Override public LinkedHashMap<String, String> getRequiredSubs() {return requiredSubs;}
+	@Override public LinkedHashMap<DefinableInterrupt, String> getInterrupts() {return interrupts;}
 
 	public void registerTypedef(String name, Type type)
 	{

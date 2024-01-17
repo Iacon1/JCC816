@@ -10,6 +10,8 @@ import Grammar.C99.C99Parser.Function_definitionContext;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -43,7 +45,7 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 	private DeclaratorNode signature;
 	
 	private StatementNode<?> code;
-	
+
 	private boolean requiresStackLoader; // Do we need a stack-loading foreword?
 	
 	public FunctionDefinitionNode(ComponentNode<?> parent)
@@ -151,7 +153,7 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 	{
 		List<VariableNode> variables = new ArrayList<VariableNode>();
 		
-		for (VariableNode var : getTranslationUnit().getVariables())
+		for (VariableNode var : getTranslationUnit().getVariables().values())
 			if (var.getEnclosingFunction() == null || canCall(var.getEnclosingFunction()))
 				variables.add(var);
 		
@@ -167,7 +169,7 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 		if (requiresStackLoader) // Need to sometimes get arguments from the stack
 		{
 			assembly += whitespace + getLoaderLabel() + ":\t; " + CompConfig.functionTag + "\n";
-			List<VariableNode> parameters = getParameters();
+			List<VariableNode> parameters = new LinkedList<VariableNode>(getParameters().values());
 			Collections.reverse(parameters);
 			for (VariableNode parameter : parameters)
 				assembly += AssemblyUtils.stackLoader(whitespace, parameter.getSize(), parameter.getSource());
@@ -197,7 +199,7 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 		
 		if (isInterruptHandler() && isISR()) // Have to load *everything* to the stack
 		{
-			List<VariableNode> variables = getChildVariables();
+			List<VariableNode> variables = new LinkedList<VariableNode>(getChildVariables().values());
 			Collections.reverse(variables);
 			for (VariableNode variable : interruptRequirements(true))
 				assembly += AssemblyUtils.stackLoader(whitespace, leadingWhitespace, variable.getSource());
@@ -212,7 +214,7 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 		
 		ScratchManager.clearPointers();
 
-		for (VariableNode var : getReferencedVariables())
+		for (VariableNode var : getReferencedVariables().values())
 			var.clearPossibleValues();
 		return assembly;
 	}	

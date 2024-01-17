@@ -5,6 +5,7 @@ package Compiler.ASMGrapher;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -179,13 +180,13 @@ public class ASMGraphBuilder
 	 * @param internalVariables All variables only accessible within the function
 	 * @return The function's assembly, free of (at least most) dead code
 	 */
-	public String clearDeadCode(List<VariableNode> internalVariables)
+	public String clearDeadCode(LinkedHashMap<String, VariableNode> internalVariables)
 	{
 		List<Address> internalAddresses = new ArrayList<Address>();
 		String functionAssembly;
 		
 		// List internal addresses
-		for (VariableNode internalVar : internalVariables)
+		for (VariableNode internalVar : internalVariables.values())
 			for (int i = 0; i < internalVar.getSize(); ++i)
 				internalAddresses.add(new Address(internalVar.getFullName(), i));
 		

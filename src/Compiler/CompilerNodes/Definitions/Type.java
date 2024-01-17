@@ -197,7 +197,7 @@ public class Type implements Serializable
 				List<Type> paramTypes = new ArrayList<Type>();
 				for (int i = 0; i < info.paramDecls.length; ++i)
 				{
-					for (VariableNode variable : info.paramDecls[i].getChildVariables(false))
+					for (VariableNode variable : info.paramDecls[i].getChildVariables(false).values())
 					{
 						Type paramType = variable.getType();
 						if (paramType.isExtern() | paramType.isAuto() | paramType.isStatic())

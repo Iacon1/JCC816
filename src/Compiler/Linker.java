@@ -4,6 +4,7 @@ package Compiler;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -40,71 +41,71 @@ public final class Linker implements Catalogger
 	
 	private List<TranslationUnitNode> translationUnits;
 	
-	public List<VariableNode> getVariables()
+	public LinkedHashMap<String, VariableNode> getVariables()
 	{
-		List<VariableNode> variables = new LinkedList<VariableNode>();
+		LinkedHashMap<String, VariableNode> variables = new LinkedHashMap<String, VariableNode>();
 		for (TranslationUnitNode translationUnit : translationUnits)
-			variables.addAll(translationUnit.getVariables());
+			variables.putAll(translationUnit.getVariables());
 		
 		return variables;
 	}
 	@Override
-	public List<StructUnionDefinitionNode> getStructs()
+	public LinkedHashMap<String, StructUnionDefinitionNode> getStructs()
 	{
-		List<StructUnionDefinitionNode> structs = new LinkedList<StructUnionDefinitionNode>();
+		LinkedHashMap<String, StructUnionDefinitionNode> structs = new LinkedHashMap<String, StructUnionDefinitionNode>();
 		for (TranslationUnitNode translationUnit : translationUnits)
-			structs.addAll(translationUnit.getStructs());
+			structs.putAll(translationUnit.getStructs());
 		
 		return structs;
 	}
 	@Override
-	public List<EnumDefinitionNode> getEnums()
+	public LinkedHashMap<String, EnumDefinitionNode> getEnums()
 	{
-		List<EnumDefinitionNode> enums = new LinkedList<EnumDefinitionNode>();
+		LinkedHashMap<String, EnumDefinitionNode> enums = new LinkedHashMap<String, EnumDefinitionNode>();
 		for (TranslationUnitNode translationUnit : translationUnits)
-			enums.addAll(translationUnit.getEnums());
+			enums.putAll(translationUnit.getEnums());
 		
 		return enums;
 	}
 	@Override
-	public List<EnumeratorNode> getEnumerators()
+	public LinkedHashMap<String, EnumeratorNode> getEnumerators()
 	{
-		List<EnumeratorNode> enumerators = new LinkedList<EnumeratorNode>();
+		LinkedHashMap<String, EnumeratorNode> enumerators = new LinkedHashMap<String, EnumeratorNode>();
 		for (TranslationUnitNode translationUnit : translationUnits)
-			enumerators.addAll(translationUnit.getEnumerators());
+			enumerators.putAll(translationUnit.getEnumerators());
 		
 		return enumerators;
 	}
 	@Override
-	public List<FunctionDefinitionNode> getFunctions()
+	public LinkedHashMap<String, FunctionDefinitionNode> getFunctions()
 	{
-		List<FunctionDefinitionNode> functions = new LinkedList<FunctionDefinitionNode>();
+		LinkedHashMap<String, FunctionDefinitionNode> functions = new LinkedHashMap<String, FunctionDefinitionNode>();
 		for (TranslationUnitNode translationUnit : translationUnits)
-			functions.addAll(translationUnit.getFunctions());
+			functions.putAll(translationUnit.getFunctions());
 		
 		return functions;
 	}
 	@Override
-	public Map<String, Type> getTypedefs()
+	public LinkedHashMap<String, Type> getTypedefs()
 	{
-		Map<String, Type> typedefs = new HashMap<String, Type>();
+		LinkedHashMap<String, Type> typedefs = new LinkedHashMap<String, Type>();
 		for (TranslationUnitNode translationUnit : translationUnits)
 			typedefs.putAll(translationUnit.getTypedefs());
 		
 		return typedefs;
 	}
 	@Override
-	public Map<String, String> getRequiredSubs()
+	public LinkedHashMap<String, String> getRequiredSubs()
 	{
-		Map<String, String> requiredSubs = new HashMap<String, String>();
+		LinkedHashMap<String, String> requiredSubs = new LinkedHashMap<String, String>();
 		for (TranslationUnitNode translationUnit : translationUnits)
 			requiredSubs.putAll(translationUnit.getRequiredSubs());
 		
 		return requiredSubs;
 	}
-	public Map<DefinableInterrupt, String> getInterrupts()
+	public LinkedHashMap<DefinableInterrupt, String> getInterrupts()
 	{
-		Map<DefinableInterrupt, String> interrupts = new HashMap<DefinableInterrupt, String>();
+		LinkedHashMap<DefinableInterrupt, String> interrupts = new LinkedHashMap<DefinableInterrupt, String>();
 		for (TranslationUnitNode translationUnit : translationUnits)
 			interrupts.putAll(translationUnit.getInterrupts());
 		
@@ -116,7 +117,7 @@ public final class Linker implements Catalogger
 		String assembly = "";
 		
 		Set<String> fullNames = new HashSet<String>();
-		for (VariableNode variable : getVariables())
+		for (VariableNode variable : getVariables().values())
 			fullNames.add(variable.getFullName());
 		
 		// Get longest variable name
@@ -248,7 +249,7 @@ public final class Linker implements Catalogger
 		String assembly = "";
 		
 		// Get assembly from functions
-		for (FunctionDefinitionNode funcNode : getFunctions())
+		for (FunctionDefinitionNode funcNode : getFunctions().values())
 		{
 			assembly += funcNode.getAssembly();
 		}
