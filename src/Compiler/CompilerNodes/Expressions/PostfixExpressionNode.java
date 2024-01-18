@@ -201,9 +201,10 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 						assembly += AssemblyUtils.stackLoader(whitespace, leadingWhitespace, parameter.getSource());
 				}
 				
+				List<VariableNode> funcParams = new LinkedList<VariableNode>(func.getParameters().values());
 				for (int i = 0; i < params.size(); ++i)
 				{
-					OperandSource sourceV = func.getParameters().get(i).getSource();
+					OperandSource sourceV = funcParams.get(i).getSource();
 					if (params.get(i).hasAssembly()) assembly += params.get(i).getAssembly(leadingWhitespace, sourceV, scratchManager, ticket);
 					else
 					{

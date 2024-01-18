@@ -35,4 +35,8 @@ public class Scope
 		scope.levels.add(level);
 		return scope;
 	}
+	public boolean isRoot()
+	{
+		return levels.size() == 0;
+	}
 }

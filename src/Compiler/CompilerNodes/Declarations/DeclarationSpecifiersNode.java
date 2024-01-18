@@ -15,6 +15,7 @@ import Compiler.CompilerNodes.ComponentNode;
 import Compiler.CompilerNodes.InterpretingNode;
 import Compiler.CompilerNodes.Definitions.EnumDefinitionNode;
 import Compiler.CompilerNodes.Definitions.StructUnionDefinitionNode;
+import Compiler.Exceptions.CompilerMultipleDefinitionException;
 import Compiler.Exceptions.ConstraintException;
 import Grammar.C99.C99Parser.Declaration_specifiersContext;
 import Grammar.C99.C99Parser.Function_specifierContext;

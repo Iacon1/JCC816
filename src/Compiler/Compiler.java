@@ -36,7 +36,7 @@ public class Compiler
 		parser.addErrorListener(collector);
 		
 		Translation_unitContext tree = parser.translation_unit();
-		
+//		Logging.viewParseTree(parser, tree);
 		if (collector.getException() != null) throw collector.getException();
 		return new TranslationUnitNode().interpret(tree);
 	}

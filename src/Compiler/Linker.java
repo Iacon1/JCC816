@@ -19,6 +19,7 @@ import java.util.Arrays;
 import Compiler.CompConfig.DebugLevel;
 import Compiler.CompConfig.DefinableInterrupt;
 import Compiler.CompConfig.VerbosityLevel;
+import Compiler.CompilerNodes.ComponentNode;
 import Compiler.CompilerNodes.FunctionDefinitionNode;
 import Compiler.CompilerNodes.TranslationUnitNode;
 import Compiler.CompilerNodes.Definitions.EnumDefinitionNode;
@@ -27,6 +28,9 @@ import Compiler.CompilerNodes.Definitions.Type;
 import Compiler.CompilerNodes.Dummies.EnumeratorNode;
 import Compiler.CompilerNodes.Interfaces.Catalogger;
 import Compiler.CompilerNodes.LValues.VariableNode;
+import Compiler.Exceptions.CompilerMultipleDefinitionException;
+import Compiler.Exceptions.LinkerMultipleDefinitionException;
+import Compiler.Exceptions.UndefinedFunctionException;
 import Compiler.Utils.AssemblyUtils;
 import Compiler.Utils.CompUtils;
 import Compiler.Utils.SNESRegisters;
@@ -40,12 +44,17 @@ public final class Linker implements Catalogger
 	}
 	
 	private List<TranslationUnitNode> translationUnits;
-	
+	private List<Exception> storedExceptions;
 	public LinkedHashMap<String, VariableNode> getVariables()
 	{
 		LinkedHashMap<String, VariableNode> variables = new LinkedHashMap<String, VariableNode>();
 		for (TranslationUnitNode translationUnit : translationUnits)
-			variables.putAll(translationUnit.getVariables());
+			for (VariableNode variable : translationUnit.getVariables().values()) // Have to check one-by-one for name problems
+			{
+				if (variable.getScope().isRoot() && variables.get(variable.getFullName()) != null) // Two root-level variables cannot have same full name
+					storedExceptions.add(new LinkerMultipleDefinitionException(variable)); 
+				else variables.put(variable.getFullName(), variable);
+			}
 		
 		return variables;
 	}
@@ -81,8 +90,20 @@ public final class Linker implements Catalogger
 	{
 		LinkedHashMap<String, FunctionDefinitionNode> functions = new LinkedHashMap<String, FunctionDefinitionNode>();
 		for (TranslationUnitNode translationUnit : translationUnits)
-			functions.putAll(translationUnit.getFunctions());
-		
+			for (FunctionDefinitionNode function : translationUnit.getFunctions().values()) // Have to check one-by-one for name problems
+			{
+				FunctionDefinitionNode oldFunction = functions.get(function.getFullName());
+				if (oldFunction != null && oldFunction.isImplemented() && function.isImplemented()) // Two implemented functions cannot have same full name
+					storedExceptions.add(new LinkerMultipleDefinitionException(function));
+				else if (oldFunction != null && oldFunction.isImplemented()) // Don't replace the implemented one!
+					function.implement(oldFunction); // Instead set this one as a reference to it
+				else
+				{
+					if (oldFunction != null) oldFunction.implement(function); // Otherwise do the opposite
+					functions.put(function.getFullName(), function);
+				}
+				
+			}
 		return functions;
 	}
 	@Override
@@ -229,6 +250,7 @@ public final class Linker implements Catalogger
 	public Linker()
 	{
 		translationUnits = new LinkedList<TranslationUnitNode>();
+		storedExceptions = new LinkedList<Exception>();
 	}
 	
 	public void addUnit(TranslationUnitNode unit)
@@ -251,6 +273,8 @@ public final class Linker implements Catalogger
 		// Get assembly from functions
 		for (FunctionDefinitionNode funcNode : getFunctions().values())
 		{
+			if (!funcNode.isImplemented())
+				throw new UndefinedFunctionException(funcNode);
 			assembly += funcNode.getAssembly();
 		}
 		

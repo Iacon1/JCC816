@@ -4,6 +4,9 @@
 package Compiler.CompilerNodes;
 
 import Grammar.C99.C99Parser.Attributes_declarationContext;
+import Grammar.C99.C99Parser.Compound_statementContext;
+import Grammar.C99.C99Parser.Declaration_specifiersContext;
+import Grammar.C99.C99Parser.DeclaratorContext;
 import Grammar.C99.C99Parser.Direct_declaratorContext;
 import Grammar.C99.C99Parser.Function_definitionContext;
 
@@ -15,6 +18,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import Compiler.CompConfig;
@@ -30,6 +34,7 @@ import Compiler.CompilerNodes.Interfaces.TypedNode;
 import Compiler.CompilerNodes.LValues.VariableNode;
 import Compiler.CompilerNodes.Statements.CompoundStatementNode;
 import Compiler.CompilerNodes.Statements.StatementNode;
+import Compiler.Exceptions.CompilerMultipleDefinitionException;
 import Compiler.Exceptions.ConstraintException;
 import Compiler.Exceptions.UnsupportedFeatureException;
 import Compiler.Utils.AssemblyUtils;
@@ -45,7 +50,8 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 	private DeclaratorNode signature;
 	
 	private StatementNode<?> code;
-
+	private FunctionDefinitionNode implementation; // For intra-linker definitions
+	
 	private boolean requiresStackLoader; // Do we need a stack-loading foreword?
 	
 	public FunctionDefinitionNode(ComponentNode<?> parent)
@@ -53,6 +59,7 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 		super(parent);
 		attributes = new HashSet<String>();
 		requiresStackLoader = false;
+		implementation = null;
 	}
 
 	@Override
@@ -71,10 +78,32 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 		if (getName().equals(CompConfig.mainName)) // If main
 			if (!getType().getSignature().equals("void()")) // Must be void with no arguments
 				throw new UnsupportedFeatureException("Function \"main\" having a signature other than \"void()\"", true, node.start);
-		if (node.compound_statement() != null) code = new CompoundStatementNode(this, getName()).interpret(node.compound_statement());
+
+		code = new CompoundStatementNode(this, getName()).interpret(node.compound_statement());
 		return this;
 	}
-	
+	public FunctionDefinitionNode interpret(Declaration_specifiersContext declarationSpecifiers, DeclaratorContext declarator) throws Exception // Load from declaration
+	{
+		specifiers = new DeclarationSpecifiersNode(this).interpret(declarationSpecifiers).getSpecifiers();
+		signature = new DeclaratorNode(this, getName(declarator.direct_declarator())).interpret(declarator);
+
+		type = Type.manufacture(specifiers, signature, declarationSpecifiers.start);
+
+		if (type.isArray()) throw new ConstraintException("6.9.1", 3, declarator.start);
+		if (getName().equals(CompConfig.mainName)) // If main
+			if (!getType().getSignature().equals("void()")) // Must be void with no arguments
+				throw new UnsupportedFeatureException("Function \"main\" having a signature other than \"void()\"", true, declarator.start);
+
+		return this;
+	}
+	public void implement(Compound_statementContext implementation) throws Exception
+	{
+		code = new CompoundStatementNode(this, getName()).interpret(implementation);
+	}
+	public void implement(FunctionDefinitionNode implementation)
+	{
+		this.implementation = implementation;
+	}
 	private String getName(Direct_declaratorContext node)
 	{
 		while (node.Identifier() == null)
@@ -88,22 +117,21 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 	{
 		return getName().equals("main");
 	}
-	public List<VariableNode> getParameters()
+	public boolean isImplemented()
 	{
-		return signature.getChildVariables();
+		if (this.implementation != null) return this.implementation.isImplemented();
+		else return code != null;
+	}
+	public LinkedHashMap<String, VariableNode> getParameters()
+	{
+		if (this.implementation != null) return this.implementation.getParameters();
+		else return signature.getChildVariables();
 	}
 	public String getLoaderLabel()
 	{
 		return "__" + getFullName() + "_LOAD";
 	}
-	public String getStartLabel()
-	{
-		String label = getFullName();
-		for (int i = 0; i < getParameters().size(); ++i)
-			label += (i == 0 ? CompConfig.scopeDelimiter : "__") + getParameters().get(i).getType().getSignature().replaceAll(" ", "_");
-		
-		return label;
-	}
+	public String getStartLabel() {return getFullName();}
 	public String getLabel(String gotoLabel)
 	{
 		return "__" + getFullName() + CompConfig.scopeDelimiter + gotoLabel;
@@ -119,16 +147,19 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 	}
 	private boolean isISR()
 	{
-		return !attributes.contains(CompUtils.Attributes.noISR1) && !attributes.contains(CompUtils.Attributes.noISR2);
+		if (this.implementation != null) return this.implementation.isISR();
+		else return !attributes.contains(CompUtils.Attributes.noISR1) && !attributes.contains(CompUtils.Attributes.noISR2);
 	}
 	public boolean isSA1()
 	{
-		return attributes.contains(CompUtils.Attributes.SA1);
+		if (this.implementation != null) return this.implementation.isSA1();
+		else return attributes.contains(CompUtils.Attributes.SA1);
 	}
 	
 	public void requireStackLoader()
 	{
-		requiresStackLoader = true;
+		if (this.implementation != null) this.implementation.requiresStackLoader = true;
+		else requiresStackLoader = true;
 	}
 
 	@Override
@@ -140,13 +171,21 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 	@Override
 	public boolean canCall(FunctionDefinitionNode function)
 	{
+		if (this.implementation != null)
+		{
+			return (
+					function == this || function == this.implementation ||
+					this.implementation.canCall(function) ||
+					(function.implementation != null && this.implementation.canCall(function.implementation))
+				   );
+		}
 		return code.canCall(function) || (function == this);
 	}
 	
 	@Override
 	public boolean hasAssembly()
 	{
-		return true; // Always there as a label at least
+		return isImplemented(); // Always there as a label at least
 	}
 
 	private List<VariableNode> interruptRequirements(boolean reverse) // The variables an interrupt needs to preserve
@@ -217,5 +256,5 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 		for (VariableNode var : getReferencedVariables().values())
 			var.clearPossibleValues();
 		return assembly;
-	}	
+	}
 }

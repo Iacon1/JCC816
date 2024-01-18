@@ -3,10 +3,8 @@
 // The program itself.
 package Compiler.CompilerNodes;
 
-import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.function.Function;
 
 import Compiler.CompConfig.DefinableInterrupt;
 import Compiler.CompilerNodes.Declarations.DeclarationNode;
@@ -16,6 +14,7 @@ import Compiler.CompilerNodes.Definitions.Type;
 import Compiler.CompilerNodes.Dummies.EnumeratorNode;
 import Compiler.CompilerNodes.Interfaces.Catalogger;
 import Compiler.CompilerNodes.LValues.VariableNode;
+import Compiler.Exceptions.CompilerMultipleDefinitionException;
 import Grammar.C99.C99Parser.External_declarationContext;
 import Grammar.C99.C99Parser.Translation_unitContext;
 
@@ -53,6 +52,7 @@ public class TranslationUnitNode extends InterpretingNode<TranslationUnitNode, T
 	{
 		typedefs.put(name, type);
 	}
+	
 	public void requireSub(String name, String assembly)
 	{
 		requiredSubs.put(name, assembly);
@@ -67,8 +67,22 @@ public class TranslationUnitNode extends InterpretingNode<TranslationUnitNode, T
 	{
 		for (External_declarationContext extDec : node.external_declaration())
 		{
+			Exception innerException = new Exception();
 			if (extDec.declaration() != null) new DeclarationNode(this).interpret(extDec.declaration());
-			else new FunctionDefinitionNode(this).interpret(extDec.function_definition());
+			else
+			{
+				FunctionDefinitionNode oldFunction = checkRepeatFunctions((ComponentNode<?> c) -> {
+							try {return new FunctionDefinitionNode(c).interpret(extDec.function_definition());}
+							catch (Exception e) {innerException.addSuppressed(e); return null;}});
+				if (innerException.getSuppressed().length > 0) throw (Exception) innerException.getSuppressed()[0]; // Weird hack I know
+
+				if (oldFunction != null && oldFunction.isImplemented()) // Two implemented functions cannot have same erasure and name
+					throw new CompilerMultipleDefinitionException(oldFunction.getName(), extDec.start); 
+				else if (oldFunction != null) // Function definition found but not signature
+					oldFunction.implement(extDec.function_definition().compound_statement());
+				else // No preceeding function found
+					new FunctionDefinitionNode(this).interpret(extDec.function_definition());
+			}
 		}
 
 		return this;

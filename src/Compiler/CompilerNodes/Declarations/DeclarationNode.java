@@ -13,6 +13,7 @@ import Compiler.CompilerNodes.InterpretingNode;
 import Compiler.CompilerNodes.Definitions.Type;
 import Compiler.CompilerNodes.Interfaces.AssemblableNode;
 import Compiler.CompilerNodes.LValues.VariableNode;
+import Compiler.Exceptions.CompilerMultipleDefinitionException;
 import Compiler.Exceptions.ConstraintException;
 import Compiler.Utils.AssemblyUtils;
 import Compiler.Utils.AssemblyUtils.DetailsTicket;
@@ -54,8 +55,22 @@ public class DeclarationNode extends InterpretingNode<DeclarationNode, Declarati
 				{
 					getTranslationUnit().registerTypedef(getScope().getPrefix() + declaratorNode.getIdentifier(), type);
 				}
+				if (type.isFunction()) // Function definition
+				{
+					Exception innerException = new Exception();
+					FunctionDefinitionNode oldFunction = checkRepeatFunctions((ComponentNode<?> c) -> {
+						try {return new FunctionDefinitionNode(c).interpret(node.declaration_specifiers(), initDeclarator.declarator());}
+						catch (Exception e) {innerException.addSuppressed(e); return null;}});
+					if (innerException.getSuppressed().length > 0) throw (Exception) innerException.getSuppressed()[0]; // Weird hack I know
+
+					if (oldFunction == null) // Ignore subsequent identical declarations without definitions
+						new FunctionDefinitionNode(this).interpret(node.declaration_specifiers(), initDeclarator.declarator());
+				}
 				else
 				{
+					if (checkRepeatVariables((ComponentNode<?> c) -> new VariableNode(c, declaratorNode.getIdentifier(), type)) != null)
+						throw new CompilerMultipleDefinitionException(declaratorNode.getIdentifier(), initDeclarator.start); // Two variables cannot have same full name
+					
 					VariableNode variable = new VariableNode(this, declaratorNode.getIdentifier(), type);
 					variables.add(variable);
 				}
