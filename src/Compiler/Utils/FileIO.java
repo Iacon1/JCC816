@@ -13,7 +13,6 @@ import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.nio.charset.Charset;
 
 public final class FileIO
 {
@@ -21,7 +20,10 @@ public final class FileIO
 	{
 		return new String(ClassLoader.getSystemResourceAsStream(filename).readAllBytes());
 	}
-	
+	public static byte[] readResourceBytes(String filename) throws IOException
+	{
+		return ClassLoader.getSystemResourceAsStream(filename).readAllBytes();
+	}
 	public static final String readFile(File file) throws IOException
 	{
 		FileInputStream inStream = new FileInputStream(file);

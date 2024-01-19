@@ -31,6 +31,7 @@ control_line
 	| HashTg Line pp_token* NL
 	| HashTg Error pp_token* NL
 	| HashTg Pragma pp_token* NL
+	| HashTg Embed pp_token+ NL
 	| HashTg NL
 	;
 text_line : pp_token* NL ;

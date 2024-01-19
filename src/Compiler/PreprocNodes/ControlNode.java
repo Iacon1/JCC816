@@ -9,6 +9,7 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 
 import Grammar.C99A3.C99A3Parser.Control_lineContext;
 import Grammar.C99A3.C99A3Parser.Pp_tokenContext;
+import Compiler.CompConfig.VerbosityLevel;
 import Compiler.Compiler;
 import Compiler.Preprocessor;
 import Compiler.Utils.FileIO;
@@ -18,18 +19,21 @@ public class ControlNode extends InterpretingNode<ControlNode, Control_lineConte
 {
 	private String command;
 	private GroupNode include;
+	private byte[] embedBytes;
 	
 	public ControlNode(PreProcComponentNode<?> parent)
 	{
 		super(parent);
 		command = null;
 		include = null;
+		embedBytes = null;
 	}
 	public ControlNode()
 	{
 		super();
 		command = null;
 		include = null;
+		embedBytes = null;
 	}
 	
 	private List<String> getPPTokens(Control_lineContext node) throws Exception // LOL
@@ -43,10 +47,11 @@ public class ControlNode extends InterpretingNode<ControlNode, Control_lineConte
 	{
 		command = node.getChild(1).getText();
 		
+		String filename; // For include and embed
 		switch (command)
 		{
 		case "include":
-			String filename = "";
+			filename = "";
 			String file = "";
 			if (node.pp_token(0).Header_name() == null)
 			{
@@ -103,10 +108,31 @@ public class ControlNode extends InterpretingNode<ControlNode, Control_lineConte
 			String error = "";
 			for (String token : getPPTokens(node)) error += token + " ";
 			error = error.stripTrailing();
-			Logging.logError(error);
+			if (VerbosityLevel.isAtLeast(VerbosityLevel.low)) Logging.logError(error);
 			break;
 		case "pragma":
 			Compiler.procPragma(getPPTokens(node));
+			break;
+		case "embed":
+			filename = "";
+			if (node.pp_token(0).Header_name() == null)
+			{
+				for (String word : resolveDefines(getPPTokens(node).toArray(new String[] {})))
+					filename += word + " ";
+				filename = filename.stripTrailing();
+			}
+			else filename = node.pp_token(0).Header_name().getText();
+			embeds.add(filename);
+			if (filename.contains("<")) // Include library
+			{
+				filename = filename.replaceAll("[<>\"\"]", "");
+				embedBytes = FileIO.readResourceBytes("stdlib/" + filename);
+			}
+			else if (filename.contains("\"")) // Include file
+			{
+				filename = filename.replaceAll("[<>\"\"]", "");
+				embedBytes = FileIO.readFileBytes(filename);
+			}
 			break;
 		}
 		incrLineNo();
@@ -117,12 +143,21 @@ public class ControlNode extends InterpretingNode<ControlNode, Control_lineConte
 	@Override
 	public boolean hasText()
 	{
-		return command.equals("include");
+		return command.equals("include") || command.equals("embed");
 	}
 	
 	@Override
 	public String getText() throws Exception
 	{
-		return include.getText();
+		if (command.equals("include"))
+			return include.getText();
+		else if (command.equals("embed"))
+		{
+			String text = "";
+			for (byte b : embedBytes)
+				text += String.format("0x%02x", b) + ", ";
+			return text.substring(0, text.length() - 2) + "\n";
+		}
+		else return null;
 	}
 }

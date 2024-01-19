@@ -55,3 +55,6 @@ Undef : 'undef' {Grammar.GrammarFlags.isPreproc}? ;
 Line : 'line' {Grammar.GrammarFlags.isPreproc}? ;
 Error : 'error' {Grammar.GrammarFlags.isPreproc}? ;
 Pragma : 'pragma' {Grammar.GrammarFlags.isPreproc}? ;
+
+HasEmbed : '__has_embed' {Grammar.GrammarFlags.isPreproc}? ; // Backported from C23
+Embed : 'embed'  {Grammar.GrammarFlags.isPreproc}? ;

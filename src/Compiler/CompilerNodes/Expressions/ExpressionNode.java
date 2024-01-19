@@ -15,7 +15,6 @@ import Compiler.Utils.AssemblyUtils.DetailsTicket;
 import Compiler.Utils.ScratchManager;
 import Compiler.Utils.OperandSources.OperandSource;
 import Grammar.C99.C99Parser.Assignment_expressionContext;
-import Grammar.C99.C99Parser.Conditional_expressionContext;
 import Grammar.C99.C99Parser.ExpressionContext;
 
 public class ExpressionNode extends BaseExpressionNode<ExpressionContext>

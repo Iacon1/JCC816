@@ -9,9 +9,11 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class PreProcComponentNode<T extends PreProcComponentNode<T>>
 {
@@ -22,6 +24,7 @@ public class PreProcComponentNode<T extends PreProcComponentNode<T>>
 	protected static int line = 0;
 	
 	public static final Map<String, DefineNode> defines = new HashMap<String, DefineNode>();
+	public static final Set<String> embeds = new HashSet<String>();
 	
 	public static void resetLineNo(String file, int line)
 	{

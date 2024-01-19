@@ -30,7 +30,7 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 	private BaseExpressionNode<?> expr;
 	private Type type;
 	private String operator;
-	private String defName; // Only useful in preproc mode
+	private String defName, embName; // Only useful in preproc mode
 	private LValueNode<?> pointerRef; // LValue if this is a pointer reference (*x)
 	
 	public UnaryExpressionNode(ComponentNode<?> parent) {super(parent);}
@@ -48,6 +48,10 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 				this.expr = new CastExpressionNode(this).interpret(node.cast_expression());
 			else if (node.type_name() != null)
 				type = new TypeNameNode(this).interpret(node.type_name()).getType();
+			else if (node.Header_name() != null)
+				this.embName = node.Header_name().getText();
+			else if (node.String_literal() != null)
+				this.embName = node.String_literal().getText();
 			else if (node.Identifier() != null)
 				this.defName = node.Identifier().getText();
 			operator = node.getChild(0).getText();
@@ -114,7 +118,7 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 	@Override
 	public boolean hasPropValue()
 	{
-		if (operator.equals("sizeof") || operator.equals("defined")) return true;
+		if (operator.equals("sizeof") || operator.equals("defined") || operator.equals("__has_embed")) return true;
 		else if (operator.equals("*"))
 			if (pointerRef != null && pointerRef.hasPossibleValues() && pointerRef.getPossibleValues().size() == 1)
 			{
@@ -146,6 +150,10 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 		else if (operator.equals("defined")) // Only useful in preproc mode
 		{
 			return PreProcComponentNode.defines.containsKey(defName) ? Long.valueOf(1) : Long.valueOf(0);
+		}
+		else if (operator.equals("__has_embed")) // Only useful in preproc mode
+		{
+			return PreProcComponentNode.embeds.contains(embName) ? Long.valueOf(1) : Long.valueOf(0);
 		}
 		else if (operator.equals("-")) return Long.valueOf(-1 * expr.getPropLong());
 		else if (operator.equals("~")) return Long.valueOf(~expr.getPropLong());

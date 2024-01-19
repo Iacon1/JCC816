@@ -52,6 +52,9 @@ keyword
 	| Line {Grammar.GrammarFlags.isPreproc}?
 	| Error {Grammar.GrammarFlags.isPreproc}?
 	| Pragma {Grammar.GrammarFlags.isPreproc}?
+	
+	| HasEmbed {Grammar.GrammarFlags.isPreproc}?
+	| Embed {Grammar.GrammarFlags.isPreproc}?
 	;
 	
 punctuator

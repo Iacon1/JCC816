@@ -28,6 +28,7 @@ unary_expression
 	| (Amper|Star|Plus|Minus|Tilde|Excla) cast_expression
 	| Sizeof unary_expression
 	| Sizeof LeRoBr type_name RiRoBr
+	| HasEmbed LeRoBr (Header_name|String_literal) RiRoBr
 	| Defined Identifier
 	| Defined LeRoBr Identifier RiRoBr
 	;
@@ -188,4 +189,3 @@ external_declaration
 	| declaration ;
 function_definition : attributes_declaration* declaration_specifiers declarator declaration_list? compound_statement ;
 declaration_list : declaration+ ;
-	
