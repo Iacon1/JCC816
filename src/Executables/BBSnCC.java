@@ -72,7 +72,8 @@ public class BBSnCC
 			switch (commandLine.getOptionValue("v"))
 			{
 			case "0" : CompConfig.verbosityLevel = VerbosityLevel.none; break;
-			case "1" : CompConfig.verbosityLevel = VerbosityLevel.medium; break;
+			case "1" : CompConfig.verbosityLevel = VerbosityLevel.low; break;
+			case "2" : CompConfig.verbosityLevel = VerbosityLevel.medium; break;
 			}
 		
 		

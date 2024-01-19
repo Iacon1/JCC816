@@ -132,6 +132,7 @@ public final class CompConfig
 	public static enum VerbosityLevel
 	{
 		none, 	// None
+		low,	// + Preproc "error" output
 		medium, // + Timing data
 		;
 		public static boolean isAtLeast(VerbosityLevel level)
