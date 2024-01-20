@@ -5,7 +5,7 @@ package Assembler.Configs;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-import Compiler.CartConfig;
+import C99Compiler.CartConfig;
 
 public interface Configurer
 {

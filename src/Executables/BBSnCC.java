@@ -10,17 +10,17 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Options;
 
-import Compiler.CartConfig;
-import Compiler.CartConfig.AddonChip;
-import Compiler.CartConfig.ROMType;
-import Compiler.CompConfig;
-import Compiler.CompConfig.DebugLevel;
-import Compiler.CompConfig.OptimizationLevel;
-import Compiler.CompConfig.VerbosityLevel;
-import Compiler.CompilerNodes.TranslationUnitNode;
-import Compiler.Compiler;
-import Compiler.Linker;
-import Compiler.Utils.FileIO;
+import C99Compiler.CartConfig;
+import C99Compiler.CompConfig;
+import C99Compiler.C99Compiler;
+import C99Compiler.Linker;
+import C99Compiler.CartConfig.AddonChip;
+import C99Compiler.CartConfig.ROMType;
+import C99Compiler.CompConfig.DebugLevel;
+import C99Compiler.CompConfig.OptimizationLevel;
+import C99Compiler.CompConfig.VerbosityLevel;
+import C99Compiler.CompilerNodes.TranslationUnitNode;
+import C99Compiler.Utils.FileIO;
 import Logging.DebugLogger;
 import Logging.Logging;
 
@@ -90,7 +90,7 @@ public class BBSnCC
 				if (parameter.endsWith(".c") || parameter.endsWith(".h")) // C file
 				{
 					String fileText = FileIO.readFile(parameter);
-					translationUnits.add(Compiler.compile(parameter, fileText));
+					translationUnits.add(C99Compiler.compile(parameter, fileText));
 				}
 				else if (parameter.endsWith(".o"))
 				{
@@ -109,7 +109,7 @@ public class BBSnCC
 				if (parameter.endsWith(".c") || parameter.endsWith(".h")) // C file
 				{
 					String fileText = FileIO.readFile(parameter);
-					TranslationUnitNode node = Compiler.compile(parameter, fileText);
+					TranslationUnitNode node = C99Compiler.compile(parameter, fileText);
 					byte[] fileBytes = FileIO.serialize(node);
 					FileIO.writeFile(parameter.replaceAll("\\.[ch]", ".o"), fileBytes);
 				}

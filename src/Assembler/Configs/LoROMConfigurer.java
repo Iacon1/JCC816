@@ -3,7 +3,7 @@
 
 package Assembler.Configs;
 
-import Compiler.CompConfig;
+import C99Compiler.CompConfig;
 
 public class LoROMConfigurer implements Configurer
 {

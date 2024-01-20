@@ -8,11 +8,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 import Assembler.Header.DestinationCode;
+import C99Compiler.CartConfig;
+import C99Compiler.CompConfig.DebugLevel;
+import C99Compiler.CompConfig.VerbosityLevel;
 import Assembler.Configs.Configurer;
-import Compiler.CartConfig;
-import Compiler.CompConfig.DebugLevel;
-import Compiler.CompConfig.VerbosityLevel;
-import Compiler.Utils.FileIO;
+import C99Compiler.Utils.FileIO;
 import Logging.Logging;
 
 public class Assembler
