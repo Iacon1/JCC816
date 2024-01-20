@@ -2,6 +2,7 @@
 //
 package Compiler.CompilerNodes.Definitions;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
@@ -71,6 +72,14 @@ public class StructUnionDefinitionNode extends InterpretingNode<StructUnionDefin
 	public int getOffset(String memberName)
 	{
 		return (int) Math.floor( getOffsetBits(memberName) / 8);
+	}
+	public List<String> getMemberNames()
+	{
+		List<String> memberNames = new ArrayList<String>();
+		for (int i = 0; i < members.size(); ++i)
+			memberNames.add(members.get(i).getName());
+		
+		return memberNames;
 	}
 	public MemberNode getMember(String memberName)
 	{
