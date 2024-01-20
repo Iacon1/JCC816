@@ -13,6 +13,7 @@ import Compiler.CompilerNodes.Definitions.Type;
 import Compiler.CompilerNodes.LValues.MemberNode;
 import Compiler.CompilerNodes.Definitions.StructUnionDefinitionNode;
 import Compiler.Exceptions.ConstraintException;
+import Compiler.Exceptions.UnsupportedFeatureException;
 import Grammar.C99.C99Parser.Struct_declarationContext;
 import Grammar.C99.C99Parser.Struct_declaratorContext;
 
@@ -37,11 +38,12 @@ public class StructDeclarationNode extends InterpretingNode<StructDeclarationNod
 				Type type = Type.manufacture(specifiers.getSpecifiers(), declaratorNode, structDeclarator.start);
 				if (structDeclarator.constant_expression() != null) // Bitfield
 				{
-					long fieldBits = new ConstantExpressionNode(this).interpret(structDeclarator.constant_expression()).getPropLong();
+					throw new UnsupportedFeatureException("Bitfields", false, structDeclarator.start); // TODO later
+/*					long fieldBits = new ConstantExpressionNode(this).interpret(structDeclarator.constant_expression()).getPropLong();
 					if (type.isInteger() || type.containsSpecifier("_Bool"))
 						type = new BitFieldType(type, fieldBits);
 					else throw new ConstraintException("6.7.2.1", 4, structDeclarator.start);
-				}
+*/				}
 				MemberNode member = new MemberNode(this, (StructUnionDefinitionNode) parent, declaratorNode.getIdentifier(), type);
 				members.add(member);
 			}
