@@ -25,13 +25,13 @@ import Grammar.C99.C99Parser.Init_declaratorContext;
 public class DeclarationNode extends InterpretingNode<DeclarationNode, DeclarationContext> implements AssemblableNode
 {
 	private List<VariableNode> variables;
-	private List<BaseExpressionNode<?>> expressions;
+	private List<InitializerNode> initializers;
 	
 	public DeclarationNode(ComponentNode<?> parent)
 	{
 		super(parent);
 		variables = new ArrayList<VariableNode>();
-		expressions = new ArrayList<BaseExpressionNode<?>>();
+		initializers = new ArrayList<InitializerNode>();
 	}
 
 	@Override
@@ -41,12 +41,6 @@ public class DeclarationNode extends InterpretingNode<DeclarationNode, Declarati
 		if (node.init_declarator_list() != null)
 			for (Init_declaratorContext initDeclarator : node.init_declarator_list().init_declarator())
 			{
-				if (initDeclarator.initializer() != null)
-				{
-					Assignment_expressionContext expr = (Assignment_expressionContext) initDeclarator.initializer().assignment_expression();
-					expressions.add((BaseExpressionNode<?>) new AssignmentExpressionNode(this).interpret(expr));
-				}
-				else expressions.add(null);
 				DeclaratorNode declaratorNode = new DeclaratorNode(this).interpret(initDeclarator);
 				
 				Type type = Type.manufacture(specifiers.getSpecifiers(), declaratorNode, initDeclarator.start);
@@ -70,9 +64,11 @@ public class DeclarationNode extends InterpretingNode<DeclarationNode, Declarati
 				{
 					if (checkRepeatVariables((ComponentNode<?> c) -> new VariableNode(c, declaratorNode.getIdentifier(), type)) != null)
 						throw new CompilerMultipleDefinitionException(declaratorNode.getIdentifier(), initDeclarator.start); // Two variables cannot have same full name
-					
 					VariableNode variable = new VariableNode(this, declaratorNode.getIdentifier(), type);
 					variables.add(variable);
+					if (initDeclarator.initializer() != null)
+						initializers.add(new InitializerNode(this, variable).interpret(initDeclarator.initializer()));
+					else initializers.add(new InitializerNode(this, variable));
 				}
 				
 			}
@@ -88,33 +84,26 @@ public class DeclarationNode extends InterpretingNode<DeclarationNode, Declarati
 	@Override
 	public boolean canCall(FunctionDefinitionNode function)
 	{
-		for (BaseExpressionNode<?> expr : expressions) if (expr != null && expr.canCall(function)) return true;
+		for (InitializerNode initializer : initializers) if (
+				initializer != null &&
+				initializer.hasAssembly() &&
+				initializer.canCall(function)) return true;
 		return false;
 	}
 	@Override
 	public boolean hasAssembly()
 	{
-		for (BaseExpressionNode<?> expr : expressions) if (expr != null) return true;
+		for (InitializerNode initializer : initializers) if (
+				initializer != null &&
+				initializer.hasAssembly()) return true;
 		return false;
 	}
 	@Override
 	public String getAssembly(int leadingWhitespace) throws Exception
 	{
 		String assembly = "";
-		for (int i = 0; i < variables.size(); ++i)
-			if (expressions.get(i) != null)
-			{
-				if (expressions.get(i).hasAssembly())
-					assembly += expressions.get(i).getAssembly(leadingWhitespace, variables.get(i).getSource(), new DetailsTicket());
-				else if (expressions.get(i).hasLValue())
-					assembly += AssemblyUtils.byteCopier(AssemblyUtils.getWhitespace(leadingWhitespace), variables.get(i).getSize(), variables.get(i).getSource(), expressions.get(i).getLValue().getSource());
-				else if (expressions.get(i).hasPropValue())
-				{	
-					OperandSource sourceN = new ConstantSource(expressions.get(i).getPropValue(), expressions.get(i).getSize());
-					assembly += AssemblyUtils.byteCopier(AssemblyUtils.getWhitespace(leadingWhitespace), variables.get(i).getSize(), variables.get(i).getSource(), sourceN);
-				}
-				AssignmentExpressionNode.equateLValue(variables.get(i), expressions.get(i));
-			}
+		for (InitializerNode initializer : initializers)
+			if (initializer.hasAssembly()) assembly += initializer.getAssembly(leadingWhitespace);
 				
 		return assembly;
 	}
