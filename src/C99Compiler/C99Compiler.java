@@ -42,6 +42,18 @@ public class C99Compiler
 		if (collector.getException() != null) throw collector.getException();
 		return new TranslationUnitNode().interpret(tree);
 	}
+	private static CompoundStatementNode parseSnippet(CommonTokenStream tokens) throws Exception
+	{
+		SyntaxErrorCollector collector = new SyntaxErrorCollector();
+		C99Parser parser = new C99Parser(tokens);
+		parser.removeErrorListeners(); // Removes default error listener
+		parser.addErrorListener(collector);
+		
+		Compound_statementContext tree = parser.compound_statement();
+//		Logging.viewParseTree(parser, tree);
+		if (collector.getException() != null) throw collector.getException();
+		return new CompoundStatementNode(new TranslationUnitNode()).interpret(tree);
+	}
 
 	private static String precompile(String filename, String mainFile) throws Exception
 	{
@@ -78,6 +90,22 @@ public class C99Compiler
 			printInfo("Compilation done.");
 
 		return unit;
+	}
+	
+	/** A scaled-down version of the compilation process, immediately returning the ASM instead of a translation unit node.
+	 * 
+	 * @param source The C code to read. Should be a self-contained Compound statement with no preprocessor directives.
+	 * @param parameters Parameters injected into the C code via java format symbols (i. e. %1$s).
+	 * @return The ASM equivalent of the C code provided.
+	 * @throws Exception
+	 */
+	public static String compileSnippet(int leadingWhitespace, String source, Object... parameters) throws Exception
+	{ 
+		source = Preprocessor.removeComments(source);
+		CommonTokenStream tokens = lex(source.formatted(parameters));
+		CompoundStatementNode statement = parseSnippet(tokens);
+
+		return statement.getAssembly(leadingWhitespace);
 	}
 	
 }
