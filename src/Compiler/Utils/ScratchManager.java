@@ -40,24 +40,10 @@ public class ScratchManager
 	
 	public static class ScratchSource extends AddressSource
 	{
-		private int offset;
 		public ScratchSource(int offset, int size)
 		{
-			super(CompConfig.scratchBase, size);
-			this.offset = offset;
+			super(CompConfig.scratchBase, offset, size);
 		}
-		
-		@Override
-		public String getInstruction(String whitespace, String operation, Integer i, DetailsTicket ticket)
-		{
-			if (i >= size)
-				return whitespace + operation + "\t" + (ticket.is16Bit() ? "#$0000" : "#$00") + "\n";
-			return whitespace + operation + "\t" + super.getBase() + " + " + (offset + i) + "\n";
-		}
-		public int getOffset() {return offset;}
-		public String getBase(int mod) {return super.getBase() + " + " + (offset + mod);}
-		@Override
-		public String getBase() {return getBase(0);}
 	}
 	
 	public ScratchSource reserveScratchBlock(int size, int offset) throws Exception

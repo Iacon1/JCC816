@@ -23,7 +23,6 @@ import Compiler.Utils.AssemblyUtils.DetailsTicket;
 import Compiler.Utils.ScratchManager;
 import Compiler.Utils.OperandSources.ConstantSource;
 import Compiler.Utils.OperandSources.OperandSource;
-import Compiler.Utils.OperandSources.WrapperSource;
 import Compiler.Utils.ScratchManager.ScratchSource;
 import Grammar.C99.C99Parser.Assignment_expressionContext;
 import Grammar.C99.C99Parser.Postfix_expressionContext;
@@ -178,7 +177,7 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 		{
 		case arraySubscript:
 			this.destSource = destSource; // Initialize LValue
-			OperandSource sourceA = new WrapperSource(expr.getLValue().getSource(), CompConfig.pointerSize);
+			OperandSource sourceA = expr.getLValue().getSource().respec(CompConfig.pointerSize);
 			// An array normal has a size representing its memory footprint, we just need the size of the actual address here
 			ScratchSource sourceI = scratchManager.reserveScratchBlock(CompConfig.pointerSize);
 			OperandSource sourceS = new ConstantSource(indexExpr.getType().getSize(), CompConfig.pointerSize);

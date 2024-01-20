@@ -7,7 +7,6 @@ import java.util.function.BiFunction;
 import Compiler.CompilerNodes.Definitions.Type;
 import Compiler.CompilerNodes.LValues.LValueNode;
 import Compiler.Utils.OperandSources.OperandSource;
-import Compiler.Utils.OperandSources.WrapperSource;
 
 public final class AssemblyUtils
 {
@@ -215,7 +214,7 @@ public final class AssemblyUtils
 		{
 			Type fittedTypeX = CompUtils.getSmallestType(Math.max(-x.getSmallestPossibleLong(), x.getLargestPossibleLong()));
 			if (x.getSize() > fittedTypeX.getSize())
-				return new WrapperSource(x.getSource(), fittedTypeX.getSize());
+				return x.getSource().getShifted(0, fittedTypeX.getSize() - x.getSize());
 		}
 		return x.getSource();
 	}

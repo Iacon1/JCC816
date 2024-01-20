@@ -1,6 +1,6 @@
 // By Iacon1
 // Created 05/06/2023
-// The program itself.
+// Assign one variable to another, more or less.
 package Compiler.CompilerNodes.Expressions;
 
 import Compiler.CompilerNodes.ComponentNode;
@@ -17,7 +17,6 @@ import Grammar.C99.C99Parser.Assignment_expressionContext;
 import Grammar.C99.C99Parser.Conditional_expressionContext;
 import Grammar.C99.C99Parser.Unary_expressionContext;
 
-// TODO conditional expression
 public class AssignmentExpressionNode extends BinaryExpressionNode
 <Unary_expressionContext, Assignment_expressionContext, Conditional_expressionContext, Assignment_expressionContext>
 {

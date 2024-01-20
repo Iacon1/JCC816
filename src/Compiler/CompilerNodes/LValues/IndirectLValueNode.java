@@ -20,6 +20,8 @@ public class IndirectLValueNode extends LValueNode<IndirectLValueNode>
 		}
 
 		@Override
+		public OperandSource getShifted(int offset, int size) {return this;}
+		@Override
 		public String getBase()
 		{
 			return "[" + addrSource.getBase() + "]";
@@ -40,6 +42,9 @@ public class IndirectLValueNode extends LValueNode<IndirectLValueNode>
 
 			return assembly;
 		}
+
+		@Override
+		public OperandSource getRespecified(int offset, int size) {return this;}
 	}
 	private IndirectOperandSource source;
 	

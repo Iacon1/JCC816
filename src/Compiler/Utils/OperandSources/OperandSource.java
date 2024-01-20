@@ -2,23 +2,32 @@
 // A way of accessing and operating on a value or region of memory.
 package Compiler.Utils.OperandSources;
 
-import java.util.function.BiFunction;
-
 import Compiler.Utils.AssemblyUtils.DetailsTicket;
 
 public abstract class OperandSource
 {
 	private boolean isLiteral;
-	protected int size;
+	protected int size, offset;
 	
+	public OperandSource(int size, int offset, boolean isLiteral)
+	{
+		this.size = size;
+		this.offset = offset;
+		this.isLiteral = isLiteral;
+	}
 	public OperandSource(int size, boolean isLiteral)
 	{
 		this.size = size;
+		this.offset = 0;
 		this.isLiteral = isLiteral;
 	}
 	public boolean isLiteral() {return isLiteral;}
 	public int getSize() {return size;}
-	
+	public int getOffset() {return offset;}
+	public abstract OperandSource getShifted(int offset, int size);
+	public OperandSource getShifted(int offset) {return getShifted(offset, 0);}
+	public abstract OperandSource getRespecified(int offset, int size);
+	public OperandSource respec(int size) {return getRespecified(offset, size);}
 	/** Returns the "base" value of the source, i. e. what would come after the operation if the byte offset is 0.
 	 * 
 	 * @return The "base" value of the source, e. g. a variable's address

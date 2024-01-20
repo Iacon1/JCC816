@@ -14,34 +14,11 @@ public class MemberNode extends VariableNode
 	
 	private class MemberInstanceNode extends LValueNode<MemberInstanceNode>
 	{
-		private class MemberSource extends OperandSource
-		{
-			public MemberSource()
-			{
-				super(MemberInstanceNode.this.getSize(), false);
-			}
-			
-			private LValueNode<?> getParent()
-			{
-				return (LValueNode<?>) MemberInstanceNode.this.parent;
-			}
-
-			@Override
-			public String getInstruction(String whitespace, String operation, Integer i, DetailsTicket ticket)
-			{
-				return getParent().getSource().getInstruction(whitespace, operation, i + owner.getOffset(name), ticket);
-			}
-
-			@Override
-			public String getBase()
-			{
-				return getParent().getSource().getBase() + " + " + owner.getOffset(name);
-			}
-		}
-		private MemberSource source = new MemberSource();
+		private OperandSource source;
 		public MemberInstanceNode(LValueNode<?> parent)
 		{
 			super(parent, MemberNode.this.getType());
+			source = parent.getSource().getShifted(owner.getOffset(name)).respec(MemberNode.this.getType().getSize());
 		}
 
 		@Override
