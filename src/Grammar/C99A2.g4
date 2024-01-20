@@ -138,7 +138,7 @@ typedef_name : Identifier ;
 initializer
 	: assignment_expression
 	| LeCuBr initializer_list Comma? RiCuBr ;
-initializer_list : designation? initializer (Comma designation? initializer)+ ;
+initializer_list : designation? initializer (Comma designation? initializer)* ;
 designation : designator_list Assign ;
 designator_list : designator+ ;
 designator
