@@ -3,7 +3,8 @@
 package Compiler.CompilerNodes.Definitions;
 
 import Compiler.CompConfig;
-
+import Compiler.CompilerNodes.LValues.LValueNode;
+import Compiler.CompilerNodes.LValues.WrapperLValueNode;
 public class ArrayType extends PointerType
 {
 	private int length; // -1 marks incomplete
@@ -33,6 +34,18 @@ public class ArrayType extends PointerType
 	@Override
 	public boolean isArray() {return true;}
 
+	public int getLength()
+	{
+		return length;
+	}
+	public void setLength(int length)
+	{
+		this.length = length;
+	}
+	public LValueNode<?> getAtIndex(LValueNode<?> owner, int index)
+	{
+		return new WrapperLValueNode(owner, type, owner, index * type.getSize());
+	}
 	@Override
 	public String getSignature()
 	{
