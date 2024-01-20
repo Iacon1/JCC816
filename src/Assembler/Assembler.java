@@ -61,12 +61,14 @@ public class Assembler
 		header.calcROMSize(bytes);
 		header.calcChecksum(bytes);
 		byte[] headerBytes = header.asBytes();
-		for (int i = header.getOffset(); i < header.getOffset() + header.getSize(); ++i) bytes[i] = headerBytes[i - header.getOffset()];
+		for (int i = header.getOffset(); i < header.getOffset() + header.getSize(); ++i)
+			bytes[i] = headerBytes[i - header.getOffset()];
 		
 		header.calcChecksum(bytes);
 		headerBytes = header.asBytes();
-		for (int i = header.getOffset(); i < header.getOffset() + header.getSize(); ++i) bytes[i] = headerBytes[i - header.getOffset()];
-		
+		for (int i = header.getOffset(); i < header.getOffset() + header.getSize(); ++i)
+			bytes[i] = headerBytes[i - header.getOffset()];
+		FileIO.writeFile(sfcFile.getName(), bytes);
 		if (DebugLevel.isAtLeast(DebugLevel.medium))
 		{
 			dbgFile = new File(name + ".dbg");
