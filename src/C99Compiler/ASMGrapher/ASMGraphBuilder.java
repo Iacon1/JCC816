@@ -81,7 +81,6 @@ public class ASMGraphBuilder
 		
 		if (line.affectsParameter() && !internalAddresses.contains(line.getAddress()))
 			line.setExport();
-				
 		int j = i - 1;
 		while (j >= 0) // For each line before this one
 		{
@@ -123,10 +122,11 @@ public class ASMGraphBuilder
 				}
 				break;
 			case label:
+				line.setExport(); // Hack
 				for (Integer k : jumpsTo(prevLine.getAddress().toString(), j))
 				{
 					prevLine.require(lines.get(k));
-					buildGraph(k, internalAddresses, importantAddresses, importantRegisters, importantFlags);
+					if (k != i) buildGraph(k, internalAddresses, importantAddresses, importantRegisters, importantFlags);
 				}
 			case preproc: case jumpSub:
 				required = true;

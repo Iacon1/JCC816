@@ -3,6 +3,7 @@
 package C99Compiler.ASMGrapher.Nodes;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -64,17 +65,30 @@ public abstract class ASMNode<C extends ParserRuleContext>
 		exports.add(this);
 	}
 	
-	public boolean isRequiredForExports()
+	private boolean isRequiredForExports(List<ASMNode<?>> accountedFor)
 	{
 		if (hidden) return false;
 		
-		for (ASMNode<?> export : exports)
-			if (export.equals(this)) return true;
+		if (exports.contains(this)) return true;
 		for (ASMNode<?> requirer : requirers)
-			if (requirer == this) continue;
-			else if (requirer.isRequiredForExports()) return true;
+			if (accountedFor.contains(requirer)) continue;
+			else if (requirer == this) continue;
+			else
+			{
+				accountedFor.add(this);
+				if (requirer.isRequiredForExports(accountedFor))
+				{
+					accountedFor.remove(this);
+					 return true;
+				}
+				else accountedFor.remove(this);
+			}
 		
 		return false;
+	}
+	public boolean isRequiredForExports()
+	{
+		return isRequiredForExports(new LinkedList<ASMNode<?>>());
 	}
 	
 	public abstract ASMNode<C> interpret(C node) throws Exception;

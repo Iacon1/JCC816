@@ -9,11 +9,14 @@ import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.FunctionDefinitionNode;
 import C99Compiler.CompilerNodes.Declarations.DeclarationNode;
 import C99Compiler.CompilerNodes.Expressions.BaseExpressionNode;
+import C99Compiler.CompilerNodes.Expressions.BranchingExpressionNode;
 import C99Compiler.CompilerNodes.Expressions.EqualityExpressionNode;
 import C99Compiler.CompilerNodes.Expressions.ExpressionNode;
+import C99Compiler.CompilerNodes.Expressions.RelationalExpressionNode;
 import C99Compiler.CompilerNodes.Interfaces.AssemblableNode;
 import C99Compiler.Utils.AssemblyUtils;
 import C99Compiler.Utils.AssemblyUtils.DetailsTicket;
+import C99Compiler.Utils.CompUtils;
 import C99Compiler.Utils.ScratchManager;
 import Grammar.C99.C99Parser.Iteration_statementContext;
 
@@ -26,7 +29,7 @@ public class IterationStatementNode extends StatementNode<Iteration_statementCon
 		for_,
 	}
 	private IterType iterType;
-	private UUID iterId;
+	private String iterId;
 	
 	private StatementNode<?> stmNode;
 	private BaseExpressionNode<?> condExpNode;
@@ -36,7 +39,7 @@ public class IterationStatementNode extends StatementNode<Iteration_statementCon
 	public IterationStatementNode(ComponentNode<?> parent)
 	{
 		super(parent);
-		iterId = UUID.randomUUID();
+		iterId = CompUtils.getSafeUUID();
 		
 		stmNode = null;
 		condExpNode = null;
@@ -157,20 +160,36 @@ public class IterationStatementNode extends StatementNode<Iteration_statementCon
 			assembly += whitespace + getEndLabel() + ":\n";
 			break;
 		case for_:
+			// Declaration / initial node
 			if (declNode != null && declNode.hasAssembly()) assembly += declNode.getAssembly(leadingWhitespace);
 			else if (initExpNode != null && initExpNode.hasAssembly()) assembly += initExpNode.getAssembly(leadingWhitespace);
 
 			assembly += whitespace + getStartLabel() + ":\n";
-			if (condExpNode != null) // Run forever if null
+			if (condExpNode != null) // Run forever if condition not provided
 			{
-				if (condExpNode.hasPropValue() && ((Number) condExpNode.getPropValue()).equals(0)) return ""; // Don't run if 0, otherwise run forever
+				if (condExpNode.hasPropValue() && condExpNode.getPropLong() == 0) return ""; // Don't run if 0, otherwise run forever
 				else if (!condExpNode.hasPropValue())
 				{
-					if (condExpNode.hasAssembly()) assembly += condExpNode.getAssembly(leadingWhitespace, CompConfig.callResultSource(condExpNode.getSize()));
-					else assembly += AssemblyUtils.byteCopier(whitespace, condExpNode.getSize(), CompConfig.callResultSource(condExpNode.getSize()), condExpNode.getLValue().getSource());
-					
-					assembly += EqualityExpressionNode.getIsZero(whitespace, CompConfig.callResultSource(2), new ScratchManager(), CompConfig.callResultSource(condExpNode.getSize()), new DetailsTicket());
-					assembly += whitespace + "BEQ\t" + getEndLabel() + "\n";
+					if (condExpNode.hasAssembly())
+					{
+						if (BranchingExpressionNode.class.isAssignableFrom(condExpNode.getClass())) // Branching
+						{
+							assembly += ((BranchingExpressionNode<?,?,?,?>) condExpNode).getAssembly(leadingWhitespace, ":+", getEndLabel(), new ScratchManager(), new DetailsTicket());
+							assembly += whitespace + ":\n";
+						}
+						else
+						{
+							assembly += condExpNode.getAssembly(leadingWhitespace, CompConfig.callResultSource(condExpNode.getSize()));
+							assembly += EqualityExpressionNode.getIsZero(whitespace, CompConfig.callResultSource(2), new ScratchManager(), CompConfig.callResultSource(condExpNode.getSize()), new DetailsTicket());
+							assembly += whitespace + "BEQ\t" + getEndLabel() + "\n";
+						}
+					}
+					else
+					{
+						assembly += AssemblyUtils.byteCopier(whitespace, condExpNode.getSize(), CompConfig.callResultSource(condExpNode.getSize()), condExpNode.getLValue().getSource());
+						assembly += EqualityExpressionNode.getIsZero(whitespace, CompConfig.callResultSource(2), new ScratchManager(), CompConfig.callResultSource(condExpNode.getSize()), new DetailsTicket());
+						assembly += whitespace + "BEQ\t" + getEndLabel() + "\n";
+					}
 				}
 			}
 			assembly += stmNode.getAssembly(leadingWhitespace + CompConfig.indentSize);
