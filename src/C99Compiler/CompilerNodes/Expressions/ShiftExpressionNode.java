@@ -48,46 +48,13 @@ public class ShiftExpressionNode extends BinaryExpressionNode
 		default: return null;
 		}
 	}
-	public static String getSingleShift(String whitespace, OperandSource destSource, ScratchManager scratchManager, String operator, OperandSource sourceX, DetailsTicket ticket) throws Exception
-	{
-		String assembly = "";
-		assembly += ticket.save(whitespace, DetailsTicket.saveA);
-		DetailsTicket innerTicket = new DetailsTicket(ticket, DetailsTicket.saveA, 0);
-		innerTicket.flags &= ~(DetailsTicket.isA16Bit | DetailsTicket.isXY16Bit);
-
-		switch (operator)
-		{
-		case "<<":
-			assembly += AssemblyUtils.bytewiseOperation(whitespace, sourceX.getSize(), (Integer i, DetailsTicket ticket2) ->
-			{
-				return new String[]
-				{
-					sourceX.getLDA(i, ticket2),
-					(i >= sourceX.getSize() - 2) ? "ASL" : "ROL",
-					(destSource == null) ? "" : destSource.getSTA(i, ticket2),
-				};
-			});
-			break;
-		case ">>":
-			assembly += AssemblyUtils.bytewiseOperation(whitespace, sourceX.getSize(), (Integer i, DetailsTicket ticket2) -> 
-			{return new String[]
-				{
-					sourceX.getLDA(i, ticket2),
-					(i >= sourceX.getSize() - 2) ? "LSR" : "ROR",
-					(destSource == null) ? "" : destSource.getSTA(i, ticket2),
-				};
-			}, true, true);
-			break;
-		}
-		assembly += ticket.restore(whitespace, DetailsTicket.saveA);
-		return assembly;
-	}
 	@Override
 	protected String getAssembly(String whitespace, OperandSource destSource, OperandSource sourceX, OperandSource sourceY, ScratchManager scratchManager, DetailsTicket ticket) throws Exception
 	{
 		String assembly = "";
 		assembly += ticket.save(whitespace, DetailsTicket.saveA | DetailsTicket.saveX);
 		DetailsTicket innerTicket = new DetailsTicket(ticket, DetailsTicket.saveA | DetailsTicket.saveX, 0);
+		boolean isOne = y.hasPropValue() && (y.getPropLong() == 1); // No need for loop w/ only one iteration
 		if (sourceY.getSize() >= 2)
 		{
 			assembly += whitespace + CompUtils.setA16 + "\n";
@@ -98,16 +65,19 @@ public class ShiftExpressionNode extends BinaryExpressionNode
 			assembly += whitespace + CompUtils.setA8 + "\n";
 			innerTicket.flags &= ~(DetailsTicket.isA16Bit | DetailsTicket.isXY16Bit);
 		}
-		assembly += sourceY.getLDA(whitespace, 0, innerTicket) + "\n";
-		assembly += whitespace + "BEQ\t:++\n";
-		assembly += whitespace + "TAX\t\n";
 		
-		assembly += whitespace.substring(1) + ":\n"; // A loop
-		
+		if (!isOne)
+		{
+			assembly += sourceY.getLDA(whitespace, 0, innerTicket) + "\n";
+			assembly += whitespace + "BEQ\t:++\n";
+			assembly += whitespace + "TAX\t\n";
+			assembly += whitespace.substring(1) + ":\n"; // A loop
+		}
+
 		switch (operator)
 		{
 		case "<<":
-			assembly += AssemblyUtils.bytewiseOperation(whitespace + AssemblyUtils.getWhitespace(CompConfig.indentSize), sourceX.getSize(), (Integer i, DetailsTicket ticket2) ->
+			assembly += AssemblyUtils.bytewiseOperation(whitespace + (isOne? "" : AssemblyUtils.getWhitespace(CompConfig.indentSize)), sourceX.getSize(), (Integer i, DetailsTicket ticket2) ->
 			{
 				return new String[]
 				{
@@ -128,9 +98,12 @@ public class ShiftExpressionNode extends BinaryExpressionNode
 			}, true, true);
 			break;
 		}
-		assembly += whitespace + AssemblyUtils.getWhitespace(CompConfig.indentSize) + "DEX\n";
-		assembly += whitespace + AssemblyUtils.getWhitespace(CompConfig.indentSize) + "BNE\t:-\n";
-		assembly += whitespace.substring(1) + ":\n"; // A loop
+		if (!isOne)
+		{
+			assembly += whitespace + AssemblyUtils.getWhitespace(CompConfig.indentSize) + "DEX\n";
+			assembly += whitespace + AssemblyUtils.getWhitespace(CompConfig.indentSize) + "BNE\t:-\n";
+			assembly += whitespace.substring(1) + ":\n"; // A loop
+		}
 		
 		assembly += ticket.restore(whitespace, DetailsTicket.saveA | DetailsTicket.saveX);
 		
