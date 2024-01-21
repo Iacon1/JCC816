@@ -66,8 +66,8 @@ public class RelationalExpressionNode extends BranchingExpressionNode
 		}
 		switch (operator) // Let's always do variants of <
 		{
-		case ">": return getComparison(whitespace, noLabel, yesLabel,sourceY, "<=", sourceX, scratchManager, ticket);
-		case ">=": return getComparison(whitespace, noLabel, yesLabel, sourceY, "<", sourceX, scratchManager, ticket);
+		case ">": return getComparison(whitespace, noLabel, yesLabel,sourceX, "<=", sourceY, scratchManager, ticket);
+		case ">=": return getComparison(whitespace, noLabel, yesLabel, sourceX, "<", sourceY, scratchManager, ticket);
 		}
 
 		String assembly = "";
@@ -117,9 +117,10 @@ public class RelationalExpressionNode extends BranchingExpressionNode
 		switch (operator)
 		{
 		case "<":
-			assembly += "BRA\t" + noLabel + "\n"; // If equal, false
+			assembly += whitespace + "BRA\t" + noLabel + "\n"; // If equal, false
+			break;
 		case "<=":
-			assembly += "BRA\t" + yesLabel + "\n"; // If equal, true
+			assembly += whitespace + "BRA\t" + yesLabel + "\n"; // If equal, true
 			break;
 		}
 		scratchManager.releasePointer(tempSource);
@@ -141,7 +142,7 @@ public class RelationalExpressionNode extends BranchingExpressionNode
 		String assembly = "";
 		assembly += whitespace + getAssembly(whitespace, yesLabel, noLabel, sourceX, sourceY, scratchManager, ticket);
 		
-		assembly += whitespace + yesLabel + ":" + (DebugLevel.isAtLeast(DebugLevel.medium) ? "\t; " + operator + "\n" : "\n");
+		assembly += whitespace + yesLabel + ":\n";
 		assembly += AssemblyUtils.byteCopier(whitespace, destSource.getSize(), destSource, new ConstantSource(1, destSource.getSize()));
 		assembly += whitespace + "BRA\t" + endLabel + "\n";
 		
