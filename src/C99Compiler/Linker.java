@@ -23,6 +23,7 @@ import java.util.Arrays;
 import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.FunctionDefinitionNode;
 import C99Compiler.CompilerNodes.TranslationUnitNode;
+import C99Compiler.CompilerNodes.Declarations.InitializerNode;
 import C99Compiler.CompilerNodes.Definitions.EnumDefinitionNode;
 import C99Compiler.CompilerNodes.Definitions.StructUnionDefinitionNode;
 import C99Compiler.CompilerNodes.Definitions.Type;
@@ -52,7 +53,7 @@ public final class Linker implements Catalogger
 		for (TranslationUnitNode translationUnit : translationUnits)
 			for (VariableNode variable : translationUnit.getVariables().values()) // Have to check one-by-one for name problems
 			{
-				if (variable.getScope().isRoot() && variables.get(variable.getFullName()) != null) // Two root-level variables cannot have same full name
+				if (variables.get(variable.getFullName()) != null) // Two variables cannot have same full name
 					storedExceptions.add(new LinkerMultipleDefinitionException(variable)); 
 				else variables.put(variable.getFullName(), variable);
 			}
@@ -237,6 +238,10 @@ public final class Linker implements Catalogger
 				 CompUtils.setA16 + "\n";
 		assembly += "LDA\t#$" + String.format("%04x", CompConfig.stackSize - 1) + "\n";
 		assembly += "TCS\n";
+		// Load initialized globals
+		for (TranslationUnitNode unit : translationUnits)
+			for (InitializerNode init : unit.getGlobalInitializers())
+				assembly += init.getAssembly();
 		assembly += "JML\tmain\n";
 
 		// Required special subs
@@ -267,7 +272,7 @@ public final class Linker implements Catalogger
 		translationUnits.addAll(units);
 	}
 	
-	public String getAssemblyRaw() throws Exception
+	private String getAssemblyRaw() throws Exception
 	{
 		String assembly = "";
 		
@@ -298,8 +303,7 @@ public final class Linker implements Catalogger
 	public String link() throws Exception
 	{
 		if (VerbosityLevel.isAtLeast(VerbosityLevel.medium))
-			printInfo("Linking...");
-		
+			printInfo("Linking...");	
 		long t = System.currentTimeMillis();
 		String assembly = getAssemblyRaw();
 		if (VerbosityLevel.isAtLeast(VerbosityLevel.medium))

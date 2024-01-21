@@ -3,8 +3,10 @@
 
 package Executables;
 
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
@@ -14,6 +16,7 @@ import C99Compiler.CartConfig;
 import C99Compiler.CompConfig;
 import C99Compiler.C99Compiler;
 import C99Compiler.Linker;
+import C99Compiler.Preprocessor;
 import C99Compiler.CartConfig.AddonChip;
 import C99Compiler.CartConfig.ROMType;
 import C99Compiler.CompConfig.DebugLevel;
@@ -84,7 +87,7 @@ public class BBSnCC
 		
 		if (commandLine.hasOption("l")) // Link to executable
 		{
-			List<TranslationUnitNode> translationUnits = new LinkedList<TranslationUnitNode>();
+			List<TranslationUnitNode> translationUnits  = new LinkedList<TranslationUnitNode>();
 			for (String parameter : commandLine.getArgList()) // Read all input files
 			{
 				if (parameter.endsWith(".c") || parameter.endsWith(".h")) // C file
@@ -99,9 +102,21 @@ public class BBSnCC
 				}
 			}
 			
+			// Include std libs
+			Set<String> includedStdLibs = new HashSet<String>();
+			for (TranslationUnitNode unit : translationUnits)
+				if (unit.getIncludedStdLibs() != null) includedStdLibs.addAll(unit.getIncludedStdLibs());
+			
+			for (String stdLib : includedStdLibs)
+			{
+				String fileText = FileIO.readResource("stdlib/" + stdLib.replace(".h", "") + ".c");
+				translationUnits.add(0, C99Compiler.compile(stdLib, fileText));
+			}
+			
 			String name = commandLine.getOptionValue("l");
 
 			linker.addUnits(translationUnits);
+			
 			Assembler.Assembler.assemble(name, cartConfig, linker.link());
 		}
 		else // Save to .o files

@@ -4,10 +4,14 @@
 package C99Compiler.CompilerNodes;
 
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 import java.util.function.Function;
 
 import C99Compiler.CompConfig.DefinableInterrupt;
 import C99Compiler.CompilerNodes.Declarations.DeclarationNode;
+import C99Compiler.CompilerNodes.Declarations.InitializerNode;
 import C99Compiler.CompilerNodes.Definitions.EnumDefinitionNode;
 import C99Compiler.CompilerNodes.Definitions.StructUnionDefinitionNode;
 import C99Compiler.CompilerNodes.Definitions.Type;
@@ -23,6 +27,8 @@ public class TranslationUnitNode extends InterpretingNode<TranslationUnitNode, T
 	private LinkedHashMap<DefinableInterrupt, String> interrupts;
 	private LinkedHashMap<String, Type> typedefs;
 	private LinkedHashMap<String, String> requiredSubs;
+	private Set<String> includedStdLibs;
+	private List<InitializerNode> globalInitializers;
 	
 	public TranslationUnitNode(ComponentNode<?> parent)
 	{
@@ -30,6 +36,7 @@ public class TranslationUnitNode extends InterpretingNode<TranslationUnitNode, T
 		interrupts = new LinkedHashMap<DefinableInterrupt, String>();
 		typedefs = new LinkedHashMap<String, Type>();
 		requiredSubs = new LinkedHashMap<String, String>();
+		globalInitializers = new LinkedList<InitializerNode>();
 	}
 	public TranslationUnitNode()
 	{
@@ -37,6 +44,7 @@ public class TranslationUnitNode extends InterpretingNode<TranslationUnitNode, T
 		interrupts = new LinkedHashMap<DefinableInterrupt, String>();
 		typedefs = new LinkedHashMap<String, Type>();
 		requiredSubs = new LinkedHashMap<String, String>();
+		globalInitializers = new LinkedList<InitializerNode>();
 	}
 	
 	@Override public LinkedHashMap<String, VariableNode> getVariables() {return getChildVariables();}
@@ -48,6 +56,10 @@ public class TranslationUnitNode extends InterpretingNode<TranslationUnitNode, T
 	@Override public LinkedHashMap<String, String> getRequiredSubs() {return requiredSubs;}
 	@Override public LinkedHashMap<DefinableInterrupt, String> getInterrupts() {return interrupts;}
 
+	public List<InitializerNode> getGlobalInitializers()
+	{
+		return globalInitializers;
+	}
 	public void registerTypedef(String name, Type type)
 	{
 		typedefs.put(name, type);
@@ -68,7 +80,13 @@ public class TranslationUnitNode extends InterpretingNode<TranslationUnitNode, T
 		for (External_declarationContext extDec : node.external_declaration())
 		{
 			Exception innerException = new Exception();
-			if (extDec.declaration() != null) new DeclarationNode(this).interpret(extDec.declaration());
+			if (extDec.declaration() != null)
+			{
+				DeclarationNode declNode = new DeclarationNode(this).interpret(extDec.declaration());
+				for (ComponentNode<?> child : declNode.children)
+					if ((InitializerNode.class.isAssignableFrom(child.getClass())))
+						globalInitializers.add((InitializerNode) child);
+			}
 			else
 			{
 				FunctionDefinitionNode oldFunction = checkRepeatFunctions((ComponentNode<?> c) -> {
@@ -86,5 +104,13 @@ public class TranslationUnitNode extends InterpretingNode<TranslationUnitNode, T
 		}
 
 		return this;
-	}	
+	}
+	public void includeStdLibs(Set<String> includedStdLibs)
+	{
+		this.includedStdLibs = includedStdLibs;
+	}
+	public Set<String> getIncludedStdLibs()
+	{
+		return includedStdLibs;
+	}
 }

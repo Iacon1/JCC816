@@ -3,8 +3,10 @@
 package C99Compiler;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -77,14 +79,16 @@ public final class Preprocessor
 		return group;
 	}
 	
-	public static final String preprocess(String filename, String source) throws Exception
+	public static final String preprocess(Set<String> includedStdLibs, String filename, String source) throws Exception
 	{
 		Grammar.GrammarFlags.isPreproc = true;
 		PreProcComponentNode.loadPredefs();
 		PreProcComponentNode.resetLineNo(filename, 1);
-		source = new GroupNode().interpret(parsePreprocess(source)).getText();
-
+		GroupNode node = new GroupNode().interpret(parsePreprocess(source));
+		includedStdLibs.addAll(node.getIncludedStdLibs());
+		source = node.getText();
 		Grammar.GrammarFlags.isPreproc = false;
+
 		return source;
 	}
 }

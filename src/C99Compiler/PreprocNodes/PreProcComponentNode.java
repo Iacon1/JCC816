@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class PreProcComponentNode<T extends PreProcComponentNode<T>>
+public abstract class PreProcComponentNode<T extends PreProcComponentNode<T>>
 {
 	protected PreProcComponentNode<?> parent;
 	protected List<PreProcComponentNode<?>> children;
@@ -70,6 +70,14 @@ public class PreProcComponentNode<T extends PreProcComponentNode<T>>
 	public void removeChild(PreProcComponentNode<?> child)
 	{
 		children.remove(child);
+	}
+	
+	public Set<String> getIncludedStdLibs()
+	{
+		Set<String> incl = new HashSet<String>();
+		for (PreProcComponentNode<?> child : children)
+			incl.addAll(child.getIncludedStdLibs());
+		return incl;
 	}
 	
 	// Get the list of parameters for a macro

@@ -4,6 +4,7 @@ package C99Compiler.PreprocNodes;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.antlr.v4.runtime.tree.TerminalNode;
 
@@ -19,6 +20,7 @@ public class ControlNode extends InterpretingNode<ControlNode, Control_lineConte
 {
 	private String command;
 	private GroupNode include;
+	private String stdLib; // Only fill out if standard lib was included
 	private byte[] embedBytes;
 	
 	public ControlNode(PreProcComponentNode<?> parent)
@@ -64,6 +66,7 @@ public class ControlNode extends InterpretingNode<ControlNode, Control_lineConte
 			if (filename.contains("<")) // Include library
 			{
 				filename = filename.replaceAll("[<>\"\"]", "");
+				stdLib = filename;
 				file = FileIO.readResource("stdlib/" + filename);
 			}
 			else if (filename.contains("\"")) // Include file
@@ -139,7 +142,13 @@ public class ControlNode extends InterpretingNode<ControlNode, Control_lineConte
 		
 		return this;
 	}
-	
+	@Override
+	public Set<String> getIncludedStdLibs()
+	{
+		Set<String> incl = super.getIncludedStdLibs();
+		if (stdLib != null) incl.add(stdLib);
+		return incl;
+	}
 	@Override
 	public boolean hasText()
 	{
