@@ -227,7 +227,7 @@ public final class Linker implements Catalogger
 		assembly += ".res\t48, 0;\tHEADER_HERE\n";
 		assembly += mapMemory();
 		
-		assembly += ".segment \"" + CompConfig.bankName(0) + "\"\n"; // Begins runnable code
+		assembly += ".segment \"" + CompConfig.codeBankName(0) + "\"\n"; // Begins runnable code
 		assembly +=  "RESET:\n";
 		assembly +=
 				 "SEI\n" +

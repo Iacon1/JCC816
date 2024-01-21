@@ -11,6 +11,7 @@ import Assembler.Header.DestinationCode;
 import C99Compiler.CartConfig;
 import C99Compiler.CompConfig.DebugLevel;
 import C99Compiler.CompConfig.VerbosityLevel;
+import Assembler.Configs.ConfigRequirements;
 import Assembler.Configs.Configurer;
 import C99Compiler.Utils.FileIO;
 import Logging.Logging;
@@ -38,7 +39,7 @@ public class Assembler
 		FileOutputStream asmStream = new FileOutputStream(asmFile);
 		FileInputStream sfcStream;
 		
-		Configurer.selectConfig(cartConfig).writeConfig(configStream, 2);
+		Configurer.selectConfig(cartConfig).writeConfig(configStream, new ConfigRequirements(1));
 		configStream.close();
 		
 		asmStream.write(assembly.getBytes());

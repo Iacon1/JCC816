@@ -48,11 +48,7 @@ public final class CompConfig
 		return callResultSource(callResultSize);
 	}
 	
-	public static String bankName(int i)
-	{
-		return bankRootName + i;
-	}
-	
+	public static String codeBankName(int i) {return bankRootName + i;}
 	public static List<SimpleEntry<String, Integer>> reservedRAM() 
 	{
 		List<SimpleEntry<String, Integer>> list = new LinkedList<SimpleEntry<String, Integer>>();

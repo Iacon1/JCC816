@@ -44,7 +44,7 @@ public final class Banker
 					if (lastBank + blockSize >= bankSize) // Need to make new bank
 					{
 						banks += 1;
-						lines.add(blockStart, ".SEGMENT\t\"" + CompConfig.bankName(banks - 1) + "\"");
+						lines.add(blockStart, ".SEGMENT\t\"" + CompConfig.codeBankName(banks - 1) + "\"");
 						lastBank = 0;
 						
 						i += 1;
