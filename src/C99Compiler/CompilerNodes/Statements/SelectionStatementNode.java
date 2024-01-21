@@ -27,10 +27,8 @@ import C99Compiler.Utils.OperandSources.OperandSource;
 import Grammar.C99.C99Parser.Selection_statementContext;
 
 public class SelectionStatementNode extends StatementNode<Selection_statementContext>
-{
-	private static int selCount = 0;
-	private int selId;
-	
+{	
+	private String selId;
 	private BaseExpressionNode<?> expression;
 	
 	private StatementNode<?> switchStm, ifStm, elseStm;
@@ -43,12 +41,9 @@ public class SelectionStatementNode extends StatementNode<Selection_statementCon
 	public SelectionStatementNode(ComponentNode<?> parent)
 	{
 		super(parent);
-		selId = selCount;
-		selCount += 1;
+		selId = CompUtils.getSafeUUID();
 		cases = new HashMap<BaseExpressionNode<?>, String>();
 	}
-	@Override
-	public void finalize() {selCount -= 1;}
 	@Override
 	public StatementNode<Selection_statementContext> interpret(Selection_statementContext node) throws Exception
 	{
@@ -122,11 +117,11 @@ public class SelectionStatementNode extends StatementNode<Selection_statementCon
 		String whitespace = AssemblyUtils.getWhitespace(leadingWhitespace);
 		String assembly = "";
 		
-		if (!isSwitch)
+		if (!isSwitch) // If statement
 		{
-			if (expression.hasPropValue() && expression.getPropBool() || expression.getPropLong() != 0) // Always true
+			if (expression.hasPropValue() && (expression.getPropBool() || expression.getPropLong() != 0)) // It's always true
 				assembly += ifStm.getAssembly(leadingWhitespace);
-			else if (expression.hasPropValue() && elseStm != null) // Always false
+			else if (expression.hasPropValue() && elseStm != null) // It's always false
 				assembly += elseStm.getAssembly(leadingWhitespace);
 			else if (!expression.hasPropValue()) // Unknown
 			{
@@ -137,8 +132,8 @@ public class SelectionStatementNode extends StatementNode<Selection_statementCon
 						assembly += ((BranchingExpressionNode<?,?,?,?>) expression).getAssembly(leadingWhitespace, ":+", skipName, new ScratchManager(), new DetailsTicket());
 					else
 					{
-						assembly += expression.getAssembly(leadingWhitespace);
-						assembly += whitespace + "BEQ\t" + skipName + "\n";
+						assembly += expression.getAssembly(leadingWhitespace); // Get value
+						assembly += whitespace + "BEQ\t" + skipName + "\n"; // Skip if 0, i. e. not true
 						assembly += ifStm.getAssembly(leadingWhitespace + CompConfig.indentSize);
 					}
 				}
@@ -164,35 +159,38 @@ public class SelectionStatementNode extends StatementNode<Selection_statementCon
 		}
 		else
 		{
-			switchStm.getAssembly(leadingWhitespace + CompConfig.indentSize);
+			// switchStm.getAssembly(leadingWhitespace + CompConfig.indentSize);
 			
 			long smallestCase = 0, largestCase = 0;
 			Set<Long> caseValues = new HashSet<Long>();
-			for (BaseExpressionNode<?> node : cases.keySet())
+			BaseExpressionNode<?> largestExpr = null;
+			for (BaseExpressionNode<?> node : cases.keySet()) // Determine case values
 			{
 				long l = node.getPropLong();
 				smallestCase = Math.min(smallestCase, l);
 				largestCase = Math.max(largestCase, l);
+				if (largestCase == l)
+					largestExpr = node;
 				caseValues.add(l);
 			}
+			
 			ScratchManager scratchManager = new ScratchManager();
-			assembly += new RelationalExpressionNode(	// If largestCase < value of expr then go to default
-					this, "<", 
-					new DummyExpressionNode(this, CompUtils.getSmallestType(largestCase), Long.valueOf(largestCase)),
-					expression).getAssembly(leadingWhitespace, hasDefault? getDefaultLabel(false) : getEndLabel(), ":+", scratchManager, new DetailsTicket());
-			assembly += whitespace.substring(1) + ":\n";
-			ScratchSource sourceS = scratchManager.reserveScratchBlock(1);
-			assembly += whitespace + new ShiftExpressionNode(this, "<<", expression, new DummyExpressionNode(this, CompUtils.getSmallestType(largestCase), Long.valueOf(largestCase)))
-					.getAssembly(leadingWhitespace, sourceS);
+			
+			// If greater than largest case, skip
+			assembly += new RelationalExpressionNode(this, "<", largestExpr, expression).getAssembly(leadingWhitespace, hasDefault? getDefaultLabel(false) : getEndLabel(), ":+", scratchManager, new DetailsTicket());
+			assembly += whitespace + ":\n";
+			
+			ScratchSource sourceS = scratchManager.reserveScratchBlock(expression.getSize());
+			assembly += new ShiftExpressionNode(this, "<<", expression, new DummyExpressionNode(this, 1)).getAssembly(leadingWhitespace, sourceS);
 			assembly += whitespace + "TAX\n";
-			assembly += whitespace + "JMP\t(" + getTableLabel() + ",X)\n";
+			assembly += whitespace + "JMP\t(" + getTableLabel() + ",x)\n";
 			scratchManager.releaseScratchBlock(sourceS);
 			assembly += whitespace + getTableLabel() + ":\n";
 			for (long i = smallestCase; i <= largestCase; ++i)
 			{
 				if (caseValues.contains(i))
-					assembly += whitespace + ".word\t" + getCaseLabel(i) + "\n";
-				else assembly += whitespace + ".word\t" + getDefaultLabel(false) + "\n";
+					assembly += whitespace + AssemblyUtils.getWhitespace(CompConfig.indentSize) + ".word\t" + getCaseLabel(i) + "\n";
+				else assembly += whitespace + AssemblyUtils.getWhitespace(CompConfig.indentSize) + ".word\t" + getDefaultLabel(false) + "\n";
 			}
 			assembly += switchStm.getAssembly(leadingWhitespace + CompConfig.indentSize);
 			switchStm.clearPossibleValues();

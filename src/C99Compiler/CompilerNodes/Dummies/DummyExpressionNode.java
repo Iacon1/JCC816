@@ -22,7 +22,14 @@ public class DummyExpressionNode extends BaseExpressionNode<ExpressionContext>
 	public DummyExpressionNode(ComponentNode<?> parent, Type type, Object value)
 	{
 		super(parent);
+		this.type = type;
 		this.value = value;
+	}
+	public DummyExpressionNode(ComponentNode<?> parent, long value)
+	{
+		super(parent);
+		this.type = CompUtils.getSmallestType(value);
+		this.value = Long.valueOf(value);
 	}
 	@Override public boolean hasAssembly() {return false;}
 
