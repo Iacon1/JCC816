@@ -35,6 +35,13 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 	
 	public UnaryExpressionNode(ComponentNode<?> parent) {super(parent);}
 	
+	public UnaryExpressionNode(ComponentNode<?> parent, String operator, BaseExpressionNode<?> expr)
+	{
+		super(parent);
+		this.operator = operator;
+		this.expr = expr;
+	}
+
 	@Override
 	public BaseExpressionNode<Unary_expressionContext> interpret(Unary_expressionContext node) throws Exception
 	{
@@ -85,7 +92,7 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 		if (operator.equals("*")) return true;
 		else if (operator.equals("&"))
 		{
-			if (UnaryExpressionNode.class.isAssignableFrom(expr.getClass()) && ((UnaryExpressionNode) expr).operator.equals("&"))
+			if (UnaryExpressionNode.class.isAssignableFrom(expr.getClass()) && ((UnaryExpressionNode) expr).operator.equals("*"))
 				return ((UnaryExpressionNode) expr).expr.hasLValue();
 			else return false;
 		}
@@ -97,13 +104,13 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 	{
 		if (operator.equals("*"))
 		{
-			if (UnaryExpressionNode.class.isAssignableFrom(expr.getClass()) && ((UnaryExpressionNode) expr).operator.equals("*"))
+			if (UnaryExpressionNode.class.isAssignableFrom(expr.getClass()) && ((UnaryExpressionNode) expr).operator.equals("&"))
 				return ((UnaryExpressionNode) expr).expr.getLValue(); // These two cancel each other out
 			else return pointerRef;
 		}
 		else if (operator.equals("&"))
 		{
-			if (UnaryExpressionNode.class.isAssignableFrom(expr.getClass()) && ((UnaryExpressionNode) expr).operator.equals("&"))
+			if (UnaryExpressionNode.class.isAssignableFrom(expr.getClass()) && ((UnaryExpressionNode) expr).operator.equals("*"))
 				return ((UnaryExpressionNode) expr).expr.getLValue(); // These two cancel each other out
 			else return null;
 		}
@@ -232,35 +239,46 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 		{
 		case "++":
 			assembly += AdditiveExpressionNode.getIncrementer(whitespace, sourceX, sourceX, ticket);
-			if (!destSource.equals(sourceX))
+			if (destSource != null && !destSource.equals(sourceX))
 				assembly += AssemblyUtils.byteCopier(whitespace, sourceX.getSize(), destSource, sourceX);
 			break;
 		case "--":
 			assembly += AdditiveExpressionNode.getDecrementer(whitespace, sourceX, ticket);
-			if (!destSource.equals(sourceX))
+			if (destSource != null && !destSource.equals(sourceX))
 				assembly += AssemblyUtils.byteCopier(whitespace, sourceX.getSize(), destSource, sourceX);
 			break;
 		case "-": // -x = ~(x-1)
-			assembly += AdditiveExpressionNode.getSubtractor(whitespace, destSource, sourceX, new ConstantSource(1, sourceX.getSize()), ticket);
-			sourceX = destSource;
-		case "~":
-			assembly += XOrExpressionNode.getComplementer(whitespace, destSource, sourceX, ticket);
-			break;
-		case "!":
-			assembly += EqualityExpressionNode.getIsZero(whitespace, destSource, scratchManager, sourceX, ticket);
-			break;
-		case "*":
-			ScratchSource sourceI;
-			if (!ScratchManager.hasPointer(sourceX))
+			if (destSource != null)
 			{
-				sourceI = scratchManager.reservePointer(sourceX);
-				assembly += AssemblyUtils.byteCopier(whitespace, CompConfig.pointerSize, sourceI, sourceX, ticket);
+				assembly += AdditiveExpressionNode.getSubtractor(whitespace, destSource, sourceX, new ConstantSource(1, sourceX.getSize()), ticket);
+				sourceX = destSource;
 			}
-			else sourceI = scratchManager.getPointer(sourceX);
+		case "~":
+			if (destSource != null)
+			{
+				assembly += XOrExpressionNode.getComplementer(whitespace, destSource, sourceX, ticket);
+				break;
+			}
+		case "!":
+			if (destSource != null)
+			{
+				assembly += EqualityExpressionNode.getIsZero(whitespace, destSource, scratchManager, sourceX, ticket);
+				break;
+			}
+		case "*":
+			if (destSource != null)
+			{
+				ScratchSource sourceI;
+				if (!ScratchManager.hasPointer(sourceX))
+				{
+					sourceI = scratchManager.reservePointer(sourceX);
+					assembly += AssemblyUtils.byteCopier(whitespace, CompConfig.pointerSize, sourceI, sourceX, ticket);
+				}
+				else sourceI = scratchManager.getPointer(sourceX);
 			
-			pointerRef = new IndirectLValueNode(this, expr.getLValue(), sourceI, ((PointerType) expr.getType()).getType());
-			if (destSource != null) // Was this just a calc or did we need to put this somewhere?
+				pointerRef = new IndirectLValueNode(this, expr.getLValue(), sourceI, ((PointerType) expr.getType()).getType());
 				assembly += AssemblyUtils.byteCopier(whitespace, ((PointerType) expr.getType()).getType().getSize(), destSource, pointerRef.getSource(), ticket);
+			}
 			break;
 		default: return "";
 		}

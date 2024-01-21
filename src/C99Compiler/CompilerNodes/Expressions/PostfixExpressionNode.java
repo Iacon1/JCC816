@@ -20,6 +20,7 @@ import C99Compiler.CompilerNodes.LValues.VariableNode;
 import C99Compiler.Exceptions.UnsupportedFeatureException;
 import C99Compiler.Utils.AssemblyUtils;
 import C99Compiler.Utils.AssemblyUtils.DetailsTicket;
+import C99Compiler.Utils.CompUtils;
 import C99Compiler.Utils.ScratchManager;
 import C99Compiler.Utils.OperandSources.ConstantSource;
 import C99Compiler.Utils.OperandSources.OperandSource;
@@ -50,7 +51,7 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 	
 	private FunctionDefinitionNode getReferencedFunction()
 	{
-		if (expr.getPropValue() != null)
+		if (expr.hasPropValue())
 		{
 			Object obj = expr.getPropValue();
 			if (FunctionDefinitionNode.class.equals(obj.getClass())) // Object is a function so this was a function reference or function pointer
@@ -187,10 +188,9 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 			scratchManager.releaseScratchBlock(sourceI);
 			break;
 		case funcCall:
-			if (expr.hasAssembly()) assembly += expr.getAssembly(leadingWhitespace, scratchManager, ticket);
-			
 			if (getReferencedFunction() != null && !getReferencedFunction().canCall(getEnclosingFunction())) // We can know the variables to copy parameters to
 			{
+				if (expr.hasAssembly()) expr.getAssembly(leadingWhitespace, scratchManager, ticket);
 				FunctionDefinitionNode func = getReferencedFunction();
 				
 				if (func.canCall(getEnclosingFunction())) // Prepare for possible recursion
@@ -225,6 +225,16 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 			}
 			else // TODO Unpredictable function pointer or recursion, need to use the stack
 			{
+				// Copy pointer
+				BaseExpressionNode<?> addrExpr = new UnaryExpressionNode(this, "&", expr);
+				if (addrExpr.hasAssembly()) assembly += addrExpr.getAssembly(leadingWhitespace, CompConfig.funcPointerSource(), scratchManager, ticket);
+				else if (addrExpr.hasPropValue())
+					assembly += AssemblyUtils.byteCopier(whitespace, CompConfig.pointerSize, CompConfig.funcPointerSource(), new ConstantSource(addrExpr.getPropValue(), CompConfig.pointerSize));
+				else if (addrExpr.hasLValue())
+					assembly += AssemblyUtils.byteCopier(whitespace, CompConfig.pointerSize, CompConfig.funcPointerSource(), addrExpr.getLValue().getSource());
+				assembly += whitespace + "PHK\n";
+				assembly += whitespace + "PEA\t:+\n";
+				
 				List<VariableNode> variables = new LinkedList<VariableNode>(getEnclosingFunction().getChildVariables().values()); // Prepare for possible recursion
 				for (VariableNode parameter : variables)
 					assembly += AssemblyUtils.stackLoader(whitespace, leadingWhitespace, parameter.getSource());
@@ -244,9 +254,8 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 					assembly += AssemblyUtils.stackPusher(whitespace, leadingWhitespace, sourceP);
 					if (sourceV != null) scratchManager.releaseScratchBlock(sourceV);
 				}
-
-				if (expr.hasPropValue()) assembly += new ConstantSource(expr.getPropValue(), CompConfig.pointerSize).getInstruction("JSL", 0, ticket);
-				else if (expr.hasLValue()) assembly += expr.getLValue().getSource().getInstruction(whitespace, "JSL", 0, ticket);
+				assembly += whitespace + "JML\t[" + CompConfig.funcPointer + "]\n";
+				assembly += whitespace + ":\n";
 				
 				Collections.reverse(variables);
 				for (VariableNode parameter : variables)

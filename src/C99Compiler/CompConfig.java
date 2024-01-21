@@ -25,11 +25,12 @@ public final class CompConfig
 	public static final int specSubSize = 16;
 	public static final String specSubX = "__@specSubX";
 	public static final String specSubY = "__@specSubY";
-	public static final int scratchSize = 160;
+	public static final int scratchSize = 157;
 	public static final String scratchBase = "__@scratchBase";
+	public static final String funcPointer = "__@funcPointer";
 	public static final int callResultSize = 64;
-	// 16 + 16 + 160 + 64 = 256 = Just large enough to be a ZP!
 	public static final String callResult = "__@callResult";
+	// 16 + 16 + 157 + 3 + 64 = 256 = Just large enough to be a ZP!
 	public static final String bankRootName = "ROMBANK";
 	public static final String functionTag = "@func";
 	
@@ -47,7 +48,10 @@ public final class CompConfig
 	{
 		return callResultSource(callResultSize);
 	}
-	
+	public static final OperandSource funcPointerSource()
+	{
+		return new AddressSource(funcPointer, pointerSize);
+	}
 	public static String codeBankName(int i) {return bankRootName + i;}
 	public static List<SimpleEntry<String, Integer>> reservedRAM() 
 	{
@@ -55,6 +59,7 @@ public final class CompConfig
 		list.add(new SimpleEntry<String, Integer>(callResult, callResultSize));
 		list.add(new SimpleEntry<String, Integer>(specSubY, specSubSize));
 		list.add(new SimpleEntry<String, Integer>(specSubX, specSubSize));
+		list.add(new SimpleEntry<String, Integer>(funcPointer, pointerSize));
 		list.add(new SimpleEntry<String, Integer>(scratchBase, scratchSize));
 		return list;
 	};

@@ -20,7 +20,11 @@ Operation
 	| 'TAX' | 'TAY' | 'TCD' | 'TCS' | 'TDC' | 'TSC' | 'TSX' | 'TXA' | 'TXS' | 'TXY' | 'TYA' | 'TYX' | 'TRB' | 'TSB'
 	| 'WAI' | 'XCE'
 	;
-Symbol : [a-zA-Z_] [0-9a-zA-Z@_]* ;
+Symbol
+	: [a-zA-Z_] [0-9a-zA-Z@_]*
+	| '.loWord(' Symbol ')'
+	| '.bankByte(' Symbol ')'
+	;
 Number
 	: [0-9]+
 	|  '$' [0-9a-fA-F]+ 
@@ -30,10 +34,10 @@ Preproc
 	: '.' ~[\n]* 
 	| ~[\n=]+ '=' ~[\n]+; 
 parameter
-	: '(' address ')'  (',' 'x'|'y')?
+	: '(' address ')'  (',' ('x'|'y'))?
 	| '(' address ',' ('x'|'y') ')'
 	| '[' address']' (',' 'x')?
-	| '[' address ']' (',' 'x')?
+	| '[' address ']' (',' ('x'|'y'))?
 	| '(' address ',' 's' ')' (',' ('x'|'y')?)
 	| address ',' ('x'|'y')
 	| address ',' address

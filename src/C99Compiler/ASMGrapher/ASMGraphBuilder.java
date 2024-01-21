@@ -128,7 +128,13 @@ public class ASMGraphBuilder
 					prevLine.require(lines.get(k));
 					if (k != i) buildGraph(k, internalAddresses, importantAddresses, importantRegisters, importantFlags);
 				}
-			case preproc: case jumpSub:
+			case preproc:
+				required = true;
+				break;
+			case jumpSub:
+				// Who knows what's important in the sub, so assume it all is
+				importantRegisters = (byte) 0xFF;
+				importantFlags = (byte) 0xFF;
 				required = true;
 				break;
 			}

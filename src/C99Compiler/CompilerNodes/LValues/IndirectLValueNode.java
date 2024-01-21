@@ -24,7 +24,7 @@ public class IndirectLValueNode extends LValueNode<IndirectLValueNode>
 		@Override
 		public String getBase()
 		{
-			return "[" + addrSource.getBase() + "]";
+			return "(" + addrSource.getBase() + ")";
 		}
 		
 		@Override
@@ -36,7 +36,7 @@ public class IndirectLValueNode extends LValueNode<IndirectLValueNode>
 				assembly += whitespace + "PHY\n";
 			assembly += whitespace + "LDY\t#$" + String.format(ticket.is16Bit() ? "%04x" : "%02x", i) + "\n";
 
-			assembly += whitespace + operation + "[" + addrSource.getBase() + "],y" + "\n";
+			assembly += whitespace + operation + "\t[" + addrSource.getBase() + "],y" + "\n";
 			if ((ticket.flags & DetailsTicket.saveY) != 0)
 				assembly += whitespace + "PLY\n";
 

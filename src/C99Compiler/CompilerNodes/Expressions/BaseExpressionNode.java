@@ -55,7 +55,7 @@ public abstract class BaseExpressionNode<C extends ParserRuleContext> extends In
 	}
 	protected String getAssembly(int leadingWhitespace, ScratchManager scratchManager, DetailsTicket ticket) throws Exception
 	{
-		return getAssembly(leadingWhitespace, CompConfig.callResultSource(getType().getSize()),  scratchManager, ticket);
+		return getAssembly(leadingWhitespace, null,  scratchManager, ticket);
 	}
 	@Override
 	public String getAssembly(int leadingWhitespace) throws Exception
