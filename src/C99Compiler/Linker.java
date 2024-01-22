@@ -173,6 +173,8 @@ public final class Linker implements Catalogger
 					CompUtils.mapOffset(positions.get(fullName), var.getSize()) +
 					(DebugLevel.isAtLeast(DebugLevel.medium) ? "\t; " + var.getType().getSignature() + " (" + var.getSize() + " bytes)": "") + 
 					"\n";
+			if (DebugLevel.isAtLeast(DebugLevel.low)) // Output variable symbol for variable
+				assembly += ".dbg sym, \"" + var.getName() + "\", \"00\", EXTERN, \"" + fullName + "\"\n";
 			FunctionDefinitionNode owner = var.getEnclosingFunction();
 			for (String otherFullName: fullNames)
 			{
@@ -222,6 +224,9 @@ public final class Linker implements Catalogger
 		assembly += ".p816\n" +  ".smart\t+\n";
 		if (CompConfig.scopeDelimiterPermissor != null)
 			assembly +=  ".feature " + CompConfig.scopeDelimiterPermissor + "\n";
+		for (TranslationUnitNode unit : translationUnits)
+			if (DebugLevel.isAtLeast(DebugLevel.low))
+				assembly += ".dbg file, \"" + unit.getFilename() + "\", 0, 0\n";
 		assembly += generateVectorTable(); // Vector table
 		
 		assembly += ".segment \"HEADER\"\n"; // Declare header

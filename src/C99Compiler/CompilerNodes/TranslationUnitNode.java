@@ -29,22 +29,25 @@ public class TranslationUnitNode extends InterpretingNode<TranslationUnitNode, T
 	private LinkedHashMap<String, String> requiredSubs;
 	private Set<String> includedStdLibs;
 	private List<InitializerNode> globalInitializers;
+	private String filename;
 	
-	public TranslationUnitNode(ComponentNode<?> parent)
+	public TranslationUnitNode(ComponentNode<?> parent, String filename)
 	{
 		super(parent);
 		interrupts = new LinkedHashMap<DefinableInterrupt, String>();
 		typedefs = new LinkedHashMap<String, Type>();
 		requiredSubs = new LinkedHashMap<String, String>();
 		globalInitializers = new LinkedList<InitializerNode>();
+		this.filename = filename;
 	}
-	public TranslationUnitNode()
+	public TranslationUnitNode(String filename)
 	{
 		super();
 		interrupts = new LinkedHashMap<DefinableInterrupt, String>();
 		typedefs = new LinkedHashMap<String, Type>();
 		requiredSubs = new LinkedHashMap<String, String>();
 		globalInitializers = new LinkedList<InitializerNode>();
+		this.filename = filename;
 	}
 	
 	@Override public LinkedHashMap<String, VariableNode> getVariables() {return getChildVariables();}
@@ -113,4 +116,5 @@ public class TranslationUnitNode extends InterpretingNode<TranslationUnitNode, T
 	{
 		return includedStdLibs;
 	}
+	public String getFilename() {return filename;}
 }

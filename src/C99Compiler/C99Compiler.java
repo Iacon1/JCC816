@@ -32,7 +32,7 @@ public class C99Compiler
 		
 		return new CommonTokenStream(lexer);
 	}
-	private static TranslationUnitNode parse(CommonTokenStream tokens) throws Exception
+	private static TranslationUnitNode parse(String filename, CommonTokenStream tokens) throws Exception
 	{
 		SyntaxErrorCollector collector = new SyntaxErrorCollector();
 		C99Parser parser = new C99Parser(tokens);
@@ -42,7 +42,7 @@ public class C99Compiler
 		Translation_unitContext tree = parser.translation_unit();
 //		Logging.viewParseTree(parser, tree);
 		if (collector.getException() != null) throw collector.getException();
-		return new TranslationUnitNode().interpret(tree);
+		return new TranslationUnitNode(filename).interpret(tree);
 	}
 	private static CompoundStatementNode parseSnippet(CommonTokenStream tokens) throws Exception
 	{
@@ -54,7 +54,7 @@ public class C99Compiler
 		Compound_statementContext tree = parser.compound_statement();
 //		Logging.viewParseTree(parser, tree);
 		if (collector.getException() != null) throw collector.getException();
-		return new CompoundStatementNode(new TranslationUnitNode()).interpret(tree);
+		return new CompoundStatementNode(new TranslationUnitNode("INTERNAL")).interpret(tree);
 	}
 
 	private static String precompile(Set<String> includedStdLibs, String filename, String mainFile) throws Exception
@@ -84,7 +84,7 @@ public class C99Compiler
 			printInfo("Lexed in " + (System.currentTimeMillis() - t) + " ms. Tokens: " + tokens.getNumberOfOnChannelTokens() + ".");
 		t = System.currentTimeMillis();
 
-		TranslationUnitNode unit = parse(tokens);
+		TranslationUnitNode unit = parse(filename, tokens);
 		unit.includeStdLibs(includedStdLibs);
 		if (VerbosityLevel.isAtLeast(VerbosityLevel.medium))
 			printInfo("Parsed in " + (System.currentTimeMillis() - t) + " ms.");

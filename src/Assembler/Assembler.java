@@ -46,7 +46,7 @@ public class Assembler
 		asmStream.close();
 		
 		Process proc;
-		if (VerbosityLevel.isAtLeast(VerbosityLevel.medium))
+		if (DebugLevel.isAtLeast(DebugLevel.medium))
 			proc = Runtime.getRuntime().exec(new String[] {"cl65", "--verbose", "-g", "-C", cfgFile.getAbsolutePath(), "-o", sfcFile.getAbsolutePath(), asmFile.getAbsolutePath(), "-Wl", "--dbgfile", "-Wl", name + ".dbg"});
 		else
 			proc = Runtime.getRuntime().exec(new String[] {"cl65", "--verbose", "-C", cfgFile.getAbsolutePath(), "-o", sfcFile.getAbsolutePath(), asmFile.getAbsolutePath()});
@@ -72,8 +72,8 @@ public class Assembler
 		FileIO.writeFile(sfcFile.getName(), bytes);
 		if (DebugLevel.isAtLeast(DebugLevel.medium))
 		{
-			dbgFile = new File(name + ".dbg");
-			convertNewline(dbgFile.getAbsolutePath(), true);
+//			dbgFile = new File(name + ".dbg");
+//			convertNewline(dbgFile.getAbsolutePath(), true);
 		}
 			
 		return bytes;

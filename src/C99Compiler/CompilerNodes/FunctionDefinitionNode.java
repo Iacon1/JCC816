@@ -205,6 +205,9 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 		String whitespace = AssemblyUtils.getWhitespace(leadingWhitespace);
 		String assembly = "";
 		
+//		if (DebugLevel.isAtLeast(DebugLevel.low))
+//			assembly += ".dbg func, \"" + getName() + "\", \"01\", EXTERN, \"" + getFullName() + "\"\n";
+		
 		if (requiresStackLoader) // Need to sometimes get arguments from the stack
 		{
 			assembly += whitespace + getLoaderLabel() + ":\t; " + CompConfig.functionTag + "\n";
