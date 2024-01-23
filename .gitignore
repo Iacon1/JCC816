@@ -1,10 +1,4 @@
 /bin/
-test.cpu.sym
-test.asm
-test.sfc
-test.asm
-test.cpu.sym
-test.sfc
 target/generated-sources/antlr4/Grammar/C99A11.java
 target/generated-sources/antlr4/Grammar/C99A11.tokens
 target/generated-sources/antlr4/Grammar/C99A17.java
@@ -16,3 +10,5 @@ target/generated-sources/antlr4/Grammar/C99A1GListener.java
 target/generated-sources/antlr4/Grammar/C99A2.java
 target/generated-sources/antlr4/Grammar/C99A3Lexer.java
 target/generated-sources/antlr4/Grammar/C99A3Lexer.tokens
+src/Executables/Test.java
+/Test/
