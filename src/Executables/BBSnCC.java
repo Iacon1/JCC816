@@ -12,6 +12,7 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Options;
 
+import Assembler.Header;
 import C99Compiler.CartConfig;
 import C99Compiler.CompConfig;
 import C99Compiler.C99Compiler;
@@ -117,7 +118,7 @@ public class BBSnCC
 
 			linker.addUnits(translationUnits);
 			
-			Assembler.Assembler.assemble(name, cartConfig, linker.link());
+			Assembler.Assembler.assemble(name, cartConfig, linker.link(new CartConfig()));
 		}
 		else // Save to .o files
 			for (String parameter : commandLine.getArgList())

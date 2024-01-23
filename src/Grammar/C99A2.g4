@@ -81,7 +81,7 @@ declaration_specifiers
 	| type_specifier
 	| type_qualifier
 	| function_specifier)+? ;
-storage_class_specifier:Typedef|Extern|Static|Auto|Register;
+storage_class_specifier:Typedef|Extern|Static|Auto|Register|SRAM;
 function_specifier : Inline ;
 init_declarator_list : init_declarator (Comma init_declarator)* ;
 init_declarator: declarator (Assign initializer)? ;

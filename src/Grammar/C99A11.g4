@@ -58,3 +58,5 @@ Pragma : 'pragma' {Grammar.GrammarFlags.isPreproc}? ;
 
 HasEmbed : '__has_embed' {Grammar.GrammarFlags.isPreproc}? ; // Backported from C23
 Embed : 'embed'  {Grammar.GrammarFlags.isPreproc}? ;
+
+SRAM : '__SRAM' ; // Implementation-defined

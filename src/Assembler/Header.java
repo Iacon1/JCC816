@@ -121,6 +121,18 @@ public class Header extends CartConfig
 		
 		checksum = 0;
 	}
+	public Header()
+	{
+		super();
+
+		makerCode = "";
+		gameCode = "";
+		specialVersion = 0;
+		title = "";
+		devID = 0;
+		destCode = DestinationCode.japan;
+		revision = 0;
+	}
 	
 	public int getSize()
 	{
@@ -172,7 +184,7 @@ public class Header extends CartConfig
 		
 		bytes.write(title.getBytes(), 0, 21);
 		byte mapMode = (byte) (isFast? 0x30 : 0x20);
-		mapMode |= ROMType.code();
+		mapMode |= ROMType_.getCode();
 		bytes.write(mapMode);
 		
 		byte cartType = 0;
@@ -199,7 +211,7 @@ public class Header extends CartConfig
 	
 	public int getOffset()
 	{
-		switch (ROMType)
+		switch (ROMType_)
 		{
 		case loROM : return devID == 0x33 ? 0x007FB0 : 0x007FC0;
 		case hiROM : return devID == 0x33 ? 0x00FFB0 : 0x00FFC0;

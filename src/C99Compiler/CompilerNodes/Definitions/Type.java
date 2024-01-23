@@ -289,7 +289,10 @@ public class Type implements Serializable
 	{
 		return storageClassSpecifier != null && storageClassSpecifier.equals("register");
 	}
-	
+	public boolean isSRAM()
+	{
+		return storageClassSpecifier != null && storageClassSpecifier.equals("__SRAM");
+	}
 	
 	public boolean isConstant()
 	{
