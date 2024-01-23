@@ -5,6 +5,7 @@ package C99Compiler.CompilerNodes.Statements;
 import java.util.LinkedList;
 import java.util.List;
 
+import C99Compiler.CompConfig.DebugLevel;
 import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.FunctionDefinitionNode;
 import C99Compiler.CompilerNodes.InterpretingNode;
@@ -79,7 +80,8 @@ public class CompoundStatementNode extends StatementNode<Compound_statementConte
 		int i = 0;
 		for (AssemblableNode assemblable : assemblables)
 		{
-			assembly += AssemblyUtils.getWhitespace(leadingWhitespace) + ".dbg\tline, \"" + getTranslationUnit().getFilename() + "\", " + lines.get(i++) + "\n";
+			if (DebugLevel.isAtLeast(DebugLevel.low))
+				assembly += AssemblyUtils.getWhitespace(leadingWhitespace) + ".dbg\tline, \"" + getTranslationUnit().getFilename() + "\", " + lines.get(i++) + "\n";
 			assembly += assemblable.getAssembly(leadingWhitespace);
 		}
 		return assembly;
