@@ -13,6 +13,7 @@ import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Options;
 
 import Assembler.Header;
+import Assembler.MemorySize;
 import C99Compiler.CartConfig;
 import C99Compiler.CompConfig;
 import C99Compiler.C99Compiler;
@@ -38,8 +39,8 @@ public class BBSnCC
 		
 		options.addOption("c", "cartridge-config", true, "Specifies a cartridge configuration to use.");
 		options.addOption("h", "header", true, "Specifies a header file to use.");
-		options.addOption("C", "generate-cartridge", false, "Generates a default cartridge configuration file for the user to edit.");
-		options.addOption("H", "generate-header", false, "Generates a default header configuration file for the user to edit.");
+		options.addOption("C", "generate-cartridge", true, "Generates a default cartridge configuration file for the user to edit.");
+		options.addOption("H", "generate-header", true, "Generates a default header configuration file for the user to edit.");
 		
 		options.addOption("o", "optimization-level", true, "Sets the level of optimization, from 0 to 3.");
 		options.addOption("d", "debug-level", true, "Sets the level of debug info, from 0 to 2.");
@@ -49,7 +50,6 @@ public class BBSnCC
 	}
 	public static void main(String[] args) throws Exception
 	{
-		CartConfig cartConfig = new CartConfig(ROMType.loROM, AddonChip.none, false, false, 0); // Default ROM config
 		Linker linker = new Linker();
 		
 		Logging.setLogger(new DebugLogger());
@@ -80,14 +80,8 @@ public class BBSnCC
 			case "2" : CompConfig.verbosityLevel = VerbosityLevel.medium; break;
 			}
 		
-		
-		if (commandLine.hasOption("c"))
-		{
-			
-		}
-		
 		if (commandLine.hasOption("l")) // Link to executable
-		{
+		{	
 			List<TranslationUnitNode> translationUnits  = new LinkedList<TranslationUnitNode>();
 			for (String parameter : commandLine.getArgList()) // Read all input files
 			{
@@ -118,7 +112,21 @@ public class BBSnCC
 
 			linker.addUnits(translationUnits);
 			
-			Assembler.Assembler.assemble(name, cartConfig, linker.link(new CartConfig()));
+			MemorySize memorySize = new MemorySize(0, 0, 0, false);
+			
+			Header header = null;
+			if (commandLine.hasOption("h"))
+			{
+				
+			}
+			else if (commandLine.hasOption("c"))
+			{
+				CartConfig cartConfig = new CartConfig();
+				header = new Header(cartConfig);
+			}
+			else header = new Header();
+			String assembly = linker.link(header, memorySize);
+			Assembler.Assembler.assemble(name, header, assembly, memorySize);
 		}
 		else // Save to .o files
 			for (String parameter : commandLine.getArgList())

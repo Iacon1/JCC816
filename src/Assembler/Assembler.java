@@ -16,20 +16,9 @@ import Logging.Logging;
 
 public class Assembler
 {
-	// toLinux = 0 -> LF to CRLF, = 1 -> CRLF to LF
-	private static void convertNewline(String filename, boolean toLinux) throws IOException
+	public static byte[] assemble(String name, Header header, String assembly, MemorySize memorySize) throws IOException
 	{
-		File file = new File(filename);
-		char[] chars = FileIO.readFile(file).toCharArray();
-		file.delete();
-		FileOutputStream outStream = new FileOutputStream(file);
-		if (toLinux) outStream.write(new String(chars).replaceAll("\\r\\n?", "\n").getBytes());
-		else outStream.write(new String(chars).replaceAll("\\n", "\r\n").getBytes());
-		outStream.close();
-	}
-	public static byte[] assemble(String name, CartConfig cartConfig, String assembly) throws IOException
-	{
-		File cfgFile, asmFile, sfcFile, dbgFile;
+		File cfgFile, asmFile, sfcFile;
 		cfgFile = new File(name + ".cfg");
 		asmFile = new File(name + ".asm");
 		sfcFile = new File(name + ".sfc");
@@ -37,7 +26,7 @@ public class Assembler
 		FileOutputStream asmStream = new FileOutputStream(asmFile);
 		FileInputStream sfcStream;
 		
-		cartConfig.getType().writeConfig(configStream, new MemorySize(128*1024, 128*1024, 4*1024*1024, false));
+		header.getType().writeConfig(configStream, memorySize);
 		configStream.close();
 		
 		asmStream.write(assembly.getBytes());
@@ -55,8 +44,6 @@ public class Assembler
 		byte[] bytes = sfcStream.readAllBytes();
 		sfcStream.close();
 
-		Header header = new Header("TT", "TEST", "TEST", 0, 0, DestinationCode.USA, cartConfig);
-
 		header.calcROMSize(bytes);
 		header.calcChecksum(bytes);
 		byte[] headerBytes = header.asBytes();
@@ -68,12 +55,7 @@ public class Assembler
 		for (int i = header.getOffset(); i < header.getOffset() + header.getSize(); ++i)
 			bytes[i] = headerBytes[i - header.getOffset()];
 		FileIO.writeFile(sfcFile.getName(), bytes);
-		if (DebugLevel.isAtLeast(DebugLevel.medium))
-		{
-//			dbgFile = new File(name + ".dbg");
-//			convertNewline(dbgFile.getAbsolutePath(), true);
-		}
-			
+
 		return bytes;
 	}
 }

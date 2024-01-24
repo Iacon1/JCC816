@@ -6,6 +6,7 @@ import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
 
 import C99Compiler.CartConfig;
+import C99Compiler.Utils.AssemblyUtils;
 import Logging.Logging;
 
 public class Header extends CartConfig
@@ -121,6 +122,17 @@ public class Header extends CartConfig
 		
 		checksum = 0;
 	}
+	public Header(CartConfig cartConfig)
+	{
+		super();
+		makerCode = "";
+		gameCode = "";
+		specialVersion = 0;
+		title = "";
+		devID = 0;
+		destCode = DestinationCode.japan;
+		revision = 0;
+	}
 	public Header()
 	{
 		super();
@@ -133,7 +145,7 @@ public class Header extends CartConfig
 		destCode = DestinationCode.japan;
 		revision = 0;
 	}
-	
+
 	public int getSize()
 	{
 		if (devID == 0x33) return expSize + baseSize;
@@ -182,7 +194,7 @@ public class Header extends CartConfig
 			
 		}
 		
-		bytes.write(title.getBytes(), 0, 21);
+		bytes.write(AssemblyUtils.applyFiller(title, 21).getBytes(), 0, 21);
 		byte mapMode = (byte) (isFast? 0x30 : 0x20);
 		mapMode |= ROMType_.getCode();
 		bytes.write(mapMode);

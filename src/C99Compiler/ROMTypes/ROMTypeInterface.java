@@ -4,6 +4,7 @@ package C99Compiler.ROMTypes;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.AbstractMap.SimpleEntry;
 
 import Assembler.MemorySize;
 import Assembler.Configurer;
@@ -52,35 +53,39 @@ public interface ROMTypeInterface extends Configurer
 	public int getROMBankStart(boolean isFast, int i);
 	public int getROMBankAlign(int i);
 	
-	public default List<Integer> mapWRAM(List<VariableNode> variables, int offset)
+	public default List<Integer> mapWRAM(List<VariableNode> variables, int offset, MemorySize memorySize)
 	{
 		List<VariableOverlayable> variableOverlayables = new ArrayList<VariableOverlayable>();
 		for (VariableNode variable : variables)
 			variableOverlayables.add(new VariableOverlayable(variable));
-		return OverlaySolver.solveOverlay(variableOverlayables, getWRAMBankLength(), getMaxWRAMBanks(), (Integer i) ->
+		SimpleEntry<List<Integer>, Integer> solution = OverlaySolver.solveOverlay(variableOverlayables, getWRAMBankLength(), getMaxWRAMBanks(), (Integer i) ->
 		{
 			if (i == 0) return getWRAMBankStart(i) + offset;
 			else return getWRAMBankStart(i);
 		});
+		memorySize.WRAMSize = solution.getValue();
+		return solution.getKey();
 	}
-	public default List<Integer> mapSRAM(List<VariableNode> variables, int offset)
+	public default List<Integer> mapSRAM(List<VariableNode> variables, int offset, MemorySize memorySize)
 	{
 		List<VariableOverlayable> variableOverlayables = new ArrayList<VariableOverlayable>();
 		for (VariableNode variable : variables)
 			variableOverlayables.add(new VariableOverlayable(variable));
-		return OverlaySolver.solveOverlay(variableOverlayables, getSRAMBankLength(), getMaxSRAMBanks(), (Integer i) ->
+		SimpleEntry<List<Integer>, Integer> solution = OverlaySolver.solveOverlay(variableOverlayables, getSRAMBankLength(), getMaxSRAMBanks(), (Integer i) ->
 		{
 			if (i == 0) return getSRAMBankStart(i) + offset;
 			else return getSRAMBankStart(i);
 		});
+		memorySize.SRAMSize = solution.getValue();
+		return solution.getKey();
 	}
 	
 	@Override
 	public default String getRegions(MemorySize memorySize) // init size in bytes
 	{
 		int WRAMBanks, SRAMBanks, ROMBanks = 0;
-		WRAMBanks = (int) Math.ceil(memorySize.WRAMSize / getWRAMBankLength());
-		SRAMBanks = (int) Math.ceil(memorySize.SRAMSize / getSRAMBankLength());
+		WRAMBanks = (int) Math.ceil((double) memorySize.WRAMSize / (double) getWRAMBankLength());
+		SRAMBanks = (int) Math.ceil((double) memorySize.SRAMSize / (double) getSRAMBankLength());
 		int ROMSize = memorySize.ROMSize;
 		while (ROMSize > 0)
 			ROMSize -= getROMBankLength(memorySize.isFast, ROMBanks++); // For ExHIROM
@@ -117,8 +122,6 @@ public interface ROMTypeInterface extends Configurer
 		int ROMBanks = 0;
 		int ROMSize = memorySize.ROMSize;
 		while (ROMSize > 0) ROMSize -= getROMBankLength(memorySize.isFast, ROMBanks++); // For ExHIROM
-		
-		ROMBanks = Math.max(ROMBanks, 4); // Minimum 128 KB
 		
 		String segments = "";
 		segments += whitespace + "ZEROPAGE: load = ZEROPAGE, type=zp;\n".replace(" ", "\t");

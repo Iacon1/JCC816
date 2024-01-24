@@ -3,6 +3,7 @@
 
 package C99Compiler.Utils;
 
+import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -16,11 +17,11 @@ public final class OverlaySolver
 		int getLength();
 	}
 	
-	public static <T extends Overlayable<T>> List<Integer> solveOverlay(List<T> overlayables, int bankLength, int numBanks, Function<Integer, Integer> bankStarts)
+	public static <T extends Overlayable<T>> SimpleEntry<List<Integer>, Integer> solveOverlay(List<T> overlayables, int bankLength, int numBanks, Function<Integer, Integer> bankStarts)
 	{
 		int[][] solution = new int[numBanks][overlayables.size()];
 		if (overlayables.size() < 1) return null;
-		else if (overlayables.size() == 1) return Arrays.asList(bankStarts.apply(0));
+		else if (overlayables.size() == 1) return new SimpleEntry<List<Integer>, Integer>(Arrays.asList(bankStarts.apply(0)), 0);
 
 		for (int b = 0; b < numBanks; ++b)
 			for (int i = 0; i < overlayables.size(); ++i)
@@ -50,16 +51,23 @@ public final class OverlaySolver
 		}
 		
 		List<Integer> solutionList = new ArrayList<Integer>();
+		int[] bankLengths = new int[numBanks];
 		for (int i = 0; i < overlayables.size(); ++i) // For each overlayable
 		{
 			for (int b = 0; b < numBanks; ++b) // Find the first bank it's in
 				if (solution[b][i] != -1)
 				{
+					bankLengths[b] = Math.max(bankLengths[b], solution[b][i] - bankStarts.apply(b) + overlayables.get(i).getLength());
 					solutionList.add(solution[b][i]);
 					break;
 				}
 		}
-		
-		return solutionList;
+		for (int b = numBanks - 1; b >= 0; ++b) // Find the first bank it's in
+			if (bankLengths[b] != 0)
+			{
+				bankLengths[b] += b * bankLength;
+				return new SimpleEntry<List<Integer>, Integer>(solutionList, bankLengths[b]);
+			}
+		return new SimpleEntry<List<Integer>, Integer>(solutionList, 0);
 	}
 }

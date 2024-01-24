@@ -13,6 +13,7 @@ import java.util.AbstractMap.SimpleEntry;
 
 import org.antlr.v4.runtime.CommonTokenStream;
 
+import Assembler.MemorySize;
 import C99Compiler.CartConfig.AddonChip;
 import C99Compiler.CartConfig.ROMType;
 import C99Compiler.CompConfig.DebugLevel;
@@ -49,6 +50,7 @@ public final class Linker implements Catalogger
 	
 	private List<TranslationUnitNode> translationUnits;
 	private List<Exception> storedExceptions;
+	@Override
 	public LinkedHashMap<String, VariableNode> getVariables()
 	{
 		LinkedHashMap<String, VariableNode> variables = new LinkedHashMap<String, VariableNode>();
@@ -59,6 +61,14 @@ public final class Linker implements Catalogger
 					storedExceptions.add(new LinkerMultipleDefinitionException(variable)); 
 				else variables.put(variable.getFullName(), variable);
 			}
+		
+		return variables;
+	}
+	public LinkedHashMap<String, VariableNode> getGlobalVariables()
+	{
+		LinkedHashMap<String, VariableNode> variables = new LinkedHashMap<String, VariableNode>();
+		for (TranslationUnitNode translationUnit : translationUnits)
+			variables.putAll(translationUnit.getGlobalVariables());
 		
 		return variables;
 	}
@@ -137,7 +147,30 @@ public final class Linker implements Catalogger
 		return interrupts;
 	}
 	
-	private String mapRAM(CartConfig cartConfig)
+	private Map<String, Integer> mapVariables(CartConfig cartConfig, MemorySize memorySize)
+	{
+		int offset = CompConfig.stackSize;
+		List<VariableNode> WRAMVars = new LinkedList<VariableNode>(), SRAMVars = new LinkedList<VariableNode>();
+		for (VariableNode var : getVariables().values())
+		{
+			if (var.getType().isSRAM())
+				SRAMVars.add(var);
+			else
+				WRAMVars.add(var);
+		}
+		List<Integer> WRAMPoses = null, SRAMPoses = null;
+		if (WRAMVars.size() > 0) WRAMPoses = cartConfig.getType().mapWRAM(WRAMVars, offset, memorySize);
+		if (SRAMVars.size() > 0) SRAMPoses = cartConfig.getType().mapSRAM(SRAMVars, 0, memorySize);
+		
+		Map<String, Integer> map = new HashMap<String, Integer>();
+		for (int i = 0; i < WRAMVars.size(); ++i)
+			map.put(WRAMVars.get(i).getFullName(), WRAMPoses.get(i));
+		for (int i = 0; i < SRAMVars.size(); ++i)
+			map.put(SRAMVars.get(i).getFullName(), SRAMPoses.get(i));
+		
+		return map;
+	}
+	private String mapGlobalRAM(CartConfig cartConfig, Map<String, Integer> varPoses)
 	{
 		String assembly = "";
 		
@@ -161,35 +194,11 @@ public final class Linker implements Catalogger
 					String.format("%06x", offset) + "\n";
 			offset += entry.getValue();
 		}
-		offset = CompConfig.stackSize;
-		// Declare variable locations
-		List<VariableNode> WRAMVars = new LinkedList<VariableNode>(), SRAMVars = new LinkedList<VariableNode>();
+		
 		for (VariableNode var : getVariables().values())
 		{
-			if (var.getType().isSRAM())
-				SRAMVars.add(var);
-			else
-				WRAMVars.add(var);
-		}
-		List<Integer> WRAMPoses = null, SRAMPoses = null;
-		if (WRAMVars.size() > 0) WRAMPoses = cartConfig.getType().mapWRAM(WRAMVars, offset);
-		if (SRAMVars.size() > 0) SRAMPoses = cartConfig.getType().mapSRAM(SRAMVars, 0);
-		for (int i = 0; i < WRAMVars.size(); ++i)
-		{
-			VariableNode var = WRAMVars.get(i);
 			String fullName = var.getFullName();
-			assembly += AssemblyUtils.applyFiller(fullName, maxLength) + " = $" + String.format("%06x", WRAMPoses.get(i));
-			if (DebugLevel.isAtLeast(DebugLevel.medium))
-				assembly += "\t; " + var.getType().getSignature() + " (" + var.getSize() + " bytes)";
-			assembly += "\n";
-			if (DebugLevel.isAtLeast(DebugLevel.low)) // Output variable symbol for variable
-				assembly += ".dbg sym, \"" + var.getName() + "\", \"00\", EXTERN, \"" + fullName + "\"\n";
-		}
-		for (int i = 0; i < SRAMVars.size(); ++i)
-		{
-			VariableNode var = SRAMVars.get(i);
-			String fullName = var.getFullName();
-			assembly += AssemblyUtils.applyFiller(fullName, maxLength) + " = $" + String.format("%06x", SRAMPoses.get(i));
+			assembly += AssemblyUtils.applyFiller(fullName, maxLength) + " = $" + String.format("%06x", varPoses.get(var.getFullName()));
 			if (DebugLevel.isAtLeast(DebugLevel.medium))
 				assembly += "\t; " + var.getType().getSignature() + " (" + var.getSize() + " bytes)";
 			assembly += "\n";
@@ -225,7 +234,7 @@ public final class Linker implements Catalogger
 
 		return assembly;
 	}
-	private String getAssemblyPreface(CartConfig cartConfig) throws Exception
+	private String getAssemblyPreface(CartConfig cartConfig, Map<String, Integer> varPoses) throws Exception
 	{
 		String assembly = "";
 
@@ -239,7 +248,7 @@ public final class Linker implements Catalogger
 		
 		assembly += ".segment \"HEADER\"\n"; // Declare header
 		assembly += ".res\t48, 0;\tHEADER_HERE\n";
-		assembly += mapRAM(cartConfig);
+		assembly += mapGlobalRAM(cartConfig, varPoses);
 		
 		assembly += ".segment \"" + CompConfig.codeBankName(0) + "\"\n"; // Begins runnable code
 		assembly +=  "RESET:\n";
@@ -290,9 +299,10 @@ public final class Linker implements Catalogger
 		translationUnits.addAll(units);
 	}
 	
-	private String getAssemblyRaw(CartConfig cartConfig) throws Exception
+	private String getAssembly(CartConfig cartConfig, MemorySize memorySize) throws Exception
 	{
 		String assembly = "";
+		Map<String, Integer> varPoses = mapVariables(cartConfig, memorySize);
 		
 		// Get assembly from functions
 		for (FunctionDefinitionNode funcNode : getFunctions().values())
@@ -305,30 +315,31 @@ public final class Linker implements Catalogger
 		
 		if (resolveFunction("main") == null)
 			throw new Exception("Program must have \"" + CompConfig.mainName + "\" function.");
-		return getAssemblyPreface(cartConfig) + assembly;
+		return getAssemblyPreface(cartConfig, varPoses) + assembly;
 	}
-	private  static String postprocess(String assembly) throws Exception
+	private  static String postprocess(String assembly, MemorySize memorySize) throws Exception
 	{
 		ArrayList<String> lines = new ArrayList<String>(Arrays.asList(assembly.split("\n")));
 
 		lines = (ArrayList<String>) AssemblyOptimizer.optimizeAssembly((List<String>) lines);
-		int banks = Banker.splitBanks(new CartConfig(), lines);
+		memorySize.ROMSize = Banker.splitBanks(new CartConfig(), lines);
 		
 		assembly = "";
 		for (String line : lines) if (!line.matches("\s*")) assembly += line + "\n";
 		return assembly;
 	}
 	
-	public String link(CartConfig cartConfig) throws Exception
+	public String link(CartConfig cartConfig, MemorySize memorySize) throws Exception
 	{
 		if (VerbosityLevel.isAtLeast(VerbosityLevel.medium))
 			printInfo("Linking...");	
+		
 		long t = System.currentTimeMillis();
-		String assembly = getAssemblyRaw(cartConfig);
+		String assembly = getAssembly(cartConfig, memorySize);
 		if (VerbosityLevel.isAtLeast(VerbosityLevel.medium))
 			printInfo("Emitted in " + (System.currentTimeMillis() - t) + " ms. Assembly length: " + assembly.length() + ".");
 		t = System.currentTimeMillis();
-		assembly = postprocess(assembly);
+		assembly = postprocess(assembly, memorySize);
 		if (VerbosityLevel.isAtLeast(VerbosityLevel.medium))
 			printInfo("Postprocessed in " + (System.currentTimeMillis() - t) + " ms. Assembly length: " + assembly.length() + ".");
 		if (VerbosityLevel.isAtLeast(VerbosityLevel.medium))

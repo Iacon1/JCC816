@@ -13,6 +13,7 @@ public final class Banker
 	public static final int splitBanks(CartConfig cartConfig, ArrayList<String> lines) throws Exception // Returns # of banks
 	{
 		int banks = 1;
+		int sizeEstimate = 0;
 		int lastBank = 0; // Distance in bytes to the last bank
 		String blockAssembly = ""; // Assembly of current subroutine
 		
@@ -49,6 +50,7 @@ public final class Banker
 						lastBank += blockSize;
 					blockStart = i;
 					blockAssembly = "";
+					sizeEstimate += blockSize;
 				}
 				inFunc = line.contains("; " + CompConfig.functionTag);
 			}
@@ -57,6 +59,6 @@ public final class Banker
 			++i;
 		}
 		
-		return banks;
+		return sizeEstimate;
 	}
 }

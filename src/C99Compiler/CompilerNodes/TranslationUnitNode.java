@@ -6,6 +6,7 @@ package C99Compiler.CompilerNodes;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -117,4 +118,14 @@ public class TranslationUnitNode extends InterpretingNode<TranslationUnitNode, T
 		return includedStdLibs;
 	}
 	public String getFilename() {return filename;}
+	public LinkedHashMap<String, VariableNode> getGlobalVariables()
+	{
+		LinkedHashMap<String, VariableNode> globals = new LinkedHashMap<String, VariableNode>();
+		for (ComponentNode<?> node : children)
+		{
+			if (VariableNode.class.isAssignableFrom(node.getClass()))
+				globals.put(((VariableNode) node).getFullName(), (VariableNode) node);
+		}
+		return globals;
+	}
 }
