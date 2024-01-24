@@ -211,9 +211,18 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 						if (params.get(i).hasPropValue()) sourceP = new ConstantSource(params.get(i).getPropValue(), params.get(i).getSize());
 						else if (params.get(i).hasLValue()) sourceP = params.get(i).getLValue().getSource();
 						assembly += AssemblyUtils.byteCopier(whitespace, sourceV.getSize(), sourceV, sourceP);
+						
+						if (func.isInline())
+							AssignmentExpressionNode.equateLValue(funcParams.get(i), params.get(i));
 					}
 				}
-				assembly += whitespace + "JSL\t" + func.getStartLabel() + "\n";
+				if (func.isInline())
+				{
+					String endLabel = "__inline_end_" + CompUtils.getSafeUUID();
+					assembly += func.getCode().getAssembly(leadingWhitespace, endLabel);
+					assembly += whitespace + endLabel + ":" + "\n";
+				}
+				else assembly += whitespace + "JSL\t" + func.getStartLabel() + "\n";
 				
 				if (func.canCall(getEnclosingFunction())) // Finish possible recursion
 				{

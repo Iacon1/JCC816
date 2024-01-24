@@ -124,7 +124,7 @@ public class IterationStatementNode extends StatementNode<Iteration_statementCon
 	}
 	
 	@Override
-	public String getAssembly(int leadingWhitespace) throws Exception
+	public String getAssembly(int leadingWhitespace, String returnAddr) throws Exception
 	{
 		String whitespace = AssemblyUtils.getWhitespace(leadingWhitespace);
 		String assembly = "";
@@ -147,13 +147,13 @@ public class IterationStatementNode extends StatementNode<Iteration_statementCon
 				else assembly += EqualityExpressionNode.getIsZero(whitespace, CompConfig.callResultSource(condExpNode.getSize()), new ScratchManager(), condExpNode.getLValue().getSource(), new DetailsTicket());
 				assembly += whitespace + "BEQ\t" + getEndLabel() + "\n";
 			}
-			assembly += stmNode.getAssembly(leadingWhitespace + CompConfig.indentSize);
+			assembly += stmNode.getAssembly(leadingWhitespace + CompConfig.indentSize, returnAddr);
 			assembly += whitespace + "JMP\t" + getStartLabel() + "\n";
 			assembly += whitespace + getEndLabel() + ":\n";
 			break;
 		case doWhile:
 			assembly += whitespace + getStartLabel() + ":\n";
-			assembly += stmNode.getAssembly(leadingWhitespace + CompConfig.indentSize);
+			assembly += stmNode.getAssembly(leadingWhitespace + CompConfig.indentSize, returnAddr);
 			assembly += condExpNode.getAssembly(leadingWhitespace, CompConfig.callResultSource(condExpNode.getLValue().getSize()));
 			assembly += EqualityExpressionNode.getIsZero(whitespace, CompConfig.callResultSource(condExpNode.getSize()), new ScratchManager(), CompConfig.callResultSource(condExpNode.getSize()), new DetailsTicket());
 			assembly += whitespace + "BNE\t" + getStartLabel() + "\n";
@@ -192,7 +192,7 @@ public class IterationStatementNode extends StatementNode<Iteration_statementCon
 					}
 				}
 			}
-			assembly += stmNode.getAssembly(leadingWhitespace + CompConfig.indentSize);
+			assembly += stmNode.getAssembly(leadingWhitespace + CompConfig.indentSize, returnAddr);
 			if (iterExpNode != null && iterExpNode.hasAssembly()) assembly += iterExpNode.getAssembly(leadingWhitespace + CompConfig.indentSize); 
 			assembly += whitespace + "JMP\t" + getStartLabel() + "\n";
 			assembly += whitespace + getEndLabel() + ":\n";

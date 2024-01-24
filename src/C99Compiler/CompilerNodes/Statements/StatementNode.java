@@ -39,4 +39,7 @@ public abstract class StatementNode<C extends ParserRuleContext> extends Interpr
 		for (VariableNode var : getReferencedVariables().values())
 			var.clearPossibleValues();
 	}
+
+	public abstract String getAssembly(int leadingWhitespace, String returnAddr) throws Exception;
+	@Override public String getAssembly(int leadingWhitespace) throws Exception {return getAssembly(leadingWhitespace, getEnclosingFunction().getEndLabel());}
 }

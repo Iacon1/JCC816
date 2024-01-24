@@ -73,8 +73,7 @@ public class CompoundStatementNode extends StatementNode<Compound_statementConte
 			if (assemblable.hasAssembly()) return true;
 		return false;
 	}
-	@Override
-	public String getAssembly(int leadingWhitespace) throws Exception
+	public String getAssembly(int leadingWhitespace, String returnAddr) throws Exception
 	{
 		String assembly = "";
 		int i = 0;
@@ -82,7 +81,7 @@ public class CompoundStatementNode extends StatementNode<Compound_statementConte
 		{
 			if (DebugLevel.isAtLeast(DebugLevel.low))
 				assembly += AssemblyUtils.getWhitespace(leadingWhitespace) + ".dbg\tline, \"" + getTranslationUnit().getFilename() + "\", " + lines.get(i++) + "\n";
-			assembly += assemblable.getAssembly(leadingWhitespace);
+			if (StatementNode.class.isAssignableFrom(assemblable.getClass())) assembly += ((StatementNode) assemblable).getAssembly(leadingWhitespace, returnAddr);
 		}
 		return assembly;
 	}

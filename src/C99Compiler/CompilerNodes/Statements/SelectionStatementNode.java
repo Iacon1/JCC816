@@ -112,7 +112,7 @@ public class SelectionStatementNode extends StatementNode<Selection_statementCon
 		else return switchStm.hasAssembly();
 	}
 	@Override
-	public String getAssembly(int leadingWhitespace) throws Exception
+	public String getAssembly(int leadingWhitespace, String returnAddr) throws Exception
 	{
 		String whitespace = AssemblyUtils.getWhitespace(leadingWhitespace);
 		String assembly = "";
@@ -122,7 +122,7 @@ public class SelectionStatementNode extends StatementNode<Selection_statementCon
 			if (expression.hasPropValue() && (expression.getPropBool() || expression.getPropLong() != 0)) // It's always true
 				assembly += ifStm.getAssembly(leadingWhitespace);
 			else if (expression.hasPropValue() && elseStm != null) // It's always false
-				assembly += elseStm.getAssembly(leadingWhitespace);
+				assembly += elseStm.getAssembly(leadingWhitespace, returnAddr);
 			else if (!expression.hasPropValue()) // Unknown
 			{
 				String skipName = "__IFNOT_" + selId;
@@ -134,7 +134,7 @@ public class SelectionStatementNode extends StatementNode<Selection_statementCon
 					{
 						assembly += expression.getAssembly(leadingWhitespace); // Get value
 						assembly += whitespace + "BEQ\t" + skipName + "\n"; // Skip if 0, i. e. not true
-						assembly += ifStm.getAssembly(leadingWhitespace + CompConfig.indentSize);
+						assembly += ifStm.getAssembly(leadingWhitespace + CompConfig.indentSize, returnAddr);
 					}
 				}
 				else
@@ -144,14 +144,14 @@ public class SelectionStatementNode extends StatementNode<Selection_statementCon
 					else
 						assembly += EqualityExpressionNode.getIsZero(whitespace, null, new ScratchManager(), expression.getLValue().getSource(), new DetailsTicket());
 					assembly += whitespace + "BEQ\t" + skipName + "\n";
-					assembly += ifStm.getAssembly(leadingWhitespace + CompConfig.indentSize);
+					assembly += ifStm.getAssembly(leadingWhitespace + CompConfig.indentSize, returnAddr);
 				}
 				ifStm.clearPossibleValues();
 				if (elseStm != null)
 				{
 					assembly += AssemblyUtils.getWhitespace(leadingWhitespace + CompConfig.indentSize) + "JML\t" + getEndLabel() + "\n";
 					assembly += whitespace + skipName + ":\n";
-					assembly += elseStm.getAssembly(leadingWhitespace + CompConfig.indentSize);
+					assembly += elseStm.getAssembly(leadingWhitespace + CompConfig.indentSize, returnAddr);
 					elseStm.clearPossibleValues();
 				}
 				assembly += whitespace + getEndLabel() + ":\n";
@@ -192,7 +192,7 @@ public class SelectionStatementNode extends StatementNode<Selection_statementCon
 					assembly += whitespace + AssemblyUtils.getWhitespace(CompConfig.indentSize) + ".word\t" + getCaseLabel(i) + "\n";
 				else assembly += whitespace + AssemblyUtils.getWhitespace(CompConfig.indentSize) + ".word\t" + getDefaultLabel(false) + "\n";
 			}
-			assembly += switchStm.getAssembly(leadingWhitespace + CompConfig.indentSize);
+			assembly += switchStm.getAssembly(leadingWhitespace + CompConfig.indentSize, returnAddr);
 			switchStm.clearPossibleValues();
 			if (!hasDefault) assembly += whitespace + getDefaultLabel(false) + ":\n";
 			assembly += whitespace + getEndLabel() + ":\n";

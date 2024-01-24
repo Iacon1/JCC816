@@ -297,7 +297,8 @@ public final class Linker implements Catalogger
 		// Get assembly from functions
 		for (FunctionDefinitionNode funcNode : getFunctions().values())
 		{
-			if (!funcNode.isImplemented())
+			if (funcNode.isImplemented() && funcNode.isInline()) continue;
+			else if (!funcNode.isImplemented())
 				throw new UndefinedFunctionException(funcNode);
 			assembly += funcNode.getAssembly();
 		}

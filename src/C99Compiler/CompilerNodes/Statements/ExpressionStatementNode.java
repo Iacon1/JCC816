@@ -34,7 +34,7 @@ public class ExpressionStatementNode extends StatementNode<Expression_statementC
 		return expression.hasAssembly();
 	}
 	@Override
-	public String getAssembly(int leadingWhitespace) throws Exception
+	public String getAssembly(int leadingWhitespace, String returnAddr) throws Exception
 	{
 		return expression.getAssembly(leadingWhitespace);
 	}

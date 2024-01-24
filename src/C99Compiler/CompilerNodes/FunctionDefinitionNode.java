@@ -155,6 +155,10 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 		if (this.implementation != null) return this.implementation.isSA1();
 		else return attributes.contains(CompUtils.Attributes.SA1);
 	}
+	public boolean isInline()
+	{
+		return specifiers.functionSpecifiers.length > 0 && specifiers.functionSpecifiers[0].equals("inline");
+	}
 	
 	public void requireStackLoader()
 	{
@@ -259,5 +263,10 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 		for (VariableNode var : getReferencedVariables().values())
 			var.clearPossibleValues();
 		return assembly;
+	}
+	
+	public StatementNode<?> getCode()
+	{
+		return code;
 	}
 }

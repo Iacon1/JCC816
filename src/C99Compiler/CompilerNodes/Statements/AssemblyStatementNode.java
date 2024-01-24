@@ -25,7 +25,7 @@ public class AssemblyStatementNode extends StatementNode<Asm_statementContext>
 		return assemblyLines.length > 0;
 	}
 	@Override
-	public String getAssembly(int leadingWhitespace) throws Exception
+	public String getAssembly(int leadingWhitespace, String returnAddr) throws Exception
 	{
 		String whitespace = AssemblyUtils.getWhitespace(leadingWhitespace);
 		String assembly = "";

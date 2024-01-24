@@ -105,7 +105,7 @@ public class DeclarationSpecifiersNode extends InterpretingNode<DeclarationSpeci
 			}
 			else if (r.getClass().equals(Type_qualifierContext.class))
 				typeQualifiers.add(((Type_qualifierContext) r).getText());
-			else if (r.getClass().equals(Type_qualifierContext.class))
+			else if (r.getClass().equals(Function_specifierContext.class))
 				functionSpecifiers.add(((Function_specifierContext) r).getText());
 		}
 		
@@ -129,7 +129,7 @@ public class DeclarationSpecifiersNode extends InterpretingNode<DeclarationSpeci
 			}
 			else if (r.getClass().equals(Type_qualifierContext.class))
 				typeQualifiers.add(((Type_qualifierContext) r).getText());
-			else if (r.getClass().equals(Type_qualifierContext.class))
+			else if (r.getClass().equals(Function_specifierContext.class))
 				functionSpecifiers.add(((Function_specifierContext) r).getText());
 		}
 		

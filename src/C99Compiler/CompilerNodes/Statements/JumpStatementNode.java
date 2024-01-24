@@ -75,8 +75,7 @@ public class JumpStatementNode extends StatementNode<Jump_statementContext> impl
 	{
 		return true; // Always does *something*
 	}
-	@Override
-	public String getAssembly(int leadingWhitespace) throws Exception
+	public String getAssembly(int leadingWhitespace, String returnAddr) throws Exception
 	{
 		String whitespace = AssemblyUtils.getWhitespace(leadingWhitespace);
 		String assembly = "";
@@ -99,7 +98,7 @@ public class JumpStatementNode extends StatementNode<Jump_statementContext> impl
 			if (expr != null && expr.hasAssembly()) assembly += expr.getAssembly(leadingWhitespace, CompConfig.callResultSource(expr.getSize()));
 			else if (expr != null && expr.hasPropValue()) assembly += AssemblyUtils.byteCopier(whitespace, funcNode.getSize(), CompConfig.callResultSource(funcNode.getSize()), new ConstantSource(expr.getPropLong(), funcNode.getSize()));
 			else if (expr != null && expr.hasLValue()) assembly += AssemblyUtils.byteCopier(whitespace, funcNode.getType().getSize(), CompConfig.callResultSource(expr.getLValue().getSize()), expr.getLValue().getSource());
-			assembly += whitespace + "JMP\t" + funcNode.getEndLabel() + "\n";
+			assembly += whitespace + "JMP\t" + returnAddr + "\n";
 			break;
 		}
 			
@@ -107,5 +106,5 @@ public class JumpStatementNode extends StatementNode<Jump_statementContext> impl
 		return assembly;
 		
 	}
-
+	@Override public String getAssembly(int leadingWhitespace) throws Exception {return getAssembly(leadingWhitespace, getEnclosingFunction().getEndLabel());}
 }
