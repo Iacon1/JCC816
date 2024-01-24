@@ -4,6 +4,8 @@
 
 package C99Compiler;
 
+import C99Compiler.ROMTypes.ExHiROMType;
+import C99Compiler.ROMTypes.HiROMType;
 import C99Compiler.ROMTypes.LoROMType;
 import C99Compiler.ROMTypes.ROMTypeInterface;
 
@@ -12,9 +14,9 @@ public class CartConfig
 	public static enum ROMType implements ROMTypeInterface
 	{
 		loROM(new LoROMType()),
-		hiROM(new LoROMType()), //0x01),
-		SA1(new LoROMType()), // 0x03),
-		exHiROM(new LoROMType()); // 0x05);
+		hiROM(new HiROMType()),
+		SA1(new LoROMType()),
+		exHiROM(new ExHiROMType());
 		
 		private ROMTypeInterface implementer;
 		
@@ -23,16 +25,22 @@ public class CartConfig
 			this.implementer = implementer;
 		}
 
+		@Override public String getName() {return implementer.getName();}
 		@Override public byte getCode() {return implementer.getCode();}
+		@Override public int getHeaderPosition(boolean longHeader) {return implementer.getHeaderPosition(longHeader);}
 		
 		@Override public int getWRAMBankLength() {return implementer.getWRAMBankLength();} 
 		@Override public int getSRAMBankLength() {return implementer.getSRAMBankLength();}
-
-		@Override public int getWRAMBanks() {return implementer.getWRAMBanks();}
-		@Override public int getSRAMBanks() {return implementer.getSRAMBanks();}
-
+		@Override public int getROMBankLength(boolean isFast, int i) {return implementer.getROMBankLength(isFast, i);}
+		
+		@Override public int getMaxWRAMBanks() {return implementer.getMaxWRAMBanks();}
+		@Override public int getMaxSRAMBanks() {return implementer.getMaxSRAMBanks();}
+		@Override public int getMaxROMBanks(boolean isFast) {return implementer.getMaxROMBanks(isFast);}
+		
 		@Override public int getWRAMBankStart(int i) {return implementer.getWRAMBankStart(i);}
 		@Override public int getSRAMBankStart(int i) {return implementer.getSRAMBankStart(i);}
+		@Override public int getROMBankStart(boolean isFast, int i) {return implementer.getROMBankStart(isFast, i);}
+		@Override public int getROMBankAlign(int i) {return implementer.getROMBankAlign(i);}
 	}
 	public static enum AddonChip
 	{

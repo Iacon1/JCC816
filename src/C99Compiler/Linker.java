@@ -13,6 +13,8 @@ import java.util.AbstractMap.SimpleEntry;
 
 import org.antlr.v4.runtime.CommonTokenStream;
 
+import C99Compiler.CartConfig.AddonChip;
+import C99Compiler.CartConfig.ROMType;
 import C99Compiler.CompConfig.DebugLevel;
 import C99Compiler.CompConfig.DefinableInterrupt;
 import C99Compiler.CompConfig.VerbosityLevel;
@@ -135,7 +137,7 @@ public final class Linker implements Catalogger
 		return interrupts;
 	}
 	
-	private String mapMemory(CartConfig cartConfig)
+	private String mapRAM(CartConfig cartConfig)
 	{
 		String assembly = "";
 		
@@ -171,7 +173,7 @@ public final class Linker implements Catalogger
 		}
 		List<Integer> WRAMPoses = null, SRAMPoses = null;
 		if (WRAMVars.size() > 0) WRAMPoses = cartConfig.getType().mapWRAM(WRAMVars, offset);
-		if (SRAMVars.size() > 0) SRAMPoses = cartConfig.getType().mapSRAM(SRAMVars);
+		if (SRAMVars.size() > 0) SRAMPoses = cartConfig.getType().mapSRAM(SRAMVars, 0);
 		for (int i = 0; i < WRAMVars.size(); ++i)
 		{
 			VariableNode var = WRAMVars.get(i);
@@ -237,7 +239,7 @@ public final class Linker implements Catalogger
 		
 		assembly += ".segment \"HEADER\"\n"; // Declare header
 		assembly += ".res\t48, 0;\tHEADER_HERE\n";
-		assembly += mapMemory(cartConfig);
+		assembly += mapRAM(cartConfig);
 		
 		assembly += ".segment \"" + CompConfig.codeBankName(0) + "\"\n"; // Begins runnable code
 		assembly +=  "RESET:\n";
@@ -249,6 +251,11 @@ public final class Linker implements Catalogger
 				 CompUtils.setA16 + "\n";
 		assembly += "LDA\t#$" + String.format("%04x", CompConfig.stackSize - 1) + "\n";
 		assembly += "TCS\n";
+		if (cartConfig.isFast) // Activate FastROM
+		{
+			assembly += "LDA\t#$FFFF\n";
+			assembly += "STA\t#$420D\n";
+		}
 		// Load initialized globals
 		for (TranslationUnitNode unit : translationUnits)
 			for (InitializerNode init : unit.getGlobalInitializers())
@@ -304,7 +311,7 @@ public final class Linker implements Catalogger
 		ArrayList<String> lines = new ArrayList<String>(Arrays.asList(assembly.split("\n")));
 
 		lines = (ArrayList<String>) AssemblyOptimizer.optimizeAssembly((List<String>) lines);
-		int banks = Banker.splitBanks(lines);
+		int banks = Banker.splitBanks(new CartConfig(), lines);
 		
 		assembly = "";
 		for (String line : lines) if (!line.matches("\s*")) assembly += line + "\n";

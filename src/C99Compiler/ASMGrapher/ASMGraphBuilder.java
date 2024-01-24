@@ -278,9 +278,9 @@ public class ASMGraphBuilder
 	 * 
 	 * @return The function's assembly, free of (at least most) dead code
 	 */
-	public long getSize()
+	public int getSize()
 	{
-		long size = 0;
+		int size = 0;
 		for (ASMNode<?> line : lines)
 			size += line.getSize();
 			

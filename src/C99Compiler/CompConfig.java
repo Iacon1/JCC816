@@ -31,7 +31,7 @@ public final class CompConfig
 	public static final int callResultSize = 64;
 	public static final String callResult = "__@callResult";
 	// 16 + 16 + 157 + 3 + 64 = 256 = Just large enough to be a ZP!
-	public static final String bankRootName = "ROMBANK";
+	public static final String bankRootName = "ROM";
 	public static final String functionTag = "@func";
 	
 	public static final OperandSource callResultSource(int size)
@@ -52,7 +52,7 @@ public final class CompConfig
 	{
 		return new AddressSource(funcPointer, pointerSize);
 	}
-	public static String codeBankName(int i) {return bankRootName + i;}
+	public static String codeBankName(int i) {return bankRootName + String.format("%03d",i);}
 	public static List<SimpleEntry<String, Integer>> reservedRAM() 
 	{
 		List<SimpleEntry<String, Integer>> list = new LinkedList<SimpleEntry<String, Integer>>();
