@@ -104,8 +104,12 @@ public class BBSnCC
 			
 			for (String stdLib : includedStdLibs)
 			{
-				String fileText = FileIO.readResource("stdlib/" + stdLib.replace(".h", "") + ".c");
-				translationUnits.add(0, C99Compiler.compile(stdLib, fileText));
+				String sourceName = "stdlib/" + stdLib.replace(".h", "") + ".c";
+				if (FileIO.hasResource(sourceName))
+				{
+					String fileText = FileIO.readResource(sourceName);
+					translationUnits.add(0, C99Compiler.compile(stdLib, fileText));
+				}
 			}
 			
 			String name = commandLine.getOptionValue("l");
