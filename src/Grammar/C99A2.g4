@@ -31,10 +31,12 @@ unary_expression
 	| HasEmbed LeRoBr (Header_name|String_literal) RiRoBr
 	| Defined Identifier
 	| Defined LeRoBr Identifier RiRoBr
+	| Offsetof LeRoBr type_name Comma Identifier RiRoBr
 	;
 cast_expression
-	: unary_expression
-	| LeRoBr type_name RiRoBr cast_expression ;	
+	: LeRoBr type_name RiRoBr cast_expression
+	| unary_expression
+	;	
 multiplicative_expression
 	: cast_expression
 	| multiplicative_expression (Star|BckSla|Percnt) cast_expression ;	

@@ -60,3 +60,4 @@ HasEmbed : '__has_embed' {Grammar.GrammarFlags.isPreproc}? ; // Backported from 
 Embed : 'embed'  {Grammar.GrammarFlags.isPreproc}? ;
 
 SRAM : '__SRAM' ; // Implementation-defined
+Offsetof: '__offset_of' ;

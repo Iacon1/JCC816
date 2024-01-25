@@ -57,6 +57,7 @@ keyword
 	| Embed {Grammar.GrammarFlags.isPreproc}?
 	
 	| SRAM
+	| Offsetof
 	;
 	
 punctuator
