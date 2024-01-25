@@ -62,9 +62,6 @@ public class C99Compiler
 		return Preprocessor.preprocess(includedStdLibs, filename, mainFile);
 	}
 		
-	public static void procPragma(List<String> parameters) throws Exception
-	{
-	}
 	public static TranslationUnitNode compile(String filename, String file) throws Exception
 	{ 
 		Set<String> includedStdLibs = new HashSet<String>();

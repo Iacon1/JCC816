@@ -9,7 +9,9 @@ import java.util.Set;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import C99Compiler.C99Compiler;
+import C99Compiler.PragmaProcessor;
 import C99Compiler.Preprocessor;
+import C99Compiler.Exceptions.ErrorException;
 import C99Compiler.CompConfig.VerbosityLevel;
 import Grammar.C99A3.C99A3Parser.Control_lineContext;
 import Grammar.C99A3.C99A3Parser.Pp_tokenContext;
@@ -111,10 +113,9 @@ public class ControlNode extends InterpretingNode<ControlNode, Control_lineConte
 			String error = "";
 			for (String token : getPPTokens(node)) error += token + " ";
 			error = error.stripTrailing();
-			if (VerbosityLevel.isAtLeast(VerbosityLevel.low)) Logging.logError(error);
-			break;
+			throw new ErrorException(error, PreProcComponentNode.file, PreProcComponentNode.line);
 		case "pragma":
-			C99Compiler.procPragma(getPPTokens(node));
+			PragmaProcessor.procPragma(getPPTokens(node), PreProcComponentNode.file, PreProcComponentNode.line);
 			break;
 		case "embed":
 			filename = "";
