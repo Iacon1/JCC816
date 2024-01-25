@@ -108,13 +108,16 @@ public class DeclaratorNode extends InterpretingNode<DeclaratorNode, DeclaratorC
 			}
 		}
 		
-		directDeclarator = new DirectDeclaratorNode(this, scopeOverride).interpret(node.direct_abstract_declarator());
+		if (node.direct_abstract_declarator() != null)
+			directDeclarator = new DirectDeclaratorNode(this, scopeOverride).interpret(node.direct_abstract_declarator());
 		
 		return this;
 	}
 	public String getIdentifier()
 	{
-		return directDeclarator.getIdentifier();
+		if (directDeclarator != null)
+			return directDeclarator.getIdentifier();
+		else return null;
 	}
 
 	public List<Set<String>> pointerQualifiers()
@@ -127,7 +130,10 @@ public class DeclaratorNode extends InterpretingNode<DeclaratorNode, DeclaratorC
 	}
 	public List<DeclaratorInfo> getInfo()
 	{
-		List<DeclaratorInfo> info = directDeclarator.getInfo();
+		List<DeclaratorInfo> info;
+		if (directDeclarator != null)
+			info = directDeclarator.getInfo();
+		else  info = new LinkedList<DeclaratorInfo>();
 		for (Set<String> set : pointerQualifiers)
 		{
 			DeclaratorInfo newInfo = new DeclaratorInfo(DeclaratorType.pointer);
