@@ -127,7 +127,11 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 	@Override
 	public boolean canCall(FunctionDefinitionNode function)
 	{
-		return expr.canCall(function);
+		if (type == PFType.funcCall)
+			if (getReferencedFunction() != null)
+				return getReferencedFunction().getFullName().equals(function.getFullName());
+			else return true;
+			else return expr.canCall(function);
 	}
 	
 	@Override
