@@ -24,6 +24,7 @@ public abstract class PreProcComponentNode<T extends PreProcComponentNode<T>>
 	protected static int line = 0;
 	
 	public static final Map<String, DefineNode> defines = new HashMap<String, DefineNode>();
+	public static final Map<String, Map<Character, Character>> charMappings = new HashMap<String, Map<Character, Character>>();
 	public static final Set<String> embeds = new HashSet<String>();
 	
 	public static void resetLineNo(String file, int line)
@@ -108,7 +109,7 @@ public abstract class PreProcComponentNode<T extends PreProcComponentNode<T>>
 	}
 	public static List<String> resolveDefines(String... words) throws Exception
 	{
-		if (words.length == 0) return null;
+		if (words.length == 0) return new ArrayList<String>();
 		List<String> wordList = new ArrayList<String>(Arrays.asList(words));
 
 		int i = 0;

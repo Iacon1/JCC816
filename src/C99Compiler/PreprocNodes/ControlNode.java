@@ -8,6 +8,7 @@ import java.util.Set;
 
 import org.antlr.v4.runtime.tree.TerminalNode;
 
+import C99Compiler.CompConfig;
 import C99Compiler.PragmaProcessor;
 import C99Compiler.Preprocessor;
 import C99Compiler.Exceptions.ErrorException;
@@ -21,6 +22,7 @@ public class ControlNode extends InterpretingNode<ControlNode, Control_lineConte
 	private GroupNode include;
 	private String stdLib; // Only fill out if standard lib was included
 	private byte[] embedBytes;
+	private String pragmaOutput; // Output of Pragma
 	
 	public ControlNode(PreProcComponentNode<?> parent)
 	{
@@ -28,6 +30,7 @@ public class ControlNode extends InterpretingNode<ControlNode, Control_lineConte
 		command = null;
 		include = null;
 		embedBytes = null;
+		pragmaOutput = null;
 	}
 	public ControlNode()
 	{
@@ -35,6 +38,7 @@ public class ControlNode extends InterpretingNode<ControlNode, Control_lineConte
 		command = null;
 		include = null;
 		embedBytes = null;
+		pragmaOutput = null;
 	}
 	
 	private List<String> getPPTokens(Control_lineContext node) throws Exception // LOL
@@ -66,12 +70,14 @@ public class ControlNode extends InterpretingNode<ControlNode, Control_lineConte
 			{
 				filename = filename.replaceAll("[<>\"\"]", "");
 				stdLib = filename;
-				file = FileIO.readResource("stdlib/" + filename);
+				try {file = FileIO.readResource("stdlib/" + filename);}
+				catch (Exception e) {file = FileIO.readFile(CompConfig.rootFolder + "/" + filename);}
 			}
 			else if (filename.contains("\"")) // Include file
 			{
 				filename = filename.replaceAll("[<>\"\"]", "");
-				file = FileIO.readFile(filename);
+				try {file = FileIO.readFile(CompConfig.rootFolder + "/" + filename);}
+				catch (Exception e) {file = FileIO.readResource("stdlib/" + filename);}
 			}
 			String oldFILE = PreProcComponentNode.file;
 			int oldLINE = PreProcComponentNode.line;
@@ -82,6 +88,9 @@ public class ControlNode extends InterpretingNode<ControlNode, Control_lineConte
 		case "define": // Defines a macro
 			String name = node.Identifier().getText();
 			List<String> replacements = getPPTokens(node);
+			if (replacements.isEmpty()) replacements.add(""); // If null replace with nothing
+
+			charMappings.remove(name); // So as to avoid confusion
 			if (node.identifier_list() != null)
 			{
 				List<String> parameters = new ArrayList<String>();
@@ -93,7 +102,9 @@ public class ControlNode extends InterpretingNode<ControlNode, Control_lineConte
 				defines.put(name, new DefineNode(this, replacements.toArray(new String[] {})));
 			break;
 		case "undef":
-			defines.remove(node.Identifier().getText());
+			name = node.Identifier().getText();
+			if (defines.containsKey(name)) defines.remove(name);
+			else charMappings.remove(name);
 			incrLineNo();
 			break;
 		case "line":
@@ -112,7 +123,7 @@ public class ControlNode extends InterpretingNode<ControlNode, Control_lineConte
 			error = error.stripTrailing();
 			throw new ErrorException(error, PreProcComponentNode.file, PreProcComponentNode.line);
 		case "pragma":
-			PragmaProcessor.procPragma(getPPTokens(node), PreProcComponentNode.file, PreProcComponentNode.line);
+			pragmaOutput = PragmaProcessor.procPragma(getPPTokens(node), PreProcComponentNode.file, PreProcComponentNode.line);
 			break;
 		case "embed":
 			filename = "";
@@ -150,7 +161,7 @@ public class ControlNode extends InterpretingNode<ControlNode, Control_lineConte
 	@Override
 	public boolean hasText()
 	{
-		return command.equals("include") || command.equals("embed");
+		return command.equals("include") || command.equals("embed") || pragmaOutput != null;
 	}
 	
 	@Override
@@ -165,6 +176,8 @@ public class ControlNode extends InterpretingNode<ControlNode, Control_lineConte
 				text += String.format("0x%02x", b) + ", ";
 			return text.substring(0, text.length() - 2) + "\n";
 		}
+		else if (pragmaOutput != null)
+			return pragmaOutput;
 		else return null;
 	}
 }
