@@ -4,6 +4,9 @@
 package C99Compiler.Utils;
 
 import java.util.AbstractMap.SimpleEntry;
+import java.util.regex.MatchResult;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import C99Compiler.CompConfig;
 
@@ -64,14 +67,14 @@ public final class CompUtils
 	{
 		return getSmallestType(value.longValue());
 	}
-	public static Object parseLiteral(String literal)
+	public static Number parseLiteral(String literal)
 	{
 		if (literal.startsWith("0x")) // Hex;
 			return Long.valueOf(literal.substring(2), 16);
 		else if (literal.startsWith("0")) // Octal???
 			return Long.valueOf(literal.substring(2), 8);
 		else if (literal.contains("'")) // Character constant
-			return Long.valueOf(literal.getBytes()[0]);
+			return Long.valueOf(literal.getBytes()[1]);
 		else // TODO, assume decimal for now
 			return Long.valueOf(literal);	
 	}
@@ -87,5 +90,21 @@ public final class CompUtils
 	public static final String getSafeUUID()
 	{
 		return UUID.randomUUID().toString().replace("-", "_");
+	}
+	
+	public static final String processEscapes(String s)
+	{
+		Pattern pattern = Pattern.compile("\\\\x[0-9A-Fa-f][0-9A-Fa-f]");
+		Matcher matcher = pattern.matcher(s);
+		List<MatchResult> results = new ArrayList<MatchResult>();
+		while (matcher.find())
+			results.add(matcher.toMatchResult());
+		for (int i = results.size() - 1; i >= 0; --i)	 // In reverse order to avoid string indexing problems
+		{
+			MatchResult result = results.get(i);
+			char b = (char) Byte.valueOf(result.group().substring(2), 16).byteValue(); // Get byte
+			s = s.substring(0, result.start()) + Character.valueOf(b) + s.substring(result.end());
+		}
+		return s;
 	}
 }

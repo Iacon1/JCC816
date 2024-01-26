@@ -5,6 +5,7 @@ package C99Compiler.Utils.OperandSources;
 import java.util.Arrays;
 
 import C99Compiler.Utils.AssemblyUtils.DetailsTicket;
+import C99Compiler.Utils.CompUtils;
 import C99Compiler.Utils.PropPointer;
 
 public class ConstantSource extends ConstantByteSource
@@ -24,8 +25,13 @@ public class ConstantSource extends ConstantByteSource
 		}
 		else if (String.class.isAssignableFrom(obj.getClass()))
 		{
-			bytes = Arrays.copyOf(((String) obj).getBytes(), size);
-			bytes[size - 1] = 0x00;
+			String str = (String) obj;
+			// Fix escape sequences
+			str = CompUtils.processEscapes(str);
+			
+			bytes = Arrays.copyOf(str.getBytes(), Math.min(str.length(), size));
+			for (int i = str.length(); i < size - str.length(); ++i)
+				bytes[i] = 0x00;
 		}
 		else if (Boolean.class.isAssignableFrom(obj.getClass()))
 			bytes[0] =(byte) ((Boolean) obj ? 0xFF : 0x00);
