@@ -36,6 +36,7 @@ keyword
 	| Union
 	| Unsigned
 	| Void
+	| Volatile
 	| While
 	| Bool
 	| Complex
