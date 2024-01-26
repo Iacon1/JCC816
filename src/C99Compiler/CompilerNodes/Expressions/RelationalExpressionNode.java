@@ -97,7 +97,7 @@ public class RelationalExpressionNode extends BranchingExpressionNode
 				{
 					lines.add(sourceY.getLDA(i, ticket2));							// Get Y
 					lines.add("EOR\t" + toXOR);										// Flip sign
-					lines.add(tempSource.getSTA(i, ticket2));
+					lines.add(tempSource.getSTA(0, ticket2));
 					lines.add(sourceX.getLDA(i, ticket2));							// Get X
 					lines.add("EOR\t" + toXOR);										// Flip sign
 					lines.add(tempSource.getInstruction("CMP", 0, ticket2));		// Cmp Y & X?
