@@ -4,6 +4,12 @@
 
 package Logging;
 
+import java.awt.Point;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 import java.util.Arrays;
 
 import javax.swing.JFrame;
@@ -62,6 +68,36 @@ public final class Logging
 		TreeViewer viewer = new TreeViewer(Arrays.asList(parser.getRuleNames()), tree);
 		viewer.setScale(1);
 		panel.add(viewer);
+		panel.addMouseMotionListener(new MouseMotionListener()
+		{
+			Point lastPos = new Point();
+			Point oldPoint = new Point();
+			@Override
+			public void mouseDragged(MouseEvent e)
+			{
+				viewer.setLocation(lastPos.x + e.getX() - oldPoint.x, lastPos.y + e.getY() - oldPoint.y);
+				
+			}
+
+			@Override
+			public void mouseMoved(MouseEvent e)
+			{
+				lastPos = viewer.getLocation();
+				oldPoint = e.getPoint();
+				
+			}	
+		});
+		panel.addMouseWheelListener(new MouseWheelListener()
+		{
+
+			@Override
+			public void mouseWheelMoved(MouseWheelEvent e)
+			{
+				if (e.getScrollType() == MouseWheelEvent.WHEEL_UNIT_SCROLL)
+					viewer.setScale(viewer.getScale() + e.getScrollAmount());
+			}
+			
+		});
 		frame.add(panel);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.pack();
