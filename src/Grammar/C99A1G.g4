@@ -29,6 +29,7 @@ keyword
 	| Short
 	| Signed
 	| Sizeof
+	| Static
 	| Struct
 	| Switch
 	| Typedef
