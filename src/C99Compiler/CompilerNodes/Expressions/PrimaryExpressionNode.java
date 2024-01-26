@@ -8,7 +8,9 @@ import java.util.List;
 import C99Compiler.CompConfig.OptimizationLevel;
 import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.FunctionDefinitionNode;
+import C99Compiler.CompilerNodes.Definitions.PointerType;
 import C99Compiler.CompilerNodes.Definitions.Type;
+import C99Compiler.CompilerNodes.Dummies.DummyType;
 import C99Compiler.CompilerNodes.LValues.LValueNode;
 import C99Compiler.CompilerNodes.LValues.VariableNode;
 import C99Compiler.Exceptions.UndefinedVariableException;
@@ -43,7 +45,10 @@ public class PrimaryExpressionNode extends BaseExpressionNode<Primary_expression
 		else if (node.Constant() != null)
 			constant = CompUtils.parseLiteral(node.Constant().getText());
 		else if (node.String_literal() != null)
+		{
 			stringLiteral = node.String_literal().getText();
+			stringLiteral = stringLiteral.substring(1, stringLiteral.length() - 1);
+		}
 		
 		return this;
 	}
@@ -58,6 +63,7 @@ public class PrimaryExpressionNode extends BaseExpressionNode<Primary_expression
 			else // Probably function pointer
 				return resolveFunctionRelative(identifier).getType();
 		else if (constant != null) return CompUtils.getSmallestType((Number) constant);
+		else if (stringLiteral != null) return new PointerType(new DummyType("char"));
 		else return null;
 	}
 

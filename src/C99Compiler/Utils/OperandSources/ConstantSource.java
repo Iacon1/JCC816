@@ -2,93 +2,48 @@
 //
 package C99Compiler.Utils.OperandSources;
 
-import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 import C99Compiler.Utils.AssemblyUtils.DetailsTicket;
 import C99Compiler.Utils.PropPointer;
 
-public class ConstantSource extends OperandSource
+public class ConstantSource extends ConstantByteSource
 {
-	private byte[] bytes;
 	private PropPointer<?> pointer;
 	private Object constant;
 	
+	private static byte[] asBytes(Object obj, int size)
+	{
+		byte[] bytes = new byte[size];
+		
+		if (Number.class.isAssignableFrom(obj.getClass()))
+		{
+			String s = new StringBuilder().append(String.format("%0" + 2*size + "x", obj)).reverse().toString();
+			for (int i = 0; i < size; ++i)
+				bytes[i] = Byte.valueOf(s.substring(2 * i, 2 * (i + 1)), 16);
+		}
+		else if (String.class.isAssignableFrom(obj.getClass()))
+		{
+			bytes = Arrays.copyOf(((String) obj).getBytes(), size);
+			bytes[size - 1] = 0x00;
+		}
+		else if (Boolean.class.isAssignableFrom(obj.getClass()))
+			bytes[0] =(byte) ((Boolean) obj ? 0xFF : 0x00);
+		
+		return bytes;
+	}
 	public ConstantSource(Object constant, int offset, int size)
 	{
-		super(size, offset, true);
-		if (Number.class.isAssignableFrom(constant.getClass()))
-		{
-			bytes = Arrays.copyOfRange(
-					ByteBuffer.allocate(Math.max(size, Long.BYTES)).
-					putLong(Math.max(size - Long.BYTES, 0), ((Number) constant).longValue()).
-					array(), Math.max(Long.BYTES - size, 0), Long.BYTES);
-			// little-endian WRT words
-			if (bytes.length >= 4)
-				for (int i = 0; i < bytes.length - 1; i += 2)
-				{
-					byte x = bytes[i];
-					byte y = bytes[i + 1];
-					bytes[i] = bytes[bytes.length - 2 - i]; bytes[bytes.length - 2 - i] = x;
-					bytes[i + 1] = bytes[bytes.length - 1 - i]; bytes[bytes.length - 1 - i] = y;
-				}
-			else if (bytes.length == 3)
-			{
-				byte x = bytes[2];
-				bytes[2] = bytes[1];
-				bytes[1] = x;
-			}
-		}
-		else if (String.class.isAssignableFrom(constant.getClass()))
-		{
-			bytes = ((String) constant).getBytes();
-		}
-		else if (Boolean.class.isAssignableFrom(constant.getClass()))
-		{
-			bytes = new byte[] {(byte) ((Boolean) constant ? 0xFF : 0x00)};
-		}
-		else if (PropPointer.class.isAssignableFrom(constant.getClass()))
-		{
+		super(asBytes(constant, size), offset, size);
+		if (PropPointer.class.isAssignableFrom(constant.getClass()))
 			pointer = (PropPointer<?>) constant;
-		}
 	}
+	
 	public ConstantSource(Object constant, int size)
 	{
-		super(size, true);
-		if (Number.class.isAssignableFrom(constant.getClass()))
-		{
-			bytes = Arrays.copyOfRange(
-					ByteBuffer.allocate(Math.max(size, Long.BYTES)).
-					putLong(Math.max(size - Long.BYTES, 0), ((Number) constant).longValue()).
-					array(), Math.max(Long.BYTES - size, 0), Long.BYTES);
-			// little-endian WRT words
-			if (bytes.length >= 4)
-				for (int i = 0; i < bytes.length - 1; i += 2)
-				{
-					byte x = bytes[i];
-					byte y = bytes[i + 1];
-					bytes[i] = bytes[bytes.length - 2 - i]; bytes[bytes.length - 2 - i] = x;
-					bytes[i + 1] = bytes[bytes.length - 1 - i]; bytes[bytes.length - 1 - i] = y;
-				}
-			else if (bytes.length == 3)
-			{
-				byte x = bytes[2];
-				bytes[2] = bytes[1];
-				bytes[1] = x;
-			}
-		}
-		else if (String.class.isAssignableFrom(constant.getClass()))
-		{
-			bytes = ((String) constant).getBytes();
-		}
-		else if (Boolean.class.isAssignableFrom(constant.getClass()))
-		{
-			bytes = new byte[] {(byte) ((Boolean) constant ? 0xFF : 0x00)};
-		}
-		else if (PropPointer.class.isAssignableFrom(constant.getClass()))
-		{
+		super(asBytes(constant, size), size);
+		if (PropPointer.class.isAssignableFrom(constant.getClass()))
 			pointer = (PropPointer<?>) constant;
-		}
 	}
 	@Override
 	public OperandSource getShifted(int offset, int size)
@@ -104,21 +59,6 @@ public class ConstantSource extends OperandSource
 	public String getBase(int i, DetailsTicket ticket)
 	{
 		if (pointer != null) return pointer.apply(i, ticket);
-		if (bytes.length <= i) return "#$" + String.format(ticket.is16Bit() ? "%04x" : "%02x", 0);
-		if (ticket.is16Bit())
-			if (bytes.length == 1) return "#$" + String.format("%02x%02x", 0, bytes[0]);
-			else return "#$" + String.format("%02x%02x", bytes[i], bytes[i + 1]);
-		else return "#$" + String.format("%02x", bytes[i]);
-	}
-	@Override
-	public String getBase()
-	{
-		return getBase(0, new DetailsTicket());
-	}
-	
-	@Override
-	public String getInstruction(String whitespace, String operation, Integer i, DetailsTicket ticket)
-	{
-		return whitespace + operation + "\t" + getBase(i, ticket) + "\n";
+		else return super.getBase(i, ticket);
 	}
 }
