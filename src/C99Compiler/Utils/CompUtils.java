@@ -68,24 +68,12 @@ public final class CompUtils
 	{
 		if (literal.startsWith("0x")) // Hex;
 			return Long.valueOf(literal.substring(2), 16);
-		else
-			return Long.valueOf(literal); // TODO
-		
-	}
-	
-	/** Maps a byte offset from the start of RAM to a memory address the CPU can understand.
-	 *  @param offset The offset from the start of RAM.
-	 */
-	public static final String mapOffset(int offset, int size)
-	{
-		offset += size;
-		if (offset / 0x10000 <= (0x7F - 0x7E))
-		{
-			String bank = String.format("%02x", 0x7F - offset / 0x10000);
-			String addr = String.format("%04x", 0xFFFF - (offset % 0x10000));
-			return "$" + bank + addr;
-		}
-		else return null;
+		else if (literal.startsWith("0")) // Octal???
+			return Long.valueOf(literal.substring(2), 8);
+		else if (literal.contains("'")) // Character constant
+			return Long.valueOf(literal.getBytes()[0]);
+		else // TODO, assume decimal for now
+			return Long.valueOf(literal);	
 	}
 	
 	public static final boolean isInZeroPage(String label)
