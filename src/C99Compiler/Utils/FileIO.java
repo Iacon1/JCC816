@@ -16,6 +16,10 @@ import java.io.Serializable;
 
 public final class FileIO
 {
+	public static final boolean hasResource(String filename)
+	{
+		return ClassLoader.getSystemResource(filename) != null;
+	}
 	public static final String readResource(String filename) throws IOException
 	{
 		return new String(ClassLoader.getSystemResourceAsStream(filename).readAllBytes());
