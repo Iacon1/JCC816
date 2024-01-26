@@ -18,6 +18,7 @@ import C99Compiler.Utils.FileIO;
 import C99Compiler.Utils.OperandSources.ConstantSource;
 import C99Compiler.Utils.OperandSources.OperandSource;
 import C99Compiler.Utils.ScratchManager.ScratchSource;
+import C99Compiler.CompilerNodes.Dummies.DummyExpressionNode;
 
 public class LongDividerModulator
 {
@@ -25,30 +26,96 @@ public class LongDividerModulator
 	
 	public static String generate(String whitespace, OperandSource destSource, OperandSource sourceX, OperandSource sourceY, boolean isModulo, DetailsTicket ticket) throws Exception
 	{
-		ScratchManager scratchManager = new ScratchManager();
+		// X = size of x
+		int xSize = sourceX.getSize();
+		Type xType = CompUtils.getTypeForSize(xSize);
+		// Y = size of y
+		int ySize = sourceY.getSize();
+		Type yType = CompUtils.getTypeForSize(ySize);
+		// Z = X + Y
+		int zSize = xSize + ySize;
+		Type zType = CompUtils.getTypeForSize(zSize);
 		
+		String LDivIter = "__L" + (isModulo ? "Mod" : "Div") + xSize + "_" + ySize + "Iter";
+		String LDivSkip = "__L" + (isModulo ? "Mod" : "Div") + xSize + "_" + ySize + "Skip";
+		
+		ScratchManager scratchManager = new ScratchManager();
+		scratchManager.reserveScratchBlock(CompConfig.scratchSize - zSize - xSize); // Minimum size needed
 		String assembly = "";
+		
 		assembly += ticket.save(whitespace, DetailsTicket.saveA | DetailsTicket.saveX | DetailsTicket.saveY); // All three modified hereafter
 		DetailsTicket innerTicket = new DetailsTicket(ticket, DetailsTicket.saveY, DetailsTicket.saveA); // "Please don't break these"
 
-		int size = Math.max(sourceX.getSize(), sourceY.getSize());
-		Type t1 = CompUtils.getTypeForSize(size);
-		Type t2 = CompUtils.getTypeForSize(2 * size);
+		// uintX_t ret = 0;
+		OperandSource ret = destSource.respec(xSize);
+		assembly += AssemblyUtils.byteCopier(whitespace, xSize, ret, new ConstantSource(0, xSize));
+		// uintZ_t big_div = (uintZ_t)y << (X - 1);
+		ScratchSource bigDiv = scratchManager.reserveScratchBlock(zSize);
+		assembly += AssemblyUtils.byteCopier(whitespace, ySize, bigDiv.getShifted(xSize), sourceY);
+		assembly += AssemblyUtils.bytewiseOperation(whitespace, zSize, (Integer i, DetailsTicket ticket2) -> 
+			{return new String[]
+				{
+					bigDiv.getLDA(i, ticket2),
+					(i >= bigDiv.getSize() - 2) ? "LSR" : "ROR",
+					bigDiv.getSTA(i, ticket2),
+				};
+			}, true, true);
+		//uintX_t i = 0x8...[X bytes]
+		ScratchSource iS = scratchManager.reserveScratchBlock(xSize);
+		assembly += AssemblyUtils.byteCopier(whitespace, xSize, iS, new ConstantSource(0x80 * Math.pow(0x100, xSize - 1), xSize));
+		// For...
+		assembly += whitespace + LDivIter + ":\n";
+			// If (x >= big_div)
+			assembly += new RelationalExpressionNode(null, ">=", new DummyExpressionNode(null, xType, sourceX), new DummyExpressionNode(null, zType, bigDiv))
+					.getAssembly(whitespace.length(), ":+", LDivSkip, scratchManager, innerTicket);
+			assembly += whitespace + ":\n";
+				// x -= big_div;
+				assembly += whitespace + "SEC" + "\n";
+				assembly += AssemblyUtils.bytewiseOperation(whitespace, xSize, (Integer i, DetailsTicket ticket2) -> 
+				{return new String[]
+					{
+						sourceX.getLDA(i, ticket2),
+						bigDiv.getInstruction("SBC", i, ticket2),
+						sourceX.getSTA(i, ticket2)
+					};
+				}, true, true, innerTicket);
+				// ret += i;
+				assembly += whitespace + "CLC" + "\n";
+				assembly += AssemblyUtils.bytewiseOperation(whitespace, xSize, (Integer i, DetailsTicket ticket2) -> 
+				{return new String[]
+					{
+						ret.getLDA(i, ticket2),
+						iS.getInstruction("ADC", i, ticket2),
+						ret.getSTA(i, ticket2)
+					};
+				}, true, false, innerTicket);
+			assembly += whitespace + LDivSkip + ":\n";
+			// big_div >>= 1;
+			assembly += AssemblyUtils.bytewiseOperation(whitespace, zSize, (Integer i, DetailsTicket ticket2) -> 
+			{return new String[]
+					{
+						bigDiv.getLDA(i, ticket2),
+						(i >= bigDiv.getSize() - 2) ? "LSR" : "ROR",
+						bigDiv.getSTA(i, ticket2),
+					};
+				}, true, true);
+			// i >>= 1
+			assembly += AssemblyUtils.bytewiseOperation(whitespace, xSize, (Integer i, DetailsTicket ticket2) -> 
+			{return new String[]
+					{
+						iS.getLDA(i, ticket2),
+						(i >= iS.getSize() - 2) ? "LSR" : "ROR",
+						iS.getSTA(i, ticket2),
+					};
+				}, true, true);
+			// i != 0
+			assembly += EqualityExpressionNode.getIsZero(whitespace, null, scratchManager, iS, innerTicket);
+			assembly += whitespace + "BNE\t" + LDivIter + "\n";
+		// [if modulo] ret = x;
+		if (isModulo)
+			assembly += AssemblyUtils.byteCopier(whitespace, xSize, ret, sourceX, innerTicket);
 		
-		ScratchSource sourceI = scratchManager.reserveScratchBlock(t1.getSize());
-		ScratchSource sourceB = scratchManager.reserveScratchBlock(t2.getSize());	
-
-		String source = FileIO.readResource("Compiler/CompilerNodes/Expressions/Snippets/LongDivider.c");
-		assembly += C99Compiler.compileSnippet(whitespace.length(), source, t1.getSignature(),
-				t2.getSignature(),
-				String.valueOf(8*size - 1),
-				"0x8" + "0".repeat(4 * size - 1));
-
-		scratchManager.releaseScratchBlock(sourceI);
-		scratchManager.releaseScratchBlock(sourceB);
-
 		assembly += ticket.restore(whitespace, DetailsTicket.saveA | DetailsTicket.saveX | DetailsTicket.saveY);
-		
 		return assembly;
 	}
 }
