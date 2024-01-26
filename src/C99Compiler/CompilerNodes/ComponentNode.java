@@ -31,7 +31,8 @@ public class ComponentNode<C extends ComponentNode<C>> implements Serializable
 	{
 		this.children = new LinkedList<ComponentNode<?>>();
 		this.parent = parent;
-		this.parent.children.add(this);
+		if (parent != null)
+			this.parent.children.add(this);
 	}
 	public ComponentNode()
 	{
