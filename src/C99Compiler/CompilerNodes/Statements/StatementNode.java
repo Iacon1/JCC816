@@ -41,5 +41,10 @@ public abstract class StatementNode<C extends ParserRuleContext> extends Interpr
 	}
 
 	public abstract String getAssembly(int leadingWhitespace, String returnAddr) throws Exception;
-	@Override public String getAssembly(int leadingWhitespace) throws Exception {return getAssembly(leadingWhitespace, getEnclosingFunction().getEndLabel());}
+	@Override public String getAssembly(int leadingWhitespace) throws Exception
+	{
+		if (getEnclosingFunction() != null)
+			return getAssembly(leadingWhitespace, getEnclosingFunction().getEndLabel());
+		else return getAssembly(leadingWhitespace, null);
+	}
 }

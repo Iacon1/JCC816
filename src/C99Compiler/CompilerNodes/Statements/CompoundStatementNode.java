@@ -82,6 +82,8 @@ public class CompoundStatementNode extends StatementNode<Compound_statementConte
 			if (DebugLevel.isAtLeast(DebugLevel.low))
 				assembly += AssemblyUtils.getWhitespace(leadingWhitespace) + ".dbg\tline, \"" + getTranslationUnit().getFilename() + "\", " + lines.get(i++) + "\n";
 			if (StatementNode.class.isAssignableFrom(assemblable.getClass())) assembly += ((StatementNode) assemblable).getAssembly(leadingWhitespace, returnAddr);
+			else
+				assembly += assemblable.getAssembly(leadingWhitespace);
 		}
 		return assembly;
 	}
