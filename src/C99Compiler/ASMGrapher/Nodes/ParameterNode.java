@@ -26,13 +26,14 @@ public class ParameterNode extends ASMNode<ParameterContext>
 	@Override
 	public ParameterNode interpret(ParameterContext node) throws Exception
 	{
-		if (node.getText().contains("X"))
+		String upper = node.getText().toUpperCase();
+		if (upper.contains(",X"))
 			referencesX = true;
-		if (node.getText().contains("Y"))
-			referencesX = true;
-		if (node.getText().contains("S"))
+		if (upper.contains(",Y"))
+			referencesY = true;
+		if (upper.contains(",S"))
 			referencesS = true;
-		if (node.getText().contains("#"))
+		if (upper.contains(",#"))
 			isImmediate = true;
 
 		if (node.address().size() > 0)

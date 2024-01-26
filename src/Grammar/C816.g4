@@ -8,7 +8,7 @@ Operation
 	| 'CLC'	| 'CLD'	| 'CLI'	| 'CLV'	| 'CMP'	| 'CPX'	| 'CPY'	| 'COP'
 	| 'DEC'	| 'DEX' | 'DEY'
 	| 'EOR'
-	| 'INC'	| 'INX'
+	| 'INC'	| 'INX' | 'INY'
 	| 'JMP'	| 'JML'	| 'JSL'
 	| 'LDA'	| 'LDX'	| 'LDY'	| 'LSR'
 	| 'MVN'	| 'MVP'
