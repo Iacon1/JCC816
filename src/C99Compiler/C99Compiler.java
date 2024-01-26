@@ -74,7 +74,6 @@ public class C99Compiler
 		if (VerbosityLevel.isAtLeast(VerbosityLevel.medium))
 			printInfo("Precompiled in " + (System.currentTimeMillis() - t) + " ms. Source length: " + source.length() + ".");
 		t = System.currentTimeMillis();
-		Logging.logNotice(source);
 		
 		CommonTokenStream tokens = lex(source);
 		if (VerbosityLevel.isAtLeast(VerbosityLevel.medium))

@@ -11,12 +11,13 @@ import Assembler.Header.DestinationCode;
 import C99Compiler.CartConfig;
 import C99Compiler.CompConfig.DebugLevel;
 import C99Compiler.CompConfig.VerbosityLevel;
+import C99Compiler.Exceptions.AssemblerException;
 import C99Compiler.Utils.FileIO;
 import Logging.Logging;
 
 public class Assembler
 {
-	public static byte[] assemble(String name, Header header, String assembly, MemorySize memorySize) throws IOException
+	public static byte[] assemble(String name, Header header, String assembly, MemorySize memorySize) throws Exception
 	{
 		File cfgFile, asmFile, sfcFile;
 		cfgFile = new File(name + ".cfg");
@@ -37,8 +38,9 @@ public class Assembler
 			proc = Runtime.getRuntime().exec(new String[] {"cl65", "--verbose", "-g", "-C", cfgFile.getAbsolutePath(), "-o", sfcFile.getAbsolutePath(), asmFile.getAbsolutePath(), "-Wl", "--dbgfile", "-Wl", name + ".dbg"});
 		else
 			proc = Runtime.getRuntime().exec(new String[] {"cl65", "--verbose", "-C", cfgFile.getAbsolutePath(), "-o", sfcFile.getAbsolutePath(), asmFile.getAbsolutePath()});
-		Logging.logNotice(new String(proc.getErrorStream().readAllBytes()));
-		Logging.logNotice(new String(proc.getInputStream().readAllBytes()));
+		String error = new String(proc.getErrorStream().readAllBytes());
+		if (!error.isEmpty()) throw new AssemblerException(error);
+		// Logging.logNotice(new String(proc.getInputStream().readAllBytes()));
 		while (proc.isAlive());
 		sfcStream = new FileInputStream(sfcFile);
 		byte[] bytes = sfcStream.readAllBytes();

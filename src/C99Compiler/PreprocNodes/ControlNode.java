@@ -8,15 +8,12 @@ import java.util.Set;
 
 import org.antlr.v4.runtime.tree.TerminalNode;
 
-import C99Compiler.C99Compiler;
 import C99Compiler.PragmaProcessor;
 import C99Compiler.Preprocessor;
 import C99Compiler.Exceptions.ErrorException;
-import C99Compiler.CompConfig.VerbosityLevel;
 import Grammar.C99A3.C99A3Parser.Control_lineContext;
 import Grammar.C99A3.C99A3Parser.Pp_tokenContext;
 import C99Compiler.Utils.FileIO;
-import Logging.Logging;
 
 public class ControlNode extends InterpretingNode<ControlNode, Control_lineContext> implements GeneratingNode
 {
