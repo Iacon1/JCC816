@@ -4,6 +4,7 @@ package C99Compiler.CompilerNodes.Expressions;
 
 import C99Compiler.CompConfig;
 import C99Compiler.CompilerNodes.ComponentNode;
+import C99Compiler.CompilerNodes.Expressions.Snippets.DivisionHeaderFooter;
 import C99Compiler.CompilerNodes.Expressions.Snippets.LongDividerModulator;
 import C99Compiler.CompilerNodes.Expressions.Snippets.Multiplier;
 import C99Compiler.CompilerNodes.Expressions.Snippets.ShortDividerModulator;
@@ -66,6 +67,49 @@ public class MultiplicativeExpressionNode extends CallingArithmeticBinaryExpress
 		case "*": return "__multiplier@" + sizeX + "@" + sizeY;
 		case "/": return "__divider@" + sizeX + "@" + sizeY;
 		case "%": return "__modulator@" + sizeX + "@" + sizeY;
+		default: return null;
+		}
+	}
+	@Override
+	public String getCall(String whitespace, int sizeR, int sizeX, int sizeY) throws Exception
+	{
+		switch (operator)
+		{
+		case "*": return whitespace + "JSL\t" + getSubName(sizeX, sizeY) + "\n";
+		case "/":
+		case "%":
+		{
+			if (x.getType().isSigned() || y.getType().isSigned())
+			{
+				String assembly = "";
+				String divHeader = "__divisionHeader@" + sizeX + "@" + sizeY;
+				String headerASM = divHeader + ":\n";
+				headerASM += DivisionHeaderFooter.divisionHeader(
+						AssemblyUtils.getWhitespace(CompConfig.indentSize),
+						CompConfig.specSubSource(true, sizeX),
+						CompConfig.specSubSource(false, sizeY), 
+						new DetailsTicket());
+				headerASM += "RTL\n";
+				
+				String divFooter = "__divisionFooter@" + sizeR;
+				String footerASM = divFooter + ":\n";
+				footerASM += DivisionHeaderFooter.divisionFooter(
+						AssemblyUtils.getWhitespace(CompConfig.indentSize),
+						CompConfig.callResultSource(sizeR), 
+						CompConfig.callResultSource(sizeR), 
+						new DetailsTicket());
+				footerASM += "RTL\n";
+				
+				getTranslationUnit().requireSub(divHeader, headerASM);
+				getTranslationUnit().requireSub(divFooter, footerASM);
+				
+				assembly += whitespace + "JSL\t" + divHeader + "\n";
+				assembly += whitespace + "JSL\t" + getSubName(sizeX, sizeY) + "\n";
+				assembly += whitespace + "JSL\t" + divFooter + "\n";
+				return assembly;
+			}
+			else return whitespace + "JSL\t" + getSubName(sizeX, sizeY) + "\n";
+		}
 		default: return null;
 		}
 	}

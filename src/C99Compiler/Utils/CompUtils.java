@@ -30,9 +30,10 @@ public final class CompUtils
 
 	public static final String headerTag = "__HEADER_HERE";
 	
-	public static Type getTypeForSize(int size)
+	public static Type getTypeForSize(int size, boolean isSigned)
 	{
 		List<String> specifiers = new ArrayList<String>();
+		specifiers.add(isSigned ? "signed" : "unsigned");
 		String[] options = new String[] {"char", "short", "int", "long", "long long"};
 		for (String option : options)
 			if (size <= CompConfig.sizeOf(option.split(" ")))

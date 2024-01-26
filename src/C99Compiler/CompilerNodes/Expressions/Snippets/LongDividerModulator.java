@@ -28,22 +28,22 @@ public class LongDividerModulator
 	{
 		// X = size of x
 		int xSize = sourceX.getSize();
-		Type xType = CompUtils.getTypeForSize(xSize);
+		Type xType = CompUtils.getTypeForSize(xSize, false);
 		// Y = size of y
 		int ySize = sourceY.getSize();
-		Type yType = CompUtils.getTypeForSize(ySize);
+		Type yType = CompUtils.getTypeForSize(ySize, false);
 		// Z = X + Y
 		int zSize = xSize + ySize;
-		Type zType = CompUtils.getTypeForSize(zSize);
+		Type zType = CompUtils.getTypeForSize(zSize, false);
 		
-		String LDivIter = "__L" + (isModulo ? "Mod" : "Div") + xSize + "_" + ySize + "Iter";
-		String LDivSkip = "__L" + (isModulo ? "Mod" : "Div") + xSize + "_" + ySize + "Skip";
+		String LDivIter = "__LU" + (isModulo ? "Mod" : "Div") + xSize + "_U" + ySize + "Iter";
+		String LDivSkip = "__LU" + (isModulo ? "Mod" : "Div") + xSize + "_U" + ySize + "Skip";
 		
 		ScratchManager scratchManager = new ScratchManager();
 		scratchManager.reserveScratchBlock(CompConfig.scratchSize - zSize - xSize); // Minimum size needed
 		String assembly = "";
 		
-		assembly += ticket.save(whitespace, DetailsTicket.saveA | DetailsTicket.saveX | DetailsTicket.saveY); // All three modified hereafter
+		assembly += ticket.save(whitespace, DetailsTicket.saveA | DetailsTicket.saveX); // All three modified hereafter
 		DetailsTicket innerTicket = new DetailsTicket(ticket, DetailsTicket.saveY, DetailsTicket.saveA); // "Please don't break these"
 
 		// uintX_t ret = 0;
@@ -115,7 +115,7 @@ public class LongDividerModulator
 		if (isModulo)
 			assembly += AssemblyUtils.byteCopier(whitespace, xSize, ret, sourceX, innerTicket);
 		
-		assembly += ticket.restore(whitespace, DetailsTicket.saveA | DetailsTicket.saveX | DetailsTicket.saveY);
+		assembly += ticket.restore(whitespace, DetailsTicket.saveA | DetailsTicket.saveX);
 		return assembly;
 	}
 }

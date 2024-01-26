@@ -32,7 +32,7 @@ CC extends ParserRuleContext
 	
 	public abstract String getSubAssembly(int sizeX, int sizeY) throws Exception;
 	public abstract String getSubName(int sizeX, int sizeY);
-	
+	public abstract String getCall(String whitespace, int sizeR, int sizeX, int sizeY) throws Exception;
 	@Override
 	protected String getAssembly(String whitespace, OperandSource destSource, OperandSource sourceX,
 			OperandSource sourceY, DetailsTicket ticket) throws Exception
@@ -42,8 +42,8 @@ CC extends ParserRuleContext
 		DetailsTicket innerTicket = new DetailsTicket(ticket, 0, 0xFF);
 		assembly += AssemblyUtils.byteCopier(whitespace, sourceX.getSize(), CompConfig.specSubSource(true, sourceX.getSize()), sourceX, innerTicket);
 		assembly += AssemblyUtils.byteCopier(whitespace, sourceY.getSize(), CompConfig.specSubSource(false, sourceY.getSize()), sourceY, innerTicket);
-		assembly += whitespace + "JSL\t" + getSubName(sourceX.getSize(), sourceY.getSize()) + "\n";
 		int retSize = Math.min(destSource.getSize(), getRetSize(sourceX.getSize(), sourceY.getSize()));
+		assembly += getCall(whitespace, retSize, sourceX.getSize(), sourceY.getSize());
 		assembly += AssemblyUtils.byteCopier(whitespace, retSize, destSource, CompConfig.callResultSource(retSize), innerTicket);
 		getTranslationUnit().requireSub(getSubName(sourceX.getSize(), sourceY.getSize()), getSubAssembly(sourceX.getSize(), sourceY.getSize()));
 		assembly += ticket.restore(whitespace, 0xFF);

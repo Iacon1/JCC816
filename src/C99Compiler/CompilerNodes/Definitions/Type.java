@@ -318,6 +318,10 @@ public class Type implements Serializable
 		return containsSpecifier("enum");
 	}
 	
+	public boolean isSigned()
+	{
+		return !containsSpecifier("unsigned");
+	}
 	public boolean isCharacter()
 	{
 		return containsSpecifier("char");

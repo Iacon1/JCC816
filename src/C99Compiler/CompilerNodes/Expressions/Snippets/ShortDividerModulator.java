@@ -13,45 +13,6 @@ import C99Compiler.Utils.AssemblyUtils.DetailsTicket;
 public class ShortDividerModulator
 {
 	private ShortDividerModulator() {}
-	// Handles negative numbers for division, stores 0, 1, or 2 in Y-register
-	protected static String divisionHeader(String whitespace, OperandSource sourceX, OperandSource sourceY, DetailsTicket ticket) throws Exception
-	{
-		String assembly = "";
-		
-		// First, check negative for X
-		assembly += whitespace + CompUtils.setAXY8 + "\n";
-		assembly += whitespace + "LDY\t#$00\n";
-		assembly += sourceX.getLDA(whitespace, sourceX.getSize() - 1, ticket);
-		assembly += whitespace + "BPL\t:+\n";
-		// If it was negative we add one to the flag and then make it positive.
-		assembly += whitespace + "INY\n";
-//		assembly += XOrExpressionNode.getExclOr(whitespace, sourceX, sourceX, new ConstantSource(-1, sourceX.getSize())); // TODO this is wrong, not how you negative it
-		
-		// Then for Y
-		assembly += whitespace + CompUtils.setA8 + "\n";
-		assembly += sourceY.getLDA(whitespace, sourceY.getSize() - 1, ticket);
-		assembly += whitespace + "BPL\t:+\n";
-		// If it was negative we subtract one from the previous flag (making it not zero if it was zero and making it zero if it wasn't)
-		// and then make it positive.
-		assembly += whitespace + "DEY\n";
-//		assembly += XOrExpressionNode.getExclOr(whitespace, sourceY, sourceY, new ConstantSource(-1, sourceY.getSize())); // TODO this is wrong, not how you negative it
-		assembly += ":\n";
-		
-		return assembly;
-	}
-	protected static String divisionFooter(String whitespace, OperandSource destSource, OperandSource source, DetailsTicket ticket)
-	{
-		String assembly = "";
-		// First, check flag from header
-		assembly += whitespace + "TYA\n";
-		assembly += whitespace + "BEQ\t:+\n";
-		// If it was positive then only one of the operands was negative so the result is negative too.
-//		assembly += XOrExpressionNode.getExclOr(whitespace, destSource, source, new ConstantSource(-0, source.getSize())); // TODO this is wrong
-		assembly += ":\n";
-		
-		return assembly;
-	}
-	
 	public static String generate(String whitespace, OperandSource destSource, OperandSource sourceX, OperandSource sourceY, boolean isModulo, DetailsTicket ticket) throws Exception
 	{
 		String assembly = "";
@@ -68,10 +29,9 @@ public class ShortDividerModulator
 			RRegH = SNESRegisters.RDDIVH;
 		}
 		
-		assembly += ticket.save(whitespace, DetailsTicket.saveA | DetailsTicket.saveX | DetailsTicket.saveY); // All three modified hereafter
+		assembly += ticket.save(whitespace, DetailsTicket.saveA | DetailsTicket.saveX); // Both modified hereafter
 		DetailsTicket innerTicket = new DetailsTicket(ticket, DetailsTicket.saveA | DetailsTicket.saveX | DetailsTicket.saveY, 0); // "Please don't break these"
 
-		divisionHeader(whitespace, sourceX, sourceY, innerTicket);
 		assembly += AssemblyUtils.bytewiseOperation(whitespace, sourceX.getSize(), (Integer i, DetailsTicket ticket2) ->
 		{
 			if (i < sourceX.getSize() - 1 || sourceX.getSize() % 2 == 0) // We start in 16-bit mode
@@ -145,8 +105,7 @@ public class ShortDividerModulator
 					destSource.getSTA(i, ticket2),			// Store result
 				};
 		}, innerTicket);
-		assembly += divisionFooter(whitespace, destSource, destSource, ticket);
-		assembly += ticket.restore(whitespace, DetailsTicket.saveA | DetailsTicket.saveX | DetailsTicket.saveY);
+		assembly += ticket.restore(whitespace, DetailsTicket.saveA | DetailsTicket.saveX);
 		
 		return assembly;
 	}

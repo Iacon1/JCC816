@@ -38,7 +38,7 @@ public class XOrExpressionNode extends ArithmeticBinaryExpressionNode
 	}
 	public static String getComplementer(String whitespace, OperandSource destSource, OperandSource sourceX, DetailsTicket ticket) throws Exception
 	{
-		OperandSource sourceY = new ConstantSource(Long.valueOf("FF".repeat(sourceX.getSize())), sourceX.getSize()); // 0xFF...FF
+		OperandSource sourceY = new ConstantSource(Long.valueOf("FF".repeat(sourceX.getSize()), 16), sourceX.getSize()); // 0xFF...FF
 		
 		return new XOrExpressionNode(null).getAssembly(whitespace, destSource, sourceX, sourceY, ticket);
 	}
@@ -65,7 +65,7 @@ public class XOrExpressionNode extends ArithmeticBinaryExpressionNode
 	@Override
 	protected String getInstruction()
 	{
-		return "XOR";
+		return "EOR";
 	}
 
 	@Override
