@@ -113,6 +113,8 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 	
 	@Override
 	public String getName() {return signature.getIdentifier();}
+	@Override
+	public String getFullName() {return NamedNode.super.getFullName() + (isStatic() ? "@" + getTranslationUnit().getStaticUUID() : "");}
 	public boolean isMain()
 	{
 		return getName().equals("main");
@@ -140,7 +142,10 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 	{
 		return "__" + getFullName() + "_END";
 	}
-
+	public boolean isStatic()
+	{
+		return type.isStatic();
+	}
 	public boolean isInterruptHandler()
 	{
 		return attributes.contains(CompUtils.Attributes.interrupt);

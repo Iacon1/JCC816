@@ -156,6 +156,12 @@ public class ComponentNode<C extends ComponentNode<C>> implements Serializable
 		if (fullName.length() == 1) fullName = "__" + fullName;
 		if (getTranslationUnit().resolveVariable(fullName) != null)
 			return getTranslationUnit().resolveVariable(fullName);
+		else
+		{
+			fullName += "@" + getTranslationUnit().getStaticUUID();
+			if (getTranslationUnit().resolveVariable(fullName) != null)
+				return getTranslationUnit().resolveVariable(fullName);
+		}
 		if (parent != null) return parent.resolveVariableRelative(name);
 		return null;
 	}
@@ -208,6 +214,12 @@ public class ComponentNode<C extends ComponentNode<C>> implements Serializable
 		if (fullName.length() == 1) fullName = "__" + fullName;
 		if (getTranslationUnit().resolveFunction(fullName) != null)
 			return getTranslationUnit().resolveFunction(fullName);
+		else
+		{
+			fullName += "@" + getTranslationUnit().getStaticUUID();
+			if (getTranslationUnit().resolveVariable(fullName) != null)
+				return getTranslationUnit().resolveFunction(fullName);
+		}
 		if (parent != null) return parent.resolveFunctionRelative(name);
 		return null;
 	}

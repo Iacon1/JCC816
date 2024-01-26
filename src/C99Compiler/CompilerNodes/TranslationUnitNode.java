@@ -20,6 +20,7 @@ import C99Compiler.CompilerNodes.Dummies.EnumeratorNode;
 import C99Compiler.CompilerNodes.Interfaces.Catalogger;
 import C99Compiler.CompilerNodes.LValues.VariableNode;
 import C99Compiler.Exceptions.CompilerMultipleDefinitionException;
+import C99Compiler.Utils.CompUtils;
 import Grammar.C99.C99Parser.External_declarationContext;
 import Grammar.C99.C99Parser.Translation_unitContext;
 
@@ -31,6 +32,7 @@ public class TranslationUnitNode extends InterpretingNode<TranslationUnitNode, T
 	private Set<String> includedStdLibs;
 	private List<InitializerNode> globalInitializers;
 	private String filename;
+	private String staticUUID;
 	
 	public TranslationUnitNode(ComponentNode<?> parent, String filename)
 	{
@@ -40,6 +42,7 @@ public class TranslationUnitNode extends InterpretingNode<TranslationUnitNode, T
 		requiredSubs = new LinkedHashMap<String, String>();
 		globalInitializers = new LinkedList<InitializerNode>();
 		this.filename = filename;
+		staticUUID = CompUtils.getSafeUUID();
 	}
 	public TranslationUnitNode(String filename)
 	{
@@ -49,6 +52,7 @@ public class TranslationUnitNode extends InterpretingNode<TranslationUnitNode, T
 		requiredSubs = new LinkedHashMap<String, String>();
 		globalInitializers = new LinkedList<InitializerNode>();
 		this.filename = filename;
+		staticUUID = CompUtils.getSafeUUID();
 	}
 	
 	@Override public LinkedHashMap<String, VariableNode> getVariables() {return getChildVariables();}
@@ -128,4 +132,5 @@ public class TranslationUnitNode extends InterpretingNode<TranslationUnitNode, T
 		}
 		return globals;
 	}
+	public String getStaticUUID() {return staticUUID;}
 }
