@@ -15,6 +15,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import C99Compiler.PragmaProcessor;
+
 public abstract class PreProcComponentNode<T extends PreProcComponentNode<T>>
 {
 	protected PreProcComponentNode<?> parent;
@@ -116,15 +118,29 @@ public abstract class PreProcComponentNode<T extends PreProcComponentNode<T>>
 		while (i != wordList.size())
 		{
 			String word = wordList.get(i);
+			if (charMappings.containsKey(word) && wordList.get(i + 1).equals("("))
+			{
+				wordList.remove(i);
+				List<String> parameters = collectParameters(wordList, i + 1);
+				wordList.removeAll(parameters);
+				wordList.remove(i + 1); // Remove parentheses
+				wordList.remove(i); // Remove parentheses
+				parameters.add(0, "APPLY_CMAP");
+				parameters.add(1, word);
+				wordList.add(i, PragmaProcessor.procPragma(parameters, file, line));
+				--i;
+			}
 			if (defines.containsKey(word)) // Replace with filled macro
 			{
+				if (defines.get(word).hasParameters() && !wordList.get(i + 1).equals("(")) // Function-like but no function
+					continue;
 				wordList.remove(i);
 				if (defines.get(word).hasParameters())
 				{
 					List<String> parameters = collectParameters(wordList, i + 1);
 					wordList.removeAll(parameters);
-					wordList.remove(i + 1);
-					wordList.remove(i);
+					wordList.remove(i + 1); // Remove parentheses
+					wordList.remove(i); // Remove parentheses
 					wordList.addAll(i, Arrays.asList(defines.get(word).getText(removeCommas(parameters)).split(" ")));
 				}
 				else
