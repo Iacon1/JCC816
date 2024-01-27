@@ -1,8 +1,8 @@
 // Created by Iacon1 on 01/23/2024.
 // ExHiROM cartridge type
-package C99Compiler.ROMTypes;
+package C99Compiler.MapModes;
 
-public class ExHiROMType extends HiROMType
+public class ExHiROM extends HiROM
 {
 	@Override public String getName() {return "ExHiROM";}
 	@Override public byte getCode() {return 0x05;}

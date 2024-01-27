@@ -21,7 +21,7 @@ public final class OverlaySolver
 	{
 		int[][] solution = new int[numBanks][overlayables.size()];
 		if (overlayables.size() < 1) return null;
-		else if (overlayables.size() == 1) return new SimpleEntry<List<Integer>, Integer>(Arrays.asList(bankStarts.apply(0)), 0);
+		else if (overlayables.size() == 1) return new SimpleEntry<List<Integer>, Integer>(Arrays.asList(bankStarts.apply(0)), overlayables.get(0).getLength());
 
 		for (int b = 0; b < numBanks; ++b)
 			for (int i = 0; i < overlayables.size(); ++i)

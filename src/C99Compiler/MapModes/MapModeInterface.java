@@ -1,6 +1,6 @@
 // Created by Iacon1 on 01/23/2024.
 //
-package C99Compiler.ROMTypes;
+package C99Compiler.MapModes;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +13,7 @@ import C99Compiler.CompilerNodes.FunctionDefinitionNode;
 import C99Compiler.CompilerNodes.LValues.VariableNode;
 import C99Compiler.Utils.OverlaySolver;
 
-public interface ROMTypeInterface extends Configurer
+public interface MapModeInterface extends Configurer
 {
 	public static class VariableOverlayable implements OverlaySolver.Overlayable<VariableOverlayable>
 	{
@@ -92,14 +92,15 @@ public interface ROMTypeInterface extends Configurer
 		ROMBanks = Math.max(ROMBanks, 4); // Minimum 128 KB
 		
 		String regions = "";
-		regions += whitespace + "ZEROPAGE: start = $000000, size = $000100;\n".replace(" ", "\t");
-		regions += whitespace + "STACK: start = $000100, size = $1eff;\n".replace(" ", "\t");
+		regions += whitespace + "ZEROPAGE: start = $000000, size = $000100 ;\n".replace(" ", "\t");
+		regions += whitespace + "STACK: start = $000000, size = $" + String.format("%06x", CompConfig.stackSize) + ";\n".replace(" ", "\t");
 		
-		String regionLength = String.format("%06x",  getWRAMBankLength());
+		String regionLength = String.format("%06x", getWRAMBankLength() - CompConfig.stackSize);
 		for (int i = 0; i < WRAMBanks; ++i)
 		{
-			String regionStart = String.format("%06x",  getWRAMBankStart(i));
+			String regionStart = String.format("%06x",  (i == 0 ? CompConfig.stackSize : 0) + getWRAMBankStart(i));
 			regions += whitespace + "WRAM" + String.format("%03d",i) + ": start = $" + regionStart + ", size = $" + regionLength + ";\n".replace(" ", "\t");
+			if (i == 0) regionLength = String.format("%06x",  getWRAMBankLength());
 		}
 		regionLength = String.format("%06x",  getSRAMBankLength());
 		for (int i = 0; i < SRAMBanks; ++i)

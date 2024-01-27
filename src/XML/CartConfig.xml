@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CartConfig>
+	<mapMode isFast="false" battery="false">LoROM</mapMode>
+	<addonChip>none</addonChip>
+</CartConfig>
+<!-- Template for cartridge config, without header info -->

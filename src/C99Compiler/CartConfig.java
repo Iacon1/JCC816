@@ -4,23 +4,26 @@
 
 package C99Compiler;
 
-import C99Compiler.ROMTypes.ExHiROMType;
-import C99Compiler.ROMTypes.HiROMType;
-import C99Compiler.ROMTypes.LoROMType;
-import C99Compiler.ROMTypes.ROMTypeInterface;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+
+import C99Compiler.MapModes.ExHiROM;
+import C99Compiler.MapModes.HiROM;
+import C99Compiler.MapModes.LoROM;
+import C99Compiler.MapModes.MapModeInterface;
 
 public class CartConfig
 {
-	public static enum ROMType implements ROMTypeInterface
+	public static enum MapMode implements MapModeInterface
 	{
-		loROM(new LoROMType()),
-		hiROM(new HiROMType()),
-		SA1(new LoROMType()),
-		exHiROM(new ExHiROMType());
+		loROM(new LoROM()),
+		hiROM(new HiROM()),
+		SA1(new LoROM()),
+		exHiROM(new ExHiROM());
 		
-		private ROMTypeInterface implementer;
+		private MapModeInterface implementer;
 		
-		private ROMType(ROMTypeInterface implementer)
+		private MapMode(MapModeInterface implementer)
 		{
 			this.implementer = implementer;
 		}
@@ -71,37 +74,37 @@ public class CartConfig
 		public byte subType() {return type;}
 	}
 	
-	protected ROMType ROMType_;
+	protected MapMode mapMode;
 	
 	protected AddonChip addonChip;
 	protected boolean hasBattery;
 	
 	protected boolean isFast;
-	protected int SRAMSize;
+//	protected int SRAMSize;
 	
-	public CartConfig(ROMType ROMType, AddonChip addonChip, boolean hasBattery, boolean isFast, int SRAMSize)
+	public CartConfig(MapMode ROMType, AddonChip addonChip, boolean hasBattery, boolean isFast, int SRAMSize)
 	{
-		this.ROMType_ = ROMType;
+		this.mapMode = ROMType;
 		this.addonChip = addonChip;
 		this.hasBattery = hasBattery;
 		this.isFast = isFast;
-		this.SRAMSize = Math.max(0, (int) Math.ceil(Math.log(SRAMSize) / Math.log(2)));
+//		this.SRAMSize = Math.max(0, (int) Math.ceil(Math.log(SRAMSize) / Math.log(2)));
 	}
 	public CartConfig(CartConfig cartConfig)
 	{
-		this.ROMType_ = cartConfig.ROMType_;
+		this.mapMode = cartConfig.mapMode;
 		this.addonChip = cartConfig.addonChip;
 		this.hasBattery = cartConfig.hasBattery;
 		this.isFast = cartConfig.isFast;
-		this.SRAMSize = cartConfig.SRAMSize;
+//		this.SRAMSize = cartConfig.SRAMSize;
 	}
 	public CartConfig()
 	{
-		this.ROMType_ = ROMType.loROM;
+		this.mapMode = MapMode.loROM;
 		this.addonChip = AddonChip.none;
 		this.hasBattery = false;
 		this.isFast = false;
-		this.SRAMSize = 0;
+//		this.SRAMSize = 0;
 	}
 	
 	public boolean containsChip(AddonChip addonChip)
@@ -109,8 +112,20 @@ public class CartConfig
 		return addonChip.equals(addonChip);
 	}
 
-	public ROMType getType()
+	public MapMode getType()
 	{
-		return ROMType_;
+		return mapMode;
+	}
+	
+	public CartConfig(Document document)
+	{
+		Node memLayout = document.getElementsByTagName("mapMode").item(0);
+		this.mapMode = MapMode.valueOf(memLayout.getTextContent());
+		this.isFast = memLayout.getAttributes().getNamedItem("fastROM").getTextContent().equals("true");
+		this.hasBattery = memLayout.getAttributes().getNamedItem("battery").getTextContent().equals("true");
+		
+		Node addon = document.getElementsByTagName("addonChip").item(0);
+		this.addonChip = AddonChip.valueOf(addon.getTextContent());
+		if (this.addonChip == null) this.addonChip = AddonChip.none;
 	}
 }

@@ -5,7 +5,12 @@ package Assembler;
 import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
 
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+
 import C99Compiler.CartConfig;
+import C99Compiler.CartConfig.AddonChip;
+import C99Compiler.CartConfig.MapMode;
 import C99Compiler.Utils.AssemblyUtils;
 import Logging.Logging;
 
@@ -51,16 +56,16 @@ public class Header extends CartConfig
 	private int specialVersion;
 	private String title;
 
-	private int ROMSize;
+	private int ROMSize, SRAMSize;
 	private int devID; // 0x33 indicates expanded ROM header
 	private DestinationCode destCode;
 	private int revision;
 	
 	private int checksum;
 	
-	public Header(String makerCode, String gameCode, String title, int revision, int specialVersion, boolean isFast, int SRAMSize, boolean hasBattery, ROMType ROMType, AddonChip addonChip, DestinationCode destinationCode)
+	public Header(String makerCode, String gameCode, String title, int revision, int specialVersion, boolean isFast, int SRAMSize, boolean hasBattery, MapMode mapMode, AddonChip addonChip, DestinationCode destinationCode)
 	{
-		super(ROMType, addonChip, hasBattery, isFast, SRAMSize);
+		super(mapMode, addonChip, hasBattery, isFast, SRAMSize);
 		if (makerCode.length() != 2) throw new IllegalArgumentException("Maker code must be 2 bytes long.");
 		this.makerCode = makerCode;
 		if (gameCode.length() != 4) throw new IllegalArgumentException("Game code must be 4 bytes long.");
@@ -91,12 +96,13 @@ public class Header extends CartConfig
 		if (specialVersion < 0 || 255 < specialVersion) throw new IllegalArgumentException("Special version must be between 0 and 255.");
 		this.specialVersion = specialVersion;
 		this.ROMSize = 7;
+		this.SRAMSize = 0;
 		this.devID = 0x33;
 		this.destCode = destinationCode;
 		
 		checksum = 0;
 	}
-	public Header(int devID, String title, int revision, boolean isFast, int SRAMSize, boolean hasBattery, ROMType ROMType, AddonChip addonChip, DestinationCode destinationCode)
+	public Header(int devID, String title, int revision, boolean isFast, int SRAMSize, boolean hasBattery, MapMode ROMType, AddonChip addonChip, DestinationCode destinationCode)
 	{
 		super(ROMType, addonChip, hasBattery, isFast, SRAMSize);
 		if (title.length() > 21) throw new IllegalArgumentException("Title must be less than 21 bytes long.");
@@ -104,6 +110,8 @@ public class Header extends CartConfig
 		if (revision < 0 || 255 < revision) throw new IllegalArgumentException("Revision must be between 0 and 255.");
 		this.revision = revision;
 		this.ROMSize = 7;
+		this.SRAMSize = 0;
+		if (devID < 0 || 255 < devID) throw new IllegalArgumentException("Developer ID must be between 0 and 255.");
 		this.devID = devID;
 		this.destCode = destinationCode;
 		
@@ -117,6 +125,8 @@ public class Header extends CartConfig
 		if (revision < 0 || 255 < revision) throw new IllegalArgumentException("Revision must be between 0 and 255.");
 		this.revision = revision;
 		this.ROMSize = 7;
+		this.SRAMSize = 0;
+		if (devID < 0 || 255 < devID) throw new IllegalArgumentException("Developer ID must be between 0 and 255.");
 		this.devID = devID;
 		this.destCode = destinationCode;
 		
@@ -146,10 +156,53 @@ public class Header extends CartConfig
 		revision = 0;
 	}
 
+	public Header(Document document) throws Exception
+	{
+		super(document);
+		
+		Node releaseInfo = document.getElementsByTagName("releaseInfo").item(0);
+		this.title = releaseInfo.getTextContent();
+		this.title = this.title + " ".repeat(21 - this.title.length());
+		if (releaseInfo.getAttributes().getNamedItem("devID") == null || Integer.decode(releaseInfo.getAttributes().getNamedItem("devID").getTextContent()) == 0x33)
+		{
+			// ID not present or is 0x33, assume long header
+			this.devID = 0x33;
+			this.makerCode = releaseInfo.getAttributes().getNamedItem("makerCode").getTextContent();
+			this.gameCode = releaseInfo.getAttributes().getNamedItem("gameCode").getTextContent();
+			
+		}
+		else // dev ID presented
+			this.devID = Integer.decode(releaseInfo.getAttributes().getNamedItem("devID").getTextContent());
+		
+		Node revision = document.getElementsByTagName("revision").item(0);
+		this.revision = Integer.decode(revision.getTextContent());
+		if (this.devID == 0x33)
+			this.specialVersion = Integer.decode(revision.getAttributes().getNamedItem("specialVersion").getTextContent());
+		
+		this.destCode = DestinationCode.valueOf(document.getElementsByTagName("region").item(0).getTextContent());
+		
+		this.ROMSize = 7;
+		this.SRAMSize = 0;
+		
+		if (this.title.length() > 21) throw new IllegalArgumentException("Title must be less than 21 bytes long.");
+		if (this.devID < 0 || 255 < this.devID) throw new IllegalArgumentException("Developer ID must be between 0 and 255.");
+		if (this.devID == 0x33)
+		{
+			if (makerCode.length() != 2) throw new IllegalArgumentException("Maker code must be 2 bytes long.");
+			if (gameCode.length() != 4) throw new IllegalArgumentException("Game code must be 4 bytes long.");
+			if (specialVersion < 0 || 255 < specialVersion) throw new IllegalArgumentException("Special version must be between 0 and 255.");
+		}
+		if (this.revision < 0 || 255 < this.revision) throw new IllegalArgumentException("Revision must be between 0 and 255.");
+	}
+	
 	public int getSize()
 	{
 		if (devID == 0x33) return expSize + baseSize;
 		else return baseSize;
+	}
+	public void setSRAMSize(int size) // Bytes
+	{
+		SRAMSize = (int) Math.max(7, Math.ceil(Math.log(size / 1024) / Math.log(2)));
 	}
 	public void calcROMSize(byte[] bytes)
 	{
@@ -195,9 +248,9 @@ public class Header extends CartConfig
 		}
 		
 		bytes.write(AssemblyUtils.applyFiller(title, 21).getBytes(), 0, 21);
-		byte mapMode = (byte) (isFast? 0x30 : 0x20);
-		mapMode |= ROMType_.getCode();
-		bytes.write(mapMode);
+		byte mapModeByte = (byte) (isFast? 0x30 : 0x20);
+		mapModeByte |= mapMode.getCode();
+		bytes.write(mapModeByte);
 		
 		byte cartType = 0;
 		if (SRAMSize != 0 && hasBattery) cartType = 2;
@@ -223,13 +276,6 @@ public class Header extends CartConfig
 	
 	public int getOffset()
 	{
-		switch (ROMType_)
-		{
-		case loROM : return devID == 0x33 ? 0x007FB0 : 0x007FC0;
-		case hiROM : return devID == 0x33 ? 0x00FFB0 : 0x00FFC0;
-		case SA1 : return devID == 0x33 ? 0x00FFB0 : 0x00FFC0;
-		case exHiROM : return devID == 0x33 ? 0x40FFB0 : 0x40FFC0;
-		default: return devID == 0x33 ? 0x7FB0 : 0x7FC0; // Default to LoROM
-		}
+		return mapMode.getHeaderPosition(devID == 0x33);
 	}
 }

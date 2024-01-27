@@ -15,7 +15,7 @@ import org.antlr.v4.runtime.CommonTokenStream;
 
 import Assembler.MemorySize;
 import C99Compiler.CartConfig.AddonChip;
-import C99Compiler.CartConfig.ROMType;
+import C99Compiler.CartConfig.MapMode;
 import C99Compiler.CompConfig.DebugLevel;
 import C99Compiler.CompConfig.DefinableInterrupt;
 import C99Compiler.CompConfig.VerbosityLevel;

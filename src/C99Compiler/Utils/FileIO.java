@@ -14,6 +14,11 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
+import org.w3c.dom.Document;
+
 public final class FileIO
 {
 	public static final boolean hasResource(String filename)
@@ -86,5 +91,14 @@ public final class FileIO
 		stream.close();
 		byteStream.close();
 		return t;
+	}
+	
+	public static Document readFileXML(String filename) throws Exception
+	{
+		File file = new File(filename);
+		DocumentBuilderFactory factory = DocumentBuilderFactory.newDefaultInstance();
+		DocumentBuilder builder = factory.newDocumentBuilder();
+		Document document = builder.parse(file);
+		return document;
 	}
 }

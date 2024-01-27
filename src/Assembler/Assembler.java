@@ -46,6 +46,7 @@ public class Assembler
 		byte[] bytes = sfcStream.readAllBytes();
 		sfcStream.close();
 
+		header.setSRAMSize(memorySize.SRAMSize);
 		header.calcROMSize(bytes);
 		header.calcChecksum(bytes);
 		byte[] headerBytes = header.asBytes();

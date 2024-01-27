@@ -1,8 +1,8 @@
 // Created by Iacon1 on 01/23/2024.
 //
-package C99Compiler.ROMTypes;
+package C99Compiler.MapModes;
 
-public class HiROMType implements ROMTypeInterface
+public class HiROM implements MapModeInterface
 {
 	@Override public String getName() {return "HiROM";}
 	@Override public byte getCode() {return 0x01;}
