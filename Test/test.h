@@ -1,1 +1,0 @@
-short foo(short x);
