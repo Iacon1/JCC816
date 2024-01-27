@@ -6,8 +6,7 @@
 			<attribute name="module" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="libraries/antlr-4.13.1-complete.jar"/>
-	<classpathentry kind="lib" path="libraries/commons-cli-1.6.0/commons-cli-1.6.0.jar"/>
-	<classpathentry kind="lib" path="libraries/commons-cli-1.6.0/commons-cli-1.6.0-javadoc.jar"/>
+	<classpathentry kind="lib" path="I:/Coding Projects/BBSnCC/lib/antlr-4.13.1-complete.jar"/>
+	<classpathentry kind="lib" path="I:/Coding Projects/BBSnCC/lib/commons-cli-1.6.0/commons-cli-1.6.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
