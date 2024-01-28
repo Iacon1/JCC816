@@ -10,14 +10,14 @@ import C99Compiler.Utils.PropPointer;
 
 public class ConstantByteSource extends OperandSource
 {
-	private byte[] bytes;
+	private int[] bytes; // Not really bytes, I know
 
-	public ConstantByteSource(byte[] source, int offset, int size)
+	public ConstantByteSource(int[] source, int offset, int size)
 	{
 		super(size, offset, true);
 		bytes = source;
 	}
-	public ConstantByteSource(byte[] source, int size)
+	public ConstantByteSource(int[] source, int size)
 	{
 		super(size, true);
 		bytes = source;
@@ -37,9 +37,15 @@ public class ConstantByteSource extends OperandSource
 	{
 		if (bytes.length <= i) return "#$" + String.format(ticket.is16Bit() ? "%04x" : "%02x", 0);
 		if (ticket.is16Bit())
-			if (bytes.length == 1) return "#$" + String.format("%02x%02x", 0, bytes[0]);
+		{
+			if (bytes.length - 1 == i) return "#$" + String.format("%02x%02x", 0, bytes[i]);
 			else return "#$" + String.format("%02x%02x", bytes[i + 1], bytes[i]);
+		}
 		else return "#$" + String.format("%02x", bytes[i]);
+	}
+	public String getBase(DetailsTicket ticket)
+	{
+		return getBase(0, ticket);
 	}
 	@Override
 	public String getBase()

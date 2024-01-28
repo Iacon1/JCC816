@@ -72,7 +72,7 @@ public final class CompUtils
 		if (literal.startsWith("0x")) // Hex;
 			return Long.valueOf(literal.substring(2), 16);
 		else if (literal.startsWith("0")) // Octal???
-			return Long.valueOf(literal.substring(2), 8);
+			return Long.valueOf(literal, 8);
 		else if (literal.contains("'")) // Character constant
 			return Long.valueOf(literal.getBytes()[1]);
 		else // TODO, assume decimal for now
@@ -102,7 +102,7 @@ public final class CompUtils
 		for (int i = results.size() - 1; i >= 0; --i)	 // In reverse order to avoid string indexing problems
 		{
 			MatchResult result = results.get(i);
-			char b = (char) Byte.valueOf(result.group().substring(2), 16).byteValue(); // Get byte
+			char b = (char) Integer.valueOf(result.group().substring(2), 16).intValue(); // Get byte
 			s = s.substring(0, result.start()) + Character.valueOf(b) + s.substring(result.end());
 		}
 		return s;
