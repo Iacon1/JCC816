@@ -200,7 +200,7 @@ public class Header extends CartConfig
 		if (devID == 0x33) return expSize + baseSize;
 		else return baseSize;
 	}
-	public void setSRAMSize(int size) // Bytes
+	public void calcSRAMSize(int size) // Bytes
 	{
 		SRAMSize = (int) Math.max(7, Math.ceil(Math.log(size / 1024) / Math.log(2)));
 	}

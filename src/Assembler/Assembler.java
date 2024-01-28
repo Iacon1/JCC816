@@ -46,7 +46,7 @@ public class Assembler
 		byte[] bytes = sfcStream.readAllBytes();
 		sfcStream.close();
 
-		header.setSRAMSize(memorySize.SRAMSize);
+		header.calcSRAMSize(memorySize.SRAMSize);
 		header.calcROMSize(bytes);
 		header.calcChecksum(bytes);
 		byte[] headerBytes = header.asBytes();
@@ -57,7 +57,7 @@ public class Assembler
 		headerBytes = header.asBytes();
 		for (int i = header.getOffset(); i < header.getOffset() + header.getSize(); ++i)
 			bytes[i] = headerBytes[i - header.getOffset()];
-		FileIO.writeFile(sfcFile.getName(), bytes);
+		FileIO.writeFile(sfcFile.getAbsolutePath(), bytes);
 
 		return bytes;
 	}
