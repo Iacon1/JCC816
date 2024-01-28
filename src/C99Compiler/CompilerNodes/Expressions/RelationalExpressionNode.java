@@ -75,7 +75,7 @@ public class RelationalExpressionNode extends BranchingExpressionNode
 
 		assembly += ticket.save(whitespace, DetailsTicket.saveA);
 		DetailsTicket innerTicket = new DetailsTicket(ticket, 0, DetailsTicket.saveA);
-		
+		assembly += AssemblyUtils.setSignExtend(whitespace, sourceX, sourceY, innerTicket);
 		ScratchSource tempSource = scratchManager.reserveScratchBlock(2);
 		assembly += whitespace + "CLC\n";
 		assembly += AssemblyUtils.bytewiseOperation(whitespace, Math.max(sourceX.getSize(), sourceY.getSize()), (Integer i, DetailsTicket ticket2) -> 

@@ -2,6 +2,7 @@
 //
 package C99Compiler.Utils.OperandSources;
 
+import C99Compiler.CompConfig;
 import C99Compiler.Utils.AssemblyUtils.DetailsTicket;
 
 public class AddressSource extends OperandSource
@@ -34,7 +35,7 @@ public class AddressSource extends OperandSource
 	public String getInstruction(String whitespace, String operation, Integer i, DetailsTicket ticket)
 	{
 		if (i >= size)
-			return whitespace + operation + "\t" + (ticket.is16Bit() ? "#$0000" : "#$00") + "\n";
+			return whitespace + operation + "\t" + CompConfig.signExtend + "\n";
 		return whitespace + operation + "\t" + address + " + " + (i + offset) + "\n";
 	}
 	

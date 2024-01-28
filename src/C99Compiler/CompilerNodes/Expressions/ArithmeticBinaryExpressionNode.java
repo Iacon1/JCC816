@@ -59,13 +59,31 @@ CC extends ParserRuleContext
 
 		assembly += whitespace + getPreface() + "\n";
 		int size = Math.min(destSource.getSize(), getRetSize(sourceX.getSize(), sourceY.getSize()));
+		assembly += AssemblyUtils.setSignExtend(whitespace, sourceX, sourceY, innerTicket);
 		assembly += AssemblyUtils.bytewiseOperation(whitespace, size, (Integer i, DetailsTicket ticket2) -> 
-		{return new String[]
+		{
+			if (i == sourceX.getSize() - 1 ^ i == sourceY.getSize() - 1) // Reached the last byte of only one of these
 			{
-				sourceX.getLDA(i, ticket2),
-				sourceY.getInstruction(getInstruction(), i, ticket2),
-				(destSource == null) ? "" : destSource.getSTA(i, ticket2)
-			};
+				DetailsTicket ticket3 = new DetailsTicket(ticket2, 0, DetailsTicket.isA16Bit);
+				return new String[]
+				{
+					CompUtils.setA8,
+					sourceX.getLDA(i, ticket3),
+					sourceY.getInstruction(getInstruction(), i, ticket3),
+					(destSource == null) ? "" : destSource.getSTA(i, ticket3),
+					sourceX.getLDA(i + 1, ticket3),
+					sourceY.getInstruction(getInstruction(), i + 1, ticket3),
+					(destSource == null) ? "" : destSource.getSTA(i + 1, ticket3),
+					CompUtils.setA16
+				};
+			}
+			else
+				return new String[]
+				{
+					sourceX.getLDA(i, ticket2),
+					sourceY.getInstruction(getInstruction(), i, ticket2),
+					(destSource == null) ? "" : destSource.getSTA(i, ticket2)
+				};
 		}, true, isReversed(), innerTicket);
 		
 		assembly += ticket.restore(whitespace, DetailsTicket.saveA);

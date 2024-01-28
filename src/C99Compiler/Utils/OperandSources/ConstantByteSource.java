@@ -35,10 +35,11 @@ public class ConstantByteSource extends OperandSource
 	
 	public String getBase(int i, DetailsTicket ticket)
 	{
-		if (bytes.length <= i) return "#$" + String.format(ticket.is16Bit() ? "%04x" : "%02x", 0);
+		int signExtend = (bytes[bytes.length - 1] & 0x80) != 0 ? 0xFF : 0x00;
+		if (bytes.length <= i) return "#$" + String.format("%02x", signExtend).repeat(ticket.is16Bit() ?  2 : 1);
 		if (ticket.is16Bit())
 		{
-			if (bytes.length - 1 == i) return "#$" + String.format("%02x%02x", 0, bytes[i]);
+			if (bytes.length - 1 == i) return "#$" + String.format("%02x%02x", signExtend, bytes[i]);
 			else return "#$" + String.format("%02x%02x", bytes[i + 1], bytes[i]);
 		}
 		else return "#$" + String.format("%02x", bytes[i]);

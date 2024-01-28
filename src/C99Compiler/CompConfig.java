@@ -28,12 +28,13 @@ public final class CompConfig
 	public static final int specSubSize = 16;
 	public static final String specSubX = "__@specSubX";
 	public static final String specSubY = "__@specSubY";
-	public static final int scratchSize = 157;
+	public static final int scratchSize = 155;
 	public static final String scratchBase = "__@scratchBase";
 	public static final String funcPointer = "__@funcPointer";
+	public static final String signExtend = "__@signExtend"; // 1 byte; Set to be 0x00 if the last byte of an operand was positive, 0xFF otherwise
 	public static final int callResultSize = 64;
 	public static final String callResult = "__@callResult";
-	// 16 + 16 + 157 + 3 + 64 = 256 = Just large enough to be a ZP!
+	// 16 + 16 + 155 + 3 + 2 + 64 = 256 = Just large enough to be a ZP!
 	public static final String bankRootName = "ROM";
 	public static final String functionTag = "@func";
 	
@@ -63,6 +64,7 @@ public final class CompConfig
 		list.add(new SimpleEntry<String, Integer>(specSubY, specSubSize));
 		list.add(new SimpleEntry<String, Integer>(specSubX, specSubSize));
 		list.add(new SimpleEntry<String, Integer>(funcPointer, pointerSize));
+		list.add(new SimpleEntry<String, Integer>(signExtend, 2));
 		list.add(new SimpleEntry<String, Integer>(scratchBase, scratchSize));
 		return list;
 	};

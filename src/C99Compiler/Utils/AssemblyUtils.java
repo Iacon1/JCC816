@@ -4,6 +4,7 @@ package C99Compiler.Utils;
 
 import java.util.function.BiFunction;
 
+import C99Compiler.CompConfig;
 import C99Compiler.CompilerNodes.Definitions.Type;
 import C99Compiler.CompilerNodes.LValues.LValueNode;
 import C99Compiler.Utils.OperandSources.OperandSource;
@@ -217,5 +218,29 @@ public final class AssemblyUtils
 				return x.getSource().getShifted(0, fittedTypeX.getSize() - x.getSize());
 		}
 		return x.getSource();
+	}
+	
+	public static String setSignExtend(String whitespace, OperandSource x, OperandSource y, DetailsTicket ticket)
+	{
+		String assembly = "";
+		if (x.getSize() == y.getSize()) return ""; // Sign extension not needed.
+		assembly += whitespace + CompUtils.setA8 + "\n";
+		if (x.getSize() < y.getSize() && !x.isLiteral()) // x will need the sign extension.
+			assembly += x.getLDA(whitespace, x.getSize() - 1, ticket) + "\n";
+		else if (x.isLiteral()) // Literals account for this, so not needed.
+			return "";
+		else if (!y.isLiteral()) // y will need the sign extension.
+			assembly += y.getLDA(whitespace, y.getSize() - 1, ticket) + "\n";
+		else if (y.isLiteral()) // Literals account for this, so not needed.
+			return "";
+		assembly += whitespace + "BPL\t:+\n";
+		assembly += whitespace + "LDA\t#$FF\n";
+		assembly += whitespace + "BRA\t:++\n";
+		assembly += whitespace + ":\n";
+		assembly += whitespace + "LDA\t#$00\n";
+		assembly += whitespace + ":\n";
+		assembly += whitespace + "STA\t" + CompConfig.signExtend + "\n";
+		
+		return assembly;		
 	}
 }
