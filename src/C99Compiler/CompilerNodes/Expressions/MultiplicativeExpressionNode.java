@@ -4,7 +4,7 @@ package C99Compiler.CompilerNodes.Expressions;
 
 import C99Compiler.CompConfig;
 import C99Compiler.CompilerNodes.ComponentNode;
-import C99Compiler.CompilerNodes.Expressions.Snippets.DivisionHeaderFooter;
+import C99Compiler.CompilerNodes.Expressions.Snippets.DivisionMultiplicationHeaderFooter;
 import C99Compiler.CompilerNodes.Expressions.Snippets.LongDividerModulator;
 import C99Compiler.CompilerNodes.Expressions.Snippets.Multiplier;
 import C99Compiler.CompilerNodes.Expressions.Snippets.ShortDividerModulator;
@@ -75,37 +75,38 @@ public class MultiplicativeExpressionNode extends CallingArithmeticBinaryExpress
 	{
 		switch (operator)
 		{
-		case "*": return whitespace + "JSL\t" + getSubName(sizeX, sizeY) + "\n";
+		case "*":
 		case "/":
 		case "%":
 		{
-			if (x.getType().isSigned() || y.getType().isSigned())
+			if ((x.getType().isSigned() || y.getType().isSigned()))// &&
+//					!(operator.equals("*") && x.getSize() == y.getSize() && x.getSize() <= 0)) TODO we shoudln't need sign checks for 1- or 2-byte mults
 			{
 				String assembly = "";
-				String divHeader = "__divisionHeader@" + sizeX + "@" + sizeY;
-				String headerASM = divHeader + ":\n";
-				headerASM += DivisionHeaderFooter.divisionHeader(
+				String divMulHeader = "__divMulHeader@" + sizeX + "@" + sizeY;
+				String headerASM = divMulHeader + ":\n";
+				headerASM += DivisionMultiplicationHeaderFooter.divisionMultiplicationHeader(
 						AssemblyUtils.getWhitespace(CompConfig.indentSize),
 						CompConfig.specSubSource(true, sizeX),
 						CompConfig.specSubSource(false, sizeY), 
 						new DetailsTicket());
 				headerASM += "RTL\n";
 				
-				String divFooter = "__divisionFooter@" + sizeR;
-				String footerASM = divFooter + ":\n";
-				footerASM += DivisionHeaderFooter.divisionFooter(
+				String divMulFooter = "__divMulFooter@" + sizeR;
+				String footerASM = divMulFooter + ":\n";
+				footerASM += DivisionMultiplicationHeaderFooter.divisionMultiplicationFooter(
 						AssemblyUtils.getWhitespace(CompConfig.indentSize),
 						CompConfig.callResultSource(sizeR), 
 						CompConfig.callResultSource(sizeR), 
 						new DetailsTicket());
 				footerASM += "RTL\n";
 				
-				getTranslationUnit().requireSub(divHeader, headerASM);
-				getTranslationUnit().requireSub(divFooter, footerASM);
+				getTranslationUnit().requireSub(divMulHeader, headerASM);
+				getTranslationUnit().requireSub(divMulFooter, footerASM);
 				
-				assembly += whitespace + "JSL\t" + divHeader + "\n";
+				assembly += whitespace + "JSL\t" + divMulHeader + "\n";
 				assembly += whitespace + "JSL\t" + getSubName(sizeX, sizeY) + "\n";
-				assembly += whitespace + "JSL\t" + divFooter + "\n";
+				assembly += whitespace + "JSL\t" + divMulFooter + "\n";
 				return assembly;
 			}
 			else return whitespace + "JSL\t" + getSubName(sizeX, sizeY) + "\n";
