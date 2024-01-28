@@ -7,9 +7,13 @@ import java.util.List;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 
+import C99Compiler.CompConfig;
 import C99Compiler.CompilerNodes.ComponentNode;
+import C99Compiler.CompilerNodes.Definitions.Type;
+import C99Compiler.CompilerNodes.Dummies.DummyType;
 import C99Compiler.CompilerNodes.Interfaces.SequencePointNode;
 import C99Compiler.Utils.AssemblyUtils;
+import C99Compiler.Utils.CompUtils;
 import C99Compiler.Utils.ScratchManager;
 import C99Compiler.Utils.AssemblyUtils.DetailsTicket;
 import C99Compiler.Utils.OperandSources.ConstantSource;
@@ -37,6 +41,7 @@ CC extends ParserRuleContext
 	@Override public void clearSequence() {sequenceQueue.clear();}
 	@Override public String getAccumulatedSequences() {String assembly = ""; for (String queued : sequenceQueue) assembly += queued; return assembly;}
 
+	@Override public Type getType() {return new DummyType("int");}
 	@Override
 	public String getAssembly(int leadingWhitespace, OperandSource destSource, ScratchManager scratchManager, DetailsTicket ticket) throws Exception
 	{

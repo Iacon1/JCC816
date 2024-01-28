@@ -156,7 +156,7 @@ public class ASMGraphBuilder
 		lines = new ArrayList<ASMNode<?>>();
 		textLines = new ArrayList<String>();
 
-		assembly = assembly.replace("\n:", "\n:\n ");
+		assembly = assembly.replaceAll("(?<!\n[^\s]*):(?=[^\n])",":\n");
 		assembly = assembly.replaceAll("\n+", "\n");
 		for (String line : assembly.split("\n"))
 			textLines.add(line);

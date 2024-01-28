@@ -48,7 +48,7 @@ public class LANDExpressionNode extends LogicalBinaryExpressionNode
 			return new String[]
 			{
 				sourceX.getLDA(i, ticket2),
-				sourceY.getInstruction("BIT", i, ticket2),
+				sourceY.getInstruction("AND", i, ticket2),
 				"BNE\t:+",
 			};
 		}, innerTicket);
