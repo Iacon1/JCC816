@@ -6,10 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import C99Compiler.Exceptions.ErrorException;
 import C99Compiler.PreprocNodes.PreProcComponentNode;
 import C99Compiler.Utils.CompUtils;
-
 
 public final class PragmaProcessor
 {
@@ -35,10 +33,13 @@ public final class PragmaProcessor
 			String name = parameters.get(1);
 			Map<Character, Character> mapping = PreProcComponentNode.charMappings.get(name);
 			String input = parameters.get(2);
-			String output = "\""; // String literal!
-			for (int i = 1; i < input.length() - 1; ++i) // Map all characters of input
-				output += "\\x" + String.format("%02x", (byte) mapping.get(input.charAt(i)).charValue());
-			return output + "\"";
+			String output = "" + input.charAt(0); // Either char quote or string quote
+			input = CompUtils.processEscapes(input.substring(1, input.length() - 1));
+			for (int i = 0; i < input.length(); ++i) // Map all characters of input
+				if (mapping.get(input.charAt(i)) != null)
+						output += "\\x" + String.format("%02x", mapping.get(input.charAt(i)).charValue());
+				else output += input.charAt(i);
+			return output + output.charAt(0);
 		}
 		
 		return null;

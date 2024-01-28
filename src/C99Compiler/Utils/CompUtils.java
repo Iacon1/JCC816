@@ -68,7 +68,7 @@ public final class CompUtils
 		else if (literal.startsWith("0")) // Octal???
 			return Long.valueOf(literal, 8);
 		else if (literal.contains("'")) // Character constant
-			return Long.valueOf(literal.getBytes()[1]);
+			return Long.valueOf((int) processEscapes(literal).charAt(1));
 		else // TODO, assume decimal for now
 			return Long.valueOf(literal);	
 	}
