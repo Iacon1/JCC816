@@ -63,7 +63,7 @@ public class LongDividerModulator
 			}, true, true);
 		//uintX_t i = 0x8...[X bytes]
 		ScratchSource iS = scratchManager.reserveScratchBlock(xSize);
-		assembly += AssemblyUtils.byteCopier(whitespace, xSize, iS, new ConstantSource(0x80 * Math.pow(0x100, xSize - 1), xSize));
+		assembly += AssemblyUtils.byteCopier(whitespace, xSize, iS, new ConstantSource(0x80 * (long) Math.pow(0x100, xSize - 1), xSize));
 		// For...
 		assembly += whitespace + LDivIter + ":\n";
 			// If (x >= big_div)

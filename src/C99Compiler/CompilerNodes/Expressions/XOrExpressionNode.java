@@ -2,6 +2,8 @@
 //
 package C99Compiler.CompilerNodes.Expressions;
 
+import java.math.BigInteger;
+
 import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.Utils.AssemblyUtils;
 import C99Compiler.Utils.ScratchManager;
@@ -38,7 +40,7 @@ public class XOrExpressionNode extends ArithmeticBinaryExpressionNode
 	}
 	public static String getComplementer(String whitespace, OperandSource destSource, OperandSource sourceX, DetailsTicket ticket) throws Exception
 	{
-		OperandSource sourceY = new ConstantSource(Long.valueOf("FF".repeat(sourceX.getSize()), 16), sourceX.getSize()); // 0xFF...FF
+		OperandSource sourceY = new ConstantSource(new BigInteger("FF".repeat(sourceX.getSize()), 16), sourceX.getSize()); // 0xFF...FF
 		
 		return new XOrExpressionNode(null).getAssembly(whitespace, destSource, sourceX, sourceY, ticket);
 	}

@@ -45,7 +45,7 @@ public class ShortDividerModulator
 						sourceY.getLDA(0, ticket2),		// Load Y-the-variable
 						"STA\t" + SNESRegisters.WRDIVB, // Place in reg, begin 16-cycle calc
 						CompUtils.setA16,				// 3 cycles - 3
-						sourceX.getLDA(i, ticket2),		// 4-6 cycles - 7-9 Load X-the-variable for next iteration
+						sourceX.getLDA(i + 1, ticket2),		// 4-6 cycles - 7-9 Load X-the-variable for next iteration
 						"TAX",							// 2 cycles - 9-11
 						"NOP",							// 2 cycles - 11-13
 						"NOP",							// 2 cycles - 13-15

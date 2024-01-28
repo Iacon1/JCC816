@@ -46,6 +46,8 @@ public final class CompUtils
 			specifiers.add("signed");
 			value = 2 * Math.abs(value);
 		}
+		else
+			specifiers.add("unsigned");
 		String[] options = new String[] {"char", "short", "int", "long", "long long"};
 		for (String option : options)
 			if (value < Math.pow(2, 8 * CompConfig.sizeOf(option.split(" "))))

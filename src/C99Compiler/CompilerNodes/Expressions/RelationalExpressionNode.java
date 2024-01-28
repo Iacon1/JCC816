@@ -14,6 +14,7 @@ import C99Compiler.Utils.FileIO;
 import C99Compiler.Utils.ScratchManager;
 import C99Compiler.Utils.ScratchManager.ScratchSource;
 import C99Compiler.Utils.AssemblyUtils.DetailsTicket;
+import C99Compiler.Utils.OperandSources.ConstantByteSource;
 import C99Compiler.Utils.OperandSources.ConstantSource;
 import C99Compiler.Utils.OperandSources.OperandSource;
 import Grammar.C99.C99Parser.Relational_expressionContext;
@@ -55,19 +56,19 @@ public class RelationalExpressionNode extends BranchingExpressionNode
 		default: return null;
 		}
 	}
-	private static String getComparison(String whitespace, String yesLabel, String noLabel, OperandSource sourceX, String operator, OperandSource sourceY, ScratchManager scratchManager, DetailsTicket ticket) throws Exception
+	private static String getComparison(String whitespace, String yesLabel, String noLabel, OperandSource sourceX, String operator, OperandSource sourceY, boolean isSigned, ScratchManager scratchManager, DetailsTicket ticket) throws Exception
 	{
 		if (sourceX.isLiteral() && !sourceY.isLiteral()) switch (operator)
 		{
-			case "<": return getComparison(whitespace, yesLabel, noLabel, sourceY, ">=", sourceX, scratchManager, ticket);
-			case "<=": return getComparison(whitespace, yesLabel, noLabel, sourceY, ">", sourceX, scratchManager, ticket);
-			case ">": return getComparison(whitespace, yesLabel, noLabel, sourceY, "<=", sourceX, scratchManager, ticket);
-			case ">=": return getComparison(whitespace, yesLabel, noLabel, sourceY, "<", sourceX, scratchManager, ticket);
+			case "<": return getComparison(whitespace, yesLabel, noLabel, sourceY, ">=", sourceX, isSigned, scratchManager, ticket);
+			case "<=": return getComparison(whitespace, yesLabel, noLabel, sourceY, ">", sourceX, isSigned, scratchManager, ticket);
+			case ">": return getComparison(whitespace, yesLabel, noLabel, sourceY, "<=", sourceX, isSigned, scratchManager, ticket);
+			case ">=": return getComparison(whitespace, yesLabel, noLabel, sourceY, "<", sourceX, isSigned, scratchManager, ticket);
 		}
 		switch (operator) // Let's always do variants of <
 		{
-		case ">": return getComparison(whitespace, noLabel, yesLabel,sourceX, "<=", sourceY, scratchManager, ticket);
-		case ">=": return getComparison(whitespace, noLabel, yesLabel, sourceX, "<", sourceY, scratchManager, ticket);
+		case ">": return getComparison(whitespace, noLabel, yesLabel,sourceX, "<=", sourceY, isSigned, scratchManager, ticket);
+		case ">=": return getComparison(whitespace, noLabel, yesLabel, sourceX, "<", sourceY, isSigned, scratchManager, ticket);
 		}
 
 		String assembly = "";
@@ -80,13 +81,13 @@ public class RelationalExpressionNode extends BranchingExpressionNode
 		assembly += AssemblyUtils.bytewiseOperation(whitespace, Math.max(sourceX.getSize(), sourceY.getSize()), (Integer i, DetailsTicket ticket2) -> 
 		{	
 			List<String> lines = new LinkedList<String>();
-			if (i >= Math.max(sourceX.getSize(), sourceY.getSize()) - 2) // Are we at the last byte of an odd-size number, i. e. in 8-bit mode?
+			if (isSigned && i >= Math.max(sourceX.getSize(), sourceY.getSize()) - 2) // Are we signed and at the last byte of an odd-size number, i. e. in 8-bit mode?
 			{
-				String toXOR = (i < Math.max(sourceX.getSize(), sourceY.getSize()) - 1) ? "#$8000" : "#$80";
+				String toXOR = ticket2.is16Bit() ? "#$8000" : "#$80"; // If so we have to invert MSB to deal w/ 2's complement stuff
 				// Start at MSB
 				if (sourceY.isLiteral())
 				{
-					String oldY = sourceY.getBase().substring(2);
+					String oldY = ((ConstantByteSource) sourceY).getBase(i, ticket2).substring(2);
 					int yVal = Integer.valueOf(oldY, 16);
 					String newY = "#$" + String.format("%0" + (ticket2.is16Bit() ? 4 : 2) + "x", yVal ^ (ticket2.is16Bit() ? 0x8000 : 0x80));
 					lines.add(sourceX.getLDA(i, ticket2));	// Get X
@@ -108,8 +109,12 @@ public class RelationalExpressionNode extends BranchingExpressionNode
 				lines.add(sourceX.getLDA(i, ticket2)); 					// Get X
 				lines.add(sourceY.getInstruction("CMP", i, ticket2));	// Cmp X & Y?
 			}
-			lines.add("BCC\t" + yesLabel);								// If x < y then yes
-			lines.add("BNE\t" + noLabel);								// If x >= y then no
+			lines.add("BCC\t:+");									// Done this way to enable med-jumps
+			lines.add("BRA:++");
+			lines.add(":JMP\t" + yesLabel);								// If x < y then yes
+			lines.add(":BEQ\t:+");
+			lines.add("JMP\t" + noLabel);							// If x >= y then no
+			lines.add(":");
 			// else maybe
 			return lines.toArray(new String[] {});
 		}, true, true);
@@ -117,10 +122,10 @@ public class RelationalExpressionNode extends BranchingExpressionNode
 		switch (operator)
 		{
 		case "<":
-			assembly += whitespace + "BRA\t" + noLabel + "\n"; // If equal, false
+			assembly += whitespace + "JMP\t" + noLabel + "\n"; // If equal, false
 			break;
 		case "<=":
-			assembly += whitespace + "BRA\t" + yesLabel + "\n"; // If equal, true
+			assembly += whitespace + "JMP\t" + yesLabel + "\n"; // If equal, true
 			break;
 		}
 		scratchManager.releasePointer(tempSource);
@@ -132,7 +137,8 @@ public class RelationalExpressionNode extends BranchingExpressionNode
 	@Override
 	protected String getAssembly(String whitespace, String yesLabel, String noLabel, OperandSource sourceX, OperandSource sourceY, ScratchManager scratchManager, DetailsTicket ticket) throws Exception
 	{
-		return getComparison(whitespace, yesLabel, noLabel, sourceX, operator, sourceY, scratchManager, ticket);
+		boolean isSigned = x.getType().isSigned() || y.getType().isSigned();
+		return getComparison(whitespace, yesLabel, noLabel, sourceX, operator, sourceY, isSigned, scratchManager, ticket);
 	}
 	@Override
 	protected String getAssembly(String whitespace, OperandSource destSource, OperandSource sourceX, OperandSource sourceY, ScratchManager scratchManager, DetailsTicket ticket) throws Exception
