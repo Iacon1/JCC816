@@ -17,6 +17,7 @@ import C99Compiler.CompilerNodes.Definitions.StructUnionDefinitionNode;
 import C99Compiler.CompilerNodes.Definitions.Type;
 import C99Compiler.CompilerNodes.Dummies.EnumeratorNode;
 import C99Compiler.CompilerNodes.Interfaces.NamedNode;
+import C99Compiler.CompilerNodes.Interfaces.SequencePointNode;
 import C99Compiler.CompilerNodes.Interfaces.TypedNode;
 import C99Compiler.CompilerNodes.LValues.VariableNode;
 import C99Compiler.CompilerNodes.Statements.IterationStatementNode;
@@ -309,7 +310,7 @@ public class ComponentNode<C extends ComponentNode<C>> implements Serializable
 		else return null;
 	}
 	/** Gets the enclosing selection, if any.
-	 * @return The variable node in question, if present.
+	 * @return The selection node in question, if present.
 	 */
 	public SelectionStatementNode getEnclosingSelection()
 	{
@@ -319,7 +320,7 @@ public class ComponentNode<C extends ComponentNode<C>> implements Serializable
 		else return null;
 	}
 	/** Gets the enclosing loop, if any.
-	 * @return The variable node in question, if present.
+	 * @return The iteration node in question, if present.
 	 */
 	public IterationStatementNode getEnclosingIteration()
 	{
@@ -328,5 +329,15 @@ public class ComponentNode<C extends ComponentNode<C>> implements Serializable
 		else if (parent != null) return parent.getEnclosingIteration();
 		else return null;
 	}
-	
+	public boolean isSequencePoint() {return false;}
+	/** Gets the enclosing sequence point, if any.
+	 * @return The sequence point node in question, if present.
+	 */
+	public SequencePointNode getEnclosingSequencePoint()
+	{
+		if (SequencePointNode.class.isAssignableFrom(getClass()) && isSequencePoint())
+			return (SequencePointNode) this;
+		else if (parent != null) return parent.getEnclosingSequencePoint();
+		else return null;
+	}
 }

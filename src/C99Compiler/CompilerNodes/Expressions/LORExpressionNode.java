@@ -2,7 +2,11 @@
 //
 package C99Compiler.CompilerNodes.Expressions;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import C99Compiler.CompilerNodes.ComponentNode;
+import C99Compiler.CompilerNodes.Interfaces.SequencePointNode;
 import C99Compiler.Utils.AssemblyUtils;
 import C99Compiler.Utils.AssemblyUtils.DetailsTicket;
 import C99Compiler.Utils.CompUtils;
@@ -11,10 +15,9 @@ import C99Compiler.Utils.OperandSources.OperandSource;
 import Grammar.C99.C99Parser.Land_expressionContext;
 import Grammar.C99.C99Parser.Lor_expressionContext;
 
-public class LORExpressionNode extends BinaryExpressionNode
+public class LORExpressionNode extends LogicalBinaryExpressionNode
 <Lor_expressionContext, Land_expressionContext, Land_expressionContext, Lor_expressionContext>
 {
-
 	public LORExpressionNode(ComponentNode<?> parent) {super(parent);}
 
 	@Override
@@ -28,7 +31,7 @@ public class LORExpressionNode extends BinaryExpressionNode
 	@Override
 	protected BaseExpressionNode<Land_expressionContext> getPCNode(Lor_expressionContext node) throws Exception
 	{return new LANDExpressionNode(this).interpret(node.land_expression());}
-
+	
 	@Override
 	public Object getPropValue()
 	{

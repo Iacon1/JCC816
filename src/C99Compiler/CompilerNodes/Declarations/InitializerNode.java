@@ -5,6 +5,7 @@ package C99Compiler.CompilerNodes.Declarations;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -17,6 +18,7 @@ import C99Compiler.CompilerNodes.Expressions.AssignmentExpressionNode;
 import C99Compiler.CompilerNodes.Expressions.BaseExpressionNode;
 import C99Compiler.CompilerNodes.Expressions.ConstantExpressionNode;
 import C99Compiler.CompilerNodes.Interfaces.AssemblableNode;
+import C99Compiler.CompilerNodes.Interfaces.SequencePointNode;
 import C99Compiler.CompilerNodes.Interfaces.TypedNode;
 import C99Compiler.CompilerNodes.LValues.LValueNode;
 import C99Compiler.Exceptions.ConstraintException;
@@ -26,18 +28,20 @@ import Grammar.C99.C99Parser.DesignationContext;
 import Grammar.C99.C99Parser.DesignatorContext;
 import Grammar.C99.C99Parser.InitializerContext;
 
-public class InitializerNode extends InterpretingNode<InitializerNode, InitializerContext> implements AssemblableNode, TypedNode
+public class InitializerNode extends InterpretingNode<InitializerNode, InitializerContext> implements AssemblableNode, TypedNode, SequencePointNode
 {
 	private LValueNode<?> LValue;
 	private Map<Integer, InitializerNode> arrayInitializers;
 	private Map<String, InitializerNode> structInitializers;
 	
 	private BaseExpressionNode<?> expr;
+	private List<String> sequenceQueue;
 	
 	public InitializerNode(ComponentNode<?> parent, LValueNode<?> LValue)
 	{
 		super(parent);
 		expr = null;
+		sequenceQueue = new LinkedList<String>();
 		if (LValue.getType().isArray())
 		{
 			arrayInitializers = new LinkedHashMap<Integer, InitializerNode>();
@@ -96,6 +100,12 @@ public class InitializerNode extends InterpretingNode<InitializerNode, Initializ
 		
 		return currNode;
 	}
+	
+	@Override public boolean isSequencePoint() {return true;}
+	@Override public void registerSequence(String assembly) {sequenceQueue.add(assembly);}
+	@Override public void clearSequence() {sequenceQueue.clear();}
+	@Override public String getAccumulatedSequences() {String assembly = ""; for (String queued : sequenceQueue) assembly += queued; return assembly;}
+	
 	@Override
 	public InitializerNode interpret(InitializerContext node) throws Exception
 	{
@@ -197,22 +207,23 @@ public class InitializerNode extends InterpretingNode<InitializerNode, Initializ
 	@Override
 	public String getAssembly(int leadingWhitespace) throws Exception
 	{
+		clearSequence();
 		if (expr != null)
 		{
 			if (expr.hasAssembly())
-				return expr.getAssembly(leadingWhitespace, LValue.getSource());
+				return expr.getAssembly(leadingWhitespace, LValue.getSource()) + getAccumulatedSequences();
 			else if (expr.hasPropValue())
 				return AssemblyUtils.byteCopier(
 						AssemblyUtils.getWhitespace(leadingWhitespace),
 						LValue.getSize(),
 						LValue.getSource(),
-						new ConstantSource(expr.getPropValue(), LValue.getSize()));
+						new ConstantSource(expr.getPropValue(), LValue.getSize())) + getAccumulatedSequences();
 			else if (expr.hasLValue())
 				return AssemblyUtils.byteCopier(
 						AssemblyUtils.getWhitespace(leadingWhitespace),
 						LValue.getSize(),
 						LValue.getSource(),
-						expr.getLValue().getSource());
+						expr.getLValue().getSource()) + getAccumulatedSequences();
 			else return "";
 		}	
 		else if (arrayInitializers != null) // Array
@@ -234,7 +245,7 @@ public class InitializerNode extends InterpretingNode<InitializerNode, Initializ
 				AssemblyUtils.getWhitespace(leadingWhitespace),
 				LValue.getSize(),
 				LValue.getSource(),
-				new ConstantSource(0, LValue.getSize()));
+				new ConstantSource(0, LValue.getSize())) + getAccumulatedSequences();
 		else return "";
 	}
 

@@ -10,7 +10,7 @@ import C99Compiler.CompilerNodes.Expressions.ExpressionNode;
 import C99Compiler.CompilerNodes.Interfaces.AssemblableNode;
 import Grammar.C99.C99Parser.Expression_statementContext;
 
-public class ExpressionStatementNode extends StatementNode<Expression_statementContext>
+public class ExpressionStatementNode extends SequencePointStatementNode<Expression_statementContext>
 {
 	private BaseExpressionNode<?> expression;
 	public ExpressionStatementNode(ComponentNode<?> parent) {super(parent);}
@@ -36,6 +36,6 @@ public class ExpressionStatementNode extends StatementNode<Expression_statementC
 	@Override
 	public String getAssembly(int leadingWhitespace, String returnAddr) throws Exception
 	{
-		return expression.getAssembly(leadingWhitespace);
+		return getAssemblyWithSequence(expression, leadingWhitespace);
 	}
 }

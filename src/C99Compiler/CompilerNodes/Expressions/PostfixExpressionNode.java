@@ -14,6 +14,7 @@ import C99Compiler.CompilerNodes.FunctionDefinitionNode;
 import C99Compiler.CompilerNodes.Definitions.PointerType;
 import C99Compiler.CompilerNodes.Definitions.FunctionType;
 import C99Compiler.CompilerNodes.Definitions.Type;
+import C99Compiler.CompilerNodes.Interfaces.SequencePointNode;
 import C99Compiler.CompilerNodes.LValues.IndirectLValueNode;
 import C99Compiler.CompilerNodes.LValues.LValueNode;
 import C99Compiler.CompilerNodes.LValues.VariableNode;
@@ -28,7 +29,7 @@ import C99Compiler.Utils.ScratchManager.ScratchSource;
 import Grammar.C99.C99Parser.Assignment_expressionContext;
 import Grammar.C99.C99Parser.Postfix_expressionContext;
 
-public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expressionContext>
+public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expressionContext> implements SequencePointNode
 {
 	private enum PFType
 	{
@@ -41,7 +42,8 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 	private PFType type;
 	
 	private BaseExpressionNode<?> expr, indexExpr;
-
+	private List<String> sequenceQueue;
+	
 	private List<BaseExpressionNode<?>> params;
 	
 	private OperandSource destSource;
@@ -63,7 +65,7 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 	{
 		super(parent);
 		params = new ArrayList<BaseExpressionNode<?>>();
-		
+		sequenceQueue = new LinkedList<String>();
 	}
 
 	@Override
@@ -106,6 +108,11 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 		return this;
 	}
 	
+	@Override public boolean isSequencePoint() {return type == PFType.funcCall;}
+	@Override public void registerSequence(String assembly) {sequenceQueue.add(assembly);}
+	@Override public void clearSequence() {sequenceQueue.clear();}
+	@Override public String getAccumulatedSequences() {String assembly = ""; for (String queued : sequenceQueue) assembly += queued; return assembly;}
+	
 	@Override
 	public Type getType()
 	{
@@ -119,6 +126,8 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 			return getTranslationUnit().resolveStructOrUnion(expr.getType().getSUEName()).getMember(memberName).getType();
 		case structMemberP:
 			return getTranslationUnit().resolveStructOrUnion(((PointerType) expr.getType()).getType().getSUEName()).getMember(memberName).getType();	
+		case incr: case decr:
+			return expr.getType();
 		default:
 			return null;
 		}
@@ -128,10 +137,12 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 	public boolean canCall(FunctionDefinitionNode function)
 	{
 		if (type == PFType.funcCall)
+		{
 			if (getReferencedFunction() != null)
 				return getReferencedFunction().getFullName().equals(function.getFullName());
 			else return true;
-			else return expr.canCall(function);
+		}
+		else return expr.canCall(function);
 	}
 	
 	@Override
@@ -176,6 +187,7 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 	@Override
 	public String getAssembly(int leadingWhitespace, OperandSource destSource, ScratchManager scratchManager, DetailsTicket ticket) throws Exception
 	{
+		clearSequence();
 		String whitespace = AssemblyUtils.getWhitespace(leadingWhitespace);
 		String assembly = "";
 		switch (type)
@@ -220,6 +232,7 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 							AssignmentExpressionNode.equateLValue(funcParams.get(i), params.get(i));
 					}
 				}
+				assembly += getAccumulatedSequences();
 				if (func.isInline())
 				{
 					String endLabel = "__inline_end_" + CompUtils.getSafeUUID();
@@ -267,6 +280,7 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 					assembly += AssemblyUtils.stackPusher(whitespace, leadingWhitespace, sourceP);
 					if (sourceV != null) scratchManager.releaseScratchBlock(sourceV);
 				}
+				assembly += getAccumulatedSequences();
 				assembly += whitespace + "JML\t[" + CompConfig.funcPointer + "]\n";
 				assembly += whitespace + ":\n";
 				
@@ -289,6 +303,30 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 			}
 			else sourceP = scratchManager.getPointer(expr.getLValue().getSource());
 			pointerRef = new IndirectLValueNode(this, expr.getLValue(), sourceP, ((PointerType) expr.getType()).getType());
+			break;
+		case incr: case decr:
+			OperandSource sourceX;
+			ScratchSource scratchX = null;
+			if (expr.hasAssembly())
+			{
+				scratchX = scratchManager.reserveScratchBlock(expr.getSize());
+				assembly += expr.getAssembly(leadingWhitespace, scratchX, scratchManager, ticket);
+				if (expr.hasLValue())
+					sourceX = expr.getLValue().getSource();
+				else sourceX = scratchX;
+			}
+			else if (expr.hasPropValue())
+				sourceX = new ConstantSource(expr.getPropValue(), expr.getType().getSize());
+			else if (expr.hasLValue())
+				sourceX = expr.getLValue().getSource();
+			else sourceX = null;
+			
+			if (destSource != null && !destSource.equals(sourceX)) assembly += AssemblyUtils.byteCopier(whitespace, expr.getSize(), destSource, sourceX);
+			if (type == PFType.incr)
+				getEnclosingSequencePoint().registerSequence(AdditiveExpressionNode.getIncrementer(whitespace, sourceX, sourceX, ticket));
+			else if (type == PFType.decr)
+				getEnclosingSequencePoint().registerSequence(AdditiveExpressionNode.getIncrementer(whitespace, sourceX, sourceX, ticket));
+			if (scratchX != null) scratchManager.releaseScratchBlock(scratchX);
 			break;
 		default:
 			break;

@@ -26,7 +26,7 @@ import C99Compiler.Utils.OperandSources.ConstantSource;
 import C99Compiler.Utils.OperandSources.OperandSource;
 import Grammar.C99.C99Parser.Selection_statementContext;
 
-public class SelectionStatementNode extends StatementNode<Selection_statementContext>
+public class SelectionStatementNode extends SequencePointStatementNode<Selection_statementContext>
 {	
 	private String selId;
 	private BaseExpressionNode<?> expression;
@@ -129,14 +129,13 @@ public class SelectionStatementNode extends StatementNode<Selection_statementCon
 				if (expression.hasAssembly())
 				{
 					String miscLabel = CompUtils.getMiscLabel();
-					if (BranchingExpressionNode.class.isAssignableFrom(expression.getClass())) // Branchable
-						assembly += ((BranchingExpressionNode<?,?,?,?>) expression).getAssembly(leadingWhitespace, miscLabel, skipName, new ScratchManager(), new DetailsTicket());
-					else
-					{
-						assembly += expression.getAssembly(leadingWhitespace); // Get value
-						assembly += whitespace + "BEQ\t" + skipName + "\n"; // Skip if 0, i. e. not true
-						assembly += ifStm.getAssembly(leadingWhitespace + CompConfig.indentSize, returnAddr);
-					}
+					ScratchManager scratchManager = new ScratchManager();
+					ScratchSource exprSource = scratchManager.reserveScratchBlock(expression.getSize());
+					assembly = getAssemblyWithSequence(expression, leadingWhitespace, exprSource, scratchManager);
+					assembly += EqualityExpressionNode.getIsZero(whitespace, exprSource, scratchManager, exprSource, new DetailsTicket());
+					assembly += whitespace + "BEQ\t" + skipName + "\n"; // Skip if 0, i. e. not true
+					assembly += ifStm.getAssembly(leadingWhitespace + CompConfig.indentSize, returnAddr);
+//					}
 				}
 				else
 				{
@@ -176,14 +175,15 @@ public class SelectionStatementNode extends StatementNode<Selection_statementCon
 			}
 			
 			ScratchManager scratchManager = new ScratchManager();
-			
+			ScratchSource exprSource = scratchManager.reserveScratchBlock(expression.getSize());
 			// If greater than largest case, skip
 			String miscLabel = CompUtils.getMiscLabel();
-			assembly += new RelationalExpressionNode(this, "<", largestExpr, expression).getAssembly(leadingWhitespace, hasDefault? getDefaultLabel(false) : getEndLabel(), miscLabel, scratchManager, new DetailsTicket());
+			assembly = getAssemblyWithSequence(expression, leadingWhitespace, exprSource, scratchManager);
+			assembly += new RelationalExpressionNode(this, "<", largestExpr, new DummyExpressionNode(this, expression.getType(), exprSource)).getAssembly(leadingWhitespace, hasDefault? getDefaultLabel(false) : getEndLabel(), miscLabel, scratchManager, new DetailsTicket());
 			assembly += whitespace + miscLabel + ":\n";
 			
 			ScratchSource sourceS = scratchManager.reserveScratchBlock(expression.getSize());
-			assembly += new ShiftExpressionNode(this, "<<", expression, new DummyExpressionNode(this, 1)).getAssembly(leadingWhitespace, sourceS);
+			assembly += new ShiftExpressionNode(this, "<<", new DummyExpressionNode(this, expression.getType(), exprSource), new DummyExpressionNode(this, 1)).getAssembly(leadingWhitespace, sourceS);
 			assembly += whitespace + "TAX\n";
 			assembly += whitespace + "JMP\t(" + getTableLabel() + ",x)\n";
 			scratchManager.releaseScratchBlock(sourceS);

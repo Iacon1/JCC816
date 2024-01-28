@@ -11,7 +11,7 @@ import C99Compiler.Utils.OperandSources.OperandSource;
 import Grammar.C99.C99Parser.Land_expressionContext;
 import Grammar.C99.C99Parser.Or_expressionContext;
 
-public class LANDExpressionNode extends BinaryExpressionNode
+public class LANDExpressionNode extends LogicalBinaryExpressionNode
 <Or_expressionContext, Land_expressionContext, Or_expressionContext, Land_expressionContext>
 {
 

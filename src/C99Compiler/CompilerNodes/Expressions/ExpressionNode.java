@@ -10,6 +10,7 @@ import java.util.List;
 import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.FunctionDefinitionNode;
 import C99Compiler.CompilerNodes.Definitions.Type;
+import C99Compiler.CompilerNodes.Interfaces.SequencePointNode;
 import C99Compiler.CompilerNodes.LValues.LValueNode;
 import C99Compiler.Utils.AssemblyUtils.DetailsTicket;
 import C99Compiler.Utils.ScratchManager;
@@ -17,13 +18,18 @@ import C99Compiler.Utils.OperandSources.OperandSource;
 import Grammar.C99.C99Parser.Assignment_expressionContext;
 import Grammar.C99.C99Parser.ExpressionContext;
 
-public class ExpressionNode extends BaseExpressionNode<ExpressionContext>
+public class ExpressionNode extends BaseExpressionNode<ExpressionContext> implements SequencePointNode
 {
 	private List<BaseExpressionNode<?>> expressions;
+	private List<String> sequenceQueue;
+	private boolean isSP;
+	
 	public ExpressionNode(ComponentNode<?> parent)
 	{
 		super(parent);
 		expressions = new LinkedList<BaseExpressionNode<?>>();
+		sequenceQueue = new LinkedList<String>();
+		isSP = false;
 	}
 
 	@Override
@@ -35,6 +41,10 @@ public class ExpressionNode extends BaseExpressionNode<ExpressionContext>
 		return this;
 	}
 	
+	@Override public void registerSequence(String assembly) {sequenceQueue.add(assembly);}
+	@Override public void clearSequence() {sequenceQueue.clear();}
+	@Override public String getAccumulatedSequences() {String assembly = ""; for (String queued : sequenceQueue) assembly += queued; return assembly;}
+
 	@Override
 	public Type getType() {return null;}
 	
@@ -65,9 +75,16 @@ public class ExpressionNode extends BaseExpressionNode<ExpressionContext>
 	public String getAssembly(int leadingWhitespace, OperandSource destSource, ScratchManager scratchManager, DetailsTicket ticket) throws Exception
 	{
 		String assembly = "";
+		clearSequence();
+		assembly += expressions.get(0).getAssembly(leadingWhitespace,  scratchManager, ticket);
+		assembly += getAccumulatedSequences();
+		
 		for (BaseExpressionNode<?> expression : expressions.subList(1, expressions.size()))
-			assembly += expression.getAssembly(leadingWhitespace,  scratchManager, ticket);
-		assembly += expressions.get(0).getAssembly(leadingWhitespace, destSource, scratchManager, ticket);
+		{
+			clearSequence();
+			assembly += expression.getAssembly(leadingWhitespace, scratchManager, ticket);
+			assembly += getAccumulatedSequences();
+		}
 		
 		return assembly;
 	}
@@ -76,7 +93,11 @@ public class ExpressionNode extends BaseExpressionNode<ExpressionContext>
 	{
 		String assembly = "";
 		for (BaseExpressionNode<?> expression : expressions)
+		{
+			clearSequence();
 			assembly += expression.getAssembly(leadingWhitespace);
+			assembly += getAccumulatedSequences();
+		}
 		return assembly;
 	}	
 }

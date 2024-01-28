@@ -92,20 +92,7 @@ public abstract class BinaryExpressionNode<
 		final OperandSource sourceX, sourceY;
 		String assembly = "";
 
-		if (y.hasAssembly())
-		{
-			scratchY = scratchManager.reserveScratchBlock(y.getType().getSize());
-			assembly += y.getAssembly(leadingWhitespace, scratchY, scratchManager, ticket);
-			if (y.hasLValue())
-				sourceY = y.getLValue().getSource();
-			else sourceY = scratchY;
-		}
-		else if (y.hasPropValue())
-			sourceY = new ConstantSource(y.getPropValue(), y.getType().getSize());
-		else if (y.hasLValue())
-			sourceY = y.getLValue().getSource();
-		else sourceY = null;
-		// Now we figure out X
+		// figure out X
 		if (x.hasAssembly())
 		{
 			scratchX = scratchManager.reserveScratchBlock(y.getType().getSize());
@@ -120,11 +107,27 @@ public abstract class BinaryExpressionNode<
 			sourceX = x.getLValue().getSource();
 		else sourceX = null;
 		
+		// figure out Y		
+		if (y.hasAssembly())
+		{
+			scratchY = scratchManager.reserveScratchBlock(y.getType().getSize());
+			assembly += y.getAssembly(leadingWhitespace, scratchY, scratchManager, ticket);
+			if (y.hasLValue())
+				sourceY = y.getLValue().getSource();
+			else sourceY = scratchY;
+		}
+		else if (y.hasPropValue())
+			sourceY = new ConstantSource(y.getPropValue(), y.getType().getSize());
+		else if (y.hasLValue())
+			sourceY = y.getLValue().getSource();
+		else sourceY = null;
+		
+		
 		assembly += getAssembly(whitespace, destSource, sourceX, sourceY, scratchManager, ticket);
 		if (scratchX != null) scratchManager.releaseScratchBlock(scratchX);
 		if (scratchY != null) scratchManager.releaseScratchBlock(scratchY);
 		
-		scratchManager.demotePointer(destSource); // A copy of the destination, if it's a pointer, has gone stale
+		ScratchManager.demotePointer(destSource); // A copy of the destination, if it's a pointer, has gone stale
 		return assembly;
 	}
 }
