@@ -268,19 +268,17 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 				break;
 			}
 		case "*":
-			if (destSource != null)
+			ScratchSource sourceI;
+			if (!ScratchManager.hasPointer(sourceX))
 			{
-				ScratchSource sourceI;
-				if (!ScratchManager.hasPointer(sourceX))
-				{
-					sourceI = scratchManager.reservePointer(sourceX);
-					assembly += AssemblyUtils.byteCopier(whitespace, CompConfig.pointerSize, sourceI, sourceX, ticket);
-				}
-				else sourceI = scratchManager.getPointer(sourceX);
-			
-				pointerRef = new IndirectLValueNode(this, expr.getLValue(), sourceI, ((PointerType) expr.getType()).getType());
-				assembly += AssemblyUtils.byteCopier(whitespace, ((PointerType) expr.getType()).getType().getSize(), destSource, pointerRef.getSource(), ticket);
+				sourceI = scratchManager.reservePointer(sourceX);
+				assembly += AssemblyUtils.byteCopier(whitespace, CompConfig.pointerSize, sourceI, sourceX, ticket);
 			}
+			else sourceI = scratchManager.getPointer(sourceX);
+		
+			pointerRef = new IndirectLValueNode(this, expr.getLValue(), sourceI, ((PointerType) expr.getType()).getType());
+			if (destSource != null)
+				assembly += AssemblyUtils.byteCopier(whitespace, ((PointerType) expr.getType()).getType().getSize(), destSource, pointerRef.getSource(), ticket);
 			break;
 		default: return "";
 		}
