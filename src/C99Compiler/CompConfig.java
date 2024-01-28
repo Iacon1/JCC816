@@ -10,11 +10,14 @@ import C99Compiler.Utils.OperandSources.OperandSource;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 public final class CompConfig
 {
 	public static final String version = "0.X";
 
+	public static String rootFolder; // Name of base folder to look for non-stdlib libraries in
+	
 	public static final String mainName = "main";
 	public static final String scopeDelimiter = "@";
 	public static final String scopeDelimiterPermissor = "at_in_identifiers";
@@ -95,12 +98,19 @@ public final class CompConfig
 	
 	public static enum DefinableInterrupt // Interrupts the user is allowed to assign functions to
 	{
-		COP,
-		BRK,
-		ABORT,
-		NMI,
-		RESET,
-		IRQ
+		COP("__longCOP"),
+		BRK("__longBRK"),
+		ABORT("__longABORT"),
+		NMI("__longNMI"),
+		RESET("RESET"),
+		IRQ("__longIRQ");
+		
+		public final String longLabel;
+		
+		private DefinableInterrupt(String longLabel)
+		{
+			this.longLabel = longLabel;
+		}
 	}
 	
 	public static enum OptimizationLevel
@@ -142,4 +152,26 @@ public final class CompConfig
 		}
 	}
 	public static VerbosityLevel verbosityLevel = VerbosityLevel.none;
+
+	public static final class Attributes
+	{
+		public static final String interruptCOP = "interrupt_COP";
+		public static final String interruptBRK = "interrupt_BRK";
+		public static final String interruptABORT = "interrupt_ABORT";
+		public static final String interruptNMI = "interrupt_NMI";
+		public static final String interruptIRQ = "interrupt_IRQ";
+		public static final String noISR1 = "no_isr1"; // Level 1 noISR - removes normal stack pushers / loaders from interrupt handler
+		public static final String noISR2 = "no_isr2"; // Level 2 noISR - like level 1, but replaces RTI with RTL
+		public static final String SA1 = "sa1";	// Specifies that a function can only be called on the SA1 coprocessor
+		
+		public static final boolean isInterrupt(Set<String> attributes)
+		{
+			return
+					attributes.contains(interruptCOP)	||
+					attributes.contains(interruptBRK)	||
+					attributes.contains(interruptABORT)	||
+					attributes.contains(interruptNMI)	||
+					attributes.contains(interruptIRQ)	;
+		}
+	}
 }

@@ -11,11 +11,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.AbstractMap.SimpleEntry;
 
-import org.antlr.v4.runtime.CommonTokenStream;
-
 import Assembler.MemorySize;
-import C99Compiler.CartConfig.AddonChip;
-import C99Compiler.CartConfig.MapMode;
 import C99Compiler.CompConfig.DebugLevel;
 import C99Compiler.CompConfig.DefinableInterrupt;
 import C99Compiler.CompConfig.VerbosityLevel;
@@ -23,7 +19,6 @@ import C99Compiler.CompConfig.VerbosityLevel;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.FunctionDefinitionNode;
 import C99Compiler.CompilerNodes.TranslationUnitNode;
 import C99Compiler.CompilerNodes.Declarations.InitializerNode;
@@ -33,7 +28,6 @@ import C99Compiler.CompilerNodes.Definitions.Type;
 import C99Compiler.CompilerNodes.Dummies.EnumeratorNode;
 import C99Compiler.CompilerNodes.Interfaces.Catalogger;
 import C99Compiler.CompilerNodes.LValues.VariableNode;
-import C99Compiler.Exceptions.CompilerMultipleDefinitionException;
 import C99Compiler.Exceptions.LinkerMultipleDefinitionException;
 import C99Compiler.Exceptions.UndefinedFunctionException;
 import C99Compiler.Utils.AssemblyUtils;
@@ -215,14 +209,10 @@ public final class Linker implements Catalogger
 		String assembly = "";
 		assembly += ".segment \"VECTORS\"\n";
 		// Native
-		assembly += ".word\tRESET\n"; // Unused
-		assembly +=  ".word\tRESET\n"; // Unused
-		assembly +=  ".word\t" + getInterrupt(DefinableInterrupt.COP) + "\n";	// COP
-		assembly +=  ".word\t" + getInterrupt(DefinableInterrupt.BRK) + "\n"; 	// BRK
-		assembly +=  ".word\t" + getInterrupt(DefinableInterrupt.ABORT) + "\n"; 	// ABORT
-		assembly +=  ".word\t" + getInterrupt(DefinableInterrupt.NMI) + "\n"; 	// NMI
-		assembly +=  ".word\tRESET\n"; 													// RESET
-		assembly +=  ".word\t" + getInterrupt(DefinableInterrupt.IRQ) + "\n"; 	// IRQ
+		assembly += ".word\tRESET\n"; 						// Unused
+		assembly +=  ".word\tRESET\n"; 						// Unused
+		for (DefinableInterrupt interrupt : DefinableInterrupt.values())
+			assembly +=  ".word\t" + interrupt.longLabel + "\n";
 		// Emulation
 		assembly +=  ".word\tRESET\n"; // Unused
 		assembly +=  ".word\tRESET\n"; // Unused
@@ -270,7 +260,11 @@ public final class Linker implements Catalogger
 			for (InitializerNode init : unit.getGlobalInitializers())
 				assembly += init.getAssembly();
 		assembly += "JML\tmain\n";
-
+		
+		// Long interrupt tables TODO optimize this if they're in zero bank
+		for (DefinableInterrupt interrupt : DefinableInterrupt.values())
+			if (interrupt != DefinableInterrupt.RESET)
+				assembly +=  interrupt.longLabel + ":JML\t" + getInterrupt(interrupt) + "\n";
 		// Required special subs
 		for (String sub : getRequiredSubs().values())
 		{	

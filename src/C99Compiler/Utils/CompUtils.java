@@ -23,14 +23,6 @@ public final class CompUtils
 	public static final String setXY8 = "SEP\t#$10", setXY16 = "REP\t#$10";
 	public static final String setAXY8 = "SEP\t#$30", setAXY16 = "REP\t#$30";
 
-	public static final class Attributes
-	{
-		public static final String interrupt = "interrupt";
-		public static final String noISR1 = "no_isr1"; // Level 1 noISR - removes normal stack pushers / loaders from interrupt handler
-		public static final String noISR2 = "no_isr2"; // Level 2 noISR - like level 1, but replaces RTI with RTL
-		public static final String SA1 = "sa1";	// Specifies that a function can only be called on the SA1 coprocessor
-	}
-
 	public static final String headerTag = "__HEADER_HERE";
 	
 	public static Type getTypeForSize(int size, boolean isSigned)

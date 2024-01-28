@@ -22,6 +22,7 @@ import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import C99Compiler.CompConfig;
+import C99Compiler.CompConfig.Attributes;
 import C99Compiler.CompConfig.DebugLevel;
 import C99Compiler.CompConfig.OptimizationLevel;
 import C99Compiler.ASMGrapher.ASMGraphBuilder;
@@ -38,7 +39,6 @@ import C99Compiler.Exceptions.CompilerMultipleDefinitionException;
 import C99Compiler.Exceptions.ConstraintException;
 import C99Compiler.Exceptions.UnsupportedFeatureException;
 import C99Compiler.Utils.AssemblyUtils;
-import C99Compiler.Utils.CompUtils;
 import C99Compiler.Utils.ScratchManager;
 import C99Compiler.Utils.ScratchManager.ScratchSource;
 
@@ -80,6 +80,9 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 				throw new UnsupportedFeatureException("Function \"main\" having a signature other than \"void()\"", true, node.start);
 
 		code = new CompoundStatementNode(this, getName()).interpret(node.compound_statement());
+		
+		if (attributes.contains(Attributes.interruptCOP)); // TODO
+			
 		return this;
 	}
 	public FunctionDefinitionNode interpret(Declaration_specifiersContext declarationSpecifiers, DeclaratorContext declarator) throws Exception // Load from declaration
@@ -144,21 +147,21 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 	}
 	public boolean isStatic()
 	{
-		return type.isStatic();
+		return type.isStatic() || isInline();
 	}
 	public boolean isInterruptHandler()
 	{
-		return attributes.contains(CompUtils.Attributes.interrupt);
+		return Attributes.isInterrupt(attributes);
 	}
 	private boolean isISR()
 	{
 		if (this.implementation != null) return this.implementation.isISR();
-		else return !attributes.contains(CompUtils.Attributes.noISR1) && !attributes.contains(CompUtils.Attributes.noISR2);
+		else return !attributes.contains(Attributes.noISR1) && !attributes.contains(Attributes.noISR2);
 	}
 	public boolean isSA1()
 	{
 		if (this.implementation != null) return this.implementation.isSA1();
-		else return attributes.contains(CompUtils.Attributes.SA1);
+		else return attributes.contains(Attributes.SA1);
 	}
 	public boolean isInline()
 	{
@@ -261,7 +264,7 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 			assembly += AssemblyUtils.stackLoader(whitespace, CompConfig.scratchSize, CompConfig.callResultSource(CompConfig.callResultSize));
 		}
 		
-		assembly += whitespace + getEndLabel() + ": " + (isInterruptHandler() && !attributes.contains(CompUtils.Attributes.noISR2) ? "RTI\n" : "RTL") + "\n";
+		assembly += whitespace + getEndLabel() + ": " + (isInterruptHandler() && !attributes.contains(Attributes.noISR2) ? "RTI\n" : "RTL") + "\n";
 		
 		ScratchManager.clearPointers();
 

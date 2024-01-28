@@ -6,7 +6,6 @@ import java.util.ArrayList;
 
 import C99Compiler.ASMGrapher.ASMGraphBuilder;
 import C99Compiler.Exceptions.UnsupportedFeatureException;
-import Logging.Logging;
 
 public final class Banker
 {
