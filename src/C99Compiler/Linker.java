@@ -14,6 +14,7 @@ import java.util.AbstractMap.SimpleEntry;
 import Assembler.MemorySize;
 import C99Compiler.CompConfig.DebugLevel;
 import C99Compiler.CompConfig.DefinableInterrupt;
+import C99Compiler.CompConfig.OptimizationLevel;
 import C99Compiler.CompConfig.VerbosityLevel;
 
 import java.util.ArrayList;
@@ -315,7 +316,8 @@ public final class Linker implements Catalogger
 	{
 		ArrayList<String> lines = new ArrayList<String>(Arrays.asList(assembly.split("\n")));
 
-		lines = (ArrayList<String>) AssemblyOptimizer.optimizeAssembly((List<String>) lines);
+		if (OptimizationLevel.isAtLeast(OptimizationLevel.low))
+			lines = (ArrayList<String>) AssemblyOptimizer.optimizeAssembly((List<String>) lines);
 		memorySize.ROMSize = Banker.splitBanks(new CartConfig(), lines);
 		
 		assembly = "";
