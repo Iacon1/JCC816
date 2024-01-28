@@ -156,7 +156,8 @@ public class IterationStatementNode extends StatementNode<Iteration_statementCon
 			assembly += stmNode.getAssembly(leadingWhitespace + CompConfig.indentSize, returnAddr);
 			assembly += condExpNode.getAssembly(leadingWhitespace, CompConfig.callResultSource(condExpNode.getLValue().getSize()));
 			assembly += EqualityExpressionNode.getIsZero(whitespace, CompConfig.callResultSource(condExpNode.getSize()), new ScratchManager(), CompConfig.callResultSource(condExpNode.getSize()), new DetailsTicket());
-			assembly += whitespace + "BNE\t" + getStartLabel() + "\n";
+			assembly += whitespace + "BEQ\t" + getEndLabel() + "\n";
+			assembly += whitespace + "JMP\t" + getStartLabel() + "\n";
 			assembly += whitespace + getEndLabel() + ":\n";
 			break;
 		case for_:
@@ -174,8 +175,9 @@ public class IterationStatementNode extends StatementNode<Iteration_statementCon
 					{
 						if (BranchingExpressionNode.class.isAssignableFrom(condExpNode.getClass())) // Branching
 						{
-							assembly += ((BranchingExpressionNode<?,?,?,?>) condExpNode).getAssembly(leadingWhitespace, ":+", getEndLabel(), new ScratchManager(), new DetailsTicket());
-							assembly += whitespace + ":\n";
+							String miscLabel = CompUtils.getMiscLabel();
+							assembly += ((BranchingExpressionNode<?,?,?,?>) condExpNode).getAssembly(leadingWhitespace, miscLabel, getEndLabel(), new ScratchManager(), new DetailsTicket());
+							assembly += whitespace + miscLabel + ":\n";
 						}
 						else
 						{

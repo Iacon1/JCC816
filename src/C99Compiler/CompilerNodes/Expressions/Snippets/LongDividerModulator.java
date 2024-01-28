@@ -38,6 +38,7 @@ public class LongDividerModulator
 		
 		String LDivIter = "__LU" + (isModulo ? "Mod" : "Div") + xSize + "_U" + ySize + "Iter";
 		String LDivSkip = "__LU" + (isModulo ? "Mod" : "Div") + xSize + "_U" + ySize + "Skip";
+		String LDivNSkip = "__LU" + (isModulo ? "Mod" : "Div") + xSize + "_U" + ySize + "NSkip";
 		
 		ScratchManager scratchManager = new ScratchManager();
 		scratchManager.reserveScratchBlock(CompConfig.scratchSize - zSize - xSize); // Minimum size needed
@@ -67,8 +68,8 @@ public class LongDividerModulator
 		assembly += whitespace + LDivIter + ":\n";
 			// If (x >= big_div)
 			assembly += new RelationalExpressionNode(null, ">=", new DummyExpressionNode(null, xType, sourceX), new DummyExpressionNode(null, zType, bigDiv))
-					.getAssembly(whitespace.length(), ":+", LDivSkip, scratchManager, innerTicket);
-			assembly += whitespace + ":\n";
+					.getAssembly(whitespace.length(), LDivNSkip, LDivSkip, scratchManager, innerTicket);
+			assembly += whitespace + LDivNSkip + ":\n";
 				// x -= big_div;
 				assembly += whitespace + "SEC" + "\n";
 				assembly += AssemblyUtils.bytewiseOperation(whitespace, xSize, (Integer i, DetailsTicket ticket2) -> 
@@ -110,7 +111,9 @@ public class LongDividerModulator
 				}, true, true);
 			// i != 0
 			assembly += EqualityExpressionNode.getIsZero(whitespace, null, scratchManager, iS, innerTicket);
-			assembly += whitespace + "BNE\t" + LDivIter + "\n";
+			assembly += whitespace + "BEQ\t:+\n";
+			assembly += whitespace + "JMP\t" + LDivIter + "\n";
+			assembly += whitespace + ":\n";
 		// [if modulo] ret = x;
 		if (isModulo)
 			assembly += AssemblyUtils.byteCopier(whitespace, xSize, ret, sourceX, innerTicket);

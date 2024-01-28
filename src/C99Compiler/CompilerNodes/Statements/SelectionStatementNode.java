@@ -128,8 +128,9 @@ public class SelectionStatementNode extends StatementNode<Selection_statementCon
 				String skipName = "__IFNOT_" + selId;
 				if (expression.hasAssembly())
 				{
+					String miscLabel = CompUtils.getMiscLabel();
 					if (BranchingExpressionNode.class.isAssignableFrom(expression.getClass())) // Branchable
-						assembly += ((BranchingExpressionNode<?,?,?,?>) expression).getAssembly(leadingWhitespace, ":+", skipName, new ScratchManager(), new DetailsTicket());
+						assembly += ((BranchingExpressionNode<?,?,?,?>) expression).getAssembly(leadingWhitespace, miscLabel, skipName, new ScratchManager(), new DetailsTicket());
 					else
 					{
 						assembly += expression.getAssembly(leadingWhitespace); // Get value
@@ -177,8 +178,9 @@ public class SelectionStatementNode extends StatementNode<Selection_statementCon
 			ScratchManager scratchManager = new ScratchManager();
 			
 			// If greater than largest case, skip
-			assembly += new RelationalExpressionNode(this, "<", largestExpr, expression).getAssembly(leadingWhitespace, hasDefault? getDefaultLabel(false) : getEndLabel(), ":+", scratchManager, new DetailsTicket());
-			assembly += whitespace + ":\n";
+			String miscLabel = CompUtils.getMiscLabel();
+			assembly += new RelationalExpressionNode(this, "<", largestExpr, expression).getAssembly(leadingWhitespace, hasDefault? getDefaultLabel(false) : getEndLabel(), miscLabel, scratchManager, new DetailsTicket());
+			assembly += whitespace + miscLabel + ":\n";
 			
 			ScratchSource sourceS = scratchManager.reserveScratchBlock(expression.getSize());
 			assembly += new ShiftExpressionNode(this, "<<", expression, new DummyExpressionNode(this, 1)).getAssembly(leadingWhitespace, sourceS);

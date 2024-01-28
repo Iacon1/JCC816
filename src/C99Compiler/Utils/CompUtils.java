@@ -91,7 +91,10 @@ public final class CompUtils
 	{
 		return UUID.randomUUID().toString().replace("-", "_");
 	}
-	
+	public static final String getMiscLabel()
+	{
+		return "__mLabel" + UUID.randomUUID().toString().replace("-", "_");
+	}
 	public static final String processEscapes(String s)
 	{
 		Pattern pattern = Pattern.compile("\\\\x[0-9A-Fa-f][0-9A-Fa-f]");

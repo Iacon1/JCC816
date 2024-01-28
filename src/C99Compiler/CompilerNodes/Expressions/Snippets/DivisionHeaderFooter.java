@@ -25,20 +25,22 @@ public class DivisionHeaderFooter
 		assembly += whitespace + CompUtils.setAXY8 + "\n";
 		assembly += whitespace + "LDY\t#$00\n";
 		assembly += sourceX.getLDA(whitespace, sourceX.getSize() - 1, ticket);
-		assembly += whitespace + "BPL\t:+\n";
+		String label1 = "__L1" + sourceX.getSize() + "_" + sourceY.getSize() + "_header";
+		assembly += whitespace + "BPL\t" + label1 + "\n";
 		// If it was negative we add one to the flag and then make it positive.
 		assembly += whitespace + "INY\n";
 		assembly += new UnaryExpressionNode(null, "-", new DummyExpressionNode(null, xType, sourceX)).getAssembly(whitespace.length(), sourceX);
-		assembly += whitespace + ":\n";
+		assembly += whitespace + label1 + ":" + "\n";
 		// Then for Y
 		assembly += whitespace + CompUtils.setA8 + "\n";
 		assembly += sourceY.getLDA(whitespace, sourceY.getSize() - 1, ticket);
-		assembly += whitespace + "BPL\t:+\n";
+		String label2 = "__L2" + sourceX.getSize() + "_" + sourceY.getSize() + "_header";
+		assembly += whitespace + "BPL\t" + label2 + "\n";
 		// If it was negative we subtract one from the previous flag (making it not zero if it was zero and making it zero if it wasn't)
 		// and then make it positive.
 		assembly += whitespace + "DEY\n";
 		assembly += new UnaryExpressionNode(null, "-", new DummyExpressionNode(null, yType, sourceY)).getAssembly(whitespace.length(), sourceY);
-		assembly += ":\n";
+		assembly += label2 + ":\n";
 		
 		return assembly;
 	}
@@ -46,12 +48,13 @@ public class DivisionHeaderFooter
 	{
 		Type sType = CompUtils.getTypeForSize(destSource.getSize(), true);
 		String assembly = "";
+		String label1 = "__L1" + destSource.getSize() + "_" + "_footer";
 		// First, check flag from header
 		assembly += whitespace + "TYA\n";
-		assembly += whitespace + "BEQ\t:+\n";
+		assembly += whitespace + "BEQ\t" + label1 + "\n";
 		// If it was positive then only one of the operands was negative so the result is negative too.
 		assembly += new UnaryExpressionNode(null, "-", new DummyExpressionNode(null, sType, source)).getAssembly(whitespace.length(), destSource);
-		assembly += ":\n";
+		assembly += whitespace + label1 + ":\n";
 		
 		return assembly;
 	}
