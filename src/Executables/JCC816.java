@@ -30,7 +30,7 @@ import C99Compiler.Utils.FileIO;
 import Logging.DebugLogger;
 import Logging.Logging;
 
-public class BBSnCC
+public class JCC816
 {
 
 	private static Options getOptions()
