@@ -232,7 +232,7 @@ public class ComponentNode<C extends ComponentNode<C>> implements Serializable
 	public Type resolveTypedefRelative(String name)
 	{
 		String fullName = getScope().getPrefix() + name;
-		if (fullName.length() == 1) fullName = "__" + fullName;
+//		if (fullName.length() == 1) fullName = "__" + fullName;
 		if (getTranslationUnit().resolveTypedef(fullName) != null)
 			return getTranslationUnit().resolveTypedef(fullName);
 		if (parent != null) return parent.resolveTypedefRelative(name);
