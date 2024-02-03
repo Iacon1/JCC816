@@ -22,4 +22,10 @@ public class WrapperLValueNode extends LValueNode<WrapperLValueNode>
 	{
 		return original.getSource().getShifted(offset).respec(type.getSize());
 	}
+
+	@Override
+	public String getAddress(int offset)
+	{
+		return original.getAddress(offset + this.offset);
+	}
 }

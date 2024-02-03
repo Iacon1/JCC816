@@ -5,7 +5,7 @@ package C99Compiler.CompilerNodes.Interfaces;
 
 import C99Compiler.CompilerNodes.Definitions.Scope;
 
-public interface NamedNode
+public interface NamedNode extends AddressableNode
 {
 	public Scope getScope();
 	public String getName();
@@ -17,4 +17,5 @@ public interface NamedNode
 		else fullName = getName();
 		return (fullName.length() == 1 ? "__" : "") + fullName;
 	}
+	@Override public default String getAddress(int offset) {return getFullName() + (offset != 0 ? " + " + offset : "");}
 }

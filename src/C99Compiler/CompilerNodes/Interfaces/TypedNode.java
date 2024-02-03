@@ -4,14 +4,15 @@
 package C99Compiler.CompilerNodes.Interfaces;
 
 import C99Compiler.CompilerNodes.Definitions.Type;
+import C99Compiler.CompilerNodes.Definitions.Type.CastContext;
 
 public interface TypedNode
 {
 	public Type getType();
 	public default int getSize() {return getType().getSize();}
 	public default int getSizeBits() {return getType().getSizeBits();}
-	public default boolean canCastTo(Type type) {return getType().canCastTo(type);}
-	public default boolean canCastFrom(Type type) {return getType().canCastFrom(type);}
-	public default boolean canCastTo(TypedNode node) {return getType().canCastTo(node.getType());}
-	public default boolean canCastFrom(TypedNode node) {return getType().canCastFrom(node.getType());}
+	public default boolean canCastTo(Type type, CastContext context) {return getType().canCastTo(type, context);}
+	public default boolean canCastFrom(Type type, CastContext context) {return getType().canCastFrom(type, context);}
+	public default boolean canCastTo(TypedNode node, CastContext context) {return getType().canCastTo(node.getType(), context);}
+	public default boolean canCastFrom(TypedNode node, CastContext context) {return getType().canCastFrom(node.getType(), context);}
 }

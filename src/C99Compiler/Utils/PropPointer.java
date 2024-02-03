@@ -5,14 +5,15 @@ package C99Compiler.Utils;
 
 import java.util.function.BiFunction;
 
+import C99Compiler.CompilerNodes.Interfaces.AddressableNode;
 import C99Compiler.CompilerNodes.Interfaces.NamedNode;
 import C99Compiler.CompilerNodes.Interfaces.TypedNode;
 import C99Compiler.Utils.AssemblyUtils.DetailsTicket;
 
-public class PropPointer<T extends NamedNode & TypedNode> implements BiFunction<Integer, DetailsTicket, String>
+public class PropPointer<T extends AddressableNode & TypedNode> implements BiFunction<Integer, DetailsTicket, String>
 {
 	private T node;
-	private long offset;
+	private int offset;
 
 	public PropPointer(T node, int offset)
 	{
@@ -34,9 +35,7 @@ public class PropPointer<T extends NamedNode & TypedNode> implements BiFunction<
 	
 	public String apply(Integer i, DetailsTicket ticket)
 	{
-		String address = null;
-		if (offset != 0) address = node.getFullName() + " + " + offset;
-		else if (offset == 0) address = node.getFullName();
+		String address = node.getAddress(offset);
 		return "#" + (ticket.is16Bit() ? ".loWord(" : ".bankByte(") + address + ")";
 	}
 }

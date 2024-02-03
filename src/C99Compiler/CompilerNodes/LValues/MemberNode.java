@@ -2,10 +2,14 @@
 // Variable node
 package C99Compiler.CompilerNodes.LValues;
 
+import C99Compiler.CompConfig;
 import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.Definitions.StructUnionDefinitionNode;
 import C99Compiler.CompilerNodes.Definitions.Type;
+import C99Compiler.CompilerNodes.Dummies.DummyLValueNode;
+import C99Compiler.Utils.PropPointer;
 import C99Compiler.Utils.AssemblyUtils.DetailsTicket;
+import C99Compiler.Utils.OperandSources.ConstantSource;
 import C99Compiler.Utils.OperandSources.OperandSource;
 
 public class MemberNode extends VariableNode
@@ -27,6 +31,11 @@ public class MemberNode extends VariableNode
 			return source;
 		}
 		
+		@Override
+		public String getAddress(int offset)
+		{
+			return ((LValueNode<?>) parent).getAddress(owner.getOffset(name));
+		}
 	}
 	
 	

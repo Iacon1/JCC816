@@ -6,6 +6,7 @@ package C99Compiler.CompilerNodes.LValues;
 import java.util.Set;
 
 import C99Compiler.CompilerNodes.ComponentNode;
+import C99Compiler.CompilerNodes.Dummies.DummyLValueNode;
 import C99Compiler.CompilerNodes.Definitions.Type;
 import C99Compiler.Utils.AssemblyUtils.DetailsTicket;
 import C99Compiler.Utils.OperandSources.OperandSource;
@@ -113,5 +114,17 @@ public class IndirectLValueNode extends LValueNode<IndirectLValueNode>
 	{
 		if (destination != null) destination.addPossibleValue(value);
 		else super.addPossibleValue(value);
+	}
+	
+	@Override
+	public String getAddress(int offset)
+	{
+		return addrSource.getShifted(offset).getBase();
+	}
+	@Override
+	public LValueNode<?> castTo(Type type)
+	{
+		if (destination != null) return destination.castTo(type);
+		else return super.castTo(type);
 	}
 }

@@ -5,13 +5,19 @@ package C99Compiler.CompilerNodes.LValues;
 import java.util.HashSet;
 import java.util.Set;
 
+import C99Compiler.CompConfig;
 import C99Compiler.CompConfig.OptimizationLevel;
 import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.Definitions.Type;
+import C99Compiler.CompilerNodes.Dummies.DummyLValueNode;
+import C99Compiler.CompilerNodes.Interfaces.AddressableNode;
+import C99Compiler.CompilerNodes.Interfaces.NamedNode;
 import C99Compiler.CompilerNodes.Interfaces.TypedNode;
+import C99Compiler.Utils.PropPointer;
+import C99Compiler.Utils.OperandSources.ConstantSource;
 import C99Compiler.Utils.OperandSources.OperandSource;
 
-public abstract class LValueNode<C extends LValueNode<C>> extends ComponentNode<C> implements TypedNode
+public abstract class LValueNode<C extends LValueNode<C>> extends ComponentNode<C> implements AddressableNode, TypedNode
 {
 	protected Type type;
 	
@@ -31,6 +37,14 @@ public abstract class LValueNode<C extends LValueNode<C>> extends ComponentNode<
 	{
 		return type;
 	}
+
+	
+	public LValueNode<?> castTo(Type type)
+	{
+		if (this.type.isArray() && type.isPointer() && !type.isArray()) // Decay array into pointer
+			return new DummyLValueNode(this, type, new ConstantSource(new PropPointer<C>((C) this, 0), CompConfig.pointerSize));
+		else return new DummyLValueNode(this, type, getSource()); // TODO
+	}	
 	
 	public int getSize()
 	{

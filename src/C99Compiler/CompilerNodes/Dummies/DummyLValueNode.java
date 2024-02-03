@@ -4,6 +4,7 @@ package C99Compiler.CompilerNodes.Dummies;
 
 import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.Definitions.Type;
+import C99Compiler.CompilerNodes.LValues.IndirectLValueNode;
 import C99Compiler.CompilerNodes.LValues.LValueNode;
 import C99Compiler.Utils.OperandSources.OperandSource;
 
@@ -18,4 +19,7 @@ public class DummyLValueNode extends LValueNode<DummyLValueNode>
 	}
 
 	public OperandSource getSource() {return source;}
+
+	@Override public String getAddress(int offset) {return null;}
+
 }
