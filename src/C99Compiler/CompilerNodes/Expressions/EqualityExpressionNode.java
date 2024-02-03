@@ -7,6 +7,7 @@ import java.util.List;
 
 import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.Definitions.Type;
+import C99Compiler.CompilerNodes.Definitions.Type.CastContext;
 import C99Compiler.CompilerNodes.Dummies.DummyType;
 import C99Compiler.Utils.AssemblyUtils;
 import C99Compiler.Utils.AssemblyUtils.DetailsTicket;
@@ -51,6 +52,8 @@ public class EqualityExpressionNode extends BinaryExpressionNode
 		default: return null;
 		}
 	}
+	
+	@Override public CastContext getCastContext() {return CastContext.equality;}
 	
 	public static String getIsZero(String whitespace, OperandSource destSource, ScratchManager scratchManager, OperandSource source, DetailsTicket ticket)
 	{

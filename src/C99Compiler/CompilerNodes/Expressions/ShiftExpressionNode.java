@@ -4,6 +4,7 @@ package C99Compiler.CompilerNodes.Expressions;
 
 import C99Compiler.CompConfig;
 import C99Compiler.CompilerNodes.ComponentNode;
+import C99Compiler.CompilerNodes.Definitions.Type.CastContext;
 import C99Compiler.Utils.AssemblyUtils;
 import C99Compiler.Utils.CompUtils;
 import C99Compiler.Utils.ScratchManager;
@@ -36,6 +37,8 @@ public class ShiftExpressionNode extends BinaryExpressionNode
 	protected BaseExpressionNode<Additive_expressionContext> getPCNode(Shift_expressionContext node) throws Exception
 	{return new AdditiveExpressionNode(this).interpret(node.additive_expression());}
 
+	@Override public CastContext getCastContext() {return CastContext.bitwise;}
+	
 	@Override
 	public Object getPropValue()
 	{

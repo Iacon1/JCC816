@@ -5,6 +5,7 @@ package C99Compiler.CompilerNodes.Expressions;
 import java.math.BigInteger;
 
 import C99Compiler.CompilerNodes.ComponentNode;
+import C99Compiler.CompilerNodes.Definitions.Type.CastContext;
 import C99Compiler.Utils.AssemblyUtils;
 import C99Compiler.Utils.ScratchManager;
 import C99Compiler.Utils.AssemblyUtils.DetailsTicket;
@@ -34,6 +35,8 @@ public class XOrExpressionNode extends ArithmeticBinaryExpressionNode
 	protected BaseExpressionNode<And_expressionContext> getPCNode(Xor_expressionContext node) throws Exception
 	{return new AndExpressionNode(this).interpret(node.and_expression());}
 
+	@Override public CastContext getCastContext() {return CastContext.bitwise;}
+	
 	public static String getExclOr(String whitespace, OperandSource destSource, OperandSource sourceX, OperandSource sourceY, DetailsTicket ticket) throws Exception
 	{
 		return new XOrExpressionNode(null).getAssembly(whitespace, destSource, sourceX, sourceY, ticket);

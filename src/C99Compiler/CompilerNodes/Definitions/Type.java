@@ -241,30 +241,88 @@ public class Type implements Serializable
 		else return null;
 	}
 	
-	public boolean canCastTo(Type type) // Defined by 6.5.16.1
+	public static enum CastContext
 	{
-		return type.canCastFrom(this);
+		cast,
+		multiplicative,
+		modulative,
+		additive,
+		subtractive,
+		bitwise,
+		relational,
+		equality,
+		logical,
+		conditional,
+		assignment
 	}
-	public boolean canCastFrom(Type type)
+	public boolean canCastTo(Type type, CastContext context)
 	{
-		return
+		return type.canCastFrom(this, context);
+	}
+	public boolean canCastFrom(Type type, CastContext context)
+	{
+		switch (context)
+		{
+		case cast: // Defined by 6.5.4.2
+			return
+					isScalar() && type.isScalar() ||
+					canCastFrom(context, "void");
+		case multiplicative: // Defined by 6.5.5.2
+			return isArithmetic() && type.isArithmetic();
+		case modulative: // Defined by 6.5.5.2
+			return isInteger() && type.isInteger();
+		case additive: // Defined by 6.5.6.2
+			return
+					isArithmetic() && type.isArithmetic() ||
+					isInteger() && type.isPointer() ||
+					isPointer() && type.isInteger();
+		case subtractive: // Defined by 6.5.6.3
+			return
+					isArithmetic() && type.isArithmetic() ||
+					isPointer() && type.isPointer() && ((PointerType) this).getType().canCastFrom(((PointerType) type).getType(), CastContext.assignment) ||
+					type.isInteger();
+		case bitwise: // Defined by 6.5.7.2, 6.5.10.2, 6.5.11.2, and 6.5.12.2
+			return isInteger() && type.isInteger();
+		case relational: // Defined by 6.5.8.2
+			return
+					isReal() && type.isReal() ||
+					isPointer() && type.isPointer() && ((PointerType) this).getType().canCastFrom(((PointerType) type).getType(), CastContext.assignment);
+		case equality: // Defined by 6.5.9.2
+			return
+					isArithmetic() && type.isArithmetic() ||
+					isPointer() && type.isPointer() && ((PointerType) this).getType().canCastFrom(((PointerType) type).getType(), CastContext.assignment) ||
+					isPointer() && type.isPointer() && ((PointerType) this).getType().canCastFrom(context, "void") ||
+					isPointer() && type.isPointer() && ((PointerType) type).getType().canCastFrom(context, "void") ||
+					isPointer() && type.isConstant() && type.isInteger(); // Null pointer
+		case logical: // Defined by 6.5.13.2 and 6.5.14.2
+			return isScalar() && type.isScalar();
+		case conditional: // Defined by 6.5.15.3
+			return
+					isArithmetic() && type.isArithmetic() ||
+					isStructOrUnion() && type.isStructOrUnion() && getSUEName().equals(type.getSUEName()) ||
+					canCastFrom(context, "void") && type.canCastFrom(context, "void") ||
+					isPointer() && (type.canCastFrom(context, "void") || type.isConstant() && type.isInteger()) || // Null pointer
+					type.isPointer() && (canCastFrom(context, "void") || isConstant() && isInteger()); // Null pointer
+		case assignment: // Defined by 6.5.16.1
+			return
 				isArithmetic() && type.isArithmetic() ||
-				(isStructOrUnion() && type.isStructOrUnion() && getSUEName().equals(type.getSUEName())) ||
-				(isEnum() && type.isEnum() && getSUEName().equals(type.getSUEName())) ||
-				isPointer() && type.isPointer() && ((PointerType) this).getType().canCastTo(((PointerType) type).getType()) ||
-				isPointer() && type.isPointer() && ((PointerType) this).getType().canCastTo("void") ||
-				isPointer() && type.isPointer() && ((PointerType) type).getType().canCastTo("void") ||
-				isPointer() && type.isConstant() && type.isInteger() ||
-				isPointer() && type.isArithmetic() || // TODO only in some cases
+				isStructOrUnion() && type.isStructOrUnion() && getSUEName().equals(type.getSUEName()) ||
+				isPointer() && type.isPointer() && ((PointerType) this).getType().canCastFrom(((PointerType) type).getType(), CastContext.assignment) ||
+				isPointer() && type.isPointer() && ((PointerType) this).getType().canCastFrom(context, "void") ||
+				isPointer() && type.isPointer() && ((PointerType) type).getType().canCastFrom(context, "void") ||
+				isPointer() && type.isConstant() && type.isInteger() || // Null pointer
 				typeSpecifiers.contains("_Bool") && type.isPointer();
+		default:
+			return true;
+		}
 	}
-	public boolean canCastTo(String... specifiers)
+	public boolean canCastTo(CastContext context, String... specifiers)
 	{
-		return canCastTo(new DummyType(specifiers));
+		return canCastTo(new DummyType(specifiers), context);
 	}
-	public boolean canCastFrom(String...specifiers)
+	public boolean canCastFrom(CastContext context, String...specifiers)
 	{
-		return canCastFrom(new DummyType(specifiers));
+		return canCastFrom(new DummyType(specifiers), context);
 	}
 
 	public boolean containsSpecifier(String specifier)
@@ -334,6 +392,10 @@ public class Type implements Serializable
 	{
 		return isInteger();
 	}
+	public boolean isReal()
+	{
+		return isInteger();
+	}
 	public boolean isPointer() {return false;} // To be overriden
 	public boolean isScalar()
 	{
@@ -344,14 +406,6 @@ public class Type implements Serializable
 		return isArray() || isStructOrUnion();
 	}
 	
-	public boolean allowsOperator(String operator, Type other)
-	{
-		switch (operator)
-		{
-		case "&&": case "||": case "?:": return canCastTo("_Bool");
-		default: return canCastTo(other) || canCastFrom(this);
-		}
-	}
 	public String getSignature()
 	{
 		String signature = "";

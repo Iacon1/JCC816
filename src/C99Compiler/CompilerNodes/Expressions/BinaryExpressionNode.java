@@ -9,6 +9,7 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.FunctionDefinitionNode;
 import C99Compiler.CompilerNodes.Definitions.Type;
+import C99Compiler.CompilerNodes.Definitions.Type.CastContext;
 import C99Compiler.Utils.AssemblyUtils;
 import C99Compiler.Utils.AssemblyUtils.DetailsTicket;
 import C99Compiler.Utils.ScratchManager;
@@ -61,11 +62,12 @@ public abstract class BinaryExpressionNode<
 		}
 		return this;
 	}
+	protected abstract CastContext getCastContext();
 	@Override
 	public Type getType()
 	{
-		if (x.canCastFrom(y)) return x.getType();
-		else if (y.canCastFrom(x)) return y.getType();
+		if (x.canCastFrom(y, getCastContext())) return x.getType();
+		else if (y.canCastFrom(x, getCastContext())) return y.getType();
 		else return null;
 	}
 	

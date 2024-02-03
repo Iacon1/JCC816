@@ -3,6 +3,7 @@
 package C99Compiler.CompilerNodes.Expressions;
 
 import C99Compiler.CompilerNodes.ComponentNode;
+import C99Compiler.CompilerNodes.Definitions.Type.CastContext;
 import C99Compiler.Utils.AssemblyUtils;
 import C99Compiler.Utils.AssemblyUtils.DetailsTicket;
 import C99Compiler.Utils.CompUtils;
@@ -29,6 +30,8 @@ public class LANDExpressionNode extends LogicalBinaryExpressionNode
 	protected BaseExpressionNode<Or_expressionContext> getPCNode(Land_expressionContext node) throws Exception
 	{return new OrExpressionNode(this).interpret(node.or_expression());}
 
+	@Override public CastContext getCastContext() {return CastContext.logical;}
+	
 	@Override
 	public Object getPropValue()
 	{

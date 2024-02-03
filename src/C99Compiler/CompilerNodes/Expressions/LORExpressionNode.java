@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import C99Compiler.CompilerNodes.ComponentNode;
+import C99Compiler.CompilerNodes.Definitions.Type.CastContext;
 import C99Compiler.CompilerNodes.Interfaces.SequencePointNode;
 import C99Compiler.Utils.AssemblyUtils;
 import C99Compiler.Utils.AssemblyUtils.DetailsTicket;
@@ -31,6 +32,8 @@ public class LORExpressionNode extends LogicalBinaryExpressionNode
 	@Override
 	protected BaseExpressionNode<Land_expressionContext> getPCNode(Lor_expressionContext node) throws Exception
 	{return new LANDExpressionNode(this).interpret(node.land_expression());}
+	
+	@Override public CastContext getCastContext() {return CastContext.logical;}
 	
 	@Override
 	public Object getPropValue()

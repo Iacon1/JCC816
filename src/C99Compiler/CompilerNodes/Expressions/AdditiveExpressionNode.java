@@ -3,6 +3,7 @@
 package C99Compiler.CompilerNodes.Expressions;
 
 import C99Compiler.CompilerNodes.ComponentNode;
+import C99Compiler.CompilerNodes.Definitions.Type.CastContext;
 import C99Compiler.Utils.AssemblyUtils;
 import C99Compiler.Utils.AssemblyUtils.DetailsTicket;
 import C99Compiler.Utils.ScratchManager;
@@ -34,6 +35,17 @@ public class AdditiveExpressionNode extends ArithmeticBinaryExpressionNode
 	protected BaseExpressionNode<Multiplicative_expressionContext> getPCNode(Additive_expressionContext node) throws Exception
 	{return new MultiplicativeExpressionNode(this).interpret(node.multiplicative_expression());}
 
+	@Override
+	public CastContext getCastContext()
+	{
+		switch (operator)
+		{
+		case "+": return CastContext.additive;
+		case "-": return CastContext.subtractive;
+		default: return CastContext.additive;
+		}
+	}	
+	
 	@Override
 	public Object getPropValue()
 	{

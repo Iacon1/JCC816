@@ -7,6 +7,7 @@ import java.util.List;
 
 import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.FunctionDefinitionNode;
+import C99Compiler.CompilerNodes.Definitions.Type.CastContext;
 import C99Compiler.CompilerNodes.Interfaces.SequencePointNode;
 import C99Compiler.Utils.AssemblyUtils;
 import C99Compiler.Utils.AssemblyUtils.DetailsTicket;
@@ -66,6 +67,8 @@ public class ConditionalExpressionNode extends BinaryExpressionNode
 	@Override public void clearSequence() {sequenceQueue.clear();}
 	@Override public String getAccumulatedSequences() {String assembly = ""; for (String queued : sequenceQueue) assembly += queued; return assembly;}
 
+	@Override public CastContext getCastContext() {return CastContext.conditional;}
+	
 	@Override
 	public boolean canCall(FunctionDefinitionNode function)
 	{

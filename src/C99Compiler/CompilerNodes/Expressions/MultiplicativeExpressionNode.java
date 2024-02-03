@@ -4,6 +4,7 @@ package C99Compiler.CompilerNodes.Expressions;
 
 import C99Compiler.CompConfig;
 import C99Compiler.CompilerNodes.ComponentNode;
+import C99Compiler.CompilerNodes.Definitions.Type.CastContext;
 import C99Compiler.CompilerNodes.Expressions.Snippets.DivisionMultiplicationHeaderFooter;
 import C99Compiler.CompilerNodes.Expressions.Snippets.LongDividerModulator;
 import C99Compiler.CompilerNodes.Expressions.Snippets.Multiplier;
@@ -36,6 +37,17 @@ public class MultiplicativeExpressionNode extends CallingArithmeticBinaryExpress
 	protected BaseExpressionNode<Cast_expressionContext> getPCNode(Multiplicative_expressionContext node) throws Exception
 	{return new CastExpressionNode(this).interpret(node.cast_expression());}
 
+	@Override
+	public CastContext getCastContext()
+	{
+		switch (operator)
+		{
+		case "*": case "/": return CastContext.multiplicative;
+		case "%": return CastContext.modulative;
+		default: return CastContext.multiplicative;
+		}
+	}
+	
 	@Override
 	protected long doOperation(long x, long y)
 	{

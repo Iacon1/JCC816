@@ -3,10 +3,7 @@
 package C99Compiler.CompilerNodes.Expressions;
 
 import C99Compiler.CompilerNodes.ComponentNode;
-import C99Compiler.Utils.AssemblyUtils;
-import C99Compiler.Utils.AssemblyUtils.DetailsTicket;
-import C99Compiler.Utils.ScratchManager;
-import C99Compiler.Utils.OperandSources.OperandSource;
+import C99Compiler.CompilerNodes.Definitions.Type.CastContext;
 import Grammar.C99.C99Parser.And_expressionContext;
 import Grammar.C99.C99Parser.Equality_expressionContext;
 
@@ -28,6 +25,8 @@ public class AndExpressionNode extends ArithmeticBinaryExpressionNode
 	protected BaseExpressionNode<Equality_expressionContext> getPCNode(And_expressionContext node) throws Exception
 	{return new EqualityExpressionNode(this).interpret(node.equality_expression());}
 
+	@Override public CastContext getCastContext() {return CastContext.bitwise;}
+	
 	@Override
 	protected long doOperation(long x, long y)
 	{

@@ -9,6 +9,7 @@ import java.util.UUID;
 import C99Compiler.CompConfig.DebugLevel;
 import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.Definitions.Type;
+import C99Compiler.CompilerNodes.Definitions.Type.CastContext;
 import C99Compiler.CompilerNodes.Dummies.DummyType;
 import C99Compiler.Utils.AssemblyUtils;
 import C99Compiler.Utils.CompUtils;
@@ -44,6 +45,8 @@ public class RelationalExpressionNode extends BranchingExpressionNode
 	protected BaseExpressionNode<Shift_expressionContext> getPCNode(Relational_expressionContext node) throws Exception
 	{return new ShiftExpressionNode(this).interpret(node.shift_expression());}
 
+	@Override public CastContext getCastContext() {return CastContext.relational;}
+	
 	@Override
 	public Object getPropValue()
 	{
