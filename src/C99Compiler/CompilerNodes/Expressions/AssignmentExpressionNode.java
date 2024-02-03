@@ -38,7 +38,7 @@ public class AssignmentExpressionNode extends BinaryExpressionNode
 		BaseExpressionNode sInt = super.interpret(node);
 		if (sInt != this) return sInt;
 		
-		if (x.getLValue() == null) throw new ConstraintException("6.5.16", 2, node.getStart());
+		if (!x.hasLValue()) throw new ConstraintException("6.5.16", 2, node.getStart());
 		BinaryExpressionNode<?,?,?,?> newY = null;
 		switch (operator)
 		{
@@ -162,7 +162,7 @@ public class AssignmentExpressionNode extends BinaryExpressionNode
 		}
 		if (x.hasAssembly()) assembly += x.getAssembly(leadingWhitespace, scratchManager, ticket);
 		
-		if (!y.hasAssembly() || !destSource.equals(x.getLValue().getSource()))
+		if (!y.hasAssembly() || (destSource != null && !destSource.equals(x.getLValue().getSource())))
 			assembly += AssemblyUtils.byteCopier(whitespace, x.getLValue().getSize(), x.getLValue().getSource(), sourceY, ticket);
 		
 		equateLValue(x.getLValue(), y);
@@ -173,7 +173,7 @@ public class AssignmentExpressionNode extends BinaryExpressionNode
 	@Override
 	protected String getAssembly(int leadingWhitespace, ScratchManager scratchManager, DetailsTicket ticket) throws Exception
 	{
-		return getAssembly(leadingWhitespace, x.getLValue().getSource(), scratchManager, ticket);
+		return getAssembly(leadingWhitespace, x.isIndirect()? null : x.getLValue().getSource(), scratchManager, ticket);
 	}
 	
 	

@@ -44,6 +44,7 @@ public abstract class BaseExpressionNode<C extends ParserRuleContext> extends In
 		try {return (PropPointer) getPropValue();}
 		catch (Exception e) {return null;}
 	}
+	public boolean isIndirect() {return false;} // Will this L-Value be indirect?
 	public abstract String getAssembly(int leadingWhitespace, OperandSource destSource, ScratchManager scratchManager, DetailsTicket ticket) throws Exception;
 	public String getAssembly(int leadingWhitespace, OperandSource destSource, DetailsTicket ticket) throws Exception
 	{
