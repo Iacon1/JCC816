@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 import C99Compiler.CompilerNodes.ComponentNode;
+import C99Compiler.CompilerNodes.FunctionDefinitionNode;
 import C99Compiler.CompilerNodes.InterpretingNode;
 import C99Compiler.CompilerNodes.Definitions.ArrayType;
 import C99Compiler.CompilerNodes.Definitions.StructUnionDefinitionNode;
@@ -149,6 +150,12 @@ public class InitializerNode extends InterpretingNode<InitializerNode, Initializ
 		}
 		
 		return this;
+	}
+	
+	@Override
+	public boolean canCall(FunctionDefinitionNode function)
+	{
+		return expr != null && expr.canCall(function);
 	}
 	
 	@Override
