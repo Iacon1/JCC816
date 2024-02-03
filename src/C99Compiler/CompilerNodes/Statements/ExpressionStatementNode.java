@@ -13,25 +13,26 @@ import Grammar.C99.C99Parser.Expression_statementContext;
 public class ExpressionStatementNode extends SequencePointStatementNode<Expression_statementContext>
 {
 	private BaseExpressionNode<?> expression;
-	public ExpressionStatementNode(ComponentNode<?> parent) {super(parent);}
+	public ExpressionStatementNode(ComponentNode<?> parent) {super(parent); expression = null;}
 
 	@Override
 	public StatementNode<Expression_statementContext> interpret(Expression_statementContext node) throws Exception
 	{
-		expression = new ExpressionNode(this).interpret(node.expression());
+		if (node.expression() != null)
+			expression = new ExpressionNode(this).interpret(node.expression());
 		return this;
 	}
 	
 	@Override
 	public boolean canCall(FunctionDefinitionNode function)
 	{
-		return expression.canCall(function);
+		return expression != null && expression.canCall(function);
 	}
 
 	@Override
 	public boolean hasAssembly()
 	{
-		return expression.hasAssembly();
+		return expression != null && expression.hasAssembly();
 	}
 	@Override
 	public String getAssembly(int leadingWhitespace, String returnAddr) throws Exception

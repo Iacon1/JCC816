@@ -148,13 +148,13 @@ public class IterationStatementNode extends SequencePointStatementNode<Iteration
 				assembly += whitespace + "JMP\t" + getEndLabel() + "\n";
 				assembly += whitespace + ":\n";
 			}
-			assembly += stmNode.getAssembly(leadingWhitespace + CompConfig.indentSize, returnAddr);
+			if (stmNode.hasAssembly()) assembly += stmNode.getAssembly(leadingWhitespace + CompConfig.indentSize, returnAddr);
 			assembly += whitespace + "JMP\t" + getStartLabel() + "\n";
 			assembly += whitespace + getEndLabel() + ":\n";
 			break;
 		case doWhile:
 			assembly += whitespace + getStartLabel() + ":\n";
-			assembly += stmNode.getAssembly(leadingWhitespace + CompConfig.indentSize, returnAddr);
+			if (stmNode.hasAssembly()) assembly += stmNode.getAssembly(leadingWhitespace + CompConfig.indentSize, returnAddr);
 			assembly += getAssemblyWithSequence(condExpNode, leadingWhitespace, exprSource, scratchManager);
 			assembly += EqualityExpressionNode.getIsZero(whitespace, exprSource, new ScratchManager(), exprSource, new DetailsTicket());
 			assembly += whitespace + "BEQ\t" + getEndLabel() + "\n";
@@ -190,7 +190,7 @@ public class IterationStatementNode extends SequencePointStatementNode<Iteration
 					}
 				}
 			}
-			assembly += stmNode.getAssembly(leadingWhitespace + CompConfig.indentSize, returnAddr);
+			if (stmNode.hasAssembly()) assembly += stmNode.getAssembly(leadingWhitespace + CompConfig.indentSize, returnAddr);
 			if (iterExpNode != null && iterExpNode.hasAssembly()) assembly += getAssemblyWithSequence(iterExpNode, leadingWhitespace); 
 			assembly += whitespace + "JMP\t" + getStartLabel() + "\n";
 			assembly += whitespace + getEndLabel() + ":\n";
