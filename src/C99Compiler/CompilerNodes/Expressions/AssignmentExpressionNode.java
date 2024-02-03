@@ -167,7 +167,7 @@ public class AssignmentExpressionNode extends BinaryExpressionNode
 		
 		equateLValue(x.getLValue(), y);
 		
-		ScratchManager.demotePointer(destSource); // A copy of the destination, if it's a pointer, has gone stale
+		ScratchManager.releasePointer(destSource); // A copy of the destination, if it's a pointer, has gone stale
 		return assembly;
 	}
 	@Override

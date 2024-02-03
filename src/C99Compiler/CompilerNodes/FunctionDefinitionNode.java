@@ -266,7 +266,7 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 		
 		assembly += whitespace + getEndLabel() + ": " + (isInterruptHandler() && !attributes.contains(Attributes.noISR2) ? "RTI\n" : "RTL") + "\n";
 		
-		ScratchManager.clearPointers();
+		ScratchManager.releasePointers();
 
 		for (VariableNode var : getReferencedVariables().values())
 			var.clearPossibleValues();

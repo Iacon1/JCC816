@@ -3,7 +3,9 @@
 package C99Compiler.Utils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -15,11 +17,13 @@ import Logging.Logging;
 import java.util.AbstractMap.SimpleEntry;
 
 import C99Compiler.CompConfig;
+import C99Compiler.Exceptions.ScratchOverflowException;
 
 public class ScratchManager
 {
 	private List<SimpleEntry<Boolean, Integer>> blockList;
-	private static Map<OperandSource, ScratchSource> reservedPointers = new HashMap<OperandSource, ScratchSource>();
+	private static List<ScratchSource> pointerList = new ArrayList<ScratchSource>(Arrays.asList(new ScratchSource[CompConfig.generalPointers]));
+	private static LinkedHashMap<OperandSource, ScratchSource> pointerMap = new LinkedHashMap<OperandSource, ScratchSource>(CompConfig.generalPointers);
 	
 	private int totalSize()
 	{
@@ -33,9 +37,6 @@ public class ScratchManager
 		blockList = new ArrayList<SimpleEntry<Boolean, Integer>>();
 		blockList.add(new SimpleEntry<Boolean, Integer>(false, CompConfig.scratchSize));
 
-		for (ScratchSource pointer : reservedPointers.values())
-			reserveScratchBlock(pointer.getSize(), pointer.getOffset());
-
 		assert totalSize() == CompConfig.scratchSize;
 	}
 	
@@ -44,6 +45,10 @@ public class ScratchManager
 		public ScratchSource(int offset, int size)
 		{
 			super(CompConfig.scratchBase, offset, size);
+		}
+		public ScratchSource(int index)
+		{
+			super(CompConfig.pointerBase, index * CompConfig.pointerSize, CompConfig.pointerSize);
 		}
 	}
 	
@@ -84,7 +89,7 @@ public class ScratchManager
 		}
 		
 		// Found no block
-		throw new Exception(); // TODO new exception
+		throw new ScratchOverflowException();
 	}
 	public ScratchSource reserveScratchBlock(int size) throws Exception
 	{
@@ -112,14 +117,11 @@ public class ScratchManager
 		}
 		
 		// Found no block
-		throw new Exception(); // TODO new exception
+		throw new ScratchOverflowException();
 	}
 	public void releaseScratchBlock(ScratchSource s)
 	{
 		int i = -1;
-		// Remove from reserved pointers if it was one
-		for (OperandSource key : reservedPointers.keySet())
-			if (reservedPointers.get(key).equals(s)) reservedPointers.remove(key);
 		// Find the block
 		int offset = 0;
 		for (int j = 0; j < blockList.size(); ++j)
@@ -150,43 +152,46 @@ public class ScratchManager
 		
 		assert totalSize() == CompConfig.scratchSize;
 	}
-	public ScratchSource reservePointer(OperandSource sourceFrom) throws Exception
+	public static ScratchSource reservePointer(OperandSource sourceFrom) throws Exception
 	{
-		ScratchSource s = reserveScratchBlock(CompConfig.pointerSize);
-		reservedPointers.put(sourceFrom, s);
-		return s;
+		if (pointerMap.get(sourceFrom) != null)
+			return pointerMap.get(sourceFrom);
+		
+		for (int i = 0; i < CompConfig.generalPointers; ++i)
+		{
+			if (pointerList.get(i) == null)
+			{
+				ScratchSource s = new ScratchSource(i);
+				pointerMap.put(sourceFrom, s);
+				pointerList.set(i, s);
+				return s;
+			}
+		}
+		throw new ScratchOverflowException();
 	}
 	public static boolean hasPointer(OperandSource sourceFrom)
 	{
-		return reservedPointers.containsKey(sourceFrom);
+		return pointerMap.containsKey(sourceFrom);
 	}
-	public ScratchSource getPointer(OperandSource sourceFrom) throws Exception
+	public static ScratchSource getPointer(OperandSource sourceFrom) throws Exception
 	{
-		if (reservedPointers.containsKey(sourceFrom))
-			return reservedPointers.get(sourceFrom);
+		if (pointerMap.containsKey(sourceFrom))
+			return pointerMap.get(sourceFrom);
 		else return reservePointer(sourceFrom);
 	}
-	public void releasePointer(OperandSource sourceFrom)
+	public static void releasePointer(OperandSource sourceFrom)
 	{
-		if (reservedPointers.containsKey(sourceFrom))
-			releaseScratchBlock(reservedPointers.get(sourceFrom));
+		if (pointerMap.containsKey(sourceFrom))
+		{
+			ScratchSource s = pointerMap.remove(sourceFrom);
+			int i = pointerList.indexOf(s);
+			pointerList.set(i, null);
+		}
 	}
-	public static void promoteToPointer(OperandSource sourceFrom, ScratchSource source)
+	public static void releasePointers()
 	{
-		reservedPointers.put(sourceFrom, source);
-	}
-	public static void demotePointer(OperandSource sourceFrom)
-	{
-		if (reservedPointers.containsKey(sourceFrom))
-			reservedPointers.remove(sourceFrom);
-	}
-	public void releasePointers()
-	{
-		for (OperandSource key : reservedPointers.keySet())
-			releaseScratchBlock(reservedPointers.get(key));
-	}
-	public static void clearPointers()
-	{
-		reservedPointers.clear();
+		for (int i = 0; i < CompConfig.generalPointers; ++i)
+			pointerList.set(i, null);
+		pointerMap.clear();
 	}
 }

@@ -200,7 +200,7 @@ public class SelectionStatementNode extends SequencePointStatementNode<Selection
 			assembly += whitespace + getEndLabel() + ":\n";
 		}
 		
-		ScratchManager.clearPointers();
+		ScratchManager.releasePointers();
 		return assembly;
 	}	
 }

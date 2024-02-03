@@ -128,7 +128,7 @@ public class IterationStatementNode extends SequencePointStatementNode<Iteration
 		ScratchManager scratchManager = new ScratchManager();
 		ScratchSource exprSource = scratchManager.reserveScratchBlock(condExpNode.getSize());
 		
-		ScratchManager.clearPointers();
+		ScratchManager.releasePointers();
 		
 		switch (iterType)
 		{

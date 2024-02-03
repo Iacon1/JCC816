@@ -89,7 +89,7 @@ CC extends ParserRuleContext
 		if (scratchX != null) scratchManager.releaseScratchBlock(scratchX);
 		if (scratchY != null) scratchManager.releaseScratchBlock(scratchY);
 		
-		ScratchManager.demotePointer(destSource); // A copy of the destination, if it's a pointer, has gone stale
+		ScratchManager.releasePointer(destSource); // A copy of the destination, if it's a pointer, has gone stale
 		return assembly;
 	}
 }

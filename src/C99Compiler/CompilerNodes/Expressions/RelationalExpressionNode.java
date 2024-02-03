@@ -8,6 +8,7 @@ import java.util.UUID;
 
 import C99Compiler.CompConfig.DebugLevel;
 import C99Compiler.CompilerNodes.ComponentNode;
+import C99Compiler.CompilerNodes.Definitions.Type;
 import C99Compiler.Utils.AssemblyUtils;
 import C99Compiler.Utils.CompUtils;
 import C99Compiler.Utils.FileIO;
@@ -128,7 +129,7 @@ public class RelationalExpressionNode extends BranchingExpressionNode
 			assembly += whitespace + "JMP\t" + yesLabel + "\n"; // If equal, true
 			break;
 		}
-		scratchManager.releasePointer(tempSource);
+		ScratchManager.releasePointer(tempSource);
 		
 		assembly += ticket.restore(whitespace, DetailsTicket.saveA);
 		

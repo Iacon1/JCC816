@@ -19,9 +19,11 @@ import C99Compiler.Utils.AssemblyUtils.DetailsTicket;
 import C99Compiler.Utils.PropPointer;
 import C99Compiler.Utils.ScratchManager;
 import C99Compiler.Utils.ScratchManager.ScratchSource;
+import C99Compiler.Utils.OperandSources.AddressSource;
 import C99Compiler.Utils.OperandSources.ConstantSource;
 import C99Compiler.Utils.OperandSources.OperandSource;
 import Grammar.C99.C99Parser.Unary_expressionContext;
+import C99Compiler.CompilerNodes.Dummies.DummyLValueNode;
 
 public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionContext>
 {
@@ -29,15 +31,16 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 	private Type type;
 	private String operator;
 	private String identifier, embName; // Only useful in preproc mode
-	private LValueNode<?> pointerRef; // LValue if this is a pointer reference (*x)
+	private IndirectLValueNode pointerRef; // LValue if this is a pointer reference (*x)
 	
-	public UnaryExpressionNode(ComponentNode<?> parent) {super(parent);}
+	public UnaryExpressionNode(ComponentNode<?> parent) {super(parent); pointerRef = null;}
 	
 	public UnaryExpressionNode(ComponentNode<?> parent, String operator, BaseExpressionNode<?> expr)
 	{
 		super(parent);
 		this.operator = operator;
 		this.expr = expr;
+		pointerRef = null;
 	}
 
 	@Override
@@ -63,8 +66,6 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 			
 			if ((operator.equals("++") || operator.equals("--")) && !expr.hasLValue())
 				throw new ConstraintException("6.5.3.1", 1, node.start);
-			if (operator.equals("*") && expr.hasLValue())
-				pointerRef = new IndirectLValueNode(this, expr.getLValue(), null, null); // For const prop purposes
 		}
 		return this;
 	}
@@ -83,7 +84,16 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 		}
 		else return expr.getType();
 	}
-	
+	@Override public boolean isIndirect()
+	{
+		if (operator.equals("*"))
+		{
+			if (UnaryExpressionNode.class.isAssignableFrom(expr.getClass()) && ((UnaryExpressionNode) expr).operator.equals("&"))
+				return false; // These two cancel each other out
+			else return true;
+		}
+		return false;
+	}
 	@Override
 	public boolean hasLValue()
 	{
@@ -197,12 +207,14 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 				VariableNode var = (VariableNode) expr.getLValue();
 				return new PropPointer<VariableNode>(var, 0);
 			}
-			else // Probably function pointer
+			else if (FunctionDefinitionNode.class.isAssignableFrom(expr.getPropValue().getClass())) // A function pointer
 			{
 				FunctionDefinitionNode func = (FunctionDefinitionNode) expr.getPropValue();
 				func.requireStackLoader();
 				return new PropPointer<FunctionDefinitionNode>(func, 0);
 			}
+			else
+				return expr.getPropLong();
 		}
 		else return expr.getPropValue();
 	}
@@ -271,10 +283,10 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 			ScratchSource sourceI;
 			if (!ScratchManager.hasPointer(sourceX))
 			{
-				sourceI = scratchManager.reservePointer(sourceX);
+				sourceI = ScratchManager.reservePointer(sourceX);
 				assembly += AssemblyUtils.byteCopier(whitespace, CompConfig.pointerSize, sourceI, sourceX, ticket);
 			}
-			else sourceI = scratchManager.getPointer(sourceX);
+			else sourceI = ScratchManager.getPointer(sourceX);
 		
 			pointerRef = new IndirectLValueNode(this, expr.getLValue(), sourceI, ((PointerType) expr.getType()).getType());
 			if (destSource != null)
@@ -283,7 +295,7 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 		default: return "";
 		}
 
-		ScratchManager.demotePointer(destSource); // A copy of the destination, if it's a pointer, has gone stale
+		ScratchManager.releasePointer(destSource); // A copy of the destination, if it's a pointer, has gone stale
 		return assembly;
 	}
 	

@@ -48,7 +48,7 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 	
 	private OperandSource destSource;
 	
-	private LValueNode<?> pointerRef; // For arrays and pointers to structs
+	private IndirectLValueNode pointerRef; // For arrays and pointers to structs
 	String memberName;
 	
 	private FunctionDefinitionNode getReferencedFunction()
@@ -66,6 +66,7 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 		super(parent);
 		params = new ArrayList<BaseExpressionNode<?>>();
 		sequenceQueue = new LinkedList<String>();
+		pointerRef = null;
 	}
 
 	@Override
@@ -98,7 +99,6 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 		case "->": // Struct member
 			type = PFType.structMemberP;
 			memberName = node.Identifier().getText();
-			pointerRef = new IndirectLValueNode(this, expr.getLValue(), null, null); // For const prop purposes
 			break;
 		case "++":
 			type = PFType.incr;
@@ -298,10 +298,10 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 			ScratchSource sourceP;
 			if (!ScratchManager.hasPointer(expr.getLValue().getSource()))
 			{
-				sourceP = scratchManager.reservePointer(expr.getLValue().getSource());
+				sourceP = ScratchManager.reservePointer(expr.getLValue().getSource());
 				assembly += AssemblyUtils.byteCopier(whitespace, CompConfig.pointerSize, sourceP, expr.getLValue().getSource());
 			}
-			else sourceP = scratchManager.getPointer(expr.getLValue().getSource());
+			else sourceP = ScratchManager.getPointer(expr.getLValue().getSource());
 			pointerRef = new IndirectLValueNode(this, expr.getLValue(), sourceP, ((PointerType) expr.getType()).getType());
 			break;
 		case incr: case decr:
@@ -332,7 +332,7 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 			break;
 		}
 		
-		ScratchManager.demotePointer(destSource); // A copy of the destination, if it's a pointer, has gone stale
+		ScratchManager.releasePointer(destSource); // A copy of the destination, if it's a pointer, has gone stale
 		return assembly;
 	}
 	@Override

@@ -102,7 +102,7 @@ public class JumpStatementNode extends StatementNode<Jump_statementContext> impl
 			break;
 		}
 			
-		ScratchManager.clearPointers();
+		ScratchManager.releasePointers();
 		return assembly;
 		
 	}

@@ -17,6 +17,7 @@ import C99Compiler.Utils.ScratchManager;
 import C99Compiler.Utils.OperandSources.OperandSource;
 import Grammar.C99.C99Parser.Assignment_expressionContext;
 import Grammar.C99.C99Parser.ExpressionContext;
+import Logging.Logging;
 
 public class ExpressionNode extends BaseExpressionNode<ExpressionContext> implements SequencePointNode
 {
