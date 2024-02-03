@@ -129,7 +129,7 @@ public class JCC816
 				if (FileIO.hasResource(sourceName))
 				{
 					String fileText = FileIO.readResource(sourceName);
-					translationUnits.add(0, C99Compiler.compile(stdLib, fileText));
+					translationUnits.add(0, C99Compiler.compile(sourceName, fileText));
 				}
 			}
 			
