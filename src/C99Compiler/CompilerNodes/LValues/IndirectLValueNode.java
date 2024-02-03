@@ -79,6 +79,7 @@ public class IndirectLValueNode extends LValueNode<IndirectLValueNode>
 	@Override
 	public OperandSource getSource()
 	{
+		if (addrSource != null && source == null) source = new IndirectOperandSource();
 		if (addrSource != null) return source;
 		else return null;
 	}

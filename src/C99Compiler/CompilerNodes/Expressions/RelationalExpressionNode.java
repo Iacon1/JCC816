@@ -9,6 +9,7 @@ import java.util.UUID;
 import C99Compiler.CompConfig.DebugLevel;
 import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.Definitions.Type;
+import C99Compiler.CompilerNodes.Dummies.DummyType;
 import C99Compiler.Utils.AssemblyUtils;
 import C99Compiler.Utils.CompUtils;
 import C99Compiler.Utils.FileIO;
@@ -57,6 +58,13 @@ public class RelationalExpressionNode extends BranchingExpressionNode
 		default: return null;
 		}
 	}
+	
+	@Override
+	public Type getType()
+	{
+		return new DummyType("int");
+	}
+	
 	private static String getComparison(String whitespace, String yesLabel, String noLabel, OperandSource sourceX, String operator, OperandSource sourceY, boolean isSigned, ScratchManager scratchManager, DetailsTicket ticket) throws Exception
 	{
 		if (sourceX.isLiteral() && !sourceY.isLiteral()) switch (operator)
