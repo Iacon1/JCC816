@@ -103,7 +103,7 @@ struct_declarator
 	: declarator
 	| declarator? Colon constant_expression ;
 enum_specifier
-	: Enum Identifier? LeSqBr enumerator_list Comma? RiCuBr
+	: Enum Identifier? LeCuBr enumerator_list Comma? RiCuBr
 	| Enum Identifier ;
 enumerator_list : enumerator (Comma enumerator)* ;
 enumerator : Identifier (Assign constant_expression)? ;

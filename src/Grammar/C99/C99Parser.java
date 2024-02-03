@@ -2756,7 +2756,7 @@ public class C99Parser extends Parser {
 	@SuppressWarnings("CheckReturnValue")
 	public static class Enum_specifierContext extends ParserRuleContext {
 		public TerminalNode Enum() { return getToken(C99Parser.Enum, 0); }
-		public TerminalNode LeSqBr() { return getToken(C99Parser.LeSqBr, 0); }
+		public TerminalNode LeCuBr() { return getToken(C99Parser.LeCuBr, 0); }
 		public Enumerator_listContext enumerator_list() {
 			return getRuleContext(Enumerator_listContext.class,0);
 		}
@@ -2798,7 +2798,7 @@ public class C99Parser extends Parser {
 				}
 
 				setState(459);
-				match(LeSqBr);
+				match(LeCuBr);
 				setState(460);
 				enumerator_list();
 				setState(462);
@@ -5925,7 +5925,7 @@ public class C99Parser extends Parser {
 		"\u0000\u01c5\u01c1\u0001\u0000\u0000\u0000\u01c6A\u0001\u0000\u0000\u0000"+
 		"\u01c7\u01c9\u0005\u000b\u0000\u0000\u01c8\u01ca\u0005q\u0000\u0000\u01c9"+
 		"\u01c8\u0001\u0000\u0000\u0000\u01c9\u01ca\u0001\u0000\u0000\u0000\u01ca"+
-		"\u01cb\u0001\u0000\u0000\u0000\u01cb\u01cc\u0005h\u0000\u0000\u01cc\u01ce"+
+		"\u01cb\u0001\u0000\u0000\u0000\u01cb\u01cc\u0005l\u0000\u0000\u01cc\u01ce"+
 		"\u0003D\"\u0000\u01cd\u01cf\u0005f\u0000\u0000\u01ce\u01cd\u0001\u0000"+
 		"\u0000\u0000\u01ce\u01cf\u0001\u0000\u0000\u0000\u01cf\u01d0\u0001\u0000"+
 		"\u0000\u0000\u01d0\u01d1\u0005m\u0000\u0000\u01d1\u01d5\u0001\u0000\u0000"+
