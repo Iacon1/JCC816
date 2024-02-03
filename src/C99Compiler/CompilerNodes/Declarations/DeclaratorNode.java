@@ -106,6 +106,8 @@ public class DeclaratorNode extends InterpretingNode<DeclaratorNode, DeclaratorC
 					qualifiers.add(qualifier.getText());
 				pointerQualifiers.add(new HashSet<String>(qualifiers));
 			}
+			if (pointerQualifiers.isEmpty()) // Blank pointer
+				pointerQualifiers.add(new HashSet<String>());
 		}
 		
 		if (node.direct_abstract_declarator() != null)
