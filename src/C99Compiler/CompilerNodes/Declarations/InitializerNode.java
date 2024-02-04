@@ -230,7 +230,7 @@ public class InitializerNode extends InterpretingNode<InitializerNode, Initializ
 						AssemblyUtils.getWhitespace(leadingWhitespace),
 						LValue.getSize(),
 						LValue.getSource(),
-						expr.getLValue().getSource()) + getAccumulatedSequences();
+						expr.getLValue().castTo(getType()).getSource()) + getAccumulatedSequences();
 			else return "";
 		}	
 		else if (arrayInitializers != null) // Array

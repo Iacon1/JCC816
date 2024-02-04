@@ -225,7 +225,7 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 					{
 						OperandSource sourceP = null;
 						if (params.get(i).hasPropValue()) sourceP = new ConstantSource(params.get(i).getPropValue(), params.get(i).getSize());
-						else if (params.get(i).hasLValue()) sourceP = params.get(i).getLValue().getSource();
+						else if (params.get(i).hasLValue()) sourceP = params.get(i).getLValue().castTo(funcParams.get(i).getType()).getSource();
 						assembly += AssemblyUtils.byteCopier(whitespace, sourceV.getSize(), sourceV, sourceP);
 						
 						if (func.isInline())

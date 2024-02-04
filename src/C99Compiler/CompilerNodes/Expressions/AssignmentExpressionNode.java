@@ -153,14 +153,14 @@ public class AssignmentExpressionNode extends BinaryExpressionNode
 		{
 			assembly += y.getAssembly(leadingWhitespace, destSource, scratchManager, ticket);
 			if (!y.hasLValue()) sourceY = destSource;
-			else sourceY = y.getLValue().getSource();
+			else sourceY = y.getLValue().castTo(x.getType()).getSource();
 		}
 		else
 		{
 			if (y.hasPropValue())
 				sourceY = new ConstantSource(y.getPropValue(), y.getType().getSize());
 			else if (y.hasLValue())
-				sourceY = y.getLValue().getSource();
+				sourceY = y.getLValue().castTo(x.getType()).getSource();
 			else sourceY = null;
 		}
 		if (x.hasAssembly()) assembly += x.getAssembly(leadingWhitespace, scratchManager, ticket);
