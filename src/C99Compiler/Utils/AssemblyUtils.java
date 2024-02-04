@@ -119,7 +119,7 @@ public final class AssemblyUtils
 			}
 			int j = i;
 			if (reverse)
-				j = (nBytes % 2 == 1) ? nBytes - 1 - i : nBytes - 2 - i;
+				j = (nBytes != 1) ? nBytes - 2 - i : 0;
 			for (String opLine : perIteration.apply(j, innerTicket))
 				for (String subLine : opLine.split("\n"))
 						assembly += whitespace + subLine + "\n";
