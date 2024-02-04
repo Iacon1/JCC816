@@ -1,5 +1,5 @@
 <?xml-model href=""?>
-<project name="BBSnCC" default="build" basedir=".">
+<project name="JCC816" default="build" basedir=".">
 	<property name="src" location="src"/>
 	<property name="bin" location="bin"/>
 	<property name="test_bin" location="bin"/>
