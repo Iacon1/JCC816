@@ -27,7 +27,7 @@ public class ConstraintException extends TokenException
 		case "6.7.2.3": return
 				"The type specifier _Complex shall not be used if the implementation does not provide complex types.";
 		default:
-			return "";
+			return section + "." + number;
 		}
 	}
 	
