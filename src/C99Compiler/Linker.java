@@ -297,8 +297,7 @@ public final class Linker implements Catalogger
 	private String getAssembly(CartConfig cartConfig, MemorySize memorySize) throws Exception
 	{
 		String assembly = "";
-		Map<String, Integer> varPoses = mapVariables(cartConfig, memorySize);
-		
+
 		// Get assembly from functions
 		for (FunctionDefinitionNode funcNode : getFunctions().values())
 		{
@@ -307,6 +306,9 @@ public final class Linker implements Catalogger
 				throw new UndefinedFunctionException(funcNode);
 			assembly += funcNode.getAssembly();
 		}
+		
+		Map<String, Integer> varPoses = mapVariables(cartConfig, memorySize);
+		
 		
 		if (resolveFunction("main") == null)
 			throw new Exception("Program must have \"" + CompConfig.mainName + "\" function.");
