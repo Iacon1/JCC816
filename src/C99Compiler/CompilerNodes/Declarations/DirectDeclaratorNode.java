@@ -92,45 +92,49 @@ public class DirectDeclaratorNode extends InterpretingNode<DirectDeclaratorNode,
 	}
 	public DirectDeclaratorNode interpret(Direct_abstract_declaratorContext node) throws Exception
 	{
-		if (node.declarator() != null) // dec
+		if (node.abstract_declarator() != null) // dec
 		{
 			type = DeclaratorType.declarator;
-			subDec = new DeclaratorNode(this, scopeOverride).interpret(node.declarator());
+			subDec = new DeclaratorNode(this, scopeOverride).interpret(node.abstract_declarator());
 		}
-		else if (node.getChild(1).getText().equals("(")) // Parameter list
+		else
 		{
-			type = DeclaratorType.funcParam;
-			info = new DeclaratorInfo(type);
-			List<ParameterDeclarationNode> parameters = new ArrayList<ParameterDeclarationNode>();
-			if (node.parameter_type_list() != null && node.parameter_type_list().parameter_list() != null)
+			if (node.getChild(1).getText().equals("(")) // Parameter list
 			{
-				for (Parameter_declarationContext paramDecl : node.parameter_type_list().parameter_list().parameter_declaration())
-					parameters.add(new ParameterDeclarationNode(this, scopeOverride).interpret(paramDecl));
+				type = DeclaratorType.funcParam;
+				info = new DeclaratorInfo(type);
+				List<ParameterDeclarationNode> parameters = new ArrayList<ParameterDeclarationNode>();
+				if (node.parameter_type_list() != null && node.parameter_type_list().parameter_list() != null)
+				{
+					for (Parameter_declarationContext paramDecl : node.parameter_type_list().parameter_list().parameter_declaration())
+						parameters.add(new ParameterDeclarationNode(this, scopeOverride).interpret(paramDecl));
+				}
+				info.paramDecls = parameters.toArray(new ParameterDeclarationNode[] {});
 			}
-			info.paramDecls = parameters.toArray(new ParameterDeclarationNode[] {});
-			subDirDec = new DirectDeclaratorNode(this, scopeOverride).interpret(node.direct_abstract_declarator());
-		}
-		else if (node.getChild(1).getText().equals("["))// Array
-		{
-			type = DeclaratorType.array;
-			
-			if (node.getText().endsWith("*]")) // VLA
-				type = DeclaratorType.varLenArray;
-			info = new DeclaratorInfo(type);
-			if (node.type_qualifier_list() != null)
+			else if (node.getChild(1).getText().equals("["))// Array
 			{
-				List<String> typeQualifiers = new ArrayList<String>();
-				for (Type_qualifierContext typeQualifier: node.type_qualifier_list().type_qualifier())
-					typeQualifiers.add(typeQualifier.getText());
-				info.typeQualifiers = typeQualifiers.toArray(new String[] {});
+				type = DeclaratorType.array;
+				
+				if (node.getText().endsWith("*]")) // VLA
+					type = DeclaratorType.varLenArray;
+				info = new DeclaratorInfo(type);
+				if (node.type_qualifier_list() != null)
+				{
+					List<String> typeQualifiers = new ArrayList<String>();
+					for (Type_qualifierContext typeQualifier: node.type_qualifier_list().type_qualifier())
+						typeQualifiers.add(typeQualifier.getText());
+					info.typeQualifiers = typeQualifiers.toArray(new String[] {});
+				}
+				if (node.assignment_expression() != null)
+					info.assignExpr = new AssignmentExpressionNode(this).interpret(node.assignment_expression());
+				subDirDec = new DirectDeclaratorNode(this, scopeOverride).interpret(node.direct_abstract_declarator());
+				if (type == DeclaratorType.varLenArray) // VLA not supported
+					throw new UnsupportedFeatureException("Variable length arrays", false, node.start);
+				if (info.assignExpr != null && !info.assignExpr.hasPropValue()) // Static allocation can't handle arrays whose size is unknown at compile time
+					throw new UnsupportedFeatureException("Arrays of non-constant length", false, node.start);
 			}
-			if (node.assignment_expression() != null)
-				info.assignExpr = new AssignmentExpressionNode(this).interpret(node.assignment_expression());
-			subDirDec = new DirectDeclaratorNode(this, scopeOverride).interpret(node.direct_abstract_declarator());
-			if (type == DeclaratorType.varLenArray) // VLA not supported
-				throw new UnsupportedFeatureException("Variable length arrays", false, node.start);
-			if (info.assignExpr != null && !info.assignExpr.hasPropValue()) // Static allocation can't handle arrays whose size is unknown at compile time
-				throw new UnsupportedFeatureException("Arrays of non-constant length", false, node.start);
+			if (node.direct_abstract_declarator() != null)
+				subDirDec = new DirectDeclaratorNode(this, scopeOverride).interpret(node.direct_abstract_declarator());
 		}
 		return this;
 	}

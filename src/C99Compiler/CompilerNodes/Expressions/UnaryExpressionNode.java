@@ -21,9 +21,11 @@ import C99Compiler.Utils.ScratchManager;
 import C99Compiler.Utils.ScratchManager.ScratchSource;
 import C99Compiler.Utils.OperandSources.AddressSource;
 import C99Compiler.Utils.OperandSources.ConstantSource;
+import C99Compiler.Utils.OperandSources.NumericAddressSource;
 import C99Compiler.Utils.OperandSources.OperandSource;
 import Grammar.C99.C99Parser.Unary_expressionContext;
 import C99Compiler.CompilerNodes.Dummies.DummyLValueNode;
+import C99Compiler.CompilerNodes.Dummies.DummyVariableNode;
 
 public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionContext>
 {
@@ -114,6 +116,14 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 		{
 			if (UnaryExpressionNode.class.isAssignableFrom(expr.getClass()) && ((UnaryExpressionNode) expr).operator.equals("&"))
 				return ((UnaryExpressionNode) expr).expr.getLValue(); // These two cancel each other out
+			else if (expr.hasPropValue())
+			{
+				if (expr.getPropPointer() != null) // Pointer
+					return new DummyVariableNode(this, getType(), new ConstantSource(expr.getPropPointer(), getSize()));
+				else if (expr.getPropLong() != 0) // Numeric
+					return new DummyVariableNode(this, getType(), new NumericAddressSource((int) expr.getPropLong(), getSize()));
+				else return null;
+			}
 			else return pointerRef;
 		}
 		else if (operator.equals("&"))
@@ -178,6 +188,7 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 		else if (operator.equals("~")) return Long.valueOf(~expr.getPropLong());
 		else if (operator.equals("!")) return Boolean.valueOf(expr.getPropBool());
 		else if (operator.equals("*"))
+		{
 			if (pointerRef != null && pointerRef.hasPossibleValues() && pointerRef.getPossibleValues().size() == 1)
 			{
 				// if expr can only point to one thing...
@@ -200,6 +211,7 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 				else return null;
 			}
 			else return null;
+		}
 		else if (operator.equals("&"))
 		{
 			if (expr.hasLValue() && VariableNode.class.isAssignableFrom(expr.getLValue().getClass()))
@@ -222,7 +234,7 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 	@Override
 	public boolean hasAssembly()
 	{
-		if (operator.equals("*")) return true;
+		if (operator.equals("*")) return expr.hasAssembly() || !expr.hasPropValue();
 		else if (operator.equals("&")) return false;
 		else if (!operator.equals("++") && !operator.equals("--"))
 			return (expr == null ? false : expr.hasAssembly()) || !hasPropValue();

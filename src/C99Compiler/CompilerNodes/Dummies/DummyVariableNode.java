@@ -9,14 +9,21 @@ import C99Compiler.Utils.OperandSources.OperandSource;
 
 public class DummyVariableNode extends VariableNode
 {
-	public DummyVariableNode(ComponentNode<?> parent, Type type)
+	private OperandSource source;
+	
+	public DummyVariableNode(ComponentNode<?> parent, Type type, OperandSource source)
 	{
 		super(parent, null, type);
+		this.source = source;
 	}
-
+	@Override
+	public String getAddress(int offset)
+	{
+		return source.getShifted(offset).getBase();
+	}
 	@Override
 	public OperandSource getSource()
 	{
-		return null;
+		return source;
 	}
 }

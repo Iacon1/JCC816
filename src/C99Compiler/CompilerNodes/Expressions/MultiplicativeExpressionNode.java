@@ -11,12 +11,6 @@ import C99Compiler.CompilerNodes.Expressions.Snippets.Multiplier;
 import C99Compiler.CompilerNodes.Expressions.Snippets.ShortDividerModulator;
 import C99Compiler.Utils.AssemblyUtils;
 import C99Compiler.Utils.AssemblyUtils.DetailsTicket;
-import C99Compiler.Utils.CompUtils;
-import C99Compiler.Utils.SNESRegisters;
-import C99Compiler.Utils.ScratchManager;
-import C99Compiler.Utils.OperandSources.ConstantSource;
-import C99Compiler.Utils.OperandSources.OperandSource;
-import C99Compiler.Utils.ScratchManager.ScratchSource;
 import Grammar.C99.C99Parser.Cast_expressionContext;
 import Grammar.C99.C99Parser.Multiplicative_expressionContext;
 
@@ -37,6 +31,13 @@ public class MultiplicativeExpressionNode extends CallingArithmeticBinaryExpress
 	protected BaseExpressionNode<Cast_expressionContext> getPCNode(Multiplicative_expressionContext node) throws Exception
 	{return new CastExpressionNode(this).interpret(node.cast_expression());}
 
+	public MultiplicativeExpressionNode(ComponentNode<?> parent, String operator, BaseExpressionNode<?> x, BaseExpressionNode<?> y)
+	{
+		super(parent);
+		this.operator = operator;
+		this.x = x;
+		this.y = y;
+	}
 	@Override
 	public CastContext getCastContext()
 	{

@@ -22,12 +22,17 @@ import C99Compiler.Exceptions.UnsupportedFeatureException;
 import C99Compiler.Utils.AssemblyUtils;
 import C99Compiler.Utils.AssemblyUtils.DetailsTicket;
 import C99Compiler.Utils.CompUtils;
+import C99Compiler.Utils.PropPointer;
 import C99Compiler.Utils.ScratchManager;
 import C99Compiler.Utils.OperandSources.ConstantSource;
 import C99Compiler.Utils.OperandSources.OperandSource;
 import C99Compiler.Utils.ScratchManager.ScratchSource;
 import Grammar.C99.C99Parser.Assignment_expressionContext;
 import Grammar.C99.C99Parser.Postfix_expressionContext;
+import C99Compiler.CompilerNodes.Dummies.DummyExpressionNode;
+import C99Compiler.CompilerNodes.Dummies.DummyLValueNode;
+import C99Compiler.CompilerNodes.LValues.WrapperLValueNode;
+import C99Compiler.CompilerNodes.Definitions.ArrayType;
 
 public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expressionContext> implements SequencePointNode
 {
@@ -144,7 +149,7 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 		}
 		else return expr.canCall(function);
 	}
-	
+	@Override public boolean isIndirect() {return type == PFType.arraySubscript;}
 	@Override
 	public boolean hasPropValue()
 	{
@@ -157,13 +162,19 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 		// TODO Auto-generated method stub
 		return null;
 	}
+	@Override public boolean hasLValue() {return true;}
 	@Override
 	public LValueNode<?> getLValue() // Warning: Only returns meaningful result after getAssembly
 	{
 		switch (type)
 		{
 		case arraySubscript:
-			return new IndirectLValueNode(this, destSource, getType());
+			if (indexExpr.hasPropValue())
+			{
+				int offset = getType().getSize() * (int) indexExpr.getPropLong();
+				return new WrapperLValueNode(this, ((ArrayType) expr.getType()).getType(), expr.getLValue(), offset);
+			}
+			return pointerRef;
 		case structMember:
 			return getTranslationUnit().resolveStructOrUnion(expr.getType().getSUEName()).getMember(memberName).getInstance(expr.getLValue());
 		case structMemberP:
@@ -193,15 +204,32 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 		switch (type)
 		{
 		case arraySubscript:
-			this.destSource = destSource; // Initialize LValue
-			OperandSource sourceA = expr.getLValue().getSource().respec(CompConfig.pointerSize);
-			// An array normal has a size representing its memory footprint, we just need the size of the actual address here
-			ScratchSource sourceI = scratchManager.reserveScratchBlock(CompConfig.pointerSize);
-			OperandSource sourceS = new ConstantSource(indexExpr.getType().getSize(), CompConfig.pointerSize);
-			if (indexExpr.hasAssembly()) assembly += indexExpr.getAssembly(leadingWhitespace, sourceI, scratchManager, ticket);
-			assembly += new MultiplicativeExpressionNode(null).getAssembly(whitespace, sourceI, sourceI, sourceS, ticket); // Multiply by size of type
-			assembly += AdditiveExpressionNode.getAdder(whitespace, destSource, sourceA, sourceI, ticket);
-			scratchManager.releaseScratchBlock(sourceI);
+			if (destSource == null) this.destSource = destSource; // Initialize LValue
+			if (expr.hasAssembly()) expr.getAssembly(leadingWhitespace, scratchManager, ticket);
+			if (expr.hasLValue())
+			{
+				if (indexExpr.hasPropValue())
+				{
+					if (indexExpr.hasAssembly()) assembly += indexExpr.getAssembly(leadingWhitespace, scratchManager, ticket);
+					int offset = getType().getSize() * (int) indexExpr.getPropLong();
+					if (destSource != null)
+						assembly += AssemblyUtils.byteCopier(whitespace, destSource.getSize(),
+								destSource,
+								expr.getLValue().getSource().getShifted(offset));
+				}
+				else
+				{
+					ScratchSource sourceI = ScratchManager.reservePointer(expr.getLValue().getSource());
+					assembly += new MultiplicativeExpressionNode(this, "*", indexExpr, new DummyExpressionNode(this, getType().getSize())).getAssembly(whitespace.length(), sourceI, ticket); // Multiply index by size of type
+					assembly += AdditiveExpressionNode.getAdder(whitespace,
+							sourceI,
+							new ConstantSource(new PropPointer(expr.getLValue(), 0), CompConfig.pointerSize),
+							sourceI, ticket); // set pointer to pointer plus address
+					pointerRef = new IndirectLValueNode(this, new DummyLValueNode(this, expr.getType(), sourceI), sourceI, expr.getType());
+					if (destSource != null)
+						assembly += AssemblyUtils.byteCopier(whitespace, destSource.getSize(), destSource, pointerRef.getSource());
+				}
+			}
 			break;
 		case funcCall:
 			if (getReferencedFunction() != null && !getReferencedFunction().canCall(getEnclosingFunction())) // We can know the variables to copy parameters to

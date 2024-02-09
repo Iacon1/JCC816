@@ -147,12 +147,14 @@ public class AssignmentExpressionNode extends BinaryExpressionNode
 		final OperandSource sourceY;
 		String assembly = "";
 		
+		if (x.hasAssembly()) assembly += x.getAssembly(leadingWhitespace, scratchManager, ticket);
+		
 //		if (!y.getType().canCastTo(x.getType()))
 //			throw new TypeMismatchException(y.getType(), x.getType());
 		if (y.hasAssembly())
 		{
-			assembly += y.getAssembly(leadingWhitespace, destSource, scratchManager, ticket);
-			if (!y.hasLValue()) sourceY = destSource;
+			assembly += y.getAssembly(leadingWhitespace, x.getLValue().getSource(), scratchManager, ticket);
+			if (!y.hasLValue()) sourceY = x.getLValue().getSource();
 			else sourceY = y.getLValue().castTo(x.getType()).getSource();
 		}
 		else
@@ -162,11 +164,11 @@ public class AssignmentExpressionNode extends BinaryExpressionNode
 			else if (y.hasLValue())
 				sourceY = y.getLValue().castTo(x.getType()).getSource();
 			else sourceY = null;
-		}
-		if (x.hasAssembly()) assembly += x.getAssembly(leadingWhitespace, scratchManager, ticket);
-		
-		if (!y.hasAssembly() || (destSource != null && !destSource.equals(x.getLValue().getSource())))
 			assembly += AssemblyUtils.byteCopier(whitespace, x.getLValue().getSize(), x.getLValue().getSource(), sourceY, ticket);
+		}
+		
+		if (destSource != null && !destSource.equals(x.getLValue().getSource()))
+			assembly += AssemblyUtils.byteCopier(whitespace, x.getLValue().getSize(), destSource, sourceY, ticket);
 		
 		equateLValue(x.getLValue(), y);
 		
@@ -176,7 +178,7 @@ public class AssignmentExpressionNode extends BinaryExpressionNode
 	@Override
 	protected String getAssembly(int leadingWhitespace, ScratchManager scratchManager, DetailsTicket ticket) throws Exception
 	{
-		return getAssembly(leadingWhitespace, x.isIndirect()? null : x.getLValue().getSource(), scratchManager, ticket);
+		return getAssembly(leadingWhitespace, null, scratchManager, ticket);
 	}
 	
 	
