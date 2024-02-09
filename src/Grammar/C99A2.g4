@@ -129,13 +129,20 @@ abstract_declarator
 	: pointer
 	| pointer? direct_abstract_declarator ;
 direct_abstract_declarator
-	: LeRoBr declarator RiRoBr
+	: LeRoBr abstract_declarator RiRoBr
 	| direct_abstract_declarator LeSqBr type_qualifier_list? assignment_expression? RiSqBr
+	| LeSqBr type_qualifier_list? assignment_expression? RiSqBr
 	| direct_abstract_declarator LeSqBr Static type_qualifier_list? assignment_expression RiSqBr
+	| LeSqBr Static type_qualifier_list? assignment_expression RiSqBr
 	| direct_abstract_declarator LeSqBr type_qualifier_list Static assignment_expression RiSqBr
+	| LeSqBr type_qualifier_list Static assignment_expression RiSqBr
 	| direct_abstract_declarator LeSqBr type_qualifier_list? Star RiSqBr
+	| LeSqBr type_qualifier_list? Star RiSqBr
 	| direct_abstract_declarator LeRoBr parameter_type_list RiRoBr
-	| direct_abstract_declarator LeRoBr identifier_list? RiRoBr ;
+	| LeRoBr parameter_type_list RiRoBr
+	| direct_abstract_declarator LeRoBr identifier_list? RiRoBr
+	| LeRoBr identifier_list? RiRoBr
+	;
 typedef_name : Identifier ;
 initializer
 	: assignment_expression

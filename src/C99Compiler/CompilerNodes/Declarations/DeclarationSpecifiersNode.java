@@ -125,7 +125,12 @@ public class DeclarationSpecifiersNode extends InterpretingNode<DeclarationSpeci
 				storageClassSpecifiers.add(((Storage_class_specifierContext) r).getText());
 			else if (r.getClass().equals(Type_specifierContext.class))
 			{
-				typeSpecifiers.add(((Type_specifierContext) r).getText());
+				if (((Type_specifierContext) r).struct_or_union_specifier() != null)
+				{
+					typeSpecifiers.add(((Type_specifierContext) r).struct_or_union_specifier().getChild(0).getText());
+					typeSpecifiers.add(((Type_specifierContext) r).struct_or_union_specifier().getChild(1).getText());
+				}
+				else typeSpecifiers.add(((Type_specifierContext) r).getText());
 			}
 			else if (r.getClass().equals(Type_qualifierContext.class))
 				typeQualifiers.add(((Type_qualifierContext) r).getText());
