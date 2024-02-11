@@ -1,6 +1,6 @@
 // Created by Iacon1 on 01/15/2024.
 // Links TranslationUnitNodes into one asm file.
-package C99Compiler;
+package Linker;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -12,6 +12,8 @@ import java.util.Set;
 import java.util.AbstractMap.SimpleEntry;
 
 import Assembler.MemorySize;
+import C99Compiler.CartConfig;
+import C99Compiler.CompConfig;
 import C99Compiler.CompConfig.DebugLevel;
 import C99Compiler.CompConfig.DefinableInterrupt;
 import C99Compiler.CompConfig.OptimizationLevel;
@@ -251,7 +253,7 @@ public final class Linker implements Catalogger
 				 CompUtils.setA16 + "\n";
 		assembly += "LDA\t#$" + String.format("%04x", CompConfig.stackSize - 1) + "\n";
 		assembly += "TCS\n";
-		if (cartConfig.isFast) // Activate FastROM
+		if (cartConfig.isFast()) // Activate FastROM
 		{
 			assembly += "LDA\t#$FFFF\n";
 			assembly += "STA\t#$420D\n";

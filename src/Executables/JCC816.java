@@ -18,7 +18,6 @@ import Assembler.MemorySize;
 import C99Compiler.CartConfig;
 import C99Compiler.CompConfig;
 import C99Compiler.C99Compiler;
-import C99Compiler.Linker;
 import C99Compiler.Preprocessor;
 import C99Compiler.CartConfig.AddonChip;
 import C99Compiler.CartConfig.MapMode;
@@ -27,6 +26,7 @@ import C99Compiler.CompConfig.OptimizationLevel;
 import C99Compiler.CompConfig.VerbosityLevel;
 import C99Compiler.CompilerNodes.TranslationUnitNode;
 import C99Compiler.Utils.FileIO;
+import Linker.Linker;
 import Logging.DebugLogger;
 import Logging.Logging;
 

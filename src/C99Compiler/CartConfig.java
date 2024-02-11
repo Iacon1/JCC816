@@ -80,15 +80,13 @@ public class CartConfig
 	protected boolean hasBattery;
 	
 	protected boolean isFast;
-//	protected int SRAMSize;
-	
+
 	public CartConfig(MapMode ROMType, AddonChip addonChip, boolean hasBattery, boolean isFast, int SRAMSize)
 	{
 		this.mapMode = ROMType;
 		this.addonChip = addonChip;
 		this.hasBattery = hasBattery;
 		this.isFast = isFast;
-//		this.SRAMSize = Math.max(0, (int) Math.ceil(Math.log(SRAMSize) / Math.log(2)));
 	}
 	public CartConfig(CartConfig cartConfig)
 	{
@@ -96,7 +94,6 @@ public class CartConfig
 		this.addonChip = cartConfig.addonChip;
 		this.hasBattery = cartConfig.hasBattery;
 		this.isFast = cartConfig.isFast;
-//		this.SRAMSize = cartConfig.SRAMSize;
 	}
 	public CartConfig()
 	{
@@ -104,7 +101,6 @@ public class CartConfig
 		this.addonChip = AddonChip.none;
 		this.hasBattery = false;
 		this.isFast = false;
-//		this.SRAMSize = 0;
 	}
 	
 	public boolean containsChip(AddonChip addonChip)
@@ -116,6 +112,8 @@ public class CartConfig
 	{
 		return mapMode;
 	}
+	
+	public boolean isFast() {return isFast;}
 	
 	public CartConfig(Document document)
 	{

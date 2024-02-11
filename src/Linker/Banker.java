@@ -1,9 +1,11 @@
 // Created by Iacon1 on 01/14/2024.
 // Splits the code into banks
-package C99Compiler;
+package Linker;
 
 import java.util.ArrayList;
 
+import C99Compiler.CartConfig;
+import C99Compiler.CompConfig;
 import C99Compiler.ASMGrapher.ASMGraphBuilder;
 import C99Compiler.Exceptions.UnsupportedFeatureException;
 
@@ -32,7 +34,7 @@ public final class Banker
 			{
 				if (!blockAssembly.isEmpty())
 				{
-					int bankSize = cartConfig.getType().getROMBankLength(cartConfig.isFast, banks - 1);
+					int bankSize = cartConfig.getType().getROMBankLength(cartConfig.isFast(), banks - 1);
 					int blockSize = new ASMGraphBuilder(blockAssembly).getSize();
 //					Logging.logNotice(String.valueOf(blockSize));
 					if (blockSize >= bankSize)
