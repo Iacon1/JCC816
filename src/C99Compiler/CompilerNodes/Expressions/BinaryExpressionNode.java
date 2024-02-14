@@ -66,7 +66,12 @@ public abstract class BinaryExpressionNode<
 	@Override
 	public Type getType()
 	{
-		if (x.canCastFrom(y, getCastContext())) return x.getType();
+		if (x.getType().isArithmetic() && y.getType().isArithmetic())
+		{
+			if (x.getSize() < y.getSize()) return y.getType();
+			else return x.getType();
+		}
+		else if (x.canCastFrom(y, getCastContext())) return x.getType();
 		else if (y.canCastFrom(x, getCastContext())) return y.getType();
 		else return null;
 	}
@@ -97,7 +102,7 @@ public abstract class BinaryExpressionNode<
 		// figure out X
 		if (x.hasAssembly())
 		{
-			scratchX = scratchManager.reserveScratchBlock(y.getType().getSize());
+			scratchX = scratchManager.reserveScratchBlock(x.getType().getSize());
 			assembly += x.getAssembly(leadingWhitespace, scratchX, scratchManager, ticket);
 			if (x.hasLValue())
 				sourceX = x.getLValue().getSource();

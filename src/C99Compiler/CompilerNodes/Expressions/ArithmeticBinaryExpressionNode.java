@@ -62,7 +62,7 @@ CC extends ParserRuleContext
 		assembly += AssemblyUtils.setSignExtend(whitespace, sourceX, sourceY, innerTicket);
 		assembly += AssemblyUtils.bytewiseOperation(whitespace, size, (Integer i, DetailsTicket ticket2) -> 
 		{
-			if (i == sourceX.getSize() - 1 ^ i == sourceY.getSize() - 1) // Reached the last byte of only one of these
+			if ((i >= sourceX.getSize() - 1) ^ (i >= sourceY.getSize() - 1)) // Reached the last byte of only one of these
 			{
 				DetailsTicket ticket3 = new DetailsTicket(ticket2, 0, DetailsTicket.isA16Bit);
 				return new String[]
