@@ -30,6 +30,7 @@ import C99Compiler.CompilerNodes.Definitions.StructUnionDefinitionNode;
 import C99Compiler.CompilerNodes.Definitions.Type;
 import C99Compiler.CompilerNodes.Dummies.EnumeratorNode;
 import C99Compiler.CompilerNodes.Interfaces.Catalogger;
+import C99Compiler.CompilerNodes.Interfaces.TranslationUnit;
 import C99Compiler.CompilerNodes.LValues.VariableNode;
 import C99Compiler.Exceptions.LinkerMultipleDefinitionException;
 import C99Compiler.Exceptions.UndefinedFunctionException;
@@ -45,13 +46,14 @@ public final class Linker implements Catalogger
 		for (int i = 0; i < info.length; ++i) Logging.logNotice(info[i].toString() + (i == info.length - 1 ? "" : ", ") + "\n");
 	}
 	
-	private List<TranslationUnitNode> translationUnits;
+	private List<TranslationUnit> translationUnits;
+	
 	private List<Exception> storedExceptions;
 	@Override
 	public LinkedHashMap<String, VariableNode> getVariables()
 	{
 		LinkedHashMap<String, VariableNode> variables = new LinkedHashMap<String, VariableNode>();
-		for (TranslationUnitNode translationUnit : translationUnits)
+		for (TranslationUnit translationUnit : translationUnits)
 			for (VariableNode variable : translationUnit.getVariables().values()) // Have to check one-by-one for name problems
 			{
 				if (variables.get(variable.getFullName()) != null) // Two variables cannot have same full name
@@ -64,7 +66,7 @@ public final class Linker implements Catalogger
 	public LinkedHashMap<String, VariableNode> getGlobalVariables()
 	{
 		LinkedHashMap<String, VariableNode> variables = new LinkedHashMap<String, VariableNode>();
-		for (TranslationUnitNode translationUnit : translationUnits)
+		for (TranslationUnit translationUnit : translationUnits)
 			variables.putAll(translationUnit.getGlobalVariables());
 		
 		return variables;
@@ -73,7 +75,7 @@ public final class Linker implements Catalogger
 	public LinkedHashMap<String, StructUnionDefinitionNode> getStructs()
 	{
 		LinkedHashMap<String, StructUnionDefinitionNode> structs = new LinkedHashMap<String, StructUnionDefinitionNode>();
-		for (TranslationUnitNode translationUnit : translationUnits)
+		for (TranslationUnit translationUnit : translationUnits)
 			structs.putAll(translationUnit.getStructs());
 		
 		return structs;
@@ -82,7 +84,7 @@ public final class Linker implements Catalogger
 	public LinkedHashMap<String, EnumDefinitionNode> getEnums()
 	{
 		LinkedHashMap<String, EnumDefinitionNode> enums = new LinkedHashMap<String, EnumDefinitionNode>();
-		for (TranslationUnitNode translationUnit : translationUnits)
+		for (TranslationUnit translationUnit : translationUnits)
 			enums.putAll(translationUnit.getEnums());
 		
 		return enums;
@@ -91,7 +93,7 @@ public final class Linker implements Catalogger
 	public LinkedHashMap<String, EnumeratorNode> getEnumerators()
 	{
 		LinkedHashMap<String, EnumeratorNode> enumerators = new LinkedHashMap<String, EnumeratorNode>();
-		for (TranslationUnitNode translationUnit : translationUnits)
+		for (TranslationUnit translationUnit : translationUnits)
 			enumerators.putAll(translationUnit.getEnumerators());
 		
 		return enumerators;
@@ -100,7 +102,7 @@ public final class Linker implements Catalogger
 	public LinkedHashMap<String, FunctionDefinitionNode> getFunctions()
 	{
 		LinkedHashMap<String, FunctionDefinitionNode> functions = new LinkedHashMap<String, FunctionDefinitionNode>();
-		for (TranslationUnitNode translationUnit : translationUnits)
+		for (TranslationUnit translationUnit : translationUnits)
 			for (FunctionDefinitionNode function : translationUnit.getFunctions().values()) // Have to check one-by-one for name problems
 			{
 				FunctionDefinitionNode oldFunction = functions.get(function.getFullName());
@@ -121,7 +123,7 @@ public final class Linker implements Catalogger
 	public LinkedHashMap<String, Type> getTypedefs()
 	{
 		LinkedHashMap<String, Type> typedefs = new LinkedHashMap<String, Type>();
-		for (TranslationUnitNode translationUnit : translationUnits)
+		for (TranslationUnit translationUnit : translationUnits)
 			typedefs.putAll(translationUnit.getTypedefs());
 		
 		return typedefs;
@@ -130,7 +132,7 @@ public final class Linker implements Catalogger
 	public LinkedHashMap<String, String> getRequiredSubs()
 	{
 		LinkedHashMap<String, String> requiredSubs = new LinkedHashMap<String, String>();
-		for (TranslationUnitNode translationUnit : translationUnits)
+		for (TranslationUnit translationUnit : translationUnits)
 			requiredSubs.putAll(translationUnit.getRequiredSubs());
 		
 		return requiredSubs;
@@ -138,7 +140,7 @@ public final class Linker implements Catalogger
 	public LinkedHashMap<DefinableInterrupt, String> getInterrupts()
 	{
 		LinkedHashMap<DefinableInterrupt, String> interrupts = new LinkedHashMap<DefinableInterrupt, String>();
-		for (TranslationUnitNode translationUnit : translationUnits)
+		for (TranslationUnit translationUnit : translationUnits)
 			interrupts.putAll(translationUnit.getInterrupts());
 		
 		return interrupts;
@@ -234,7 +236,7 @@ public final class Linker implements Catalogger
 		assembly += ".p816\n" +  ".smart\t+\n";
 		if (CompConfig.scopeDelimiterPermissor != null)
 			assembly +=  ".feature " + CompConfig.scopeDelimiterPermissor + "\n";
-		for (TranslationUnitNode unit : translationUnits)
+		for (TranslationUnit unit : translationUnits)
 			if (DebugLevel.isAtLeast(DebugLevel.low))
 				assembly += ".dbg file, \"" + unit.getFilename() + "\", 0, 0\n";
 		assembly += generateVectorTable(); // Vector table
@@ -259,7 +261,7 @@ public final class Linker implements Catalogger
 			assembly += "STA\t#$420D\n";
 		}
 		// Load initialized globals
-		for (TranslationUnitNode unit : translationUnits)
+		for (TranslationUnit unit : translationUnits)
 			for (InitializerNode init : unit.getGlobalInitializers())
 				assembly += init.getAssembly();
 		assembly += "JML\tmain\n";
@@ -279,19 +281,19 @@ public final class Linker implements Catalogger
 
 	public Linker()
 	{
-		translationUnits = new LinkedList<TranslationUnitNode>();
+		translationUnits = new LinkedList<TranslationUnit>();
 		storedExceptions = new LinkedList<Exception>();
 	}
 	
-	public void addUnit(TranslationUnitNode unit)
+	public void addUnit(TranslationUnit unit)
 	{
 		translationUnits.add(unit);
 	}
-	public void addUnits(TranslationUnitNode... units)
+	public void addUnits(TranslationUnit... units)
 	{
 		translationUnits.addAll(Arrays.asList(units));
 	}
-	public void addUnits(List<TranslationUnitNode> units)
+	public void addUnits(List<? extends TranslationUnit> units)
 	{
 		translationUnits.addAll(units);
 	}
@@ -309,8 +311,12 @@ public final class Linker implements Catalogger
 			assembly += funcNode.getAssembly();
 		}
 		
-		Map<String, Integer> varPoses = mapVariables(cartConfig, memorySize);
+		// Get raw assembly
+		for (TranslationUnit unit : translationUnits)
+			if (AssemblyUnit.class.isAssignableFrom(unit.getClass()))
+				assembly += ((AssemblyUnit) unit).getAssembly();
 		
+		Map<String, Integer> varPoses = mapVariables(cartConfig, memorySize);
 		
 		if (resolveFunction("main") == null)
 			throw new Exception("Program must have \"" + CompConfig.mainName + "\" function.");

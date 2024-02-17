@@ -25,7 +25,9 @@ import C99Compiler.CompConfig.DebugLevel;
 import C99Compiler.CompConfig.OptimizationLevel;
 import C99Compiler.CompConfig.VerbosityLevel;
 import C99Compiler.CompilerNodes.TranslationUnitNode;
+import C99Compiler.CompilerNodes.Interfaces.TranslationUnit;
 import C99Compiler.Utils.FileIO;
+import Linker.AssemblyUnit;
 import Linker.Linker;
 import Logging.DebugLogger;
 import Logging.Logging;
@@ -103,13 +105,18 @@ public class JCC816
 		
 		if (commandLine.hasOption("l")) // Link to executable
 		{	
-			List<TranslationUnitNode> translationUnits  = new LinkedList<TranslationUnitNode>();
+			List<TranslationUnit> translationUnits  = new LinkedList<TranslationUnit>();
 			for (String parameter : commandLine.getArgList()) // Read all input files
 			{
 				if (parameter.endsWith(".c") || parameter.endsWith(".h")) // C file
 				{
 					String fileText = FileIO.readFile(parameter);
 					translationUnits.add(C99Compiler.compile(parameter, fileText));
+				}
+				if (parameter.endsWith(".asm")) // ASM file
+				{
+					String fileText = FileIO.readFile(parameter);
+					translationUnits.add(new AssemblyUnit(parameter.replace(".asm", ""), fileText));
 				}
 				else if (parameter.endsWith(".o"))
 				{
@@ -120,7 +127,7 @@ public class JCC816
 			
 			// Include std libs
 			Set<String> includedStdLibs = new HashSet<String>();
-			for (TranslationUnitNode unit : translationUnits)
+			for (TranslationUnit unit : translationUnits)
 				if (unit.getIncludedStdLibs() != null) includedStdLibs.addAll(unit.getIncludedStdLibs());
 			
 			for (String stdLib : includedStdLibs)

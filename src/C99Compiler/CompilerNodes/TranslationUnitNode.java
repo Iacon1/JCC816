@@ -6,9 +6,7 @@ package C99Compiler.CompilerNodes;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
 
 import C99Compiler.CompConfig.DefinableInterrupt;
 import C99Compiler.CompilerNodes.Declarations.DeclarationNode;
@@ -17,14 +15,14 @@ import C99Compiler.CompilerNodes.Definitions.EnumDefinitionNode;
 import C99Compiler.CompilerNodes.Definitions.StructUnionDefinitionNode;
 import C99Compiler.CompilerNodes.Definitions.Type;
 import C99Compiler.CompilerNodes.Dummies.EnumeratorNode;
-import C99Compiler.CompilerNodes.Interfaces.Catalogger;
+import C99Compiler.CompilerNodes.Interfaces.TranslationUnit;
 import C99Compiler.CompilerNodes.LValues.VariableNode;
 import C99Compiler.Exceptions.CompilerMultipleDefinitionException;
 import C99Compiler.Utils.CompUtils;
 import Grammar.C99.C99Parser.External_declarationContext;
 import Grammar.C99.C99Parser.Translation_unitContext;
 
-public class TranslationUnitNode extends InterpretingNode<TranslationUnitNode, Translation_unitContext> implements Catalogger
+public class TranslationUnitNode extends InterpretingNode<TranslationUnitNode, Translation_unitContext> implements TranslationUnit
 {	
 	private LinkedHashMap<DefinableInterrupt, String> interrupts;
 	private LinkedHashMap<String, Type> typedefs;
@@ -63,7 +61,7 @@ public class TranslationUnitNode extends InterpretingNode<TranslationUnitNode, T
 	@Override public LinkedHashMap<String, Type> getTypedefs() {return typedefs;}
 	@Override public LinkedHashMap<String, String> getRequiredSubs() {return requiredSubs;}
 	@Override public LinkedHashMap<DefinableInterrupt, String> getInterrupts() {return interrupts;}
-
+	@Override
 	public List<InitializerNode> getGlobalInitializers()
 	{
 		return globalInitializers;
@@ -117,10 +115,12 @@ public class TranslationUnitNode extends InterpretingNode<TranslationUnitNode, T
 	{
 		this.includedStdLibs = includedStdLibs;
 	}
+	@Override
 	public Set<String> getIncludedStdLibs()
 	{
 		return includedStdLibs;
 	}
+	@Override
 	public String getFilename() {return filename;}
 	public LinkedHashMap<String, VariableNode> getGlobalVariables()
 	{
