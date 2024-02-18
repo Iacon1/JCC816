@@ -105,7 +105,7 @@ public final class FileIO
 		return document;
 	}
 	
-	public static List<String> matchingFiles(File root, String searchTerm)
+	private static List<String> findAll(File root)
 	{
 		List<String> filenames = new LinkedList<String>();
 		File[] files = root.listFiles();
@@ -113,12 +113,21 @@ public final class FileIO
 		{
 			if (file.isDirectory())
 			{
-				for (String filename : matchingFiles(file, searchTerm))
+				for (String filename : findAll(file))
 					filenames.add(file.getName() + "/" + filename);
 			}
-			else if (file.getName().matches(searchTerm.replace(".", "\\.").replace("*", ".*")))
-				filenames.add(file.getName());
+			else filenames.add(file.getName());
 		}
+		
 		return filenames;
+	}
+	public static List<String> matchingFiles(File root, String searchTerm)
+	{
+		List<String> filenames = findAll(root);
+		List<String> matchingFilenames = new LinkedList<String>();
+		for (String filename : filenames)
+			if (filename.matches(searchTerm.replace(".", "\\.").replace("*", ".*")))
+				matchingFilenames.add(filename);
+		return matchingFilenames;
 	}
 }
