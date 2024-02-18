@@ -58,6 +58,6 @@ program
 	: (( label
 	   | label? instruction
 	   | label? preprocInstruction
-	   ) Comment? '\n'
+	   )? Comment? '\n'
 	  )+
 	;
