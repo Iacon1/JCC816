@@ -8,11 +8,14 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.LinkedList;
+import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -100,5 +103,22 @@ public final class FileIO
 		DocumentBuilder builder = factory.newDocumentBuilder();
 		Document document = builder.parse(file);
 		return document;
+	}
+	
+	public static List<String> matchingFiles(File root, String searchTerm)
+	{
+		List<String> filenames = new LinkedList<String>();
+		File[] files = root.listFiles();
+		for (File file : files)
+		{
+			if (file.isDirectory())
+			{
+				for (String filename : matchingFiles(file, searchTerm))
+					filenames.add(file.getName() + "/" + filename);
+			}
+			else if (file.getName().matches(searchTerm.replace(".", "\\.").replace("*", ".*")))
+				filenames.add(file.getName());
+		}
+		return filenames;
 	}
 }

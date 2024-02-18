@@ -3,7 +3,9 @@
 
 package Executables;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -106,21 +108,25 @@ public class JCC816
 		if (commandLine.hasOption("l")) // Link to executable
 		{	
 			List<TranslationUnit> translationUnits  = new LinkedList<TranslationUnit>();
-			for (String parameter : commandLine.getArgList()) // Read all input files
+			List<String> filenames = new LinkedList<String>();
+			for (String parameter : commandLine.getArgList())
+				filenames.addAll(FileIO.matchingFiles(new File(CompConfig.rootFolder), parameter));
+			
+			for (String filename : filenames) // Read all input files
 			{
-				if (parameter.endsWith(".c") || parameter.endsWith(".h")) // C file
+				if (filename.endsWith(".c") || filename.endsWith(".h")) // C file
 				{
-					String fileText = FileIO.readFile(parameter);
-					translationUnits.add(C99Compiler.compile(parameter, fileText));
+					String fileText = FileIO.readFile(CompConfig.rootFolder + "/" + filename);
+					translationUnits.add(C99Compiler.compile(filename, fileText));
 				}
-				if (parameter.endsWith(".asm")) // ASM file
+				if (filename.endsWith(".asm")) // ASM file
 				{
-					String fileText = FileIO.readFile(parameter);
-					translationUnits.add(new AssemblyUnit(parameter.replace(".asm", ""), fileText));
+					String fileText = FileIO.readFile(CompConfig.rootFolder + "/" + filename);
+					translationUnits.add(new AssemblyUnit(filename.replace(".asm", ""), fileText));
 				}
-				else if (parameter.endsWith(".o"))
+				else if (filename.endsWith(".o"))
 				{
-					byte[] bytes = FileIO.readFileBytes(parameter);
+					byte[] bytes = FileIO.readFileBytes(CompConfig.rootFolder + "/" + filename);
 					translationUnits.add(FileIO.deserialize(bytes));
 				}
 			}
