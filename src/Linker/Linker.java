@@ -258,8 +258,10 @@ public final class Linker implements Catalogger
 		if (cartConfig.isFast()) // Activate FastROM
 		{
 			assembly += "LDA\t#$FFFF\n";
-			assembly += "STA\t#$420D\n";
+			assembly += "STA\t$00420D\n";
 		}
+		assembly += "PHK\n"; // Set return address to RESET so that when main ends it restarts
+		assembly += "PEA\tRESET\n";
 		// Load initialized globals
 		for (TranslationUnit unit : translationUnits)
 			for (InitializerNode init : unit.getGlobalInitializers())
