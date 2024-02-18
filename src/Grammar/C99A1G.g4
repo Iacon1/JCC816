@@ -57,9 +57,10 @@ keyword
 	
 	| HasEmbed {Grammar.GrammarFlags.isPreproc}?
 	| Embed {Grammar.GrammarFlags.isPreproc}?
+	| Offsetof
 	
 	| SRAM
-	| Offsetof
+	| RWTWICE
 	;
 	
 punctuator

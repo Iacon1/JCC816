@@ -333,7 +333,7 @@ public class Type implements Serializable
 	
 	public boolean isExtern()
 	{
-		return storageClassSpecifier != null && storageClassSpecifier.equals("extern");
+		return storageClassSpecifier != null && (storageClassSpecifier.equals("extern") || isRWTwice()); // RWTwice implicitly extern
 	}
 	public boolean isStatic()
 	{
@@ -350,6 +350,10 @@ public class Type implements Serializable
 	public boolean isSRAM()
 	{
 		return storageClassSpecifier != null && storageClassSpecifier.equals("__SRAM");
+	}
+	public boolean isRWTwice() // Is read-twice or write-twice?
+	{
+		return storageClassSpecifier != null && storageClassSpecifier.equals("__RWTWICE");
 	}
 	
 	public boolean isConstant()

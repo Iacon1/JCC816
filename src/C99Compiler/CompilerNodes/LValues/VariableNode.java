@@ -7,9 +7,9 @@ import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.Definitions.Type;
 import C99Compiler.CompilerNodes.Dummies.DummyLValueNode;
 import C99Compiler.CompilerNodes.Interfaces.NamedNode;
-import C99Compiler.Utils.CompUtils;
 import C99Compiler.Utils.PropPointer;
 import C99Compiler.Utils.OperandSources.AddressSource;
+import C99Compiler.Utils.OperandSources.StationaryAddressSource;
 import C99Compiler.Utils.OperandSources.ConstantSource;
 import C99Compiler.Utils.OperandSources.OperandSource;
 
@@ -31,7 +31,14 @@ public class VariableNode extends LValueNode<VariableNode> implements NamedNode
 	@Override
 	public OperandSource getSource()
 	{
-		if (source == null) source = new AddressSource(this.getFullName(), this.getSize()); // We can't find our name and size until assembly time
+		if (source == null)
+		{
+			if (getType().isRWTwice())
+				source = new StationaryAddressSource(this.getFullName(), this.getSize()); // We can't find our name and size until assembly time
+			else
+				source = new AddressSource(this.getFullName(), this.getSize()); // We can't find our name and size until assembly time
+			
+		}
 		return source;
 	}
 	@Override

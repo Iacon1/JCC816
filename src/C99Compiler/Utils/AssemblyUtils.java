@@ -6,8 +6,9 @@ import java.util.function.BiFunction;
 
 import C99Compiler.CompConfig;
 import C99Compiler.CompilerNodes.Definitions.Type;
-import C99Compiler.CompilerNodes.LValues.LValueNode;
+import C99Compiler.CompilerNodes.LValues.LValueNode;import C99Compiler.Utils.AssemblyUtils.DetailsTicket;
 import C99Compiler.Utils.OperandSources.OperandSource;
+import C99Compiler.Utils.OperandSources.StationaryAddressSource;
 
 public final class AssemblyUtils
 {
@@ -152,6 +153,9 @@ public final class AssemblyUtils
 	{
 		String assembly = "";
 		assembly += ticket.save(whitespace, DetailsTicket.saveA);
+		boolean force8 = (StationaryAddressSource.class.isAssignableFrom(writeSource.getClass()) ||
+				StationaryAddressSource.class.isAssignableFrom(readSource.getClass()));
+		// If one or both is stationary only do 8-bit
 		DetailsTicket innerTicket = new DetailsTicket(ticket, 0, DetailsTicket.saveA);
 		assembly += bytewiseOperation(whitespace, nBytes, (Integer i, DetailsTicket ticket2) -> 
 			{
@@ -160,7 +164,7 @@ public final class AssemblyUtils
 						readSource.getLDA(i, ticket2),
 						writeSource.getSTA(i, ticket2)
 						};
-			}, innerTicket);
+			}, !force8, false, innerTicket);
 		assembly += ticket.save(whitespace, DetailsTicket.saveA);
 		return assembly;
 	}
