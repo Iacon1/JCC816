@@ -58,6 +58,7 @@ public final class Linker implements Catalogger
 			{
 				if (variables.get(variable.getFullName()) != null) // Two variables cannot have same full name
 					storedExceptions.add(new LinkerMultipleDefinitionException(variable)); 
+				else if (variable.getType().isExtern()) continue; // Extern, hopefully defined elsewhere
 				else variables.put(variable.getFullName(), variable);
 			}
 		

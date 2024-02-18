@@ -8,20 +8,20 @@ import java.util.Set;
 
 import C99Compiler.CompConfig;
 
-public class PointerType extends Type
+public class PointerType extends StorageWrapperType
 {
 	protected Type type;
 	private Set<String> pointerQualifiers;
 	
 	public PointerType(Type type, Set<String> pointerQualifiers)
 	{
-		this.type = type;
+		super(type);
 		this.pointerQualifiers = new HashSet<String>();
 		this.pointerQualifiers.addAll(pointerQualifiers);
 	}
 	public PointerType(Type type)
 	{
-		this.type = type;
+		super(type);
 		this.pointerQualifiers = new HashSet<String>();
 	}
 	
