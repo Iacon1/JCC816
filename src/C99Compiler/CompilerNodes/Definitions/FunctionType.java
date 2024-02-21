@@ -9,35 +9,23 @@ import java.util.List;
 import C99Compiler.CompConfig;
 import C99Compiler.CompilerNodes.Interfaces.TypedNode;
 
-public class FunctionType extends Type
+public class FunctionType extends StorageWrapperType
 {
-	private Type type;
 	private List<Type> parameterTypes;
 	
 	public FunctionType(List<Type> parameterTypes, Type type)
 	{
-		this.type = type;
+		super(type);
 		this.parameterTypes = new ArrayList<Type>();
 		this.parameterTypes.addAll(parameterTypes);
 	}
 	public FunctionType(Type type, List<? extends TypedNode> parameters) // Annoyingly, these have to be in a different order
 	{
-		this.type = type;
+		super(type);
 		parameterTypes = new ArrayList<Type>();
 		for (TypedNode node : parameters) parameterTypes.add(node.getType());
 	}
-	
-	@Override
-	public int getSize()
-	{
-		return type.getSize();
-	}
-	
-	public Type getType()
-	{
-		return type;
-	}
-	
+
 	@Override
 	public boolean isFunction() {return true;}
 	

@@ -10,7 +10,6 @@ import C99Compiler.CompConfig;
 
 public class PointerType extends StorageWrapperType
 {
-	protected Type type;
 	private Set<String> pointerQualifiers;
 	
 	public PointerType(Type type, Set<String> pointerQualifiers)
@@ -29,11 +28,6 @@ public class PointerType extends StorageWrapperType
 	public int getSize()
 	{
 		return CompConfig.pointerSize;
-	}
-	
-	public Type getType()
-	{
-		return type;
 	}
 	
 	@Override

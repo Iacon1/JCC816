@@ -6,7 +6,7 @@ package C99Compiler.CompilerNodes.Definitions;
 
 public abstract class StorageWrapperType extends Type
 {
-	private Type type;
+	protected Type type;
 	public StorageWrapperType(Type type)
 	{
 		this.type = type;
@@ -20,4 +20,6 @@ public abstract class StorageWrapperType extends Type
 	@Override public boolean isRegister() {return type.isRegister();}
 	@Override public boolean isSRAM() {return type.isSRAM();}
 	@Override public boolean isRWTwice() {return type.isRWTwice();}
+	
+	public Type getType() {return type;}
 }

@@ -22,6 +22,8 @@ public class ArrayType extends PointerType
 	}
 
 	@Override
+	public int getSizeBits() {return 8 * getSize();}
+	@Override
 	public int getSize()
 	{
 		if (length == -1) return CompConfig.pointerSize;
