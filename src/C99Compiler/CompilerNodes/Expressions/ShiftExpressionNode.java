@@ -9,6 +9,7 @@ import C99Compiler.Utils.AssemblyUtils;
 import C99Compiler.Utils.CompUtils;
 import C99Compiler.Utils.ScratchManager;
 import C99Compiler.Utils.AssemblyUtils.DetailsTicket;
+import C99Compiler.Utils.OperandSources.ConstantSource;
 import C99Compiler.Utils.OperandSources.OperandSource;
 import C99Compiler.Utils.ScratchManager.ScratchSource;
 import Grammar.C99.C99Parser.Additive_expressionContext;
@@ -58,6 +59,28 @@ public class ShiftExpressionNode extends BinaryExpressionNode
 		assembly += ticket.save(whitespace, DetailsTicket.saveA | DetailsTicket.saveX);
 		DetailsTicket innerTicket = new DetailsTicket(ticket, DetailsTicket.saveA | DetailsTicket.saveX, 0);
 		boolean isOne = y.hasPropValue() && (y.getPropLong() == 1); // No need for loop w/ only one iteration
+		if (y.hasPropValue() && ((y.getPropLong() % 8) == 0)) // Even better optimization LOL
+		{
+			int bytesShifted = (int) y.getPropLong() / 8;
+			int bytesFilled = 0;
+			switch (operator)
+			{
+			case "<<": // Fill bottom bytes of destSource w/ 0, then put x in
+				bytesFilled = Math.max(0, destSource.getSize() - bytesShifted);
+				assembly += AssemblyUtils.byteCopier(whitespace, bytesShifted, destSource, new ConstantSource(0, bytesShifted));
+				assembly += AssemblyUtils.byteCopier(whitespace, bytesFilled, destSource.getShifted(bytesShifted), sourceX);
+				assembly += ticket.restore(whitespace, DetailsTicket.saveA | DetailsTicket.saveX);
+				return assembly;
+			case ">>": // Fill bottom bytes of destSource with shifted x, then fill w/ zero
+				bytesFilled = Math.min(destSource.getSize(), Math.max(0, sourceX.getSize() - bytesShifted));
+				assembly += AssemblyUtils.byteCopier(whitespace, bytesFilled, destSource, sourceX.getShifted(bytesShifted));
+				if (bytesFilled < destSource.getSize())
+					assembly += AssemblyUtils.byteCopier(whitespace, bytesShifted, destSource.getShifted(bytesFilled), new ConstantSource(0, bytesShifted));
+				assembly += ticket.restore(whitespace, DetailsTicket.saveA | DetailsTicket.saveX);
+				return assembly;
+			}
+			
+		}
 		if (sourceY.getSize() >= 2)
 		{
 			assembly += whitespace + CompUtils.setA16 + "\n";
