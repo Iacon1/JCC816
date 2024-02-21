@@ -28,6 +28,7 @@ public class TranslationUnitNode extends InterpretingNode<TranslationUnitNode, T
 	private LinkedHashMap<String, Type> typedefs;
 	private LinkedHashMap<String, String> requiredSubs;
 	private Set<String> includedStdLibs;
+	private Set<String> includedOtherLibs;
 	private List<InitializerNode> globalInitializers;
 	private String filename;
 	private String staticUUID;
@@ -115,10 +116,19 @@ public class TranslationUnitNode extends InterpretingNode<TranslationUnitNode, T
 	{
 		this.includedStdLibs = includedStdLibs;
 	}
+	public void includeOtherLibs(Set<String> includedOtherLibs)
+	{
+		this.includedOtherLibs = includedOtherLibs;
+	}
 	@Override
 	public Set<String> getIncludedStdLibs()
 	{
 		return includedStdLibs;
+	}
+	@Override
+	public Set<String> getIncludedOtherLibs()
+	{
+		return includedOtherLibs;
 	}
 	@Override
 	public String getFilename() {return filename;}

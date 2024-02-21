@@ -6,9 +6,11 @@ package Executables;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.cli.CommandLine;
@@ -36,7 +38,6 @@ import Logging.Logging;
 
 public class JCC816
 {
-
 	private static Options getOptions()
 	{
 		Options options = new Options();
@@ -56,6 +57,85 @@ public class JCC816
 		
 		return options;
 	}
+	
+	private static void resolveIncludes(Map<String, TranslationUnit> translationUnits) throws Exception
+	{
+		// Recursively resolve all libs
+		Set<String> includedStdLibs = new HashSet<String>();
+		Set<String> includedOtherLibs = new HashSet<String>();
+
+		String oldHash = "";
+		String hash = String.format("%x X %x", includedStdLibs.hashCode(), includedOtherLibs.hashCode());
+		while (true)
+		{
+			oldHash = hash;
+			for (TranslationUnit unit : translationUnits.values())
+			{
+				if (unit.getIncludedStdLibs() != null)
+					includedStdLibs.addAll(unit.getIncludedStdLibs());
+				if (unit.getIncludedOtherLibs() != null)
+					includedOtherLibs.addAll(unit.getIncludedOtherLibs());
+			}
+			hash = String.format("%x X %x", includedStdLibs.hashCode(), includedOtherLibs.hashCode());
+			
+			if (hash.equals(oldHash)) break; // When nothing new is included, stop
+			
+			for (String stdLib : includedStdLibs)
+			{
+				String sourceNameC = "stdlib/" + stdLib.replace(".h", "") + ".c";
+				String sourceNameA = "stdlib/" + stdLib.replace(".h", "") + ".asm";
+				String sourceNameO = "stdlib/" + stdLib.replace(".h", "") + ".o";
+				if (translationUnits.get(sourceNameC) != null ||
+					translationUnits.get(sourceNameA) != null ||
+					translationUnits.get(sourceNameO) != null) continue;
+				
+				if (FileIO.hasResource(sourceNameC))
+				{
+					String fileText = FileIO.readResource(sourceNameC);
+					translationUnits.put(sourceNameC, C99Compiler.compile(sourceNameC, fileText));
+				}
+				else if (FileIO.hasResource(sourceNameA))
+				{
+					String fileText = FileIO.readResource(sourceNameA);
+					translationUnits.put(sourceNameA, new AssemblyUnit(sourceNameA, fileText));
+				}
+				else if (FileIO.hasResource(sourceNameO))
+				{
+					byte[] bytes = FileIO.readResourceBytes(sourceNameO);
+					translationUnits.put(sourceNameO, FileIO.deserialize(bytes));
+				}
+			}
+			
+			for (String otherLib : includedOtherLibs)
+			{
+				otherLib = CompConfig.rootFolder + "/" + otherLib;
+				String sourceNameC = otherLib.replace(".h", "") + ".c";
+				String sourceNameA = otherLib.replace(".h", "") + ".asm";
+				String sourceNameO = otherLib.replace(".h", "") + ".o";
+				if (translationUnits.get(sourceNameC) != null ||
+						translationUnits.get(sourceNameA) != null ||
+						translationUnits.get(sourceNameO) != null) continue;
+				
+				if (FileIO.hasFile(sourceNameC))
+				{
+					String fileText = FileIO.readFile(sourceNameC);
+					translationUnits.put(sourceNameC, C99Compiler.compile(sourceNameC, fileText));
+				}
+				else if (FileIO.hasFile(sourceNameA))
+				{
+					String fileText = FileIO.readFile(sourceNameA);
+					translationUnits.put(sourceNameA, new AssemblyUnit(sourceNameA, fileText));
+				}
+				else if (FileIO.hasFile(sourceNameO))
+				{
+					byte[] bytes = FileIO.readFileBytes(sourceNameO);
+					translationUnits.put(sourceNameO, FileIO.deserialize(bytes));
+				}
+			}
+		}
+		return;
+	}
+	
 	public static void main(String[] args) throws Exception
 	{
 		Linker linker = new Linker();
@@ -107,48 +187,35 @@ public class JCC816
 		
 		if (commandLine.hasOption("l")) // Link to executable
 		{	
-			List<TranslationUnit> translationUnits  = new LinkedList<TranslationUnit>();
+			Map<String, TranslationUnit> translationUnits  = new HashMap<String, TranslationUnit>();
 			List<String> filenames = new LinkedList<String>();
 			for (String parameter : commandLine.getArgList())
 				filenames.addAll(FileIO.matchingFiles(new File(CompConfig.rootFolder), parameter));
 			
 			for (String filename : filenames) // Read all input files
 			{
+				filename = CompConfig.rootFolder + "/" + filename;
 				if (filename.endsWith(".c") || filename.endsWith(".h")) // C file
 				{
-					String fileText = FileIO.readFile(CompConfig.rootFolder + "/" + filename);
-					translationUnits.add(C99Compiler.compile(filename, fileText));
+					String fileText = FileIO.readFile(filename);
+					translationUnits.put(filename, C99Compiler.compile(filename, fileText));
 				}
 				if (filename.endsWith(".asm")) // ASM file
 				{
-					String fileText = FileIO.readFile(CompConfig.rootFolder + "/" + filename);
-					translationUnits.add(new AssemblyUnit(filename.replace(".asm", ""), fileText));
+					String fileText = FileIO.readFile(filename);
+					translationUnits.put(filename, new AssemblyUnit(filename.replace(".asm", ""), fileText));
 				}
 				else if (filename.endsWith(".o"))
 				{
-					byte[] bytes = FileIO.readFileBytes(CompConfig.rootFolder + "/" + filename);
-					translationUnits.add(FileIO.deserialize(bytes));
+					byte[] bytes = FileIO.readFileBytes(filename);
+					translationUnits.put(filename, FileIO.deserialize(bytes));
 				}
 			}
 			
-			// Include std libs
-			Set<String> includedStdLibs = new HashSet<String>();
-			for (TranslationUnit unit : translationUnits)
-				if (unit.getIncludedStdLibs() != null) includedStdLibs.addAll(unit.getIncludedStdLibs());
-			
-			for (String stdLib : includedStdLibs)
-			{
-				String sourceName = "stdlib/" + stdLib.replace(".h", "") + ".c";
-				if (FileIO.hasResource(sourceName))
-				{
-					String fileText = FileIO.readResource(sourceName);
-					translationUnits.add(0, C99Compiler.compile(sourceName, fileText));
-				}
-			}
-			
+			resolveIncludes(translationUnits);
 			String name = commandLine.getOptionValue("l");
 
-			linker.addUnits(translationUnits);
+			linker.addUnits(translationUnits.values().toArray(new TranslationUnit[] {}));
 			
 			MemorySize memorySize = new MemorySize(0, 0, 0, false);
 			
@@ -168,7 +235,7 @@ public class JCC816
 		{
 			String parameter = commandLine.getArgList().get(0);
 			String fileText = FileIO.readFile(parameter);
-			fileText = Preprocessor.preprocess(new HashSet<String>(), parameter, fileText);
+			fileText = Preprocessor.preprocess(new HashSet<String>(), new HashSet<String>(), parameter, fileText);
 			byte[] fileBytes = fileText.getBytes();
 			FileIO.writeFile(commandLine.getOptionValue("p"), fileBytes);
 		}

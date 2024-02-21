@@ -28,6 +28,10 @@ public final class FileIO
 	{
 		return ClassLoader.getSystemResource(filename) != null;
 	}
+	public static boolean hasFile(String filename)
+	{
+		return new File(filename).exists();
+	}
 	public static final String readResource(String filename) throws IOException
 	{
 		return new String(ClassLoader.getSystemResourceAsStream(filename).readAllBytes());

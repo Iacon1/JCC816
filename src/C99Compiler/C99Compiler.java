@@ -57,20 +57,21 @@ public class C99Compiler
 		return new CompoundStatementNode(new TranslationUnitNode("INTERNAL")).interpret(tree);
 	}
 
-	private static String precompile(Set<String> includedStdLibs, String filename, String mainFile) throws Exception
+	private static String precompile(Set<String> includedStdLibs, Set<String> includedOtherLibs, String filename, String mainFile) throws Exception
 	{
-		return Preprocessor.preprocess(includedStdLibs, filename, mainFile);
+		return Preprocessor.preprocess(includedStdLibs, includedOtherLibs, filename, mainFile);
 	}
 		
 	public static TranslationUnitNode compile(String filename, String file) throws Exception
 	{ 
 		Set<String> includedStdLibs = new HashSet<String>();
+		Set<String> includedOtherLibs = new HashSet<String>();
 		long t = System.currentTimeMillis();
 
 		if (VerbosityLevel.isAtLeast(VerbosityLevel.medium))
 			printInfo("Compiling " + filename + "...");
 		
-		String source = precompile(includedStdLibs, filename, file);
+		String source = precompile(includedStdLibs, includedOtherLibs, filename, file);
 		if (VerbosityLevel.isAtLeast(VerbosityLevel.medium))
 			printInfo("Precompiled in " + (System.currentTimeMillis() - t) + " ms. Source length: " + source.length() + ".");
 		t = System.currentTimeMillis();
@@ -82,6 +83,7 @@ public class C99Compiler
 
 		TranslationUnitNode unit = parse(filename, tokens);
 		unit.includeStdLibs(includedStdLibs);
+		unit.includeOtherLibs(includedOtherLibs);
 		if (VerbosityLevel.isAtLeast(VerbosityLevel.medium))
 			printInfo("Parsed in " + (System.currentTimeMillis() - t) + " ms.");
 		if (VerbosityLevel.isAtLeast(VerbosityLevel.medium))

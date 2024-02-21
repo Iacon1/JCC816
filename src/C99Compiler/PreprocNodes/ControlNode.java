@@ -21,6 +21,7 @@ public class ControlNode extends InterpretingNode<ControlNode, Control_lineConte
 	private String command;
 	private GroupNode include;
 	private String stdLib; // Only fill out if standard lib was included
+	private String otherLib; // Only fill out if other lib was included
 	private byte[] embedBytes;
 	private String pragmaOutput; // Output of Pragma
 	
@@ -76,6 +77,7 @@ public class ControlNode extends InterpretingNode<ControlNode, Control_lineConte
 			else if (filename.contains("\"")) // Include file
 			{
 				filename = filename.replaceAll("[<>\"\"]", "");
+				otherLib = filename;
 				try {file = FileIO.readFile(CompConfig.rootFolder + "/" + filename);}
 				catch (Exception e) {file = FileIO.readResource("stdlib/" + filename);}
 			}
@@ -156,6 +158,13 @@ public class ControlNode extends InterpretingNode<ControlNode, Control_lineConte
 	{
 		Set<String> incl = super.getIncludedStdLibs();
 		if (stdLib != null) incl.add(stdLib);
+		return incl;
+	}
+	@Override
+	public Set<String> getIncludedOtherLibs()
+	{
+		Set<String> incl = super.getIncludedOtherLibs();
+		if (otherLib != null) incl.add(otherLib);
 		return incl;
 	}
 	@Override

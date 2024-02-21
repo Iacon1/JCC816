@@ -35,7 +35,7 @@ public class AssemblyUnit implements TranslationUnit {
 	@Override public LinkedHashMap<String, EnumDefinitionNode> getEnums() {return new LinkedHashMap<String, EnumDefinitionNode>();}
 	@Override public LinkedHashMap<String, EnumeratorNode> getEnumerators() {return new LinkedHashMap<String, EnumeratorNode>();}
 	@Override public LinkedHashMap<String, FunctionDefinitionNode> getFunctions()
-	{
+	{/*
 		LinkedHashMap<String, FunctionDefinitionNode> functions = new LinkedHashMap<String, FunctionDefinitionNode>();
 		for (String line : assembly.split("\n"))
 			if (line.contains("; " + CompConfig.functionTag)) // Function declaration
@@ -44,6 +44,7 @@ public class AssemblyUnit implements TranslationUnit {
 				functions.put(funcName, new DummyFunctionNode(funcName));
 			}
 		return functions;
+		*/ return new LinkedHashMap<String, FunctionDefinitionNode>();
 	}
 	@Override public LinkedHashMap<String, Type> getTypedefs() {return new LinkedHashMap<String, Type>();}
 	@Override public LinkedHashMap<String, String> getRequiredSubs() {return new LinkedHashMap<String, String>();}
@@ -52,6 +53,7 @@ public class AssemblyUnit implements TranslationUnit {
 	@Override public List<InitializerNode> getGlobalInitializers() {return new LinkedList<InitializerNode>();}
 	@Override public String getFilename() {return filename;}
 	@Override public Set<String> getIncludedStdLibs() {return new HashSet<String>();}
+	@Override public Set<String> getIncludedOtherLibs() {return new HashSet<String>();}
 	
 	public String getAssembly()
 	{

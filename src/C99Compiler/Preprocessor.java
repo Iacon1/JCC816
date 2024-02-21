@@ -79,13 +79,14 @@ public final class Preprocessor
 		return group;
 	}
 	
-	public static final String preprocess(Set<String> includedStdLibs, String filename, String source) throws Exception
+	public static final String preprocess(Set<String> includedStdLibs, Set<String> includedOtherLibs, String filename, String source) throws Exception
 	{
 		Grammar.GrammarFlags.isPreproc = true;
 		PreProcComponentNode.loadPredefs();
 		PreProcComponentNode.resetLineNo(filename, 1);
 		GroupNode node = new GroupNode().interpret(parsePreprocess(source));
 		includedStdLibs.addAll(node.getIncludedStdLibs());
+		includedOtherLibs.addAll(node.getIncludedOtherLibs());
 		source = node.getText();
 		Grammar.GrammarFlags.isPreproc = false;
 

@@ -82,6 +82,13 @@ public abstract class PreProcComponentNode<T extends PreProcComponentNode<T>>
 			incl.addAll(child.getIncludedStdLibs());
 		return incl;
 	}
+	public Set<String> getIncludedOtherLibs()
+	{
+		Set<String> incl = new HashSet<String>();
+		for (PreProcComponentNode<?> child : children)
+			incl.addAll(child.getIncludedOtherLibs());
+		return incl;
+	}
 	
 	// Get the list of parameters for a macro
 	private static List<String> collectParameters(List<String> wordList, int leftmost)

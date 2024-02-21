@@ -16,4 +16,5 @@ public interface TranslationUnit extends Catalogger
 	public List<InitializerNode> getGlobalInitializers();
 	public String getFilename();
 	public Set<String> getIncludedStdLibs();
+	public Set<String> getIncludedOtherLibs();
 }
