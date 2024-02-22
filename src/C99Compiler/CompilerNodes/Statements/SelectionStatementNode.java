@@ -178,7 +178,12 @@ public class SelectionStatementNode extends SequencePointStatementNode<Selection
 			ScratchSource exprSource = scratchManager.reserveScratchBlock(expression.getSize());
 			// If greater than largest case, skip
 			String miscLabel = CompUtils.getMiscLabel();
-			assembly = getAssemblyWithSequence(expression, leadingWhitespace, exprSource, scratchManager);
+			if (expression.hasAssembly())
+				assembly = getAssemblyWithSequence(expression, leadingWhitespace, exprSource, scratchManager);
+			else if (expression.hasPropValue())
+				assembly += AssemblyUtils.byteCopier(whitespace, exprSource.getSize(), exprSource, new ConstantSource(expression.getPropValue(), exprSource.getSize()));
+			else if (expression.hasLValue())
+				assembly += AssemblyUtils.byteCopier(whitespace, leadingWhitespace, exprSource, expression.getLValue().getSource());
 			assembly += new RelationalExpressionNode(this, "<", largestExpr, new DummyExpressionNode(this, expression.getType(), exprSource)).getAssembly(leadingWhitespace, hasDefault? getDefaultLabel(false) : getEndLabel(), miscLabel, scratchManager, new DetailsTicket());
 			assembly += whitespace + miscLabel + ":\n";
 			

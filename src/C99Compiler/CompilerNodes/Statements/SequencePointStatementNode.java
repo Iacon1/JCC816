@@ -36,7 +36,8 @@ public abstract class SequencePointStatementNode<C extends ParserRuleContext> ex
 		String assembly = "";
 		isSP = true;
 		clearSequence();
-		assembly = expr.getAssembly(leadingWhitespace, destSource, scratchManager, new DetailsTicket());
+		if (expr.hasAssembly())
+			assembly = expr.getAssembly(leadingWhitespace, destSource, scratchManager, new DetailsTicket());
 		assembly += getAccumulatedSequences();
 		clearSequence();
 		isSP = false;
