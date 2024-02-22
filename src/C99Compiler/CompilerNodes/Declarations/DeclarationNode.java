@@ -58,7 +58,10 @@ public class DeclarationNode extends InterpretingNode<DeclarationNode, Declarati
 					if (innerException.getSuppressed().length > 0) throw (Exception) innerException.getSuppressed()[0]; // Weird hack I know
 
 					if (oldFunction == null) // Ignore subsequent identical declarations without definitions
+					{
+						removeChild(declaratorNode);
 						new FunctionDefinitionNode(this).interpret(node.declaration_specifiers(), initDeclarator.declarator());
+					}
 				}
 				else
 				{
