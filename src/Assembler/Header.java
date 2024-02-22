@@ -202,7 +202,14 @@ public class Header extends CartConfig
 	}
 	public void calcSRAMSize(int size) // Bytes
 	{
-		SRAMSize = (int) Math.max(7, Math.ceil(Math.log(size / 1024) / Math.log(2)));
+		if (size == 0)
+		{
+			SRAMSize = 0;
+			return;
+		}
+		if (size < 2048)
+			size = 2048; // No distinction between 0 and 1 KB, minimum 2 KB
+		SRAMSize = (int) Math.ceil(Math.log(size / 1024) / Math.log(2));
 	}
 	public void calcROMSize(byte[] bytes)
 	{
@@ -217,7 +224,7 @@ public class Header extends CartConfig
 		
 		double sizeKB = (double) sizeB / 1024d;
 		Logging.logNotice("True ROM size: " + sizeB + " B (" + String.format("%.02f", sizeKB) + " KB)");
-		ROMSize = (int) Math.max(7, Math.ceil(Math.log(sizeKB) / Math.log(2)));
+		ROMSize = (int) Math.ceil(Math.log(sizeKB) / Math.log(2));
 	}
 	public void calcChecksum(byte[] bytes)
 	{

@@ -105,7 +105,7 @@ public interface MapModeInterface extends Configurer
 		int ROMSize = memorySize.ROMSize;
 		while (ROMSize > 0)
 			ROMSize -= getROMBankLength(memorySize.isFast, ROMBanks++); // For ExHIROM
-		ROMBanks = Math.max(ROMBanks, 4); // Minimum 128 KB
+		// ROMBanks = Math.max(ROMBanks, 4); // Minimum 128 KB
 		
 		String regions = "";
 		regions += whitespace + "ZEROPAGE: start = $000000, size = $000100 ;\n".replace(" ", "\t");
