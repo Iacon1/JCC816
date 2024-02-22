@@ -94,41 +94,68 @@ public class ShiftExpressionNode extends BinaryExpressionNode
 		
 		if (!isOne)
 		{
+			if (destSource != null)
+				assembly += AssemblyUtils.byteCopier(whitespace, destSource.getSize(), destSource, sourceX);
 			assembly += sourceY.getLDA(whitespace, 0, innerTicket) + "\n";
 			assembly += whitespace + "BEQ\t:++\n";
 			assembly += whitespace + "TAX\t\n";
 			assembly += whitespace.substring(1) + ":\n"; // A loop
-		}
-
-		switch (operator)
-		{
-		case "<<":
-			assembly += AssemblyUtils.bytewiseOperation(whitespace + (isOne? "" : AssemblyUtils.getWhitespace(CompConfig.indentSize)), sourceX.getSize(), (Integer i, DetailsTicket ticket2) ->
+			switch (operator)
 			{
-				return new String[]
+			case "<<":
+				assembly += AssemblyUtils.bytewiseOperation(whitespace + AssemblyUtils.getWhitespace(CompConfig.indentSize), destSource.getSize(), (Integer i, DetailsTicket ticket2) ->
 				{
-						sourceX.getLDA(i, ticket2),
-						(i >= sourceX.getSize() - 2) ? "ASL" : "ROL",
+					return new String[]
+					{
+							destSource.getLDA(i, ticket2),
+							(i >= sourceX.getSize() - 2) ? "ASL" : "ROL",
+							(destSource == null) ? "" : destSource.getSTA(i, ticket2),
+					};
+				});
+				break;
+			case ">>":
+				assembly += AssemblyUtils.bytewiseOperation(whitespace + AssemblyUtils.getWhitespace(CompConfig.indentSize), destSource.getSize(), (Integer i, DetailsTicket ticket2) -> 
+				{
+					return new String[]
+					{
+						destSource.getLDA(i, ticket2),
+						(i >= sourceX.getSize() - 2) ? "LSR" : "ROR",
 						(destSource == null) ? "" : destSource.getSTA(i, ticket2),
-				};
-			});
-			break;
-		case ">>":
-			assembly += AssemblyUtils.bytewiseOperation(whitespace + AssemblyUtils.getWhitespace(CompConfig.indentSize), sourceX.getSize(), (Integer i, DetailsTicket ticket2) -> 
-			{return new String[]
-				{
-					sourceX.getLDA(i, ticket2),
-					(i >= sourceX.getSize() - 2) ? "LSR" : "ROR",
-					(destSource == null) ? "" : destSource.getSTA(i, ticket2),
-				};
-			}, true, true);
-			break;
-		}
-		if (!isOne)
-		{
+					};
+				}, true, true);
+				break;
+			}
 			assembly += whitespace + AssemblyUtils.getWhitespace(CompConfig.indentSize) + "DEX\n";
 			assembly += whitespace + AssemblyUtils.getWhitespace(CompConfig.indentSize) + "BNE\t:-\n";
 			assembly += whitespace.substring(1) + ":\n"; // A loop
+		}
+		else // Only a shift by one
+		{
+			switch (operator)
+			{
+			case "<<":
+				assembly += AssemblyUtils.bytewiseOperation(whitespace, sourceX.getSize(), (Integer i, DetailsTicket ticket2) ->
+				{
+					return new String[]
+					{
+							sourceX.getLDA(i, ticket2),
+							(i >= sourceX.getSize() - 2) ? "ASL" : "ROL",
+							(destSource == null) ? "" : destSource.getSTA(i, ticket2),
+					};
+				});
+				break;
+			case ">>":
+				assembly += AssemblyUtils.bytewiseOperation(whitespace, sourceX.getSize(), (Integer i, DetailsTicket ticket2) -> 
+				{
+					return new String[]
+					{
+						sourceX.getLDA(i, ticket2),
+						(i >= sourceX.getSize() - 2) ? "LSR" : "ROR",
+						(destSource == null) ? "" : destSource.getSTA(i, ticket2),
+					};
+				}, true, true);
+				break;
+			}	
 		}
 		
 		assembly += ticket.restore(whitespace, DetailsTicket.saveA | DetailsTicket.saveX);
