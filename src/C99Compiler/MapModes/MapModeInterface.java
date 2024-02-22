@@ -3,7 +3,9 @@
 package C99Compiler.MapModes;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.AbstractMap.SimpleEntry;
 
 import Assembler.MemorySize;
@@ -18,7 +20,8 @@ public interface MapModeInterface extends Configurer
 	public static class VariableOverlayable implements OverlaySolver.Overlayable<VariableOverlayable>
 	{
 		private VariableNode variable;
-		
+		// Dynamic programming
+		private static Map<SimpleEntry<FunctionDefinitionNode, FunctionDefinitionNode>, Boolean> dynamicMap = new HashMap<SimpleEntry<FunctionDefinitionNode, FunctionDefinitionNode>, Boolean>();
 		public VariableOverlayable(VariableNode variable)
 		{
 			this.variable = variable;
@@ -30,8 +33,21 @@ public interface MapModeInterface extends Configurer
 			FunctionDefinitionNode aFunc = variable.getEnclosingFunction();
 			FunctionDefinitionNode bFunc = b.variable.getEnclosingFunction();
 			if (aFunc == null || bFunc == null) return false; // If either are root-level then no overlaying
-			else if (aFunc.canCall(bFunc) || bFunc.canCall(aFunc)) return false; // If either func can call the other then no overlaying
-			else return true; // Otherwise sure
+			SimpleEntry<FunctionDefinitionNode, FunctionDefinitionNode> entry =
+					new SimpleEntry<FunctionDefinitionNode, FunctionDefinitionNode>(aFunc, bFunc);
+
+			if (dynamicMap.get(entry) != null)
+			{
+				// Found value in map, no need to recalculate
+				return dynamicMap.get(entry);
+			}
+			else
+			{
+				// If either func can call the other then no overlaying
+				boolean value = aFunc.canCall(bFunc) || bFunc.canCall(aFunc);
+				dynamicMap.put(entry, !value);
+				return !value;
+			}
 		}
 
 		@Override
