@@ -2,6 +2,7 @@
 //
 package C99Compiler.Utils.OperandSources;
 
+import java.lang.reflect.Array;
 import java.util.Arrays;
 
 import C99Compiler.Utils.AssemblyUtils.DetailsTicket;
@@ -48,7 +49,17 @@ public class ConstantSource extends ConstantByteSource
 		}
 		else if (Boolean.class.isAssignableFrom(obj.getClass()))
 			bytes[0] = (Boolean) obj ? 0xFF : 0x00;
-		
+		else if (Object[].class.isAssignableFrom(obj.getClass())) // Array
+		{
+			Object[] array = (Object[]) obj;
+			int sizePer = size / array.length;
+			for (int i = 0; i < array.length; ++i)
+			{
+				int[] subBytes = asBytes(array[i], sizePer);
+				for (int j = 0; j < sizePer; ++j)
+					bytes[sizePer * i + j] = subBytes[j];
+			}
+		}
 		return bytes;
 	}
 	public ConstantSource(Object constant, int offset, int size)
