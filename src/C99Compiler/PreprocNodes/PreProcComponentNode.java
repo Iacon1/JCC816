@@ -59,6 +59,16 @@ public abstract class PreProcComponentNode<T extends PreProcComponentNode<T>>
 		defines.put("__STDC_IEC_559__", new DefineNode("0"));
 		defines.put("__STDC_IEC_559_COMPLEX__", new DefineNode("0"));
 	}
+	public static void reset()
+	{
+		file = "";
+		line = 0;
+		
+		defines.clear();
+		charMappings.clear();
+		embeds.clear();
+		loadPredefs();
+	}
 	public PreProcComponentNode(PreProcComponentNode<?> parent)
 	{
 		this.children = new LinkedList<PreProcComponentNode<?>>();

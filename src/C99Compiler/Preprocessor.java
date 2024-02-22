@@ -88,6 +88,7 @@ public final class Preprocessor
 		includedStdLibs.addAll(node.getIncludedStdLibs());
 		includedOtherLibs.addAll(node.getIncludedOtherLibs());
 		source = node.getText();
+		PreProcComponentNode.reset();
 		Grammar.GrammarFlags.isPreproc = false;
 
 		return source;
