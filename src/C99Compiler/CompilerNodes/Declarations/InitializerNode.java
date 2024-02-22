@@ -223,7 +223,7 @@ public class InitializerNode extends InterpretingNode<InitializerNode, Initializ
 	public String getAssembly(int leadingWhitespace) throws Exception
 	{
 		clearSequence();
-		if (!isROM()) // Normal RAM one
+		if (!getScope().isRoot() || !isROM()) // Normal RAM one
 		{
 			if (expr != null)
 			{

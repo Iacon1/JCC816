@@ -157,6 +157,8 @@ public final class Linker implements Catalogger
 				SRAMVars.add(var);
 			else if (var.getType().isWRAM())
 				WRAMVars.add(var);
+			else if (var.getType().isROM() && !var.getScope().isRoot()) // Non-global const
+				WRAMVars.add(var);
 		}
 		List<Integer> WRAMPoses = null, SRAMPoses = null;
 		if (WRAMVars.size() > 0) WRAMPoses = cartConfig.getType().mapWRAM(WRAMVars, offset, memorySize);
@@ -197,7 +199,7 @@ public final class Linker implements Catalogger
 		
 		for (VariableNode var : getVariables().values())
 		{
-			if (var.getType().isROM()) continue; // These are mapped elsewhere
+			if (var.getScope().isRoot() && var.getType().isROM()) continue; // These are mapped elsewhere
 			
 			String fullName = var.getFullName();
 			assembly += AssemblyUtils.applyFiller(fullName, maxLength) + " = $" + String.format("%06x", varPoses.get(var.getFullName()));
