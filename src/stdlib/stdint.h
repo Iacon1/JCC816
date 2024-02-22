@@ -1,5 +1,8 @@
 // Integer types
 
+#ifndef INCLG_STDINT // Include guard
+#define INCLG_STDINT
+
 typedef unsigned char uint8_t;			typedef signed char int8_t;
 typedef unsigned short uint16_t;		typedef signed short int16_t;
 typedef unsigned int uint24_t;			typedef signed int int24_t;
@@ -92,3 +95,5 @@ typedef uint64_t uintmax_t;				typedef int64_t intmax_t;
 #define UINT64_C(value) ((uint_least64_t) value)	#define INT64_C(value) ((int_least64_t) value)
 
 #define UINTMAX_C(value) ((uintleast_t) value)		#define INTMAX_C(value) ((intmax_t) value)
+
+#endif
