@@ -30,7 +30,7 @@ public class CastExpressionNode extends BaseExpressionNode<Cast_expressionContex
 			this.expr = new CastExpressionNode(this).interpret(node.cast_expression());
 			return this;
 		}
-		else return (BaseExpressionNode) new UnaryExpressionNode(this).interpret(node.unary_expression());
+		else return delegate(new UnaryExpressionNode(this).interpret(node.unary_expression()));
 	}
 	
 	@Override

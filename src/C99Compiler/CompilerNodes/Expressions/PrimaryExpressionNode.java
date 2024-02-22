@@ -32,7 +32,7 @@ public class PrimaryExpressionNode extends BaseExpressionNode<Primary_expression
 	public BaseExpressionNode<Primary_expressionContext> interpret(Primary_expressionContext node) throws Exception
 	{
 		if (node.expression() != null)
-			return (BaseExpressionNode) new ExpressionNode(this).interpret(node.expression());
+			return delegate(new ExpressionNode(this).interpret(node.expression()));
 		else if (node.Identifier() != null)
 		{
 			identifier = node.Identifier().getText();

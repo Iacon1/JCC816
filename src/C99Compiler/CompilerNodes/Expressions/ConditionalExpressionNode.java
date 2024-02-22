@@ -49,7 +49,7 @@ public class ConditionalExpressionNode extends BinaryExpressionNode
 	public BaseExpressionNode<Conditional_expressionContext> interpret(Conditional_expressionContext node) throws Exception
 	{
 		if (node.children.size() == 1) // Only one, just propagate it
-			return (BaseExpressionNode) getPCNode(node);
+			return delegate(getPCNode(node));
 		else // Two
 		{
 			z = (BaseExpressionNode) new LORExpressionNode(this).interpret(node.lor_expression());

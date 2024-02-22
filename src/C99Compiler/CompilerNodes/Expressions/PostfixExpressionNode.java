@@ -78,8 +78,7 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 	public BaseExpressionNode<Postfix_expressionContext> interpret(Postfix_expressionContext node) throws Exception
 	{
 		if (node.primary_expression() != null)
-			return (BaseExpressionNode) new PrimaryExpressionNode(this).interpret(node.primary_expression());
-		
+			return delegate(new PrimaryExpressionNode(parent).interpret(node.primary_expression()));
 		expr = new PostfixExpressionNode(this).interpret(node.postfix_expression());
 		switch (node.getChild(1).getText())
 		{

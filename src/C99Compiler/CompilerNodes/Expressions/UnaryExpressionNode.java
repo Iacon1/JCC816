@@ -49,7 +49,7 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 	public BaseExpressionNode<Unary_expressionContext> interpret(Unary_expressionContext node) throws Exception
 	{
 		if (node.postfix_expression() != null) // Propagate
-			return (BaseExpressionNode) new PostfixExpressionNode(this).interpret(node.postfix_expression());
+			return delegate(new PostfixExpressionNode(this).interpret(node.postfix_expression()));
 		else
 		{
 			if (node.unary_expression() != null)

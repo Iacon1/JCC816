@@ -38,7 +38,7 @@ public class ExpressionNode extends BaseExpressionNode<ExpressionContext> implem
 	{
 		for (Assignment_expressionContext assignment : node.assignment_expression())
 			expressions.add((BaseExpressionNode<?>) new AssignmentExpressionNode(this).interpret(assignment));
-		if (expressions.size() == 1) return (BaseExpressionNode) expressions.get(0);
+		if (expressions.size() == 1) return delegate(expressions.get(0));
 		return this;
 	}
 	

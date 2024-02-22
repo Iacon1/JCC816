@@ -20,6 +20,12 @@ import C99Compiler.Utils.OperandSources.OperandSource;
 public abstract class BaseExpressionNode<C extends ParserRuleContext> extends InterpretingNode<BaseExpressionNode<C>, C> implements AssemblableNode, TypedNode
 {
 
+	protected BaseExpressionNode delegate(BaseExpressionNode<?> delegatee)
+	{
+		delegatee.parent = parent;
+		swap(delegatee);
+		return (BaseExpressionNode) delegatee;
+	}
 	public BaseExpressionNode(ComponentNode<?> parent) {super(parent);}
 	public BaseExpressionNode() {super();}
 

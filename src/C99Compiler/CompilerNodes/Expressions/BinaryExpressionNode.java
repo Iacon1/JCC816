@@ -49,7 +49,7 @@ public abstract class BinaryExpressionNode<
 	{
 		if (node == null) return null;
 		if (node.children.size() == 1) // Only one, just propagate it
-			return (BaseExpressionNode) getPCNode(node);
+			return delegate(getPCNode(node));
 		else // Two
 		{
 			x = getC1Node(node);

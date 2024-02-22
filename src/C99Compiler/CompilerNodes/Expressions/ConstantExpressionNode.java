@@ -22,7 +22,7 @@ public class ConstantExpressionNode extends BaseExpressionNode<Constant_expressi
 		BaseExpressionNode<?> expr = new ConditionalExpressionNode(this).interpret(node.conditional_expression());
 		if (!expr.hasPropValue())
 			throw new ConstraintException("6.6", 4, node.start);
-		return (BaseExpressionNode) expr;
+		return delegate(expr);
 	}
 
 	// These will all *never* be called, since we always delegate to a conditional expression
