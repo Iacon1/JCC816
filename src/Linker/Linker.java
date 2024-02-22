@@ -155,7 +155,7 @@ public final class Linker implements Catalogger
 		{
 			if (var.getType().isSRAM())
 				SRAMVars.add(var);
-			else
+			else if (var.getType().isWRAM())
 				WRAMVars.add(var);
 		}
 		List<Integer> WRAMPoses = null, SRAMPoses = null;
@@ -197,6 +197,8 @@ public final class Linker implements Catalogger
 		
 		for (VariableNode var : getVariables().values())
 		{
+			if (var.getType().isROM()) continue; // These are mapped elsewhere
+			
 			String fullName = var.getFullName();
 			assembly += AssemblyUtils.applyFiller(fullName, maxLength) + " = $" + String.format("%06x", varPoses.get(var.getFullName()));
 			if (DebugLevel.isAtLeast(DebugLevel.medium))
@@ -266,7 +268,8 @@ public final class Linker implements Catalogger
 		// Load initialized globals
 		for (TranslationUnit unit : translationUnits)
 			for (InitializerNode init : unit.getGlobalInitializers())
-				assembly += init.getAssembly();
+				if (!init.isROM()) // Only RAM ones up here, to save space in 0 bank
+					assembly += init.getAssembly();
 		assembly += "JML\tmain\n";
 		
 		// Long interrupt tables TODO optimize this if they're in zero bank
@@ -319,6 +322,12 @@ public final class Linker implements Catalogger
 		for (TranslationUnit unit : translationUnits)
 			if (AssemblyUnit.class.isAssignableFrom(unit.getClass()))
 				assembly += ((AssemblyUnit) unit).getAssembly();
+		
+		// Get ROM data
+		for (TranslationUnit unit : translationUnits)
+			for (InitializerNode init : unit.getGlobalInitializers())
+				if (init.isROM()) // Only RAM ones up here, to save space in 0 bank
+					assembly += init.getAssembly();
 		
 		Map<String, Integer> varPoses = mapVariables(cartConfig, memorySize);
 		

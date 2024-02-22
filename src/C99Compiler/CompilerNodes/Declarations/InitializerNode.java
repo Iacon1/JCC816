@@ -9,6 +9,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import C99Compiler.CompConfig;
 import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.FunctionDefinitionNode;
 import C99Compiler.CompilerNodes.InterpretingNode;
@@ -22,8 +23,10 @@ import C99Compiler.CompilerNodes.Interfaces.AssemblableNode;
 import C99Compiler.CompilerNodes.Interfaces.SequencePointNode;
 import C99Compiler.CompilerNodes.Interfaces.TypedNode;
 import C99Compiler.CompilerNodes.LValues.LValueNode;
+import C99Compiler.CompilerNodes.LValues.VariableNode;
 import C99Compiler.Exceptions.ConstraintException;
 import C99Compiler.Utils.AssemblyUtils;
+import C99Compiler.Utils.AssemblyUtils.DetailsTicket;
 import C99Compiler.Utils.OperandSources.ConstantSource;
 import Grammar.C99.C99Parser.DesignationContext;
 import Grammar.C99.C99Parser.DesignatorContext;
@@ -164,6 +167,11 @@ public class InitializerNode extends InterpretingNode<InitializerNode, Initializ
 		return LValue.getType();
 	}
 	
+	public boolean isROM()
+	{
+		return LValue.getType().isROM();
+	}
+	
 	@Override
 	public boolean hasAssembly()
 	{
@@ -215,45 +223,65 @@ public class InitializerNode extends InterpretingNode<InitializerNode, Initializ
 	public String getAssembly(int leadingWhitespace) throws Exception
 	{
 		clearSequence();
-		if (expr != null)
+		if (!isROM()) // Normal RAM one
 		{
-			if (expr.hasAssembly())
-				return expr.getAssembly(leadingWhitespace, LValue.getSource()) + getAccumulatedSequences();
-			else if (expr.hasPropValue())
+			if (expr != null)
+			{
+				if (expr.hasAssembly())
+					return expr.getAssembly(leadingWhitespace, LValue.getSource()) + getAccumulatedSequences();
+				else if (expr.hasPropValue())
+					return AssemblyUtils.byteCopier(
+							AssemblyUtils.getWhitespace(leadingWhitespace),
+							LValue.getSize(),
+							LValue.getSource(),
+							new ConstantSource(expr.getPropValue(), LValue.getSize())) + getAccumulatedSequences();
+				else if (expr.hasLValue())
+					return AssemblyUtils.byteCopier(
+							AssemblyUtils.getWhitespace(leadingWhitespace),
+							LValue.getSize(),
+							LValue.getSource(),
+							expr.getLValue().castTo(getType()).getSource()) + getAccumulatedSequences();
+				else return "";
+			}	
+			else if (arrayInitializers != null) // Array
+			{
+				String assembly = "";
+				for (InitializerNode initializer : arrayInitializers.values())
+					assembly += initializer.getAssembly(leadingWhitespace);
+				return assembly;
+			}
+			else if (structInitializers != null) // Struct
+			{
+				String assembly = "";
+				for (InitializerNode initializer : structInitializers.values())
+					assembly += initializer.getAssembly(leadingWhitespace);
+				return assembly;
+			}
+			else if (LValue.getType().isStatic()) // Statics are initialized always
 				return AssemblyUtils.byteCopier(
-						AssemblyUtils.getWhitespace(leadingWhitespace),
-						LValue.getSize(),
-						LValue.getSource(),
-						new ConstantSource(expr.getPropValue(), LValue.getSize())) + getAccumulatedSequences();
-			else if (expr.hasLValue())
-				return AssemblyUtils.byteCopier(
-						AssemblyUtils.getWhitespace(leadingWhitespace),
-						LValue.getSize(),
-						LValue.getSource(),
-						expr.getLValue().castTo(getType()).getSource()) + getAccumulatedSequences();
+					AssemblyUtils.getWhitespace(leadingWhitespace),
+					LValue.getSize(),
+					LValue.getSource(),
+					new ConstantSource(0, LValue.getSize())) + getAccumulatedSequences();
 			else return "";
-		}	
-		else if (arrayInitializers != null) // Array
+		}
+		else // ROM one
 		{
-			String assembly = "";
-			for (InitializerNode initializer : arrayInitializers.values())
-				assembly += initializer.getAssembly(leadingWhitespace);
+			String whitespace = AssemblyUtils.getWhitespace(leadingWhitespace);
+			ConstantSource source = new ConstantSource(getPropValue(), LValue.getSize());
+			String assembly = whitespace + ((VariableNode) LValue).getFullName() + ":";
+			whitespace = AssemblyUtils.getWhitespace(leadingWhitespace + CompConfig.indentSize);
+			for (int i = 0; i < source.getSize(); ++i)
+			{
+				if (i % CompConfig.bytesPerDataLine == 0) // New line needed
+					assembly += "\n" + whitespace + ".byte\t";
+				assembly += source.getBase(i, new DetailsTicket()).replace("#", "");
+				if (i != source.getSize() - 1 && (i + 1) % CompConfig.bytesPerDataLine != 0)
+					assembly += ", "; // There will be another and on the same line
+			}
+			assembly += "\n";
 			return assembly;
 		}
-		else if (structInitializers != null) // Struct
-		{
-			String assembly = "";
-			for (InitializerNode initializer : structInitializers.values())
-				assembly += initializer.getAssembly(leadingWhitespace);
-			return assembly;
-		}
-		else if (LValue.getType().isStatic()) // Statics are initialized always
-			return AssemblyUtils.byteCopier(
-				AssemblyUtils.getWhitespace(leadingWhitespace),
-				LValue.getSize(),
-				LValue.getSource(),
-				new ConstantSource(0, LValue.getSize())) + getAccumulatedSequences();
-		else return "";
 	}
 
 }

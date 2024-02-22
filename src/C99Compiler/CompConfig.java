@@ -40,6 +40,8 @@ public final class CompConfig
 	public static final String bankRootName = "ROM";
 	public static final String functionTag = "@func";
 	
+	public static final int bytesPerDataLine = 32; // Bytes per data line for ROM data
+	
 	public static final OperandSource callResultSource(int size)
 	{
 		if (size <= callResultSize) return new AddressSource(callResult, size);
