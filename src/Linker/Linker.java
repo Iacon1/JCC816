@@ -309,6 +309,7 @@ public final class Linker implements Catalogger
 		for (FunctionDefinitionNode funcNode : getFunctions().values())
 		{
 			if (funcNode.isImplemented() && funcNode.isInline()) continue;
+			else if (funcNode.getType().isExtern()) continue;
 			else if (!funcNode.isImplemented())
 				throw new UndefinedFunctionException(funcNode);
 			assembly += funcNode.getAssembly();
