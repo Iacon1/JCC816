@@ -122,6 +122,9 @@ public class InitializerNode extends InterpretingNode<InitializerNode, Initializ
 			int j = 0, k = 0;
 			for (int i = 0; i < node.initializer_list().getChildCount(); i += 2)
 			{
+				if (i == node.initializer_list().getChildCount() - 1 &&
+						node.initializer_list().getChild(i).getText().equals(","))
+					break; // Last child is comma
 				if (node.initializer_list().getChild(i) == node.initializer_list().initializer(k)) // Designator not present
 				{
 					if (arrayInitializers != null)
