@@ -44,7 +44,7 @@ public class VariableNode extends LValueNode<VariableNode> implements NamedNode
 	@Override
 	public LValueNode<?> castTo(Type type)
 	{
-		if (this.type.isArray() && type.isPointer() && !type.isArray()) // Decay array into pointer
+		if (this.type.isArray() && !type.isArray()) // Decay array into pointer
 			return new DummyLValueNode(this, type, new ConstantSource(new PropPointer<VariableNode>(this, 0), CompConfig.pointerSize));
 		else return new DummyLValueNode(this, type, getSource()); // TODO
 	}	
