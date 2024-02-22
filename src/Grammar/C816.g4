@@ -20,10 +20,14 @@ Operation
 	| 'TAX' | 'TAY' | 'TCD' | 'TCS' | 'TDC' | 'TSC' | 'TSX' | 'TXA' | 'TXS' | 'TXY' | 'TYA' | 'TYX' | 'TRB' | 'TSB'
 	| 'WAI' | 'XCE'
 	;
+fragment PpFunc // Preprocessor function
+	: '.loWord'
+	| '.loByte'
+	| '.bankByte'
+	;
 Symbol
 	: [a-zA-Z_] [0-9a-zA-Z@_]*
-	| '.loWord(' Symbol ')'
-	| '.bankByte(' Symbol ')'
+	| PpFunc '(' Symbol ')'
 	;
 Number
 	: [0-9]+

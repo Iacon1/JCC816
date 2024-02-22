@@ -28,6 +28,7 @@ import Grammar.C816.C816Parser;
 import Grammar.C816.C816Parser.ProgramContext;
 import Logging.Logging;
 import C99Compiler.ASMGrapher.Nodes.LabelNode;
+import C99Compiler.ASMGrapher.Nodes.Operation;
 import C99Compiler.ASMGrapher.Nodes.PreprocNode;
 
 public class ASMGraphBuilder
@@ -151,12 +152,18 @@ public class ASMGraphBuilder
 			buildGraph(i, internalAddresses, new HashSet<Address>(), (byte) 0, (byte) 0);
 	}
 	
+	private static String capitalize(String assembly) // capitalize all operations.
+	{
+		for (Operation operation : Operation.values())
+			assembly = assembly.replaceAll("(?<=[\s\n\t])(?i)" + operation.name() + "(?=[\s\n\t])", operation.name());
+		return assembly;
+	}
 	public ASMGraphBuilder(String assembly) throws Exception
 	{
 		lines = new ArrayList<ASMNode<?>>();
 		textLines = new ArrayList<String>();
 
-		assembly = assembly.replaceAll("(?<!\n[^\s]*):(?=[^\n])",":\n");
+		assembly = capitalize(assembly);
 		assembly = assembly.replaceAll("\n+", "\n");
 		for (String line : assembly.split("\n"))
 			textLines.add(line);
