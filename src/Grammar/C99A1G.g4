@@ -61,6 +61,8 @@ keyword
 	
 	| SRAM
 	| RWTWICE
+	| ROTWICE
+	| WOTWICE
 	;
 	
 punctuator

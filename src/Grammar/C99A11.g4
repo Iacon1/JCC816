@@ -63,3 +63,5 @@ Offsetof: '__offset_of' ;
  // Implementation-defined below
 SRAM : '__SRAM' ;
 RWTWICE : '__RWTWICE' ;
+ROTWICE : '__ROTWICE' ;
+WOTWICE : '__WOTWICE' ;

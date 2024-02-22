@@ -19,7 +19,9 @@ public abstract class StorageWrapperType extends Type
 	@Override public boolean isAuto() {return type.isAuto();}
 	@Override public boolean isRegister() {return type.isRegister();}
 	@Override public boolean isSRAM() {return type.isSRAM();}
-	@Override public boolean isRWTwice() {return type.isRWTwice();}
+	@Override public boolean isROM() {return type.isROM();}
+	@Override public boolean isWRAM() {return type.isWRAM();}
+	@Override public boolean isTwice() {return type.isTwice();}
 	
 	public Type getType() {return type;}
 }

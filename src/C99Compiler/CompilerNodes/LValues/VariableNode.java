@@ -33,7 +33,7 @@ public class VariableNode extends LValueNode<VariableNode> implements NamedNode
 	{
 		if (source == null)
 		{
-			if (getType().isRWTwice())
+			if (getType().isTwice())
 				source = new StationaryAddressSource(this.getFullName(), this.getSize()); // We can't find our name and size until assembly time
 			else
 				source = new AddressSource(this.getFullName(), this.getSize()); // We can't find our name and size until assembly time
