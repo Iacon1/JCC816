@@ -145,7 +145,7 @@ public class ControlNode extends InterpretingNode<ControlNode, Control_lineConte
 			else if (filename.contains("\"")) // Include file
 			{
 				filename = filename.replaceAll("[<>\"\"]", "");
-				embedBytes = FileIO.readFileBytes(filename);
+				embedBytes = FileIO.readFileBytes(CompConfig.rootFolder + "/" + filename);
 			}
 			break;
 		}
@@ -181,8 +181,11 @@ public class ControlNode extends InterpretingNode<ControlNode, Control_lineConte
 		else if (command.equals("embed"))
 		{
 			String text = "";
-			for (byte b : embedBytes)
-				text += String.format("0x%02x", b) + ", ";
+			for (int i = 0; i < embedBytes.length; ++i)
+			{
+				if (i != 0 && i % CompConfig.bytesPerDataLine == 0) text += "\n";
+				text += String.format("0x%02x", embedBytes[i]) + ", ";
+			}
 			return text.substring(0, text.length() - 2) + "\n";
 		}
 		else if (pragmaOutput != null)
