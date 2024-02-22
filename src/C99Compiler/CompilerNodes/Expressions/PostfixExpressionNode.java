@@ -220,11 +220,28 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 				else
 				{
 					ScratchSource sourceI = ScratchManager.reservePointer(expr.getLValue().getSource());
-					assembly += new MultiplicativeExpressionNode(this, "*", indexExpr, new DummyExpressionNode(this, getType().getSize())).getAssembly(whitespace.length(), sourceI, ticket); // Multiply index by size of type
-					assembly += AdditiveExpressionNode.getAdder(whitespace,
+					if (getType().getSize() != 1)
+					{
+						assembly += new MultiplicativeExpressionNode(this, "*", indexExpr, new DummyExpressionNode(this, getType().getSize())).getAssembly(whitespace.length(), sourceI, ticket); // Multiply index by size of type
+						assembly += AdditiveExpressionNode.getAdder(whitespace,
 							sourceI,
 							new ConstantSource(new PropPointer(expr.getLValue(), 0), CompConfig.pointerSize),
 							sourceI, ticket); // set pointer to pointer plus address
+					}
+					else if (indexExpr.hasAssembly())
+					{
+						assembly += indexExpr.getAssembly(leadingWhitespace, sourceI, scratchManager, ticket);
+						assembly += AdditiveExpressionNode.getAdder(whitespace,
+								sourceI,
+								new ConstantSource(new PropPointer(expr.getLValue(), 0), CompConfig.pointerSize),
+								sourceI, ticket); // set pointer to pointer plus address
+					}
+					else
+					{
+						assembly += AdditiveExpressionNode.getAdder(whitespace, sourceI,
+								new ConstantSource(new PropPointer(expr.getLValue(), 0), CompConfig.pointerSize),
+								indexExpr.getLValue().getSource().respec(CompConfig.pointerSize), ticket); // set pointer to pointer plus address
+					}
 					pointerRef = new IndirectLValueNode(this, new DummyLValueNode(this, expr.getType(), sourceI), sourceI, expr.getType());
 					if (destSource != null)
 						assembly += AssemblyUtils.byteCopier(whitespace, destSource.getSize(), destSource, pointerRef.getSource());
