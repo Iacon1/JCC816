@@ -191,6 +191,7 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 					(function.implementation != null && this.implementation.canCall(function.implementation))
 				   );
 		}
+		else if (code == null) return function == this;
 		return code.canCall(function) || (function == this);
 	}
 	
