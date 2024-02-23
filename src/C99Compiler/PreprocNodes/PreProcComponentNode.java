@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.Set;
 
 import C99Compiler.PragmaProcessor;
+import C99Compiler.Utils.LineInfo;
 
 public abstract class PreProcComponentNode<T extends PreProcComponentNode<T>>
 {
@@ -170,5 +171,13 @@ public abstract class PreProcComponentNode<T extends PreProcComponentNode<T>>
 		}
 		
 		return wordList;
+	}
+	
+	public List<LineInfo> getLineInfo()
+	{
+		List<LineInfo> lineInfo = new LinkedList<LineInfo>();
+		for (PreProcComponentNode<?> child : children)
+			lineInfo.addAll(child.getLineInfo());
+		return lineInfo;
 	}
 }

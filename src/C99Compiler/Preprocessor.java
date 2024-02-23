@@ -15,6 +15,7 @@ import org.antlr.v4.runtime.Token;
 
 import C99Compiler.PreprocNodes.GroupNode;
 import C99Compiler.PreprocNodes.PreProcComponentNode;
+import C99Compiler.Utils.LineInfo;
 import Grammar.C99A3.C99A3Lexer;
 import Grammar.C99A3.C99A3Parser;
 import Grammar.C99A3.C99A3Parser.GroupContext;
@@ -79,7 +80,7 @@ public final class Preprocessor
 		return group;
 	}
 	
-	public static final String preprocess(Set<String> includedStdLibs, Set<String> includedOtherLibs, String filename, String source) throws Exception
+	public static final String preprocess(Set<String> includedStdLibs, Set<String> includedOtherLibs, List<LineInfo> lineInfo, String filename, String source) throws Exception
 	{
 		Grammar.GrammarFlags.isPreproc = true;
 		PreProcComponentNode.loadPredefs();
@@ -87,6 +88,8 @@ public final class Preprocessor
 		GroupNode node = new GroupNode().interpret(parsePreprocess(source));
 		includedStdLibs.addAll(node.getIncludedStdLibs());
 		includedOtherLibs.addAll(node.getIncludedOtherLibs());
+		lineInfo.clear();
+		lineInfo.addAll(node.getLineInfo());
 		source = node.getText();
 		PreProcComponentNode.reset();
 		Grammar.GrammarFlags.isPreproc = false;

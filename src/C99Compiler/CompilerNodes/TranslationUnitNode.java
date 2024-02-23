@@ -19,6 +19,7 @@ import C99Compiler.CompilerNodes.Interfaces.TranslationUnit;
 import C99Compiler.CompilerNodes.LValues.VariableNode;
 import C99Compiler.Exceptions.CompilerMultipleDefinitionException;
 import C99Compiler.Utils.CompUtils;
+import C99Compiler.Utils.LineInfo;
 import Grammar.C99.C99Parser.External_declarationContext;
 import Grammar.C99.C99Parser.Translation_unitContext;
 
@@ -27,13 +28,14 @@ public class TranslationUnitNode extends InterpretingNode<TranslationUnitNode, T
 	private LinkedHashMap<DefinableInterrupt, String> interrupts;
 	private LinkedHashMap<String, Type> typedefs;
 	private LinkedHashMap<String, String> requiredSubs;
+	private List<LineInfo> lineInfo;
 	private Set<String> includedStdLibs;
 	private Set<String> includedOtherLibs;
 	private List<InitializerNode> globalInitializers;
 	private String filename;
 	private String staticUUID;
 	
-	public TranslationUnitNode(ComponentNode<?> parent, String filename)
+	public TranslationUnitNode(ComponentNode<?> parent, String filename, List<LineInfo> lineInfo)
 	{
 		super(parent);
 		interrupts = new LinkedHashMap<DefinableInterrupt, String>();
@@ -41,9 +43,10 @@ public class TranslationUnitNode extends InterpretingNode<TranslationUnitNode, T
 		requiredSubs = new LinkedHashMap<String, String>();
 		globalInitializers = new LinkedList<InitializerNode>();
 		this.filename = filename;
+		this.lineInfo = lineInfo;
 		staticUUID = CompUtils.getSafeUUID();
 	}
-	public TranslationUnitNode(String filename)
+	public TranslationUnitNode(String filename, List<LineInfo> lineInfo)
 	{
 		super();
 		interrupts = new LinkedHashMap<DefinableInterrupt, String>();
@@ -51,6 +54,7 @@ public class TranslationUnitNode extends InterpretingNode<TranslationUnitNode, T
 		requiredSubs = new LinkedHashMap<String, String>();
 		globalInitializers = new LinkedList<InitializerNode>();
 		this.filename = filename;
+		this.lineInfo = lineInfo;
 		staticUUID = CompUtils.getSafeUUID();
 	}
 	
@@ -143,4 +147,6 @@ public class TranslationUnitNode extends InterpretingNode<TranslationUnitNode, T
 		return globals;
 	}
 	public String getStaticUUID() {return staticUUID;}
+	
+	public LineInfo getInfo(int i) {return lineInfo.get(i);}
 }

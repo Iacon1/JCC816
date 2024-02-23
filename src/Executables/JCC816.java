@@ -4,8 +4,6 @@
 package Executables;
 
 import java.io.File;
-import java.io.IOException;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -23,14 +21,13 @@ import C99Compiler.CartConfig;
 import C99Compiler.CompConfig;
 import C99Compiler.C99Compiler;
 import C99Compiler.Preprocessor;
-import C99Compiler.CartConfig.AddonChip;
-import C99Compiler.CartConfig.MapMode;
 import C99Compiler.CompConfig.DebugLevel;
 import C99Compiler.CompConfig.OptimizationLevel;
 import C99Compiler.CompConfig.VerbosityLevel;
 import C99Compiler.CompilerNodes.TranslationUnitNode;
 import C99Compiler.CompilerNodes.Interfaces.TranslationUnit;
 import C99Compiler.Utils.FileIO;
+import C99Compiler.Utils.LineInfo;
 import Linker.AssemblyUnit;
 import Linker.Linker;
 import Logging.DebugLogger;
@@ -235,7 +232,7 @@ public class JCC816
 		{
 			String parameter = commandLine.getArgList().get(0);
 			String fileText = FileIO.readFile(parameter);
-			fileText = Preprocessor.preprocess(new HashSet<String>(), new HashSet<String>(), parameter, fileText);
+			fileText = Preprocessor.preprocess(new HashSet<String>(), new HashSet<String>(), new LinkedList<LineInfo>(), parameter, fileText);
 			byte[] fileBytes = fileText.getBytes();
 			FileIO.writeFile(commandLine.getOptionValue("p"), fileBytes);
 		}

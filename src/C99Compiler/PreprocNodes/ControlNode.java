@@ -3,6 +3,7 @@
 package C99Compiler.PreprocNodes;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -15,6 +16,7 @@ import C99Compiler.Exceptions.ErrorException;
 import Grammar.C99A3.C99A3Parser.Control_lineContext;
 import Grammar.C99A3.C99A3Parser.Pp_tokenContext;
 import C99Compiler.Utils.FileIO;
+import C99Compiler.Utils.LineInfo;
 
 public class ControlNode extends InterpretingNode<ControlNode, Control_lineContext> implements GeneratingNode
 {
@@ -24,6 +26,7 @@ public class ControlNode extends InterpretingNode<ControlNode, Control_lineConte
 	private String otherLib; // Only fill out if other lib was included
 	private byte[] embedBytes;
 	private String pragmaOutput; // Output of Pragma
+	private List<LineInfo> lineInfo;
 	
 	public ControlNode(PreProcComponentNode<?> parent)
 	{
@@ -32,6 +35,7 @@ public class ControlNode extends InterpretingNode<ControlNode, Control_lineConte
 		include = null;
 		embedBytes = null;
 		pragmaOutput = null;
+		lineInfo = new LinkedList<LineInfo>();
 	}
 	public ControlNode()
 	{
@@ -40,6 +44,7 @@ public class ControlNode extends InterpretingNode<ControlNode, Control_lineConte
 		include = null;
 		embedBytes = null;
 		pragmaOutput = null;
+		lineInfo = new LinkedList<LineInfo>();
 	}
 	
 	private List<String> getPPTokens(Control_lineContext node) throws Exception // LOL
@@ -126,6 +131,8 @@ public class ControlNode extends InterpretingNode<ControlNode, Control_lineConte
 			throw new ErrorException(error, PreProcComponentNode.file, PreProcComponentNode.line);
 		case "pragma":
 			pragmaOutput = PragmaProcessor.procPragma(getPPTokens(node), PreProcComponentNode.file, PreProcComponentNode.line);
+			for (int i = 0; i < pragmaOutput.split("\n").length; ++i)
+				lineInfo.add(new LineInfo(PreProcComponentNode.file, PreProcComponentNode.line));
 			break;
 		case "embed":
 			filename = "";
@@ -147,6 +154,10 @@ public class ControlNode extends InterpretingNode<ControlNode, Control_lineConte
 				filename = filename.replaceAll("[<>\"\"]", "");
 				embedBytes = FileIO.readFileBytes(CompConfig.rootFolder + "/" + filename);
 			}
+			
+			int j = 0;
+			for (int i = 0; i < embedBytes.length; i += CompConfig.bytesPerDataLine)
+				lineInfo.add(new LineInfo(PreProcComponentNode.file, PreProcComponentNode.line));
 			break;
 		}
 		incrLineNo();
@@ -190,6 +201,12 @@ public class ControlNode extends InterpretingNode<ControlNode, Control_lineConte
 		}
 		else if (pragmaOutput != null)
 			return pragmaOutput;
-		else return null;
+		else return "";
+	}
+	public List<LineInfo> getLineInfo()
+	{
+		if (command.equals("include"))
+			return include.getLineInfo();
+		else return lineInfo;
 	}
 }

@@ -3,6 +3,12 @@
 
 package C99Compiler.PreprocNodes;
 
+import java.util.LinkedList;
+import java.util.List;
+
+import C99Compiler.CompConfig;
+import C99Compiler.Utils.LineInfo;
+
 public class DefineNode extends PreProcComponentNode<DefineNode> implements GeneratingNode
 {
 	private String[] parameters, replacements;

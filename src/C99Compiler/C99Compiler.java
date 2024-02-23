@@ -3,6 +3,7 @@
 
 package C99Compiler;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -13,6 +14,7 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import C99Compiler.CompConfig.VerbosityLevel;
 import C99Compiler.CompilerNodes.TranslationUnitNode;
 import C99Compiler.CompilerNodes.Statements.CompoundStatementNode;
+import C99Compiler.Utils.LineInfo;
 import Grammar.C99.C99Lexer;
 import Grammar.C99.C99Parser;
 import Grammar.C99.C99Parser.Compound_statementContext;
@@ -32,7 +34,7 @@ public class C99Compiler
 		
 		return new CommonTokenStream(lexer);
 	}
-	private static TranslationUnitNode parse(String filename, CommonTokenStream tokens) throws Exception
+	private static TranslationUnitNode parse(String filename, List<LineInfo> lineInfo, CommonTokenStream tokens) throws Exception
 	{
 		SyntaxErrorCollector collector = new SyntaxErrorCollector();
 		C99Parser parser = new C99Parser(tokens);
@@ -42,7 +44,7 @@ public class C99Compiler
 		Translation_unitContext tree = parser.translation_unit();
 //		Logging.viewParseTree(parser, tree);
 		if (collector.getException() != null) throw collector.getException();
-		return new TranslationUnitNode(filename).interpret(tree);
+		return new TranslationUnitNode(filename, lineInfo).interpret(tree);
 	}
 	private static CompoundStatementNode parseSnippet(CommonTokenStream tokens) throws Exception
 	{
@@ -54,24 +56,25 @@ public class C99Compiler
 		Compound_statementContext tree = parser.compound_statement();
 //		Logging.viewParseTree(parser, tree);
 		if (collector.getException() != null) throw collector.getException();
-		return new CompoundStatementNode(new TranslationUnitNode("INTERNAL")).interpret(tree);
+		return new CompoundStatementNode(new TranslationUnitNode("INTERNAL", null)).interpret(tree);
 	}
 
-	private static String precompile(Set<String> includedStdLibs, Set<String> includedOtherLibs, String filename, String mainFile) throws Exception
+	private static String precompile(Set<String> includedStdLibs, Set<String> includedOtherLibs, List<LineInfo> lineInfo, String filename, String mainFile) throws Exception
 	{
-		return Preprocessor.preprocess(includedStdLibs, includedOtherLibs, filename, mainFile);
+		return Preprocessor.preprocess(includedStdLibs, includedOtherLibs, lineInfo, filename, mainFile);
 	}
 		
 	public static TranslationUnitNode compile(String filename, String file) throws Exception
 	{ 
 		Set<String> includedStdLibs = new HashSet<String>();
 		Set<String> includedOtherLibs = new HashSet<String>();
+		List<LineInfo> lineInfo = new ArrayList<LineInfo>();
 		long t = System.currentTimeMillis();
 
 		if (VerbosityLevel.isAtLeast(VerbosityLevel.medium))
 			printInfo("Compiling " + filename + "...");
 		
-		String source = precompile(includedStdLibs, includedOtherLibs, filename, file);
+		String source = precompile(includedStdLibs, includedOtherLibs, lineInfo, filename, file);
 		if (VerbosityLevel.isAtLeast(VerbosityLevel.medium))
 			printInfo("Precompiled in " + (System.currentTimeMillis() - t) + " ms. Source length: " + source.length() + ".");
 		t = System.currentTimeMillis();
@@ -81,7 +84,7 @@ public class C99Compiler
 			printInfo("Lexed in " + (System.currentTimeMillis() - t) + " ms. Tokens: " + tokens.getNumberOfOnChannelTokens() + ".");
 		t = System.currentTimeMillis();
 
-		TranslationUnitNode unit = parse(filename, tokens);
+		TranslationUnitNode unit = parse(filename, lineInfo, tokens);
 		unit.includeStdLibs(includedStdLibs);
 		unit.includeOtherLibs(includedOtherLibs);
 		if (VerbosityLevel.isAtLeast(VerbosityLevel.medium))

@@ -6,17 +6,19 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+import C99Compiler.Utils.LineInfo;
 import Grammar.C99A3.C99A3Parser.Pp_tokenContext;
 import Grammar.C99A3.C99A3Parser.Text_lineContext;
 
 public class TextNode extends InterpretingNode<TextNode, Text_lineContext> implements GeneratingNode
 {
 	private List<String> words;
-	
+	private List<LineInfo> lineInfo;
 	public TextNode(PreProcComponentNode<?> parent)
 	{
 		super(parent);
 		words = new LinkedList<String>();
+		lineInfo = new LinkedList<LineInfo>();
 	}
 	public TextNode()
 	{
@@ -31,7 +33,12 @@ public class TextNode extends InterpretingNode<TextNode, Text_lineContext> imple
 		if (node.pp_token().size() > 0) for (Pp_tokenContext token : node.pp_token()) tokens.add(token.getText());
 		tokens = resolveDefines(tokens.toArray(new String[] {}));
 		if (tokens != null && tokens.size() > 0) words.addAll(tokens);
-		
+		try
+		{
+			for (int i = 0; i < getText().split("\n").length; ++i)
+				lineInfo.add(new LineInfo(file, line + i));
+		}
+		catch (Exception e) {}
 		incrLineNo();
 		return this;
 	}
@@ -45,4 +52,6 @@ public class TextNode extends InterpretingNode<TextNode, Text_lineContext> imple
 		for (String word : words) text += word + " ";
 		return text.stripTrailing() + "\n";
 	}
+	
+	public List<LineInfo> getLineInfo() {return lineInfo;}
 }

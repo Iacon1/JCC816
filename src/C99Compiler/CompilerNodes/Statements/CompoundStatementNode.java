@@ -13,6 +13,7 @@ import C99Compiler.CompilerNodes.Declarations.DeclarationNode;
 import C99Compiler.CompilerNodes.Definitions.Scope;
 import C99Compiler.CompilerNodes.Interfaces.AssemblableNode;
 import C99Compiler.Utils.AssemblyUtils;
+import C99Compiler.Utils.LineInfo;
 import Grammar.C99.C99Parser.Block_itemContext;
 import Grammar.C99.C99Parser.Compound_statementContext;
 
@@ -46,7 +47,7 @@ public class CompoundStatementNode extends StatementNode<Compound_statementConte
 			else if (blockItem.statement() != null) assemblables.add(StatementNode.manufacture(this, blockItem.statement()));
 			else continue;
 			
-			lines.add(blockItem.start.getLine());
+			lines.add(blockItem.start.getLine() - 1);
 		}
 		return this;
 	}
@@ -80,7 +81,10 @@ public class CompoundStatementNode extends StatementNode<Compound_statementConte
 		for (AssemblableNode assemblable : assemblables)
 		{
 			if (DebugLevel.isAtLeast(DebugLevel.low))
-				assembly += AssemblyUtils.getWhitespace(leadingWhitespace) + ".dbg\tline, \"" + getTranslationUnit().getFilename() + "\", " + lines.get(i++) + "\n";
+			{
+				LineInfo info = getTranslationUnit().getInfo(lines.get(i++));
+				assembly += AssemblyUtils.getWhitespace(leadingWhitespace) + ".dbg\tline, \"" + info.filename + "\", " + info.line + "\n";
+			}
 			if (StatementNode.class.isAssignableFrom(assemblable.getClass())) assembly += ((StatementNode) assemblable).getAssembly(leadingWhitespace, returnAddr);
 			else
 				assembly += assemblable.getAssembly(leadingWhitespace);
