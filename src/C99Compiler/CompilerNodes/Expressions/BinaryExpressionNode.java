@@ -63,18 +63,6 @@ public abstract class BinaryExpressionNode<
 		return this;
 	}
 	protected abstract CastContext getCastContext();
-	@Override
-	public Type getType()
-	{
-		if (x.getType().isArithmetic() && y.getType().isArithmetic())
-		{
-			if (x.getSize() < y.getSize()) return y.getType();
-			else return x.getType();
-		}
-		else if (x.canCastFrom(y, getCastContext())) return x.getType();
-		else if (y.canCastFrom(x, getCastContext())) return y.getType();
-		else return null;
-	}
 	
 	@Override
 	public boolean canCall(FunctionDefinitionNode function)

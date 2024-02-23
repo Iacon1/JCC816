@@ -241,7 +241,8 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 								new ConstantSource(new PropPointer(expr.getLValue(), 0), CompConfig.pointerSize),
 								indexExpr.getLValue().getSource().respec(CompConfig.pointerSize), ticket); // set pointer to pointer plus address
 					}
-					pointerRef = new IndirectLValueNode(this, new DummyLValueNode(this, expr.getType(), sourceI), sourceI, expr.getType());
+					Type type = ((ArrayType) expr.getType()).getType();
+					pointerRef = new IndirectLValueNode(this, new DummyLValueNode(this, type, sourceI), sourceI, type);
 					if (destSource != null)
 						assembly += AssemblyUtils.byteCopier(whitespace, destSource.getSize(), destSource, pointerRef.getSource());
 				}

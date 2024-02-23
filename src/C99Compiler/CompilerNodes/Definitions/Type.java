@@ -324,7 +324,39 @@ public class Type implements Serializable
 	{
 		return canCastFrom(new DummyType(specifiers), context);
 	}
-
+	public static Type convertArithmetic(Type a, Type b)
+	{
+		assert (a.isArithmetic() && b.isArithmetic());
+		if (a.isInteger() && b.isInteger())
+		{
+			Type greater, lesser;
+			if (a.getSize() >= b.getSize())
+			{
+				greater = a;
+				lesser = b;
+			}
+			else
+			{
+				greater = b;
+				lesser = a;
+			}
+			
+			if (greater.isSigned() == lesser.isSigned())
+				return greater;
+			else if (!greater.isSigned())
+				return greater;
+			else if (greater.getSize() > b.getSize())
+				return greater;
+			else
+			{
+				Type greaterU = new Type(greater);
+				greaterU.typeSpecifiers.add("unsigned");
+				return greaterU;
+			}
+		}
+		else return null;
+	}
+	
 	public boolean containsSpecifier(String specifier)
 	{
 		if (typeSpecifiers.size() == 0) return false;
@@ -401,7 +433,7 @@ public class Type implements Serializable
 	}
 	public boolean isInteger()
 	{
-		return isCharacter() || containsSpecifier("short") || containsSpecifier("long") || containsSpecifier("int");
+		return isCharacter() || containsSpecifier("_Bool") || containsSpecifier("short") || containsSpecifier("long") || containsSpecifier("int");
 	}
 	public boolean isArithmetic()
 	{

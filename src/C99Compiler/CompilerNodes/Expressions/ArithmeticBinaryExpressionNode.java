@@ -32,6 +32,8 @@ CC extends ParserRuleContext
 		this.operator = operator;
 	}
 
+	@Override public Type getType() {return Type.convertArithmetic(x.getType(), y.getType());}
+	
 	protected abstract long doOperation(long x, long y);
 	protected abstract String getPreface();
 	protected abstract String getInstruction();

@@ -4,6 +4,7 @@
 package C99Compiler.CompilerNodes.Expressions;
 
 import C99Compiler.CompilerNodes.ComponentNode;
+import C99Compiler.CompilerNodes.Definitions.Type;
 import C99Compiler.CompilerNodes.Definitions.Type.CastContext;
 import C99Compiler.CompilerNodes.LValues.LValueNode;
 import C99Compiler.CompilerNodes.LValues.VariableNode;
@@ -112,7 +113,7 @@ public class AssignmentExpressionNode extends BinaryExpressionNode
 	}
 	
 	@Override public CastContext getCastContext() {return CastContext.assignment;}
-	
+	@Override public Type getType() {return x.getType();}
 	@Override
 	public Object getPropValue() {return null;} // Should never happen
 	
@@ -180,6 +181,5 @@ public class AssignmentExpressionNode extends BinaryExpressionNode
 	{
 		return getAssembly(leadingWhitespace, null, scratchManager, ticket);
 	}
-	
 	
 }
