@@ -67,7 +67,7 @@ public class Multiplier
 							"ADC\t" + SNESRegisters.RDMPYL,				// 5 cycles - 12, get result
 							destSource.getSTA(ii + j, ticket2),// Store result
 						};
-					else
+					else	// Last byte
 						return new String[]
 						{
 							sourceX.getLDA(ii, ticket2),		// Load X-the-variable
@@ -78,6 +78,8 @@ public class Multiplier
 							"NOP",								// 2 cycles - 4
 							"LDA\t" + SNESRegisters.RDMPYL,		// 5 cycles - 9, get result
 							destSource.getSTA(ii + j, ticket2),	// Store result
+							"LDA\t" + SNESRegisters.RDMPYH,		// Get result
+							destSource.getSTA(ii + j + 1, ticket2),	// Store result
 						};
 			}, false, false, innerTicket);
 		}
