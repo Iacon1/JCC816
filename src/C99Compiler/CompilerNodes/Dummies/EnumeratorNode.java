@@ -13,7 +13,7 @@ public class EnumeratorNode extends VariableNode
 	
 	public EnumeratorNode(EnumDefinitionNode parent, String name, int value)
 	{
-		super(parent, name, new DummyType("enum", parent.getName()));
+		super(parent, name, parent.getType());
 		this.value = value;
 	}
 
@@ -22,9 +22,13 @@ public class EnumeratorNode extends VariableNode
 	{
 		return null;
 	}
-	
+
 	public int getValue()
 	{
 		return value;
+	}
+	public EnumDefinitionNode getEnum()
+	{
+		return (EnumDefinitionNode) parent;
 	}
 }

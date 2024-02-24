@@ -166,6 +166,7 @@ public class Type implements Serializable
 		typeQualifiers = new HashSet<String>();
 //		functionSpecifiers = new HashSet<String>();
 
+		context = other.context;
 		storageClassSpecifier = other.storageClassSpecifier;
 		typeSpecifiers.addAll(other.typeSpecifiers);
 		typeQualifiers.addAll(other.typeQualifiers);
@@ -220,7 +221,8 @@ public class Type implements Serializable
 		{
 			baseSize = context.resolveStructOrUnionRelative(getSUEName()).getSize();
 		}
-		else if (isEnum()) baseSize = CompConfig.sizeOf("char");
+		else if (isEnum())
+			baseSize = context.resolveEnumRelative(getSUEName()).getType().getSize();
 		else baseSize = CompConfig.sizeOf(typeSpecifiers);
 		return baseSize;
 	}
@@ -414,11 +416,11 @@ public class Type implements Serializable
 	}
 	public boolean isArray() {return false;} // To be overriden
 	public boolean isFunction() {return false;} // To be overriden
-	private boolean isStructOrUnion()
+	protected boolean isStructOrUnion()
 	{
 		return containsSpecifier("struct") || containsSpecifier("union");
 	}
-	private boolean isEnum()
+	protected boolean isEnum()
 	{
 		return containsSpecifier("enum");
 	}
@@ -475,5 +477,9 @@ public class Type implements Serializable
 	public EnumDefinitionNode getEnum()
 	{
 		return context.resolveEnumRelative(getSUEName());
+	}
+	public void setContext(ComponentNode<?> context) 
+	{
+		this.context = context;
 	}
 }
