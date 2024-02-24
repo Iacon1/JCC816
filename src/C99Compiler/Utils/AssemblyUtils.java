@@ -241,19 +241,36 @@ public final class AssemblyUtils
 		return x.getSource();
 	}
 	
-	public static String setSignExtend(String whitespace, OperandSource x, OperandSource y, DetailsTicket ticket)
+	public static String setSignExtend(String whitespace, OperandSource x, OperandSource y, boolean signedX, boolean signedY, DetailsTicket ticket)
 	{
 		String assembly = "";
 		if (x.getSize() == y.getSize()) return ""; // Sign extension not needed.
 		assembly += whitespace + CompUtils.setA8 + "\n";
 		if (x.getSize() < y.getSize() && !x.isLiteral()) // x will need the sign extension.
+		{
 			assembly += x.getLDA(whitespace, x.getSize() - 1, ticket) + "\n";
-		else if (x.isLiteral()) // Literals account for this, so not needed.
+			if (!signedX)
+			{
+				assembly += whitespace + "LDA\t#$00\n";
+				assembly += whitespace + "STA\t" + CompConfig.signExtend + "\n";
+				return assembly;
+			}
+		}
+		else if (x.getSize() < y.getSize() && x.isLiteral()) // Literals account for this, so not needed.
 			return "";
 		else if (!y.isLiteral()) // y will need the sign extension.
-			assembly += y.getLDA(whitespace, y.getSize() - 1, ticket) + "\n";
+		{
+			assembly += x.getLDA(whitespace, y.getSize() - 1, ticket) + "\n";
+			if (!signedY)
+			{
+				assembly += whitespace + "LDA\t#$00\n";
+				assembly += whitespace + "STA\t" + CompConfig.signExtend + "\n";
+				return assembly;
+			}
+		}
 		else if (y.isLiteral()) // Literals account for this, so not needed.
 			return "";
+		
 		assembly += whitespace + "BPL\t:+\n";
 		assembly += whitespace + "LDA\t#$FF\n";
 		assembly += whitespace + "BRA\t:++\n";
