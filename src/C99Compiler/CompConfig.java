@@ -167,9 +167,9 @@ public final class CompConfig
 		public static final String interruptABORT = "interrupt_ABORT";
 		public static final String interruptNMI = "interrupt_NMI";
 		public static final String interruptIRQ = "interrupt_IRQ";
-		public static final String noISR1 = "no_isr1"; // Level 1 noISR - removes normal stack pushers / loaders from interrupt handler
-		public static final String noISR2 = "no_isr2"; // Level 2 noISR - like level 1, but replaces RTI with RTL
-		public static final String SA1 = "sa1";	// Specifies that a function can only be called on the SA1 coprocessor
+		public static final String noISR1 = "no_ISR1"; // Level 1 noISR - removes normal stack pushers / loaders from interrupt handler
+		public static final String noISR2 = "no_ISR2"; // Level 2 noISR - like level 1, but replaces RTI with RTL
+		public static final String SA1 = "SA1";	// Specifies that a function can only be called on the SA1 coprocessor
 		
 		public static final boolean isInterrupt(Set<String> attributes)
 		{
