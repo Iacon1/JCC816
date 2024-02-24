@@ -13,19 +13,26 @@ import C99Compiler.Utils.OperandSources.OperandSource;
 
 public class IndirectLValueNode extends LValueNode<IndirectLValueNode>
 {
-	private class IndirectOperandSource extends OperandSource
+	private static class IndirectOperandSource extends OperandSource
 	{
-		public IndirectOperandSource()
-		{
-			super(type.getSize(), addrSource.isLiteral());
-		}
+		private OperandSource source;
 
+		public IndirectOperandSource(int size, OperandSource source)
+		{
+			super(size, source.isLiteral());
+			this.source = source;
+		}
+		public IndirectOperandSource(int size, int offset, OperandSource source)
+		{
+			super(size,  offset, source.isLiteral());
+			this.source = source;
+		}
 		@Override
-		public OperandSource getShifted(int offset, int size) {return this;}
+		public OperandSource getShifted(int offset, int size) {return new IndirectOperandSource(this.size + size, this.offset + offset, source);}
 		@Override
 		public String getBase()
 		{
-			return "(" + addrSource.getBase() + ")";
+			return "[" + source.getBase() + "]";
 		}
 		
 		@Override
@@ -35,9 +42,9 @@ public class IndirectLValueNode extends LValueNode<IndirectLValueNode>
 
 			if ((ticket.flags & DetailsTicket.saveY) != 0)
 				assembly += whitespace + "PHY\n";
-			assembly += whitespace + "LDY\t#$" + String.format(ticket.is16Bit() ? "%04x" : "%02x", i) + "\n";
+			assembly += whitespace + "LDY\t#$" + String.format(ticket.is16Bit() ? "%04x" : "%02x", i + offset) + "\n";
 
-			assembly += whitespace + operation + "\t[" + addrSource.getBase() + "],y" + "\n";
+			assembly += whitespace + operation + "\t[" + source.getBase() + "],y" + "\n";
 			if ((ticket.flags & DetailsTicket.saveY) != 0)
 				assembly += whitespace + "PLY\n";
 
@@ -45,7 +52,7 @@ public class IndirectLValueNode extends LValueNode<IndirectLValueNode>
 		}
 
 		@Override
-		public OperandSource getRespecified(int offset, int size) {return this;}
+		public OperandSource getRespecified(int offset, int size) {return new IndirectOperandSource(size, offset, source);}
 	}
 	private IndirectOperandSource source;
 	
@@ -56,7 +63,7 @@ public class IndirectLValueNode extends LValueNode<IndirectLValueNode>
 		super(parent, type);
 		this.destination = destination;
 		this.addrSource = addrSource;
-		if (addrSource != null) source = new IndirectOperandSource();
+		if (addrSource != null) source = new IndirectOperandSource(type.getSize(), addrSource);
 		this.type = type;
 	}
 	public IndirectLValueNode(ComponentNode<?> parent, OperandSource addrSource, Type type)
@@ -64,7 +71,7 @@ public class IndirectLValueNode extends LValueNode<IndirectLValueNode>
 		super(parent, type);
 		this.destination = null;
 		this.addrSource = addrSource;
-		if (addrSource != null) source = new IndirectOperandSource();
+		if (addrSource != null) source = new IndirectOperandSource(type.getSize(), addrSource);
 		this.type = type;
 	}
 	@Override
@@ -80,7 +87,7 @@ public class IndirectLValueNode extends LValueNode<IndirectLValueNode>
 	@Override
 	public OperandSource getSource()
 	{
-		if (addrSource != null && source == null) source = new IndirectOperandSource();
+		if (addrSource != null && source == null) source = new IndirectOperandSource(type.getSize(), addrSource);
 		if (addrSource != null) return source;
 		else return null;
 	}
