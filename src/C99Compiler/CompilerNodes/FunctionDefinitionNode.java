@@ -24,6 +24,7 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import C99Compiler.CompConfig;
 import C99Compiler.CompConfig.Attributes;
 import C99Compiler.CompConfig.DebugLevel;
+import C99Compiler.CompConfig.DefinableInterrupt;
 import C99Compiler.CompConfig.OptimizationLevel;
 import C99Compiler.ASMGrapher.ASMGraphBuilder;
 import C99Compiler.CompilerNodes.Declarations.DeclarationSpecifiersNode;
@@ -39,6 +40,7 @@ import C99Compiler.Exceptions.CompilerMultipleDefinitionException;
 import C99Compiler.Exceptions.ConstraintException;
 import C99Compiler.Exceptions.UnsupportedFeatureException;
 import C99Compiler.Utils.AssemblyUtils;
+import C99Compiler.Utils.CompUtils;
 import C99Compiler.Utils.ScratchManager;
 import C99Compiler.Utils.ScratchManager.ScratchSource;
 
@@ -81,7 +83,16 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 
 		code = new CompoundStatementNode(this, getName()).interpret(node.compound_statement());
 		
-		if (attributes.contains(Attributes.interruptCOP)); // TODO
+		if (attributes.contains(Attributes.interruptCOP))
+			getTranslationUnit().registerInterrupt(DefinableInterrupt.COP, getStartLabel());
+		if (attributes.contains(Attributes.interruptBRK))
+			getTranslationUnit().registerInterrupt(DefinableInterrupt.BRK, getStartLabel());
+		if (attributes.contains(Attributes.interruptABORT))
+			getTranslationUnit().registerInterrupt(DefinableInterrupt.ABORT, getStartLabel());
+		if (attributes.contains(Attributes.interruptIRQ))
+			getTranslationUnit().registerInterrupt(DefinableInterrupt.IRQ, getStartLabel());
+		if (attributes.contains(Attributes.interruptNMI))
+			getTranslationUnit().registerInterrupt(DefinableInterrupt.NMI, getStartLabel());
 			
 		return this;
 	}
@@ -234,11 +245,13 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 				"\n";
 		if (isInterruptHandler() && isISR()) // Have to push *everything* to the stack
 		{
-			assembly += AssemblyUtils.stackPusher(whitespace, CompConfig.scratchSize, new ScratchSource(0, CompConfig.scratchSize));
-			assembly += AssemblyUtils.stackPusher(whitespace, CompConfig.specSubSize, CompConfig.specSubSource(true, CompConfig.specSubSize));
-			assembly += AssemblyUtils.stackPusher(whitespace, CompConfig.specSubSize, CompConfig.specSubSource(false, CompConfig.specSubSize));
-			assembly += AssemblyUtils.stackPusher(whitespace, CompConfig.callResultSize, CompConfig.callResultSource(CompConfig.callResultSize));		
-			
+			// Using MVP to save space
+			assembly += whitespace + CompUtils.setAXY16 + "\n";
+			assembly += whitespace + "LDA\t#$00FF\n"; 	// 255 -> 256 bytes
+			assembly += whitespace + "LDX\t#$00FF\n"; 	// From first 256 bytes
+			assembly += whitespace + "TSY\n";			// To stack
+			assembly += "MVP\t$00,$00\n";
+			assembly += "TYS\n";						// Move stack to new location 
 			for (VariableNode variable : interruptRequirements(false))
 				assembly += AssemblyUtils.stackPusher(whitespace, leadingWhitespace, variable.getSource());
 		}
@@ -259,10 +272,12 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 			for (VariableNode variable : interruptRequirements(true))
 				assembly += AssemblyUtils.stackLoader(whitespace, leadingWhitespace, variable.getSource());
 			
-			assembly += AssemblyUtils.stackLoader(whitespace, CompConfig.callResultSize, new ScratchSource(0, CompConfig.scratchSize));
-			assembly += AssemblyUtils.stackLoader(whitespace, CompConfig.specSubSize, CompConfig.specSubSource(false, CompConfig.specSubSize));
-			assembly += AssemblyUtils.stackLoader(whitespace, CompConfig.specSubSize, CompConfig.specSubSource(true, CompConfig.specSubSize));
-			assembly += AssemblyUtils.stackLoader(whitespace, CompConfig.scratchSize, CompConfig.callResultSource(CompConfig.callResultSize));
+			assembly += whitespace + CompUtils.setAXY16 + "\n";
+			assembly += whitespace + "LDA\t#$00FF\n"; 	// 255 -> 256 bytes
+			assembly += whitespace + "TSX\n"; 			// From stack
+			assembly += whitespace + "LDY\t#$0000\n";	// To first spot in memory
+			assembly += "MVN\t$00,$00\n";
+			assembly += "TXS\n";						// Move stack to new location
 		}
 		
 		assembly += whitespace + getEndLabel() + ": " + (isInterruptHandler() && !attributes.contains(Attributes.noISR2) ? "RTI\n" : "RTL") + "\n";
