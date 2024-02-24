@@ -23,6 +23,8 @@ Operation
 fragment PpFunc // Preprocessor function
 	: '.loWord'
 	| '.loByte'
+	| '.hiWord'
+	| '.hiByte'
 	| '.bankByte'
 	;
 Symbol

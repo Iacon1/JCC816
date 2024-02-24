@@ -38,6 +38,10 @@ public class PropPointer<T extends AddressableNode & TypedNode> implements BiFun
 		String address = node.getAddress(offset);
 		if (i == 0)
 			return "#" + (ticket.is16Bit() ? ".loWord(" : ".loByte(") + address + ")";
-		else return "#.bankByte(" + address + ")";
+		else if (i == 1)
+			return "#" + (ticket.is16Bit() ? ".hiWord(" : ".hiByte(") + address + ")";
+		else if (i == 2)
+			return "#.bankByte(" + address + ")";
+		else return "#$00";
 	}
 }
