@@ -433,7 +433,11 @@ public class Type implements Serializable
 	}
 	public boolean isInteger()
 	{
-		return isCharacter() || containsSpecifier("_Bool") || containsSpecifier("short") || containsSpecifier("long") || containsSpecifier("int");
+		return isCharacter() || isEnum() ||
+				containsSpecifier("_Bool") ||
+				containsSpecifier("short") ||
+				containsSpecifier("long") ||
+				containsSpecifier("int");
 	}
 	public boolean isArithmetic()
 	{
