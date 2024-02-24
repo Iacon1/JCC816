@@ -45,6 +45,8 @@ CC extends ParserRuleContext
 		int retSize = Math.min(destSource.getSize(), getRetSize(sourceX.getSize(), sourceY.getSize()));
 		assembly += getCall(whitespace, retSize, sourceX.getSize(), sourceY.getSize());
 		assembly += AssemblyUtils.byteCopier(whitespace, retSize, destSource, CompConfig.callResultSource(retSize), innerTicket);
+		if (retSize < destSource.getSize())
+			assembly += AssemblyUtils.zeroCopier(whitespace, destSource.getSize() - retSize, destSource.getShifted(retSize), innerTicket);
 		getTranslationUnit().requireSub(getSubName(sourceX.getSize(), sourceY.getSize()), getSubAssembly(sourceX.getSize(), sourceY.getSize()));
 		assembly += ticket.restore(whitespace, 0xFF);
 		return assembly;
