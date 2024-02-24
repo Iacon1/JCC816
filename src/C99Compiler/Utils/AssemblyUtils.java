@@ -168,6 +168,23 @@ public final class AssemblyUtils
 		assembly += ticket.save(whitespace, DetailsTicket.saveA);
 		return assembly;
 	}
+	public static String zeroCopier(String whitespace, int nBytes, OperandSource writeSource, DetailsTicket ticket)
+	{
+		String assembly = "";
+		assembly += ticket.save(whitespace, DetailsTicket.saveA);
+		boolean force8 = false;
+		// If one or both is stationary only do 8-bit
+		DetailsTicket innerTicket = new DetailsTicket(ticket, 0, DetailsTicket.saveA);
+		assembly += bytewiseOperation(whitespace, nBytes, (Integer i, DetailsTicket ticket2) -> 
+			{
+				return new String[]
+						{
+						writeSource.getInstruction("STZ", i, ticket2)
+						};
+			}, !force8, false, innerTicket);
+		assembly += ticket.save(whitespace, DetailsTicket.saveA);
+		return assembly;
+	}
 	public static String byteCopier(String whitespace, int nBytes, OperandSource writeSource, OperandSource readSource)
 	{
 		return byteCopier(whitespace, nBytes, writeSource, readSource, new DetailsTicket());
