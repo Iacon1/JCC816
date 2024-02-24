@@ -218,29 +218,35 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 				}
 				else
 				{
-					ScratchSource sourceI = ScratchManager.reservePointer(expr.getLValue().getSource());
-					if (getType().getSize() != 1)
+					ScratchSource sourceI;
+					if (!indexExpr.hasLValue() || !ScratchManager.hasPointer(expr.getLValue().getSource())) // Already had a pointer to this value
 					{
-						assembly += new MultiplicativeExpressionNode(this, "*", indexExpr, new DummyExpressionNode(this, getType().getSize())).getAssembly(whitespace.length(), sourceI, ticket); // Multiply index by size of type
-						assembly += AdditiveExpressionNode.getAdder(whitespace,
-							sourceI,
-							new ConstantSource(new PropPointer(expr.getLValue(), 0), CompConfig.pointerSize),
-							sourceI, ticket); // set pointer to pointer plus address
-					}
-					else if (indexExpr.hasAssembly())
-					{
-						assembly += indexExpr.getAssembly(leadingWhitespace, sourceI, scratchManager, ticket);
-						assembly += AdditiveExpressionNode.getAdder(whitespace,
+						sourceI = ScratchManager.reservePointer(expr.getLValue().getSource());
+						if (getType().getSize() != 1)
+						{
+							assembly += new MultiplicativeExpressionNode(this, "*", indexExpr, new DummyExpressionNode(this, getType().getSize())).getAssembly(whitespace.length(), sourceI, ticket); // Multiply index by size of type
+							assembly += AdditiveExpressionNode.getAdder(whitespace,
 								sourceI,
-								new ConstantSource(new PropPointer(expr.getLValue(), 0), CompConfig.pointerSize),
+								new ConstantSource(new PropPointer<>(expr.getLValue(), 0), CompConfig.pointerSize),
 								sourceI, ticket); // set pointer to pointer plus address
+						}
+						else if (indexExpr.hasAssembly())
+						{
+							assembly += indexExpr.getAssembly(leadingWhitespace, sourceI, scratchManager, ticket);
+							assembly += AdditiveExpressionNode.getAdder(whitespace,
+									sourceI,
+									new ConstantSource(new PropPointer<>(expr.getLValue(), 0), CompConfig.pointerSize),
+									sourceI, ticket); // set pointer to pointer plus address
+						}
+						else
+						{
+							assembly += AdditiveExpressionNode.getAdder(whitespace, sourceI,
+									new ConstantSource(new PropPointer<>(expr.getLValue(), 0), CompConfig.pointerSize),
+									indexExpr.getLValue().getSource().respec(Math.min(indexExpr.getSize(), CompConfig.pointerSize)), ticket); // set pointer to pointer plus address
+						}
 					}
 					else
-					{
-						assembly += AdditiveExpressionNode.getAdder(whitespace, sourceI,
-								new ConstantSource(new PropPointer(expr.getLValue(), 0), CompConfig.pointerSize),
-								indexExpr.getLValue().getSource().respec(CompConfig.pointerSize), ticket); // set pointer to pointer plus address
-					}
+						sourceI = ScratchManager.getPointer(expr.getLValue().getSource());
 					Type type = ((ArrayType) expr.getType()).getType();
 					pointerRef = new IndirectLValueNode(this, new DummyLValueNode(this, type, sourceI), sourceI, type);
 					if (destSource != null)
