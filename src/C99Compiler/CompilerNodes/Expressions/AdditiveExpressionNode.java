@@ -3,14 +3,18 @@
 package C99Compiler.CompilerNodes.Expressions;
 
 import C99Compiler.CompilerNodes.ComponentNode;
+import C99Compiler.CompilerNodes.Definitions.Type;
 import C99Compiler.CompilerNodes.Definitions.Type.CastContext;
+import C99Compiler.CompilerNodes.Dummies.DummyExpressionNode;
 import C99Compiler.Utils.AssemblyUtils;
 import C99Compiler.Utils.AssemblyUtils.DetailsTicket;
+import C99Compiler.Utils.CompUtils;
 import C99Compiler.Utils.ScratchManager;
 import C99Compiler.Utils.OperandSources.ConstantSource;
 import C99Compiler.Utils.OperandSources.OperandSource;
 import Grammar.C99.C99Parser.Additive_expressionContext;
 import Grammar.C99.C99Parser.Multiplicative_expressionContext;
+import C99Compiler.CompilerNodes.Definitions.PointerType;
 
 public class AdditiveExpressionNode extends ArithmeticBinaryExpressionNode
 <Additive_expressionContext, Multiplicative_expressionContext, Multiplicative_expressionContext, Additive_expressionContext>
@@ -35,6 +39,32 @@ public class AdditiveExpressionNode extends ArithmeticBinaryExpressionNode
 	protected BaseExpressionNode<Multiplicative_expressionContext> getPCNode(Additive_expressionContext node) throws Exception
 	{return new MultiplicativeExpressionNode(this).interpret(node.multiplicative_expression());}
 
+	@Override
+	public BaseExpressionNode<Additive_expressionContext> interpret(Additive_expressionContext node) throws Exception
+	{
+		BaseExpressionNode<Additive_expressionContext> n = super.interpret(node);
+		if (n != this) return n;
+		
+		if (x.getType().isPointer()) // RHS must be multiplied by size of pointer base type
+		{
+			int size = ((PointerType) x.getType()).getSize();
+			int shiftAmount = (int) Math.floor(Math.log(size) / Math.log(2));
+			if (shiftAmount % 1 == 0) // Is power of two
+				y = new ShiftExpressionNode(this, "<<", y, new DummyExpressionNode(this, CompUtils.getSmallestType(shiftAmount), shiftAmount));
+			else
+			{
+				y = new MultiplicativeExpressionNode(this, "*", y, new DummyExpressionNode(this, CompUtils.getSmallestType(size), size));
+			}
+		}
+		
+		return this;
+	}
+	@Override public Type getType()
+	{
+		if (x.getType().isPointer()) return x.getType();
+		else return super.getType();
+	}
+	
 	@Override
 	public CastContext getCastContext()
 	{
