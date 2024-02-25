@@ -15,6 +15,7 @@ public class LabelNode extends ASMNode<LabelContext>
 	@Override
 	public ASMNode<LabelContext> interpret(LabelContext node) throws Exception
 	{
+		lineNo = node.start.getLine();
 		if (node.Symbol() != null)
 			name = node.Symbol().getText();
 		else name = ":";

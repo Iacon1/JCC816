@@ -37,6 +37,7 @@ public class InstructionNode extends ASMNode<InstructionContext>
 	public InstructionNode interpret(InstructionContext node) throws Exception
 	{
 		operation = Operation.valueOf(node.Operation().getText());
+		lineNo = node.start.getLine();
 		if (node.parameter() != null) parameter = new ParameterNode().interpret(node.parameter());
 		else parameter = null;
 		return this;

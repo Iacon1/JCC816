@@ -16,6 +16,7 @@ public class PreprocNode extends ASMNode<PreprocInstructionContext>
 	@Override
 	public ASMNode<PreprocInstructionContext> interpret(PreprocInstructionContext node) throws Exception
 	{
+		lineNo = node.start.getLine();
 		words = node.Preproc().getText().split("[,\s\t]");
 		return this;
 	}

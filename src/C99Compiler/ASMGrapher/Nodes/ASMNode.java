@@ -27,7 +27,7 @@ public abstract class ASMNode<C extends ParserRuleContext>
 	}
 	private static List<ASMNode<?>> exports = new ArrayList<ASMNode<?>>();
 	private List<ASMNode<?>> requirers;
-	private int lineNo;
+	protected int lineNo;
 	
 	private boolean is16A = false;
 	private boolean is16XY = false;
@@ -114,4 +114,5 @@ public abstract class ASMNode<C extends ParserRuleContext>
 	public void hide() {hidden = true;}
 	
 	public abstract int getSize(); // Size in bytes of assembled form
+	public int lineNo() {return lineNo;}
 }

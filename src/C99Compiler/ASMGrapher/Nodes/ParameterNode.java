@@ -26,6 +26,7 @@ public class ParameterNode extends ASMNode<ParameterContext>
 	@Override
 	public ParameterNode interpret(ParameterContext node) throws Exception
 	{
+		lineNo = node.start.getLine();
 		String upper = node.getText().toUpperCase();
 		if (upper.contains(",X"))
 			referencesX = true;

@@ -35,7 +35,8 @@ public class ASMGraphBuilder
 {
 	private List<ASMNode<?>> lines;
 	private List<String> textLines;
-
+	private Set<Integer> busyLines; // To keep infinite recursion from happening
+	
 	private List<Integer> jumpsTo(String label, int index)
 	{
 		List<Integer> jumpsTo = new LinkedList<Integer>();
@@ -76,6 +77,8 @@ public class ASMGraphBuilder
 	private void buildGraph(int i, List<Address> internalAddresses, Set<Address> importantAddresses, byte importantRegisters, byte importantFlags)
 	{
 		ASMNode<?> line = lines.get(i);
+		busyLines.add(i);
+		
 		importantRegisters |= line.affectingRegisters();
 		importantFlags |= line.affectingFlags();
 		if (line.affectedByParameter()) importantAddresses.add(line.getAddress());
@@ -127,7 +130,7 @@ public class ASMGraphBuilder
 				for (Integer k : jumpsTo(prevLine.getAddress().toString(), j))
 				{
 					prevLine.require(lines.get(k));
-					if (k != i) buildGraph(k, internalAddresses, importantAddresses, importantRegisters, importantFlags);
+					if (!busyLines.contains(k)) buildGraph(k, internalAddresses, importantAddresses, importantRegisters, importantFlags);
 				}
 			case preproc:
 				required = true;
@@ -145,6 +148,7 @@ public class ASMGraphBuilder
 			
 			j -= 1; // Subtract from j
 		}
+		busyLines.remove(i);
 	}
 	private void buildGraph(List<Address> internalAddresses)
 	{
@@ -162,7 +166,7 @@ public class ASMGraphBuilder
 	{
 		lines = new ArrayList<ASMNode<?>>();
 		textLines = new ArrayList<String>();
-
+		busyLines = new HashSet<Integer>();
 		assembly = capitalize(assembly);
 		assembly = assembly.replaceAll("\n+", "\n");
 		for (String line : assembly.split("\n"))
@@ -275,7 +279,7 @@ public class ASMGraphBuilder
 		functionAssembly = "";
 		for (int i = 0; i < lines.size(); ++i)
 			if (lines.get(i).isRequiredForExports())
-				functionAssembly += textLines.get(i) + "\n";
+				functionAssembly += textLines.get(lines.get(i).lineNo() - 1) + "\n";
 		
 		functionAssembly = functionAssembly.replace("\n:\n ", "\n:");
 		return functionAssembly;
