@@ -51,7 +51,17 @@ public class LANDExpressionNode extends LogicalBinaryExpressionNode
 			return new String[]
 			{
 				sourceX.getLDA(i, ticket2),
-				sourceY.getInstruction("AND", i, ticket2),
+				"BNE\t:+",
+			};
+		}, innerTicket);
+		assembly += whitespace + "DEX\n";
+		assembly += whitespace + "BRA\t:++\n"; // If above never jumped, we're done here
+		assembly += whitespace.substring(1) + ":\n";
+		assembly += AssemblyUtils.bytewiseOperation(whitespace, sourceY.getSize(), (Integer i, DetailsTicket ticket2) ->
+		{
+			return new String[]
+			{
+				sourceY.getLDA(i, ticket2),
 				"BNE\t:+",
 			};
 		}, innerTicket);
