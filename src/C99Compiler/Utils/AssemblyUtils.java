@@ -165,7 +165,7 @@ public final class AssemblyUtils
 						writeSource.getSTA(i, ticket2)
 						};
 			}, !force8, false, innerTicket);
-		assembly += ticket.save(whitespace, DetailsTicket.saveA);
+		assembly += ticket.restore(whitespace, DetailsTicket.saveA);
 		return assembly;
 	}
 	public static String zeroCopier(String whitespace, int nBytes, OperandSource writeSource, DetailsTicket ticket)
@@ -179,10 +179,11 @@ public final class AssemblyUtils
 			{
 				return new String[]
 						{
-						writeSource.getInstruction("STZ", i, ticket2)
+						"LDA\t" + (ticket2.is16Bit() ? "#$0000" : "#$00"),
+						writeSource.getInstruction("STA", i, ticket2)
 						};
 			}, !force8, false, innerTicket);
-		assembly += ticket.save(whitespace, DetailsTicket.saveA);
+		assembly += ticket.restore(whitespace, DetailsTicket.saveA);
 		return assembly;
 	}
 	public static String byteCopier(String whitespace, int nBytes, OperandSource writeSource, OperandSource readSource)
@@ -260,7 +261,7 @@ public final class AssemblyUtils
 			return "";
 		else if (!y.isLiteral()) // y will need the sign extension.
 		{
-			assembly += x.getLDA(whitespace, y.getSize() - 1, ticket) + "\n";
+			assembly += y.getLDA(whitespace, y.getSize() - 1, ticket) + "\n";
 			if (!signedY)
 			{
 				assembly += whitespace + "LDA\t#$00\n";
