@@ -133,7 +133,9 @@ public class SelectionStatementNode extends SequencePointStatementNode<Selection
 					ScratchSource exprSource = scratchManager.reserveScratchBlock(expression.getSize());
 					assembly = getAssemblyWithSequence(expression, leadingWhitespace, exprSource, scratchManager);
 					assembly += EqualityExpressionNode.getIsZero(whitespace, exprSource, scratchManager, exprSource, new DetailsTicket());
-					assembly += whitespace + "BEQ\t" + skipName + "\n"; // Skip if 0, i. e. not true
+					assembly += whitespace + "BNE\t:+\n"; // Skip if 0, i. e. not true
+					assembly += whitespace + "JMP\t" + skipName + "\n";
+					assembly += whitespace + ":\n";
 					assembly += ifStm.getAssembly(leadingWhitespace + CompConfig.indentSize, returnAddr);
 //					}
 				}
