@@ -187,7 +187,9 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 	{
 		switch (type)
 		{
-		case arraySubscript: case funcCall: return true;
+		case arraySubscript:
+			return expr.hasAssembly() || indexExpr.hasAssembly() || (expr.getLValue() == null) || !indexExpr.hasPropValue();
+		 case funcCall: return true;
 		case structMember: return expr.hasAssembly();
 		case structMemberP: return true;
 		case incr: case decr: return true;
