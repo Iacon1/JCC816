@@ -84,33 +84,10 @@ public class AdditiveExpressionNode extends ArithmeticBinaryExpressionNode
 	{
 		return new AdditiveExpressionNode("-").getAssembly(whitespace, destSource, sourceX, sourceY, ticket);
 	}
-	public static String getDecrementer(String whitespace, OperandSource source, DetailsTicket ticket)
+	public static String getDecrementer(String whitespace, OperandSource sourceX, DetailsTicket ticket) throws Exception
 	{
-		String assembly = "";
-		assembly += ticket.save(whitespace, DetailsTicket.saveA);
-		DetailsTicket innerTicket = new DetailsTicket(ticket, DetailsTicket.saveA, 0);
-		
-		if (source.getSize() >= 2)
-		{
-			assembly += source.getInstruction(whitespace, "DEC", source.getSize() - 2, innerTicket);
-			if (source.getSize() > 2)
-			{
-				assembly = whitespace + "SEC\n";
-				assembly += whitespace + AssemblyUtils.bytewiseOperation(whitespace, source.getSize() - 2, (Integer i, DetailsTicket ticket2) -> 
-				{return new String[]
-					{
-						source.getLDA(i + 1, ticket2),
-						"SBC\t" + (ticket2.is16Bit() ? "#$0000" : "#$00"),
-						source.getSTA(i + 1, ticket2),
-					};
-				}, true, true, innerTicket);
-			}
-		}
-		else
-			assembly += whitespace + source.getLDA(whitespace, source.getSize() - 1, ticket) + "\n";
-		
-		assembly += ticket.restore(whitespace, DetailsTicket.saveA);	
-		return assembly;
+		OperandSource sourceY = new ConstantSource(1, sourceX.getSize());
+		return getSubtractor(whitespace, sourceX, sourceX, sourceY, ticket);
 	}
 
 	@Override
