@@ -48,8 +48,11 @@ public class IterationStatementNode extends SequencePointStatementNode<Iteration
 	@Override
 	public boolean canCall(FunctionDefinitionNode function)
 	{
-		// TODO Auto-generated method stub
-		return false;
+		return (stmNode != null && stmNode.canCall(function)) ||
+				(condExpNode != null && condExpNode.canCall(function)) ||
+				(initExpNode != null && initExpNode.canCall(function)) ||
+				(iterExpNode != null && iterExpNode.canCall(function)) ||
+				(declNode != null && declNode.canCall(function));
 	}
 
 	@Override
