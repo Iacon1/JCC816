@@ -34,7 +34,10 @@ CC extends ParserRuleContext
 
 	@Override public Type getType()
 	{
-		return Type.convertArithmetic(x.getType(), y.getType());
+		if (hasPropValue() && !hasAssembly())
+			return CompUtils.getSmallestType(getPropLong());
+		else
+			return Type.convertArithmetic(x.getType(), y.getType());
 	}
 	
 	protected abstract long doOperation(long x, long y);
@@ -90,6 +93,8 @@ CC extends ParserRuleContext
 					(destSource == null) ? "" : destSource.getSTA(i, ticket2)
 				};
 		}, true, isReversed(), innerTicket);
+		if (size < destSource.getSize())
+			assembly += AssemblyUtils.zeroCopier(whitespace, destSource.getSize() - size, destSource.getShifted(size), innerTicket);
 		
 		assembly += ticket.restore(whitespace, DetailsTicket.saveA);
 		return assembly;
