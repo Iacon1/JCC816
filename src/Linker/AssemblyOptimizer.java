@@ -67,7 +67,8 @@ public final class AssemblyOptimizer
 				byte b = Byte.valueOf(prevLine.replace("REP\t#$", "").trim(), 16);
 				{
 					lines.set(i, line.replace(String.format("%02x", a), String.format("%02x", a | b)));
-					lines.set(i - 1, "");
+					String blank = prevLine.replace("REP\t#$" + String.format("%02x",  b), "");
+					lines.set(i - 1, blank);
 				}
 			}
 			else if (line.contains("SEP\t#$") && prevLine.contains("SEP\t#$"))
@@ -76,7 +77,8 @@ public final class AssemblyOptimizer
 				byte b = Byte.valueOf(prevLine.replace("SEP\t#$", "").trim(), 16);
 				{
 					lines.set(i, line.replace(String.format("%02x", a), String.format("%02x", a | b)));
-					lines.set(i - 1, "");
+					String blank = prevLine.replace("SEP\t#$" + String.format("%02x",  b), "");
+					lines.set(i - 1, blank);
 				}
 			}
 			else if (line.contains("SEP\t#$") && prevLine.contains("REP\t#$"))
@@ -84,12 +86,11 @@ public final class AssemblyOptimizer
 				byte a = Byte.valueOf(line.replace("SEP\t#$", "").trim(), 16);
 				byte b = Byte.valueOf(prevLine.replace("REP\t#$", "").trim(), 16);
 				{
-					if ((a & ~b) != 0)
-						lines.set(i, line.replace(String.format("%02x", a), String.format("%02x", a & ~b)));
-					else lines.set(i, "");
-					if ((b & ~a) != 0)
-						lines.set(i - 1, prevLine.replace(String.format("%02x", a), String.format("%02x", b & ~a)));
-					else lines.set(i - 1, "");
+					if ((a ^ b) == 0) // This line entirely negates prior line
+					{
+						String blank = prevLine.replace("REP\t#$" + String.format("%02x",  b), "");
+						lines.set(i - 1, blank);
+					}
 				}
 			}
 			else if (line.contains("REP\t#$") && prevLine.contains("SEP\t#$"))
@@ -97,12 +98,11 @@ public final class AssemblyOptimizer
 				byte a = Byte.valueOf(line.replace("REP\t#$", "").trim(), 16);
 				byte b = Byte.valueOf(prevLine.replace("SEP\t#$", "").trim(), 16);
 				{
-					if ((a & ~b) != 0)
-						lines.set(i, line.replace(String.format("%02x", a), String.format("%02x", a & ~b)));
-					else lines.set(i, "");
-					if ((b & ~a) != 0)
-						lines.set(i - 1, prevLine.replace(String.format("%02x", a), String.format("%02x", b & ~a)));
-					else lines.set(i - 1, "");
+					if ((a ^ b) == 0) // This line entirely negates prior line
+					{
+						String blank = prevLine.replace("SEP\t#$" + String.format("%02x",  b), "");
+						lines.set(i - 1, blank);
+					}
 				}
 			}
 		}
@@ -119,8 +119,12 @@ public final class AssemblyOptimizer
 		{
 			String line = lines.get(i);
 			String prevLine = (i == 0 ? "" : lines.get(i - 1));
-			if (line.matches("[^:\s]*:.*") || prevLine.contains("JSL")) // At a label or a JSL return point lose all assumptions of mode
+			if (line.matches("[\s]*[^:\s]*:.*") || prevLine.contains("JSL")) // At a label or a JSL return point lose all assumptions of mode
+			{
 				knownFlags = 0;
+				currFlags = 0;
+				prevFlags = 0;
+			}
 
 			prevFlags = currFlags;
 			
