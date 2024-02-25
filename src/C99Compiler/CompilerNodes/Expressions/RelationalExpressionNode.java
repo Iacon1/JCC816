@@ -87,7 +87,7 @@ public class RelationalExpressionNode extends BranchingExpressionNode
 
 		assembly += ticket.save(whitespace, DetailsTicket.saveA);
 		DetailsTicket innerTicket = new DetailsTicket(ticket, 0, DetailsTicket.saveA);
-		assembly += AssemblyUtils.setSignExtend(whitespace, sourceX, sourceY, true, true, innerTicket);
+		assembly += AssemblyUtils.setSignExtend(whitespace, sourceX, sourceY, isSigned, isSigned, innerTicket);
 		ScratchSource tempSource = scratchManager.reserveScratchBlock(2);
 		assembly += whitespace + "CLC\n";
 		assembly += AssemblyUtils.bytewiseOperation(whitespace, Math.max(sourceX.getSize(), sourceY.getSize()), (Integer i, DetailsTicket ticket2) -> 
@@ -118,11 +118,23 @@ public class RelationalExpressionNode extends BranchingExpressionNode
 			}
 			else
 			{
+				if (i == sourceX.getSize() - 1 && i < sourceY.getSize() - 1)
+				{
+					lines.add(CompUtils.setA8);
+					lines.add(sourceX.getLDA(i, ticket2)); 					// Get X
+					lines.add(sourceY.getInstruction("CMP", i, ticket2));	// Cmp X & Y?
+					lines.add("BCC\t:+");									// Done this way to enable med-jumps
+					lines.add("BRA\t:++");
+					lines.add(":JMP\t" + yesLabel);								// If x < y then yes
+					lines.add(":BEQ\t:+");
+					lines.add("JMP\t" + noLabel);							// If x >= y then no
+					lines.add(":");
+				}
 				lines.add(sourceX.getLDA(i, ticket2)); 					// Get X
 				lines.add(sourceY.getInstruction("CMP", i, ticket2));	// Cmp X & Y?
 			}
 			lines.add("BCC\t:+");									// Done this way to enable med-jumps
-			lines.add("BRA:++");
+			lines.add("BRA\t:++");
 			lines.add(":JMP\t" + yesLabel);								// If x < y then yes
 			lines.add(":BEQ\t:+");
 			lines.add("JMP\t" + noLabel);							// If x >= y then no
