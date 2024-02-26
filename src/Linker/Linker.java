@@ -328,7 +328,7 @@ public final class Linker implements Catalogger
 		// Get ROM data
 		for (TranslationUnit unit : translationUnits)
 			for (InitializerNode init : unit.getGlobalInitializers())
-				if (init.isROM()) // Only RAM ones up here, to save space in 0 bank
+				if (!init.getType().isExtern() && init.isROM()) // Only RAM ones up here, to save space in 0 bank
 					assembly += init.getAssembly();
 		
 		Map<String, Integer> varPoses = mapVariables(cartConfig, memorySize);
