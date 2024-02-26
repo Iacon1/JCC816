@@ -2,7 +2,9 @@
 // Line info for debug purposes
 package C99Compiler.Utils;
 
-public class LineInfo
+import java.io.Serializable;
+
+public class LineInfo implements Serializable
 {
 	public String filename;
 	public int line;

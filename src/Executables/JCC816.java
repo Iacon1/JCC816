@@ -13,7 +13,10 @@ import java.util.Set;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 
 import Assembler.Header;
 import Assembler.MemorySize;
@@ -35,22 +38,86 @@ import Logging.Logging;
 
 public class JCC816
 {
+	private static final String helpName = "JCC816";
+	private static final String helpHeader = "A C compiler for the WDC 65c816 and especially Ricoh 5a22 processor.\n\n";
+	private static final String helpFooter = "\nVersion " + CompConfig.version + "; Source code available at https://github.com/Iacon1/JCC816.\n";
+	
 	private static Options getOptions()
 	{
 		Options options = new Options();
-		options.addOption("l", "linker", true, "Links the provided source and object files into a single specified output file.");
-		options.addOption("p", "preprocessor", true, "Preprocesses the provided source file into a specified output file.");
+		Option option;
 		
-		options.addOption("c", "cartridge-config", true, "Specifies a cartridge configuration to use.");
-		options.addOption("h", "header", true, "Specifies a header file to use.");
-		options.addOption("C", "generate-cartridge", true, "Generates a default cartridge configuration file for the user to edit.");
-		options.addOption("H", "generate-header", true, "Generates a default header configuration file for the user to edit.");
+		option = Option.builder("l")
+				.longOpt("linker")
+				.hasArg()
+				.argName("output> <header")
+				.numberOfArgs(2)
+				.valueSeparator()
+				.desc("Links the provided source and object files into a single specified SFC file according to a provided header configuration.")
+				.build();
+		options.addOption(option);
 		
-		options.addOption("o", "optimization-level", true, "Sets the level of optimization, from 0 to 3.");
-		options.addOption("d", "debug-level", true, "Sets the level of debug info, from 0 to 2.");
-		options.addOption("v", "verbosity-level", true, "Sets the level of console output, from 0 to 1.");
+		option = Option.builder("h")
+				.longOpt("help")
+				.desc("Displays information about the program's usage.")
+				.build();
+		options.addOption(option);
 		
-		options.addOption("r", "root", true, "Specifies the root directory to search for non-stdlib header files in.");
+		option = Option.builder("p")
+			.longOpt("preprocessor")
+			.hasArg()
+			.argName("output")
+			.desc("Preprocesses the provided source file and stores it in a specified source file.")
+			.build();
+		options.addOption(option);
+		
+		option = Option.builder("o")
+				.longOpt("object")
+				.hasArg()
+				.argName("output")
+				.desc("Preprocesses the provided source file and stores it in a specified object file.")
+				.build();
+		options.addOption(option);
+		
+		option = Option.builder("H")
+			.longOpt("generate-header")
+			.hasArg()
+			.argName("output")
+			.desc("Generates a default header configuration file for the user to edit.")
+			.build();
+		options.addOption(option);
+		
+		option = Option.builder("O")
+			.longOpt("optimization-level")
+			.hasArg()
+			.argName("level")
+			.desc("Sets the level of optimization, from 0 to 3. Note that only levels 0 and 2 are meaningful for object files.")
+			.build();
+		options.addOption(option);
+		
+		option = Option.builder("D")
+			.longOpt("debug-level")
+			.hasArg()
+			.argName("level")
+			.desc("Sets the level of debug info generated, from 0 to 3.")
+			.build();
+		options.addOption(option);
+	
+		option = Option.builder("V")
+			.longOpt("debug-level")
+			.hasArg()
+			.argName("level")
+			.desc("Sets the level of console output, from 0 to 1.")
+			.build();
+		options.addOption(option);
+		
+		option = Option.builder("r")
+				.longOpt("root")
+				.hasArg()
+				.argName("path")
+				.desc("Specifies the root directory to search for files in. Otherwise defaults to current directory.")
+				.build();
+		options.addOption(option);
 		
 		return options;
 	}
@@ -139,17 +206,24 @@ public class JCC816
 		
 		Logging.setLogger(new DebugLogger());
 		
-		CommandLine commandLine = new DefaultParser().parse(getOptions(), args);
+		CommandLine commandLine;
+		try
+		{
+			commandLine = new DefaultParser().parse(getOptions(), args);
+		}
+		catch (ParseException e)
+		{
+			new HelpFormatter().printHelp(helpName, helpHeader, getOptions(), helpFooter, true);
+			return;
+		}
+		if (commandLine.hasOption("help") || commandLine.getOptions().length == 0)
+		{
+			new HelpFormatter().printHelp(helpName, helpHeader, getOptions(), helpFooter, true);
+			return;
+		}
 		
 		if (commandLine.hasOption("r")) // Root
 			CompConfig.rootFolder = commandLine.getOptionValue("r");
-		
-		if (commandLine.hasOption("C"))
-		{
-			String filename = commandLine.getOptionValue("C");
-			FileIO.writeFile(filename, FileIO.readResourceBytes("XML/CartConfig.XML"));
-			return;
-		}
 		
 		if (commandLine.hasOption("H"))
 		{
@@ -159,23 +233,23 @@ public class JCC816
 		}
 		
 		// Set levels
-		if (commandLine.hasOption("o"))
-			switch (commandLine.getOptionValue("o"))
+		if (commandLine.hasOption("O"))
+			switch (commandLine.getOptionValue("O"))
 			{
 			case "0" : CompConfig.optimizationLevel = OptimizationLevel.min; break;
 			case "1" : CompConfig.optimizationLevel = OptimizationLevel.low; break;
 			case "2" : CompConfig.optimizationLevel = OptimizationLevel.medium; break;
 			case "3" : CompConfig.optimizationLevel = OptimizationLevel.all; break;
 			}
-		if (commandLine.hasOption("d"))
-			switch (commandLine.getOptionValue("d"))
+		if (commandLine.hasOption("D"))
+			switch (commandLine.getOptionValue("D"))
 			{
 			case "0" : CompConfig.debugLevel = DebugLevel.none; break;
 			case "1" : CompConfig.debugLevel = DebugLevel.low; break;
 			case "2" : CompConfig.debugLevel = DebugLevel.medium; break;
 			}
-		if (commandLine.hasOption("v"))
-			switch (commandLine.getOptionValue("v"))
+		if (commandLine.hasOption("V"))
+			switch (commandLine.getOptionValue("V"))
 			{
 			case "0" : CompConfig.verbosityLevel = VerbosityLevel.none; break;
 			case "1" : CompConfig.verbosityLevel = VerbosityLevel.low; break;
@@ -192,59 +266,53 @@ public class JCC816
 			for (String filename : filenames) // Read all input files
 			{
 				filename = CompConfig.rootFolder + "/" + filename;
-				if (filename.endsWith(".c") || filename.endsWith(".h")) // C file
-				{
-					String fileText = FileIO.readFile(filename);
-					translationUnits.put(filename, C99Compiler.compile(filename, fileText));
-				}
-				if (filename.endsWith(".asm")) // ASM file
-				{
-					String fileText = FileIO.readFile(filename);
-					translationUnits.put(filename, new AssemblyUnit(filename.replace(".asm", ""), fileText));
-				}
-				else if (filename.endsWith(".o"))
+				if (filename.endsWith(".o"))
 				{
 					byte[] bytes = FileIO.readFileBytes(filename);
 					translationUnits.put(filename, FileIO.deserialize(bytes));
 				}
+				else if (filename.endsWith(".c") || filename.endsWith(".h")) // C file
+				{
+					String fileText = FileIO.readFile(filename);
+					translationUnits.put(filename, C99Compiler.compile(filename, fileText));
+				}
+				else if (filename.endsWith(".asm")) // ASM file
+				{
+					String fileText = FileIO.readFile(filename);
+					translationUnits.put(filename, new AssemblyUnit(filename.replace(".asm", ""), fileText));
+				}
 			}
 			
 			resolveIncludes(translationUnits);
-			String name = commandLine.getOptionValue("l");
-
+			
 			linker.addUnits(translationUnits.values().toArray(new TranslationUnit[] {}));
 			
 			MemorySize memorySize = new MemorySize(0, 0, 0, false);
 			
 			Header header = null;
-			if (commandLine.hasOption("c"))
-			{
-				CartConfig cartConfig = new CartConfig(FileIO.readFileXML(commandLine.getOptionValue("c")));
-				header = new Header(cartConfig);
-			}
-			else if (commandLine.hasOption("h"))
-				header = new Header(FileIO.readFileXML(commandLine.getOptionValue("h")));
-			else header = new Header();
+
+			String sfcName = CompConfig.rootFolder + "/" + commandLine.getOptionValues("l")[0];
+			String headerName = CompConfig.rootFolder + "/" + commandLine.getOptionValues("l")[1];
+			header = new Header(FileIO.readFileXML(headerName));
+			
 			String assembly = linker.link(header, memorySize);
-			Assembler.Assembler.assemble(name, header, assembly, memorySize);
+			Assembler.Assembler.assemble(sfcName, header, assembly, memorySize);
 		}
 		else if (commandLine.hasOption("p")) // Preprocess
 		{
-			String parameter = commandLine.getArgList().get(0);
+			String parameter = CompConfig.rootFolder + "/" + commandLine.getArgList().get(0);
 			String fileText = FileIO.readFile(parameter);
 			fileText = Preprocessor.preprocess(new HashSet<String>(), new HashSet<String>(), new LinkedList<LineInfo>(), parameter, fileText);
 			byte[] fileBytes = fileText.getBytes();
-			FileIO.writeFile(commandLine.getOptionValue("p"), fileBytes);
+			FileIO.writeFile(CompConfig.rootFolder + "/" + commandLine.getOptionValue("p"), fileBytes);
 		}
-		else // Save to .o files
-			for (String parameter : commandLine.getArgList())
-				if (parameter.endsWith(".c") || parameter.endsWith(".h")) // C file
-				{
-					String fileText = FileIO.readFile(parameter);
-					TranslationUnitNode node = C99Compiler.compile(parameter, fileText);
-					byte[] fileBytes = FileIO.serialize(node);
-					FileIO.writeFile(parameter.replaceAll("\\.[ch]", ".o"), fileBytes);
-				}
+		else if (commandLine.hasOption("o")) // Object
+		{
+			String parameter = CompConfig.rootFolder + "/" + commandLine.getArgList().get(0);
+			String fileText = FileIO.readFile(parameter);
+			byte[] fileBytes = FileIO.serialize(C99Compiler.compile(parameter, fileText));
+			FileIO.writeFile(CompConfig.rootFolder + "/" + commandLine.getOptionValue("o"), fileBytes);
+		}
 	}
 
 }
