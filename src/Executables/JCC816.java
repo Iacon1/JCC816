@@ -4,12 +4,17 @@
 package Executables;
 
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
@@ -116,6 +121,12 @@ public class JCC816
 				.hasArg()
 				.argName("path")
 				.desc("Specifies the root directory to search for files in. Otherwise defaults to current directory.")
+				.build();
+		options.addOption(option);
+		
+		option = Option.builder("c")
+				.longOpt("cleanup")
+				.desc("Ensures the assembler doesn't leave behind unecessary files.")
 				.build();
 		options.addOption(option);
 		
@@ -296,7 +307,7 @@ public class JCC816
 			header = new Header(FileIO.readFileXML(headerName));
 			
 			String assembly = linker.link(header, memorySize);
-			Assembler.Assembler.assemble(sfcName, header, assembly, memorySize);
+			Assembler.Assembler.assemble(sfcName, header, assembly, commandLine.hasOption("c"), memorySize);
 		}
 		else if (commandLine.hasOption("p")) // Preprocess
 		{

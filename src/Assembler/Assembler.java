@@ -17,7 +17,7 @@ import Logging.Logging;
 
 public class Assembler
 {
-	public static byte[] assemble(String name, Header header, String assembly, MemorySize memorySize) throws Exception
+	public static byte[] assemble(String name, Header header, String assembly, boolean cleanup, MemorySize memorySize) throws Exception
 	{
 		File cfgFile, asmFile, sfcFile;
 		cfgFile = new File(name + ".cfg");
@@ -59,6 +59,12 @@ public class Assembler
 			bytes[i] = headerBytes[i - header.getOffset()];
 		FileIO.writeFile(sfcFile.getAbsolutePath(), bytes);
 
+		if (cleanup)
+		{
+			cfgFile.delete();
+			asmFile.delete();
+		}
+		
 		return bytes;
 	}
 }
