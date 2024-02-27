@@ -164,20 +164,22 @@ public class JCC816
 					translationUnits.get(sourceNameA) != null ||
 					translationUnits.get(sourceNameO) != null) continue;
 				
+				
 				if (FileIO.hasResource(sourceNameC))
 				{
 					String fileText = FileIO.readResource(sourceNameC);
 					translationUnits.put(sourceNameC, C99Compiler.compile(sourceNameC, fileText));
 				}
-				else if (FileIO.hasResource(sourceNameA))
-				{
-					String fileText = FileIO.readResource(sourceNameA);
-					translationUnits.put(sourceNameA, new AssemblyUnit(sourceNameA, fileText));
-				}
 				else if (FileIO.hasResource(sourceNameO))
 				{
 					byte[] bytes = FileIO.readResourceBytes(sourceNameO);
 					translationUnits.put(sourceNameO, FileIO.deserialize(bytes));
+				}
+				
+				if (FileIO.hasResource(sourceNameA))
+				{
+					String fileText = FileIO.readResource(sourceNameA);
+					translationUnits.put(sourceNameA, new AssemblyUnit(sourceNameA, fileText));
 				}
 			}
 			
@@ -196,15 +198,16 @@ public class JCC816
 					String fileText = FileIO.readFile(sourceNameC);
 					translationUnits.put(sourceNameC, C99Compiler.compile(sourceNameC, fileText));
 				}
-				else if (FileIO.hasFile(sourceNameA))
-				{
-					String fileText = FileIO.readFile(sourceNameA);
-					translationUnits.put(sourceNameA, new AssemblyUnit(sourceNameA, fileText));
-				}
 				else if (FileIO.hasFile(sourceNameO))
 				{
 					byte[] bytes = FileIO.readFileBytes(sourceNameO);
 					translationUnits.put(sourceNameO, FileIO.deserialize(bytes));
+				}
+				
+				if (FileIO.hasFile(sourceNameA))
+				{
+					String fileText = FileIO.readFile(sourceNameA);
+					translationUnits.put(sourceNameA, new AssemblyUnit(sourceNameA, fileText));
 				}
 			}
 		}
