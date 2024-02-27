@@ -30,6 +30,12 @@ public final class Banker
 			line = (i == lines.size() ? "" : lines.get(i));
 			prevLine = (i == 0 ? "" : lines.get(i - 1));
 			
+			if (line.trim().startsWith(".") || line.contains("=") || line.replace(";.*", "").trim().endsWith(":")) // Skip preprocessor ones
+			{
+				i++;
+				continue;
+			}
+				
 			if (inFunc ? prevLine.contains("RTL") : line.contains("; " + CompConfig.functionTag)) // Code between functions shouldn't cross banks and code in functions shouldn't cross banks
 			{
 				if (!blockAssembly.isEmpty())
