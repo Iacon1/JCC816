@@ -717,6 +717,14 @@ public enum Operation
 			false,	// Affected by parameter?
 			false, // Affects parameter?
 			false), // Is a branch?
+	XBA(
+			InstructionNode.registerA,	// Affected by registers?
+			InstructionNode.registerA,	// Affects registers??
+			0,	// Affected by flags?
+			InstructionNode.flagZ | InstructionNode.flagN, // Affects flags?
+			false,	// Affected by parameter?
+			false, // Affects parameter?
+			false), // Is a branch?
 	XCE(
 			0,	// Affected by registers?
 			0,	// Affects registers??

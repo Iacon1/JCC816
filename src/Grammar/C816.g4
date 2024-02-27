@@ -18,7 +18,7 @@ Operation
 	| 'REP' | 'ROL' | 'ROR' | 'RTI' | 'RTS' | 'RTL'
 	| 'SBC' | 'SEC' | 'SED' | 'SEI' | 'SEP' | 'STA' | 'STX' | 'STY' | 'STP' | 'STZ'
 	| 'TAX' | 'TAY' | 'TCD' | 'TCS' | 'TDC' | 'TSC' | 'TSX' | 'TXA' | 'TXS' | 'TXY' | 'TYA' | 'TYX' | 'TRB' | 'TSB'
-	| 'WAI' | 'XCE'
+	| 'WAI' | 'XBA' | 'XCE'
 	;
 fragment PpFunc // Preprocessor function
 	: '.loWord'
