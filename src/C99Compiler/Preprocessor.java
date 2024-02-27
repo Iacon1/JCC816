@@ -47,10 +47,17 @@ public final class Preprocessor
 			else if (bigComment) continue;
 			line = line.replaceFirst("//.*", "");
 			if (line.contains("/*"))
-			{
-				bigComment = true;
-				line = line.replaceFirst("/\\*.*", "");
-			}
+				if (line.contains("*/"))
+				{
+					int i = line.indexOf("/*");
+					int j = line.indexOf("*/");
+					line = line.replace(line.substring(i, j + 2), "");
+				}
+				else
+				{
+					bigComment = true;
+					line = line.replaceFirst("/\\*.*", "");
+				}
 			if (!line.isEmpty()) source += line + "\n";
 		}
 		
