@@ -171,7 +171,7 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 			if (indexExpr.hasPropValue())
 			{
 				int offset = getType().getSize() * (int) indexExpr.getPropLong();
-				return new WrapperLValueNode(this, ((ArrayType) expr.getType()).getType(), expr.getLValue(), offset);
+				return new WrapperLValueNode(this, ((PointerType) expr.getType()).getType(), expr.getLValue(), offset);
 			}
 			return pointerRef;
 		case structMember:
@@ -209,7 +209,7 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 			if (expr.hasAssembly()) expr.getAssembly(leadingWhitespace, scratchManager, ticket);
 			if (expr.hasLValue())
 			{
-				if (indexExpr.hasPropValue())
+				if (indexExpr.hasPropValue() && expr.getType().isArray())
 				{
 					if (indexExpr.hasAssembly()) assembly += indexExpr.getAssembly(leadingWhitespace, scratchManager, ticket);
 					int offset = getType().getSize() * (int) indexExpr.getPropLong();

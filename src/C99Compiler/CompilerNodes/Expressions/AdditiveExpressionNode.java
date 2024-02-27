@@ -47,13 +47,14 @@ public class AdditiveExpressionNode extends ArithmeticBinaryExpressionNode
 		
 		if (x.getType().isPointer()) // RHS must be multiplied by size of pointer base type
 		{
-			int size = ((PointerType) x.getType()).getSize();
-			int shiftAmount = (int) Math.floor(Math.log(size) / Math.log(2));
-			if (shiftAmount % 1 == 0) // Is power of two
-				y = new ShiftExpressionNode(this, "<<", y, new DummyExpressionNode(this, CompUtils.getSmallestType(shiftAmount), shiftAmount));
-			else
+			int size = ((PointerType) x.getType()).getType().getSize();
+			if (size != 1)
 			{
-				y = new MultiplicativeExpressionNode(this, "*", y, new DummyExpressionNode(this, CompUtils.getSmallestType(size), size));
+				int shiftAmount = (int) Math.floor(Math.log(size) / Math.log(2));
+				if (shiftAmount % 1 == 0) // Is power of two
+					y = new ShiftExpressionNode(this, "<<", y, new DummyExpressionNode(this, CompUtils.getSmallestType(shiftAmount), shiftAmount));
+				else
+					y = new MultiplicativeExpressionNode(this, "*", y, new DummyExpressionNode(this, CompUtils.getSmallestType(size), size));
 			}
 		}
 		
@@ -81,21 +82,23 @@ public class AdditiveExpressionNode extends ArithmeticBinaryExpressionNode
 	{
 		if (x.getPropPointer() != null)
 		{
-			Long b = y.getPropLong();
+			int offset = (int) y.getPropLong();
+			
 			switch (operator)
 			{
-			case "+": return x.getPropPointer().addOffset(b.intValue());
-			case "-": return x.getPropPointer().addOffset(-b.intValue());
+			case "+": return x.getPropPointer().addOffset(offset);
+			case "-": return x.getPropPointer().addOffset(-offset);
 			default: return null;
 			}
 		}
 		else if (y.getPropPointer() != null)
 		{
-			Long a = x.getPropLong();
+			int offset = (int) x.getPropLong();
+			
 			switch (operator)
 			{
-			case "+": return x.getPropPointer().addOffset(a.intValue());
-			case "-": return x.getPropPointer().addOffset(-a.intValue());
+			case "+": return y.getPropPointer().addOffset(offset);
+			case "-": return y.getPropPointer().addOffset(-offset);
 			default: return null;
 			}
 		}

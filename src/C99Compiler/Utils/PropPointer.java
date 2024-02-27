@@ -15,10 +15,10 @@ public class PropPointer<T extends AddressableNode & TypedNode> implements BiFun
 	private T node;
 	private int offset;
 
-	public PropPointer(T node, int offset)
+	public PropPointer(T node, int offsetBytes)
 	{
 		this.node = node;
-		this.offset = offset * node.getType().getSize();
+		this.offset = offsetBytes;
 	}
 	
 	public PropPointer<T> addOffset(int offset)

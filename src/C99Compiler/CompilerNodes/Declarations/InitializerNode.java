@@ -119,6 +119,7 @@ public class InitializerNode extends InterpretingNode<InitializerNode, Initializ
 		else
 		{
 			int arrayIndex = 0;
+			int arraySize = -1;
 			int j = 0, k = 0;
 			for (int i = 0; i < node.initializer_list().getChildCount(); i += 2)
 			{
@@ -129,9 +130,15 @@ public class InitializerNode extends InterpretingNode<InitializerNode, Initializ
 				{
 					if (arrayInitializers != null)
 					{
-						if (!LValue.getType().isIncomplete() && arrayIndex >= arrayInitializers.size()) // Too many array indices
+						ArrayType arrayType = (ArrayType) LValue.getType();
+						
+						if (!arrayType.isIncomplete() && arrayIndex >= arrayInitializers.size()) // Too many array indices
 							throw new ConstraintException("6.7.8", 6, node.initializer_list().initializer(k).start);
+						else if (arrayIndex >= arrayInitializers.size()) // Just make a new one if we're incomplete
+							arrayInitializers.put(arrayIndex, new InitializerNode(this, arrayType.getAtIndex(LValue, i)));
 						arrayInitializers.get(arrayIndex++).interpret(node.initializer_list().initializer(k++));
+						arraySize = Math.max(arrayIndex, arraySize); // Only set if an incomplete array
+						
 					}
 					else if (structInitializers != null)
 					{
@@ -153,6 +160,13 @@ public class InitializerNode extends InterpretingNode<InitializerNode, Initializ
 					i += 1;
 				}
 			}
+			
+			if (arraySize != -1 && LValue.getType().isIncomplete()) // Array size was set, meaning it's an array
+			{
+				ArrayType arrayType = (ArrayType) LValue.getType();
+				arrayType.setLength(arraySize);
+			}
+				
 		}
 		
 		return this;

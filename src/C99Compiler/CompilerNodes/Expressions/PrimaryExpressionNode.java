@@ -5,6 +5,7 @@ package C99Compiler.CompilerNodes.Expressions;
 import java.util.LinkedHashMap;
 import java.util.List;
 
+import C99Compiler.CompConfig;
 import C99Compiler.CompConfig.OptimizationLevel;
 import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.FunctionDefinitionNode;
@@ -16,6 +17,7 @@ import C99Compiler.CompilerNodes.LValues.VariableNode;
 import C99Compiler.Exceptions.UndefinedVariableException;
 import C99Compiler.Utils.AssemblyUtils.DetailsTicket;
 import C99Compiler.Utils.CompUtils;
+import C99Compiler.Utils.PropPointer;
 import C99Compiler.Utils.ScratchManager;
 import C99Compiler.Utils.OperandSources.OperandSource;
 import Grammar.C99.C99Parser.Primary_expressionContext;
@@ -95,6 +97,9 @@ public class PrimaryExpressionNode extends BaseExpressionNode<Primary_expression
 	{
 		if (identifier != null)
 		{
+			if (resolveVariableRelative(identifier) != null &&
+					resolveVariableRelative(identifier).getType().isArray())
+				return true; // Arrays can degrade to pointers
 			if (resolveEnumeratorRelative(identifier) != null)
 				return true; // Enumerator
 			else if (hasLValue() && getLValue().hasPossibleValues() && OptimizationLevel.isAtLeast(OptimizationLevel.medium))
@@ -111,6 +116,9 @@ public class PrimaryExpressionNode extends BaseExpressionNode<Primary_expression
 	{
 		if (identifier != null)
 		{
+			if (resolveVariableRelative(identifier) != null &&
+					resolveVariableRelative(identifier).getType().isArray())
+				return new PropPointer<VariableNode>(resolveVariableRelative(identifier), 0);
 			if (resolveEnumeratorRelative(identifier) != null)
 				return resolveEnumeratorRelative(identifier).getValue();
 			else if (getLValue() != null)
