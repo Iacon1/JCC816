@@ -20,11 +20,16 @@ public class AdditiveExpressionNode extends ArithmeticBinaryExpressionNode
 <Additive_expressionContext, Multiplicative_expressionContext, Multiplicative_expressionContext, Additive_expressionContext>
 {
 
-	public AdditiveExpressionNode(ComponentNode<?> parent) {super(parent);}
+	public AdditiveExpressionNode(ComponentNode<?> parent)
+	{
+		super(parent);
+		lockToDestSize = true;
+	}
 
 	private AdditiveExpressionNode(String operator)
 	{
 		super(operator);
+		lockToDestSize = true;
 	}
 
 	@Override

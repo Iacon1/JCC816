@@ -40,7 +40,10 @@ public class ShiftExpressionNode extends BinaryExpressionNode
 	{return new AdditiveExpressionNode(this).interpret(node.additive_expression());}
 
 	@Override public CastContext getCastContext() {return CastContext.bitwise;}
-	@Override public Type getType() {return x.getType();}
+	@Override public Type getType()
+	{
+		return x.getType().promote();
+	}
 	
 	@Override
 	public Object getPropValue()

@@ -30,6 +30,7 @@ public abstract class BinaryExpressionNode<
 	protected BaseExpressionNode<?> x, y;
 	
 	protected String operator;
+	protected boolean lockToDestSize = false;
 	
 	public BinaryExpressionNode(ComponentNode<?> parent) {super(parent);}
 	public BinaryExpressionNode(ComponentNode<?> parent, String operator, BaseExpressionNode<?> x, BaseExpressionNode<?> y)
@@ -90,7 +91,8 @@ public abstract class BinaryExpressionNode<
 		// figure out X
 		if (x.hasAssembly())
 		{
-			scratchX = scratchManager.reserveScratchBlock(x.getType().getSize());
+			int xSize = Math.min(x.getSize(), lockToDestSize? destSource.getSize() : x.getSize());
+			scratchX = scratchManager.reserveScratchBlock(xSize);
 			assembly += x.getAssembly(leadingWhitespace, scratchX, scratchManager, ticket);
 			if (x.hasLValue())
 				sourceX = x.getLValue().getSource();
@@ -105,7 +107,8 @@ public abstract class BinaryExpressionNode<
 		// figure out Y		
 		if (y.hasAssembly())
 		{
-			scratchY = scratchManager.reserveScratchBlock(y.getType().getSize());
+			int ySize = Math.min(y.getSize(), lockToDestSize? destSource.getSize() : y.getSize());
+			scratchY = scratchManager.reserveScratchBlock(ySize);
 			assembly += y.getAssembly(leadingWhitespace, scratchY, scratchManager, ticket);
 			if (y.hasLValue())
 				sourceY = y.getLValue().getSource();

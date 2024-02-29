@@ -326,13 +326,18 @@ public class Type implements Serializable
 	{
 		return canCastFrom(new DummyType(specifiers), context);
 	}
+	public int getRank()
+	{
+		if (!isInteger()) return 0;
+		else return getSize();
+	}
 	public static Type convertArithmetic(Type a, Type b)
 	{
 		assert (a.isArithmetic() && b.isArithmetic());
 		if (a.isInteger() && b.isInteger())
 		{
 			Type greater, lesser;
-			if (a.getSize() >= b.getSize())
+			if (a.getRank() >= b.getRank())
 			{
 				greater = a;
 				lesser = b;
@@ -347,7 +352,7 @@ public class Type implements Serializable
 				return greater;
 			else if (!greater.isSigned())
 				return greater;
-			else if (greater.getSize() > b.getSize())
+			else if (greater.getRank() > b.getRank())
 				return greater;
 			else
 			{
@@ -358,7 +363,21 @@ public class Type implements Serializable
 		}
 		else return null;
 	}
-	
+	public Type promote()
+	{
+		if (!isInteger()) return this;
+		else if (isSigned())
+		{
+			if (getRank() >= new DummyType("int").getRank()) return this;
+			else return new DummyType("int");
+		}
+		else if (!isSigned())
+		{
+			if (getRank() >= new DummyType("unsigned", "int").getRank()) return this;
+			else return new DummyType("unsigned", "int");
+		}
+		else return null;
+	}
 	public boolean containsSpecifier(String specifier)
 	{
 		if (typeSpecifiers.size() == 0) return false;
