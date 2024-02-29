@@ -168,10 +168,10 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 		switch (type)
 		{
 		case arraySubscript:
-			if (indexExpr.hasPropValue())
+			if (indexExpr.hasPropValue() && expr.getType().isArray())
 			{
 				int offset = getType().getSize() * (int) indexExpr.getPropLong();
-				return new WrapperLValueNode(this, ((PointerType) expr.getType()).getType(), expr.getLValue(), offset);
+				return new WrapperLValueNode(this, ((ArrayType) expr.getType()).getType(), expr.getLValue(), offset);
 			}
 			return pointerRef;
 		case structMember:
@@ -188,7 +188,7 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 		switch (type)
 		{
 		case arraySubscript:
-			return expr.hasAssembly() || indexExpr.hasAssembly() || (expr.getLValue() == null) || !indexExpr.hasPropValue();
+			return expr.hasAssembly() || indexExpr.hasAssembly() || expr.getLValue() == null || !expr.getType().isArray() || !indexExpr.hasPropValue();
 		 case funcCall: return true;
 		case structMember: return expr.hasAssembly();
 		case structMemberP: return true;
@@ -221,15 +221,20 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 				else
 				{
 					ScratchSource sourceI;
-					if (!indexExpr.hasLValue() || !ScratchManager.hasPointer(expr.getLValue().getSource())) // Already had a pointer to this value
+					if (indexExpr.hasLValue() || !ScratchManager.hasPointer(expr.getLValue().getSource())) // Already had a pointer to this value
 					{
+						OperandSource addrSource = null;
+						if (expr.getType().isArray())
+							addrSource = new ConstantSource(new PropPointer<>(expr.getLValue(), 0), CompConfig.pointerSize);
+						else if (expr.getType().isPointer())
+							addrSource = expr.getLValue().getSource();
 						sourceI = ScratchManager.reservePointer(expr.getLValue().getSource());
 						if (getType().getSize() != 1)
 						{
 							assembly += new MultiplicativeExpressionNode(this, "*", indexExpr, new DummyExpressionNode(this, getType().getSize())).getAssembly(whitespace.length(), sourceI, ticket); // Multiply index by size of type
 							assembly += AdditiveExpressionNode.getAdder(whitespace,
 								sourceI,
-								new ConstantSource(new PropPointer<>(expr.getLValue(), 0), CompConfig.pointerSize),
+								addrSource,
 								sourceI, ticket); // set pointer to pointer plus address
 						}
 						else if (indexExpr.hasAssembly())
@@ -237,19 +242,24 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 							assembly += indexExpr.getAssembly(leadingWhitespace, sourceI, scratchManager, ticket);
 							assembly += AdditiveExpressionNode.getAdder(whitespace,
 									sourceI,
-									new ConstantSource(new PropPointer<>(expr.getLValue(), 0), CompConfig.pointerSize),
+									addrSource,
 									sourceI, ticket); // set pointer to pointer plus address
 						}
 						else
 						{
+							OperandSource indexSource = null;
+							if (indexExpr.hasPropValue())
+								indexSource = new ConstantSource(indexExpr.getPropValue(), CompConfig.pointerSize);
+							else if (indexExpr.hasLValue())
+								indexSource = indexExpr.getLValue().getSource().respec(Math.min(indexExpr.getSize(), CompConfig.pointerSize));
 							assembly += AdditiveExpressionNode.getAdder(whitespace, sourceI,
-									new ConstantSource(new PropPointer<>(expr.getLValue(), 0), CompConfig.pointerSize),
-									indexExpr.getLValue().getSource().respec(Math.min(indexExpr.getSize(), CompConfig.pointerSize)), ticket); // set pointer to pointer plus address
+									addrSource,
+									indexSource, ticket); // set pointer to pointer plus address
 						}
 					}
 					else
 						sourceI = ScratchManager.getPointer(expr.getLValue().getSource());
-					Type type = ((ArrayType) expr.getType()).getType();
+					Type type = ((PointerType) expr.getType()).getType();
 					pointerRef = new IndirectLValueNode(this, new DummyLValueNode(this, type, sourceI), sourceI, type);
 					if (destSource != null)
 						assembly += AssemblyUtils.byteCopier(whitespace, destSource.getSize(), destSource, pointerRef.getSource());
