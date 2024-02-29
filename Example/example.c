@@ -7,6 +7,7 @@
 #include "SNES/Graphics/oam.h"
 #include "SNES/cpu.h"
 #include "SNES/controls.h"
+#include "SNESGSS/snesgss.h"
 
 #include "Resources/resources.h"
 
@@ -82,10 +83,11 @@ void main()
 	copyTileRegion(scoreP1Tiles, tilemapAddress + (32 * 16 + 4), 4);
 	copyTileRegion(scoreP2Tiles, tilemapAddress + (32 * 16 + 24), 4);
 
+	spc_init();
+
 	INIDISP = 0x0F;
 	NMITIMEN = NMITIMENFlag_NMI | NMITIMENFlag_AutoJoypad;
 	isScanning = 1;
-
 
 	_Bool goRight = 1, goDown = 1;
 	_Bool refreshScores = 0;
