@@ -8,7 +8,7 @@
 #include "SNES/cpu.h"
 #include "SNES/controls.h"
 
-#include "resources.h"
+#include "Resources/resources.h"
 
 _Bool isScanning;
 [[interrupt_NMI, no_ISR1]] void handleNMI()
