@@ -62,7 +62,7 @@ public final class OverlaySolver
 					break;
 				}
 		}
-		for (int b = numBanks - 1; b >= 0; ++b) // Find the first bank it's in
+		for (int b = numBanks - 1; b >= 0; --b) // Find the first bank it's in
 			if (bankLengths[b] != 0)
 			{
 				bankLengths[b] += b * bankLength;
