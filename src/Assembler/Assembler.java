@@ -19,10 +19,13 @@ public class Assembler
 {
 	public static byte[] assemble(String name, Header header, String assembly, boolean cleanup, MemorySize memorySize) throws Exception
 	{
-		File cfgFile, asmFile, sfcFile;
-		cfgFile = new File(name + ".cfg");
-		asmFile = new File(name + ".asm");
-		sfcFile = new File(name + ".sfc");
+		if (name.endsWith(".sfc"))
+			name = name.replace(".sfc", "");
+		File cfgFile, asmFile, sfcFile, dbgFile;
+		cfgFile = FileIO.getFile(name + ".cfg");
+		asmFile = FileIO.getFile(name + ".asm");
+		sfcFile = FileIO.getFile(name + ".sfc");
+		dbgFile = FileIO.getFile(name + ".dbg");
 		FileOutputStream configStream = new FileOutputStream(cfgFile);
 		FileOutputStream asmStream = new FileOutputStream(asmFile);
 		FileInputStream sfcStream;
@@ -35,7 +38,7 @@ public class Assembler
 		
 		Process proc;
 		if (DebugLevel.isAtLeast(DebugLevel.medium))
-			proc = Runtime.getRuntime().exec(new String[] {"cl65", "--verbose", "-g", "-C", cfgFile.getAbsolutePath(), "-o", sfcFile.getAbsolutePath(), asmFile.getAbsolutePath(), "-Wl", "--dbgfile", "-Wl", name + ".dbg"});
+			proc = Runtime.getRuntime().exec(new String[] {"cl65", "--verbose", "-g", "-C", cfgFile.getAbsolutePath(), "-o", sfcFile.getAbsolutePath(), asmFile.getAbsolutePath(), "-Wl", "--dbgfile", "-Wl", dbgFile.getAbsolutePath()});
 		else
 			proc = Runtime.getRuntime().exec(new String[] {"cl65", "--verbose", "-C", cfgFile.getAbsolutePath(), "-o", sfcFile.getAbsolutePath(), asmFile.getAbsolutePath()});
 		String error = new String(proc.getErrorStream().readAllBytes());
@@ -57,7 +60,7 @@ public class Assembler
 		headerBytes = header.asBytes();
 		for (int i = header.getOffset(); i < header.getOffset() + header.getSize(); ++i)
 			bytes[i] = headerBytes[i - header.getOffset()];
-		FileIO.writeFile(sfcFile.getAbsolutePath(), bytes);
+		FileIO.writeFile(sfcFile.getName(), bytes);
 
 		if (cleanup)
 		{

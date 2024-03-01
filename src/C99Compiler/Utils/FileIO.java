@@ -22,15 +22,27 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.w3c.dom.Document;
 
+import C99Compiler.CompConfig;
+import Logging.Logging;
+
 public final class FileIO
 {
+	private static final String userPath = System.getProperty("user.dir");
+	
+	public static File getFile(String filename)
+	{
+		if (filename.startsWith(userPath + "/"))
+			return new File(filename);
+		else return new File(userPath + "/" + filename);
+	}
+	
 	public static final boolean hasResource(String filename)
 	{
 		return ClassLoader.getSystemResource(filename) != null;
 	}
 	public static boolean hasFile(String filename)
 	{
-		return new File(filename).exists();
+		return getFile(filename).exists();
 	}
 	public static final String readResource(String filename) throws IOException
 	{
@@ -63,16 +75,16 @@ public final class FileIO
 	
 	public static final String readFile(String filename) throws IOException
 	{
-		return readFile(new File(filename));
+		return readFile(getFile(filename));
 	}
 	public static final byte[] readFileBytes(String filename) throws IOException
 	{
-		return readFileBytes(new File(filename));
+		return readFileBytes(getFile(filename));
 	}
 	
 	public static final void writeFile(String filename, byte[] bytes) throws IOException
 	{
-		File f = new File(filename);
+		File f = getFile(filename);
 		f.createNewFile();
 		FileOutputStream fo = new FileOutputStream(f);
 		fo.write(bytes);
@@ -102,7 +114,7 @@ public final class FileIO
 	
 	public static Document readFileXML(String filename) throws Exception
 	{
-		File file = new File(filename);
+		File file = getFile(filename);
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newDefaultInstance();
 		DocumentBuilder builder = factory.newDocumentBuilder();
 		Document document = builder.parse(file);
@@ -133,5 +145,9 @@ public final class FileIO
 			if (filename.matches(searchTerm.replace(".", "\\.").replace("*", ".*")))
 				matchingFilenames.add(filename);
 		return matchingFilenames;
+	}
+	public static List<String> matchingFiles(String searchTerm)
+	{
+		return matchingFiles(new File(userPath + "/" + CompConfig.rootFolder), searchTerm);
 	}
 }

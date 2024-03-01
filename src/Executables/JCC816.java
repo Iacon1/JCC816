@@ -203,12 +203,17 @@ public class JCC816
 					byte[] bytes = FileIO.readFileBytes(sourceNameO);
 					translationUnits.put(sourceNameO, FileIO.deserialize(bytes));
 				}
+				else if (!FileIO.hasFile(otherLib) && !FileIO.hasFile(sourceNameA)) // Not found at all
+				{
+					Logging.logError("File not found: " + otherLib);
+				}
 				
 				if (FileIO.hasFile(sourceNameA))
 				{
 					String fileText = FileIO.readFile(sourceNameA);
 					translationUnits.put(sourceNameA, new AssemblyUnit(sourceNameA, fileText));
 				}
+				
 			}
 		}
 		return;
@@ -275,7 +280,7 @@ public class JCC816
 			Map<String, TranslationUnit> translationUnits  = new HashMap<String, TranslationUnit>();
 			List<String> filenames = new LinkedList<String>();
 			for (String parameter : commandLine.getArgList())
-				filenames.addAll(FileIO.matchingFiles(new File(CompConfig.rootFolder), parameter));
+				filenames.addAll(FileIO.matchingFiles(parameter));
 			
 			for (String filename : filenames) // Read all input files
 			{
