@@ -106,8 +106,9 @@ public class SelectionStatementNode extends SequencePointStatementNode<Selection
 		if (!isSwitch)
 		{
 			if (expression.hasPropValue() && expression.getPropBool()) return ifStm.hasAssembly();
-			else if (expression.hasPropValue()) return elseStm.hasAssembly();
-			else return ifStm.hasAssembly() || elseStm.hasAssembly();
+			else if (expression.hasPropValue() && elseStm != null) return elseStm.hasAssembly();
+			else if (elseStm != null) return ifStm.hasAssembly() || elseStm.hasAssembly();
+			else return ifStm.hasAssembly();
 		}
 		else return switchStm.hasAssembly();
 	}
@@ -175,7 +176,8 @@ public class SelectionStatementNode extends SequencePointStatementNode<Selection
 					largestExpr = node;
 				caseValues.add(l);
 			}
-			
+			if (largestExpr == null)
+				return "";
 			ScratchManager scratchManager = new ScratchManager();
 			ScratchSource exprSource = scratchManager.reserveScratchBlock(expression.getSize());
 			// If greater than largest case, skip

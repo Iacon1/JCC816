@@ -49,6 +49,6 @@ public class LabeledStatementNode extends StatementNode<Labeled_statementContext
 	@Override
 	public String getAssembly(int leadingWhitespace, String returnAddr) throws Exception
 	{
-		return AssemblyUtils.getWhitespace(leadingWhitespace) + label + ":\n" + statement.getAssembly(leadingWhitespace, returnAddr);
+		return AssemblyUtils.getWhitespace(leadingWhitespace) + label + ":\n" + (statement.hasAssembly()? statement.getAssembly(leadingWhitespace, returnAddr) : "");
 	}
 }
