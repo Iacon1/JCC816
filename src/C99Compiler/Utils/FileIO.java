@@ -31,9 +31,13 @@ public final class FileIO
 	
 	public static File getFile(String filename)
 	{
-		if (filename.startsWith(userPath + "/"))
-			return new File(filename);
-		else return new File(userPath + "/" + filename);
+		filename = filename.replaceAll("[/]", "\\\\");
+		if (!filename.startsWith(CompConfig.rootFolder + "\\") && !CompConfig.rootFolder.equals(""))
+			filename = CompConfig.rootFolder + "\\" + filename;
+		if (!filename.startsWith(userPath + "\\") && !userPath.equals(""))
+			filename = userPath + "\\" + filename;
+		Logging.logNotice(filename);
+		return new File(filename);
 	}
 	
 	public static final boolean hasResource(String filename)
@@ -148,6 +152,6 @@ public final class FileIO
 	}
 	public static List<String> matchingFiles(String searchTerm)
 	{
-		return matchingFiles(new File(userPath + "/" + CompConfig.rootFolder), searchTerm);
+		return matchingFiles(getFile(""), searchTerm);
 	}
 }

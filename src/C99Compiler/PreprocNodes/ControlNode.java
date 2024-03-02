@@ -77,13 +77,13 @@ public class ControlNode extends InterpretingNode<ControlNode, Control_lineConte
 				filename = filename.replaceAll("[<>\"\"]", "");
 				stdLib = filename;
 				try {file = FileIO.readResource("stdlib/" + filename);}
-				catch (Exception e) {file = FileIO.readFile(CompConfig.rootFolder + "/" + filename);}
+				catch (Exception e) {file = FileIO.readFile(filename);}
 			}
 			else if (filename.contains("\"")) // Include file
 			{
 				filename = filename.replaceAll("[<>\"\"]", "");
 				otherLib = filename;
-				try {file = FileIO.readFile(CompConfig.rootFolder + "/" + filename);}
+				try {file = FileIO.readFile(filename);}
 				catch (Exception e) {file = FileIO.readResource("stdlib/" + filename);}
 			}
 			String oldFILE = PreProcComponentNode.file;
@@ -152,7 +152,7 @@ public class ControlNode extends InterpretingNode<ControlNode, Control_lineConte
 			else if (filename.contains("\"")) // Include file
 			{
 				filename = filename.replaceAll("[<>\"\"]", "");
-				embedBytes = FileIO.readFileBytes(CompConfig.rootFolder + "/" + filename);
+				embedBytes = FileIO.readFileBytes(filename);
 			}
 			
 			int j = 0;

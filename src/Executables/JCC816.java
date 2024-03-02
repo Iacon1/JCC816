@@ -185,7 +185,7 @@ public class JCC816
 			
 			for (String otherLib : includedOtherLibs)
 			{
-				otherLib = CompConfig.rootFolder + "/" + otherLib;
+				otherLib = otherLib;
 				String sourceNameC = otherLib.replace(".h", "") + ".c";
 				String sourceNameA = otherLib.replace(".h", "") + ".asm";
 				String sourceNameO = otherLib.replace(".h", "") + ".o";
@@ -284,7 +284,6 @@ public class JCC816
 			
 			for (String filename : filenames) // Read all input files
 			{
-				filename = CompConfig.rootFolder + "/" + filename;
 				if (filename.endsWith(".o"))
 				{
 					byte[] bytes = FileIO.readFileBytes(filename);
@@ -310,8 +309,8 @@ public class JCC816
 			
 			Header header = null;
 
-			String sfcName = CompConfig.rootFolder + "/" + commandLine.getOptionValues("l")[0];
-			String headerName = CompConfig.rootFolder + "/" + commandLine.getOptionValues("l")[1];
+			String sfcName = commandLine.getOptionValues("l")[0];
+			String headerName = commandLine.getOptionValues("l")[1];
 			header = new Header(FileIO.readFileXML(headerName));
 			
 			String assembly = linker.link(header, memorySize);
@@ -319,18 +318,18 @@ public class JCC816
 		}
 		else if (commandLine.hasOption("p")) // Preprocess
 		{
-			String parameter = CompConfig.rootFolder + "/" + commandLine.getArgList().get(0);
+			String parameter = commandLine.getArgList().get(0);
 			String fileText = FileIO.readFile(parameter);
 			fileText = Preprocessor.preprocess(new HashSet<String>(), new HashSet<String>(), new LinkedList<LineInfo>(), parameter, fileText);
 			byte[] fileBytes = fileText.getBytes();
-			FileIO.writeFile(CompConfig.rootFolder + "/" + commandLine.getOptionValue("p"), fileBytes);
+			FileIO.writeFile(commandLine.getOptionValue("p"), fileBytes);
 		}
 		else if (commandLine.hasOption("o")) // Object
 		{
-			String parameter = CompConfig.rootFolder + "/" + commandLine.getArgList().get(0);
+			String parameter = commandLine.getArgList().get(0);
 			String fileText = FileIO.readFile(parameter);
 			byte[] fileBytes = FileIO.serialize(C99Compiler.compile(parameter, fileText));
-			FileIO.writeFile(CompConfig.rootFolder + "/" + commandLine.getOptionValue("o"), fileBytes);
+			FileIO.writeFile(commandLine.getOptionValue("o"), fileBytes);
 		}
 	}
 

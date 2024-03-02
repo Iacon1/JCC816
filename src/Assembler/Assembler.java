@@ -38,7 +38,11 @@ public class Assembler
 		
 		Process proc;
 		if (DebugLevel.isAtLeast(DebugLevel.medium))
-			proc = Runtime.getRuntime().exec(new String[] {"cl65", "--verbose", "-g", "-C", cfgFile.getAbsolutePath(), "-o", sfcFile.getAbsolutePath(), asmFile.getAbsolutePath(), "-Wl", "--dbgfile", "-Wl", dbgFile.getAbsolutePath()});
+			proc = Runtime.getRuntime().exec(new String[] {"cl65", "--verbose", "-g",
+					"-C", cfgFile.getAbsolutePath(),
+					"-o", sfcFile.getAbsolutePath(), asmFile.getAbsolutePath(),
+					"-Wl", "--dbgfile", "-Wl", dbgFile.getAbsolutePath(),
+					}, null, sfcFile.getParentFile());
 		else
 			proc = Runtime.getRuntime().exec(new String[] {"cl65", "--verbose", "-C", cfgFile.getAbsolutePath(), "-o", sfcFile.getAbsolutePath(), asmFile.getAbsolutePath()});
 		String error = new String(proc.getErrorStream().readAllBytes());
