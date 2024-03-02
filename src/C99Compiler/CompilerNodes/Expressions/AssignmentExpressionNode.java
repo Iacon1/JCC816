@@ -119,7 +119,8 @@ public class AssignmentExpressionNode extends BinaryExpressionNode
 	
 	public static void equateLValue(LValueNode<?> x, BaseExpressionNode<?> y) // Binds tracking data from y to x for optimization purposes
 	{
-		if (y.getEnclosingIteration() != null) // Skip if in a loop
+		if (x.getScope().isRoot()); // Don't do for globals
+		else if (y.getEnclosingIteration() != null) // Skip if in a loop
 			x.clearPossibleValues();
 		else if (y.hasPropValue())
 			x.setOnlyPossibleValue(y.getPropValue());
