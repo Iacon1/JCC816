@@ -5,10 +5,13 @@ package C99Compiler.CompilerNodes.Statements;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 
+import C99Compiler.CompConfig.DebugLevel;
 import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.InterpretingNode;
 import C99Compiler.CompilerNodes.Interfaces.AssemblableNode;
 import C99Compiler.CompilerNodes.LValues.VariableNode;
+import C99Compiler.Utils.AssemblyUtils;
+import C99Compiler.Utils.LineInfo;
 import Grammar.C99.C99Parser.StatementContext;
 
 public abstract class StatementNode<C extends ParserRuleContext> extends InterpretingNode<StatementNode<C>, C> implements AssemblableNode
@@ -46,5 +49,15 @@ public abstract class StatementNode<C extends ParserRuleContext> extends Interpr
 		if (getEnclosingFunction() != null)
 			return getAssembly(leadingWhitespace, getEnclosingFunction().getEndLabel());
 		else return getAssembly(leadingWhitespace, null);
+	}
+	
+	public String labelLine(int leadingWhitespace, int lineNo)
+	{
+		if (DebugLevel.isAtLeast(DebugLevel.low))
+		{
+			LineInfo info = getTranslationUnit().getInfo(lineNo);
+			return AssemblyUtils.getWhitespace(leadingWhitespace) + ".dbg\tline, \"" + info.filename + "\", " + info.line + "\n";
+		}
+		else return "";
 	}
 }

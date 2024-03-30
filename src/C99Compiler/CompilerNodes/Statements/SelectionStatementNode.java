@@ -32,6 +32,7 @@ public class SelectionStatementNode extends SequencePointStatementNode<Selection
 	private BaseExpressionNode<?> expression;
 	
 	private StatementNode<?> switchStm, ifStm, elseStm;
+	private int ifLineNo, elseLineNo;
 	
 	private Map<BaseExpressionNode<?>, String> cases;
 	private boolean isSwitch;
@@ -52,7 +53,12 @@ public class SelectionStatementNode extends SequencePointStatementNode<Selection
 		if (!isSwitch)
 		{
 			ifStm = StatementNode.manufacture(this, node.statement(0));
-			if (node.statement().size() == 2) elseStm = StatementNode.manufacture(this, node.statement().get(1));
+			ifLineNo = node.statement(0).start.getLine() - 1;
+			if (node.statement().size() == 2)
+			{
+				elseStm = StatementNode.manufacture(this, node.statement().get(1));
+				elseLineNo = node.statement(1).start.getLine() - 1;
+			}
 		}
 		else
 		{
@@ -121,9 +127,15 @@ public class SelectionStatementNode extends SequencePointStatementNode<Selection
 		if (!isSwitch) // If statement
 		{
 			if (expression.hasPropValue() && (expression.getPropBool() || expression.getPropLong() != 0)) // It's always true
+			{
+				assembly += labelLine(leadingWhitespace + CompConfig.indentSize, ifLineNo);
 				assembly += ifStm.getAssembly(leadingWhitespace);
+			}
 			else if (expression.hasPropValue() && elseStm != null) // It's always false
+			{
+				assembly += labelLine(leadingWhitespace + CompConfig.indentSize, elseLineNo);
 				assembly += elseStm.getAssembly(leadingWhitespace, returnAddr);
+			}
 			else if (!expression.hasPropValue()) // Unknown
 			{
 				String skipName = "__IFNOT_" + selId;
@@ -137,6 +149,7 @@ public class SelectionStatementNode extends SequencePointStatementNode<Selection
 					assembly += whitespace + "BNE\t:+\n"; // Skip if 0, i. e. not true
 					assembly += whitespace + "JMP\t" + skipName + "\n";
 					assembly += whitespace + ":\n";
+					assembly += labelLine(leadingWhitespace + CompConfig.indentSize, ifLineNo);
 					assembly += ifStm.getAssembly(leadingWhitespace + CompConfig.indentSize, returnAddr);
 //					}
 				}
@@ -147,6 +160,7 @@ public class SelectionStatementNode extends SequencePointStatementNode<Selection
 					else
 						assembly += EqualityExpressionNode.getIsZero(whitespace, null, new ScratchManager(), expression.getLValue().getSource(), new DetailsTicket());
 					assembly += whitespace + "BEQ\t" + skipName + "\n";
+					assembly += labelLine(leadingWhitespace + CompConfig.indentSize, ifLineNo);
 					assembly += ifStm.getAssembly(leadingWhitespace + CompConfig.indentSize, returnAddr);
 				}
 				ifStm.clearPossibleValues();
@@ -154,6 +168,7 @@ public class SelectionStatementNode extends SequencePointStatementNode<Selection
 				{
 					assembly += AssemblyUtils.getWhitespace(leadingWhitespace + CompConfig.indentSize) + "JML\t" + getEndLabel() + "\n";
 					assembly += whitespace + skipName + ":\n";
+					assembly += labelLine(leadingWhitespace + CompConfig.indentSize, elseLineNo);
 					assembly += elseStm.getAssembly(leadingWhitespace + CompConfig.indentSize, returnAddr);
 					elseStm.clearPossibleValues();
 				}

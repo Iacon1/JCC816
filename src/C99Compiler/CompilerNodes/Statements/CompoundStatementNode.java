@@ -80,11 +80,7 @@ public class CompoundStatementNode extends StatementNode<Compound_statementConte
 		int i = 0;
 		for (AssemblableNode assemblable : assemblables)
 		{
-			if (DebugLevel.isAtLeast(DebugLevel.low))
-			{
-				LineInfo info = getTranslationUnit().getInfo(lines.get(i++));
-				assembly += AssemblyUtils.getWhitespace(leadingWhitespace) + ".dbg\tline, \"" + info.filename + "\", " + info.line + "\n";
-			}
+			assembly += labelLine(leadingWhitespace, lines.get(i++));
 			if (StatementNode.class.isAssignableFrom(assemblable.getClass())) assembly += ((StatementNode) assemblable).getAssembly(leadingWhitespace, returnAddr);
 			else
 				assembly += assemblable.getAssembly(leadingWhitespace);
