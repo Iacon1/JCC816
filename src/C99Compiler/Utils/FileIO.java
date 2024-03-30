@@ -36,7 +36,6 @@ public final class FileIO
 			filename = CompConfig.rootFolder + "\\" + filename;
 		if (!filename.startsWith(userPath + "\\") && !userPath.equals(""))
 			filename = userPath + "\\" + filename;
-		Logging.logNotice(filename);
 		return new File(filename);
 	}
 	
