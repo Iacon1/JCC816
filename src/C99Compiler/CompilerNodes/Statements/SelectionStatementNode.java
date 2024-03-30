@@ -203,7 +203,7 @@ public class SelectionStatementNode extends SequencePointStatementNode<Selection
 				assembly += AssemblyUtils.byteCopier(whitespace, exprSource.getSize(), exprSource, new ConstantSource(expression.getPropValue(), exprSource.getSize()));
 			else if (expression.hasLValue())
 				assembly += AssemblyUtils.byteCopier(whitespace, leadingWhitespace, exprSource, expression.getLValue().getSource());
-			assembly += new RelationalExpressionNode(this, "<", largestExpr, new DummyExpressionNode(this, expression.getType(), exprSource)).getAssembly(leadingWhitespace, hasDefault? getDefaultLabel(false) : getEndLabel(), miscLabel, scratchManager, new DetailsTicket());
+			assembly += new RelationalExpressionNode(this, "<=", largestExpr, new DummyExpressionNode(this, expression.getType(), exprSource)).getAssembly(leadingWhitespace, hasDefault? getDefaultLabel(false) : getEndLabel(), miscLabel, scratchManager, new DetailsTicket());
 			assembly += whitespace + miscLabel + ":\n";
 			
 			ScratchSource sourceS = scratchManager.reserveScratchBlock(expression.getSize());
