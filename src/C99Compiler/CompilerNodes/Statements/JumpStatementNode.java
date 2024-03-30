@@ -46,7 +46,7 @@ public class JumpStatementNode extends StatementNode<Jump_statementContext> impl
 			break;
 		case "break":
 			selNode = getEnclosingSelection();
-			if (selNode == null || selNode.getEnclosingIteration() == getEnclosingIteration() && selNode.getEnclosingIteration() != null)
+			if (selNode == null || !selNode.isSwitch() && selNode.getEnclosingIteration() == getEnclosingIteration() && selNode.getEnclosingIteration() != null)
 			{
 				iterNode = getEnclosingIteration();
 				selNode = null;
