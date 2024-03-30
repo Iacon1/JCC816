@@ -42,6 +42,6 @@ public class AddressSource extends OperandSource
 	@Override
 	public String getBase()
 	{
-		return address;
+		return address + (offset != 0? " + " + offset : "");
 	}
 }
