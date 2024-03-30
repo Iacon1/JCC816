@@ -361,6 +361,7 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 			if (expr.hasAssembly()) assembly += expr.getAssembly(leadingWhitespace, scratchManager, ticket);
 			break;
 		case structMemberP:
+			if (expr.hasAssembly()) assembly += expr.getAssembly(leadingWhitespace, scratchManager, ticket);
 			ScratchSource sourceP;
 			if (!ScratchManager.hasPointer(expr.getLValue().getSource()))
 			{
