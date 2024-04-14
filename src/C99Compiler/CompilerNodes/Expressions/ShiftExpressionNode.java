@@ -64,6 +64,11 @@ public class ShiftExpressionNode extends BinaryExpressionNode
 		assembly += ticket.save(whitespace, DetailsTicket.saveA | DetailsTicket.saveX);
 		DetailsTicket innerTicket = new DetailsTicket(ticket, DetailsTicket.saveA | DetailsTicket.saveX, 0);
 		boolean isOne = y.hasPropValue() && (y.getPropLong() == 1); // No need for loop w/ only one iteration
+		if (sourceX.getSize() < destSource.getSize() && x.getType().isSigned())
+		{
+			assembly += AssemblyUtils.setSignExtend(whitespace, destSource, sourceX, true, true, innerTicket);
+		}
+		
 		if (y.hasPropValue() && ((y.getPropLong() % 8) == 0)) // Even better optimization LOL
 		{
 			int bytesShifted = (int) y.getPropLong() / 8;
@@ -97,10 +102,12 @@ public class ShiftExpressionNode extends BinaryExpressionNode
 			innerTicket.flags &= ~(DetailsTicket.isA16Bit | DetailsTicket.isXY16Bit);
 		}
 		
+		// Use destination as buffer if able to
+		OperandSource tempSource = (destSource != null && destSource.getSize() >= sourceX.getSize()) ? destSource : scratchManager.reserveScratchBlock(sourceX.getSize());
+		assembly += AssemblyUtils.byteCopier(whitespace, tempSource.getSize(), tempSource, sourceX);
+		
 		if (!isOne)
 		{
-			if (destSource != null)
-				assembly += AssemblyUtils.byteCopier(whitespace, destSource.getSize(), destSource, sourceX);
 			assembly += sourceY.getLDA(whitespace, 0, innerTicket) + "\n";
 			assembly += whitespace + "BEQ\t:++\n";
 			assembly += whitespace + "TAX\t\n";
@@ -108,24 +115,24 @@ public class ShiftExpressionNode extends BinaryExpressionNode
 			switch (operator)
 			{
 			case "<<":
-				assembly += AssemblyUtils.bytewiseOperation(whitespace + AssemblyUtils.getWhitespace(CompConfig.indentSize), destSource.getSize(), (Integer i, DetailsTicket ticket2) ->
+				assembly += AssemblyUtils.bytewiseOperation(whitespace + AssemblyUtils.getWhitespace(CompConfig.indentSize), tempSource.getSize(), (Integer i, DetailsTicket ticket2) ->
 				{
 					return new String[]
 					{
-							destSource.getLDA(i, ticket2),
+							tempSource.getLDA(i, ticket2),
 							(i >= sourceX.getSize() - 2) ? "ASL" : "ROL",
-							(destSource == null) ? "" : destSource.getSTA(i, ticket2),
+							tempSource.getSTA(i, ticket2),
 					};
 				});
 				break;
 			case ">>":
-				assembly += AssemblyUtils.bytewiseOperation(whitespace + AssemblyUtils.getWhitespace(CompConfig.indentSize), destSource.getSize(), (Integer i, DetailsTicket ticket2) -> 
+				assembly += AssemblyUtils.bytewiseOperation(whitespace + AssemblyUtils.getWhitespace(CompConfig.indentSize), tempSource.getSize(), (Integer i, DetailsTicket ticket2) -> 
 				{
 					return new String[]
 					{
-						destSource.getLDA(i, ticket2),
+						tempSource.getLDA(i, ticket2),
 						(i >= sourceX.getSize() - 2) ? "LSR" : "ROR",
-						(destSource == null) ? "" : destSource.getSTA(i, ticket2),
+						tempSource.getSTA(i, ticket2),
 					};
 				}, true, true);
 				break;
@@ -135,7 +142,7 @@ public class ShiftExpressionNode extends BinaryExpressionNode
 			assembly += whitespace.substring(1) + ":\n"; // A loop
 		}
 		else // Only a shift by one
-		{
+		{				
 			switch (operator)
 			{
 			case "<<":
@@ -145,7 +152,7 @@ public class ShiftExpressionNode extends BinaryExpressionNode
 					{
 							sourceX.getLDA(i, ticket2),
 							(i >= sourceX.getSize() - 2) ? "ASL" : "ROL",
-							(destSource == null) ? "" : destSource.getSTA(i, ticket2),
+							tempSource.getSTA(i, ticket2),
 					};
 				});
 				break;
@@ -156,13 +163,17 @@ public class ShiftExpressionNode extends BinaryExpressionNode
 					{
 						sourceX.getLDA(i, ticket2),
 						(i >= sourceX.getSize() - 2) ? "LSR" : "ROR",
-						(destSource == null) ? "" : destSource.getSTA(i, ticket2),
+						tempSource.getSTA(i, ticket2),
 					};
 				}, true, true);
 				break;
-			}	
+			}
 		}
-		
+		if (destSource != null && destSource != tempSource)
+		{
+			assembly += AssemblyUtils.byteCopier(whitespace, destSource.getSize(), destSource, tempSource);
+			scratchManager.releaseScratchBlock((ScratchSource) tempSource);
+		}
 		assembly += ticket.restore(whitespace, DetailsTicket.saveA | DetailsTicket.saveX);
 		
 		return assembly;
