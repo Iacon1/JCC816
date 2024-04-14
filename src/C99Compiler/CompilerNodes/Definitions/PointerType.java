@@ -29,6 +29,11 @@ public class PointerType extends StorageWrapperType
 	{
 		return CompConfig.pointerSize;
 	}
+	@Override
+	public int getSizeBits()
+	{
+		return getSize() * 8;
+	}
 	
 	@Override
 	public boolean isPointer() {return true;}
