@@ -104,8 +104,8 @@ CC extends ParserRuleContext
 	protected String getAssembly(String whitespace, OperandSource destSource, OperandSource sourceX,
 			OperandSource sourceY, ScratchManager scratchManager, DetailsTicket ticket) throws Exception
 	{
-		if (y.hasLValue() && OptimizationLevel.isAtLeast(OptimizationLevel.medium)) sourceY = AssemblyUtils.getShrinkWrapped(y.getLValue());
-		if (x.hasLValue() && OptimizationLevel.isAtLeast(OptimizationLevel.medium)) sourceX = AssemblyUtils.getShrinkWrapped(x.getLValue());
+		if (!sourceY.isLiteral() && y.hasLValue() && OptimizationLevel.isAtLeast(OptimizationLevel.medium)) sourceY = AssemblyUtils.getShrinkWrapped(y.getLValue());
+		if (!sourceX.isLiteral() && x.hasLValue() && OptimizationLevel.isAtLeast(OptimizationLevel.medium)) sourceX = AssemblyUtils.getShrinkWrapped(x.getLValue());
 
 		return getAssembly(whitespace, destSource, sourceX, sourceY, ticket);
 	}
