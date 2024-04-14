@@ -50,5 +50,6 @@ String_literal : 'L'? '"' (~('"'|'\\'|'\n')|Escape_sequence)+ '"' ;
 	
 // A.1.8 Header names
 Header_name
-	: '<' ~[\n>]+ '>'
-	| '"' ~[\n"]+ '"' ;
+	: '<' ~[\n>]+ '>' {Grammar.GrammarFlags.isPreproc}?
+	| '"' ~[\n"]+ '"' {Grammar.GrammarFlags.isPreproc}?
+	;
