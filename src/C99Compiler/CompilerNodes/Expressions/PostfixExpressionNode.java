@@ -370,6 +370,7 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 			}
 			else sourceP = ScratchManager.getPointer(expr.getLValue().getSource());
 			pointerRef = new IndirectLValueNode(this, expr.getLValue(), sourceP, ((PointerType) expr.getType()).getType());
+			if (destSource != null) assembly += AssemblyUtils.byteCopier(whitespace, destSource.getSize(), destSource, getLValue().getSource());
 			break;
 		case incr: case decr:
 			OperandSource sourceX;
