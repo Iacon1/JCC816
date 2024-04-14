@@ -55,9 +55,9 @@ public class AdditiveExpressionNode extends ArithmeticBinaryExpressionNode
 			int size = ((PointerType) x.getType()).getType().getSize();
 			if (size != 1)
 			{
-				int shiftAmount = (int) Math.floor(Math.log(size) / Math.log(2));
-				if (shiftAmount % 1 == 0) // Is power of two
-					y = new ShiftExpressionNode(this, "<<", y, new DummyExpressionNode(this, CompUtils.getSmallestType(shiftAmount), shiftAmount));
+				double shiftAmount = Math.log(size) / Math.log(2);
+				if (shiftAmount % 1. == 0) // Is power of two
+					y = new ShiftExpressionNode(this, "<<", y, new DummyExpressionNode(this, CompUtils.getSmallestType(shiftAmount), (int) shiftAmount));
 				else
 					y = new MultiplicativeExpressionNode(this, "*", y, new DummyExpressionNode(this, CompUtils.getSmallestType(size), size));
 			}
