@@ -5,6 +5,7 @@ package C99Compiler.CompilerNodes.Expressions.Snippets;
 import C99Compiler.Utils.CompUtils;
 import C99Compiler.Utils.OperandSources.OperandSource;
 import C99Compiler.Utils.AssemblyUtils.DetailsTicket;
+import C99Compiler.CompConfig;
 import C99Compiler.CompilerNodes.Definitions.Type;
 import C99Compiler.CompilerNodes.Dummies.DummyExpressionNode;
 import C99Compiler.CompilerNodes.Expressions.UnaryExpressionNode;
@@ -19,6 +20,10 @@ public class DivisionMultiplicationHeaderFooter
 		String assembly = "";
 		Type xType = CompUtils.getTypeForSize(sourceX.getSize(), true);
 		Type yType = CompUtils.getTypeForSize(sourceY.getSize(), true);
+		
+		if (sourceX.getSize() != sourceY.getSize()) // Will we need sign extend?
+			assembly += whitespace + "STZ\t" + CompConfig.signExtend + "\n";
+				
 		// First, check negative for X
 		assembly += whitespace + CompUtils.setAXY8 + "\n";
 		assembly += whitespace + "LDY\t#$00\n";
@@ -28,6 +33,12 @@ public class DivisionMultiplicationHeaderFooter
 		// If it was negative we add one to the flag and then make it positive.
 		assembly += whitespace + "INY\n";
 		assembly += new UnaryExpressionNode(null, "-", new DummyExpressionNode(null, xType, sourceX)).getAssembly(whitespace.length(), sourceX);
+		// If x is smaller than y we also set sign extend to 0xFF
+		if (sourceX.getSize() < sourceY.getSize())
+		{
+			assembly += whitespace + "LDA\t#$FF\n";
+			assembly += whitespace + "STA\t" + CompConfig.signExtend + "\n";
+		}
 		assembly += whitespace + label1 + ":" + "\n";
 		// Then for Y
 		assembly += whitespace + CompUtils.setA8 + "\n";
@@ -38,6 +49,12 @@ public class DivisionMultiplicationHeaderFooter
 		// and then make it positive.
 		assembly += whitespace + "DEY\n";
 		assembly += new UnaryExpressionNode(null, "-", new DummyExpressionNode(null, yType, sourceY)).getAssembly(whitespace.length(), sourceY);
+		// If y is smaller than x we also set sign extend to 0xFF
+		if (sourceY.getSize() < sourceX.getSize())
+		{
+			assembly += whitespace + "LDA\t#$FF\n";
+			assembly += whitespace + "STA\t" + CompConfig.signExtend + "\n";
+		}
 		assembly += label2 + ":\n";
 		
 		return assembly;
