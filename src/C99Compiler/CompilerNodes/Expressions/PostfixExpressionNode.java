@@ -359,6 +359,7 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 			break;
 		case structMember:
 			if (expr.hasAssembly()) assembly += expr.getAssembly(leadingWhitespace, scratchManager, ticket);
+			if (destSource != null) assembly += AssemblyUtils.byteCopier(whitespace, destSource.getSize(), destSource, getLValue().getSource());
 			break;
 		case structMemberP:
 			if (expr.hasAssembly()) assembly += expr.getAssembly(leadingWhitespace, scratchManager, ticket);
