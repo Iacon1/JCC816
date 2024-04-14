@@ -100,6 +100,13 @@ public class IterationStatementNode extends SequencePointStatementNode<Iteration
 	{
 		return "__ITER__START__" + iterId;
 	}
+	public String getIterLabel()
+	{
+		if (iterType == IterType.while_)
+			return getStartLabel();
+		else
+			return "__ITER__ITER__" + iterId;
+	}
 	public String getEndLabel()
 	{
 		return "__ITER__END__" + iterId;
@@ -158,6 +165,7 @@ public class IterationStatementNode extends SequencePointStatementNode<Iteration
 		case doWhile:
 			assembly += whitespace + getStartLabel() + ":\n";
 			if (stmNode.hasAssembly()) assembly += stmNode.getAssembly(leadingWhitespace + CompConfig.indentSize, returnAddr);
+			assembly += whitespace + getIterLabel() + ":\n";
 			assembly += getAssemblyWithSequence(condExpNode, leadingWhitespace, exprSource, scratchManager);
 			assembly += EqualityExpressionNode.getIsZero(whitespace, exprSource, new ScratchManager(), exprSource, new DetailsTicket());
 			assembly += whitespace + "BEQ\t" + getEndLabel() + "\n";
@@ -194,6 +202,7 @@ public class IterationStatementNode extends SequencePointStatementNode<Iteration
 				}
 			}
 			if (stmNode.hasAssembly()) assembly += stmNode.getAssembly(leadingWhitespace + CompConfig.indentSize, returnAddr);
+			assembly += whitespace + getIterLabel() + ":\n";
 			if (iterExpNode != null && iterExpNode.hasAssembly()) assembly += getAssemblyWithSequence(iterExpNode, leadingWhitespace); 
 			assembly += whitespace + "JMP\t" + getStartLabel() + "\n";
 			assembly += whitespace + getEndLabel() + ":\n";

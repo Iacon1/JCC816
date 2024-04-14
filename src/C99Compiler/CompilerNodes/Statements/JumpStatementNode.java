@@ -86,7 +86,7 @@ public class JumpStatementNode extends StatementNode<Jump_statementContext> impl
 			assembly += whitespace + "JMP\t" + funcNode.getLabel(gotoLabel) + "\n";
 			break;
 		case continueM:
-			assembly += whitespace + "JMP\t" + iterNode.getStartLabel() + "\n";
+			assembly += whitespace + "JMP\t" + iterNode.getIterLabel() + "\n";
 			break;
 		case breakM:
 			if (selNode != null)
