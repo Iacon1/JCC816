@@ -5,8 +5,8 @@ package C99Compiler.CompilerNodes.LValues;
 
 import java.util.Set;
 
+import C99Compiler.CompConfig;
 import C99Compiler.CompilerNodes.ComponentNode;
-import C99Compiler.CompilerNodes.Dummies.DummyLValueNode;
 import C99Compiler.CompilerNodes.Definitions.Type;
 import C99Compiler.Utils.AssemblyUtils.DetailsTicket;
 import C99Compiler.Utils.OperandSources.OperandSource;
@@ -40,6 +40,9 @@ public class IndirectLValueNode extends LValueNode<IndirectLValueNode>
 		{
 			String assembly = "";
 
+			if (i >= size)
+				return whitespace + operation + "\t" + CompConfig.signExtend + "\n";
+			
 			if ((ticket.flags & DetailsTicket.saveY) != 0)
 				assembly += whitespace + "PHY\n";
 			assembly += whitespace + "LDY\t#$" + String.format(ticket.is16Bit() ? "%04x" : "%02x", i + offset) + "\n";
