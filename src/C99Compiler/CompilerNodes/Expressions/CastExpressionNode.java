@@ -66,7 +66,7 @@ public class CastExpressionNode extends BaseExpressionNode<Cast_expressionContex
 	@Override
 	public boolean hasAssembly()
 	{
-		return expr.hasAssembly() || (getType().getSize() > expr.getType().getSize());
+		return expr.hasAssembly() || (!hasPropValue() && getType().getSize() > expr.getType().getSize());
 	}
 	@Override
 	public String getAssembly(int leadingWhitespace, OperandSource destSource, ScratchManager scratchManager, DetailsTicket ticket) throws Exception
