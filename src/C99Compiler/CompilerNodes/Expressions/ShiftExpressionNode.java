@@ -126,15 +126,27 @@ public class ShiftExpressionNode extends BinaryExpressionNode
 				});
 				break;
 			case ">>":
-				assembly += AssemblyUtils.bytewiseOperation(whitespace + AssemblyUtils.getWhitespace(CompConfig.indentSize), tempSource.getSize(), (Integer i, DetailsTicket ticket2) -> 
-				{
-					return new String[]
+				if (getType().isSigned())
+					assembly += AssemblyUtils.bytewiseOperation(whitespace, sourceX.getSize(), (Integer i, DetailsTicket ticket2) -> 
 					{
-						tempSource.getLDA(i, ticket2),
-						(i >= sourceX.getSize() - 2) ? "LSR" : "ROR",
-						tempSource.getSTA(i, ticket2),
-					};
-				}, true, true);
+						return new String[]
+						{
+							tempSource.getLDA(i, ticket2),
+							(ticket2.is16Bit()) ? "CMP\t#$8000" : "CMP\t#$80",
+							"ROR",
+							tempSource.getSTA(i, ticket2),
+						};					
+					}, true, true);
+				else
+					assembly += AssemblyUtils.bytewiseOperation(whitespace, sourceX.getSize(), (Integer i, DetailsTicket ticket2) -> 
+					{
+						return new String[]
+						{
+							tempSource.getLDA(i, ticket2),
+							(i >= sourceX.getSize() - 2) ? "LSR" : "ROR",
+							tempSource.getSTA(i, ticket2),
+						};					
+					}, true, true);
 				break;
 			}
 			assembly += whitespace + AssemblyUtils.getWhitespace(CompConfig.indentSize) + "DEX\n";
@@ -157,15 +169,27 @@ public class ShiftExpressionNode extends BinaryExpressionNode
 				});
 				break;
 			case ">>":
-				assembly += AssemblyUtils.bytewiseOperation(whitespace, sourceX.getSize(), (Integer i, DetailsTicket ticket2) -> 
-				{
-					return new String[]
+				if (getType().isSigned())
+					assembly += AssemblyUtils.bytewiseOperation(whitespace, sourceX.getSize(), (Integer i, DetailsTicket ticket2) -> 
 					{
-						sourceX.getLDA(i, ticket2),
-						(i >= sourceX.getSize() - 2) ? "LSR" : "ROR",
-						tempSource.getSTA(i, ticket2),
-					};
-				}, true, true);
+						return new String[]
+						{
+							sourceX.getLDA(i, ticket2),
+							(ticket2.is16Bit()) ? "CMP\t#$8000" : "CMP\t#$80",
+							"ROR",
+							tempSource.getSTA(i, ticket2),
+						};					
+					}, true, true);
+				else
+					assembly += AssemblyUtils.bytewiseOperation(whitespace, sourceX.getSize(), (Integer i, DetailsTicket ticket2) -> 
+					{
+						return new String[]
+						{
+							sourceX.getLDA(i, ticket2),
+							(i >= sourceX.getSize() - 2) ? "LSR" : "ROR",
+							tempSource.getSTA(i, ticket2),
+						};					
+					}, true, true);
 				break;
 			}
 		}
