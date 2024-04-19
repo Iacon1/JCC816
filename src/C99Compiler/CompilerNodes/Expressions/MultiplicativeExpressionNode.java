@@ -4,6 +4,7 @@ package C99Compiler.CompilerNodes.Expressions;
 
 import C99Compiler.CompConfig;
 import C99Compiler.CompilerNodes.ComponentNode;
+import C99Compiler.CompilerNodes.Dummies.DummyExpressionNode;
 import C99Compiler.CompilerNodes.Definitions.Type.CastContext;
 import C99Compiler.CompilerNodes.Expressions.Snippets.DivisionMultiplicationHeaderFooter;
 import C99Compiler.CompilerNodes.Expressions.Snippets.LongDividerModulator;
@@ -11,12 +12,16 @@ import C99Compiler.CompilerNodes.Expressions.Snippets.Multiplier;
 import C99Compiler.CompilerNodes.Expressions.Snippets.ShortDividerModulator;
 import C99Compiler.Utils.AssemblyUtils;
 import C99Compiler.Utils.AssemblyUtils.DetailsTicket;
+import C99Compiler.Utils.ScratchManager;
+import C99Compiler.Utils.OperandSources.OperandSource;
 import Grammar.C99.C99Parser.Cast_expressionContext;
 import Grammar.C99.C99Parser.Multiplicative_expressionContext;
 
 public class MultiplicativeExpressionNode extends CallingArithmeticBinaryExpressionNode
 <Multiplicative_expressionContext, Cast_expressionContext, Cast_expressionContext, Multiplicative_expressionContext>
 {
+	private BinaryExpressionNode<?,?,?,?> optimized = null;
+
 	public MultiplicativeExpressionNode(ComponentNode<?> parent) {super(parent);}
 
 	@Override
@@ -31,12 +36,68 @@ public class MultiplicativeExpressionNode extends CallingArithmeticBinaryExpress
 	protected BaseExpressionNode<Cast_expressionContext> getPCNode(Multiplicative_expressionContext node) throws Exception
 	{return new CastExpressionNode(this).interpret(node.cast_expression());}
 
+	private void optimizeMult() // Optimize constant mults
+	{
+		if (!operator.equals("*")) return; // Only do if multiplication
+		if (x.hasPropValue())
+		{
+			BaseExpressionNode<?> t = y;
+			y = x;
+			x = t;
+		}
+		if (x.hasPropValue()) return; // Gonna get fully optimized anyway
+		
+		if (y.hasPropValue() && 1 < y.getPropLong() && y.getPropLong() <= CompConfig.maxOptimizedMult)
+		{
+			long l = y.getPropLong();
+			int i = 0;
+			do
+			{
+				l /= 2;
+				i += 1;
+			}
+			while (l % 2 == 0 && 1 < l); // How many times can we divide by zero?
+			DummyExpressionNode d1, d2;
+			d1 = new DummyExpressionNode(this, y.getType(), l);
+			d2 = new DummyExpressionNode(this, y.getType(), i);
+			MultiplicativeExpressionNode m1 = new MultiplicativeExpressionNode(this, "*", x, d1);
+			
+			ShiftExpressionNode s1 = new ShiftExpressionNode(this, "<<", m1, d2);
+			m1.swapParent(s1);
+			d2.swapParent(d2);
+			
+			optimized = s1;
+			if (l % 2 == 1 && 0 < l)
+			{
+				optimized = new AdditiveExpressionNode(this, "+", s1, x);
+				s1.swapParent(optimized);
+			}
+		}
+		else if (y.hasPropValue() && 1 == y.getPropLong())
+		{
+			DummyExpressionNode d = new DummyExpressionNode(this, y.getType(), 0);
+			ShiftExpressionNode s = new ShiftExpressionNode(this, "<<", x, d);
+			x.swapParent(s);
+			d.swapParent(s);
+			
+			optimized = s;	
+		}
+	}
+	
 	public MultiplicativeExpressionNode(ComponentNode<?> parent, String operator, BaseExpressionNode<?> x, BaseExpressionNode<?> y)
 	{
-		super(parent);
-		this.operator = operator;
-		this.x = x;
-		this.y = y;
+		super(parent, operator, x, y);
+		x.swapParent(this);
+		y.swapParent(this);
+		optimizeMult();
+	}
+	@Override
+	public BaseExpressionNode<Multiplicative_expressionContext> interpret(Multiplicative_expressionContext node) throws Exception
+	{
+		BaseExpressionNode<Multiplicative_expressionContext> result = super.interpret(node);
+		if (result != this) return result;
+		optimizeMult();
+		return result;
 	}
 	@Override
 	public CastContext getCastContext()
@@ -164,5 +225,13 @@ public class MultiplicativeExpressionNode extends CallingArithmeticBinaryExpress
 		assembly += "RTL\n";
 		
 		return assembly;
+	}
+	
+	@Override
+	public String getAssembly(int leadingWhitespace, OperandSource destSource, ScratchManager scratchManager, DetailsTicket ticket) throws Exception
+	{
+		if (optimized != null) return optimized.getAssembly(leadingWhitespace, destSource, scratchManager, ticket);
+		else 
+			return super.getAssembly(leadingWhitespace, destSource, scratchManager, ticket);
 	}
 }

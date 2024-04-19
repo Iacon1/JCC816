@@ -58,6 +58,12 @@ public class ComponentNode<C extends ComponentNode<C>> implements Serializable
 			replacement.parent = null;
 		}
 	}
+	public void swapParent(ComponentNode<?> newParent)
+	{
+		if (this.parent != null)
+			parent.removeChild(this);
+		parent = newParent;
+	}
 	/**
 	 * @return The current node's scope.
 	 */

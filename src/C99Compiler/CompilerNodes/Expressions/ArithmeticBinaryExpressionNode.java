@@ -32,10 +32,18 @@ CC extends ParserRuleContext
 		this.operator = operator;
 	}
 
+	public ArithmeticBinaryExpressionNode(ComponentNode<?> parent, String operator, BaseExpressionNode<?> x,
+			BaseExpressionNode<?> y)
+	{
+		super(parent);
+		this.operator = operator;
+		this.x = x;
+		this.y = y;
+	}
 	@Override public Type getType()
 	{
 		if (hasPropValue() && !hasAssembly())
-			return CompUtils.getSmallestType(getPropLong());
+			return CompUtils.getSmallestSignedType(getPropLong());
 		else
 			return Type.convertArithmetic(x.getType(), y.getType());
 	}

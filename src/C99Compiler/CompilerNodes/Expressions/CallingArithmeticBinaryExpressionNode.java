@@ -22,6 +22,11 @@ CC extends ParserRuleContext
 		super(parent);
 	}
 
+	public CallingArithmeticBinaryExpressionNode(ComponentNode<?> parent, String operator, BaseExpressionNode<?> x, BaseExpressionNode<?> y)
+	{
+		super(parent, operator, x, y);
+	}
+
 	protected String getPreface() {throw new UnsupportedOperationException();}
 	@Override
 	protected String getInstruction() {throw new UnsupportedOperationException();}

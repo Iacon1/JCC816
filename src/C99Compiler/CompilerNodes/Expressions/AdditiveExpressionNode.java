@@ -25,6 +25,11 @@ public class AdditiveExpressionNode extends ArithmeticBinaryExpressionNode
 		super(parent);
 		lockToDestSize = true;
 	}
+	public AdditiveExpressionNode(ComponentNode<?> parent, String operator, BaseExpressionNode<?> x, BaseExpressionNode<?> y)
+	{
+		super(parent, operator, x, y);
+		lockToDestSize = true;
+	}
 
 	private AdditiveExpressionNode(String operator)
 	{

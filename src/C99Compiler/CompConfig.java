@@ -102,6 +102,7 @@ public final class CompConfig
 	}
 	
 	public static final int stackSize = 0x2000;
+	public static final int maxOptimizedMult = 30; // Largest constant that will be optimized out of multiplication
 	
 	public static enum DefinableInterrupt // Interrupts the user is allowed to assign functions to
 	{
