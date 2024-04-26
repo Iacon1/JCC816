@@ -5,6 +5,7 @@ package C99Compiler.CompilerNodes.Expressions;
 import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.FunctionDefinitionNode;
 import C99Compiler.CompilerNodes.Declarations.TypeNameNode;
+import C99Compiler.CompilerNodes.Definitions.PointerType;
 import C99Compiler.CompilerNodes.Definitions.Type;
 import C99Compiler.CompilerNodes.LValues.LValueNode;
 import C99Compiler.Utils.AssemblyUtils;
@@ -21,6 +22,13 @@ public class CastExpressionNode extends BaseExpressionNode<Cast_expressionContex
 	
 	public CastExpressionNode(ComponentNode<?> parent) {super(parent);}
 
+	public CastExpressionNode(BaseExpressionNode<?> parent, Type type, BaseExpressionNode<?> expr)
+	{
+		super(parent);
+		this.type = type;
+		this.expr = expr;
+	}
+	
 	@Override
 	public BaseExpressionNode<Cast_expressionContext> interpret(Cast_expressionContext node) throws Exception
 	{
