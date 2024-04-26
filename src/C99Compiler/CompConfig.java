@@ -39,6 +39,7 @@ public final class CompConfig
 	// 16 + 16 + 128 + 3*11 + 3 + 2 + 64 = 256 = Just large enough to be a ZP!
 	public static final String bankRootName = "ROM";
 	public static final String functionTag = "@func";
+	public static final String registerTag = "__REG";
 	
 	public static final int bytesPerDataLine = 32; // Bytes per data line for ROM data
 	
