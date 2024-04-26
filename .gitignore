@@ -12,3 +12,4 @@ target/generated-sources/antlr4/Grammar/C99A3Lexer.java
 target/generated-sources/antlr4/Grammar/C99A3Lexer.tokens
 src/Executables/Test.java
 /Test/*
+test.sfc

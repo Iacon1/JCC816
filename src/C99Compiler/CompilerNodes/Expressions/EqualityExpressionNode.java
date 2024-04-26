@@ -58,18 +58,20 @@ public class EqualityExpressionNode extends BinaryExpressionNode
 	public static String getIsZero(String whitespace, OperandSource destSource, ScratchManager scratchManager, OperandSource source, DetailsTicket ticket)
 	{
 		String assembly = "";
-		if ((ticket.flags & DetailsTicket.isA16Bit) != 0)
+		int offset = 0;
+		
+		if (source.getSize() == 1)
 		{
-			assembly += whitespace + CompUtils.setAXY16 + "\n";
-			assembly += whitespace + "LDA\t#$0000\n";
+			DetailsTicket ticket2 = new DetailsTicket(ticket, 0, DetailsTicket.isA16Bit);
+			assembly += source.getLDA(whitespace, 0, ticket2);
 		}
 		else
 		{
-			assembly += whitespace + CompUtils.setAXY8 + "\n";
-			assembly += whitespace + "LDA\t#$00\n";
+			DetailsTicket ticket2 = new DetailsTicket(ticket, DetailsTicket.isA16Bit, 0);
+			assembly += source.getLDA(whitespace, 0, ticket2);
+			if (source.getSize() > 2)
+				assembly += AssemblyUtils.bytewiseOperation(whitespace, source.getSize() - 2, (Integer i, DetailsTicket ticket3) -> {return new String[]{source.getInstruction("ORA", i + 2, ticket3)};});
 		}
-		
-		assembly += AssemblyUtils.bytewiseOperation(whitespace, source.getSize(), (Integer i, DetailsTicket ticket2) -> {return new String[]{source.getInstruction("ORA", i, ticket2)};});
 		if (destSource != null) assembly += destSource.getSTA(whitespace, 0, ticket);
 		return assembly;
 	}
