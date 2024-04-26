@@ -10,6 +10,7 @@ import C99Compiler.CompilerNodes.Expressions.Snippets.DivisionMultiplicationHead
 import C99Compiler.CompilerNodes.Expressions.Snippets.LongDividerModulator;
 import C99Compiler.CompilerNodes.Expressions.Snippets.Multiplier;
 import C99Compiler.CompilerNodes.Expressions.Snippets.ShortDividerModulator;
+import C99Compiler.CompilerNodes.LValues.LValueNode;
 import C99Compiler.Utils.AssemblyUtils;
 import C99Compiler.Utils.AssemblyUtils.DetailsTicket;
 import C99Compiler.Utils.ScratchManager;
@@ -20,8 +21,8 @@ import Grammar.C99.C99Parser.Multiplicative_expressionContext;
 public class MultiplicativeExpressionNode extends CallingArithmeticBinaryExpressionNode
 <Multiplicative_expressionContext, Cast_expressionContext, Cast_expressionContext, Multiplicative_expressionContext>
 {
-	private BinaryExpressionNode<?,?,?,?> optimized = null;
-
+	private BaseExpressionNode<?> optimized = null;
+	
 	public MultiplicativeExpressionNode(ComponentNode<?> parent) {super(parent);}
 
 	@Override
@@ -36,6 +37,19 @@ public class MultiplicativeExpressionNode extends CallingArithmeticBinaryExpress
 	protected BaseExpressionNode<Cast_expressionContext> getPCNode(Multiplicative_expressionContext node) throws Exception
 	{return new CastExpressionNode(this).interpret(node.cast_expression());}
 
+	private static int optimizedComplexity(long l) // Simualates below const-mult optimization to see if it's worth the trouble
+	{
+		if (l <= 1)
+			return 1;
+		
+		boolean startOdd = (l % 2 == 1);
+		
+		do l /= 2;
+		while (l % 2 == 0 && 1 < l); // How many times can we divide by zero?
+
+		return (startOdd ? 2 : 1) +  optimizedComplexity(l);
+	}
+	
 	private void optimizeMult() // Optimize constant mults
 	{
 		if (!operator.equals("*")) return; // Only do if multiplication
@@ -47,16 +61,17 @@ public class MultiplicativeExpressionNode extends CallingArithmeticBinaryExpress
 		}
 		if (x.hasPropValue()) return; // Gonna get fully optimized anyway
 		
-		if (y.hasPropValue() && 1 < y.getPropLong() && y.getPropLong() <= CompConfig.maxOptimizedMult)
-		{
+		if (y.hasPropValue() && 1 < y.getPropLong() && optimizedComplexity(y.getPropLong()) <= CompConfig.maxOptimizedMultComplexity)
+		{	
 			long l = y.getPropLong();
 			int i = 0;
+			boolean startOdd = (l % 2 == 1);
 			do
 			{
 				l /= 2;
 				i += 1;
 			}
-			while (l % 2 == 0 && 1 < l); // How many times can we divide by zero?
+			while (l % 2 == 0 && 1 < l); // How many times can we divide by two?
 			DummyExpressionNode d1, d2;
 			d1 = new DummyExpressionNode(this, y.getType(), l);
 			d2 = new DummyExpressionNode(this, y.getType(), i);
@@ -67,21 +82,14 @@ public class MultiplicativeExpressionNode extends CallingArithmeticBinaryExpress
 			d2.swapParent(d2);
 			
 			optimized = s1;
-			if (l % 2 == 1 && 0 < l)
+			if (startOdd)
 			{
 				optimized = new AdditiveExpressionNode(this, "+", s1, x);
 				s1.swapParent(optimized);
 			}
 		}
 		else if (y.hasPropValue() && 1 == y.getPropLong())
-		{
-			DummyExpressionNode d = new DummyExpressionNode(this, y.getType(), 0);
-			ShiftExpressionNode s = new ShiftExpressionNode(this, "<<", x, d);
-			x.swapParent(s);
-			d.swapParent(s);
-			
-			optimized = s;	
-		}
+			optimized = x;	
 	}
 	
 	public MultiplicativeExpressionNode(ComponentNode<?> parent, String operator, BaseExpressionNode<?> x, BaseExpressionNode<?> y)
@@ -226,11 +234,41 @@ public class MultiplicativeExpressionNode extends CallingArithmeticBinaryExpress
 		
 		return assembly;
 	}
-	
+	@Override
+	public boolean hasAssembly()
+	{
+		if (optimized != null) return optimized.hasAssembly();
+		else return super.hasAssembly();
+	}
+	@Override
+	public boolean hasPropValue()
+	{
+		if (optimized != null) return optimized.hasPropValue();
+		else return super.hasPropValue();
+	}
+	@Override
+	public Object getPropValue()
+	{
+		if (optimized != null) return optimized.getPropValue();
+		else return super.getPropValue();
+	}
+	@Override
+	public boolean hasLValue()
+	{
+		if (optimized != null) return optimized.hasLValue();
+		else return super.hasLValue();
+	}
+	@Override
+	public LValueNode<?> getLValue()
+	{
+		if (optimized != null) return optimized.getLValue();
+		else return super.getLValue();
+	}
 	@Override
 	public String getAssembly(int leadingWhitespace, OperandSource destSource, ScratchManager scratchManager, DetailsTicket ticket) throws Exception
 	{
-		if (optimized != null) return optimized.getAssembly(leadingWhitespace, destSource, scratchManager, ticket);
+		if (optimized != null)
+			return optimized.getAssembly(leadingWhitespace, destSource, scratchManager, ticket);
 		else 
 			return super.getAssembly(leadingWhitespace, destSource, scratchManager, ticket);
 	}
