@@ -69,7 +69,7 @@ public class ShiftExpressionNode extends BinaryExpressionNode
 			assembly += AssemblyUtils.setSignExtend(whitespace, destSource, sourceX, true, true, innerTicket);
 		}
 		
-		if (y.hasPropValue() && ((y.getPropLong() % 8) == 0)) // Even better optimization LOL
+		if (y.hasPropValue() && y.getPropLong() != 0 && ((y.getPropLong() % 8) == 0)) // Even better optimization LOL
 		{
 			int bytesShifted = (int) y.getPropLong() / 8;
 			int bytesFilled = 0;
@@ -120,7 +120,7 @@ public class ShiftExpressionNode extends BinaryExpressionNode
 					return new String[]
 					{
 							tempSource.getLDA(i, ticket2),
-							(i >= tempSource.getSize() - 2) ? "ROL" :"ASL",
+							(tempSource.getSize() > 2 && i >= tempSource.getSize() - 2) ? "ROL" :"ASL",
 							tempSource.getSTA(i, ticket2),
 					};
 				});
@@ -163,7 +163,7 @@ public class ShiftExpressionNode extends BinaryExpressionNode
 					return new String[]
 					{
 							sourceX.getLDA(i, ticket2),
-							(i >= sourceX.getSize() - 2) ? "ASL" : "ROL",
+							(tempSource.getSize() > 2 &&  i >= sourceX.getSize() - 2) ? "ROL" : "ASL",
 							tempSource.getSTA(i, ticket2),
 					};
 				});
