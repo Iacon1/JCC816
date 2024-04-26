@@ -120,7 +120,7 @@ public class ShiftExpressionNode extends BinaryExpressionNode
 					return new String[]
 					{
 							tempSource.getLDA(i, ticket2),
-							(i >= sourceX.getSize() - 2) ? "ASL" : "ROL",
+							(i >= tempSource.getSize() - 2) ? "ROL" :"ASL",
 							tempSource.getSTA(i, ticket2),
 					};
 				});
