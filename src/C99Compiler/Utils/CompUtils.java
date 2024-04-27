@@ -57,6 +57,7 @@ public final class CompUtils
 			}
 		return new DummyType(specifiers);
 	}
+	public static Type getSmallestSignedType(long value) {return getSmallestType(-1 * Math.abs(value));}
 	public static Type getSmallestType(Number value)
 	{
 		return getSmallestType(value.longValue());
@@ -76,7 +77,7 @@ public final class CompUtils
 	public static final boolean isInZeroPage(String label)
 	{
 		for (SimpleEntry<String, Integer> entry : CompConfig.reservedRAM())
-			if (label.equals(entry))
+			if (label.equals(entry.getKey()))
 				return true;
 		return false;
 	}
