@@ -4,8 +4,9 @@ package C99Compiler.CompilerNodes.LValues;
 
 import C99Compiler.CompConfig;
 import C99Compiler.CompilerNodes.ComponentNode;
+import C99Compiler.CompilerNodes.ValueNode;
 import C99Compiler.CompilerNodes.Definitions.Type;
-import C99Compiler.CompilerNodes.Dummies.DummyLValueNode;
+import C99Compiler.CompilerNodes.Dummies.DummyValueNode;
 import C99Compiler.CompilerNodes.Interfaces.NamedNode;
 import C99Compiler.Utils.PropPointer;
 import C99Compiler.Utils.OperandSources.AddressSource;
@@ -42,11 +43,11 @@ public class VariableNode extends LValueNode<VariableNode> implements NamedNode
 		return source;
 	}
 	@Override
-	public LValueNode<?> castTo(Type type)
+	public ValueNode<?> castTo(Type type)
 	{
 		if (this.type.isArray() && !type.isArray()) // Decay array into pointer
-			return new DummyLValueNode(this, type, new ConstantSource(new PropPointer<VariableNode>(this, 0), CompConfig.pointerSize));
-		else return new DummyLValueNode(this, type, getSource()); // TODO
+			return new DummyValueNode(this, type, new ConstantSource(new PropPointer<VariableNode>(this, 0), CompConfig.pointerSize));
+		else return new DummyValueNode(this, type, getSource()); // TODO
 	}	
 	
 }

@@ -24,7 +24,7 @@ import C99Compiler.Utils.OperandSources.ConstantSource;
 import C99Compiler.Utils.OperandSources.NumericAddressSource;
 import C99Compiler.Utils.OperandSources.OperandSource;
 import Grammar.C99.C99Parser.Unary_expressionContext;
-import C99Compiler.CompilerNodes.Dummies.DummyLValueNode;
+import C99Compiler.CompilerNodes.Dummies.DummyValueNode;
 import C99Compiler.CompilerNodes.Dummies.DummyVariableNode;
 
 public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionContext>
