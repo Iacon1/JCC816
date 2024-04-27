@@ -3,6 +3,7 @@
 package C99Compiler.CompilerNodes.Expressions;
 
 import C99Compiler.CompConfig;
+import C99Compiler.CompConfig.OptimizationLevel;
 import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.Dummies.DummyExpressionNode;
 import C99Compiler.CompilerNodes.Definitions.Type.CastContext;
@@ -97,14 +98,16 @@ public class MultiplicativeExpressionNode extends CallingArithmeticBinaryExpress
 		super(parent, operator, x, y);
 		x.swapParent(this);
 		y.swapParent(this);
-		optimizeMult();
+		if (OptimizationLevel.isAtLeast(OptimizationLevel.medium))
+			optimizeMult();
 	}
 	@Override
 	public BaseExpressionNode<Multiplicative_expressionContext> interpret(Multiplicative_expressionContext node) throws Exception
 	{
 		BaseExpressionNode<Multiplicative_expressionContext> result = super.interpret(node);
 		if (result != this) return result;
-		optimizeMult();
+		if (OptimizationLevel.isAtLeast(OptimizationLevel.medium))
+			optimizeMult();
 		return result;
 	}
 	@Override
