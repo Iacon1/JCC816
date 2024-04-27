@@ -12,6 +12,7 @@ import C99Compiler.Utils.ScratchManager;
 import C99Compiler.Utils.AssemblyUtils.DetailsTicket;
 import C99Compiler.Utils.OperandSources.ConstantSource;
 import C99Compiler.Utils.OperandSources.OperandSource;
+import C99Compiler.Utils.OperandSources.StationaryAddressSource;
 import C99Compiler.Utils.ScratchManager.ScratchSource;
 import Grammar.C99.C99Parser.Additive_expressionContext;
 import Grammar.C99.C99Parser.Or_expressionContext;
@@ -104,100 +105,70 @@ public class ShiftExpressionNode extends BinaryExpressionNode
 		
 		// Use destination as buffer if able to
 		OperandSource tempSource = (destSource != null && destSource.getSize() >= sourceX.getSize()) ? destSource : scratchManager.reserveScratchBlock(sourceX.getSize());
-		assembly += AssemblyUtils.byteCopier(whitespace, tempSource.getSize(), tempSource, sourceX);
 		
+		String innerWhitespace = whitespace;
 		if (!isOne)
 		{
+			assembly += AssemblyUtils.byteCopier(whitespace, sourceX.getSize(), tempSource, sourceX);
+			
 			assembly += sourceY.getLDA(whitespace, 0, innerTicket) + "\n";
 			assembly += whitespace + "BEQ\t:++\n";
 			assembly += whitespace + "TAX\t\n";
 			assembly += whitespace.substring(1) + ":\n"; // A loop
-			switch (operator)
+			
+			innerWhitespace += AssemblyUtils.getWhitespace(CompConfig.indentSize);
+		}
+		switch (operator)
+		{
+		case "<<":
+			assembly += AssemblyUtils.bytewiseOperation(innerWhitespace, sourceX.getSize(), (Integer i, DetailsTicket ticket2) ->
 			{
-			case "<<":
-				assembly += AssemblyUtils.bytewiseOperation(whitespace + AssemblyUtils.getWhitespace(CompConfig.indentSize), tempSource.getSize(), (Integer i, DetailsTicket ticket2) ->
+				return new String[]
+				{
+						(isOne ? sourceX : tempSource).getLDA(i, ticket2),
+						(i == 0) ? "ASL" : "ROL",
+						tempSource.getSTA(i, ticket2),
+				};
+			});
+			break;
+		case ">>":
+			if (getType().isSigned())
+				assembly += AssemblyUtils.bytewiseOperation(whitespace, sourceX.getSize(), (Integer i, DetailsTicket ticket2) -> 
 				{
 					return new String[]
 					{
-							tempSource.getLDA(i, ticket2),
-							(tempSource.getSize() > 2 && i >= tempSource.getSize() - 2) ? "ROL" :"ASL",
-							tempSource.getSTA(i, ticket2),
+						(isOne ? sourceX : tempSource).getLDA(i, ticket2),
+						(ticket2.is16Bit()) ? "CMP\t#$8000" : "CMP\t#$80",
+						"ROR",
+						tempSource.getSTA(i, ticket2),
+					};					
+				}, true, true);
+			else
+				assembly += AssemblyUtils.bytewiseOperation(innerWhitespace, sourceX.getSize(), (Integer i, DetailsTicket ticket2) -> 
+				{
+					return new String[]
+					{
+						(isOne ? sourceX : tempSource).getLDA(i, ticket2),
+						(i >= sourceX.getSize() - 2) ? "LSR" : "ROR",
+						tempSource.getSTA(i, ticket2),
 					};
-				});
-				break;
-			case ">>":
-				if (getType().isSigned())
-					assembly += AssemblyUtils.bytewiseOperation(whitespace, sourceX.getSize(), (Integer i, DetailsTicket ticket2) -> 
-					{
-						return new String[]
-						{
-							tempSource.getLDA(i, ticket2),
-							(ticket2.is16Bit()) ? "CMP\t#$8000" : "CMP\t#$80",
-							"ROR",
-							tempSource.getSTA(i, ticket2),
-						};					
-					}, true, true);
-				else
-					assembly += AssemblyUtils.bytewiseOperation(whitespace, sourceX.getSize(), (Integer i, DetailsTicket ticket2) -> 
-					{
-						return new String[]
-						{
-							tempSource.getLDA(i, ticket2),
-							(i >= sourceX.getSize() - 2) ? "LSR" : "ROR",
-							tempSource.getSTA(i, ticket2),
-						};					
-					}, true, true);
+				}, true, true);
 				break;
 			}
+		if (!isOne)
+		{
 			assembly += whitespace + AssemblyUtils.getWhitespace(CompConfig.indentSize) + "DEX\n";
 			assembly += whitespace + AssemblyUtils.getWhitespace(CompConfig.indentSize) + "BNE\t:-\n";
 			assembly += whitespace.substring(1) + ":\n"; // A loop
 		}
-		else // Only a shift by one
-		{				
-			switch (operator)
-			{
-			case "<<":
-				assembly += AssemblyUtils.bytewiseOperation(whitespace, sourceX.getSize(), (Integer i, DetailsTicket ticket2) ->
-				{
-					return new String[]
-					{
-							sourceX.getLDA(i, ticket2),
-							(tempSource.getSize() > 2 &&  i >= sourceX.getSize() - 2) ? "ROL" : "ASL",
-							tempSource.getSTA(i, ticket2),
-					};
-				});
-				break;
-			case ">>":
-				if (getType().isSigned())
-					assembly += AssemblyUtils.bytewiseOperation(whitespace, sourceX.getSize(), (Integer i, DetailsTicket ticket2) -> 
-					{
-						return new String[]
-						{
-							sourceX.getLDA(i, ticket2),
-							(ticket2.is16Bit()) ? "CMP\t#$8000" : "CMP\t#$80",
-							"ROR",
-							tempSource.getSTA(i, ticket2),
-						};					
-					}, true, true);
-				else
-					assembly += AssemblyUtils.bytewiseOperation(whitespace, sourceX.getSize(), (Integer i, DetailsTicket ticket2) -> 
-					{
-						return new String[]
-						{
-							sourceX.getLDA(i, ticket2),
-							(i >= sourceX.getSize() - 2) ? "LSR" : "ROR",
-							tempSource.getSTA(i, ticket2),
-						};					
-					}, true, true);
-				break;
-			}
-		}
-		if (destSource != null && destSource != tempSource)
+
+		if (destSource != tempSource)
 		{
-			assembly += AssemblyUtils.byteCopier(whitespace, destSource.getSize(), destSource, tempSource);
+			if (destSource != null)
+				assembly += AssemblyUtils.byteCopier(whitespace, destSource.getSize(), destSource, tempSource);
 			scratchManager.releaseScratchBlock((ScratchSource) tempSource);
 		}
+
 		assembly += ticket.restore(whitespace, DetailsTicket.saveA | DetailsTicket.saveX);
 		
 		return assembly;

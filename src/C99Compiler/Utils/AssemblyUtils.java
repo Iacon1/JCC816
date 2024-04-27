@@ -157,7 +157,7 @@ public final class AssemblyUtils
 				StationaryAddressSource.class.isAssignableFrom(readSource.getClass()));
 		// If one or both is stationary only do 8-bit
 		DetailsTicket innerTicket = new DetailsTicket(ticket, 0, DetailsTicket.saveA);
-		assembly += bytewiseOperation(whitespace, nBytes, (Integer i, DetailsTicket ticket2) -> 
+		assembly += bytewiseOperation(whitespace, Math.min(readSource.getSize(), nBytes), (Integer i, DetailsTicket ticket2) -> 
 			{
 				return new String[]
 						{
@@ -165,6 +165,17 @@ public final class AssemblyUtils
 						writeSource.getSTA(i, ticket2)
 						};
 			}, !force8, false, innerTicket);
+		if (readSource.getSize() < nBytes)
+		{
+			assembly += bytewiseOperation(whitespace, nBytes - readSource.getSize(), (Integer i, DetailsTicket ticket2) -> 
+			{
+				return new String[]
+						{
+						readSource.getLDA(i + readSource.getSize(), ticket2),
+						writeSource.getSTA(i + readSource.getSize(), ticket2)
+						};
+			}, !force8, false, innerTicket);
+		}
 		assembly += ticket.restore(whitespace, DetailsTicket.saveA);
 		return assembly;
 	}
@@ -249,25 +260,25 @@ public final class AssemblyUtils
 		assembly += whitespace + CompUtils.setA8 + "\n";
 		if (x.getSize() < y.getSize() && !x.isLiteral()) // x will need the sign extension.
 		{
-			assembly += x.getLDA(whitespace, x.getSize() - 1, ticket) + "\n";
 			if (!signedX)
 			{
 				assembly += whitespace + "LDA\t#$00\n";
 				assembly += whitespace + "STA\t" + CompConfig.signExtend + "\n";
 				return assembly;
 			}
+			assembly += x.getLDA(whitespace, x.getSize() - 1, ticket) + "\n";
 		}
 		else if (x.getSize() < y.getSize() && x.isLiteral()) // Literals account for this, so not needed.
 			return "";
 		else if (!y.isLiteral()) // y will need the sign extension.
 		{
-			assembly += y.getLDA(whitespace, y.getSize() - 1, ticket) + "\n";
 			if (!signedY)
 			{
 				assembly += whitespace + "LDA\t#$00\n";
 				assembly += whitespace + "STA\t" + CompConfig.signExtend + "\n";
 				return assembly;
 			}
+			assembly += y.getLDA(whitespace, y.getSize() - 1, ticket) + "\n";
 		}
 		else if (y.isLiteral()) // Literals account for this, so not needed.
 			return "";
