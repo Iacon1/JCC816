@@ -68,32 +68,34 @@ public class RelationalExpressionNode extends BranchingExpressionNode
 		return new DummyType("int");
 	}
 	
-	private static String getComparison(String whitespace, String yesLabel, String noLabel, OperandSource sourceX, String operator, OperandSource sourceY, boolean isSigned, ScratchManager scratchManager, DetailsTicket ticket) throws Exception
+	private static String getComparison(String whitespace, String yesLabel, String noLabel, OperandSource sourceX, String operator, OperandSource sourceY, boolean isSignedX, boolean isSignedY, ScratchManager scratchManager, DetailsTicket ticket) throws Exception
 	{
 		if (sourceX.isLiteral() && !sourceY.isLiteral()) switch (operator)
 		{
-			case "<": return getComparison(whitespace, yesLabel, noLabel, sourceY, ">=", sourceX, isSigned, scratchManager, ticket);
-			case "<=": return getComparison(whitespace, yesLabel, noLabel, sourceY, ">", sourceX, isSigned, scratchManager, ticket);
-			case ">": return getComparison(whitespace, yesLabel, noLabel, sourceY, "<=", sourceX, isSigned, scratchManager, ticket);
-			case ">=": return getComparison(whitespace, yesLabel, noLabel, sourceY, "<", sourceX, isSigned, scratchManager, ticket);
+			case "<": return getComparison(whitespace, yesLabel, noLabel, sourceY, ">=", sourceX, isSignedX, isSignedY, scratchManager, ticket);
+			case "<=": return getComparison(whitespace, yesLabel, noLabel, sourceY, ">", sourceX, isSignedX, isSignedY, scratchManager, ticket);
+			case ">": return getComparison(whitespace, yesLabel, noLabel, sourceY, "<=", sourceX, isSignedX, isSignedY, scratchManager, ticket);
+			case ">=": return getComparison(whitespace, yesLabel, noLabel, sourceY, "<", sourceX, isSignedX, isSignedY, scratchManager, ticket);
 		}
 		switch (operator) // Let's always do variants of <
 		{
-		case ">": return getComparison(whitespace, noLabel, yesLabel,sourceX, "<=", sourceY, isSigned, scratchManager, ticket);
-		case ">=": return getComparison(whitespace, noLabel, yesLabel, sourceX, "<", sourceY, isSigned, scratchManager, ticket);
+		case ">": return getComparison(whitespace, noLabel, yesLabel,sourceX, "<=", sourceY, isSignedX, isSignedY, scratchManager, ticket);
+		case ">=": return getComparison(whitespace, noLabel, yesLabel, sourceX, "<", sourceY, isSignedX, isSignedY, scratchManager, ticket);
 		}
 
 		String assembly = "";
 
 		assembly += ticket.save(whitespace, DetailsTicket.saveA);
 		DetailsTicket innerTicket = new DetailsTicket(ticket, 0, DetailsTicket.saveA);
-		assembly += AssemblyUtils.setSignExtend(whitespace, sourceX, sourceY, isSigned, isSigned, innerTicket);
+		assembly += AssemblyUtils.setSignExtend(whitespace, sourceX, sourceY, isSignedX, isSignedY, innerTicket);
 		ScratchSource tempSource = scratchManager.reserveScratchBlock(2);
 		assembly += whitespace + "CLC\n";
-		assembly += AssemblyUtils.bytewiseOperation(whitespace, Math.max(sourceX.getSize(), sourceY.getSize()), (Integer i, DetailsTicket ticket2) -> 
+		int max = Math.max(sourceX.getSize(), sourceY.getSize());
+		int min = Math.min(sourceX.getSize(), sourceY.getSize());
+		assembly += AssemblyUtils.bytewiseOperation(whitespace, max - min, min, (Integer i, DetailsTicket ticket2) -> 
 		{	
 			List<String> lines = new LinkedList<String>();
-			if (isSigned && i >= Math.max(sourceX.getSize(), sourceY.getSize()) - 2) // Are we signed and at the last byte of an odd-size number, i. e. in 8-bit mode?
+			if ((isSignedX || isSignedY) && i >= max - (min == 1 ? 1 : 2)) // Are we signed and at the last byte of an odd-size number, i. e. in 8-bit mode?
 			{
 				String toXOR = ticket2.is16Bit() ? "#$8000" : "#$80"; // If so we have to invert MSB to deal w/ 2's complement stuff
 				// Start at MSB
@@ -161,8 +163,7 @@ public class RelationalExpressionNode extends BranchingExpressionNode
 	@Override
 	protected String getAssembly(String whitespace, String yesLabel, String noLabel, OperandSource sourceX, OperandSource sourceY, ScratchManager scratchManager, DetailsTicket ticket) throws Exception
 	{
-		boolean isSigned = x.getType().isSigned() || y.getType().isSigned();
-		return getComparison(whitespace, yesLabel, noLabel, sourceX, operator, sourceY, isSigned, scratchManager, ticket);
+		return getComparison(whitespace, yesLabel, noLabel, sourceX, operator, sourceY, x.getType().isSigned(), y.getType().isSigned(), scratchManager, ticket);
 	}
 	@Override
 	protected String getAssembly(String whitespace, OperandSource destSource, OperandSource sourceX, OperandSource sourceY, ScratchManager scratchManager, DetailsTicket ticket) throws Exception

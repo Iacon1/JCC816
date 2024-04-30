@@ -137,17 +137,48 @@ public final class AssemblyUtils
 		assembly += ticket.restore(whitespace, DetailsTicket.saveABit | DetailsTicket.saveXYBit);
 		return assembly;
 	}
+	public static String bytewiseOperation(String whitespace, int nBytes1, int nBytes2, BiFunction<Integer, DetailsTicket, String[]> perIteration, boolean set16, boolean reverse, DetailsTicket ticket)
+	{
+		String assembly = "";
+
+		DetailsTicket innerTicket = new DetailsTicket(ticket.flags | DetailsTicket.saveABit | DetailsTicket.saveXYBit);
+		if (reverse)
+		{
+			assembly += bytewiseOperation(whitespace, nBytes2, (Integer i, DetailsTicket innerTicket2) -> {return perIteration.apply(i + nBytes1, innerTicket2);}, set16, reverse, innerTicket);
+			assembly += bytewiseOperation(whitespace, nBytes1, perIteration, set16, reverse, innerTicket);
+		}
+		else
+		{
+			assembly += bytewiseOperation(whitespace, nBytes1, perIteration, set16, reverse, innerTicket);
+			assembly += bytewiseOperation(whitespace, nBytes2, (Integer i, DetailsTicket innerTicket2) -> {return perIteration.apply(i + nBytes1, innerTicket2);}, set16, reverse, innerTicket);
+		}
+		
+		assembly += ticket.restore(whitespace, DetailsTicket.saveABit | DetailsTicket.saveXYBit);
+		return assembly;
+	}
 	public static String bytewiseOperation(String whitespace, int nBytes, BiFunction<Integer, DetailsTicket, String[]> perIteration, boolean set16, boolean reverse)
 	{
 		return bytewiseOperation(whitespace, nBytes, perIteration, set16, reverse, new DetailsTicket());
+	}
+	public static String bytewiseOperation(String whitespace, int nBytes1, int nBytes2, BiFunction<Integer, DetailsTicket, String[]> perIteration, boolean set16, boolean reverse)
+	{
+		return bytewiseOperation(whitespace, nBytes1, nBytes2, perIteration, set16, reverse, new DetailsTicket());
 	}
 	public static String bytewiseOperation(String whitespace, int nBytes, BiFunction<Integer, DetailsTicket, String[]> perIteration, DetailsTicket ticket)
 	{
 		return bytewiseOperation(whitespace, nBytes, perIteration, true, false, ticket);
 	}
+	public static String bytewiseOperation(String whitespace, int nBytes1, int nBytes2, BiFunction<Integer, DetailsTicket, String[]> perIteration, DetailsTicket ticket)
+	{
+		return bytewiseOperation(whitespace, nBytes1, perIteration, true, false, ticket);
+	}
 	public static String bytewiseOperation(String whitespace, int nBytes, BiFunction<Integer, DetailsTicket, String[]> perIteration)
 	{
 		return bytewiseOperation(whitespace, nBytes, perIteration, new DetailsTicket());
+	}
+	public static String bytewiseOperation(String whitespace, int nBytes1, int nBytes2, BiFunction<Integer, DetailsTicket, String[]> perIteration)
+	{
+		return bytewiseOperation(whitespace, nBytes1, nBytes2, perIteration, new DetailsTicket());
 	}
 	public static String byteCopier(String whitespace, int nBytes, OperandSource writeSource, OperandSource readSource, DetailsTicket ticket)
 	{
