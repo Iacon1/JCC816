@@ -109,6 +109,9 @@ public class ShiftExpressionNode extends BinaryExpressionNode
 		String innerWhitespace = whitespace;
 		if (!isOne)
 		{
+			if (tempSource.getSize() > sourceX.getSize()) // TODO account for sign
+				assembly += AssemblyUtils.zeroCopier(whitespace, tempSource.getSize() - sourceX.getSize(), tempSource.getShifted(sourceX.getSize()), ticket);
+			
 			assembly += AssemblyUtils.byteCopier(whitespace, sourceX.getSize(), tempSource, sourceX);
 			
 			assembly += sourceY.getLDA(whitespace, 0, innerTicket) + "\n";
@@ -121,7 +124,7 @@ public class ShiftExpressionNode extends BinaryExpressionNode
 		switch (operator)
 		{
 		case "<<":
-			assembly += AssemblyUtils.bytewiseOperation(innerWhitespace, sourceX.getSize(), (Integer i, DetailsTicket ticket2) ->
+			assembly += AssemblyUtils.bytewiseOperation(innerWhitespace, tempSource.getSize(), (Integer i, DetailsTicket ticket2) ->
 			{
 				return new String[]
 				{
@@ -133,7 +136,7 @@ public class ShiftExpressionNode extends BinaryExpressionNode
 			break;
 		case ">>":
 			if (getType().isSigned())
-				assembly += AssemblyUtils.bytewiseOperation(whitespace, sourceX.getSize(), (Integer i, DetailsTicket ticket2) -> 
+				assembly += AssemblyUtils.bytewiseOperation(whitespace, tempSource.getSize(), (Integer i, DetailsTicket ticket2) -> 
 				{
 					return new String[]
 					{
@@ -144,7 +147,7 @@ public class ShiftExpressionNode extends BinaryExpressionNode
 					};					
 				}, true, true);
 			else
-				assembly += AssemblyUtils.bytewiseOperation(innerWhitespace, sourceX.getSize(), (Integer i, DetailsTicket ticket2) -> 
+				assembly += AssemblyUtils.bytewiseOperation(innerWhitespace, tempSource.getSize(), (Integer i, DetailsTicket ticket2) -> 
 				{
 					return new String[]
 					{
