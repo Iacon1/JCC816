@@ -117,9 +117,10 @@ public class DeclarationSpecifiersNode extends InterpretingNode<DeclarationSpeci
 	}
 	public DeclarationSpecifiersNode interpret(Specifier_qualifier_listContext node) throws Exception
 	{
-		for (int i = 0; i < node.getChildCount(); ++i)
+		int i = 0;
+		while (i < node.getChildCount())
 		{
-			ParseTree r = node.getChild(i);
+			ParseTree r = node.getChild(i++);
 			// Find type of r
 			if (r.getClass().equals(Storage_class_specifierContext.class))
 				storageClassSpecifiers.add(((Storage_class_specifierContext) r).getText());
@@ -136,6 +137,11 @@ public class DeclarationSpecifiersNode extends InterpretingNode<DeclarationSpeci
 					typeSpecifiers.add(((Type_specifierContext) r).enum_specifier().getChild(1).getText());
 				}
 				else typeSpecifiers.add(((Type_specifierContext) r).getText());
+			}
+			else if (r.getClass().equals(Specifier_qualifier_listContext.class))
+			{
+				node = (Specifier_qualifier_listContext) r;
+				i = 0;
 			}
 			else if (r.getClass().equals(Type_qualifierContext.class))
 				typeQualifiers.add(((Type_qualifierContext) r).getText());
