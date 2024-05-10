@@ -49,4 +49,10 @@ public class StationaryAddressSource extends AddressSource
 		}
 		else return getInstruction(whitespace, "STA", 0, ticket);
 	}
+	
+	@Override
+	public boolean isStationary()
+	{
+		return true;
+	}
 }

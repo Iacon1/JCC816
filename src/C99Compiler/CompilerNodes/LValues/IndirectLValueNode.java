@@ -57,6 +57,12 @@ public class IndirectLValueNode extends LValueNode<IndirectLValueNode>
 
 		@Override
 		public OperandSource getRespecified(int offset, int size) {return new IndirectOperandSource(size, offset, source);}
+	
+		@Override
+		public boolean isStationary()
+		{
+			return source.isStationary();
+		}
 	}
 	private IndirectOperandSource source;
 	

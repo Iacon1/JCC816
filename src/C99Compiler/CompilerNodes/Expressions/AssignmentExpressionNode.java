@@ -13,6 +13,7 @@ import C99Compiler.Exceptions.TypeMismatchException;
 import C99Compiler.Utils.AssemblyUtils;
 import C99Compiler.Utils.AssemblyUtils.DetailsTicket;
 import C99Compiler.Utils.ScratchManager;
+import C99Compiler.Utils.ScratchManager.ScratchSource;
 import C99Compiler.Utils.OperandSources.ConstantSource;
 import C99Compiler.Utils.OperandSources.OperandSource;
 import Grammar.C99.C99Parser.Assignment_expressionContext;
@@ -153,11 +154,19 @@ public class AssignmentExpressionNode extends BinaryExpressionNode
 		
 //		if (!y.getType().canCastTo(x.getType()))
 //			throw new TypeMismatchException(y.getType(), x.getType());
-		if (y.hasAssembly())
+		if (y.hasAssembly() && !x.getType().isTwice())
 		{
 			assembly += y.getAssembly(leadingWhitespace, x.getLValue().getSource(), scratchManager, ticket);
 			if (!y.hasLValue()) sourceY = x.getLValue().getSource();
 			else sourceY = y.getLValue().castTo(x.getType()).getSource();
+		}
+		else if (y.hasAssembly())
+		{
+			ScratchSource scratchX = scratchManager.reserveScratchBlock(x.getSize());
+			assembly += y.getAssembly(leadingWhitespace, scratchX, scratchManager, ticket);
+			if (!y.hasLValue()) sourceY = scratchX;
+			else sourceY = y.getLValue().castTo(x.getType()).getSource();
+			assembly += AssemblyUtils.byteCopier(whitespace, x.getLValue().getSize(), x.getLValue().getSource(), scratchX, ticket);
 		}
 		else
 		{

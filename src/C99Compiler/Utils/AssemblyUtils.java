@@ -184,8 +184,7 @@ public final class AssemblyUtils
 	{
 		String assembly = "";
 		assembly += ticket.save(whitespace, DetailsTicket.saveA);
-		boolean force8 = (StationaryAddressSource.class.isAssignableFrom(writeSource.getClass()) ||
-				StationaryAddressSource.class.isAssignableFrom(readSource.getClass()));
+		boolean force8 = writeSource.isStationary() || readSource.isStationary();
 		// If one or both is stationary only do 8-bit
 		DetailsTicket innerTicket = new DetailsTicket(ticket, 0, DetailsTicket.saveA);
 		assembly += bytewiseOperation(whitespace, Math.min(readSource.getSize(), nBytes), (Integer i, DetailsTicket ticket2) -> 

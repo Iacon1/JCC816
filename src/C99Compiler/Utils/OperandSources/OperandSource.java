@@ -102,4 +102,9 @@ public abstract class OperandSource
 	{
 		return getSTA("", i, ticket);
 	}
+	
+	public boolean isStationary()
+	{
+		return false;
+	}
 }

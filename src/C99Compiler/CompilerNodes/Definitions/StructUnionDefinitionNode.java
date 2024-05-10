@@ -66,7 +66,11 @@ public class StructUnionDefinitionNode extends InterpretingNode<StructUnionDefin
 		for (int i = 0; i < members.size(); ++i)
 			if (members.get(i).getName().equals(memberName))
 				return offset;
-			else offset += members.get(i).getSizeBits();
+			else
+			{
+				if (members.get(i).getType().isTwice()) offset += 8;
+				else offset += members.get(i).getSizeBits();
+			}
 		return 0;
 	}
 	public int getOffset(String memberName)

@@ -11,6 +11,7 @@ import C99Compiler.Utils.PropPointer;
 import C99Compiler.Utils.AssemblyUtils.DetailsTicket;
 import C99Compiler.Utils.OperandSources.ConstantSource;
 import C99Compiler.Utils.OperandSources.OperandSource;
+import C99Compiler.Utils.OperandSources.StationaryAddressSource;
 
 public class MemberNode extends VariableNode
 {
@@ -23,6 +24,8 @@ public class MemberNode extends VariableNode
 		{
 			super(parent, MemberNode.this.getType());
 			source = parent.getSource().getShifted(owner.getOffset(name)).respec(MemberNode.this.getType().getSize());
+			if (owner.getMember(name).getType().isTwice())
+				source = new StationaryAddressSource(source.getBase(), 0, source.getSize());
 		}
 
 		@Override
