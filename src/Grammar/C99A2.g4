@@ -83,7 +83,7 @@ declaration_specifiers
 	| type_specifier
 	| type_qualifier
 	| function_specifier)+? ;
-storage_class_specifier:Typedef|Extern|Static|Auto|Register|SRAM|RWTWICE|ROTWICE|WOTWICE;
+storage_class_specifier:Typedef|Extern|Static|Auto|Register|SRAM;
 function_specifier : Inline ;
 init_declarator_list : init_declarator (Comma init_declarator)* ;
 init_declarator: declarator (Assign initializer)? ;
@@ -107,7 +107,7 @@ enum_specifier
 	| Enum Identifier ;
 enumerator_list : enumerator (Comma enumerator)* ;
 enumerator : Identifier (Assign constant_expression)? ;
-type_qualifier : (Const|Restrict|Volatile) ;
+type_qualifier : (Const|Restrict|Volatile|RWTWICE|ROTWICE|WOTWICE) ;
 declarator : pointer? direct_declarator ;
 direct_declarator
 	: Identifier

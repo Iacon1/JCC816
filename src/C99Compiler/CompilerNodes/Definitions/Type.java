@@ -386,7 +386,7 @@ public class Type implements Serializable
 	
 	public boolean isExtern()
 	{
-		return storageClassSpecifier != null && (storageClassSpecifier.equals("extern") || isTwice()); // 'Twice's implicitly extern
+		return storageClassSpecifier != null && storageClassSpecifier.equals("extern");
 	}
 	public boolean isStatic()
 	{
@@ -414,15 +414,14 @@ public class Type implements Serializable
 	}
 	public boolean isTwice() // Is read-twice or write-twice?
 	{
-		return storageClassSpecifier != null && (
-				storageClassSpecifier.equals("__RWTWICE") ||
-				storageClassSpecifier.equals("__ROTWICE") ||
-				storageClassSpecifier.equals("__WOTWICE"));
+		return typeQualifiers.contains("__RWTWICE") ||
+				typeQualifiers.contains("__ROTWICE") ||
+				typeQualifiers.contains("__WOTWICE");
 	}
 	
 	public boolean isConstant()
 	{
-		return typeQualifiers.contains("const") || (storageClassSpecifier != null && storageClassSpecifier.equals("__ROTWICE"));
+		return typeQualifiers.contains("const") || typeQualifiers.contains("__ROTWICE");
 	}
 	public boolean isVolatile()
 	{

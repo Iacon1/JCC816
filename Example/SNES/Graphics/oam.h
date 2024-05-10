@@ -18,7 +18,7 @@ enum SpriteSize
 extern uint8_t OBJSEL; // SSSN NbBB S = sprite size, N = name select, B = name address
 extern uint8_t OAMADDL;
 extern uint8_t OAMADDH;
-__WOTWICE uint16_t OAMDATA;
+extern __WOTWICE uint16_t OAMDATA;
 
 enum LowOAMFlag
 {
