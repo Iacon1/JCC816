@@ -49,3 +49,6 @@ The following features of C are currently unsupported:
 # Best Practices
 The following should be taken into account for best performance:
 * Function pointers and recursion cause imperformant assembly and should be avoided.
+
+# Further documentation
+* [Assembly considerations](Docs/assembly.md)
