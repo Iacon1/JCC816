@@ -153,7 +153,7 @@ public class IterationStatementNode extends SequencePointStatementNode<Iteration
 					assembly += getAssemblyWithSequence(condExpNode, leadingWhitespace, exprSource, scratchManager);
 					assembly += EqualityExpressionNode.getIsZero(whitespace, exprSource, new ScratchManager(), exprSource, new DetailsTicket());
 				}
-				else assembly += EqualityExpressionNode.getIsZero(whitespace, CompConfig.callResultSource(condExpNode.getSize()), new ScratchManager(), condExpNode.getLValue().getSource(), new DetailsTicket());
+				else assembly += EqualityExpressionNode.getIsZero(whitespace, null, new ScratchManager(), condExpNode.getLValue().getSource(), new DetailsTicket());
 				assembly += whitespace + "BNE\t:+\n";
 				assembly += whitespace + "JMP\t" + getEndLabel() + "\n";
 				assembly += whitespace + ":\n";
@@ -167,7 +167,7 @@ public class IterationStatementNode extends SequencePointStatementNode<Iteration
 			if (stmNode.hasAssembly()) assembly += stmNode.getAssembly(leadingWhitespace + CompConfig.indentSize, returnAddr);
 			assembly += whitespace + getIterLabel() + ":\n";
 			assembly += getAssemblyWithSequence(condExpNode, leadingWhitespace, exprSource, scratchManager);
-			assembly += EqualityExpressionNode.getIsZero(whitespace, exprSource, new ScratchManager(), exprSource, new DetailsTicket());
+			assembly += EqualityExpressionNode.getIsZero(whitespace, null, new ScratchManager(), exprSource, new DetailsTicket());
 			assembly += whitespace + "BEQ\t" + getEndLabel() + "\n";
 			assembly += whitespace + "JMP\t" + getStartLabel() + "\n";
 			assembly += whitespace + getEndLabel() + ":\n";
@@ -186,7 +186,7 @@ public class IterationStatementNode extends SequencePointStatementNode<Iteration
 					if (condExpNode.hasAssembly())
 					{
 						assembly += getAssemblyWithSequence(condExpNode, leadingWhitespace, exprSource, scratchManager);
-						assembly += EqualityExpressionNode.getIsZero(whitespace, exprSource, new ScratchManager(), exprSource, new DetailsTicket());
+						assembly += EqualityExpressionNode.getIsZero(whitespace, null, new ScratchManager(), exprSource, new DetailsTicket());
 						assembly += whitespace + "BNE\t:+\n";
 						assembly += whitespace + "JMP\t" + getEndLabel() + "\n";
 						assembly += whitespace + ":\n";
@@ -194,7 +194,7 @@ public class IterationStatementNode extends SequencePointStatementNode<Iteration
 					else
 					{
 						assembly += AssemblyUtils.byteCopier(whitespace, condExpNode.getSize(), exprSource, condExpNode.getLValue().getSource());
-						assembly += EqualityExpressionNode.getIsZero(whitespace, CompConfig.callResultSource(2), new ScratchManager(), CompConfig.callResultSource(condExpNode.getSize()), new DetailsTicket());
+						assembly += EqualityExpressionNode.getIsZero(whitespace, null, new ScratchManager(), CompConfig.callResultSource(condExpNode.getSize()), new DetailsTicket());
 						assembly += whitespace + "BNE\t:+\n";
 						assembly += whitespace + "JMP\t" + getEndLabel() + "\n";
 						assembly += whitespace + ":\n";
