@@ -16,6 +16,8 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -23,27 +25,21 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import org.w3c.dom.Document;
 
 import C99Compiler.CompConfig;
-import Logging.Logging;
 
 public final class FileIO
 {
-	private static final String userPath = System.getProperty("user.dir");
-	
 	public static File getFileER(String filename) // Execution-relative, i. e. doesn't care about rootFolder
 	{
-		if (!filename.startsWith(userPath + "\\") && !userPath.equals(""))
-			filename = userPath + "\\" + filename;
-		return new File(filename);
+		Path path = FileSystems.getDefault().getPath(filename);
+		return path.toFile();
 	}
 	
 	public static File getFile(String filename)
 	{
-		filename = filename.replaceAll("[/]", "\\\\");
-		if (!filename.startsWith(CompConfig.rootFolder + "\\") && !CompConfig.rootFolder.equals("."))
-			filename = CompConfig.rootFolder + "\\" + filename;
-		if (!filename.startsWith(userPath + "\\") && !userPath.equals(""))
-			filename = userPath + "\\" + filename;
-		return new File(filename);
+		Path path = FileSystems.getDefault().getPath(filename);
+		if (!path.startsWith(CompConfig.rootFolder))
+			path = FileSystems.getDefault().getPath(CompConfig.rootFolder).resolve(path);
+		return path.toFile();
 	}
 	
 	public static final boolean hasResource(String filename)
@@ -140,7 +136,7 @@ public final class FileIO
 			if (file.isDirectory())
 			{
 				for (String filename : findAll(file))
-					filenames.add(file.getName() + "/" + filename);
+					filenames.add(Path.of(file.getName(), filename).toString());
 			}
 			else filenames.add(file.getName());
 		}
