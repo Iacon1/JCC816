@@ -11,9 +11,11 @@ import java.util.AbstractMap.SimpleEntry;
 import Assembler.MemorySize;
 import Assembler.Configurer;
 import C99Compiler.CompConfig;
+import C99Compiler.CompConfig.VerbosityLevel;
 import C99Compiler.CompilerNodes.FunctionDefinitionNode;
 import C99Compiler.CompilerNodes.LValues.VariableNode;
 import C99Compiler.Utils.OverlaySolver;
+import Logging.Logging;
 
 public interface MapModeInterface extends Configurer
 {
@@ -130,6 +132,18 @@ public interface MapModeInterface extends Configurer
 			regionLength = String.format("%06x",  getROMBankLength(memorySize.isFast, i));
 			regions += whitespace + "ROM" + String.format("%03d",i) + ": start = $" + regionStart + ", size = $" + regionLength + ", type = ro, fill = yes;\n".replace(" ", "\t");
 		}
+		
+		if (VerbosityLevel.isAtLeast(VerbosityLevel.medium))
+		{
+			float ROMSizeKB = memorySize.ROMSize / 1024;
+			float WRAMSizeKB = memorySize.WRAMSize / 1024;
+			float SRAMSizeKB = memorySize.WRAMSize / 1024;
+			Logging.logNotice("\n" +
+					"ROM size:  " + memorySize.ROMSize + " B (" + String.format("%.02f", ROMSizeKB) + " KB)\n" +
+					"WRAM size: " + memorySize.WRAMSize + " B (" + String.format("%.02f", WRAMSizeKB) + " KB)\n" +
+					"SRAM size: " + memorySize.SRAMSize + " B (" + String.format("%.02f", SRAMSizeKB) + " KB)\n");
+		}
+			
 		return regions;
 	}
 

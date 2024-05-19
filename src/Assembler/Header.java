@@ -223,7 +223,8 @@ public class Header extends CartConfig
 			else sizeB -= 1;
 		
 		double sizeKB = (double) sizeB / 1024d;
-		Logging.logNotice("True ROM size: " + sizeB + " B (" + String.format("%.02f", sizeKB) + " KB)");
+		if (VerbosityLevel.isAtLeast(VerbosityLevel.medium))
+			Logging.logNotice("\nFinal ROM size: " + sizeB + " B (" + String.format("%.02f", sizeKB) + " KB)");
 		ROMSize = (int) Math.ceil(Math.log(sizeKB) / Math.log(2));
 	}
 	public void calcChecksum(byte[] bytes)
