@@ -29,10 +29,17 @@ public final class FileIO
 {
 	private static final String userPath = System.getProperty("user.dir");
 	
+	public static File getFileER(String filename) // Execution-relative, i. e. doesn't care about rootFolder
+	{
+		if (!filename.startsWith(userPath + "\\") && !userPath.equals(""))
+			filename = userPath + "\\" + filename;
+		return new File(filename);
+	}
+	
 	public static File getFile(String filename)
 	{
 		filename = filename.replaceAll("[/]", "\\\\");
-		if (!filename.startsWith(CompConfig.rootFolder + "\\") && !CompConfig.rootFolder.equals(""))
+		if (!filename.startsWith(CompConfig.rootFolder + "\\") && !CompConfig.rootFolder.equals("."))
 			filename = CompConfig.rootFolder + "\\" + filename;
 		if (!filename.startsWith(userPath + "\\") && !userPath.equals(""))
 			filename = userPath + "\\" + filename;

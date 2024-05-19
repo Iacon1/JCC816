@@ -22,10 +22,10 @@ public class Assembler
 		if (name.endsWith(".sfc"))
 			name = name.replace(".sfc", "");
 		File cfgFile, asmFile, sfcFile, dbgFile;
-		cfgFile = FileIO.getFile(name + ".cfg");
-		asmFile = FileIO.getFile(name + ".asm");
-		sfcFile = FileIO.getFile(name + ".sfc");
-		dbgFile = FileIO.getFile(name + ".dbg");
+		cfgFile = FileIO.getFileER(name + ".cfg");
+		asmFile = FileIO.getFileER(name + ".asm");
+		sfcFile = FileIO.getFileER(name + ".sfc");
+		dbgFile = FileIO.getFileER(name + ".dbg");
 		FileOutputStream configStream = new FileOutputStream(cfgFile);
 		FileOutputStream asmStream = new FileOutputStream(asmFile);
 		FileInputStream sfcStream;

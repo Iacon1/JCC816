@@ -5,6 +5,7 @@ package C99Compiler.CompilerNodes.Statements;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 
+import C99Compiler.CompConfig;
 import C99Compiler.CompConfig.DebugLevel;
 import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.InterpretingNode;
@@ -56,7 +57,7 @@ public abstract class StatementNode<C extends ParserRuleContext> extends Interpr
 		if (DebugLevel.isAtLeast(DebugLevel.low))
 		{
 			LineInfo info = getTranslationUnit().getInfo(lineNo);
-			return AssemblyUtils.getWhitespace(leadingWhitespace) + ".dbg\tline, \"" + info.filename + "\", " + info.line + "\n";
+			return AssemblyUtils.getWhitespace(leadingWhitespace) + ".dbg\tline, \"" + CompConfig.rootFolder + "/" + info.filename + "\", " + info.line + "\n";
 		}
 		else return "";
 	}

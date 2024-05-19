@@ -16,7 +16,7 @@ public final class CompConfig
 {
 	public static final String version = "0.X";
 
-	public static String rootFolder = ""; // Name of base folder to look for non-stdlib libraries in
+	public static String rootFolder = "."; // Name of base folder to look for non-stdlib libraries in
 	
 	public static final String mainName = "main";
 	public static final String scopeDelimiter = "@";

@@ -243,7 +243,7 @@ public final class Linker implements Catalogger
 			assembly +=  ".feature " + CompConfig.scopeDelimiterPermissor + "\n";
 		for (TranslationUnit unit : translationUnits)
 			if (DebugLevel.isAtLeast(DebugLevel.low))
-				assembly += ".dbg file, \"" + unit.getFilename() + "\", 0, 0\n";
+				assembly += ".dbg file, \"" + unit.getDBGFilename() + "\", 0, 0\n";
 		assembly += generateVectorTable(); // Vector table
 		
 		assembly += ".segment \"HEADER\"\n"; // Declare header
