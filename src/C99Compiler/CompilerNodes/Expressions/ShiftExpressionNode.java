@@ -65,7 +65,7 @@ public class ShiftExpressionNode extends BinaryExpressionNode
 		assembly += ticket.save(whitespace, DetailsTicket.saveA | DetailsTicket.saveX);
 		DetailsTicket innerTicket = new DetailsTicket(ticket, DetailsTicket.saveA | DetailsTicket.saveX, 0);
 		boolean isOne = y.hasPropValue() && (y.getPropLong() == 1); // No need for loop w/ only one iteration
-		if (sourceX.getSize() < destSource.getSize() && x.getType().isSigned())
+		if (sourceX.getSize() < destSource.getSize())
 		{
 			assembly += AssemblyUtils.setSignExtend(whitespace, destSource, sourceX, true, true, innerTicket);
 		}
@@ -107,13 +107,15 @@ public class ShiftExpressionNode extends BinaryExpressionNode
 		OperandSource tempSource = (destSource != null && destSource.getSize() >= sourceX.getSize()) ? destSource : scratchManager.reserveScratchBlock(sourceX.getSize());
 		
 		String innerWhitespace = whitespace;
-		if (!isOne)
+		if (!isOne || tempSource.getSize() > sourceX.getSize())
 		{
 			if (tempSource.getSize() > sourceX.getSize()) // TODO account for sign
 				assembly += AssemblyUtils.zeroCopier(whitespace, tempSource.getSize() - sourceX.getSize(), tempSource.getShifted(sourceX.getSize()), ticket);
 			
 			assembly += AssemblyUtils.byteCopier(whitespace, sourceX.getSize(), tempSource, sourceX);
-			
+		}
+		if (!isOne)
+		{
 			assembly += sourceY.getLDA(whitespace, 0, innerTicket) + "\n";
 			assembly += whitespace + "BEQ\t:++\n";
 			assembly += whitespace + "TAX\t\n";
@@ -128,7 +130,7 @@ public class ShiftExpressionNode extends BinaryExpressionNode
 			{
 				return new String[]
 				{
-						(isOne ? sourceX : tempSource).getLDA(i, ticket2),
+						((isOne && tempSource.getSize() <= sourceX.getSize()) ? sourceX : tempSource).getLDA(i, ticket2),
 						(i == 0) ? "ASL" : "ROL",
 						tempSource.getSTA(i, ticket2),
 				};
