@@ -205,8 +205,19 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 		switch (type)
 		{
 		case arraySubscript:
-			if (destSource == null) this.destSource = destSource; // Initialize LValue
-			if (expr.hasAssembly()) expr.getAssembly(leadingWhitespace, scratchManager, ticket);
+			if (destSource != null) this.destSource = destSource; // Initialize LValue
+			
+			OperandSource addrSource = null;
+			if (expr.hasAssembly())
+			{
+				addrSource = scratchManager.reserveScratchBlock(CompConfig.pointerSize);
+				assembly += expr.getAssembly(leadingWhitespace, addrSource, scratchManager, ticket);
+			}
+			else if (expr.getType().isArray() && !expr.hasAssembly())
+				addrSource = new ConstantSource(new PropPointer<>(expr.getLValue(), 0), CompConfig.pointerSize);
+			else if (expr.getType().isPointer())
+				addrSource = expr.getLValue().getSource();
+			
 			if (expr.hasLValue())
 			{
 				if (indexExpr.hasPropValue() && expr.getType().isArray())
@@ -216,18 +227,13 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 					if (destSource != null)
 						assembly += AssemblyUtils.byteCopier(whitespace, destSource.getSize(),
 								destSource,
-								expr.getLValue().getSource().getShifted(offset));
+								addrSource.getShifted(offset));
 				}
 				else
 				{
 					ScratchSource sourceI;
 					if (indexExpr.hasLValue() || !ScratchManager.hasPointer(expr.getLValue().getSource())) // Already had a pointer to this value
 					{
-						OperandSource addrSource = null;
-						if (expr.getType().isArray())
-							addrSource = new ConstantSource(new PropPointer<>(expr.getLValue(), 0), CompConfig.pointerSize);
-						else if (expr.getType().isPointer())
-							addrSource = expr.getLValue().getSource();
 						sourceI = ScratchManager.reservePointer(expr.getLValue().getSource());
 						if (getType().getSize() != 1)
 						{
@@ -259,10 +265,16 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 					}
 					else
 						sourceI = ScratchManager.getPointer(expr.getLValue().getSource());
+					
 					Type type = ((PointerType) expr.getType()).getType();
 					pointerRef = new IndirectLValueNode(this, new DummyLValueNode(this, type, sourceI), sourceI, type);
 					if (destSource != null)
-						assembly += AssemblyUtils.byteCopier(whitespace, destSource.getSize(), destSource, pointerRef.getSource());
+					{
+						if (getType().isPointer())
+							assembly += AssemblyUtils.byteCopier(whitespace, sourceI.getSize(), destSource, sourceI);
+						else
+							assembly += AssemblyUtils.byteCopier(whitespace, destSource.getSize(), destSource, pointerRef.getSource());
+					}
 				}
 			}
 			break;
