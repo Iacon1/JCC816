@@ -23,6 +23,7 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
+import Assembler.Assembler;
 import Assembler.Header;
 import Assembler.MemorySize;
 import C99Compiler.CartConfig;
@@ -238,6 +239,11 @@ public class JCC816
 		if (commandLine.hasOption("help") || commandLine.getOptions().length == 0)
 		{
 			new HelpFormatter().printHelp(helpName, helpHeader, getOptions(), helpFooter, true);
+			return;
+		}
+		if (commandLine.hasOption("l") && !Assembler.hasCL65()) // No Cl65 installed
+		{
+			Logging.logError("CL65 not detected. Cannot link to executable without Cl65 installed.");
 			return;
 		}
 		

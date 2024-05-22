@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 import Assembler.Header.DestinationCode;
 import C99Compiler.CartConfig;
@@ -73,5 +74,22 @@ public class Assembler
 		}
 		
 		return bytes;
+	}
+	
+	public static boolean hasCL65()
+	{
+		try
+		{
+			Process proc = Runtime.getRuntime().exec(new String[] {"cl65", "--version"});
+			InputStream stream = proc.getErrorStream();
+			if (stream.readAllBytes().length != 0) // Error detected, CL65 must be absent.
+			{
+				stream.close();
+				return false;
+			}
+			stream.close();
+			return true;
+		}
+		catch (Exception e) {return false;}
 	}
 }
