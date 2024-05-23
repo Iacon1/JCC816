@@ -82,13 +82,12 @@ public class Assembler
 		{
 			Process proc = Runtime.getRuntime().exec(new String[] {"cl65", "--version"});
 			InputStream stream = proc.getErrorStream();
-			if (stream.readAllBytes().length != 0) // Error detected, CL65 must be absent.
-			{
-				stream.close();
-				return false;
-			}
+			String s = new String(stream.readAllBytes());
 			stream.close();
-			return true;
+			if (!s.startsWith("cl65")) // Did not return version correctly.
+				return false;
+			else
+				return true;
 		}
 		catch (Exception e) {return false;}
 	}
