@@ -2,9 +2,9 @@
 // An exception from the compiler
 package C99Compiler.Exceptions;
 
-public class LinkerException extends Exception
+public class BuilderException extends Exception
 {
-	public LinkerException(String message)
+	public BuilderException(String message)
 	{
 		super("[Linker] " + message);
 	}

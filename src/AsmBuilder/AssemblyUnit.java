@@ -1,7 +1,7 @@
 // Created by Iacon1 on 02/14/2024.
 // Assembly file translation unit
 
-package Linker;
+package AsmBuilder;
 
 import java.util.HashSet;
 import java.util.LinkedHashMap;

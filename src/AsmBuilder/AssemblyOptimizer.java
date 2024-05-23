@@ -3,7 +3,7 @@
 
 // TODO use ASM parser
 
-package Linker;
+package AsmBuilder;
 
 import java.util.HashMap;
 import java.util.List;

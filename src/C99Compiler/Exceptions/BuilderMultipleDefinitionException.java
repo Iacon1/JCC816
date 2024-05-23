@@ -4,10 +4,10 @@ package C99Compiler.Exceptions;
 
 import C99Compiler.CompilerNodes.Interfaces.NamedNode;
 
-public class LinkerMultipleDefinitionException extends LinkerException
+public class BuilderMultipleDefinitionException extends BuilderException
 {
 
-	public <T extends NamedNode> LinkerMultipleDefinitionException(T item)
+	public <T extends NamedNode> BuilderMultipleDefinitionException(T item)
 	{
 		super("Item defined at least twice: " + item.getFullName());
 	}

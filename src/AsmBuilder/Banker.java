@@ -1,6 +1,6 @@
 // Created by Iacon1 on 01/14/2024.
 // Splits the code into banks
-package Linker;
+package AsmBuilder;
 
 import java.util.ArrayList;
 

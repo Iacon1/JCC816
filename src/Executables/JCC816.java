@@ -26,6 +26,9 @@ import org.apache.commons.cli.ParseException;
 import Assembler.Assembler;
 import Assembler.Header;
 import Assembler.MemorySize;
+import AsmBuilder.AssemblyUnit;
+import AsmBuilder.AsmBuilder;
+
 import C99Compiler.CartConfig;
 import C99Compiler.CompConfig;
 import C99Compiler.C99Compiler;
@@ -37,8 +40,6 @@ import C99Compiler.CompilerNodes.TranslationUnitNode;
 import C99Compiler.CompilerNodes.Interfaces.TranslationUnit;
 import C99Compiler.Utils.FileIO;
 import C99Compiler.Utils.LineInfo;
-import Linker.AssemblyUnit;
-import Linker.Linker;
 import Logging.DebugLogger;
 import Logging.Logging;
 
@@ -222,7 +223,7 @@ public class JCC816
 	
 	public static void main(String[] args) throws Exception
 	{
-		Linker linker = new Linker();
+		AsmBuilder builder = new AsmBuilder();
 		
 		Logging.setLogger(new DebugLogger());
 		
@@ -309,18 +310,21 @@ public class JCC816
 			
 			resolveIncludes(translationUnits);
 			
-			linker.addUnits(translationUnits.values().toArray(new TranslationUnit[] {}));
-			
-			MemorySize memorySize = new MemorySize(0, 0, 0, false);
-			
-			Header header = null;
+			builder.addUnits(translationUnits.values().toArray(new TranslationUnit[] {}));
 
-			String sfcName = commandLine.getOptionValues("l")[0];
-			String headerName = commandLine.getOptionValues("l")[1];
-			header = new Header(FileIO.readFileXML(headerName));
-			
-			String assembly = linker.link(header, memorySize);
-			Assembler.Assembler.assemble(sfcName, header, assembly, commandLine.hasOption("c"), memorySize);
+			if (commandLine.hasOption("l")) // Link
+			{
+				MemorySize memorySize = new MemorySize(0, 0, 0, false);
+				
+				Header header = null;
+	
+				String sfcName = commandLine.getOptionValues("l")[0];
+				String headerName = commandLine.getOptionValues("l")[1];
+				header = new Header(FileIO.readFileXML(headerName));
+				
+				String assembly = builder.build(header, memorySize);
+				Assembler.assemble(sfcName, header, assembly, commandLine.hasOption("c"), memorySize);
+			}
 		}
 		else if (commandLine.hasOption("p")) // Preprocess
 		{

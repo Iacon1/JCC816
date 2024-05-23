@@ -1,6 +1,6 @@
 // Created by Iacon1 on 01/15/2024.
 // Links TranslationUnitNodes into one asm file.
-package Linker;
+package AsmBuilder;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -32,14 +32,14 @@ import C99Compiler.CompilerNodes.Dummies.EnumeratorNode;
 import C99Compiler.CompilerNodes.Interfaces.Catalogger;
 import C99Compiler.CompilerNodes.Interfaces.TranslationUnit;
 import C99Compiler.CompilerNodes.LValues.VariableNode;
-import C99Compiler.Exceptions.LinkerMultipleDefinitionException;
+import C99Compiler.Exceptions.BuilderMultipleDefinitionException;
 import C99Compiler.Exceptions.UndefinedFunctionException;
 import C99Compiler.Utils.AssemblyUtils;
 import C99Compiler.Utils.CompUtils;
 import C99Compiler.Utils.SNESRegisters;
 import Logging.Logging;
 
-public final class Linker implements Catalogger
+public final class AsmBuilder implements Catalogger
 {
 	private static void printInfo(Object... info)
 	{
@@ -57,7 +57,7 @@ public final class Linker implements Catalogger
 			for (VariableNode variable : translationUnit.getVariables().values()) // Have to check one-by-one for name problems
 			{
 				if (variables.get(variable.getFullName()) != null) // Two variables cannot have same full name
-					storedExceptions.add(new LinkerMultipleDefinitionException(variable)); 
+					storedExceptions.add(new BuilderMultipleDefinitionException(variable)); 
 				else if (variable.getType().isExtern()) continue; // Extern, hopefully defined elsewhere
 				else variables.put(variable.getFullName(), variable);
 			}
@@ -108,7 +108,7 @@ public final class Linker implements Catalogger
 			{
 				FunctionDefinitionNode oldFunction = functions.get(function.getFullName());
 				if (oldFunction != null && oldFunction.isImplemented() && function.isImplemented()) // Two implemented functions cannot have same full name
-					storedExceptions.add(new LinkerMultipleDefinitionException(function));
+					storedExceptions.add(new BuilderMultipleDefinitionException(function));
 				else if (oldFunction != null && oldFunction.isImplemented()) // Don't replace the implemented one!
 					function.implement(oldFunction); // Instead set this one as a reference to it
 				else
@@ -287,7 +287,7 @@ public final class Linker implements Catalogger
 		return assembly;
 	}
 
-	public Linker()
+	public AsmBuilder()
 	{
 		translationUnits = new LinkedList<TranslationUnit>();
 		storedExceptions = new LinkedList<Exception>();
@@ -350,7 +350,7 @@ public final class Linker implements Catalogger
 		return assembly;
 	}
 	
-	public String link(CartConfig cartConfig, MemorySize memorySize) throws Exception
+	public String build(CartConfig cartConfig, MemorySize memorySize) throws Exception
 	{
 		if (VerbosityLevel.isAtLeast(VerbosityLevel.medium))
 			printInfo("Linking...");	

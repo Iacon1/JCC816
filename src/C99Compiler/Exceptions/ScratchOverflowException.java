@@ -3,7 +3,7 @@
 
 package C99Compiler.Exceptions;
 
-public class ScratchOverflowException extends LinkerException
+public class ScratchOverflowException extends BuilderException
 {
 	public ScratchOverflowException()
 	{
