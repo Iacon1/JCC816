@@ -316,7 +316,7 @@ public class JCC816
 				String headerName = commandLine.getOptionValues("l")[1];
 				header = new Header(FileIO.readFileXML(headerName));
 				
-				String assembly = builder.build(header, memorySize, false);
+				String assembly = builder.build(header, memorySize);
 				Assembler.assemble(outName, header, assembly, commandLine.hasOption("c"), memorySize);
 			}
 		}
