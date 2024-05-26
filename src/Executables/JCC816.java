@@ -215,7 +215,6 @@ public class JCC816
 			
 			for (String otherLib : includedOtherLibs)
 			{
-				otherLib = "stdlib/" + otherLib;
 				TranslationUnit unit = loadUnit(otherLib, true, false);
 				if (unit != null)
 					translationUnits.put(unit.getFilename(), unit);
