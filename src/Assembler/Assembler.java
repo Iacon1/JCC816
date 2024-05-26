@@ -7,6 +7,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.LinkedList;
+import java.util.List;
 
 import Assembler.Header.DestinationCode;
 import C99Compiler.CartConfig;
@@ -38,14 +40,25 @@ public class Assembler
 		asmStream.close();
 		
 		Process proc;
+		List<String> parameters = new LinkedList<String>();
+		parameters.add("cl65");
+		parameters.add("--verbose");
 		if (DebugLevel.isAtLeast(DebugLevel.medium))
-			proc = Runtime.getRuntime().exec(new String[] {"cl65", "--verbose", "-g",
-					"-C", cfgFile.getAbsolutePath(),
-					"-o", sfcFile.getAbsolutePath(), asmFile.getAbsolutePath(),
-					"-Wl", "--dbgfile", "-Wl", dbgFile.getAbsolutePath(),
-					}, null, sfcFile.getParentFile());
-		else
-			proc = Runtime.getRuntime().exec(new String[] {"cl65", "--verbose", "-C", cfgFile.getAbsolutePath(), "-o", sfcFile.getAbsolutePath(), asmFile.getAbsolutePath()});
+			parameters.add("-g");
+		parameters.add("-C");
+		parameters.add(cfgFile.getAbsolutePath());
+		parameters.add("-o");
+		parameters.add(sfcFile.getAbsolutePath());
+		parameters.add(asmFile.getAbsolutePath());
+
+		if (DebugLevel.isAtLeast(DebugLevel.medium))
+		{
+			parameters.add("-Wl");
+			parameters.add("--dbgfile");
+			parameters.add("-Wl");
+			parameters.add(dbgFile.getAbsolutePath());
+		}
+		proc = Runtime.getRuntime().exec(parameters.toArray(new String[] {}), null, sfcFile.getParentFile());
 		String error = new String(proc.getErrorStream().readAllBytes());
 		if (!error.isEmpty()) throw new AssemblerException(error);
 		// Logging.logNotice(new String(proc.getInputStream().readAllBytes()));
