@@ -5,7 +5,8 @@ This README is incomplete.
 
 # Usage
 ```
-JCC816 [-c] [-D <level>] [-h] [-H <output>] [-l <output> <header>] [-o <output>] [-O <level>] [-p <output>] [-r <path>] [-V <level>]
+JCC816 [-c] [-D <level>] [-h] [-H <output>] [-l <output> <header>]
+       [-O <level>] [-p <output>] [-r <path>] [-V <level>]
 A C compiler for the WDC 65c816 and especially Ricoh 5a22 processor.
 
  -c,--cleanup                      Ensures the assembler doesn't leave
@@ -17,13 +18,10 @@ A C compiler for the WDC 65c816 and especially Ricoh 5a22 processor.
  -H,--generate-header <output>     Generates a default header
                                    configuration file for the user to
                                    edit.
- -l,--linker <output> <header>     Links the provided source and object
+ -l,--link <output> <header>       Links the provided source and object
                                    files into a single specified SFC file
                                    according to a provided header
                                    configuration.
- -o,--object <output>              Preprocesses the provided source file
-                                   and stores it in a specified object
-                                   file.
  -O,--optimization-level <level>   Sets the level of optimization, from 0
                                    to 3. Note that only levels 0 and 2 are
                                    meaningful for object files.
@@ -46,6 +44,7 @@ The following features of C are currently unsupported:
 * Floating-points
 * Variadic functions and VLAs
 * Most of the standard library
+* Object file generation
 # Best Practices
 The following should be taken into account for best performance:
 * Function pointers and recursion cause imperformant assembly and should be avoided.
