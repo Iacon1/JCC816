@@ -28,9 +28,15 @@ import C99Compiler.CompConfig;
 
 public final class FileIO
 {
+	public static String outputFolder = null; // If not null is prefixed to all execution-relative (i. e. output) paths for debug purposes.
+	
 	public static File getFileER(String filename) // Execution-relative, i. e. doesn't care about rootFolder
 	{
-		Path path = FileSystems.getDefault().getPath(filename);
+		Path path;
+		if (outputFolder != null)
+			path = FileSystems.getDefault().getPath(outputFolder).resolve(filename);
+		else
+			path = FileSystems.getDefault().getPath(filename);
 		return path.toFile();
 	}
 	
@@ -39,6 +45,7 @@ public final class FileIO
 		Path path = FileSystems.getDefault().getPath(filename);
 		if (!path.startsWith(CompConfig.rootFolder))
 			path = FileSystems.getDefault().getPath(CompConfig.rootFolder).resolve(path);
+
 		return path.toFile();
 	}
 	
