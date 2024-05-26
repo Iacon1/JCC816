@@ -3,12 +3,19 @@
 
 package Executables;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
@@ -23,12 +30,15 @@ import Assembler.MemorySize;
 import AsmBuilder.AssemblyUnit;
 import AsmBuilder.AsmBuilder;
 
+import C99Compiler.CartConfig;
 import C99Compiler.CompConfig;
 import C99Compiler.C99Compiler;
 import C99Compiler.Preprocessor;
 import C99Compiler.CompConfig.DebugLevel;
 import C99Compiler.CompConfig.OptimizationLevel;
 import C99Compiler.CompConfig.VerbosityLevel;
+import C99Compiler.CompilerNodes.TranslationUnitNode;
+import C99Compiler.CompilerNodes.Dummies.SerializableUnitNode;
 import C99Compiler.CompilerNodes.Interfaces.TranslationUnit;
 import C99Compiler.Utils.FileIO;
 import C99Compiler.Utils.LineInfo;
@@ -55,7 +65,7 @@ public class JCC816
 				.desc("Links the provided source and object files into a single specified SFC file according to a provided header configuration.")
 				.build();
 		options.addOption(option);
-		/*
+		
 		option = Option.builder("o")
 				.longOpt("object")
 				.hasArg()
@@ -75,7 +85,6 @@ public class JCC816
 				.desc("Compiles the provided source file into an assembly file, optionally according to a provided header configuration.")
 				.build();
 		options.addOption(option);
-		*/
 		
 		option = Option.builder("h")
 				.longOpt("help")
@@ -142,28 +151,40 @@ public class JCC816
 	
 	private static TranslationUnit loadUnit(String sourceName, boolean isHeader, boolean isResource) throws Exception
 	{
-		String sourceNameA, sourceNameC, sourceNameH;
+		String sourceNameA, sourceNameC, sourceNameH, sourceNameO;
 		
 		if (isHeader)
 		{
 			sourceNameA = sourceName.replace(".h", ".asm");
 			sourceNameC = sourceName.replace(".h", ".c");
 			sourceNameH = null;
+			sourceNameO = sourceName.replace(".h", ".o");
 		}
 		else
 		{
 			sourceNameA = null;
 			sourceNameC = null;
 			sourceNameH = null;
+			sourceNameO = null;
 			if (sourceName.endsWith(".asm"))
 				sourceNameA = sourceName;
 			else if (sourceName.endsWith(".c"))
 				sourceNameC = sourceName;
 			else if (sourceName.endsWith(".h"))
 				sourceNameH = sourceName;
+			else if (sourceName.endsWith(".o"))
+				sourceNameO = sourceName;
 		}
 		
-		if (sourceNameC != null && (isResource ? FileIO.hasResource(sourceNameC) : FileIO.hasFile(sourceNameC)))
+		if (sourceNameO != null && (isResource ? FileIO.hasResource(sourceNameO) : FileIO.hasFile(sourceNameO)))
+		{
+			byte[] fileBytes = isResource ? FileIO.readResourceBytes(sourceNameO) : FileIO.readFileBytes(sourceNameO);
+			SerializableUnitNode unit = (SerializableUnitNode) FileIO.findInfo(fileBytes);
+			unit.setFilename(sourceNameO);
+			
+			return unit;
+		}
+		else if (sourceNameC != null && (isResource ? FileIO.hasResource(sourceNameC) : FileIO.hasFile(sourceNameC)))
 		{
 			String fileText = isResource ? FileIO.readResource(sourceNameC) : FileIO.readFile(sourceNameC);
 			return C99Compiler.compile(sourceNameC, fileText);
@@ -287,7 +308,7 @@ public class JCC816
 			case "2" : CompConfig.verbosityLevel = VerbosityLevel.medium; break;
 			}
 		
-		if (commandLine.hasOption("l")) // Link to executable
+		if (commandLine.hasOption("l") || commandLine.hasOption("s") || commandLine.hasOption("o")) // Link to executable, assembly, or object
 		{	
 			Map<String, TranslationUnit> translationUnits  = new HashMap<String, TranslationUnit>();
 			List<String> filenames = new LinkedList<String>();
@@ -316,8 +337,30 @@ public class JCC816
 				String headerName = commandLine.getOptionValues("l")[1];
 				header = new Header(FileIO.readFileXML(headerName));
 				
-				String assembly = builder.build(header, memorySize);
-				Assembler.assemble(outName, header, assembly, commandLine.hasOption("c"), memorySize);
+				String assembly = builder.build(header, memorySize, false);
+				List<String> objects = new LinkedList<String>();
+				for (TranslationUnit unit : translationUnits.values())
+					if (unit.getFilename().endsWith(".o"))
+						objects.add(unit.getFilename());
+				Assembler.assemble(outName, header, assembly, objects, commandLine.hasOption("c"), memorySize);
+			}
+			else if (commandLine.hasOption("s")) // Assembly
+			{
+				String outName = commandLine.getOptionValues("s")[0];
+				String headerName = commandLine.getOptionValues("s")[1];
+				header = new Header(FileIO.readFileXML(headerName));
+				
+				String assembly = builder.build(header, memorySize, false);
+				FileIO.writeFile(outName, assembly.getBytes());
+			}
+			else if (commandLine.hasOption("o")) // Object
+			{
+				String outName = commandLine.getOptionValues("o")[0];
+				String headerName = commandLine.getOptionValues("o")[1];
+				header = new Header(FileIO.readFileXML(headerName));
+				
+				String assembly = builder.build(header, memorySize, true);
+				Assembler.assembleObject(outName, header, assembly, commandLine.hasOption("c"));
 			}
 		}
 		else if (commandLine.hasOption("p")) // Preprocess

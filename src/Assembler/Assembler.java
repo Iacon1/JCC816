@@ -20,7 +20,7 @@ import Logging.Logging;
 
 public class Assembler
 {
-	public static byte[] assemble(String name, Header header, String assembly, boolean cleanup, MemorySize memorySize) throws Exception
+	public static byte[] assemble(String name, Header header, String assembly, List<String> objects, boolean cleanup, MemorySize memorySize) throws Exception
 	{
 		if (name.endsWith(".sfc"))
 			name = name.replace(".sfc", "");
@@ -50,7 +50,8 @@ public class Assembler
 		parameters.add("-o");
 		parameters.add(sfcFile.getAbsolutePath());
 		parameters.add(asmFile.getAbsolutePath());
-
+		for (String object : objects)
+			parameters.add(FileIO.getFile(object).getAbsolutePath());
 		if (DebugLevel.isAtLeast(DebugLevel.medium))
 		{
 			parameters.add("-Wl");
@@ -83,6 +84,46 @@ public class Assembler
 		if (cleanup)
 		{
 			cfgFile.delete();
+			asmFile.delete();
+		}
+		
+		return bytes;
+	}
+	
+	public static byte[] assembleObject(String name, Header header, String assembly, boolean cleanup) throws Exception
+	{
+		if (name.endsWith(".o"))
+			name = name.replace(".o", "");
+		File asmFile, oFile;
+		asmFile = FileIO.getFileER(name + ".asm");
+		oFile = FileIO.getFileER(name + ".o");
+
+		FileOutputStream asmStream = new FileOutputStream(asmFile);
+		FileInputStream oStream;
+		
+		asmStream.write(assembly.getBytes());
+		asmStream.close();
+		
+		Process proc;
+		if (DebugLevel.isAtLeast(DebugLevel.medium))
+			proc = Runtime.getRuntime().exec(new String[] {"cl65", "--verbose", "-g", "-c",
+					"-o", oFile.getAbsolutePath(),
+					asmFile.getAbsolutePath(),
+					}, null, oFile.getParentFile());
+		else
+			proc = Runtime.getRuntime().exec(new String[] {"cl65", "--verbose", "-c",
+					"-o", oFile.getAbsolutePath(),
+					asmFile.getAbsolutePath()});
+		String error = new String(proc.getErrorStream().readAllBytes());
+		if (!error.isEmpty()) throw new AssemblerException(error);
+		// Logging.logNotice(new String(proc.getInputStream().readAllBytes()));
+		while (proc.isAlive());
+		oStream = new FileInputStream(oFile);
+		byte[] bytes = oStream.readAllBytes();
+		oStream.close();
+
+		if (cleanup)
+		{
 			asmFile.delete();
 		}
 		

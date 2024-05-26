@@ -3,6 +3,8 @@
 
 package Executables;
 
+import C99Compiler.Utils.FileIO;
+
 public class Test
 {
 	public static void main(String[] args) throws Exception
@@ -12,6 +14,9 @@ public class Test
 //		JCC816.main(new String[] {"-h=Example/exampleHeader.xml", "-l=Example/example", "-o=0", "-d=2", "-v=2", "-r=Example/", "SNES/Graphics/oam.c"});
 //		JCC816.main(new String[] {"-h=Example/exampleHeader.xml", "-p=Example/exampleP.c", "-o=0", "-d=2", "-v=2", "-r=Example/", "Example/example.c"});
 //		JCC816.main(new String[] {"-r=Test/", "-l=test=testHeader.xml", "-O=2", "-D=2", "-V=2", "test.c"});
+		JCC816.main(new String[] {"-r=Test/", "-o=testO=testHeader.xml", "-O=2", "-D=2", "-V=2", "test.c"});
+		JCC816.main(new String[] {"-r=Test/", "-l=test=testHeader.xml", "-O=2", "-D=2", "-V=2", "testO.o"});
 //		JCC816.main(new String[] {"-r=../Witchcraft/src/", "-l=test=header.xml", "-O=2", "-D=2", "-V=2", "main.c"});
 	}
 }
+

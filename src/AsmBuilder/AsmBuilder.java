@@ -29,6 +29,7 @@ import C99Compiler.CompilerNodes.Definitions.EnumDefinitionNode;
 import C99Compiler.CompilerNodes.Definitions.StructUnionDefinitionNode;
 import C99Compiler.CompilerNodes.Definitions.Type;
 import C99Compiler.CompilerNodes.Dummies.EnumeratorNode;
+import C99Compiler.CompilerNodes.Dummies.SerializableUnitNode;
 import C99Compiler.CompilerNodes.Interfaces.Catalogger;
 import C99Compiler.CompilerNodes.Interfaces.TranslationUnit;
 import C99Compiler.CompilerNodes.LValues.VariableNode;
@@ -36,6 +37,7 @@ import C99Compiler.Exceptions.BuilderMultipleDefinitionException;
 import C99Compiler.Exceptions.UndefinedFunctionException;
 import C99Compiler.Utils.AssemblyUtils;
 import C99Compiler.Utils.CompUtils;
+import C99Compiler.Utils.FileIO;
 import C99Compiler.Utils.SNESRegisters;
 import Logging.Logging;
 
@@ -194,6 +196,7 @@ public final class AsmBuilder implements Catalogger
 		{
 			assembly +=  AssemblyUtils.applyFiller(entry.getKey(), maxLength) + " = $" +
 					String.format("%06x", offset) + "\n";
+			
 			offset += entry.getValue();
 		}
 		
@@ -206,12 +209,12 @@ public final class AsmBuilder implements Catalogger
 			if (DebugLevel.isAtLeast(DebugLevel.medium))
 				assembly += "\t; " + var.getType().getSignature() + " (" + var.getSize() + " bytes)";
 			assembly += "\n";
+			
 			if (DebugLevel.isAtLeast(DebugLevel.low)) // Output variable symbol for variable
 				assembly += ".dbg sym, \"" + var.getName() + "\", \"00\", EXTERN, \"" + fullName + "\"\n";
 		}
-		
 		for (SNESRegisters register : SNESRegisters.values())
-			assembly +=  AssemblyUtils.applyFiller(register.toString(), maxLength) + " = $" + String.format("%06x", register.address()) + "\n";
+			assembly += AssemblyUtils.applyFiller(register.toString(), maxLength) + " = $" + String.format("%06x", register.address()) + "\n";
 		return assembly;
 	}
 	private String generateVectorTable()
@@ -234,7 +237,7 @@ public final class AsmBuilder implements Catalogger
 
 		return assembly;
 	}
-	private String getAssemblyPreface(CartConfig cartConfig, Map<String, Integer> varPoses) throws Exception
+	private String getAssemblyPreface(CartConfig cartConfig, Map<String, Integer> varPoses, boolean isModular, int ROMSize) throws Exception
 	{
 		String assembly = "";
 
@@ -244,44 +247,85 @@ public final class AsmBuilder implements Catalogger
 		for (TranslationUnit unit : translationUnits)
 			if (DebugLevel.isAtLeast(DebugLevel.low))
 				assembly += ".dbg file, \"" + unit.getDBGFilename() + "\", 0, 0\n";
-		assembly += generateVectorTable(); // Vector table
-		
-		assembly += ".segment \"HEADER\"\n"; // Declare header
-		assembly += ".res\t48, 0;\tHEADER_HERE\n";
-		assembly += mapGlobalRAM(cartConfig, varPoses);
-		
-		assembly += ".segment \"" + CompConfig.codeBankName(0) + "\"\n"; // Begins runnable code
-		assembly +=  "RESET:\n";
-		assembly +=
-				 "SEI\n" +
-				 "CLC\n" +
-				 "XCE\n" +
-				 "REP\t#$08\n" + 
-				 CompUtils.setA16 + "\n";
-		assembly += "LDA\t#$" + String.format("%04x", CompConfig.stackSize - 1) + "\n";
-		assembly += "TCS\n";
-		if (cartConfig.isFast()) // Activate FastROM
+		assembly += ".fileopt compiler, \"JCC816 " + CompConfig.version + "\"\n";
+		if (!isModular)
 		{
-			assembly += "LDA\t#$FFFF\n";
-			assembly += "STA\t$00420D\n";
+			assembly += generateVectorTable(); // Vector table
+
+			assembly += ".segment \"HEADER\"\n"; // Declare header
+			assembly += ".res\t48, 0;\tHEADER_HERE\n";
+			assembly += mapGlobalRAM(cartConfig, varPoses);
+			boolean foundObject = false;
+			for (TranslationUnit unit : translationUnits)
+			{
+				if (SerializableUnitNode.class.isAssignableFrom(unit.getClass()))
+				{
+					for (VariableNode var : unit.getVariables().values())
+						assembly += ".export " + var.getFullName() + " : far\n";
+					for (FunctionDefinitionNode fun : unit.getFunctions().values())
+						if (getFunctions().get(fun.getFullName()).isImplemented()) // implemented elsewhere
+							assembly += ".export " + fun.getFullName() + " : far\n";
+						else
+							assembly += ".import " + fun.getFullName() + " : far\n"; 
+					if (!foundObject)
+					{
+						foundObject = true;
+						for (SimpleEntry<String, Integer> entry : CompConfig.reservedRAM())
+							assembly +=  ".exportzp " + entry.getKey() + "\n";
+						for (SNESRegisters register : SNESRegisters.values())
+							assembly += ".export " + register.toString() + " : far\n";
+					}
+				}
+			}
+			assembly += ".segment \"" + CompConfig.codeBankName(0) + "\"\n"; // Begins runnable code
+			assembly +=  "RESET:\n";
+			assembly +=
+					 "SEI\n" +
+					 "CLC\n" +
+					 "XCE\n" +
+					 "REP\t#$08\n" + 
+					 CompUtils.setA16 + "\n";
+			assembly += "LDA\t#$" + String.format("%04x", CompConfig.stackSize - 1) + "\n";
+			assembly += "TCS\n";
+			if (cartConfig.isFast()) // Activate FastROM
+			{
+				assembly += "LDA\t#$FFFF\n";
+				assembly += "STA\t$00420D\n";
+			}
+			assembly += "PHK\n"; // Set return address to RESET so that when main ends it restarts
+			assembly += "PEA\tRESET\n";
+			// Load initialized globals
+			for (TranslationUnit unit : translationUnits)
+				for (InitializerNode init : unit.getGlobalInitializers())
+					if (!init.isROM()) // Only RAM ones up here, to save space in 0 bank
+						assembly += init.getAssembly();
+			assembly += "JML\tmain\n";
+			
+			// Long interrupt tables TODO optimize this if they're in zero bank
+			for (DefinableInterrupt interrupt : DefinableInterrupt.values())
+				if (interrupt != DefinableInterrupt.RESET)
+					assembly +=  interrupt.longLabel + ":JML\t" + getInterrupt(interrupt) + "\n";
+			// Required special subs
+			for (String sub : getRequiredSubs().values())
+			{	
+				assembly += sub;
+			}
 		}
-		assembly += "PHK\n"; // Set return address to RESET so that when main ends it restarts
-		assembly += "PEA\tRESET\n";
-		// Load initialized globals
-		for (TranslationUnit unit : translationUnits)
-			for (InitializerNode init : unit.getGlobalInitializers())
-				if (!init.isROM()) // Only RAM ones up here, to save space in 0 bank
-					assembly += init.getAssembly();
-		assembly += "JML\tmain\n";
-		
-		// Long interrupt tables TODO optimize this if they're in zero bank
-		for (DefinableInterrupt interrupt : DefinableInterrupt.values())
-			if (interrupt != DefinableInterrupt.RESET)
-				assembly +=  interrupt.longLabel + ":JML\t" + getInterrupt(interrupt) + "\n";
-		// Required special subs
-		for (String sub : getRequiredSubs().values())
-		{	
-			assembly += sub;
+		else
+		{
+			for (VariableNode var : getVariables().values())
+				assembly += ".import " + var.getFullName() + " : far\n";
+			for (FunctionDefinitionNode fun : getFunctions().values())
+				if (!fun.isImplemented())
+					assembly += ".import " + fun.getFullName() + " : far\n";
+			for (SimpleEntry<String, Integer> entry : CompConfig.reservedRAM())
+				assembly +=  ".importzp " + entry.getKey() + "\n";
+			for (SNESRegisters register : SNESRegisters.values())
+				assembly += ".import " + register.toString() + " : far\n";
+
+			SerializableUnitNode n = new SerializableUnitNode(translationUnits.get(0), ROMSize);
+			
+			assembly += ".fileopt comment, \"" + FileIO.generateInfo(n) + "\"\n";
 		}
 		
 		return assembly;
@@ -306,7 +350,7 @@ public final class AsmBuilder implements Catalogger
 		translationUnits.addAll(units);
 	}
 	
-	private String getAssembly(CartConfig cartConfig, MemorySize memorySize) throws Exception
+	private String getAssembly(CartConfig cartConfig, MemorySize memorySize, boolean isModular) throws Exception
 	{
 		String assembly = "";
 
@@ -314,9 +358,12 @@ public final class AsmBuilder implements Catalogger
 		for (FunctionDefinitionNode funcNode : getFunctions().values())
 		{
 			if (funcNode.isImplemented() && funcNode.isInline()) continue;
+			else if (funcNode.getType() == null) continue; // Dummy function from object
 			else if (funcNode.getType().isExtern()) continue;
 			else if (!funcNode.isImplemented())
 				throw new UndefinedFunctionException(funcNode);
+			if (isModular)
+				assembly += ".export " + funcNode.getFullName() + " : far\n";
 			assembly += funcNode.getAssembly();
 		}
 		
@@ -331,36 +378,49 @@ public final class AsmBuilder implements Catalogger
 				if (!init.getType().isExtern() && init.isROM()) // Only RAM ones up here, to save space in 0 bank
 					assembly += init.getAssembly();
 		
-		Map<String, Integer> varPoses = mapVariables(cartConfig, memorySize);
-		
-		if (resolveFunction("main") == null)
-			throw new Exception("Program must have \"" + CompConfig.mainName + "\" function.");
-		return getAssemblyPreface(cartConfig, varPoses) + assembly;
+		Map<String, Integer> varPoses = null;
+		if (!isModular)
+		{
+			varPoses = mapVariables(cartConfig, memorySize);
+			if (resolveFunction("main") == null)
+				throw new Exception("Program must have \"" + CompConfig.mainName + "\" function.");
+			return getAssemblyPreface(cartConfig, varPoses, isModular, -1) + assembly; 
+		}	
+		else return assembly;		
 	}
-	private  static String postprocess(String assembly, MemorySize memorySize) throws Exception
+
+	private static String postprocess(String assembly, CartConfig cartConfig, MemorySize memorySize) throws Exception
 	{
 		ArrayList<String> lines = new ArrayList<String>(Arrays.asList(assembly.split("\n")));
 
 		if (OptimizationLevel.isAtLeast(OptimizationLevel.low))
 			lines = (ArrayList<String>) AssemblyOptimizer.optimizeAssembly((List<String>) lines);
-		memorySize.ROMSize = Banker.splitBanks(new CartConfig(), lines);
+		memorySize.ROMSize = Banker.splitBanks(cartConfig, lines);
 		
 		assembly = "";
 		for (String line : lines) if (!line.matches("\s*")) assembly += line + "\n";
 		return assembly;
 	}
 	
-	public String build(CartConfig cartConfig, MemorySize memorySize) throws Exception
+	public String build(CartConfig cartConfig, MemorySize memorySize, boolean isModular) throws Exception
 	{
 		if (VerbosityLevel.isAtLeast(VerbosityLevel.medium))
-			printInfo("Linking...");	
+			printInfo("Building...");	
 		
 		long t = System.currentTimeMillis();
-		String assembly = getAssembly(cartConfig, memorySize);
+		String assembly = getAssembly(cartConfig, memorySize, isModular);
 		if (VerbosityLevel.isAtLeast(VerbosityLevel.medium))
 			printInfo("Emitted in " + (System.currentTimeMillis() - t) + " ms. Assembly length: " + assembly.length() + ".");
 		t = System.currentTimeMillis();
-		assembly = postprocess(assembly, memorySize);
+		assembly = postprocess(assembly, cartConfig, memorySize);
+		if (isModular)
+			assembly = getAssemblyPreface(cartConfig, null, isModular, memorySize.ROMSize) + assembly; 
+		for (TranslationUnit unit : translationUnits)
+		{
+			if (SerializableUnitNode.class.isAssignableFrom(unit.getClass()))
+				memorySize.ROMSize += ((SerializableUnitNode) unit).getROMSize();
+		}
+		
 		if (VerbosityLevel.isAtLeast(VerbosityLevel.medium))
 			printInfo("Postprocessed in " + (System.currentTimeMillis() - t) + " ms. Assembly length: " + assembly.length() + ".");
 		if (VerbosityLevel.isAtLeast(VerbosityLevel.medium))

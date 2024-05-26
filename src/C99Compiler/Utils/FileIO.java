@@ -163,4 +163,38 @@ public final class FileIO
 	{
 		return matchingFiles(getFile(""), searchTerm);
 	}
+	
+	public static String generateInfo(Serializable s) throws IOException
+	{
+		String serialized = "";
+		for (byte b : serialize(s))
+			serialized += String.format("%02x", b);
+		return CompConfig.infoTag + ":" + String.format("%x", serialized.length()) + "{" + serialized + "}";
+	}
+	
+	public static Serializable findInfo(String s) throws IOException, ClassNotFoundException
+	{
+		int i = s.indexOf(CompConfig.infoTag);
+		i += CompConfig.infoTag.length() + 1; // Find the size
+		int j = i + s.substring(i).indexOf("{");
+		int length = Integer.valueOf(s.substring(i, j), 16);
+		i = j + 1;
+		j = i + length;
+		s = s.substring(i, j);
+		byte[] bytes = new byte[s.length() / 2];
+		i = 0;
+		while (s.length() > 0)
+		{
+			bytes[i++] = (byte) (int) Integer.valueOf(s.substring(0, 2), 16);
+			s = s.substring(2);
+		}
+		
+		return deserialize(bytes);
+	}
+	
+	public static Serializable findInfo(byte[] bytes) throws IOException, ClassNotFoundException
+	{
+		String s = new String(bytes, "US-ASCII");
+		return findInfo(s);
+	}
 }

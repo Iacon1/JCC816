@@ -23,6 +23,8 @@ public final class CompConfig
 	public static final String scopeDelimiterPermissor = "at_in_identifiers";
 	public static final int indentSize = 2;
 	
+	public static final String infoTag = "__@CompInfo";
+	
 	public static final int scratchBank = 0x7F;
 	public static final int scratchPage = 0xFF;
 	public static final int specSubSize = 16;

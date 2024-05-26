@@ -11,9 +11,9 @@ public class DummyVariableNode extends VariableNode
 {
 	private OperandSource source;
 	
-	public DummyVariableNode(ComponentNode<?> parent, Type type, OperandSource source)
+	public DummyVariableNode(ComponentNode<?> parent, String name, Type type, OperandSource source)
 	{
-		super(parent, null, type);
+		super(parent, name, type);
 		this.source = source;
 	}
 	@Override
