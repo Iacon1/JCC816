@@ -3,7 +3,6 @@
 // A type
 package C99Compiler.CompilerNodes.Definitions;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -24,7 +23,7 @@ import C99Compiler.Exceptions.ConstraintException;
 import C99Compiler.Exceptions.UndefinedTypeException;
 import C99Compiler.Exceptions.UnsupportedFeatureException;
 
-public class Type implements Serializable
+public class Type
 {
 	private ComponentNode<?> context; // The node this was defined under
 	

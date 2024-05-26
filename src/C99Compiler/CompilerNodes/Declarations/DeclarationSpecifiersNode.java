@@ -4,8 +4,6 @@
 
 package C99Compiler.CompilerNodes.Declarations;
 
-
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,7 +29,7 @@ public class DeclarationSpecifiersNode extends InterpretingNode<DeclarationSpeci
 	private List<String> typeQualifiers = new ArrayList<String>();
 	private List<String> functionSpecifiers = new ArrayList<String>();
 	
-	public static class DeclSpecifiers implements Serializable
+	public static class DeclSpecifiers
 	{
 		public String[] storageClassSpecifiers;
 		public String[] typeSpecifiers;
