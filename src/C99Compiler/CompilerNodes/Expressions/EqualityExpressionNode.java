@@ -74,11 +74,13 @@ public class EqualityExpressionNode extends BinaryExpressionNode
 		if (source.getSize() == 1)
 		{
 			DetailsTicket ticket2 = new DetailsTicket(ticket, 0, DetailsTicket.isA16Bit);
+			assembly += whitespace + CompUtils.setA8 + "\n";
 			assembly += source.getLDA(whitespace, 0, ticket2);
 		}
 		else
 		{
 			DetailsTicket ticket2 = new DetailsTicket(ticket, DetailsTicket.isA16Bit, 0);
+			assembly += whitespace + CompUtils.setA16 + "\n";
 			assembly += source.getLDA(whitespace, 0, ticket2);
 			if (source.getSize() > 2)
 				assembly += AssemblyUtils.bytewiseOperation(whitespace, source.getSize() - 2, (Integer i, DetailsTicket ticket3) -> {return new String[]{source.getInstruction("ORA", i + 2, ticket3)};});
