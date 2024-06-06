@@ -158,12 +158,14 @@ public class IterationStatementNode extends SequencePointStatementNode<Iteration
 				assembly += whitespace + "JMP\t" + getEndLabel() + "\n";
 				assembly += whitespace + ":\n";
 			}
+			stmNode.clearPossibleValues();
 			if (stmNode.hasAssembly()) assembly += stmNode.getAssembly(leadingWhitespace + CompConfig.indentSize, returnAddr);
 			assembly += whitespace + "JMP\t" + getStartLabel() + "\n";
 			assembly += whitespace + getEndLabel() + ":\n";
 			break;
 		case doWhile:
 			assembly += whitespace + getStartLabel() + ":\n";
+			stmNode.clearPossibleValues();
 			if (stmNode.hasAssembly()) assembly += stmNode.getAssembly(leadingWhitespace + CompConfig.indentSize, returnAddr);
 			assembly += whitespace + getIterLabel() + ":\n";
 			assembly += getAssemblyWithSequence(condExpNode, leadingWhitespace, exprSource, scratchManager);
@@ -201,6 +203,7 @@ public class IterationStatementNode extends SequencePointStatementNode<Iteration
 					}
 				}
 			}
+			stmNode.clearPossibleValues();
 			if (stmNode.hasAssembly()) assembly += stmNode.getAssembly(leadingWhitespace + CompConfig.indentSize, returnAddr);
 			assembly += whitespace + getIterLabel() + ":\n";
 			if (iterExpNode != null && iterExpNode.hasAssembly()) assembly += getAssemblyWithSequence(iterExpNode, leadingWhitespace); 
