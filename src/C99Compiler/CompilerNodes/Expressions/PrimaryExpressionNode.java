@@ -9,6 +9,7 @@ import C99Compiler.CompConfig;
 import C99Compiler.CompConfig.OptimizationLevel;
 import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.FunctionDefinitionNode;
+import C99Compiler.CompilerNodes.Definitions.ArrayType;
 import C99Compiler.CompilerNodes.Definitions.PointerType;
 import C99Compiler.CompilerNodes.Definitions.Type;
 import C99Compiler.CompilerNodes.Dummies.DummyType;
@@ -65,7 +66,12 @@ public class PrimaryExpressionNode extends BaseExpressionNode<Primary_expression
 			else // Probably function pointer
 				return resolveFunctionRelative(identifier).getType();
 		else if (constant != null) return CompUtils.getSmallestType((Number) constant);
-		else if (stringLiteral != null) return new PointerType(new DummyType("char"));
+		else if (stringLiteral != null)
+		{
+			ArrayType t = new ArrayType(new DummyType("char"));
+			t.setLength(stringLiteral.length() + 1);
+			return t;
+		}
 		else return null;
 	}
 
