@@ -69,7 +69,7 @@ public final class CompUtils
 		else if (literal.startsWith("0")) // Octal???
 			return Long.valueOf(literal, 8);
 		else if (literal.contains("'")) // Character constant
-			return Long.valueOf((int) processEscapes(literal).charAt(1));
+			return Long.valueOf((int) processEscapes(literal.substring(1, literal.length() - 1)).charAt(0));
 		else // TODO, assume decimal for now
 			return Long.valueOf(literal);	
 	}
@@ -92,7 +92,7 @@ public final class CompUtils
 	}
 	public static final String processEscapes(String s)
 	{
-		Pattern pattern = Pattern.compile("\\\\x[0-9A-Fa-f][0-9A-Fa-f]");
+		Pattern pattern = Pattern.compile("(\\\\x[0-9A-Fa-f]{0,2}+)|(\\\\[0-7]{0,3}+)");
 		Matcher matcher = pattern.matcher(s);
 		List<MatchResult> results = new ArrayList<MatchResult>();
 		while (matcher.find())
@@ -100,8 +100,17 @@ public final class CompUtils
 		for (int i = results.size() - 1; i >= 0; --i)	 // In reverse order to avoid string indexing problems
 		{
 			MatchResult result = results.get(i);
-			char b = (char) Integer.valueOf(result.group().substring(2), 16).intValue(); // Get byte
-			s = s.substring(0, result.start()) + Character.valueOf(b) + s.substring(result.end());
+			if (result.group().length() < 2) continue;
+			if (result.group().charAt(1) == 'x') // Hex
+			{
+				char b = (char) Integer.valueOf(result.group().substring(2), 16).intValue(); // Get byte
+				s = s.substring(0, result.start()) + Character.valueOf(b) + s.substring(result.end());
+			}
+			else // Octal
+			{
+				char b = (char) Integer.valueOf(result.group().substring(1), 8).intValue(); // Get byte
+				s = s.substring(0, result.start()) + Character.valueOf(b) + s.substring(result.end());
+			}
 		}
 		return s;
 	}
