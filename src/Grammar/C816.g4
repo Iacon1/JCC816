@@ -14,7 +14,7 @@ Operation
 	| 'MVN'	| 'MVP'
 	| 'NOP'
 	| 'ORA'
-	| 'PEA'	| 'PEI'	| 'PER'	| 'PHA'	| 'PHD'	| 'PHK'	| 'PHX'	| 'PHY'	| 'PLA'	| 'PLD'	| 'PLP'	| 'PLX' | 'PLY'
+	| 'PEA'	| 'PEI'	| 'PER'	| 'PHA'	| 'PHD'	| 'PHK'	| 'PHX'	| 'PHY'	| 'PLA'	| 'PLB' | 'PLD'	| 'PLP'	| 'PLX' | 'PLY'
 	| 'REP' | 'ROL' | 'ROR' | 'RTI' | 'RTS' | 'RTL'
 	| 'SBC' | 'SEC' | 'SED' | 'SEI' | 'SEP' | 'STA' | 'STX' | 'STY' | 'STP' | 'STZ'
 	| 'TAX' | 'TAY' | 'TCD' | 'TCS' | 'TDC' | 'TSC' | 'TSX' | 'TXA' | 'TXS' | 'TXY' | 'TYA' | 'TYX' | 'TRB' | 'TSB'
