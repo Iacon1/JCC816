@@ -13,6 +13,7 @@ import C99Compiler.CompilerNodes.LValues.LValueNode;
 import C99Compiler.CompilerNodes.LValues.VariableNode;
 import C99Compiler.CompilerNodes.Definitions.PointerType;
 import C99Compiler.Exceptions.ConstraintException;
+import C99Compiler.Exceptions.ScratchOverflowException;
 import C99Compiler.PreprocNodes.PreProcComponentNode;
 import C99Compiler.Utils.AssemblyUtils;
 import C99Compiler.Utils.AssemblyUtils.DetailsTicket;
@@ -295,7 +296,15 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 			ScratchSource sourceI;
 			if (!ScratchManager.hasPointer(sourceX))
 			{
-				sourceI = ScratchManager.reservePointer(sourceX);
+				try
+				{
+					sourceI = ScratchManager.reservePointer(sourceX);
+				}
+				catch (ScratchOverflowException e)
+				{
+					ScratchManager.popPointer();
+					sourceI = ScratchManager.reservePointer(sourceX);
+				}
 				assembly += AssemblyUtils.byteCopier(whitespace, CompConfig.pointerSize, sourceI, sourceX, ticket);
 			}
 			else sourceI = ScratchManager.getPointer(sourceX);

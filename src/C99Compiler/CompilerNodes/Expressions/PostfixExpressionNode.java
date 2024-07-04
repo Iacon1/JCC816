@@ -18,6 +18,7 @@ import C99Compiler.CompilerNodes.Interfaces.SequencePointNode;
 import C99Compiler.CompilerNodes.LValues.IndirectLValueNode;
 import C99Compiler.CompilerNodes.LValues.LValueNode;
 import C99Compiler.CompilerNodes.LValues.VariableNode;
+import C99Compiler.Exceptions.ScratchOverflowException;
 import C99Compiler.Exceptions.UnsupportedFeatureException;
 import C99Compiler.Utils.AssemblyUtils;
 import C99Compiler.Utils.AssemblyUtils.DetailsTicket;
@@ -234,7 +235,15 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 					ScratchSource sourceI;
 					if (indexExpr.hasLValue() || !ScratchManager.hasPointer(expr.getLValue().getSource())) // Already had a pointer to this value
 					{
-						sourceI = ScratchManager.reservePointer(expr.getLValue().getSource());
+						try
+						{
+							sourceI = ScratchManager.reservePointer(expr.getLValue().getSource());
+						}
+						catch (ScratchOverflowException e)
+						{
+							ScratchManager.popPointer();
+							sourceI = ScratchManager.reservePointer(expr.getLValue().getSource());
+						}
 						if (getType().getSize() != 1)
 						{
 							assembly += new MultiplicativeExpressionNode(this, "*", indexExpr, new DummyExpressionNode(this, getType().getSize())).getAssembly(whitespace.length(), sourceI, ticket); // Multiply index by size of type
@@ -378,7 +387,15 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 			ScratchSource sourceP;
 			if (!ScratchManager.hasPointer(expr.getLValue().getSource()))
 			{
-				sourceP = ScratchManager.reservePointer(expr.getLValue().getSource());
+				try
+				{
+					sourceP = ScratchManager.reservePointer(expr.getLValue().getSource());
+				}
+				catch (ScratchOverflowException e)
+				{
+					ScratchManager.popPointer();
+					sourceP = ScratchManager.reservePointer(expr.getLValue().getSource());
+				}
 				assembly += AssemblyUtils.byteCopier(whitespace, CompConfig.pointerSize, sourceP, expr.getLValue().getSource());
 			}
 			else sourceP = ScratchManager.getPointer(expr.getLValue().getSource());

@@ -194,4 +194,9 @@ public class ScratchManager
 			pointerList.set(i, null);
 		pointerMap.clear();
 	}
+	public static void popPointer()
+	{
+		pointerMap.remove(pointerList.get(0));
+		pointerList.set(0,  null);
+	}
 }
