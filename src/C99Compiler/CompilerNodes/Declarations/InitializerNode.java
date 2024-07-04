@@ -115,7 +115,14 @@ public class InitializerNode extends InterpretingNode<InitializerNode, Initializ
 	{
 		if (node == null) return null;
 		if (node.children.size() == 1) // Can't be an initializer, which would at least have brackets
+		{
 			expr = new AssignmentExpressionNode(this).interpret(node.assignment_expression());
+			if (expr.getType().isArray() && !expr.getType().isIncomplete()) // Expression is fixed-size array
+			{
+				ArrayType arrayType = (ArrayType) LValue.getType();
+				arrayType.setLength(((ArrayType) expr.getType()).getLength());
+			}
+		}
 		else
 		{
 			int arrayIndex = 0;
