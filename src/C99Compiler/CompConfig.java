@@ -136,6 +136,7 @@ public final class CompConfig
 	}
 	public static OptimizationLevel optimizationLevel = OptimizationLevel.all;
 	
+	public static boolean fastByteCount = false; // Uses fast generous estimate for assigning banks
 	public static enum DebugLevel
 	{
 		none, 	// None

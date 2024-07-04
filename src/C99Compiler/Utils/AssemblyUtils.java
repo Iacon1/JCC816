@@ -323,4 +323,23 @@ public final class AssemblyUtils
 		
 		return assembly;		
 	}
+	
+	public static String getCompJump(String whitespace, String jumpTo, String statement, boolean skipOnZero, String jumpAfter, String dbgLine)
+	{
+		String assembly = "";
+		if (CompUtils.estimateLength(statement) <= 127)
+			assembly += whitespace + (skipOnZero ? "BEQ\t" : "BNE\t") + jumpTo + "\n";
+		else
+		{
+			assembly += whitespace + (skipOnZero ? "BNE\t" : "BEQ\t") + ":+\n";
+			assembly += whitespace + "JMP\t" + jumpTo + "\n";
+			assembly += whitespace + ":\n";
+		}
+		if (dbgLine != null) assembly += dbgLine;
+		assembly += statement;
+		if (jumpAfter != null)
+			assembly += whitespace + "JMP\t" + jumpAfter + "\n";
+		assembly += whitespace + jumpTo + ":\n";
+		return assembly;
+	}
 }

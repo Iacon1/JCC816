@@ -141,44 +141,32 @@ public class SelectionStatementNode extends SequencePointStatementNode<Selection
 				String skipName = "__IFNOT_" + selId;
 				if (expression.hasAssembly())
 				{
-					String miscLabel = CompUtils.getMiscLabel();
 					ScratchManager scratchManager = new ScratchManager();
 					ScratchSource exprSource = scratchManager.reserveScratchBlock(expression.getSize());
 					assembly = getAssemblyWithSequence(expression, leadingWhitespace, exprSource, scratchManager);
 					assembly += EqualityExpressionNode.getIsZero(whitespace, null, scratchManager, exprSource, new DetailsTicket());
-					assembly += whitespace + "BNE\t:+\n"; // Skip if 0, i. e. not true
-					assembly += whitespace + "JMP\t" + skipName + "\n";
-					assembly += whitespace + ":\n";
-					assembly += labelLine(leadingWhitespace + CompConfig.indentSize, ifLineNo);
-					assembly += ifStm.getAssembly(leadingWhitespace + CompConfig.indentSize, returnAddr);
-//					}
 				}
 				else
-				{
-					if (expression.hasPropValue())
-						assembly += AssemblyUtils.byteCopier(whitespace, expression.getSize(), CompConfig.callResultSource(expression.getSize()), new ConstantSource(expression.getPropValue(), expression.getSize()));
-					else
-						assembly += EqualityExpressionNode.getIsZero(whitespace, null, new ScratchManager(), expression.getLValue().getSource(), new DetailsTicket());
-					assembly += whitespace + "BEQ\t" + skipName + "\n";
-					assembly += labelLine(leadingWhitespace + CompConfig.indentSize, ifLineNo);
-					assembly += ifStm.getAssembly(leadingWhitespace + CompConfig.indentSize, returnAddr);
-				}
+					assembly += EqualityExpressionNode.getIsZero(whitespace, null, new ScratchManager(), expression.getLValue().getSource(), new DetailsTicket());
+				
+				assembly += AssemblyUtils.getCompJump(whitespace, skipName,
+						ifStm.getAssembly(leadingWhitespace + CompConfig.indentSize, returnAddr),
+						true,
+						elseStm != null ? getEndLabel() : null,
+						labelLine(leadingWhitespace + CompConfig.indentSize, ifLineNo));
+				
 				ifStm.clearPossibleValues();
 				if (elseStm != null)
 				{
-					assembly += AssemblyUtils.getWhitespace(leadingWhitespace + CompConfig.indentSize) + "JML\t" + getEndLabel() + "\n";
-					assembly += whitespace + skipName + ":\n";
 					assembly += labelLine(leadingWhitespace + CompConfig.indentSize, elseLineNo);
 					assembly += elseStm.getAssembly(leadingWhitespace + CompConfig.indentSize, returnAddr);
 					elseStm.clearPossibleValues();
+					assembly += whitespace + getEndLabel() + ":\n";
 				}
-				assembly += whitespace + getEndLabel() + ":\n";
 			}
 		}
 		else
 		{
-			// switchStm.getAssembly(leadingWhitespace + CompConfig.indentSize);
-			
 			long smallestCase = 0, largestCase = 0;
 			Set<Long> caseValues = new HashSet<Long>();
 			BaseExpressionNode<?> largestExpr = null;
