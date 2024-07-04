@@ -8,6 +8,7 @@ import C99Compiler.CartConfig;
 import C99Compiler.CompConfig;
 import C99Compiler.ASMGrapher.ASMGraphBuilder;
 import C99Compiler.Exceptions.UnsupportedFeatureException;
+import C99Compiler.Utils.CompUtils;
 
 public final class Banker
 {
@@ -41,7 +42,12 @@ public final class Banker
 				if (!blockAssembly.isEmpty())
 				{
 					int bankSize = cartConfig.getType().getROMBankLength(cartConfig.isFast(), banks - 1);
-					int blockSize = new ASMGraphBuilder(blockAssembly).getSize();
+					int blockSize = 0;
+					if (CompConfig.fastByteCount)
+						blockSize = CompUtils.estimateLength(blockAssembly);
+					else
+						blockSize = new ASMGraphBuilder(blockAssembly).getSize();
+						
 //					Logging.logNotice(String.valueOf(blockSize));
 					if (blockSize >= bankSize)
 						throw new UnsupportedFeatureException("Functions larger than " + bankSize / 1024 + " KB in bank " + (banks - 1) + " in " + cartConfig.getType().getName() + " mapping mode", false, i, 0);

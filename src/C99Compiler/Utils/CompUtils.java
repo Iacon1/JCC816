@@ -114,4 +114,8 @@ public final class CompUtils
 		}
 		return s;
 	}
+	public static int estimateLength(String statement)
+	{
+		return statement.split("\n").length * 4; // Assumes generous estimate of 4 bytes per instruction
+	}
 }

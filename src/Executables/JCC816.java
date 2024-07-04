@@ -107,6 +107,18 @@ public class JCC816
 			.build();
 		options.addOption(option);
 		
+		option = Option.builder()
+				.longOpt("optimize-addresses")
+				.desc("Optimizes most memory accesses to use 16 bit instead of 24 bit addressing. Only valid if < 64 KB of work memory are used.")
+				.build();
+		options.addOption(option);
+		
+		option = Option.builder()
+				.longOpt("fast-byte-count")
+				.desc("Uses a faster but more generous method for estimating the size of assembly chunks during banking.")
+				.build();
+		options.addOption(option);
+		
 		option = Option.builder("D")
 			.longOpt("debug-level")
 			.hasArg()
@@ -136,6 +148,7 @@ public class JCC816
 				.desc("Ensures the assembler doesn't leave behind unecessary files.")
 				.build();
 		options.addOption(option);
+		
 		
 		return options;
 	}
@@ -285,6 +298,11 @@ public class JCC816
 			case "1" : CompConfig.verbosityLevel = VerbosityLevel.low; break;
 			case "2" : CompConfig.verbosityLevel = VerbosityLevel.medium; break;
 			}
+		
+		if (commandLine.hasOption("optimize-addresses"))
+			CompConfig.wordAddresses = true;
+		if (commandLine.hasOption("fast-byte-count"))
+			CompConfig.fastByteCount = true;
 		
 		if (commandLine.hasOption("l")) // Link to executable
 		{	
