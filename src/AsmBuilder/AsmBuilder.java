@@ -32,6 +32,7 @@ import C99Compiler.CompilerNodes.Dummies.EnumeratorNode;
 import C99Compiler.CompilerNodes.Interfaces.Catalogger;
 import C99Compiler.CompilerNodes.Interfaces.TranslationUnit;
 import C99Compiler.CompilerNodes.LValues.VariableNode;
+import C99Compiler.Exceptions.BuilderException;
 import C99Compiler.Exceptions.BuilderMultipleDefinitionException;
 import C99Compiler.Exceptions.UndefinedFunctionException;
 import C99Compiler.Utils.AssemblyUtils;
@@ -147,6 +148,19 @@ public final class AsmBuilder implements Catalogger
 		return interrupts;
 	}
 	
+	private boolean isPreassembled(FunctionDefinitionNode function)
+	{
+		TranslationUnit targetUnit = function.getTranslationUnit();
+		for (TranslationUnit unit : translationUnits)
+			if (unit.getFilename().equals(targetUnit.getFilename()))
+			{
+				if (ModuleAssemblyUnit.class.isAssignableFrom(unit.getClass()))
+					return true;
+				else
+					return false;
+			}
+		return false;
+	}
 	private Map<String, Integer> mapVariables(CartConfig cartConfig, MemorySize memorySize)
 	{
 		int offset = CompConfig.stackSize;
@@ -249,15 +263,20 @@ public final class AsmBuilder implements Catalogger
 		assembly += ".segment \"HEADER\"\n"; // Declare header
 		assembly += ".res\t48, 0;\tHEADER_HERE\n";
 		assembly += mapGlobalRAM(cartConfig, varPoses);
-		
 		assembly += ".segment \"" + CompConfig.codeBankName(0) + "\"\n"; // Begins runnable code
-		assembly +=  "RESET:\n";
+		assembly += "RESET:\n";
 		assembly +=
 				 "SEI\n" +
 				 "CLC\n" +
 				 "XCE\n" +
-				 "REP\t#$08\n" + 
-				 CompUtils.setA16 + "\n";
+				 "REP\t#$08\n";
+		if (CompConfig.wordAddresses)
+			assembly +=
+				"LDA\t#$7E\n" +
+				"PHA\n" +
+				"PLB\n";
+		
+		assembly +=	CompUtils.setA16 + "\n";
 		assembly += "LDA\t#$" + String.format("%04x", CompConfig.stackSize - 1) + "\n";
 		assembly += "TCS\n";
 		if (cartConfig.isFast()) // Activate FastROM
@@ -306,7 +325,7 @@ public final class AsmBuilder implements Catalogger
 		translationUnits.addAll(units);
 	}
 	
-	private String getAssembly(CartConfig cartConfig, MemorySize memorySize) throws Exception
+	private String getAssembly(CartConfig cartConfig, MemorySize memorySize, boolean isModule) throws Exception
 	{
 		String assembly = "";
 
@@ -316,7 +335,13 @@ public final class AsmBuilder implements Catalogger
 			if (funcNode.isImplemented() && funcNode.isInline()) continue;
 			else if (funcNode.getType().isExtern()) continue;
 			else if (!funcNode.isImplemented())
-				throw new UndefinedFunctionException(funcNode);
+			{
+				if (!isModule)
+					throw new UndefinedFunctionException(funcNode);
+				else continue;
+			}
+			else if (isPreassembled(funcNode)) continue;
+			
 			assembly += funcNode.getAssembly();
 		}
 		
@@ -325,17 +350,22 @@ public final class AsmBuilder implements Catalogger
 			if (AssemblyUnit.class.isAssignableFrom(unit.getClass()))
 				assembly += ((AssemblyUnit) unit).getAssembly();
 		
-		// Get ROM data
-		for (TranslationUnit unit : translationUnits)
-			for (InitializerNode init : unit.getGlobalInitializers())
-				if (!init.getType().isExtern() && init.isROM()) // Only RAM ones up here, to save space in 0 bank
-					assembly += init.getAssembly();
+		if (!isModule)
+		{	
+			// Get ROM data
+			for (TranslationUnit unit : translationUnits)
+				for (InitializerNode init : unit.getGlobalInitializers())
+					if (!init.getType().isExtern() && init.isROM()) // Rom ones go last
+						assembly += init.getAssembly();
 		
-		Map<String, Integer> varPoses = mapVariables(cartConfig, memorySize);
-		
-		if (resolveFunction("main") == null)
-			throw new Exception("Program must have \"" + CompConfig.mainName + "\" function.");
-		return getAssemblyPreface(cartConfig, varPoses) + assembly;
+			Map<String, Integer> varPoses = mapVariables(cartConfig, memorySize);
+			if (CompConfig.wordAddresses && memorySize.WRAMSize > 0xFFFF)
+				throw new BuilderException("Cannot use 16-bit addressing, more than 64 KB RAM required.");
+			if (resolveFunction("main") == null)
+				throw new BuilderException("Program must have \"" + CompConfig.mainName + "\" function.");
+			return getAssemblyPreface(cartConfig, varPoses) + assembly;
+		}
+		else return assembly;
 	}
 	private  static String postprocess(String assembly, MemorySize memorySize) throws Exception
 	{
@@ -356,7 +386,7 @@ public final class AsmBuilder implements Catalogger
 			printInfo("Linking...");	
 		
 		long t = System.currentTimeMillis();
-		String assembly = getAssembly(cartConfig, memorySize);
+		String assembly = getAssembly(cartConfig, memorySize, false);
 		if (VerbosityLevel.isAtLeast(VerbosityLevel.medium))
 			printInfo("Emitted in " + (System.currentTimeMillis() - t) + " ms. Assembly length: " + assembly.length() + ".");
 		t = System.currentTimeMillis();
@@ -366,5 +396,20 @@ public final class AsmBuilder implements Catalogger
 		if (VerbosityLevel.isAtLeast(VerbosityLevel.medium))
 			printInfo("Linking done.");
 		return assembly;
+	}
+	
+	public ModuleAssemblyUnit buildModule(CartConfig cartConfig, MemorySize memorySize) throws Exception
+	{
+		if (VerbosityLevel.isAtLeast(VerbosityLevel.medium))
+			printInfo("Linking...");	
+		
+		long t = System.currentTimeMillis();
+		String assembly = getAssembly(cartConfig, memorySize, true);
+		if (VerbosityLevel.isAtLeast(VerbosityLevel.medium))
+		{
+			printInfo("Emitted in " + (System.currentTimeMillis() - t) + " ms. Assembly length: " + assembly.length() + ".");
+			printInfo("Linking done.");
+		}
+		return new ModuleAssemblyUnit(translationUnits.get(0), assembly);
 	}
 }

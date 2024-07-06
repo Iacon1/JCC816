@@ -2,6 +2,7 @@
 //
 package C99Compiler.CompilerNodes.Declarations;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -29,7 +30,7 @@ public class DeclaratorNode extends InterpretingNode<DeclaratorNode, DeclaratorC
 		
 		pointer;
 	}
-	public static class DeclaratorInfo
+	public static class DeclaratorInfo implements Serializable
 	{
 		public final DeclaratorType type;
 		

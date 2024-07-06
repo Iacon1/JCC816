@@ -4,6 +4,7 @@
 
 package C99Compiler.CompilerNodes;
 
+import java.io.Serializable;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -22,7 +23,7 @@ import C99Compiler.CompilerNodes.LValues.VariableNode;
 import C99Compiler.CompilerNodes.Statements.IterationStatementNode;
 import C99Compiler.CompilerNodes.Statements.SelectionStatementNode;
 
-public class ComponentNode<C extends ComponentNode<C>>
+public class ComponentNode<C extends ComponentNode<C>> implements Serializable
 {
 	protected ComponentNode<?> parent;
 	protected List<ComponentNode<?>> children;

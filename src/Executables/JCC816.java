@@ -21,6 +21,7 @@ import Assembler.Assembler;
 import Assembler.Header;
 import Assembler.MemorySize;
 import AsmBuilder.AssemblyUnit;
+import AsmBuilder.ModuleAssemblyUnit;
 import AsmBuilder.AsmBuilder;
 
 import C99Compiler.CompConfig;
@@ -65,7 +66,7 @@ public class JCC816
 				.desc("Assembles the provided source file into an object file, optionally according to a provided header configuration.")
 				.build();
 		options.addOption(option);
-		
+		*/
 		option = Option.builder("s")
 				.longOpt("assembler")
 				.hasArg()
@@ -75,7 +76,6 @@ public class JCC816
 				.desc("Compiles the provided source file into an assembly file, optionally according to a provided header configuration.")
 				.build();
 		options.addOption(option);
-		*/
 		
 		option = Option.builder("h")
 				.longOpt("help")
@@ -153,6 +153,15 @@ public class JCC816
 		return options;
 	}
 	
+	private static boolean isHeaderLoaded(Map<String, TranslationUnit> translationUnits, String headerName)
+	{
+		String nameA, nameC;
+		
+		nameA = headerName.replace(".h", ".asm");
+		nameC = headerName.replace(".h", ".c");
+		
+		return translationUnits.containsKey(headerName) || translationUnits.containsKey(nameA) || translationUnits.containsKey(nameC);
+	}
 	private static TranslationUnit loadUnit(String sourceName, boolean isHeader, boolean isResource) throws Exception
 	{
 		String sourceNameA, sourceNameC, sourceNameH;
@@ -184,7 +193,10 @@ public class JCC816
 		else if (sourceNameA != null && (isResource ? FileIO.hasResource(sourceNameA) : FileIO.hasFile(sourceNameA)))
 		{
 			String fileText = isResource ? FileIO.readResource(sourceNameA) : FileIO.readFile(sourceNameA);
-			return new AssemblyUnit(sourceNameA, fileText);
+			if (fileText.startsWith(ModuleAssemblyUnit.getPrefix()))
+				return new ModuleAssemblyUnit(fileText);
+			else
+				return new AssemblyUnit(sourceNameA, fileText);
 		}
 		else if (sourceNameH != null && (isResource ? FileIO.hasResource(sourceNameH) : FileIO.hasFile(sourceNameH)))
 		{
@@ -199,12 +211,13 @@ public class JCC816
 		// Recursively resolve all libs
 		Set<String> includedStdLibs = new HashSet<String>();
 		Set<String> includedOtherLibs = new HashSet<String>();
-
+		
 		String oldHash = "";
 		String hash = String.format("%x X %x", includedStdLibs.hashCode(), includedOtherLibs.hashCode());
 		while (true)
 		{
 			oldHash = hash;
+
 			for (TranslationUnit unit : translationUnits.values())
 			{
 				if (unit.getIncludedStdLibs() != null)
@@ -212,13 +225,15 @@ public class JCC816
 				if (unit.getIncludedOtherLibs() != null)
 					includedOtherLibs.addAll(unit.getIncludedOtherLibs());
 			}
+
 			hash = String.format("%x X %x", includedStdLibs.hashCode(), includedOtherLibs.hashCode());
 			
 			if (hash.equals(oldHash)) break; // When nothing new is included, stop
 			
 			for (String stdLib : includedStdLibs)
 			{
-				stdLib = "stdlib/" + stdLib;
+				stdLib = "stdlib\\" + stdLib;
+				if (stdLib.endsWith(".h") && isHeaderLoaded(translationUnits, stdLib)) continue;
 				TranslationUnit unit = loadUnit(stdLib, true, true);
 				if (unit != null)
 					translationUnits.put(unit.getFilename(), unit);
@@ -228,6 +243,7 @@ public class JCC816
 			
 			for (String otherLib : includedOtherLibs)
 			{
+				if (otherLib.endsWith(".h") && isHeaderLoaded(translationUnits, otherLib)) continue;
 				TranslationUnit unit = loadUnit(otherLib, true, false);
 				if (unit != null)
 					translationUnits.put(unit.getFilename(), unit);
@@ -266,12 +282,12 @@ public class JCC816
 		}
 		
 		if (commandLine.hasOption("r")) // Root
-			CompConfig.rootFolder = commandLine.getOptionValue("r");
+			CompConfig.rootFolder = FileIO.fixFilepath(commandLine.getOptionValue("r"));
 		
 		if (commandLine.hasOption("H"))
 		{
 			String filename = commandLine.getOptionValue("H");
-			FileIO.writeFile(filename, FileIO.readResourceBytes("XML/Header.XML"));
+			FileIO.writeFile(filename, FileIO.readResourceBytes("XML\\Header.XML"));
 			return;
 		}
 		
@@ -304,7 +320,7 @@ public class JCC816
 		if (commandLine.hasOption("fast-byte-count"))
 			CompConfig.fastByteCount = true;
 		
-		if (commandLine.hasOption("l")) // Link to executable
+		if (commandLine.hasOption("l") || commandLine.hasOption("s")) // Link to executable or to assembly
 		{	
 			Map<String, TranslationUnit> translationUnits  = new HashMap<String, TranslationUnit>();
 			List<String> filenames = new LinkedList<String>();
@@ -313,14 +329,20 @@ public class JCC816
 			
 			for (String filename : filenames) // Read all input files
 			{
-				TranslationUnit unit = loadUnit(filename, false, false);
+				TranslationUnit unit = loadUnit(FileIO.fixFilepath(filename), false, false);
 				if (unit != null)
 					translationUnits.put(unit.getFilename(), unit);
 				else
 					Logging.logError("File not found: " + filename);
 			}
 			
-			resolveIncludes(translationUnits);
+			if (commandLine.hasOption("s"))
+			{
+				if (translationUnits.size() > 1)
+					Logging.logError("Multiple sources provided. Only saving file " + filenames.get(0) + ".");
+			}
+			else
+				resolveIncludes(translationUnits);
 			
 			builder.addUnits(translationUnits.values().toArray(new TranslationUnit[] {}));
 
@@ -335,6 +357,17 @@ public class JCC816
 				
 				String assembly = builder.build(header, memorySize);
 				Assembler.assemble(outName, header, assembly, commandLine.hasOption("c"), memorySize);
+			}
+			else if (commandLine.hasOption("s")) // Assembly
+			{
+				String outName = commandLine.getOptionValues("s")[0];
+				String headerName = commandLine.getOptionValues("s")[1];
+				header = new Header(FileIO.readFileXML(headerName));
+				
+				ModuleAssemblyUnit unit = builder.buildModule(header, memorySize);
+				if (!outName.endsWith(".asm"))
+					outName = outName + ".asm";
+				FileIO.writeFile(outName, unit.save());
 			}
 		}
 		else if (commandLine.hasOption("p")) // Preprocess

@@ -2,9 +2,11 @@
 // A way of accessing and operating on a value or region of memory.
 package C99Compiler.Utils.OperandSources;
 
+import java.io.Serializable;
+
 import C99Compiler.Utils.AssemblyUtils.DetailsTicket;
 
-public abstract class OperandSource
+public abstract class OperandSource implements Serializable
 {
 	private boolean isLiteral;
 	protected int size, offset;
@@ -20,6 +22,12 @@ public abstract class OperandSource
 		this.size = size;
 		this.offset = 0;
 		this.isLiteral = isLiteral;
+	}
+	public OperandSource()
+	{
+		this.size = 0;
+		this.offset = 0;
+		this.isLiteral = false;
 	}
 	public boolean isLiteral() {return isLiteral;}
 	public int getSize() {return size;}

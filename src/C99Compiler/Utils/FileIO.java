@@ -30,6 +30,10 @@ public final class FileIO
 {
 	public static String outputFolder = null; // If not null is prefixed to all execution-relative (i. e. output) paths for debug purposes.
 	
+	public static String fixFilepath(String filepath)
+	{
+		return filepath.replace("/", "\\");
+	}
 	public static File getFileER(String filename) // Execution-relative, i. e. doesn't care about rootFolder
 	{
 		Path path;
@@ -152,10 +156,11 @@ public final class FileIO
 	}
 	public static List<String> matchingFiles(File root, String searchTerm)
 	{
+		searchTerm = searchTerm.replace("/", "\\\\").replace(".", "\\.").replace("*", ".*");
 		List<String> filenames = findAll(root);
 		List<String> matchingFilenames = new LinkedList<String>();
 		for (String filename : filenames)
-			if (filename.matches(searchTerm.replace(".", "\\.").replace("*", ".*")))
+			if (filename.matches(searchTerm))
 				matchingFilenames.add(filename);
 		return matchingFilenames;
 	}

@@ -71,20 +71,20 @@ public class ControlNode extends InterpretingNode<ControlNode, Control_lineConte
 				filename = filename.stripTrailing();
 			}
 			else filename = node.pp_token(0).Header_name().getText();
+			boolean isStd = filename.contains("<");
+			filename = FileIO.fixFilepath(filename.replaceAll("[<>\"\"]", ""));
 			
-			if (filename.contains("<")) // Include library
+			if (isStd) // Include std library
 			{
-				filename = filename.replaceAll("[<>\"\"]", "");
 				stdLib = filename;
-				try {file = FileIO.readResource("stdlib/" + filename);}
+				try {file = FileIO.readResource("stdlib\\" + filename);}
 				catch (Exception e) {file = FileIO.readFile(filename);}
 			}
-			else if (filename.contains("\"")) // Include file
+			else // Include other file
 			{
-				filename = filename.replaceAll("[<>\"\"]", "");
 				otherLib = filename;
 				try {file = FileIO.readFile(filename);}
-				catch (Exception e) {file = FileIO.readResource("stdlib/" + filename);}
+				catch (Exception e) {file = FileIO.readResource("stdlib\\" + filename);}
 			}
 			String oldFILE = PreProcComponentNode.file;
 			int oldLINE = PreProcComponentNode.line;
@@ -143,17 +143,15 @@ public class ControlNode extends InterpretingNode<ControlNode, Control_lineConte
 				filename = filename.stripTrailing();
 			}
 			else filename = node.pp_token(0).Header_name().getText();
-			embeds.add(filename);
-			if (filename.contains("<")) // Include library
-			{
-				filename = filename.replaceAll("[<>\"\"]", "");
-				embedBytes = FileIO.readResourceBytes("stdlib/" + filename);
-			}
-			else if (filename.contains("\"")) // Include file
-			{
-				filename = filename.replaceAll("[<>\"\"]", "");
+			isStd = filename.contains("<");
+			filename = FileIO.fixFilepath(filename.replaceAll("[<>\"\"]", ""));
+			
+			if (isStd) // Include std library
+				embedBytes = FileIO.readResourceBytes("stdlib\\" + filename);
+			else // Include other file
 				embedBytes = FileIO.readFileBytes(filename);
-			}
+
+			embeds.add(filename);
 			
 			int j = 0;
 			for (int i = 0; i < embedBytes.length; i += CompConfig.bytesPerDataLine)

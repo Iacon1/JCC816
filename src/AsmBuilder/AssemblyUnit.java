@@ -23,12 +23,18 @@ import C99Compiler.CompilerNodes.LValues.VariableNode;
 
 public class AssemblyUnit implements TranslationUnit {
 
-	private String filename, assembly;
+	private String filename;
+	protected String assembly;
 	
 	public AssemblyUnit(String filename, String assembly)
 	{
 		this.filename = filename;
 		this.assembly = assembly;
+	}
+	public AssemblyUnit()
+	{
+		this.filename = null;
+		this.assembly = null;
 	}
 	@Override public LinkedHashMap<String, VariableNode> getVariables() {return new LinkedHashMap<String, VariableNode>();}
 	@Override public LinkedHashMap<String, StructUnionDefinitionNode> getStructs() {return new LinkedHashMap<String, StructUnionDefinitionNode>();}
