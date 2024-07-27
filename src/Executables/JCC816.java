@@ -119,6 +119,12 @@ public class JCC816
 				.build();
 		options.addOption(option);
 		
+		option = Option.builder()
+				.longOpt("no-node-caching")
+				.desc("Disables caching of searches in the node tree. Uses less memory but takes a lot longer.")
+				.build();
+		options.addOption(option);
+		
 		option = Option.builder("D")
 			.longOpt("debug-level")
 			.hasArg()
@@ -326,6 +332,8 @@ public class JCC816
 			CompConfig.wordAddresses = true;
 		if (commandLine.hasOption("fast-byte-count"))
 			CompConfig.fastByteCount = true;
+		if (commandLine.hasOption("no-node-caching"))
+			CompConfig.cacheSearches = false;
 		
 		if (commandLine.hasOption("l") || commandLine.hasOption("s")) // Link to executable or to assembly
 		{	

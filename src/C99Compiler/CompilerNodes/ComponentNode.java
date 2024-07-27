@@ -5,12 +5,15 @@
 package C99Compiler.CompilerNodes;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import C99Compiler.CompConfig;
 import C99Compiler.CompilerNodes.Definitions.EnumDefinitionNode;
 import C99Compiler.CompilerNodes.Definitions.Scope;
 import C99Compiler.CompilerNodes.Definitions.StructUnionDefinitionNode;
@@ -18,7 +21,6 @@ import C99Compiler.CompilerNodes.Definitions.Type;
 import C99Compiler.CompilerNodes.Dummies.EnumeratorNode;
 import C99Compiler.CompilerNodes.Interfaces.NamedNode;
 import C99Compiler.CompilerNodes.Interfaces.SequencePointNode;
-import C99Compiler.CompilerNodes.Interfaces.TypedNode;
 import C99Compiler.CompilerNodes.LValues.VariableNode;
 import C99Compiler.CompilerNodes.Statements.IterationStatementNode;
 import C99Compiler.CompilerNodes.Statements.SelectionStatementNode;
@@ -27,6 +29,7 @@ public class ComponentNode<C extends ComponentNode<C>> implements Serializable
 {
 	protected ComponentNode<?> parent;
 	protected List<ComponentNode<?>> children;
+	private Map<Class<?>, LinkedHashMap<String, ?>> searchCaches; // Cache results of searches of child nodes
 	
 	public ComponentNode(ComponentNode<?> parent)
 	{
@@ -34,15 +37,18 @@ public class ComponentNode<C extends ComponentNode<C>> implements Serializable
 		this.parent = parent;
 		if (parent != null)
 			this.parent.children.add(this);
+		invalidateSearchCaches();
 	}
 	public ComponentNode()
 	{
 		this.children = new LinkedList<ComponentNode<?>>();
 		this.parent = null;
+		invalidateSearchCaches();
 	}
 	public void removeChild(ComponentNode<?> child)
 	{
 		children.remove(child);
+		invalidateSearchCaches();
 	}
 	public void swap(ComponentNode<?> replacement)
 	{
@@ -50,11 +56,13 @@ public class ComponentNode<C extends ComponentNode<C>> implements Serializable
 		{
 			int i = parent.children.indexOf(this);
 			parent.children.set(i, replacement);
+			parent.invalidateSearchCaches();
 			parent = null;
 		}
 		else if (replacement.parent != null)
 		{
 			replacement.parent.removeChild(replacement);
+			replacement.parent.invalidateSearchCaches();
 			replacement.parent = null;
 		}
 	}
@@ -63,6 +71,7 @@ public class ComponentNode<C extends ComponentNode<C>> implements Serializable
 		if (this.parent != null)
 			parent.removeChild(this);
 		parent = newParent;
+		parent.invalidateSearchCaches();
 	}
 	/**
 	 * @return The current node's scope.
@@ -72,7 +81,13 @@ public class ComponentNode<C extends ComponentNode<C>> implements Serializable
 		if (parent == null) return new Scope();
 		else return parent.getScope();
 	}
-	
+
+	private void invalidateSearchCaches()
+	{
+		searchCaches = new HashMap<Class<?>, LinkedHashMap<String, ?>>();
+		if (parent != null && parent != this)
+			parent.invalidateSearchCaches();
+	}
 	/** Gets the list of Ts defined in this node or its subnodes.
 	 * 
 	 * @param tClass The class of T.
@@ -81,6 +96,8 @@ public class ComponentNode<C extends ComponentNode<C>> implements Serializable
 	 */
 	private <T extends ComponentNode<?> & NamedNode> LinkedHashMap<String, T> getChildTs(Class<T> tClass, boolean strict)
 	{
+		if (CompConfig.cacheSearches && searchCaches.containsKey(tClass))
+			return (LinkedHashMap<String, T>) searchCaches.get(tClass);
 		LinkedHashMap<String, T> childTs = new LinkedHashMap<String, T>();
 		for (ComponentNode<?> node : children)
 		{
@@ -90,6 +107,8 @@ public class ComponentNode<C extends ComponentNode<C>> implements Serializable
 				childTs.put(((T) node).getFullName(), (T) node);
 			childTs.putAll(node.getChildTs(tClass, strict));
 		}
+		if (CompConfig.cacheSearches)
+			searchCaches.put(tClass, childTs);
 		return childTs;
 	}
 	/** Gets the list of variables defined in this node or its subnodes.
