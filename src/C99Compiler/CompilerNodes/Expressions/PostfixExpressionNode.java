@@ -37,7 +37,7 @@ import C99Compiler.CompilerNodes.Definitions.ArrayType;
 
 public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expressionContext> implements SequencePointNode
 {
-	private enum PFType
+	public static enum PFType
 	{
 		incr, decr,
 		arraySubscript,
@@ -440,4 +440,6 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 			return getAssembly(leadingWhitespace, expr.getLValue().getSource(), new ScratchManager(), new DetailsTicket());
 		else return super.getAssembly(leadingWhitespace);
 	}
+	
+	public PFType getPFType() {return type;}
 }

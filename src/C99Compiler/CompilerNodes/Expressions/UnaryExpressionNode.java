@@ -27,6 +27,7 @@ import C99Compiler.Utils.OperandSources.OperandSource;
 import Grammar.C99.C99Parser.Unary_expressionContext;
 import C99Compiler.CompilerNodes.Dummies.DummyValueNode;
 import C99Compiler.CompilerNodes.Dummies.DummyVariableNode;
+import C99Compiler.CompilerNodes.Expressions.PostfixExpressionNode.PFType;
 
 public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionContext>
 {
@@ -69,6 +70,11 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 			
 			if ((operator.equals("++") || operator.equals("--")) && !expr.hasLValue())
 				throw new ConstraintException("6.5.3.1", 1, node.start);
+			if (operator.equals("&") && PostfixExpressionNode.class.isAssignableFrom(expr.getClass()))
+			{
+				if (((PostfixExpressionNode) expr).getPFType() == PFType.funcCall || !expr.hasLValue())
+					throw new ConstraintException("6.5.3.2", 1, node.start);
+			}
 		}
 		return this;
 	}
@@ -161,7 +167,7 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 			else return false;
 		else if (operator.equals("&"))
 		{
-			return expr.hasPropValue() || (expr.hasLValue() && VariableNode.class.isAssignableFrom(expr.getLValue().getClass()));
+			return expr.hasPropValue() || (expr.hasLValue() && VariableNode.class.isAssignableFrom(expr.getLValue().getClass()) && !expr.hasAssembly() && !PostfixExpressionNode.class.isAssignableFrom(expr.getClass()));
 		}
 		else return expr.hasPropValue();
 	}
@@ -236,7 +242,8 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 	public boolean hasAssembly()
 	{
 		if (operator.equals("*")) return expr.hasAssembly() || !expr.hasPropValue();
-		else if (operator.equals("&")) return false;
+		else if (operator.equals("&"))
+			return expr.hasAssembly() || PostfixExpressionNode.class.isAssignableFrom(expr.getClass());
 		else if (!operator.equals("++") && !operator.equals("--"))
 			return (expr == null ? false : expr.hasAssembly()) || !hasPropValue();
 		else return true;
@@ -312,6 +319,14 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 			pointerRef = new IndirectLValueNode(this, expr.getLValue(), sourceI, ((PointerType) expr.getType()).getType());
 			if (destSource != null)
 				assembly += AssemblyUtils.byteCopier(whitespace, ((PointerType) expr.getType()).getType().getSize(), destSource, pointerRef.getSource(), ticket);
+			break;
+		case "&":
+			if (destSource != null)
+				if (expr.hasLValue())
+				{
+					PropPointer<LValueNode<?>> p = new PropPointer<LValueNode<?>>(expr.getLValue(), 0);
+					assembly += AssemblyUtils.byteCopier(whitespace, CompConfig.pointerSize, destSource, new ConstantSource(p, CompConfig.pointerSize), ticket);
+				}
 			break;
 		default: return "";
 		}
