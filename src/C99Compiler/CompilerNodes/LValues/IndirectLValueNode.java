@@ -46,9 +46,12 @@ public class IndirectLValueNode extends LValueNode<IndirectLValueNode>
 			
 			if ((ticket.flags & DetailsTicket.saveY) != 0)
 				assembly += whitespace + "PHY\n";
+			if (Math.abs(i + offset) >= 128 && (ticket.flags & DetailsTicket.isXY16Bit) == 0)
+				assembly += "REP\t#$10\n";
 			assembly += whitespace + "LDY\t#$" + String.format(ticket.is16Bit() ? "%04x" : "%02x", i + offset) + "\n";
-
 			assembly += whitespace + operation + "\t[" + source.getBase() + "],y" + "\n";
+			if (Math.abs(i + offset) >= 128 && (ticket.flags & DetailsTicket.isXY16Bit) == 0)
+				assembly += "SEP\t#$10\n";
 			if ((ticket.flags & DetailsTicket.saveY) != 0)
 				assembly += whitespace + "PLY\n";
 
