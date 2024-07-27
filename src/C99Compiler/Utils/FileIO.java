@@ -30,9 +30,12 @@ public final class FileIO
 {
 	public static String outputFolder = null; // If not null is prefixed to all execution-relative (i. e. output) paths for debug purposes.
 	
-	public static String fixFilepath(String filepath)
+	private static String fixFilepath(String filepath, boolean forResource) // If for resource, use /. If for file, use \.
 	{
-		return filepath.replace("/", "\\");
+		if (!forResource)
+			return filepath.replace("/", "\\");
+		else
+			return filepath.replace("\\", "/");
 	}
 	public static File getFileER(String filename) // Execution-relative, i. e. doesn't care about rootFolder
 	{
@@ -55,20 +58,25 @@ public final class FileIO
 	
 	public static final boolean hasResource(String filename)
 	{
+		filename = fixFilepath(filename, true);
 		return ClassLoader.getSystemResource(filename) != null;
 	}
 	public static boolean hasFile(String filename)
 	{
+		filename = fixFilepath(filename, false);
 		return getFile(filename).exists();
 	}
 	public static final String readResource(String filename) throws IOException
 	{
+		filename = fixFilepath(filename, true);
 		return new String(ClassLoader.getSystemResourceAsStream(filename).readAllBytes());
 	}
 	public static byte[] readResourceBytes(String filename) throws IOException
 	{
+		filename = fixFilepath(filename, true);
 		return ClassLoader.getSystemResourceAsStream(filename).readAllBytes();
 	}
+
 	public static final String readFile(File file) throws IOException
 	{
 		FileInputStream inStream = new FileInputStream(file);
@@ -92,15 +100,18 @@ public final class FileIO
 	
 	public static final String readFile(String filename) throws IOException
 	{
+		filename = fixFilepath(filename, false);
 		return readFile(getFile(filename));
 	}
 	public static final byte[] readFileBytes(String filename) throws IOException
 	{
+		filename = fixFilepath(filename, false);
 		return readFileBytes(getFile(filename));
 	}
 	
 	public static final void writeFile(String filename, byte[] bytes) throws IOException
 	{
+		filename = fixFilepath(filename, false);
 		File f = getFile(filename);
 		f.createNewFile();
 		FileOutputStream fo = new FileOutputStream(f);
@@ -156,7 +167,7 @@ public final class FileIO
 	}
 	public static List<String> matchingFiles(File root, String searchTerm)
 	{
-		searchTerm = searchTerm.replace("/", "\\\\").replace(".", "\\.").replace("*", ".*");
+		searchTerm = fixFilepath(searchTerm, false).replace("\\", "\\\\").replace(".", "\\.").replace("*", ".*");
 		List<String> filenames = findAll(root);
 		List<String> matchingFilenames = new LinkedList<String>();
 		for (String filename : filenames)

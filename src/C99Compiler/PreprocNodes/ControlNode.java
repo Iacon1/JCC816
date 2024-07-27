@@ -72,7 +72,7 @@ public class ControlNode extends InterpretingNode<ControlNode, Control_lineConte
 			}
 			else filename = node.pp_token(0).Header_name().getText();
 			boolean isStd = filename.contains("<");
-			filename = FileIO.fixFilepath(filename.replaceAll("[<>\"\"]", ""));
+			filename = filename.replaceAll("[<>\"\"]", "");
 			
 			if (isStd) // Include std library
 			{
@@ -144,7 +144,7 @@ public class ControlNode extends InterpretingNode<ControlNode, Control_lineConte
 			}
 			else filename = node.pp_token(0).Header_name().getText();
 			isStd = filename.contains("<");
-			filename = FileIO.fixFilepath(filename.replaceAll("[<>\"\"]", ""));
+			filename = filename.replaceAll("[<>\"\"]", "");
 			
 			if (isStd) // Include std library
 				embedBytes = FileIO.readResourceBytes("stdlib\\" + filename);

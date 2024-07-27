@@ -187,11 +187,15 @@ public class JCC816
 		
 		if (sourceNameC != null && (isResource ? FileIO.hasResource(sourceNameC) : FileIO.hasFile(sourceNameC)))
 		{
+			if (VerbosityLevel.isAtLeast(VerbosityLevel.high))
+				Logging.logNotice("Loading file " + sourceNameC);
 			String fileText = isResource ? FileIO.readResource(sourceNameC) : FileIO.readFile(sourceNameC);
 			return C99Compiler.compile(sourceNameC, fileText);
 		}
 		else if (sourceNameA != null && (isResource ? FileIO.hasResource(sourceNameA) : FileIO.hasFile(sourceNameA)))
 		{
+			if (VerbosityLevel.isAtLeast(VerbosityLevel.high))
+				Logging.logNotice("Loading file " + sourceNameA);
 			String fileText = isResource ? FileIO.readResource(sourceNameA) : FileIO.readFile(sourceNameA);
 			if (fileText.startsWith(ModuleAssemblyUnit.getPrefix()))
 				return new ModuleAssemblyUnit(fileText);
@@ -200,6 +204,8 @@ public class JCC816
 		}
 		else if (sourceNameH != null && (isResource ? FileIO.hasResource(sourceNameH) : FileIO.hasFile(sourceNameH)))
 		{
+			if (VerbosityLevel.isAtLeast(VerbosityLevel.high))
+				Logging.logNotice("Loading file " + sourceNameH);
 			String fileText = isResource ? FileIO.readResource(sourceNameH) : FileIO.readFile(sourceNameH);
 			return C99Compiler.compile(sourceNameH, fileText);
 		}
@@ -237,7 +243,7 @@ public class JCC816
 				TranslationUnit unit = loadUnit(stdLib, true, true);
 				if (unit != null)
 					translationUnits.put(unit.getFilename(), unit);
-				else
+				else if (!stdLib.endsWith(".h"))
 					Logging.logError("File not found: " + stdLib);
 			}
 			
@@ -247,7 +253,7 @@ public class JCC816
 				TranslationUnit unit = loadUnit(otherLib, true, false);
 				if (unit != null)
 					translationUnits.put(unit.getFilename(), unit);
-				else
+				else if (!otherLib.endsWith(".h"))
 					Logging.logError("File not found: " + otherLib);
 			}
 		}
@@ -282,7 +288,7 @@ public class JCC816
 		}
 		
 		if (commandLine.hasOption("r")) // Root
-			CompConfig.rootFolder = FileIO.fixFilepath(commandLine.getOptionValue("r"));
+			CompConfig.rootFolder = commandLine.getOptionValue("r");
 		
 		if (commandLine.hasOption("H"))
 		{
@@ -313,6 +319,7 @@ public class JCC816
 			case "0" : CompConfig.verbosityLevel = VerbosityLevel.none; break;
 			case "1" : CompConfig.verbosityLevel = VerbosityLevel.low; break;
 			case "2" : CompConfig.verbosityLevel = VerbosityLevel.medium; break;
+			case "3" : CompConfig.verbosityLevel = VerbosityLevel.high; break;
 			}
 		
 		if (commandLine.hasOption("optimize-addresses"))
@@ -325,11 +332,17 @@ public class JCC816
 			Map<String, TranslationUnit> translationUnits  = new HashMap<String, TranslationUnit>();
 			List<String> filenames = new LinkedList<String>();
 			for (String parameter : commandLine.getArgList())
-				filenames.addAll(FileIO.matchingFiles(parameter));
+			{
+				List<String> matchingFiles = FileIO.matchingFiles(parameter);
+				if (matchingFiles.isEmpty())
+					Logging.logError("File not found: " + parameter);
+				else
+					filenames.addAll(matchingFiles);
+			}
 			
 			for (String filename : filenames) // Read all input files
 			{
-				TranslationUnit unit = loadUnit(FileIO.fixFilepath(filename), false, false);
+				TranslationUnit unit = loadUnit(filename, false, false);
 				if (unit != null)
 					translationUnits.put(unit.getFilename(), unit);
 				else
