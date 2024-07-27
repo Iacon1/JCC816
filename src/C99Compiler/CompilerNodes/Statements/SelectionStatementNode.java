@@ -203,8 +203,8 @@ public class SelectionStatementNode extends SequencePointStatementNode<Selection
 			for (long i = smallestCase; i <= largestCase; ++i)
 			{
 				if (caseValues.contains(i))
-					assembly += whitespace + AssemblyUtils.getWhitespace(CompConfig.indentSize) + ".word\t" + getCaseLabel(i) + "\n";
-				else assembly += whitespace + AssemblyUtils.getWhitespace(CompConfig.indentSize) + ".word\t" + getDefaultLabel(false) + "\n";
+					assembly += whitespace + AssemblyUtils.getWhitespace(CompConfig.indentSize) + ".word\t.LoWord(" + getCaseLabel(i) + ")\n";
+				else assembly += whitespace + AssemblyUtils.getWhitespace(CompConfig.indentSize) + ".word\t.LoWord(" + getDefaultLabel(false) + ")\n";
 			}
 			assembly += switchStm.getAssembly(leadingWhitespace + CompConfig.indentSize, returnAddr);
 			switchStm.clearPossibleValues();
