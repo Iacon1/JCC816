@@ -236,7 +236,7 @@ public class Header extends CartConfig
 		if (bytes.length - P2Chunk > 0) // If there was a difference...
 		{
 			int subChecksum = 0;
-			for (byte x : Arrays.copyOfRange(bytes, P2Chunk, bytes.length - P2Chunk)) subChecksum += Byte.toUnsignedInt(x);
+			for (byte x : Arrays.copyOfRange(bytes, P2Chunk, bytes.length)) subChecksum += Byte.toUnsignedInt(x);
 			double factor = ((double) bytes.length) / ((double) (bytes.length - P2Chunk)); // Repeat until same length as previous chunk
 			checksum += factor * subChecksum;
 		}
