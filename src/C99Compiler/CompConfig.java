@@ -40,7 +40,7 @@ public final class CompConfig
 	public static final String bankRootName = "ROM";
 	public static final String functionTag = "@func";
 	public static final String registerTag = "__REG";
-	
+
 	public static final int bytesPerDataLine = 32; // Bytes per data line for ROM data
 	
 	public static final OperandSource callResultSource(int size)
@@ -135,7 +135,7 @@ public final class CompConfig
 		}
 	}
 	public static OptimizationLevel optimizationLevel = OptimizationLevel.all;
-	
+	public static boolean wordAddresses = false; // Use 16-bit addressing when possible?
 	public static boolean fastByteCount = false; // Uses fast generous estimate for assigning banks
 	public static enum DebugLevel
 	{
@@ -155,6 +155,7 @@ public final class CompConfig
 		none, 	// None
 		low,	// + None
 		medium, // + Timing data
+		high,	// + Debug info
 		;
 		public static boolean isAtLeast(VerbosityLevel level)
 		{

@@ -36,7 +36,11 @@ public class AddressSource extends OperandSource
 	{
 		if (i >= size)
 			return whitespace + operation + "\t" + CompConfig.signExtend + "\n";
-		return whitespace + operation + "\t" + address + " + " + (i + offset) + "\n";
+		
+		if (CompConfig.wordAddresses)
+			return whitespace + operation + "\t.loWord(" + address + ") + " + (i + offset) + "\n";
+		else
+			return whitespace + operation + "\t" + address + " + " + (i + offset) + "\n";
 	}
 	
 	@Override

@@ -2,9 +2,6 @@
 //
 package C99Compiler.Utils.OperandSources;
 
-import java.lang.reflect.Array;
-import java.util.Arrays;
-
 import C99Compiler.Utils.AssemblyUtils.DetailsTicket;
 import C99Compiler.Utils.CompUtils;
 import C99Compiler.Utils.PropPointer;
@@ -33,7 +30,6 @@ public class ConstantSource extends ConstantByteSource
 			{
 				bytes[i] = Integer.valueOf(s.substring(2 * i, 2 * (i + 1)), 16);
 			}
-				
 		}
 		else if (String.class.isAssignableFrom(obj.getClass()))
 		{
