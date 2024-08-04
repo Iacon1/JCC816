@@ -11,6 +11,7 @@ import org.w3c.dom.Node;
 import C99Compiler.CartConfig;
 import C99Compiler.CartConfig.AddonChip;
 import C99Compiler.CartConfig.MapMode;
+import C99Compiler.CompConfig.VerbosityLevel;
 import C99Compiler.Utils.AssemblyUtils;
 import Logging.Logging;
 
