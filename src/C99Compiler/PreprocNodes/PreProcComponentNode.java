@@ -32,7 +32,7 @@ public abstract class PreProcComponentNode<T extends PreProcComponentNode<T>>
 	
 	public static void resetLineNo(String file, int line)
 	{
-		PreProcComponentNode.file = file;
+		PreProcComponentNode.file = file.replace("/", "\\");
 		PreProcComponentNode.line = line;
 		defines.put("__FILE__", new DefineNode(file)); // Change each file
 		defines.put("__LINE__", new DefineNode(String.valueOf(line))); // Change each newline

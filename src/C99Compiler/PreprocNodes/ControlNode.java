@@ -47,6 +47,16 @@ public class ControlNode extends InterpretingNode<ControlNode, Control_lineConte
 		lineInfo = new LinkedList<LineInfo>();
 	}
 	
+	private static String resolveFilename(String filename)
+	{
+		filename = filename.replaceAll("[<>\"\"]", "");
+		if (filename.startsWith("..\\") || filename.startsWith("../"))
+			filename = FileIO.getFile(PreProcComponentNode.file).getParentFile().getParentFile().getPath() + "\\" + filename.substring(3);
+		else if (filename.startsWith(".\\") || filename.startsWith("./"))
+			filename = FileIO.getFile(PreProcComponentNode.file).getParentFile().getPath() + "\\" + filename.substring(2);
+		
+		return filename;
+	}
 	private List<String> getPPTokens(Control_lineContext node) throws Exception // LOL
 	{
 		List<String> tokens = new ArrayList<String>();
@@ -72,7 +82,7 @@ public class ControlNode extends InterpretingNode<ControlNode, Control_lineConte
 			}
 			else filename = node.pp_token(0).Header_name().getText();
 			boolean isStd = filename.contains("<");
-			filename = filename.replaceAll("[<>\"\"]", "");
+			filename = resolveFilename(filename);
 			
 			if (isStd) // Include std library
 			{
@@ -144,7 +154,7 @@ public class ControlNode extends InterpretingNode<ControlNode, Control_lineConte
 			}
 			else filename = node.pp_token(0).Header_name().getText();
 			isStd = filename.contains("<");
-			filename = filename.replaceAll("[<>\"\"]", "");
+			filename = resolveFilename(filename);
 			
 			if (isStd) // Include std library
 				embedBytes = FileIO.readResourceBytes("stdlib\\" + filename);
