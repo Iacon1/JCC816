@@ -13,6 +13,7 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.DiagnosticErrorListener;
 import org.antlr.v4.runtime.Token;
 
+import Assembler.Header;
 import C99Compiler.PreprocNodes.GroupNode;
 import C99Compiler.PreprocNodes.PreProcComponentNode;
 import C99Compiler.Utils.LineInfo;
@@ -87,10 +88,10 @@ public final class Preprocessor
 		return group;
 	}
 	
-	public static final String preprocess(Set<String> includedStdLibs, Set<String> includedOtherLibs, List<LineInfo> lineInfo, String filename, String source) throws Exception
+	public static final String preprocess(Set<String> includedStdLibs, Set<String> includedOtherLibs, List<LineInfo> lineInfo, String filename, String source, Header header) throws Exception
 	{
 		Grammar.GrammarFlags.isPreproc = true;
-		PreProcComponentNode.loadPredefs();
+		PreProcComponentNode.loadPredefs(header);
 		PreProcComponentNode.resetLineNo(filename, 1);
 		GroupNode node = new GroupNode().interpret(parsePreprocess(source));
 		includedStdLibs.addAll(node.getIncludedStdLibs());
@@ -102,5 +103,10 @@ public final class Preprocessor
 		Grammar.GrammarFlags.isPreproc = false;
 
 		return source;
+	}
+	
+	public static final String preprocess(Set<String> includedStdLibs, Set<String> includedOtherLibs, List<LineInfo> lineInfo, String filename, String source) throws Exception
+	{
+		return preprocess(includedStdLibs, includedOtherLibs, lineInfo, filename, source, null);
 	}
 }

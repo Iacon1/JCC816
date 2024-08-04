@@ -15,6 +15,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import Assembler.Header;
+import C99Compiler.CompConfig.DebugLevel;
 import C99Compiler.PragmaProcessor;
 import C99Compiler.Utils.LineInfo;
 
@@ -46,7 +48,7 @@ public abstract class PreProcComponentNode<T extends PreProcComponentNode<T>>
 		line += 1;
 		defines.put("__LINE__", new DefineNode(String.valueOf(line))); // Change each newline
 	}
-	public static void loadPredefs() // Predefined macros
+	public static void loadPredefs(Header header) // Predefined macros
 	{
 		defines.put("__DATE__", new DefineNode(LocalDate.now().format(DateTimeFormatter.ofPattern("LLL dd yyyy"))));
 //		defines.put("__FILE__", new DefineNode(file)); // Change each file
@@ -59,8 +61,54 @@ public abstract class PreProcComponentNode<T extends PreProcComponentNode<T>>
 		
 		defines.put("__STDC_IEC_559__", new DefineNode("0"));
 		defines.put("__STDC_IEC_559_COMPLEX__", new DefineNode("0"));
+		
+		if (header != null)
+		{
+			DefineNode destCode = new DefineNode("0x" + String.format("%02x", header.getDestinationCode().getNumber()));
+			defines.put("__SNES_REGION__", destCode);
+			switch (header.getDestinationCode())
+			{
+			case japan: defines.put("__SNES_REGION_JPN__", destCode); break;
+			case USA: defines.put("__SNES_REGION_USA__", destCode); break;
+			case australia: defines.put("__SNES_REGION_AUS__", destCode); break;
+			case brazil: defines.put("__SNES_REGION_BRA__", destCode); break;
+			case canada: defines.put("__SNES_REGION_CAN__", destCode); break;
+			case china: defines.put("__SNES_REGION_CHN__", destCode); break;
+			case denmark: defines.put("__SNES_REGION_DEN__", destCode); break;
+			case europe: defines.put("__SNES_REGION_EUR__", destCode); break;
+			case finland: defines.put("__SNES_REGION_FIN__", destCode); break;
+			case france: defines.put("__SNES_REGION_FRA__", destCode); break;
+			case germany: defines.put("__SNES_REGION_GER__", destCode); break;
+			case indonesia: defines.put("__SNES_REGION_IND__", destCode); break;
+			case international: defines.put("__SNES_REGION_INT__", destCode); break;
+			case italy: defines.put("__SNES_REGION_ITA__", destCode); break;
+			case netherlands: defines.put("__SNES_REGION_NET__", destCode); break;
+			case southKorea: defines.put("__SNES_REGION_KOR__", destCode); break;
+			case spain: defines.put("__SNES_REGION_SPN__", destCode); break;
+			case sweden: defines.put("__SNES_REGION_SWE__", destCode); break;
+			}
+				
+			DefineNode revision = new DefineNode("0x" + String.format("%02x", header.getRevision()));
+			defines.put("__SNES_REVISION__", revision);
+			DefineNode specialVersion = new DefineNode("0x" + String.format("%02x", header.getSpecialVersion()));
+			defines.put("__SNES_SPECIAL_VER__", specialVersion);
+			
+			if (DebugLevel.isAtLeast(DebugLevel.low))
+			{
+				DefineNode debugLevel = new DefineNode(String.format("%d", DebugLevel.getOrdinal()));
+				defines.put("__DEBUG__", debugLevel);
+				defines.put("__DEBUG_LOW__", debugLevel);
+
+				if (DebugLevel.isAtLeast(DebugLevel.medium))
+					defines.put("__DEBUG_MED__", debugLevel);
+			}
+		}
 	}
-	public static void reset()
+	public static void loadPredefs()
+	{
+		loadPredefs(null);
+	}
+	public static void reset(Header header)
 	{
 		file = "";
 		line = 0;
@@ -68,7 +116,11 @@ public abstract class PreProcComponentNode<T extends PreProcComponentNode<T>>
 		defines.clear();
 		charMappings.clear();
 		embeds.clear();
-		loadPredefs();
+		loadPredefs(header);
+	}
+	public static void reset()
+	{
+		reset(null);
 	}
 	public PreProcComponentNode(PreProcComponentNode<?> parent)
 	{

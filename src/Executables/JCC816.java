@@ -168,7 +168,7 @@ public class JCC816
 		
 		return translationUnits.containsKey(headerName) || translationUnits.containsKey(nameA) || translationUnits.containsKey(nameC);
 	}
-	private static TranslationUnit loadUnit(String sourceName, boolean isHeader, boolean isResource) throws Exception
+	private static TranslationUnit loadUnit(String sourceName, boolean isHeader, boolean isResource, Header ROMHeader) throws Exception
 	{
 		String sourceNameA, sourceNameC, sourceNameH;
 		
@@ -196,7 +196,7 @@ public class JCC816
 			if (VerbosityLevel.isAtLeast(VerbosityLevel.high))
 				Logging.logNotice("Loading file " + sourceNameC);
 			String fileText = isResource ? FileIO.readResource(sourceNameC) : FileIO.readFile(sourceNameC);
-			return C99Compiler.compile(sourceNameC, fileText);
+			return C99Compiler.compile(sourceNameC, fileText, ROMHeader);
 		}
 		else if (sourceNameA != null && (isResource ? FileIO.hasResource(sourceNameA) : FileIO.hasFile(sourceNameA)))
 		{
@@ -218,7 +218,7 @@ public class JCC816
 		else
 			return null;
 	}
-	private static void resolveIncludes(Map<String, TranslationUnit> translationUnits) throws Exception
+	private static void resolveIncludes(Map<String, TranslationUnit> translationUnits, Header ROMHeader) throws Exception
 	{
 		// Recursively resolve all libs
 		Set<String> includedStdLibs = new HashSet<String>();
@@ -246,7 +246,7 @@ public class JCC816
 			{
 				stdLib = "stdlib\\" + stdLib;
 				if (stdLib.endsWith(".h") && isHeaderLoaded(translationUnits, stdLib)) continue;
-				TranslationUnit unit = loadUnit(stdLib, true, true);
+				TranslationUnit unit = loadUnit(stdLib, true, true, ROMHeader);
 				if (unit != null)
 					translationUnits.put(unit.getFilename(), unit);
 				else if (!stdLib.endsWith(".h"))
@@ -256,7 +256,7 @@ public class JCC816
 			for (String otherLib : includedOtherLibs)
 			{
 				if (otherLib.endsWith(".h") && isHeaderLoaded(translationUnits, otherLib)) continue;
-				TranslationUnit unit = loadUnit(otherLib, true, false);
+				TranslationUnit unit = loadUnit(otherLib, true, false, ROMHeader);
 				if (unit != null)
 					translationUnits.put(unit.getFilename(), unit);
 				else if (!otherLib.endsWith(".h"))
@@ -269,6 +269,7 @@ public class JCC816
 	public static void main(String[] args) throws Exception
 	{
 		AsmBuilder builder = new AsmBuilder();
+		Header header;
 		
 		Logging.setLogger(new DebugLogger());
 		
@@ -302,6 +303,20 @@ public class JCC816
 			FileIO.writeFile(filename, FileIO.readResourceBytes("XML\\Header.XML"));
 			return;
 		}
+		
+		// Load header
+		if (commandLine.hasOption("l")) // Executable
+		{
+			String headerName = commandLine.getOptionValues("l")[1];
+			header = new Header(FileIO.readFileXML(headerName));
+		}
+		else if (commandLine.hasOption("s")) // Assembly
+		{
+			String headerName = commandLine.getOptionValues("s")[1];
+			header = new Header(FileIO.readFileXML(headerName));
+		}
+		else
+			header = null;
 		
 		// Set levels
 		if (commandLine.hasOption("O"))
@@ -350,7 +365,7 @@ public class JCC816
 			
 			for (String filename : filenames) // Read all input files
 			{
-				TranslationUnit unit = loadUnit(filename, false, false);
+				TranslationUnit unit = loadUnit(filename, false, false, header);
 				if (unit != null)
 					translationUnits.put(unit.getFilename(), unit);
 				else
@@ -363,27 +378,23 @@ public class JCC816
 					Logging.logError("Multiple sources provided. Only saving file " + filenames.get(0) + ".");
 			}
 			else
-				resolveIncludes(translationUnits);
+				resolveIncludes(translationUnits, header);
 			
 			builder.addUnits(translationUnits.values().toArray(new TranslationUnit[] {}));
 
 			MemorySize memorySize = new MemorySize(0, 0, 0, false);
-			Header header = null;
-			
+
 			if (commandLine.hasOption("l")) // Executable
 			{
 				String outName = commandLine.getOptionValues("l")[0];
-				String headerName = commandLine.getOptionValues("l")[1];
-				header = new Header(FileIO.readFileXML(headerName));
-				
+				if (header == null) header = new Header();
 				String assembly = builder.build(header, memorySize);
 				Assembler.assemble(outName, header, assembly, commandLine.hasOption("c"), memorySize);
 			}
 			else if (commandLine.hasOption("s")) // Assembly
 			{
 				String outName = commandLine.getOptionValues("s")[0];
-				String headerName = commandLine.getOptionValues("s")[1];
-				header = new Header(FileIO.readFileXML(headerName));
+				if (header == null) header = new Header();
 				
 				ModuleAssemblyUnit unit = builder.buildModule(header, memorySize);
 				if (!outName.endsWith(".asm"))

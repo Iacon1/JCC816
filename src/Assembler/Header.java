@@ -9,9 +9,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
 import C99Compiler.CartConfig;
-import C99Compiler.CartConfig.AddonChip;
-import C99Compiler.CartConfig.MapMode;
 import C99Compiler.CompConfig.VerbosityLevel;
+
 import C99Compiler.Utils.AssemblyUtils;
 import Logging.Logging;
 
@@ -286,5 +285,17 @@ public class Header extends CartConfig
 	public int getOffset()
 	{
 		return mapMode.getHeaderPosition(devID == 0x33);
+	}
+	public DestinationCode getDestinationCode()
+	{
+		return destCode;
+	}
+	public int getSpecialVersion()
+	{
+		return specialVersion;
+	}
+	public int getRevision()
+	{
+		return revision;
 	}
 }

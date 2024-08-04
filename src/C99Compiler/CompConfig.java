@@ -148,6 +148,11 @@ public final class CompConfig
 		{
 			return CompConfig.debugLevel.compareTo(level) >= 0;
 		}
+
+		public static int getOrdinal()
+		{
+			return CompConfig.debugLevel.ordinal();
+		}
 	}
 	public static DebugLevel debugLevel = DebugLevel.none;
 	

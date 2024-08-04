@@ -11,6 +11,7 @@ import java.util.Set;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 
+import Assembler.Header;
 import C99Compiler.CompConfig.VerbosityLevel;
 import C99Compiler.CompilerNodes.TranslationUnitNode;
 import C99Compiler.CompilerNodes.Statements.CompoundStatementNode;
@@ -58,13 +59,8 @@ public class C99Compiler
 		if (collector.getException() != null) throw collector.getException();
 		return new CompoundStatementNode(new TranslationUnitNode("INTERNAL", null)).interpret(tree);
 	}
-
-	private static String precompile(Set<String> includedStdLibs, Set<String> includedOtherLibs, List<LineInfo> lineInfo, String filename, String mainFile) throws Exception
-	{
-		return Preprocessor.preprocess(includedStdLibs, includedOtherLibs, lineInfo, filename, mainFile);
-	}
 		
-	public static TranslationUnitNode compile(String filename, String file) throws Exception
+	public static TranslationUnitNode compile(String filename, String file, Header header) throws Exception
 	{ 
 		Set<String> includedStdLibs = new HashSet<String>();
 		Set<String> includedOtherLibs = new HashSet<String>();
@@ -74,7 +70,7 @@ public class C99Compiler
 		if (VerbosityLevel.isAtLeast(VerbosityLevel.medium))
 			printInfo("Compiling " + filename + "...");
 		
-		String source = precompile(includedStdLibs, includedOtherLibs, lineInfo, filename, file);
+		String source = Preprocessor.preprocess(includedStdLibs, includedOtherLibs, lineInfo, filename, file, header);
 		if (VerbosityLevel.isAtLeast(VerbosityLevel.medium))
 			printInfo("Precompiled in " + (System.currentTimeMillis() - t) + " ms. Source length: " + source.length() + ".");
 		t = System.currentTimeMillis();
@@ -93,6 +89,10 @@ public class C99Compiler
 			printInfo("Compilation done.");
 
 		return unit;
+	}
+	public static TranslationUnitNode compile(String filename, String file) throws Exception
+	{ 
+		return compile(filename, file, null);
 	}
 	
 	/** A scaled-down version of the compilation process, immediately returning the ASM instead of a translation unit node.
