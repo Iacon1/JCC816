@@ -125,6 +125,12 @@ public class JCC816
 				.build();
 		options.addOption(option);
 		
+		option = Option.builder()
+				.longOpt("no-static-initialization")
+				.desc("Doesn't initialize static variables. Not compliant with standard.")
+				.build();
+		options.addOption(option);
+		
 		option = Option.builder("D")
 			.longOpt("debug-level")
 			.hasArg()
@@ -154,7 +160,6 @@ public class JCC816
 				.desc("Ensures the assembler doesn't leave behind unecessary files.")
 				.build();
 		options.addOption(option);
-		
 		
 		return options;
 	}
@@ -349,6 +354,8 @@ public class JCC816
 			CompConfig.fastByteCount = true;
 		if (commandLine.hasOption("no-node-caching"))
 			CompConfig.cacheSearches = false;
+		if (commandLine.hasOption("no-static-initialization"))
+			CompConfig.initializeStatics = false;
 		
 		if (commandLine.hasOption("l") || commandLine.hasOption("s")) // Link to executable or to assembly
 		{	

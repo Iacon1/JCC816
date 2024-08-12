@@ -281,7 +281,7 @@ public class InitializerNode extends InterpretingNode<InitializerNode, Initializ
 					assembly += initializer.getAssembly(leadingWhitespace);
 				return assembly;
 			}
-			else if (LValue.getType().isStatic()) // Statics are initialized always
+			else if (LValue.getType().isStatic() && CompConfig.initializeStatics) // Statics are initialized always when compliant
 				return AssemblyUtils.byteCopier(
 					AssemblyUtils.getWhitespace(leadingWhitespace),
 					LValue.getSize(),

@@ -137,7 +137,8 @@ public final class CompConfig
 	public static OptimizationLevel optimizationLevel = OptimizationLevel.all;
 	public static boolean wordAddresses = false;	// Use 16-bit addressing when possible?
 	public static boolean fastByteCount = false;	// Uses fast generous estimate for assigning banks
-	public static boolean cacheSearches = true;		// Uses caches for each node to make compilation faster 
+	public static boolean cacheSearches = true;		// Uses caches for each node to make compilation faster
+	public static boolean initializeStatics = true; // Always initialize statics; To be compliant, must be true
 	public static enum DebugLevel
 	{
 		none, 	// None
