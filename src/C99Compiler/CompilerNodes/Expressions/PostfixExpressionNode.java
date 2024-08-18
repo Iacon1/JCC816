@@ -18,6 +18,7 @@ import C99Compiler.CompilerNodes.Interfaces.SequencePointNode;
 import C99Compiler.CompilerNodes.LValues.IndirectLValueNode;
 import C99Compiler.CompilerNodes.LValues.LValueNode;
 import C99Compiler.CompilerNodes.LValues.VariableNode;
+import C99Compiler.Exceptions.ConstraintException;
 import C99Compiler.Exceptions.ScratchOverflowException;
 import C99Compiler.Exceptions.UnsupportedFeatureException;
 import C99Compiler.Utils.AssemblyUtils;
@@ -92,6 +93,8 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 			if (node.argument_expression_list() != null)
 				for (Assignment_expressionContext expr : node.argument_expression_list().assignment_expression())
 					params.add(new AssignmentExpressionNode(this).interpret(expr));
+			if (params.size() != getReferencedFunction().getParameters().size())
+				throw new ConstraintException("6.5.2.2", 2, node.start);
 			if (getReferencedFunction() != null && getReferencedFunction().isSA1() && !getEnclosingFunction().isSA1())
 				throw new UnsupportedFeatureException("Calling an SA1 function outside an SA1 context", true, node.start);
 			else if (getReferencedFunction() != null && !getReferencedFunction().isSA1() && getEnclosingFunction().isSA1())
