@@ -42,23 +42,29 @@ public final class Preprocessor
 		{
 			if (bigComment && line.contains("*/"))
 			{
-				line = line.replaceFirst(".*\\*/", "");
+				line = line.replaceFirst(".*\\*/", " ");
 				bigComment = false;
 			}
-			else if (bigComment) continue;
-			line = line.replaceFirst("//.*", "");
-			if (line.contains("/*"))
-				if (line.contains("*/"))
-				{
-					int i = line.indexOf("/*");
-					int j = line.indexOf("*/");
-					line = line.replace(line.substring(i, j + 2), "");
-				}
-				else
-				{
-					bigComment = true;
-					line = line.replaceFirst("/\\*.*", "");
-				}
+			else if (bigComment)
+			{
+				line = " ";
+			}
+			else
+			{
+				line = line.replaceFirst("//.*", " ");
+				if (line.contains("/*"))
+					if (line.contains("*/"))
+					{
+						int i = line.indexOf("/*");
+						int j = line.indexOf("*/");
+						line = line.replace(line.substring(i, j + 2), " ");
+					}
+					else
+					{
+						bigComment = true;
+						line = line.replaceFirst("/\\*.*", " ");
+					}
+			}
 			if (!line.isEmpty()) source += line + "\n";
 		}
 		
@@ -92,7 +98,7 @@ public final class Preprocessor
 	{
 		Grammar.GrammarFlags.isPreproc = true;
 		PreProcComponentNode.loadPredefs(header);
-		PreProcComponentNode.resetLineNo(filename, 1);
+		PreProcComponentNode.resetLineNo(filename, 1, includedStdLibs.contains(filename));
 		GroupNode node = new GroupNode().interpret(parsePreprocess(source));
 		includedStdLibs.addAll(node.getIncludedStdLibs());
 		includedOtherLibs.addAll(node.getIncludedOtherLibs());
