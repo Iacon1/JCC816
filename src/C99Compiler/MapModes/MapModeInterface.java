@@ -35,6 +35,8 @@ public interface MapModeInterface extends Configurer
 			FunctionDefinitionNode aFunc = variable.getEnclosingFunction();
 			FunctionDefinitionNode bFunc = b.variable.getEnclosingFunction();
 			if (aFunc == null || bFunc == null) return false; // If either are root-level then no overlaying
+			if (variable.getType().isStatic() || b.variable.getType().isStatic()) return false; // If either are static then no overlaying
+			
 			SimpleEntry<FunctionDefinitionNode, FunctionDefinitionNode> entry =
 					new SimpleEntry<FunctionDefinitionNode, FunctionDefinitionNode>(aFunc, bFunc);
 
