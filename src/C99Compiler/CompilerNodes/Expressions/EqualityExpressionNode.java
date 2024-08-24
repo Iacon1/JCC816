@@ -79,11 +79,21 @@ public class EqualityExpressionNode extends BinaryExpressionNode
 		}
 		else
 		{
-			DetailsTicket ticket2 = new DetailsTicket(ticket, DetailsTicket.isA16Bit, 0);
-			assembly += whitespace + CompUtils.setA16 + "\n";
-			assembly += source.getLDA(whitespace, 0, ticket2);
-			if (source.getSize() > 2)
-				assembly += AssemblyUtils.bytewiseOperation(whitespace, source.getSize() - 2, (Integer i, DetailsTicket ticket3) -> {return new String[]{source.getInstruction("ORA", i + 2, ticket3)};});
+			DetailsTicket ticket2;
+			if (source.getSize() % 2 != 0) // Odd number
+			{
+				ticket2 = new DetailsTicket(ticket, 0, DetailsTicket.isA16Bit);
+				assembly += source.getLDA(whitespace, 0, ticket2);
+				ticket2 = new DetailsTicket(ticket, DetailsTicket.isA16Bit, 0);
+				assembly += AssemblyUtils.bytewiseOperation(whitespace, source.getSize() - 1, (Integer i, DetailsTicket ticket3) -> {return new String[]{source.getInstruction("ORA", i + 1, ticket3)};});
+			}
+			else
+			{
+				ticket2 = new DetailsTicket(ticket, DetailsTicket.isA16Bit, 0);
+				assembly += source.getLDA(whitespace, 0, ticket2);
+				if (source.getSize() > 2)
+					assembly += AssemblyUtils.bytewiseOperation(whitespace, source.getSize() - 2, (Integer i, DetailsTicket ticket3) -> {return new String[]{source.getInstruction("ORA", i + 2, ticket3)};});
+			}			
 		}
 		if (destSource != null)
 		{
