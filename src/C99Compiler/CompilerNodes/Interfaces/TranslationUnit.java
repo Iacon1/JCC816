@@ -20,6 +20,6 @@ public interface TranslationUnit extends Catalogger
 	public Set<String> getIncludedOtherLibs();
 	public default String getDBGFilename()
 	{
-		return CompConfig.rootFolder + "/" + getFilename();
+		return getFilename();
 	}
 }

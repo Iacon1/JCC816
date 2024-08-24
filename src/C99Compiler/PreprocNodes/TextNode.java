@@ -36,7 +36,7 @@ public class TextNode extends InterpretingNode<TextNode, Text_lineContext> imple
 		try
 		{
 			for (int i = 0; i < getText().split("\n").length; ++i)
-				lineInfo.add(new LineInfo(file, line + i));
+				lineInfo.add(new LineInfo(file, line + i, isStd));
 		}
 		catch (Exception e) {}
 		incrLineNo();

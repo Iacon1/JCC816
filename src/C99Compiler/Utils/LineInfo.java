@@ -8,10 +8,21 @@ public class LineInfo implements Serializable
 {
 	public String filename;
 	public int line;
-
-	public LineInfo(String filename, int line)
+	public boolean isStd;
+	
+	public LineInfo(String filename, int line, boolean isStd)
 	{
 		this.filename = filename;
 		this.line = line;
+		this.isStd = isStd;
+	}
+	
+	public String getLine()
+	{
+		if (!isStd)
+			return "\"" + FileIO.getFile(filename) + "\", " + line;
+		else
+			return "\"stdlib\\" + filename + "\", " + line;
+
 	}
 }

@@ -27,26 +27,32 @@ public abstract class PreProcComponentNode<T extends PreProcComponentNode<T>>
 	
 	protected static String file = "";
 	protected static int line = 0;
+	protected static boolean isStd = false;
 	
 	public static final Map<String, DefineNode> defines = new HashMap<String, DefineNode>();
 	public static final Map<String, Map<Character, Character>> charMappings = new HashMap<String, Map<Character, Character>>();
 	public static final Set<String> embeds = new HashSet<String>();
 	
-	public static void resetLineNo(String file, int line)
+	public static void resetLineNo(String file, int line, boolean isStd)
 	{
 		PreProcComponentNode.file = file.replace("/", "\\");
 		PreProcComponentNode.line = line;
+		PreProcComponentNode.isStd = isStd;
 		defines.put("__FILE__", new DefineNode(file)); // Change each file
 		defines.put("__LINE__", new DefineNode(String.valueOf(line))); // Change each newline
 	}
 	public static void resetLineNo(int line)
 	{
-		resetLineNo(file, line);
+		resetLineNo(file, line, isStd);
 	}
 	public static void incrLineNo()
 	{
 		line += 1;
 		defines.put("__LINE__", new DefineNode(String.valueOf(line))); // Change each newline
+	}
+	public static LineInfo getCurrLineInfo()
+	{
+		return new LineInfo(file, line, isStd);
 	}
 	public static void loadPredefs(Header header) // Predefined macros
 	{

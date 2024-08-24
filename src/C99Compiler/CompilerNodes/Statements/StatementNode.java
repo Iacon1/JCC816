@@ -12,6 +12,7 @@ import C99Compiler.CompilerNodes.InterpretingNode;
 import C99Compiler.CompilerNodes.Interfaces.AssemblableNode;
 import C99Compiler.CompilerNodes.LValues.VariableNode;
 import C99Compiler.Utils.AssemblyUtils;
+import C99Compiler.Utils.FileIO;
 import C99Compiler.Utils.LineInfo;
 import Grammar.C99.C99Parser.StatementContext;
 
@@ -57,7 +58,7 @@ public abstract class StatementNode<C extends ParserRuleContext> extends Interpr
 		if (DebugLevel.isAtLeast(DebugLevel.low))
 		{
 			LineInfo info = getTranslationUnit().getInfo(lineNo);
-			return AssemblyUtils.getWhitespace(leadingWhitespace) + ".dbg\tline, \"" + CompConfig.rootFolder + "/" + info.filename + "\", " + info.line + "\n";
+			return AssemblyUtils.getWhitespace(leadingWhitespace) + ".dbg\tline, " + info.getLine() + "\n";
 		}
 		else return "";
 	}

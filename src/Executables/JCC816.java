@@ -30,6 +30,7 @@ import C99Compiler.Preprocessor;
 import C99Compiler.CompConfig.DebugLevel;
 import C99Compiler.CompConfig.OptimizationLevel;
 import C99Compiler.CompConfig.VerbosityLevel;
+import C99Compiler.CompilerNodes.Dummies.DummyTranslationUnit;
 import C99Compiler.CompilerNodes.Interfaces.TranslationUnit;
 import C99Compiler.Utils.FileIO;
 import C99Compiler.Utils.LineInfo;
@@ -201,6 +202,7 @@ public class JCC816
 			if (VerbosityLevel.isAtLeast(VerbosityLevel.high))
 				Logging.logNotice("Loading file " + sourceNameC);
 			String fileText = isResource ? FileIO.readResource(sourceNameC) : FileIO.readFile(sourceNameC);
+			if (!isResource) sourceNameC = FileIO.getFile(sourceNameC).getPath();
 			return C99Compiler.compile(sourceNameC, fileText, ROMHeader);
 		}
 		else if (sourceNameA != null && (isResource ? FileIO.hasResource(sourceNameA) : FileIO.hasFile(sourceNameA)))
@@ -208,6 +210,7 @@ public class JCC816
 			if (VerbosityLevel.isAtLeast(VerbosityLevel.high))
 				Logging.logNotice("Loading file " + sourceNameA);
 			String fileText = isResource ? FileIO.readResource(sourceNameA) : FileIO.readFile(sourceNameA);
+			if (!isResource) sourceNameA = FileIO.getFile(sourceNameA).getPath();
 			if (fileText.startsWith(ModuleAssemblyUnit.getPrefix()))
 				return new ModuleAssemblyUnit(fileText);
 			else
@@ -218,6 +221,7 @@ public class JCC816
 			if (VerbosityLevel.isAtLeast(VerbosityLevel.high))
 				Logging.logNotice("Loading file " + sourceNameH);
 			String fileText = isResource ? FileIO.readResource(sourceNameH) : FileIO.readFile(sourceNameH);
+			if (!isResource) sourceNameH = FileIO.getFile(sourceNameH).getPath();
 			return C99Compiler.compile(sourceNameH, fileText);
 		}
 		else
@@ -250,7 +254,11 @@ public class JCC816
 			for (String stdLib : includedStdLibs)
 			{
 				stdLib = "stdlib\\" + stdLib;
-				if (stdLib.endsWith(".h") && isHeaderLoaded(translationUnits, stdLib)) continue;
+				if (stdLib.endsWith(".h"))
+				{
+					if (isHeaderLoaded(translationUnits, stdLib)) continue;
+					translationUnits.put(stdLib, new DummyTranslationUnit(stdLib));
+				}
 				TranslationUnit unit = loadUnit(stdLib, true, true, ROMHeader);
 				if (unit != null)
 					translationUnits.put(unit.getFilename(), unit);
@@ -260,7 +268,11 @@ public class JCC816
 			
 			for (String otherLib : includedOtherLibs)
 			{
-				if (otherLib.endsWith(".h") && isHeaderLoaded(translationUnits, otherLib)) continue;
+				if (otherLib.endsWith(".h"))
+				{
+					if (isHeaderLoaded(translationUnits, otherLib)) continue;
+					translationUnits.put(otherLib, new DummyTranslationUnit(otherLib));
+				}
 				TranslationUnit unit = loadUnit(otherLib, true, false, ROMHeader);
 				if (unit != null)
 					translationUnits.put(unit.getFilename(), unit);
@@ -300,7 +312,7 @@ public class JCC816
 		}
 		
 		if (commandLine.hasOption("r")) // Root
-			CompConfig.rootFolder = commandLine.getOptionValue("r");
+			CompConfig.rootFolder = commandLine.getOptionValue("r").replace("/", "\\");
 		
 		if (commandLine.hasOption("H"))
 		{

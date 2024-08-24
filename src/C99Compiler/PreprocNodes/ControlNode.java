@@ -47,14 +47,14 @@ public class ControlNode extends InterpretingNode<ControlNode, Control_lineConte
 		lineInfo = new LinkedList<LineInfo>();
 	}
 	
-	private static String resolveFilename(String filename)
+	private static String resolveFilename(String filename, boolean isStd)
 	{
 		filename = filename.replaceAll("[<>\"\"]", "");
-		if (filename.startsWith("..\\") || filename.startsWith("../"))
-			filename = FileIO.getFile(PreProcComponentNode.file).getParentFile().getParentFile().getPath() + "\\" + filename.substring(3);
-		else if (filename.startsWith(".\\") || filename.startsWith("./"))
-			filename = FileIO.getFile(PreProcComponentNode.file).getParentFile().getPath() + "\\" + filename.substring(2);
-		
+		if (filename.startsWith(".."))
+			filename = FileIO.getFile(PreProcComponentNode.file).toPath().getParent().resolveSibling(filename.substring(3)).toString();
+		else if (filename.startsWith("."))
+			filename = FileIO.getFile(PreProcComponentNode.file).toPath().resolveSibling(filename.substring(2)).toString();
+		filename = filename.replace("/", "\\");
 		return filename;
 	}
 	private List<String> getPPTokens(Control_lineContext node) throws Exception // LOL
@@ -82,7 +82,7 @@ public class ControlNode extends InterpretingNode<ControlNode, Control_lineConte
 			}
 			else filename = node.pp_token(0).Header_name().getText();
 			boolean isStd = filename.contains("<");
-			filename = resolveFilename(filename);
+			filename = resolveFilename(filename, isStd);
 			
 			if (isStd) // Include std library
 			{
@@ -98,9 +98,10 @@ public class ControlNode extends InterpretingNode<ControlNode, Control_lineConte
 			}
 			String oldFILE = PreProcComponentNode.file;
 			int oldLINE = PreProcComponentNode.line;
-			resetLineNo(filename, 1);
+			boolean oldStd = PreProcComponentNode.isStd;
+			resetLineNo(filename, 1, isStd);
 			include = new GroupNode(this).interpret(Preprocessor.parsePreprocess(file));
-			resetLineNo(oldFILE, oldLINE);
+			resetLineNo(oldFILE, oldLINE, oldStd);
 			break;
 		case "define": // Defines a macro
 			String name = node.Identifier().getText();
@@ -122,7 +123,6 @@ public class ControlNode extends InterpretingNode<ControlNode, Control_lineConte
 			name = node.Identifier().getText();
 			if (defines.containsKey(name)) defines.remove(name);
 			else charMappings.remove(name);
-			incrLineNo();
 			break;
 		case "line":
 			List<String> tokens = getPPTokens(node);
@@ -130,7 +130,7 @@ public class ControlNode extends InterpretingNode<ControlNode, Control_lineConte
 			if (tokens.size() == 2)
 			{
 				String newFILE = tokens.get(1);
-				resetLineNo(newFILE, newLINE - 1); // -1 since we're about to increment
+				resetLineNo(newFILE, newLINE - 1, this.isStd); // -1 since we're about to increment
 			}
 			else resetLineNo(newLINE - 1);
 			break;
@@ -142,7 +142,7 @@ public class ControlNode extends InterpretingNode<ControlNode, Control_lineConte
 		case "pragma":
 			pragmaOutput = PragmaProcessor.procPragma(getPPTokens(node), PreProcComponentNode.file, PreProcComponentNode.line);
 			for (int i = 0; i < pragmaOutput.split("\n").length; ++i)
-				lineInfo.add(new LineInfo(PreProcComponentNode.file, PreProcComponentNode.line));
+				lineInfo.add(getCurrLineInfo());
 			break;
 		case "embed":
 			filename = "";
@@ -154,7 +154,7 @@ public class ControlNode extends InterpretingNode<ControlNode, Control_lineConte
 			}
 			else filename = node.pp_token(0).Header_name().getText();
 			isStd = filename.contains("<");
-			filename = resolveFilename(filename);
+			filename = resolveFilename(filename, isStd);
 			
 			if (isStd) // Include std library
 				embedBytes = FileIO.readResourceBytes("stdlib\\" + filename);
@@ -165,7 +165,7 @@ public class ControlNode extends InterpretingNode<ControlNode, Control_lineConte
 			
 			int j = 0;
 			for (int i = 0; i < embedBytes.length; i += CompConfig.bytesPerDataLine)
-				lineInfo.add(new LineInfo(PreProcComponentNode.file, PreProcComponentNode.line));
+				lineInfo.add(getCurrLineInfo());
 			break;
 		}
 		incrLineNo();
