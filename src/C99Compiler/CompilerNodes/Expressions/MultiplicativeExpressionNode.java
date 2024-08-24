@@ -12,6 +12,7 @@ import C99Compiler.CompilerNodes.Expressions.Snippets.LongDividerModulator;
 import C99Compiler.CompilerNodes.Expressions.Snippets.Multiplier;
 import C99Compiler.CompilerNodes.Expressions.Snippets.ShortDividerModulator;
 import C99Compiler.CompilerNodes.LValues.LValueNode;
+import C99Compiler.Exceptions.UnsupportedFeatureException;
 import C99Compiler.Utils.AssemblyUtils;
 import C99Compiler.Utils.AssemblyUtils.DetailsTicket;
 import C99Compiler.Utils.ScratchManager;
@@ -53,44 +54,58 @@ public class MultiplicativeExpressionNode extends CallingArithmeticBinaryExpress
 	
 	private void optimizeMult() // Optimize constant mults
 	{
-		if (!operator.equals("*")) return; // Only do if multiplication
-		if (x.hasPropValue())
+		if (operator.equals("%")) return; // Don't do for modulo
+		if (x.hasPropValue() && operator.equals("*")) // We need x to be the variable one
 		{
 			BaseExpressionNode<?> t = y;
 			y = x;
 			x = t;
 		}
+		else if (x.hasPropValue()) // There's no way to fix this in division
+			return;
+		
 		if (x.hasPropValue()) return; // Gonna get fully optimized anyway
 		
-		if (y.hasPropValue() && 1 < y.getPropLong() && optimizedComplexity(y.getPropLong()) <= CompConfig.maxOptimizedMultComplexity)
-		{	
-			long l = y.getPropLong();
-			int i = 0;
-			boolean startOdd = (l % 2 == 1);
-			do
-			{
-				l /= 2;
-				i += 1;
+		if (operator.equals("*"))
+		{
+			if (y.hasPropValue() && 1 < y.getPropLong() && optimizedComplexity(y.getPropLong()) <= CompConfig.maxOptimizedMultComplexity)
+			{	
+				long l = y.getPropLong();
+				int i = 0;
+				boolean startOdd = (l % 2 == 1);
+				do
+				{
+					l /= 2;
+					i += 1;
+				}
+				while (l % 2 == 0 && 1 < l); // How many times can we divide by two?
+				DummyExpressionNode d1, d2;
+				d1 = new DummyExpressionNode(this, y.getType(), l);
+				d2 = new DummyExpressionNode(this, y.getType(), i);
+				MultiplicativeExpressionNode m1 = new MultiplicativeExpressionNode(this, "*", x, d1);
+				
+				ShiftExpressionNode s1 = new ShiftExpressionNode(this, "<<", m1, d2);
+				m1.swapParent(s1);
+				d2.swapParent(d2);
+				
+				optimized = s1;
+				if (startOdd)
+				{
+					optimized = new AdditiveExpressionNode(this, "+", s1, x);
+					s1.swapParent(optimized);
+				}
 			}
-			while (l % 2 == 0 && 1 < l); // How many times can we divide by two?
-			DummyExpressionNode d1, d2;
-			d1 = new DummyExpressionNode(this, y.getType(), l);
-			d2 = new DummyExpressionNode(this, y.getType(), i);
-			MultiplicativeExpressionNode m1 = new MultiplicativeExpressionNode(this, "*", x, d1);
-			
-			ShiftExpressionNode s1 = new ShiftExpressionNode(this, "<<", m1, d2);
-			m1.swapParent(s1);
-			d2.swapParent(d2);
-			
-			optimized = s1;
-			if (startOdd)
-			{
-				optimized = new AdditiveExpressionNode(this, "+", s1, x);
-				s1.swapParent(optimized);
-			}
+			else if (y.hasPropValue() && 1 == y.getPropLong())
+				optimized = x;	
 		}
-		else if (y.hasPropValue() && 1 == y.getPropLong())
-			optimized = x;	
+		else if (operator.equals("/") && ((y.getPropLong() & (y.getPropLong() - 1)) == 0)) // y is power of 2
+		{
+			assert y.getPropLong() != 0; // Should be caught by parsing
+			DummyExpressionNode d1;
+			d1 = new DummyExpressionNode(this, y.getType(), (int) (Math.log(y.getPropLong()) / Math.log(2)));
+			ShiftExpressionNode s1 = new ShiftExpressionNode(this, ">>", x, d1);
+			optimized = s1;
+		}
 	}
 	
 	public MultiplicativeExpressionNode(ComponentNode<?> parent, String operator, BaseExpressionNode<?> x, BaseExpressionNode<?> y)
@@ -108,6 +123,8 @@ public class MultiplicativeExpressionNode extends CallingArithmeticBinaryExpress
 		if (result != this) return result;
 		if (OptimizationLevel.isAtLeast(OptimizationLevel.medium))
 			optimizeMult();
+		if (operator.equals("/") && y.hasPropValue() && y.getPropLong() == 0) // Divide by zero
+			throw new UnsupportedFeatureException("Division by zero", true, node.start);
 		return result;
 	}
 	@Override
