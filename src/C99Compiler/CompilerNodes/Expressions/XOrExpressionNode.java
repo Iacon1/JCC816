@@ -6,7 +6,9 @@ import java.math.BigInteger;
 
 import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.Definitions.Type.CastContext;
+import C99Compiler.CompilerNodes.Dummies.DummyExpressionNode;
 import C99Compiler.Utils.AssemblyUtils;
+import C99Compiler.Utils.CompUtils;
 import C99Compiler.Utils.ScratchManager;
 import C99Compiler.Utils.AssemblyUtils.DetailsTicket;
 import C99Compiler.Utils.OperandSources.ConstantSource;
@@ -46,13 +48,6 @@ public class XOrExpressionNode extends ArithmeticBinaryExpressionNode
 		OperandSource sourceY = new ConstantSource(new BigInteger("FF".repeat(sourceX.getSize()), 16), sourceX.getSize()); // 0xFF...FF
 		
 		return new XOrExpressionNode(null).getAssembly(whitespace, destSource, sourceX, sourceY, ticket);
-	}
-	public static String getNegator(String whitespace, OperandSource destSource, OperandSource sourceX, DetailsTicket ticket) throws Exception
-	{
-		String assembly = "";
-		assembly += getComplementer(whitespace, destSource, sourceX, ticket);
-		assembly += AdditiveExpressionNode.getDecrementer(whitespace, destSource, ticket);
-		return assembly;
 	}
 
 	@Override

@@ -7,6 +7,7 @@ import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.FunctionDefinitionNode;
 import C99Compiler.CompilerNodes.Declarations.TypeNameNode;
 import C99Compiler.CompilerNodes.Definitions.Type;
+import C99Compiler.CompilerNodes.Dummies.DummyExpressionNode;
 import C99Compiler.CompilerNodes.Dummies.DummyType;
 import C99Compiler.CompilerNodes.LValues.IndirectLValueNode;
 import C99Compiler.CompilerNodes.LValues.LValueNode;
@@ -16,6 +17,7 @@ import C99Compiler.Exceptions.ConstraintException;
 import C99Compiler.Exceptions.ScratchOverflowException;
 import C99Compiler.PreprocNodes.PreProcComponentNode;
 import C99Compiler.Utils.AssemblyUtils;
+import C99Compiler.Utils.CompUtils;
 import C99Compiler.Utils.AssemblyUtils.DetailsTicket;
 import C99Compiler.Utils.PropPointer;
 import C99Compiler.Utils.ScratchManager;
@@ -268,24 +270,27 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 		else if (expr.hasLValue())
 			sourceX = expr.getLValue().getSource();
 		else sourceX = null;
-		
+
+		DummyExpressionNode dX = new DummyExpressionNode(this, expr.getType(), 1);
 		switch (operator)
 		{
 		case "++":
-			assembly += AdditiveExpressionNode.getIncrementer(whitespace, sourceX, sourceX, ticket);
+			assembly += new AdditiveExpressionNode("+", dX, expr).getAssembly(leadingWhitespace, sourceX, ticket);
 			if (destSource != null && !destSource.equals(sourceX))
 				assembly += AssemblyUtils.byteCopier(whitespace, sourceX.getSize(), destSource, sourceX);
 			break;
 		case "--":
-			assembly += AdditiveExpressionNode.getDecrementer(whitespace, sourceX, ticket);
+			assembly += new AdditiveExpressionNode("-", dX, expr).getAssembly(leadingWhitespace, sourceX, ticket);
 			if (destSource != null && !destSource.equals(sourceX))
 				assembly += AssemblyUtils.byteCopier(whitespace, sourceX.getSize(), destSource, sourceX);
 			break;
 		case "-": // -x = ~(x-1)
 			if (destSource != null)
 			{
-				assembly += AdditiveExpressionNode.getSubtractor(whitespace, destSource, sourceX, new ConstantSource(1, sourceX.getSize()), ticket);
+				dX = new DummyExpressionNode(this, expr.getType(), 0);
+				assembly += new AdditiveExpressionNode("-", dX, expr).getAssembly(leadingWhitespace, sourceX, ticket);
 				sourceX = destSource;
+				break;
 			}
 		case "~":
 			if (destSource != null)

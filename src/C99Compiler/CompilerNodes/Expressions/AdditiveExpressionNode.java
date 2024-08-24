@@ -6,6 +6,7 @@ import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.Definitions.Type;
 import C99Compiler.CompilerNodes.Definitions.Type.CastContext;
 import C99Compiler.CompilerNodes.Dummies.DummyExpressionNode;
+import C99Compiler.CompilerNodes.Dummies.DummyVariableNode;
 import C99Compiler.Utils.AssemblyUtils;
 import C99Compiler.Utils.AssemblyUtils.DetailsTicket;
 import C99Compiler.Utils.CompUtils;
@@ -18,8 +19,7 @@ import C99Compiler.CompilerNodes.Definitions.PointerType;
 
 public class AdditiveExpressionNode extends ArithmeticBinaryExpressionNode
 <Additive_expressionContext, Multiplicative_expressionContext, Multiplicative_expressionContext, Additive_expressionContext>
-{
-
+{	
 	public AdditiveExpressionNode(ComponentNode<?> parent)
 	{
 		super(parent);
@@ -31,9 +31,9 @@ public class AdditiveExpressionNode extends ArithmeticBinaryExpressionNode
 		lockToDestSize = true;
 	}
 
-	private AdditiveExpressionNode(String operator)
+	public AdditiveExpressionNode(String operator, BaseExpressionNode<?> x, BaseExpressionNode<?> y)
 	{
-		super(operator);
+		super(null, operator, x, y);
 		lockToDestSize = true;
 	}
 
@@ -113,24 +113,6 @@ public class AdditiveExpressionNode extends ArithmeticBinaryExpressionNode
 			}
 		}
 		else return super.getPropValue();
-	}
-	public static String getAdder(String whitespace, OperandSource destSource, OperandSource sourceX, OperandSource sourceY, DetailsTicket ticket) throws Exception
-	{
-		return new AdditiveExpressionNode("+").getAssembly(whitespace, destSource, sourceX, sourceY, ticket);
-	}
-	public static String getIncrementer(String whitespace, OperandSource destSource, OperandSource sourceX, DetailsTicket ticket) throws Exception
-	{
-		OperandSource sourceY = new ConstantSource(1, sourceX.getSize());
-		return getAdder(whitespace, destSource, sourceX, sourceY, ticket);
-	}
-	public static String getSubtractor(String whitespace, OperandSource destSource, OperandSource sourceX, OperandSource sourceY, DetailsTicket ticket) throws Exception
-	{
-		return new AdditiveExpressionNode("-").getAssembly(whitespace, destSource, sourceX, sourceY, ticket);
-	}
-	public static String getDecrementer(String whitespace, OperandSource sourceX, DetailsTicket ticket) throws Exception
-	{
-		OperandSource sourceY = new ConstantSource(1, sourceX.getSize());
-		return getSubtractor(whitespace, sourceX, sourceX, sourceY, ticket);
 	}
 
 	@Override

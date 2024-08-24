@@ -171,7 +171,7 @@ public class AssignmentExpressionNode extends BinaryExpressionNode
 		else
 		{
 			if (y.hasPropValue())
-				sourceY = new ConstantSource(y.getPropValue(), y.getType().getSize());
+				sourceY = new ConstantSource(y.getPropValue(), x.getType().getSize());
 			else if (y.hasLValue())
 				sourceY = y.getLValue().castTo(x.getType()).getSource();
 			else sourceY = null;

@@ -118,4 +118,8 @@ public final class CompUtils
 	{
 		return statement.split("\n").length * 4; // Assumes generous estimate of 4 bytes per instruction
 	}
+	public static Type getPointerType()
+	{
+		return getTypeForSize(CompConfig.pointerSize, false);
+	}
 }

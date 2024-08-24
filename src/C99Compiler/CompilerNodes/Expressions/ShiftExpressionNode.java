@@ -67,7 +67,7 @@ public class ShiftExpressionNode extends BinaryExpressionNode
 		boolean isOne = y.hasPropValue() && (y.getPropLong() == 1); // No need for loop w/ only one iteration
 		if (sourceX.getSize() < destSource.getSize())
 		{
-			assembly += AssemblyUtils.setSignExtend(whitespace, destSource, sourceX, true, true, innerTicket);
+			assembly += AssemblyUtils.setSignExtend(whitespace, destSource, sourceX, x.getType().isSigned(), y.getType().isSigned(), innerTicket);
 		}
 		
 		if (y.hasPropValue() && y.getPropLong() != 0 && ((y.getPropLong() % 8) == 0)) // Even better optimization LOL

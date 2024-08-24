@@ -249,19 +249,16 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 						}
 						if (getType().getSize() != 1)
 						{
-							assembly += new MultiplicativeExpressionNode(this, "*", indexExpr, new DummyExpressionNode(this, getType().getSize())).getAssembly(whitespace.length(), sourceI, ticket); // Multiply index by size of type
-							assembly += AdditiveExpressionNode.getAdder(whitespace,
-								sourceI,
-								addrSource,
-								sourceI, ticket); // set pointer to pointer plus address
+							DummyExpressionNode dM = new DummyExpressionNode(this, getType().getSize());
+							assembly += new MultiplicativeExpressionNode(this, "*", indexExpr, dM).getAssembly(whitespace.length(), sourceI, ticket); // Multiply index by size of type
+							DummyExpressionNode dX = new DummyExpressionNode(this, CompUtils.getPointerType(), addrSource);
+							assembly += new AdditiveExpressionNode(this, "+", dX, indexExpr).getAssembly(leadingWhitespace, sourceI, ticket); // set pointer to pointer plus address
 						}
 						else if (indexExpr.hasAssembly())
 						{
 							assembly += indexExpr.getAssembly(leadingWhitespace, sourceI, scratchManager, ticket);
-							assembly += AdditiveExpressionNode.getAdder(whitespace,
-									sourceI,
-									addrSource,
-									sourceI, ticket); // set pointer to pointer plus address
+							DummyExpressionNode dX = new DummyExpressionNode(this, CompUtils.getPointerType(), addrSource);
+							assembly += new AdditiveExpressionNode(this, "+", indexExpr, dX).getAssembly(leadingWhitespace, sourceI, ticket); // set pointer to pointer plus address
 						}
 						else
 						{
@@ -270,9 +267,8 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 								indexSource = new ConstantSource(indexExpr.getPropValue(), CompConfig.pointerSize);
 							else if (indexExpr.hasLValue())
 								indexSource = indexExpr.getLValue().getSource().respec(Math.min(indexExpr.getSize(), CompConfig.pointerSize));
-							assembly += AdditiveExpressionNode.getAdder(whitespace, sourceI,
-									addrSource,
-									indexSource, ticket); // set pointer to pointer plus address
+							DummyExpressionNode dX = new DummyExpressionNode(this, CompUtils.getPointerType(), addrSource);
+							assembly += new AdditiveExpressionNode(this, "+", indexExpr, dX).getAssembly(leadingWhitespace, sourceI, ticket); // set pointer to pointer plus address
 						}
 					}
 					else
@@ -424,9 +420,15 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 			
 			if (destSource != null && !destSource.equals(sourceX)) assembly += AssemblyUtils.byteCopier(whitespace, expr.getSize(), destSource, sourceX);
 			if (type == PFType.incr)
-				getEnclosingSequencePoint().registerSequence(AdditiveExpressionNode.getIncrementer(whitespace, sourceX, sourceX, ticket));
+			{
+				DummyExpressionNode dX = new DummyExpressionNode(this, CompUtils.getPointerType(), 1);
+				getEnclosingSequencePoint().registerSequence(new AdditiveExpressionNode("+", expr, dX).getAssembly(leadingWhitespace, sourceX, ticket));
+			}
 			else if (type == PFType.decr)
-				getEnclosingSequencePoint().registerSequence(AdditiveExpressionNode.getIncrementer(whitespace, sourceX, sourceX, ticket));
+			{
+				DummyExpressionNode dX = new DummyExpressionNode(this, CompUtils.getPointerType(), 1);
+				getEnclosingSequencePoint().registerSequence(new AdditiveExpressionNode("-", expr, dX).getAssembly(leadingWhitespace, sourceX, ticket));
+			}
 			if (scratchX != null) scratchManager.releaseScratchBlock(scratchX);
 			break;
 		default:

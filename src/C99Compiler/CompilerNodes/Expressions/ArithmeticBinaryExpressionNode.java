@@ -75,7 +75,7 @@ CC extends ParserRuleContext
 
 		assembly += whitespace + getPreface() + "\n";
 		int size = Math.min(destSource.getSize(), getRetSize(sourceX.getSize(), sourceY.getSize()));
-		assembly += AssemblyUtils.setSignExtend(whitespace, sourceX, sourceY, x == null ? true : x.getType().isSigned(), y == null ? true : y.getType().isSigned(), innerTicket);
+		assembly += AssemblyUtils.setSignExtend(whitespace, sourceX, sourceY, x.getType().isSigned(), y.getType().isSigned(), innerTicket);
 		assembly += AssemblyUtils.bytewiseOperation(whitespace, size, (Integer i, DetailsTicket ticket2) -> 
 		{
 			if ((i >= sourceX.getSize() - 1) ^ (i >= sourceY.getSize() - 1)) // Reached the last byte of only one of these
