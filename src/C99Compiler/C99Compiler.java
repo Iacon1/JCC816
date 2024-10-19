@@ -24,6 +24,8 @@ import Logging.Logging;
 
 public class C99Compiler
 {
+	private static String currFilename;
+	
 	private static void printInfo(Object... info)
 	{
 		for (int i = 0; i < info.length; ++i) Logging.logNotice(info[i].toString() + (i == info.length - 1 ? "" : ", ") + "\n");
@@ -62,6 +64,7 @@ public class C99Compiler
 		
 	public static TranslationUnitNode compile(String filename, String file, Header header) throws Exception
 	{ 
+		currFilename = filename;
 		Set<String> includedStdLibs = new HashSet<String>();
 		Set<String> includedOtherLibs = new HashSet<String>();
 		List<LineInfo> lineInfo = new ArrayList<LineInfo>();
@@ -109,6 +112,11 @@ public class C99Compiler
 		CompoundStatementNode statement = parseSnippet(tokens);
 
 		return statement.getAssembly(leadingWhitespace);
+	}
+	
+	public static String getCurrFilename()
+	{
+		return currFilename;
 	}
 	
 }

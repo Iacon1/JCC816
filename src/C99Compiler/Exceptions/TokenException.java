@@ -4,16 +4,18 @@ package C99Compiler.Exceptions;
 
 import org.antlr.v4.runtime.Token;
 
+import C99Compiler.C99Compiler;
+
 public class TokenException extends CompilerException
 {
 	public TokenException(String message, Token location)
 	{
-		super("At " + location.getLine() + ":" + location.getCharPositionInLine() + "\n" +
+		super("At " + C99Compiler.getCurrFilename() + " " + location.getLine() + ":" + location.getCharPositionInLine() + "\n" +
 				message);
 	}
 	public TokenException(String message, int line, int charPositionInLine)
 	{
-		super("At " + line + ":" + charPositionInLine + "\n" +
+		super("At " + C99Compiler.getCurrFilename() + " " + line + ":" + charPositionInLine + "\n" +
 				message);
 	}
 }
