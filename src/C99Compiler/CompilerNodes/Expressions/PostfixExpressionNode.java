@@ -165,7 +165,18 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 		// TODO Auto-generated method stub
 		return null;
 	}
-	@Override public boolean hasLValue() {return true;}
+	@Override public boolean hasLValue()
+	{
+		switch (type)
+		{
+		case arraySubscript:
+		case structMember:
+		case structMemberP:
+			return true;
+		default:
+			return false;
+		}
+	}
 	@Override
 	public LValueNode<?> getLValue() // Warning: Only returns meaningful result after getAssembly
 	{
