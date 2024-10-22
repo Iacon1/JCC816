@@ -12,19 +12,29 @@ public class HiROM implements MapModeInterface
 	@Override public int getSRAMBankLength() {return 8*1024;} // 8 KB
 	@Override public int getROMBankLength(boolean isFast, int i)
 	{
-		if (isFast)
-			return 64 * 64 * 1024;
-		else if (i == 0)
-			return 62 * 64 * 1024;
-		else return 2 * 64 * 1024;
+		if (i < 2)
+			return 32 * 1024;
+		else
+			return 64 * 1024;
 	} // 4096 KB ; 
 	
 	@Override public int getMaxWRAMBanks() {return 1;}
 	@Override public int getMaxSRAMBanks() {return 16;} // 16 * 8 = 128 KB
-	@Override public int getMaxROMBanks(boolean isFast) {return isFast? 1 : 2;} // 1 * 64 = 4096 KB; 1 * 62 + 1 * 2 = 4096 KB
+	@Override public int getMaxROMBanks(boolean isFast) {return 65;} // Split zero bank into 2
 	
 	@Override public int getWRAMBankStart(int i) {return 0x7E0000;}
 	@Override public int getSRAMBankStart(int i) {return 0xB06000 + 0x010000 * i;}
-	@Override public int getROMBankStart(boolean isFast, int i) {return (isFast || i == 1) ? 0x800000 : 0x000000;} // Last region only accessable in FastROM space
-	@Override public int getROMBankAlign(int i) {return 0x000000;}
+	@Override public int getROMBankStart(boolean isFast, int i) // Last 2 banks only accessable in FastROM space
+	{
+		int start = (isFast || i >= 63) ? 0xC00000 : 0x400000;
+		if (i == 0) // Start of bank 0 has to be here because 0x000000-0x007fff are mapped to something else
+			return start + 0x8000;
+		else if (i == 1)
+			return start;
+		else
+			return start + (i - 1) * 0x010000;
+	} 
+	@Override public int getROMBankAlign(int i) {return (i < 2) ? 0x008000 : 0x010000;}
+	@Override public int getHeaderAddress(boolean isFast) {return isFast ? 0xC0FFB0 : 0x40FFB0;}
+	@Override public int getVectorAddress(boolean isFast) {return isFast ? 0xC0FFE0 : 0x40FFE0;}
 }

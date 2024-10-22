@@ -6,30 +6,32 @@ public class ExHiROM extends HiROM
 {
 	@Override public String getName() {return "ExHiROM";}
 	@Override public byte getCode() {return 0x05;}
-	@Override public int getHeaderPosition(boolean longHeader) {return longHeader ? 0x40FFB0 : 0x40FFC0;}
+	@Override public int getHeaderPosition(boolean longHeader) {return longHeader ? 0xFFB0 : 0xFFC0;}
 
 	@Override public int getROMBankLength(boolean isFast, int i)
 	{
-		switch (i)
-		{
-		case 0: return 64 * 64 * 1024; // Q4 chunk
-		case 1: return 62 * 64 * 1024; // Q2 chunk
-		case 2: return 32 * 1024; // Q1 Chunk 1
-		case 3: return 32 * 1024; // Q1 Chunk 2
-		default: return 0; // Error
-		}
-	}  // 4096 / 3968 / 32 / 32 KB
-	@Override public int getMaxROMBanks(boolean isFast) {return 4;} // 4096 + 3968 + 32 + 32 = 8128 KB
+		if (i < 4)
+			return 32 * 1024;
+		else
+			return 64 * 1024;
+	}
+	@Override public int getMaxROMBanks(boolean isFast) {return 129;}
 	@Override public int getROMBankStart(boolean isFast, int i)
 	{
-		switch (i)
-		{
-		case 0: return 0x800000;
-		case 1: return 0x400000;
-		case 2: return 0x3E8000;
-		case 3: return 0x3F8000;
-		default: return 0; // Error
-		}
+		if (i == 0)
+			return 0x408000;
+		else if (i == 1)
+			return 0x400000;
+		else if (i == 2)
+			return 0x3E8000;
+		else if (i == 3)
+			return 0x3F8000;
+		else if (i < 65)
+			return 0x400000 + (i - 3) * 0x010000;
+		else
+			return 0xC00000 + (i - 65) * 0x01000;
 	}
-	@Override public int getROMBankAlign(int i) {return (i < 2) ? 0x000000 : 0x008000;}
+	@Override public int getROMBankAlign(int i) {return (i < 4) ? 0x008000 : 0x010000;}
+	@Override public int getHeaderAddress(boolean isFast) {return 0x40FFB0;}
+	@Override public int getVectorAddress(boolean isFast) {return 0x40FFE0;}
 }

@@ -72,6 +72,8 @@ public interface MapModeInterface extends Configurer
 	public int getSRAMBankStart(int i);
 	public int getROMBankStart(boolean isFast, int i);
 	public int getROMBankAlign(int i);
+	public int getHeaderAddress(boolean isFast);
+	public int getVectorAddress(boolean isFast);
 	
 	public default List<Integer> mapWRAM(List<VariableNode> variables, int offset, MemorySize memorySize)
 	{
@@ -112,34 +114,35 @@ public interface MapModeInterface extends Configurer
 		// ROMBanks = Math.max(ROMBanks, 4); // Minimum 128 KB
 		
 		String regions = "";
-		regions += whitespace + "ZEROPAGE: start = $000000, size = $000100 ;\n".replace(" ", "\t");
-		regions += whitespace + "STACK: start = $000000, size = $" + String.format("%06x", CompConfig.stackSize) + ";\n".replace(" ", "\t");
+		regions += (whitespace + "ZEROPAGE: start = $000000, size = $000100 ;\n").replace(" ", "\t");
+		regions += (whitespace + "STACK: start = $000000, size = $" + String.format("%06x", CompConfig.stackSize) + ";\n").replace(" ", "\t");
 		
 		String regionLength = String.format("%06x", getWRAMBankLength() - CompConfig.stackSize);
 		for (int i = 0; i < WRAMBanks; ++i)
 		{
 			String regionStart = String.format("%06x",  (i == 0 ? CompConfig.stackSize : 0) + getWRAMBankStart(i));
-			regions += whitespace + "WRAM" + String.format("%03d",i) + ": start = $" + regionStart + ", size = $" + regionLength + ";\n".replace(" ", "\t");
+			regions += (whitespace + "WRAM" + String.format("%03d",i) + ": start = $" + regionStart + ", size = $" + regionLength + ";\n").replace(" ", "\t");
 			if (i == 0) regionLength = String.format("%06x",  getWRAMBankLength());
 		}
 		regionLength = String.format("%06x",  getSRAMBankLength());
 		for (int i = 0; i < SRAMBanks; ++i)
 		{
 			String regionStart = String.format("%06x",  getSRAMBankStart(i));
-			regions += whitespace + "SRAM" + String.format("%03d",i) + ": start = $" + regionStart + ", size = $" + regionLength + ";\n".replace(" ", "\t");
+			regions += (whitespace + "SRAM" + String.format("%03d",i) + ": start = $" + regionStart + ", size = $" + regionLength + ";\n").replace(" ", "\t");
 		}
+
 		for (int i = 0; i < ROMBanks; ++i)
 		{
 			String regionStart = String.format("%06x",  getROMBankStart(memorySize.isFast, i));
 			regionLength = String.format("%06x",  getROMBankLength(memorySize.isFast, i));
-			regions += whitespace + "ROM" + String.format("%03d",i) + ": start = $" + regionStart + ", size = $" + regionLength + ", type = ro, fill = yes;\n".replace(" ", "\t");
+			regions += (whitespace + "ROM" + String.format("%03d",i) + ": start = $" + regionStart + ", size = $" + regionLength + ", type = ro, fill = yes;\n").replace(" ", "\t");
 		}
 		
 		if (VerbosityLevel.isAtLeast(VerbosityLevel.medium))
 		{
-			float ROMSizeKB = memorySize.ROMSize / 1024;
-			float WRAMSizeKB = memorySize.WRAMSize / 1024;
-			float SRAMSizeKB = memorySize.WRAMSize / 1024;
+			float ROMSizeKB = (float) memorySize.ROMSize / 1024f;
+			float WRAMSizeKB = (float) memorySize.WRAMSize / 1024f;
+			float SRAMSizeKB = (float) memorySize.WRAMSize / 1024f;
 			Logging.logNotice("\n" +
 					"ROM size:  " + memorySize.ROMSize + " B (" + String.format("%.02f", ROMSizeKB) + " KB)\n" +
 					"WRAM size: " + memorySize.WRAMSize + " B (" + String.format("%.02f", WRAMSizeKB) + " KB)\n" +
@@ -157,16 +160,16 @@ public interface MapModeInterface extends Configurer
 		while (ROMSize > 0) ROMSize -= getROMBankLength(memorySize.isFast, ROMBanks++); // For ExHIROM
 		
 		String segments = "";
-		segments += whitespace + "ZEROPAGE: load = ZEROPAGE, type=zp;\n".replace(" ", "\t");
+		segments += (whitespace + "ZEROPAGE: load = ZEROPAGE, type=zp;\n").replace(" ", "\t");
 		
 		
 		for (int i = 0; i < ROMBanks; ++i)
 		{
 			String align = String.format("%06x", getROMBankAlign(i));
-			segments += whitespace + CompConfig.codeBankName(i) + ": load = ROM" + String.format("%03d",i) + ", type = ro, align = $" + align + ";\n".replace(" ", "\t");
+			segments += (whitespace + CompConfig.codeBankName(i) + ":  load = ROM" + String.format("%03d",i) + ", type = ro, align = $" + align + ";\n").replace(" ", "\t");
 		}
-		segments += whitespace + "HEADER: load = ROM000, type = ro, start = $FFB0;\n".replace(" ", "\t");
-		segments += whitespace + "VECTORS: load = ROM000, type = ro, start = $FFE0;\n".replace(" ", "\t");
+		segments += (whitespace + "HEADER:  load = ROM000, type = ro, start = $" + String.format("%06x", getHeaderAddress(memorySize.isFast)) + ";\n").replace(" ", "\t");
+		segments += (whitespace + "VECTORS: load = ROM000, type = ro, start = $" + String.format("%06x", getVectorAddress(memorySize.isFast)) + ";\n").replace(" ", "\t");
 		
 		return segments;
 	}

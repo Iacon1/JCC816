@@ -23,4 +23,7 @@ public class LoROM implements MapModeInterface
 		return ((isFast || i >= 126)? 0x808000 : 0x008000) + i * 0x010000; // Banks 126 and 127 only reachable in fastROM area
 	}
 	@Override public int getROMBankAlign(int i) {return 0x008000;}
+	
+	@Override public int getHeaderAddress(boolean isFast) {return isFast ? 0x80FFB0 : 0x00FFB0;}
+	@Override public int getVectorAddress(boolean isFast) {return isFast ? 0x80FFE0 : 0x00FFE0;}
 }

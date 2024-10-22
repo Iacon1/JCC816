@@ -233,18 +233,18 @@ public final class AsmBuilder implements Catalogger
 		String assembly = "";
 		assembly += ".segment \"VECTORS\"\n";
 		// Native
-		assembly += ".word\tRESET\n"; 						// Unused
-		assembly +=  ".word\tRESET\n"; 						// Unused
+		assembly += ".word\t.loWORD(RESET)\n"; 						// Unused
+		assembly +=  ".word\t.loWORD(RESET)\n"; 						// Unused
 		for (DefinableInterrupt interrupt : DefinableInterrupt.values())
-			assembly +=  ".word\t" + interrupt.longLabel + "\n";
+			assembly +=  ".word\t.loWORD(" + interrupt.longLabel + ")\n";
 		// Emulation
-		assembly +=  ".word\tRESET\n"; // Unused
-		assembly +=  ".word\tRESET\n"; // Unused
-		assembly +=  ".word\tRESET\n"; // COP
-		assembly +=  ".word\tRESET\n"; // Unused
-		assembly +=  ".word\tRESET\n"; // ABORT
-		assembly +=  ".word\tRESET\n"; // RESET
-		assembly +=  ".word\tRESET\n"; // IRQ/BRK
+		assembly +=  ".word\t.loWORD(RESET)\n"; // Unused
+		assembly +=  ".word\t.loWORD(RESET)\n"; // Unused
+		assembly +=  ".word\t.loWORD(RESET)\n"; // COP
+		assembly +=  ".word\t.loWORD(RESET)\n"; // Unused
+		assembly +=  ".word\t.loWORD(RESET)\n"; // ABORT
+		assembly +=  ".word\t.loWORD(RESET)\n"; // RESET
+		assembly +=  ".word\t.loWORD(RESET)\n"; // IRQ/BRK
 
 		return assembly;
 	}
@@ -328,7 +328,7 @@ public final class AsmBuilder implements Catalogger
 	private String getAssembly(CartConfig cartConfig, MemorySize memorySize, boolean isModule) throws Exception
 	{
 		String assembly = "";
-
+		memorySize.isFast = cartConfig.isFast();
 		// Get assembly from functions
 		for (FunctionDefinitionNode funcNode : getFunctions().values())
 		{
@@ -367,13 +367,13 @@ public final class AsmBuilder implements Catalogger
 		}
 		else return assembly;
 	}
-	private  static String postprocess(String assembly, MemorySize memorySize) throws Exception
+	private static String postprocess(CartConfig cartConfig, String assembly, MemorySize memorySize) throws Exception
 	{
 		ArrayList<String> lines = new ArrayList<String>(Arrays.asList(assembly.split("\n")));
 
 		if (OptimizationLevel.isAtLeast(OptimizationLevel.low))
 			lines = (ArrayList<String>) AssemblyOptimizer.optimizeAssembly((List<String>) lines);
-		memorySize.ROMSize = Banker.splitBanks(new CartConfig(), lines);
+		memorySize.ROMSize = Banker.splitBanks(cartConfig, lines);
 		
 		assembly = "";
 		for (String line : lines) if (!line.matches("\s*")) assembly += line + "\n";
@@ -390,7 +390,7 @@ public final class AsmBuilder implements Catalogger
 		if (VerbosityLevel.isAtLeast(VerbosityLevel.medium))
 			printInfo("Emitted in " + (System.currentTimeMillis() - t) + " ms. Assembly length: " + assembly.length() + ".");
 		t = System.currentTimeMillis();
-		assembly = postprocess(assembly, memorySize);
+		assembly = postprocess(cartConfig, assembly, memorySize);
 		if (VerbosityLevel.isAtLeast(VerbosityLevel.medium))
 			printInfo("Postprocessed in " + (System.currentTimeMillis() - t) + " ms. Assembly length: " + assembly.length() + ".");
 		if (VerbosityLevel.isAtLeast(VerbosityLevel.medium))

@@ -11,6 +11,7 @@ import C99Compiler.MapModes.ExHiROM;
 import C99Compiler.MapModes.HiROM;
 import C99Compiler.MapModes.LoROM;
 import C99Compiler.MapModes.MapModeInterface;
+import Logging.Logging;
 
 public class CartConfig
 {
@@ -44,6 +45,9 @@ public class CartConfig
 		@Override public int getSRAMBankStart(int i) {return implementer.getSRAMBankStart(i);}
 		@Override public int getROMBankStart(boolean isFast, int i) {return implementer.getROMBankStart(isFast, i);}
 		@Override public int getROMBankAlign(int i) {return implementer.getROMBankAlign(i);}
+		
+		@Override public int getHeaderAddress(boolean isFast) {return implementer.getHeaderAddress(isFast);}
+		@Override public int getVectorAddress(boolean isFast) {return implementer.getVectorAddress(isFast);}
 	}
 	public static enum AddonChip
 	{
@@ -120,6 +124,7 @@ public class CartConfig
 		Node memLayout = document.getElementsByTagName("mapMode").item(0);
 		this.mapMode = MapMode.valueOf(memLayout.getTextContent());
 		this.isFast = memLayout.getAttributes().getNamedItem("fastROM").getTextContent().equals("true");
+
 		this.hasBattery = memLayout.getAttributes().getNamedItem("battery").getTextContent().equals("true");
 		
 		Node addon = document.getElementsByTagName("addonChip").item(0);
