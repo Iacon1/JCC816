@@ -36,4 +36,5 @@ public class ExHiROM extends HiROM
 	@Override public int getROMBankAlign(int i) {return (i < 4) ? 0x008000 : 0x010000;}
 	@Override public int getHeaderAddress(boolean isFast) {return 0x40FFB0;}
 	@Override public int getVectorAddress(boolean isFast) {return 0x40FFE0;}
+	@Override public boolean isContiguous(int i) {return i != 63 && i < 127;}
 }

@@ -76,6 +76,12 @@ public interface MapModeInterface extends Configurer
 	public int getHeaderAddress(boolean isFast);
 	public int getVectorAddress(boolean isFast);
 	
+	/**
+	 * @param i The current bank
+	 * @return Whether the next bank is contiguous.
+	 */
+	public boolean isContiguous(int i);
+	
 	public default List<Integer> mapWRAM(List<VariableNode> variables, int offset, MemorySize memorySize)
 	{
 		List<VariableOverlayable> variableOverlayables = new ArrayList<VariableOverlayable>();

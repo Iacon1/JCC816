@@ -38,4 +38,5 @@ public class HiROM implements MapModeInterface
 	@Override public int getROMBankAlign(int i) {return (i < 2) ? 0x008000 : 0x010000;}
 	@Override public int getHeaderAddress(boolean isFast) {return isFast ? 0xC0FFB0 : 0x40FFB0;}
 	@Override public int getVectorAddress(boolean isFast) {return isFast ? 0xC0FFE0 : 0x40FFE0;}
+	@Override public boolean isContiguous(int i) {return i != 63;}
 }

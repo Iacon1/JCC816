@@ -49,6 +49,7 @@ public class CartConfig
 		
 		@Override public int getHeaderAddress(boolean isFast) {return implementer.getHeaderAddress(isFast);}
 		@Override public int getVectorAddress(boolean isFast) {return implementer.getVectorAddress(isFast);}
+		@Override public boolean isContiguous(int i) {return implementer.isContiguous(i);}
 	}
 	public static enum AddonChip
 	{

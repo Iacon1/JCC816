@@ -45,11 +45,16 @@ public final class Banker
 				inBlock = false;
 				leftBlock = true;
 			}
-			if (line.contains("; " + CompConfig.functionTag))
+			if (
+					line.contains("; " + CompConfig.functionTag) ||
+					(!inBlock && line.contains(":") && !cartConfig.getType().isContiguous(banks - 1)) // Data segment beginning and in a non-contiguous bank
+				)
 			{
 				inBlock = true;
 				leftBlock = true;
 			}
+			if (i == lines.size())
+				leftBlock = true;
 			
 			if (leftBlock)
 			{
@@ -61,7 +66,13 @@ public final class Banker
 					remainingBank = cartConfig.getType().getROMBankLength(cartConfig.isFast(), banks - 1);
 					
 					if (blockSize > remainingBank)
-						throw new UnsupportedFeatureException("Functions larger than " + remainingBank / 1024 + " KB in bank " + (banks - 1) + " in " + cartConfig.getType().getName() + " mapping mode", false, i, 0);
+					{
+						if (!cartConfig.getType().isContiguous(banks - 2))
+							throw new UnsupportedFeatureException("Data segments cannot cross out of bank " + (banks - 2) + " in " + cartConfig.getType().getName() + " mapping mode", false, i, 0);
+						else
+							throw new UnsupportedFeatureException("Functions larger than " + remainingBank / 1024 + " KB in bank " + (banks - 2) + " in " + cartConfig.getType().getName() + " mapping mode", false, i, 0);
+					}
+						
 					i += 1;
 				}
 				remainingBank -= blockSize;

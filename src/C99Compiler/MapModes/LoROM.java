@@ -27,4 +27,6 @@ public class LoROM implements MapModeInterface
 	
 	@Override public int getHeaderAddress(boolean isFast) {return isFast ? 0x80FFB0 : 0x00FFB0;}
 	@Override public int getVectorAddress(boolean isFast) {return isFast ? 0x80FFE0 : 0x00FFE0;}
+	
+	@Override public boolean isContiguous(int i) {return false;}
 }
