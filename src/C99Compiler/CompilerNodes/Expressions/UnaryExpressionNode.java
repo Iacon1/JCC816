@@ -280,7 +280,7 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 				assembly += AssemblyUtils.byteCopier(whitespace, sourceX.getSize(), destSource, sourceX);
 			break;
 		case "--":
-			assembly += new AdditiveExpressionNode("-", dX, expr).getAssembly(leadingWhitespace, sourceX, ticket);
+			assembly += new AdditiveExpressionNode("-", expr, dX).getAssembly(leadingWhitespace, sourceX, ticket);
 			if (destSource != null && !destSource.equals(sourceX))
 				assembly += AssemblyUtils.byteCopier(whitespace, sourceX.getSize(), destSource, sourceX);
 			break;
