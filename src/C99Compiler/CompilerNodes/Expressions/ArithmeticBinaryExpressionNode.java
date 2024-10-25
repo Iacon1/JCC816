@@ -70,8 +70,9 @@ CC extends ParserRuleContext
 			OperandSource sourceY, DetailsTicket ticket) throws Exception
 	{
 		String assembly = "";
-		assembly += ticket.save(whitespace, DetailsTicket.saveA);
-		DetailsTicket innerTicket = new DetailsTicket(ticket, DetailsTicket.saveA, 0);
+		assembly += ticket.save(whitespace, DetailsTicket.saveA | DetailsTicket.saveABit);
+
+		DetailsTicket innerTicket = new DetailsTicket(ticket);
 
 		assembly += whitespace + getPreface() + "\n";
 		int size = Math.min(destSource.getSize(), getRetSize(sourceX.getSize(), sourceY.getSize()));
@@ -103,8 +104,8 @@ CC extends ParserRuleContext
 		}, true, isReversed(), innerTicket);
 		if (size < destSource.getSize())
 			assembly += AssemblyUtils.zeroCopier(whitespace, destSource.getSize() - size, destSource.getShifted(size), innerTicket);
-		
-		assembly += ticket.restore(whitespace, DetailsTicket.saveA);
+
+		assembly += ticket.restore(whitespace, DetailsTicket.saveA | DetailsTicket.saveABit);
 		return assembly;
 	}
 	
