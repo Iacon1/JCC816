@@ -8,6 +8,7 @@ import Grammar.C816.C816Parser.PreprocInstructionContext;
 public class PreprocNode extends ASMNode<PreprocInstructionContext>
 {
 	private String[] words;
+	private String text;
 	public PreprocNode(int lineNumber)
 	{
 		super(lineNumber);
@@ -17,7 +18,9 @@ public class PreprocNode extends ASMNode<PreprocInstructionContext>
 	public ASMNode<PreprocInstructionContext> interpret(PreprocInstructionContext node) throws Exception
 	{
 		lineNo = node.start.getLine();
-		words = node.Preproc().getText().split("[,\s\t]");
+		text = node.Preproc().getText();
+		words = text.split("[,\s\t]");
+		
 		return this;
 	}
 
@@ -54,6 +57,7 @@ public class PreprocNode extends ASMNode<PreprocInstructionContext>
 		{
 		case ".res": return procNumber(words[1]);
 		case ".word": return 2;
+		case ".byte": return text.length() - text.replace("$", "").length();
 		default: return 0;
 		}
 	}
