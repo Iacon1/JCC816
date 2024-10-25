@@ -12,7 +12,7 @@ public class HiROM implements MapModeInterface
 	@Override public int getSRAMBankLength() {return 8*1024;} // 8 KB
 	@Override public int getROMBankLength(boolean isFast, int i)
 	{
-		if (i < 2)
+		if (i == 0 || i == 64)
 			return 32 * 1024;
 		else
 			return 64 * 1024;
@@ -30,10 +30,10 @@ public class HiROM implements MapModeInterface
 		int start = (isFast || i >= 63) ? 0xC00000 : 0x400000;
 		if (i == 0) // Start of bank 0 has to be here because 0x000000-0x007fff are mapped to something else
 			return start + 0x8000;
-		else if (i == 1)
+		else if (i == 64)
 			return start;
 		else
-			return start + (i - 1) * 0x010000;
+			return start + i * 0x010000;
 	} 
 	@Override public int getROMBankAlign(int i) {return (i < 2) ? 0x008000 : 0x010000;}
 	@Override public int getHeaderAddress(boolean isFast) {return isFast ? 0xC0FFB0 : 0x40FFB0;}
