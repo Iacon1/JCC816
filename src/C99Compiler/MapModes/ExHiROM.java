@@ -6,8 +6,7 @@ public class ExHiROM extends HiROM
 {
 	@Override public String getName() {return "ExHiROM";}
 	@Override public byte getCode() {return 0x05;}
-	@Override public int getHeaderPosition(boolean longHeader) {return longHeader ? 0xFFB0 : 0xFFC0;}
-
+	
 	@Override public int getROMBankLength(boolean isFast, int i)
 	{
 		if (i < 4)

@@ -39,6 +39,7 @@ public class CartConfig
 		
 		@Override public int getMaxWRAMBanks() {return implementer.getMaxWRAMBanks();}
 		@Override public int getMaxSRAMBanks() {return implementer.getMaxSRAMBanks();}
+		@Override public int getMinROMBanks() {return implementer.getMinROMBanks();}
 		@Override public int getMaxROMBanks(boolean isFast) {return implementer.getMaxROMBanks(isFast);}
 		
 		@Override public int getWRAMBankStart(int i) {return implementer.getWRAMBankStart(i);}

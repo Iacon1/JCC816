@@ -20,6 +20,7 @@ public class HiROM implements MapModeInterface
 	
 	@Override public int getMaxWRAMBanks() {return 1;}
 	@Override public int getMaxSRAMBanks() {return 16;} // 16 * 8 = 128 KB
+	@Override public int getMinROMBanks() {return 2;}
 	@Override public int getMaxROMBanks(boolean isFast) {return 65;} // Split zero bank into 2
 	
 	@Override public int getWRAMBankStart(int i) {return 0x7E0000;}

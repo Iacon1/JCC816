@@ -66,6 +66,7 @@ public interface MapModeInterface extends Configurer
 	
 	public int getMaxWRAMBanks();
 	public int getMaxSRAMBanks();
+	public int getMinROMBanks(); // Because HiROM and ExHiROM have to have enough memory to fill the first half of bank 40 / C0.
 	public int getMaxROMBanks(boolean isFast);
 	
 	public int getWRAMBankStart(int i);
@@ -111,7 +112,7 @@ public interface MapModeInterface extends Configurer
 		int ROMSize = memorySize.ROMSize;
 		while (ROMSize > 0)
 			ROMSize -= getROMBankLength(memorySize.isFast, ROMBanks++); // For ExHIROM
-		// ROMBanks = Math.max(ROMBanks, 4); // Minimum 128 KB
+		ROMBanks = Math.max(ROMBanks, getMinROMBanks()); // Minimum 32 KB (LoROM), 64 KB (HiROM, ExHiROM)
 		
 		String regions = "";
 		regions += (whitespace + "ZEROPAGE: start = $000000, size = $000100 ;\n").replace(" ", "\t");
