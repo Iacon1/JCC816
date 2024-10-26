@@ -221,81 +221,16 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 		{
 		case arraySubscript:
 			if (destSource != null) this.destSource = destSource; // Initialize LValue
-			
-			OperandSource addrSource = null;
-			if (expr.hasAssembly())
+		
+			OperandSource dummySource = new ConstantSource(0, 1); // Just to keep track of the pointer
+			OperandSource addrSource = ScratchManager.reservePointer(dummySource);
+			assembly += new AdditiveExpressionNode(this, "+", expr, indexExpr).getAssembly(leadingWhitespace, addrSource);
+			pointerRef = new IndirectLValueNode(this, new DummyLValueNode(this, getType(), addrSource), addrSource, getType());
+			if (destSource != null)
 			{
-				addrSource = scratchManager.reserveScratchBlock(CompConfig.pointerSize);
-				assembly += expr.getAssembly(leadingWhitespace, addrSource, scratchManager, ticket);
+				assembly += AssemblyUtils.byteCopier(whitespace, destSource.getSize(), destSource, pointerRef.getSource());
 			}
-			else if (expr.getType().isArray() && !expr.hasAssembly())
-				addrSource = new ConstantSource(new PropPointer<>(expr.getLValue(), 0), CompConfig.pointerSize);
-			else if (expr.getType().isPointer())
-				addrSource = expr.getLValue().getSource();
-			
-			if (expr.hasLValue())
-			{
-				if (indexExpr.hasPropValue() && expr.getType().isArray())
-				{
-					if (indexExpr.hasAssembly()) assembly += indexExpr.getAssembly(leadingWhitespace, scratchManager, ticket);
-					int offset = getType().getSize() * (int) indexExpr.getPropLong();
-					if (destSource != null)
-						assembly += AssemblyUtils.byteCopier(whitespace, destSource.getSize(),
-								destSource,
-								addrSource.getShifted(offset));
-				}
-				else
-				{
-					ScratchSource sourceI;
-					if (indexExpr.hasLValue() || !ScratchManager.hasPointer(expr.getLValue().getSource())) // Already had a pointer to this value
-					{
-						try
-						{
-							sourceI = ScratchManager.reservePointer(expr.getLValue().getSource());
-						}
-						catch (ScratchOverflowException e)
-						{
-							ScratchManager.popPointer();
-							sourceI = ScratchManager.reservePointer(expr.getLValue().getSource());
-						}
-						if (getType().getSize() != 1)
-						{
-							DummyExpressionNode dM = new DummyExpressionNode(this, getType().getSize());
-							assembly += new MultiplicativeExpressionNode(this, "*", indexExpr, dM).getAssembly(whitespace.length(), sourceI, ticket); // Multiply index by size of type
-							DummyExpressionNode dX = new DummyExpressionNode(this, CompUtils.getPointerType(), addrSource);
-							assembly += new AdditiveExpressionNode(this, "+", dX, indexExpr).getAssembly(leadingWhitespace, sourceI, ticket); // set pointer to pointer plus address
-						}
-						else if (indexExpr.hasAssembly())
-						{
-							assembly += indexExpr.getAssembly(leadingWhitespace, sourceI, scratchManager, ticket);
-							DummyExpressionNode dX = new DummyExpressionNode(this, CompUtils.getPointerType(), addrSource);
-							assembly += new AdditiveExpressionNode(this, "+", indexExpr, dX).getAssembly(leadingWhitespace, sourceI, ticket); // set pointer to pointer plus address
-						}
-						else
-						{
-							OperandSource indexSource = null;
-							if (indexExpr.hasPropValue())
-								indexSource = new ConstantSource(indexExpr.getPropValue(), CompConfig.pointerSize);
-							else if (indexExpr.hasLValue())
-								indexSource = indexExpr.getLValue().getSource().respec(Math.min(indexExpr.getSize(), CompConfig.pointerSize));
-							DummyExpressionNode dX = new DummyExpressionNode(this, CompUtils.getPointerType(), addrSource);
-							assembly += new AdditiveExpressionNode(this, "+", indexExpr, dX).getAssembly(leadingWhitespace, sourceI, ticket); // set pointer to pointer plus address
-						}
-					}
-					else
-						sourceI = ScratchManager.getPointer(expr.getLValue().getSource());
-					
-					Type type = ((PointerType) expr.getType()).getType();
-					pointerRef = new IndirectLValueNode(this, new DummyLValueNode(this, type, sourceI), sourceI, type);
-					if (destSource != null)
-					{
-						if (getType().isPointer())
-							assembly += AssemblyUtils.byteCopier(whitespace, sourceI.getSize(), destSource, sourceI);
-						else
-							assembly += AssemblyUtils.byteCopier(whitespace, destSource.getSize(), destSource, pointerRef.getSource());
-					}
-				}
-			}
+			ScratchManager.releasePointer(dummySource);
 			break;
 		case funcCall:
 			if (getReferencedFunction() != null && !getReferencedFunction().canCall(getEnclosingFunction())) // We can know the variables to copy parameters to

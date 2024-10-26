@@ -28,6 +28,13 @@ public class AdditiveExpressionNode extends ArithmeticBinaryExpressionNode
 	public AdditiveExpressionNode(ComponentNode<?> parent, String operator, BaseExpressionNode<?> x, BaseExpressionNode<?> y)
 	{
 		super(parent, operator, x, y);
+		if (x.getType().isPointer()) // RHS must be multiplied by size of pointer base type
+		{
+			int size = ((PointerType) x.getType()).getType().getSize();
+			if (size != 1)
+				this.y = new MultiplicativeExpressionNode(this, "*", y, new DummyExpressionNode(this, CompUtils.getSmallestType(size), size));
+		}
+		
 		lockToDestSize = true;
 	}
 
@@ -59,13 +66,7 @@ public class AdditiveExpressionNode extends ArithmeticBinaryExpressionNode
 		{
 			int size = ((PointerType) x.getType()).getType().getSize();
 			if (size != 1)
-			{
-				double shiftAmount = Math.log(size) / Math.log(2);
-				if (shiftAmount % 1. == 0) // Is power of two
-					y = new ShiftExpressionNode(this, "<<", y, new DummyExpressionNode(this, CompUtils.getSmallestType(shiftAmount), (int) shiftAmount));
-				else
-					y = new MultiplicativeExpressionNode(this, "*", y, new DummyExpressionNode(this, CompUtils.getSmallestType(size), size));
-			}
+				y = new MultiplicativeExpressionNode(this, "*", y, new DummyExpressionNode(this, CompUtils.getSmallestType(size), size));
 		}
 		
 		return this;
