@@ -233,6 +233,7 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 			ScratchManager.releasePointer(dummySource);
 			break;
 		case funcCall:
+			ScratchManager.releasePointers();
 			if (getReferencedFunction() != null && !getReferencedFunction().canCall(getEnclosingFunction())) // We can know the variables to copy parameters to
 			{
 				if (expr.hasAssembly()) expr.getAssembly(leadingWhitespace, scratchManager, ticket);
