@@ -233,19 +233,30 @@ public final class AsmBuilder implements Catalogger
 		String assembly = "";
 		assembly += ".segment \"VECTORS\"\n";
 		// Native
-		assembly += ".word\t.loWORD(RESET)\n"; 						// Unused
-		assembly +=  ".word\t.loWORD(RESET)\n"; 						// Unused
+		assembly += ".word\t.loWORD(__longRESET)\n"; 						// Unused
+		assembly +=  ".word\t.loWORD(__longRESET)\n"; 						// Unused
 		for (DefinableInterrupt interrupt : DefinableInterrupt.values())
 			assembly +=  ".word\t.loWORD(" + interrupt.longLabel + ")\n";
 		// Emulation
-		assembly +=  ".word\t.loWORD(RESET)\n"; // Unused
-		assembly +=  ".word\t.loWORD(RESET)\n"; // Unused
-		assembly +=  ".word\t.loWORD(RESET)\n"; // COP
-		assembly +=  ".word\t.loWORD(RESET)\n"; // Unused
-		assembly +=  ".word\t.loWORD(RESET)\n"; // ABORT
-		assembly +=  ".word\t.loWORD(RESET)\n"; // RESET
-		assembly +=  ".word\t.loWORD(RESET)\n"; // IRQ/BRK
+		assembly +=  ".word\t.loWORD(__longRESET)\n"; // Unused
+		assembly +=  ".word\t.loWORD(__longRESET)\n"; // Unused
+		assembly +=  ".word\t.loWORD(__longRESET)\n"; // COP
+		assembly +=  ".word\t.loWORD(__longRESET)\n"; // Unused
+		assembly +=  ".word\t.loWORD(__longRESET)\n"; // ABORT
+		assembly +=  ".word\t.loWORD(__longRESET)\n"; // RESET
+		assembly +=  ".word\t.loWORD(__longRESET)\n"; // IRQ/BRK
 
+		return assembly;
+	}
+	private String generateLongVectorTable()
+	{
+		String assembly = "";
+		assembly += ".segment \"LVECTORS\"\n";
+		for (DefinableInterrupt interrupt : DefinableInterrupt.values())
+			if (interrupt != DefinableInterrupt.RESET)
+				assembly +=  interrupt.longLabel + ":JML\t" + getInterrupt(interrupt) + "\n";
+			else
+				assembly += interrupt.longLabel + ":JML\tRESET\n";
 		return assembly;
 	}
 	private String getAssemblyPreface(CartConfig cartConfig, Map<String, Integer> varPoses) throws Exception
@@ -258,10 +269,10 @@ public final class AsmBuilder implements Catalogger
 		for (TranslationUnit unit : translationUnits)
 			if (DebugLevel.isAtLeast(DebugLevel.low))
 				assembly += ".dbg file, \"" + unit.getDBGFilename() + "\", 0, 0\n";
-		assembly += generateVectorTable(); // Vector table
-		
+		assembly += generateLongVectorTable(); // Long vector table
 		assembly += ".segment \"HEADER\"\n"; // Declare header
 		assembly += ".res\t48, 0;\tHEADER_HERE\n";
+		assembly += generateVectorTable(); // Vector table
 		assembly += mapGlobalRAM(cartConfig, varPoses);
 		assembly += ".segment \"" + CompConfig.codeBankName(0) + "\"\n"; // Begins runnable code
 		assembly += "RESET:\n";
@@ -293,10 +304,6 @@ public final class AsmBuilder implements Catalogger
 					assembly += init.getAssembly();
 		assembly += "JML\tmain\n";
 		
-		// Long interrupt tables TODO optimize this if they're in zero bank
-		for (DefinableInterrupt interrupt : DefinableInterrupt.values())
-			if (interrupt != DefinableInterrupt.RESET)
-				assembly +=  interrupt.longLabel + ":JML\t" + getInterrupt(interrupt) + "\n";
 		// Required special subs
 		for (String sub : getRequiredSubs().values())
 		{	

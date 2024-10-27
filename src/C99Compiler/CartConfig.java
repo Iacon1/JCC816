@@ -31,8 +31,7 @@ public class CartConfig
 
 		@Override public String getName() {return implementer.getName();}
 		@Override public byte getCode() {return implementer.getCode();}
-		@Override public int getHeaderPosition(boolean longHeader) {return implementer.getHeaderPosition(longHeader);}
-		
+
 		@Override public int getWRAMBankLength() {return implementer.getWRAMBankLength();} 
 		@Override public int getSRAMBankLength() {return implementer.getSRAMBankLength();}
 		@Override public int getROMBankLength(boolean isFast, int i) {return implementer.getROMBankLength(isFast, i);}
@@ -47,8 +46,7 @@ public class CartConfig
 		@Override public int getROMBankStart(boolean isFast, int i) {return implementer.getROMBankStart(isFast, i);}
 		@Override public int getROMBankAlign(int i) {return implementer.getROMBankAlign(i);}
 		
-		@Override public int getHeaderAddress(boolean isFast) {return implementer.getHeaderAddress(isFast);}
-		@Override public int getVectorAddress(boolean isFast) {return implementer.getVectorAddress(isFast);}
+		@Override public int getHVAddress(boolean isFast) {return implementer.getHVAddress(isFast);}
 		@Override public boolean isContiguous(int i) {return implementer.isContiguous(i);}
 	}
 	public static enum AddonChip

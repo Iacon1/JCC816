@@ -28,8 +28,8 @@ public final class Banker
 		remainingBank = cartConfig.getType().getROMBankLength(cartConfig.isFast(), banks - 1);
 
 		while (!lines.get(++i).equals("RESET:"));
-		remainingBank -= 80; // Header and vectors
-		sizeEstimate += 80;
+		remainingBank -= 104; // Header and vectors and long vectors
+		sizeEstimate += 104;
 		
 		blockStart = i;
 		blockBuffer = "";

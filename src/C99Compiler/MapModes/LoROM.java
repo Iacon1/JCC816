@@ -6,8 +6,7 @@ public class LoROM implements MapModeInterface
 {
 	@Override public String getName() {return "LoROM";}
 	@Override public byte getCode() {return 0x00;}
-	@Override public int getHeaderPosition(boolean longHeader) {return longHeader ? 0x007FB0 : 0x007FC0;}
-	
+
 	@Override public int getWRAMBankLength() {return 128*1024;} // 128 KB since we use the contiguous mirror
 	@Override public int getSRAMBankLength() {return 32*1024;} // 32 KB
 	@Override public int getROMBankLength(boolean isFast, int i) {return 32*1024;} // 32 KB
@@ -25,8 +24,7 @@ public class LoROM implements MapModeInterface
 	}
 	@Override public int getROMBankAlign(int i) {return 0x008000;}
 	
-	@Override public int getHeaderAddress(boolean isFast) {return isFast ? 0x80FFB0 : 0x00FFB0;}
-	@Override public int getVectorAddress(boolean isFast) {return isFast ? 0x80FFE0 : 0x00FFE0;}
+	@Override public int getHVAddress(boolean isFast) {return (isFast ? 0x80FFB0 : 0x00FFB0) - 24;}
 	
 	@Override public boolean isContiguous(int i) {return false;}
 }

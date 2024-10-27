@@ -111,7 +111,7 @@ public final class CompConfig
 		BRK("__longBRK"),
 		ABORT("__longABORT"),
 		NMI("__longNMI"),
-		RESET("RESET"),
+		RESET("__longRESET"),
 		IRQ("__longIRQ");
 		
 		public final String longLabel;

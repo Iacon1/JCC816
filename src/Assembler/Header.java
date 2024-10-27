@@ -284,7 +284,7 @@ public class Header extends CartConfig
 	
 	public int getOffset()
 	{
-		return mapMode.getHeaderPosition(devID == 0x33);
+		return mapMode.getHeaderROMAddress(devID == 0x33);
 	}
 	public DestinationCode getDestinationCode()
 	{

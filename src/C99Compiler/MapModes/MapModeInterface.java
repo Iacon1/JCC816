@@ -58,7 +58,6 @@ public interface MapModeInterface extends Configurer
 		public int getLength() {return variable.getSize();}
 	}
 	public byte getCode();
-	public int getHeaderPosition(boolean longHeader);
 	
 	public int getWRAMBankLength();
 	public int getSRAMBankLength();
@@ -73,9 +72,15 @@ public interface MapModeInterface extends Configurer
 	public int getSRAMBankStart(int i);
 	public int getROMBankStart(boolean isFast, int i);
 	public int getROMBankAlign(int i);
-	public int getHeaderAddress(boolean isFast);
-	public int getVectorAddress(boolean isFast);
-	
+	/** Returns the address in memory of the first byte of the long-vector table.
+	 *  The address of the header should be 6 * 4 = 24 bytes after and the address of the real vector table should be 48 after that.
+	 * 	@return the address of the first byte of the long-vector table.
+	 */
+	public int getHVAddress(boolean isFast);
+	public default int getHeaderROMAddress(boolean longHeader) // Position in ROM instead of in memory
+	{
+		return (getHVAddress(false) + 24) & 0x00FFFF + (longHeader? 0 : 0x10);
+	}
 	/**
 	 * @param i The current bank
 	 * @return Whether the next bank is contiguous.
@@ -118,8 +123,7 @@ public interface MapModeInterface extends Configurer
 		int ROMSize = memorySize.ROMSize;
 		while (ROMSize > 0)
 			ROMSize -= getROMBankLength(memorySize.isFast, ROMBanks++); // For ExHIROM
-		ROMBanks = Math.max(ROMBanks, getMinROMBanks()); // Minimum 32 KB (LoROM), 64 KB (HiROM, ExHiROM)
-		
+
 		String regions = "";
 		regions += (whitespace + "ZEROPAGE: start = $000000, size = $000100 ;\n").replace(" ", "\t");
 		regions += (whitespace + "STACK: start = $000000, size = $" + String.format("%06x", CompConfig.stackSize) + ";\n").replace(" ", "\t");
@@ -173,10 +177,16 @@ public interface MapModeInterface extends Configurer
 		for (int i = 0; i < ROMBanks; ++i)
 		{
 			String align = String.format("%06x", getROMBankAlign(i));
-			segments += (whitespace + CompConfig.codeBankName(i) + ":  load = ROM" + String.format("%03d",i) + ", type = ro, align = $" + align + ";\n").replace(" ", "\t");
+			segments += (whitespace + CompConfig.codeBankName(i) + ":  load = ROM" + String.format("%03d",i) + ", type = ro").replace(" ", "\t");
+			if (!align.equals("000000")) segments += (", align = $" + align + ";\n").replace(" ", "\t");
+			else segments += ";\n";
 		}
-		segments += (whitespace + "HEADER:  load = ROM000, type = ro, start = $" + String.format("%06x", getHeaderAddress(memorySize.isFast)) + ";\n").replace(" ", "\t");
-		segments += (whitespace + "VECTORS: load = ROM000, type = ro, start = $" + String.format("%06x", getVectorAddress(memorySize.isFast)) + ";\n").replace(" ", "\t");
+		
+		// Header and vectors
+		int hvAddress = getHVAddress(memorySize.isFast);
+		segments += (whitespace + "LVECTORS: load = ROM000, type = ro, start = $" + String.format("%06x", hvAddress + 0) + ";\n").replace(" ", "\t");
+		segments += (whitespace + "HEADER:  load = ROM000, type = ro, start = $" + String.format("%06x", hvAddress + 24) + ";\n").replace(" ", "\t");
+		segments += (whitespace + "VECTORS: load = ROM000, type = ro, start = $" + String.format("%06x", hvAddress + 72) + ";\n").replace(" ", "\t");
 		
 		return segments;
 	}
