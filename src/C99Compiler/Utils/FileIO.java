@@ -118,6 +118,15 @@ public final class FileIO
 		fo.write(bytes);
 		fo.close();
 	}
+	public static final void writeFileER(String filename, byte[] bytes) throws IOException
+	{
+		filename = fixFilepath(filename, false);
+		File f = getFileER(filename);
+		f.createNewFile();
+		FileOutputStream fo = new FileOutputStream(f);
+		fo.write(bytes);
+		fo.close();
+	}
 	
 	public static byte[] serialize(Serializable s) throws IOException
 	{

@@ -78,7 +78,7 @@ public class Assembler
 		headerBytes = header.asBytes();
 		for (int i = header.getOffset(); i < header.getOffset() + header.getSize(); ++i)
 			bytes[i] = headerBytes[i - header.getOffset()];
-		FileIO.writeFile(sfcFile.getName(), bytes);
+		FileIO.writeFileER(sfcFile.getName(), bytes);
 
 		if (cleanup)
 		{
