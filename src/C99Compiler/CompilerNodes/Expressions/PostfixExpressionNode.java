@@ -156,13 +156,17 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 	@Override
 	public boolean hasPropValue()
 	{
-		// TODO Auto-generated method stub
+		if (type == PFType.structMember)
+			if (getType().isArray())
+				return true; // Arrays can degrade to pointers
 		return false;
 	}
 	@Override
 	public Object getPropValue()
 	{
-		// TODO Auto-generated method stub
+		if (type == PFType.structMember)
+			if (getType().isArray())
+				return new PropPointer<LValueNode>(getLValue(), 0);
 		return null;
 	}
 	@Override public boolean hasLValue()
@@ -170,6 +174,7 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 		switch (type)
 		{
 		case arraySubscript:
+			return !getType().isArray();
 		case structMember:
 		case structMemberP:
 			return true;
@@ -222,15 +227,19 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 		case arraySubscript:
 			if (destSource != null) this.destSource = destSource; // Initialize LValue
 		
-			OperandSource dummySource = new ConstantSource(0, 1); // Just to keep track of the pointer
-			OperandSource addrSource = ScratchManager.reservePointer(dummySource);
-			assembly += new AdditiveExpressionNode(this, "+", expr, indexExpr).getAssembly(leadingWhitespace, addrSource);
-			pointerRef = new IndirectLValueNode(this, new DummyLValueNode(this, getType(), addrSource), addrSource, getType());
-			if (destSource != null)
+			if (!getType().isArray()) // return element of an array
 			{
-				assembly += AssemblyUtils.byteCopier(whitespace, destSource.getSize(), destSource, pointerRef.getSource());
+				OperandSource dummySource = new ConstantSource(0, 1); // Just to keep track of the pointer
+				OperandSource addrSource = ScratchManager.reservePointer(dummySource);
+				assembly += new AdditiveExpressionNode(this, "+", expr, indexExpr).getAssembly(leadingWhitespace, addrSource);
+				pointerRef = new IndirectLValueNode(this, new DummyLValueNode(this, getType(), addrSource), addrSource, getType());
+				if (destSource != null)
+				{
+					assembly += AssemblyUtils.byteCopier(whitespace, destSource.getSize(), destSource, pointerRef.getSource());
+				}
 			}
-			ScratchManager.releasePointer(dummySource);
+			else // Return head of an array
+				assembly += new AdditiveExpressionNode(this, "+", expr, indexExpr).getAssembly(leadingWhitespace, destSource);
 			break;
 		case funcCall:
 			ScratchManager.releasePointers();
