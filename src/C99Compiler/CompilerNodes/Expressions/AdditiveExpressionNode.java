@@ -2,6 +2,7 @@
 //
 package C99Compiler.CompilerNodes.Expressions;
 
+import C99Compiler.CompConfig;
 import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.Definitions.Type;
 import C99Compiler.CompilerNodes.Definitions.Type.CastContext;
@@ -32,7 +33,12 @@ public class AdditiveExpressionNode extends ArithmeticBinaryExpressionNode
 		{
 			int size = ((PointerType) x.getType()).getType().getSize();
 			if (size != 1)
-				this.y = new MultiplicativeExpressionNode(this, "*", y, new DummyExpressionNode(this, CompUtils.getSmallestType(size), size));
+			{
+				Type t = CompUtils.getSmallestType(size);
+				if (y.getSize() + t.getSize() < CompConfig.pointerSize)
+					y = new CastExpressionNode(this, CompUtils.getTypeForSize(CompConfig.pointerSize - t.getSize(), y.getType().isSigned()), y);
+				this.y = new MultiplicativeExpressionNode(this, "*", y, new DummyExpressionNode(this, t, size));
+			}
 		}
 		
 		lockToDestSize = true;
