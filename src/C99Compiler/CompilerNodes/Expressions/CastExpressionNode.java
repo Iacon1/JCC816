@@ -83,7 +83,10 @@ public class CastExpressionNode extends BaseExpressionNode<Cast_expressionContex
 		String assembly = "";
 		if (getType().getSize() > expr.getType().getSize()) // Need to make space
 			assembly += AssemblyUtils.byteCopier(whitespace, getType().getSize(), destSource, new ConstantSource(0, getType().getSize()));
-		assembly += expr.getAssembly(leadingWhitespace, destSource, scratchManager, ticket);
+		if (expr.hasAssembly())
+			assembly += expr.getAssembly(leadingWhitespace, destSource, scratchManager, ticket);
+		else if (expr.hasLValue())
+			assembly += AssemblyUtils.byteCopier(whitespace, getType().getSize(), destSource, expr.getLValue().getSource());
 		
 		return assembly;
 	}
