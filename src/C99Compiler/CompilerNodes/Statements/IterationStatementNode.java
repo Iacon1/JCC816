@@ -154,7 +154,7 @@ public class IterationStatementNode extends SequencePointStatementNode<Iteration
 					assembly += EqualityExpressionNode.getIsZero(whitespace, exprSource, new ScratchManager(), exprSource, new DetailsTicket());
 				}
 				else assembly += EqualityExpressionNode.getIsZero(whitespace, null, new ScratchManager(), condExpNode.getLValue().getSource(), new DetailsTicket());
-				assembly += whitespace + "BNE\t:+\n";
+				assembly += whitespace + "BEQ\t:+\n";
 				assembly += whitespace + "JMP\t" + getEndLabel() + "\n";
 				assembly += whitespace + ":\n";
 			}
