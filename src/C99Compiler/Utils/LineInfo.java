@@ -22,7 +22,7 @@ public class LineInfo implements Serializable
 		if (!isStd)
 			return "\"" + FileIO.getFile(filename) + "\", " + line;
 		else
-			return "\"stdlib\\" + filename + "\", " + line;
+			return "\"stdlib\\" + filename.replace("stdlib\\", "") + "\", " + line;
 
 	}
 }

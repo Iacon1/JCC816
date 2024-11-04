@@ -177,7 +177,8 @@ public class JCC816
 	private static TranslationUnit loadUnit(String sourceName, boolean isHeader, boolean isResource, Header ROMHeader) throws Exception
 	{
 		String sourceNameA, sourceNameC, sourceNameH;
-		
+		DebugLevel dbgLevel = null;
+
 		if (isHeader)
 		{
 			sourceNameA = sourceName.replace(".h", ".asm");
@@ -203,7 +204,7 @@ public class JCC816
 				Logging.logNotice("Loading file " + sourceNameC);
 			String fileText = isResource ? FileIO.readResource(sourceNameC) : FileIO.readFile(sourceNameC);
 			if (!isResource) sourceNameC = FileIO.getFile(sourceNameC).getPath();
-			return C99Compiler.compile(sourceNameC, fileText, ROMHeader);
+			return C99Compiler.compile(sourceNameC, fileText, ROMHeader, isResource);
 		}
 		else if (sourceNameA != null && (isResource ? FileIO.hasResource(sourceNameA) : FileIO.hasFile(sourceNameA)))
 		{
@@ -222,7 +223,7 @@ public class JCC816
 				Logging.logNotice("Loading file " + sourceNameH);
 			String fileText = isResource ? FileIO.readResource(sourceNameH) : FileIO.readFile(sourceNameH);
 			if (!isResource) sourceNameH = FileIO.getFile(sourceNameH).getPath();
-			return C99Compiler.compile(sourceNameH, fileText);
+			return C99Compiler.compile(sourceNameH, fileText, isResource);
 		}
 		else
 			return null;
@@ -425,7 +426,7 @@ public class JCC816
 		{
 			String parameter = commandLine.getArgList().get(0);
 			String fileText = FileIO.readFile(parameter);
-			fileText = Preprocessor.preprocess(new HashSet<String>(), new HashSet<String>(), new LinkedList<LineInfo>(), parameter, fileText);
+			fileText = Preprocessor.preprocess(new HashSet<String>(), new HashSet<String>(), new LinkedList<LineInfo>(), parameter, fileText, false);
 			byte[] fileBytes = fileText.getBytes();
 			FileIO.writeFile(commandLine.getOptionValue("p"), fileBytes);
 		}

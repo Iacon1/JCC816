@@ -62,7 +62,7 @@ public class C99Compiler
 		return new CompoundStatementNode(new TranslationUnitNode("INTERNAL", null)).interpret(tree);
 	}
 		
-	public static TranslationUnitNode compile(String filename, String file, Header header) throws Exception
+	public static TranslationUnitNode compile(String filename, String file, Header header, boolean isStd) throws Exception
 	{ 
 		currFilename = filename;
 		Set<String> includedStdLibs = new HashSet<String>();
@@ -73,7 +73,7 @@ public class C99Compiler
 		if (VerbosityLevel.isAtLeast(VerbosityLevel.medium))
 			printInfo("Compiling " + filename + "...");
 		
-		String source = Preprocessor.preprocess(includedStdLibs, includedOtherLibs, lineInfo, filename, file, header);
+		String source = Preprocessor.preprocess(includedStdLibs, includedOtherLibs, lineInfo, filename, file, header, isStd);
 		if (VerbosityLevel.isAtLeast(VerbosityLevel.medium))
 			printInfo("Precompiled in " + (System.currentTimeMillis() - t) + " ms. Source length: " + source.length() + ".");
 		t = System.currentTimeMillis();
@@ -93,9 +93,9 @@ public class C99Compiler
 
 		return unit;
 	}
-	public static TranslationUnitNode compile(String filename, String file) throws Exception
+	public static TranslationUnitNode compile(String filename, String file, boolean isStd) throws Exception
 	{ 
-		return compile(filename, file, null);
+		return compile(filename, file, null, isStd);
 	}
 	
 	/** A scaled-down version of the compilation process, immediately returning the ASM instead of a translation unit node.

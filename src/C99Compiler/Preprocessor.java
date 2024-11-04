@@ -94,11 +94,11 @@ public final class Preprocessor
 		return group;
 	}
 	
-	public static final String preprocess(Set<String> includedStdLibs, Set<String> includedOtherLibs, List<LineInfo> lineInfo, String filename, String source, Header header) throws Exception
+	public static final String preprocess(Set<String> includedStdLibs, Set<String> includedOtherLibs, List<LineInfo> lineInfo, String filename, String source, Header header, boolean isStd) throws Exception
 	{
 		Grammar.GrammarFlags.isPreproc = true;
 		PreProcComponentNode.loadPredefs(header);
-		PreProcComponentNode.resetLineNo(filename, 1, includedStdLibs.contains(filename));
+		PreProcComponentNode.resetLineNo(filename, 1, isStd);
 		GroupNode node = new GroupNode().interpret(parsePreprocess(source));
 		includedStdLibs.addAll(node.getIncludedStdLibs());
 		includedOtherLibs.addAll(node.getIncludedOtherLibs());
@@ -111,8 +111,8 @@ public final class Preprocessor
 		return source;
 	}
 	
-	public static final String preprocess(Set<String> includedStdLibs, Set<String> includedOtherLibs, List<LineInfo> lineInfo, String filename, String source) throws Exception
+	public static final String preprocess(Set<String> includedStdLibs, Set<String> includedOtherLibs, List<LineInfo> lineInfo, String filename, String source, boolean isStd) throws Exception
 	{
-		return preprocess(includedStdLibs, includedOtherLibs, lineInfo, filename, source, null);
+		return preprocess(includedStdLibs, includedOtherLibs, lineInfo, filename, source, null, isStd);
 	}
 }
