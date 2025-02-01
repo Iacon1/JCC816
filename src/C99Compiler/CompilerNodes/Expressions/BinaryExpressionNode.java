@@ -121,7 +121,7 @@ public abstract class BinaryExpressionNode<
 			scratchY = state.lastScratchSource();
 			state = state.setDestSource(scratchY);
 			
-			tmpPair = x.getAssemblyAndState(state);
+			tmpPair = y.getAssemblyAndState(state);
 			assembly += tmpPair.assembly;
 			state = tmpPair.state;
 			
