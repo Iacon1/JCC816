@@ -331,7 +331,7 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 			if (destSource != null)
 			{
 				// TODO
-				tmpPair = new EqualityExpressionNode(this).getAssemblyAndState(state);
+				tmpPair = new EqualityExpressionNode(this, expr).getAssemblyAndState(state);
 				assembly += tmpPair.assembly;
 				state = tmpPair.state;
 			}
