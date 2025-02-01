@@ -33,7 +33,7 @@ public class LANDExpressionNode extends LogicalBinaryExpressionNode
 			tmpPair = source.getLDA(state, i);
 			assembly += tmpPair.assembly;
 			state = tmpPair.state;
-			assembly += state.getWhitespace() + "BNE:\n";
+			assembly += state.getWhitespace() + "BNE\t:+\n";
 			return new AssemblyStatePair(assembly, state);
 		}
 		
