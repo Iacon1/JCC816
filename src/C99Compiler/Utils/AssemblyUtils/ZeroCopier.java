@@ -9,10 +9,10 @@ public class ZeroCopier extends ByteCopier
 {
 	public ZeroCopier(int n, OperandSource sourceTo, boolean reversed)
 	{
-		super(n, new ConstantSource(0, n), sourceTo, reversed);
+		super(n, sourceTo, new ConstantSource(0, n), reversed);
 	}
 	public ZeroCopier(int n, OperandSource sourceTo)
 	{
-		super(n, new ConstantSource(0, n), sourceTo, false);
+		super(n, sourceTo, new ConstantSource(0, n), false);
 	}
 }
