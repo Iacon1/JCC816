@@ -3,7 +3,9 @@
 package C99Compiler.CompilerNodes.Statements;
 
 import C99Compiler.CompilerNodes.ComponentNode;
-import C99Compiler.Utils.AssemblyUtils;
+import C99Compiler.CompilerNodes.FunctionDefinitionNode;
+import C99Compiler.Utils.ProgramState;
+import C99Compiler.Utils.AssemblyUtils.AssemblyUtils;
 import Grammar.C99.C99Parser.Asm_statementContext;
 
 public class AssemblyStatementNode extends StatementNode<Asm_statementContext>
@@ -25,11 +27,24 @@ public class AssemblyStatementNode extends StatementNode<Asm_statementContext>
 		return assemblyLines.length > 0;
 	}
 	@Override
-	public String getAssembly(int leadingWhitespace, String returnAddr) throws Exception
+	public ProgramState getStateAfter(ProgramState state)
 	{
-		String whitespace = AssemblyUtils.getWhitespace(leadingWhitespace);
+		return state.wipe();
+	}
+	
+	@Override
+	public AssemblyStatePair getAssemblyAndState(ProgramState state) throws Exception
+	{
+		String whitespace = state.getWhitespace();
 		String assembly = "";
 		for (String line : assemblyLines) assembly += whitespace + line + "\n";
-		return assembly;
+		state = state.wipe();
+		return new AssemblyStatePair(assembly, state);
 	}
+
+	@Override
+	public boolean canCall(ProgramState state, FunctionDefinitionNode function) {return false;}
+
+	@Override
+	public boolean hasAssembly(ProgramState state) {return true;}
 }

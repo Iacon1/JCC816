@@ -16,10 +16,9 @@ import C99Compiler.CompilerNodes.Dummies.DummyType;
 import C99Compiler.CompilerNodes.LValues.LValueNode;
 import C99Compiler.CompilerNodes.LValues.VariableNode;
 import C99Compiler.Exceptions.UndefinedVariableException;
-import C99Compiler.Utils.AssemblyUtils.DetailsTicket;
 import C99Compiler.Utils.CompUtils;
+import C99Compiler.Utils.ProgramState;
 import C99Compiler.Utils.PropPointer;
-import C99Compiler.Utils.ScratchManager;
 import C99Compiler.Utils.OperandSources.OperandSource;
 import Grammar.C99.C99Parser.Primary_expressionContext;
 
@@ -95,11 +94,11 @@ public class PrimaryExpressionNode extends BaseExpressionNode<Primary_expression
 	}
 	
 	@Override
-	public boolean canCall(FunctionDefinitionNode function) {return false;}
+	public boolean canCall(ProgramState state, FunctionDefinitionNode function) {return false;}
 	@Override
-	public boolean hasAssembly() {return false;}
+	public boolean hasAssembly(ProgramState state) {return false;}
 	@Override
-	public boolean hasPropValue()
+	public boolean hasPropValue(ProgramState state)
 	{
 		if (identifier != null)
 		{
@@ -108,8 +107,8 @@ public class PrimaryExpressionNode extends BaseExpressionNode<Primary_expression
 				return true; // Arrays can degrade to pointers
 			if (resolveEnumeratorRelative(identifier) != null)
 				return true; // Enumerator
-			else if (hasLValue() && getLValue().hasPossibleValues() && OptimizationLevel.isAtLeast(OptimizationLevel.medium))
-				return getLValue().getPossibleValues().size() == 1;
+			else if (hasLValue() && state.getOnlyValue(getLValue()) != null && OptimizationLevel.isAtLeast(OptimizationLevel.medium))
+				return true;
 			else if (resolveFunctionRelative(identifier) != null)
 				return true;
 			else
@@ -118,7 +117,7 @@ public class PrimaryExpressionNode extends BaseExpressionNode<Primary_expression
 		else return constant != null || stringLiteral != null;
 	}
 	@Override
-	public Object getPropValue()
+	public Object getPropValue(ProgramState state)
 	{
 		if (identifier != null)
 		{
@@ -128,7 +127,7 @@ public class PrimaryExpressionNode extends BaseExpressionNode<Primary_expression
 			if (resolveEnumeratorRelative(identifier) != null)
 				return resolveEnumeratorRelative(identifier).getValue();
 			else if (getLValue() != null)
-				return getLValue().getPossibleValues().toArray()[0];
+				return state.getOnlyValue(getLValue());
 			else if (resolveFunctionRelative(identifier) != null)
 				return resolveFunctionRelative(identifier);
 			else
@@ -139,5 +138,7 @@ public class PrimaryExpressionNode extends BaseExpressionNode<Primary_expression
 	}
 	
 	@Override
-	public String getAssembly(int leadingWhitespace, OperandSource destSource, ScratchManager scratchManager, DetailsTicket ticket) throws Exception {return null;}
+	public ProgramState getStateAfter(ProgramState state) {return state;}
+	@Override
+	public AssemblyStatePair getAssemblyAndState(ProgramState state) throws Exception {return null;}
 }

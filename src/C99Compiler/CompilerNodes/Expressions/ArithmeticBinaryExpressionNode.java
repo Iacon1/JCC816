@@ -7,13 +7,11 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import C99Compiler.CompConfig.OptimizationLevel;
 import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.Definitions.Type;
-import C99Compiler.Utils.AssemblyUtils.DetailsTicket;
-import C99Compiler.Utils.CompUtils;
-import C99Compiler.Utils.AssemblyUtils;
-import C99Compiler.Utils.ScratchManager;
-import C99Compiler.Utils.OperandSources.ConstantSource;
+import C99Compiler.Utils.ProgramState;
+import C99Compiler.Utils.AssemblyUtils.AssemblyUtils;
+import C99Compiler.Utils.AssemblyUtils.BytewiseOperator;
+import C99Compiler.Utils.AssemblyUtils.ZeroCopier;
 import C99Compiler.Utils.OperandSources.OperandSource;
-import C99Compiler.Utils.ScratchManager.ScratchSource;
 
 public abstract class ArithmeticBinaryExpressionNode<
 C1 extends ParserRuleContext,
@@ -22,6 +20,40 @@ PC extends ParserRuleContext,
 CC extends ParserRuleContext
 > extends BinaryExpressionNode<C1, C2, PC, CC>
 {
+	private class ArithmeticOperator extends BytewiseOperator
+	{
+		private OperandSource destSource, sourceX, sourceY;
+		
+		protected ArithmeticOperator(int size, OperandSource destSource, OperandSource sourceX, OperandSource sourceY, boolean reversed)
+		{
+			super(Math.max(sourceX.getSize(), sourceY.getSize()), Math.min(sourceX.getSize(), sourceY.getSize()), reversed);
+			this.destSource = destSource;
+			this.sourceX = sourceX;
+			this.sourceY = sourceY;
+		}
+
+		@Override
+		protected AssemblyStatePair getAssemblyAndState(ProgramState state, int i) throws Exception
+		{
+			AssemblyStatePair tmpPair;
+			String assembly = "";
+			
+			tmpPair = sourceX.getLDA(state, i);
+			assembly += tmpPair.assembly;
+			state = tmpPair.state;
+			
+			tmpPair = sourceY.getInstruction(state, getInstruction(), i);
+			assembly += tmpPair.assembly;
+			state = tmpPair.state;
+			
+			tmpPair = destSource.getSTA(state, i);
+			assembly += tmpPair.assembly;
+			state = tmpPair.state;
+				
+			return new AssemblyStatePair(assembly, state);
+		}
+	}
+	
 	protected ArithmeticBinaryExpressionNode(ComponentNode<?> parent)
 	{
 		super(parent);
@@ -41,11 +73,11 @@ CC extends ParserRuleContext
 		this.y = y;
 	}
 	@Override public Type getType()
-	{
+	{/*
 		if (hasPropValue() && !hasAssembly())
 			return CompUtils.getSmallestSignedType(getPropLong());
 		else
-			return Type.convertArithmetic(x.getType(), y.getType());
+	*/		return Type.convertArithmetic(x.getType(), y.getType());
 	}
 	
 	protected abstract long doOperation(long x, long y);
@@ -58,64 +90,45 @@ CC extends ParserRuleContext
 	}
 	
 	@Override
-	public Object getPropValue()
+	public Object getPropValue(ProgramState state)
 	{
-		Long a = x.getPropLong();
-		Long b = y.getPropLong();
+		Long a = x.getPropLong(state);
+		Long b = y.getPropLong(state);
 		if (a == null || b == null) return null;
 		else return Long.valueOf(doOperation(a, b));
 	}	
 	
-	protected String getAssembly(String whitespace, OperandSource destSource, OperandSource sourceX,
-			OperandSource sourceY, DetailsTicket ticket) throws Exception
-	{
-		String assembly = "";
-		assembly += ticket.save(whitespace, DetailsTicket.saveA | DetailsTicket.saveABit);
-
-		DetailsTicket innerTicket = new DetailsTicket(ticket);
-
-		assembly += whitespace + getPreface() + "\n";
-		int size = Math.min(destSource.getSize(), getRetSize(sourceX.getSize(), sourceY.getSize()));
-		assembly += AssemblyUtils.setSignExtend(whitespace, sourceX, sourceY, x.getType().isSigned(), y.getType().isSigned(), innerTicket);
-		assembly += AssemblyUtils.bytewiseOperation(whitespace, size, (Integer i, DetailsTicket ticket2) -> 
-		{
-			if ((i >= sourceX.getSize() - 1) ^ (i >= sourceY.getSize() - 1)) // Reached the last byte of only one of these
-			{
-				DetailsTicket ticket3 = new DetailsTicket(ticket2, 0, DetailsTicket.isA16Bit);
-				return new String[]
-				{
-					CompUtils.setA8,
-					sourceX.getLDA(i, ticket3),
-					sourceY.getInstruction(getInstruction(), i, ticket3),
-					(destSource == null) ? "" : destSource.getSTA(i, ticket3),
-					sourceX.getLDA(i + 1, ticket3),
-					sourceY.getInstruction(getInstruction(), i + 1, ticket3),
-					(destSource == null) ? "" : destSource.getSTA(i + 1, ticket3),
-					CompUtils.setA16
-				};
-			}
-			else
-				return new String[]
-				{
-					sourceX.getLDA(i, ticket2),
-					sourceY.getInstruction(getInstruction(), i, ticket2),
-					(destSource == null) ? "" : destSource.getSTA(i, ticket2)
-				};
-		}, true, isReversed(), innerTicket);
-		if (size < destSource.getSize())
-			assembly += AssemblyUtils.zeroCopier(whitespace, destSource.getSize() - size, destSource.getShifted(size), innerTicket);
-
-		assembly += ticket.restore(whitespace, DetailsTicket.saveA | DetailsTicket.saveABit);
-		return assembly;
-	}
-	
 	@Override
-	protected String getAssembly(String whitespace, OperandSource destSource, OperandSource sourceX,
-			OperandSource sourceY, ScratchManager scratchManager, DetailsTicket ticket) throws Exception
+	protected AssemblyStatePair getAssemblyAndState(ProgramState state, OperandSource sourceX, OperandSource sourceY) throws Exception
 	{
-		if (!sourceY.isLiteral() && y.hasLValue() && OptimizationLevel.isAtLeast(OptimizationLevel.medium)) sourceY = AssemblyUtils.getShrinkWrapped(y.getLValue());
-		if (!sourceX.isLiteral() && x.hasLValue() && OptimizationLevel.isAtLeast(OptimizationLevel.medium)) sourceX = AssemblyUtils.getShrinkWrapped(x.getLValue());
+		if (!sourceY.isLiteral() && y.hasLValue() && OptimizationLevel.isAtLeast(OptimizationLevel.medium)) sourceY = AssemblyUtils.getShrinkWrapped(state, y.getLValue());
+		if (!sourceX.isLiteral() && x.hasLValue() && OptimizationLevel.isAtLeast(OptimizationLevel.medium)) sourceX = AssemblyUtils.getShrinkWrapped(state, x.getLValue());
 
-		return getAssembly(whitespace, destSource, sourceX, sourceY, ticket);
+		String assembly = "";
+		OperandSource destSource = state.destSource();
+		
+		byte pFlags = state.getPreserveFlags();
+		assembly += AssemblyUtils.store(state, ProgramState.PreserveFlag.A);
+		state = state.clearPreserveFlags(ProgramState.PreserveFlag.A);
+		
+		assembly += state.getWhitespace() + getPreface() + "\n";
+		int size;
+		if (destSource != null)
+			size = Math.min(destSource.getSize(), getRetSize(sourceX.getSize(), sourceY.getSize()));
+		else
+			size = getRetSize(sourceX.getSize(), sourceY.getSize());
+		ArithmeticOperator operator = new ArithmeticOperator(size, destSource, sourceX, sourceY, isReversed());
+		
+		assembly += operator.getAssembly(state);
+		state = operator.getStateAfter(state);
+		if (size < destSource.getSize())
+		{
+			ZeroCopier zeroCopier = new ZeroCopier(destSource.getSize(), destSource.getShifted(size), false);
+			assembly += zeroCopier.getAssembly(state);
+			state = zeroCopier.getStateAfter(state);
+		}
+		state.setPreserveFlags(pFlags);
+		assembly += AssemblyUtils.restore(state, ProgramState.PreserveFlag.A);
+		return new AssemblyStatePair(assembly, state);
 	}
 }

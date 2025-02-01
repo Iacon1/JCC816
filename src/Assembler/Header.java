@@ -10,8 +10,7 @@ import org.w3c.dom.Node;
 
 import C99Compiler.CartConfig;
 import C99Compiler.CompConfig.VerbosityLevel;
-
-import C99Compiler.Utils.AssemblyUtils;
+import C99Compiler.Utils.AssemblyUtils.AssemblyUtils;
 import Logging.Logging;
 
 public class Header extends CartConfig

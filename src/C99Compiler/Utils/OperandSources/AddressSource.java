@@ -3,7 +3,8 @@
 package C99Compiler.Utils.OperandSources;
 
 import C99Compiler.CompConfig;
-import C99Compiler.Utils.AssemblyUtils.DetailsTicket;
+import C99Compiler.CompilerNodes.Interfaces.Assemblable.AssemblyStatePair;
+import C99Compiler.Utils.ProgramState;
 
 public class AddressSource extends OperandSource
 {
@@ -32,15 +33,19 @@ public class AddressSource extends OperandSource
 	}
 	
 	@Override
-	public String getInstruction(String whitespace, String operation, Integer i, DetailsTicket ticket)
+	public AssemblyStatePair getInstruction(ProgramState state, String operation, Integer i)
 	{
+		String assembly = "";
+		if (operation.equals("LDA"))
+			state = state.clearKnownFlags(ProgramState.PreserveFlag.A);
 		if (i >= size)
-			return whitespace + operation + "\t" + CompConfig.signExtend + "\n";
-		
-		if (CompConfig.wordAddresses)
-			return whitespace + operation + "\t.loWord(" + address + ") + " + (i + offset) + "\n";
+			assembly = state.getWhitespace() + operation + "\t" + CompConfig.signExtend + "\n";
+		else if (CompConfig.wordAddresses)
+			assembly = state.getWhitespace() + operation + "\t.loWord(" + address + ") + " + (i + offset) + "\n";
 		else
-			return whitespace + operation + "\t" + address + " + " + (i + offset) + "\n";
+			assembly = state.getWhitespace() + operation + "\t" + address + " + " + (i + offset) + "\n";
+		
+		return new AssemblyStatePair(assembly, state);
 	}
 	
 	@Override

@@ -8,10 +8,9 @@ import C99Compiler.CompilerNodes.FunctionDefinitionNode;
 import C99Compiler.CompilerNodes.Expressions.BaseExpressionNode;
 import C99Compiler.CompilerNodes.Expressions.ExpressionNode;
 import C99Compiler.CompilerNodes.Interfaces.AssemblableNode;
-import C99Compiler.Utils.AssemblyUtils;
 import C99Compiler.Utils.OperandSources.ConstantSource;
-import C99Compiler.Utils.CompUtils;
-import C99Compiler.Utils.ScratchManager;
+import C99Compiler.Utils.ProgramState;
+import C99Compiler.Utils.AssemblyUtils.ByteCopier;
 import Grammar.C99.C99Parser.Jump_statementContext;
 
 public class JumpStatementNode extends StatementNode<Jump_statementContext> implements AssemblableNode
@@ -64,20 +63,20 @@ public class JumpStatementNode extends StatementNode<Jump_statementContext> impl
 	}
 	
 	@Override
-	public boolean canCall(FunctionDefinitionNode function)
+	public boolean canCall(ProgramState state, FunctionDefinitionNode function)
 	{
 		if (expr == null) return false;
-		return expr.canCall(function);
+		return expr.canCall(state, function);
 	}
 	
 	@Override
-	public boolean hasAssembly()
+	public boolean hasAssembly(ProgramState state)
 	{
 		return true; // Always does *something*
 	}
-	public String getAssembly(int leadingWhitespace, String returnAddr) throws Exception
+	public AssemblyStatePair getAssemblyAndState(ProgramState state) throws Exception
 	{
-		String whitespace = AssemblyUtils.getWhitespace(leadingWhitespace);
+		String whitespace = state.getWhitespace();
 		String assembly = "";
 		
 		switch (mode)
@@ -95,16 +94,27 @@ public class JumpStatementNode extends StatementNode<Jump_statementContext> impl
 				assembly += whitespace + "JMP\t" + iterNode.getEndLabel() + "\n";
 			break;
 		case returnM:
-			if (expr != null && expr.hasAssembly()) assembly += expr.getAssembly(leadingWhitespace, CompConfig.callResultSource(expr.getSize()));
-			else if (expr != null && expr.hasPropValue()) assembly += AssemblyUtils.byteCopier(whitespace, funcNode.getSize(), CompConfig.callResultSource(funcNode.getSize()), new ConstantSource(expr.getPropLong(), funcNode.getSize()));
-			else if (expr != null && expr.hasLValue()) assembly += AssemblyUtils.byteCopier(whitespace, funcNode.getType().getSize(), CompConfig.callResultSource(expr.getLValue().getSize()), expr.getLValue().getSource());
-			assembly += whitespace + "JMP\t" + returnAddr + "\n";
+			if (expr != null && expr.hasAssembly(state)) assembly += expr.getAssembly(state);
+			else if (expr != null && expr.hasPropValue(state))
+			{
+				ByteCopier copier = new ByteCopier(funcNode.getSize(), CompConfig.callResultSource(funcNode.getSize()), new ConstantSource(expr.getPropLong(state), funcNode.getSize()));
+				AssemblyStatePair tmpPair = copier.getAssemblyAndState(state);
+				assembly += tmpPair.assembly;
+				state = tmpPair.state;
+			}
+			else if (expr != null && expr.hasLValue())
+			{
+				ByteCopier copier = new ByteCopier(funcNode.getType().getSize(), CompConfig.callResultSource(expr.getLValue().getSize()), expr.getLValue().getSource());
+				AssemblyStatePair tmpPair = copier.getAssemblyAndState(state);
+				assembly += tmpPair.assembly;
+				state = tmpPair.state;
+			}
+			assembly += whitespace + "JMP\t" + state.exitFuncLabel() + "\n";
 			break;
 		}
 			
-		ScratchManager.releasePointers();
-		return assembly;
+		state = state.wipe();
+		return new AssemblyStatePair(assembly, state);
 		
 	}
-	@Override public String getAssembly(int leadingWhitespace) throws Exception {return getAssembly(leadingWhitespace, getEnclosingFunction().getEndLabel());}
 }

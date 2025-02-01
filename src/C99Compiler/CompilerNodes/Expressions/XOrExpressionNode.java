@@ -2,21 +2,9 @@
 //
 package C99Compiler.CompilerNodes.Expressions;
 
-import java.math.BigInteger;
-
 import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.Definitions.Type.CastContext;
-import C99Compiler.CompilerNodes.Dummies.DummyExpressionNode;
-import C99Compiler.Utils.AssemblyUtils;
-import C99Compiler.Utils.CompUtils;
-import C99Compiler.Utils.ScratchManager;
-import C99Compiler.Utils.AssemblyUtils.DetailsTicket;
-import C99Compiler.Utils.OperandSources.ConstantSource;
-import C99Compiler.Utils.OperandSources.OperandSource;
 import Grammar.C99.C99Parser.And_expressionContext;
-import Grammar.C99.C99Parser.Land_expressionContext;
-import Grammar.C99.C99Parser.Lor_expressionContext;
-import Grammar.C99.C99Parser.Or_expressionContext;
 import Grammar.C99.C99Parser.Xor_expressionContext;
 
 public class XOrExpressionNode extends ArithmeticBinaryExpressionNode
@@ -38,17 +26,6 @@ public class XOrExpressionNode extends ArithmeticBinaryExpressionNode
 	{return new AndExpressionNode(this).interpret(node.and_expression());}
 
 	@Override public CastContext getCastContext() {return CastContext.bitwise;}
-	
-	public static String getExclOr(String whitespace, OperandSource destSource, OperandSource sourceX, OperandSource sourceY, DetailsTicket ticket) throws Exception
-	{
-		return new XOrExpressionNode(null).getAssembly(whitespace, destSource, sourceX, sourceY, ticket);
-	}
-	public static String getComplementer(String whitespace, OperandSource destSource, OperandSource sourceX, DetailsTicket ticket) throws Exception
-	{
-		OperandSource sourceY = new ConstantSource(new BigInteger("FF".repeat(sourceX.getSize()), 16), sourceX.getSize()); // 0xFF...FF
-		
-		return new XOrExpressionNode(null).getAssembly(whitespace, destSource, sourceX, sourceY, ticket);
-	}
 
 	@Override
 	protected long doOperation(long x, long y)

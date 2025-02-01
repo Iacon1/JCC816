@@ -3,13 +3,14 @@
 
 package C99Compiler.CompilerNodes.LValues;
 
-import java.util.Set;
-
 import C99Compiler.CompConfig;
 import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.ValueNode;
 import C99Compiler.CompilerNodes.Definitions.Type;
-import C99Compiler.Utils.AssemblyUtils.DetailsTicket;
+import C99Compiler.CompilerNodes.Interfaces.Assemblable.AssemblyStatePair;
+import C99Compiler.Utils.ProgramState;
+import C99Compiler.Utils.ProgramState.PreserveFlag;
+import C99Compiler.Utils.ProgramState.ProcessorFlag;
 import C99Compiler.Utils.OperandSources.OperandSource;
 
 public class IndirectLValueNode extends LValueNode<IndirectLValueNode>
@@ -37,25 +38,28 @@ public class IndirectLValueNode extends LValueNode<IndirectLValueNode>
 		}
 		
 		@Override
-		public String getInstruction(String whitespace, String operation, Integer i, DetailsTicket ticket)
+		public AssemblyStatePair getInstruction(ProgramState state, String operation, Integer i)
 		{
+			String whitespace = state.getWhitespace();
 			String assembly = "";
 
 			if (i >= size)
-				return whitespace + operation + "\t" + CompConfig.signExtend + "\n";
-			
-			if ((ticket.flags & DetailsTicket.saveY) != 0)
-				assembly += whitespace + "PHY\n";
-			if (Math.abs(i + offset) >= 128 && (ticket.flags & DetailsTicket.isXY16Bit) == 0)
-				assembly += "REP\t#$10\n";
-			assembly += whitespace + "LDY\t#$" + String.format(ticket.is16Bit() ? "%04x" : "%02x", i + offset) + "\n";
-			assembly += whitespace + operation + "\t[" + source.getBase() + "],y" + "\n";
-			if (Math.abs(i + offset) >= 128 && (ticket.flags & DetailsTicket.isXY16Bit) == 0)
-				assembly += "SEP\t#$10\n";
-			if ((ticket.flags & DetailsTicket.saveY) != 0)
-				assembly += whitespace + "PLY\n";
-
-			return assembly;
+				assembly = whitespace + operation + "\t" + CompConfig.signExtend + "\n";
+			else
+			{
+				if (state.testPreserveFlag(PreserveFlag.Y))
+					assembly += whitespace + "PHY\n";
+				if (Math.abs(i + offset) >= 128 && !state.testProcessorFlag(ProcessorFlag.I))
+					assembly += whitespace + "REP\t#$10\n";
+				if (!(state.testKnownFlag(PreserveFlag.Y) && state.getY() == i + offset))
+					assembly += whitespace + "LDY\t#$" + String.format(state.testProcessorFlag(ProcessorFlag.M) ? "%04x" : "%02x", i + offset) + "\n";
+				assembly += whitespace + operation + "\t[" + source.getBase() + "],y" + "\n";
+				if (Math.abs(i + offset) >= 128 && !state.testProcessorFlag(ProcessorFlag.I) && state.testPreserveFlag(PreserveFlag.I))
+					assembly += whitespace + "SEP\t#$10\n";
+				if (state.testPreserveFlag(PreserveFlag.Y))
+					assembly += whitespace + "PLY\n";
+			}
+			return new AssemblyStatePair(assembly, state);
 		}
 
 		@Override
@@ -103,37 +107,6 @@ public class IndirectLValueNode extends LValueNode<IndirectLValueNode>
 		if (addrSource != null && source == null) source = new IndirectOperandSource(type.getSize(), addrSource);
 		if (addrSource != null) return source;
 		else return null;
-	}
-	
-	@Override
-	public boolean hasPossibleValues()
-	{
-		if (destination != null) return destination.hasPossibleValues();
-		else return super.hasPossibleValues();
-	}
-	@Override
-	public Set<Object> getPossibleValues()
-	{
-		if (destination != null) return destination.getPossibleValues();
-		else return super.getPossibleValues();
-	}
-	@Override
-	public void clearPossibleValues()
-	{
-		if (destination != null) destination.clearPossibleValues();
-		else super.clearPossibleValues();
-	}
-	@Override
-	public void setPossibleValues(Set<Object> possibleValues)
-	{
-		if (destination != null) destination.setPossibleValues(possibleValues);
-		else super.setPossibleValues(possibleValues);
-	}
-	@Override
-	public void addPossibleValue(Object value)
-	{
-		if (destination != null) destination.addPossibleValue(value);
-		else super.addPossibleValue(value);
 	}
 	
 	@Override

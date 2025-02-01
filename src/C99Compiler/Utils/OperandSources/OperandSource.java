@@ -4,7 +4,9 @@ package C99Compiler.Utils.OperandSources;
 
 import java.io.Serializable;
 
-import C99Compiler.Utils.AssemblyUtils.DetailsTicket;
+import C99Compiler.CompilerNodes.Interfaces.Assemblable.AssemblyStatePair;
+import C99Compiler.CompilerNodes.Interfaces.Assemblable.MutableAssemblyStatePair;
+import C99Compiler.Utils.ProgramState;
 
 public abstract class OperandSource implements Serializable
 {
@@ -42,75 +44,60 @@ public abstract class OperandSource implements Serializable
 	 */
 	public abstract String getBase();
 	
-	/** Returns assembly to perform the specified operation on the value or region represented by the source.
-	 * 
-	 * @param whitespace The whitespace to place before each line
-	 * @param operation The operation to perform
-	 * @param i	The byte offset from the first byte of the source
-	 * @param ticket The details on what registers must be preserved by the access
-	 * @return The assembly to perform the specified operation on the value or region represented by the source
-	 */
-	public abstract String getInstruction(String whitespace, String operation, Integer i, DetailsTicket ticket);
-	/** Returns assembly to perform the specified operation on the value or region represented by the source.
-	 * 
-	 * @param operation The operation to perform
-	 * @param i	The byte offset from the first byte of the source
-	 * @param ticket The details on what registers must be preserved by the access
-	 * @return The assembly to perform the specified operation on the value or region represented by the source
-	 */
-	public String getInstruction(String operation, Integer i, DetailsTicket ticket)
+	public abstract AssemblyStatePair getInstruction(ProgramState state, String operation, Integer i);
+	public AssemblyStatePair applyInstruction(AssemblyStatePair pair, String operation, Integer i)
 	{
-		return getInstruction("", operation, i, ticket);
+		AssemblyStatePair myPair = getInstruction(pair.state, operation, i);
+		return new AssemblyStatePair(pair.assembly + myPair.assembly, myPair.state);
 	}
-	
-	/** Returns assembly to load the the value or region represented by the source into the A register.
-	 * 
-	 * @param whitespace The whitespace to place before each line
-	 * @param i	The byte offset from the first byte of the source
-	 * @param ticket The details on what registers must be preserved by the access
-	 * @return The assembly to perform the specified operation on the value or region represented by the source
-	 */
-	public String getLDA(String whitespace, Integer i, DetailsTicket ticket)
+	public MutableAssemblyStatePair applyInstruction(MutableAssemblyStatePair pair, String operation, Integer i)
 	{
-		assert (ticket.flags & DetailsTicket.saveA) == 0; // We can't do this if we need to save A
-		return getInstruction(whitespace, "LDA", i, ticket);
+		AssemblyStatePair myPair = getInstruction(pair.state, operation, i);
+		return new MutableAssemblyStatePair(pair.assembly + myPair.assembly, myPair.state);
 	}
 	/** Returns assembly to load the the value or region represented by the source into the A register.
 	 * 
-	 * @param whitespace The whitespace to place before each line
+	 * @param state The program state to start at
 	 * @param i	The byte offset from the first byte of the source
-	 * @param ticket The details on what registers must be preserved by the access
-	 * @return The assembly to perform the specified operation on the value or region represented by the source
+	 * @return The assembly to perform the specified operation on the value or region represented by the source and the state of the program afterwards
 	 */
-	public String getLDA(Integer i, DetailsTicket ticket)
+	public AssemblyStatePair getLDA(ProgramState state, Integer i)
 	{
-		return getLDA("", i, ticket);
+		assert !state.testPreserveFlag(ProgramState.PreserveFlag.A); // We can't do this if we need to save A
+		return getInstruction(state, "LDA", i);
 	}
-	
-	/** Returns assembly to store the value of the A register into the region represented by the source.
-	 * 
-	 * @param whitespace The whitespace to place before each line
-	 * @param i	The byte offset from the first byte of the source
-	 * @param ticket The details on what registers must be preserved by the access
-	 * @return The assembly to perform the specified operation on the value or region represented by the source
-	 */
-	public String getSTA(String whitespace, Integer i, DetailsTicket ticket)
+	public AssemblyStatePair applyLDA(AssemblyStatePair pair, Integer i)
+	{
+		assert !pair.state.testPreserveFlag(ProgramState.PreserveFlag.A); // We can't do this if we need to save A
+		return applyInstruction(pair, "LDA", i);
+	}
+	public MutableAssemblyStatePair applyLDA(MutableAssemblyStatePair pair, Integer i)
 	{
 		assert !isLiteral; // Can't store into numbers
-		return getInstruction(whitespace, "STA", i, ticket);
+		return applyInstruction(pair, "STA", i);
 	}
-	/** Returns assembly to store the value of the A register into the region represented by the source.
+	/** Returns assembly to store the value of the A register into the region represented by the source and the state of the program afterwards
 	 * 
-	 * @param whitespace The whitespace to place before each line
+	 * @param state The program state to start at
 	 * @param i	The byte offset from the first byte of the source
 	 * @param ticket The details on what registers must be preserved by the access
-	 * @return The assembly to perform the specified operation on the value or region represented by the source
+	 * @return The assembly to perform the specified operation on the value or region represented by the source and the state of the program afterwards
 	 */
-	public String getSTA(Integer i, DetailsTicket ticket)
+	public AssemblyStatePair getSTA(ProgramState state, Integer i)
 	{
-		return getSTA("", i, ticket);
+		assert !isLiteral; // Can't store into numbers
+		return getInstruction(state, "STA", i);
 	}
-	
+	public AssemblyStatePair applySTA(AssemblyStatePair pair, Integer i)
+	{
+		assert !isLiteral; // Can't store into numbers
+		return applyInstruction(pair, "STA", i);
+	}
+	public MutableAssemblyStatePair applySTA(MutableAssemblyStatePair pair, Integer i)
+	{
+		assert !isLiteral; // Can't store into numbers
+		return applyInstruction(pair, "STA", i);
+	}
 	public boolean isStationary()
 	{
 		return false;

@@ -2,11 +2,8 @@
 //
 package C99Compiler.Utils.OperandSources;
 
-import java.nio.ByteBuffer;
-import java.util.Arrays;
-
-import C99Compiler.Utils.AssemblyUtils.DetailsTicket;
-import C99Compiler.Utils.PropPointer;
+import C99Compiler.CompilerNodes.Interfaces.Assemblable.AssemblyStatePair;
+import C99Compiler.Utils.ProgramState;
 
 public class ConstantByteSource extends OperandSource
 {
@@ -33,30 +30,43 @@ public class ConstantByteSource extends OperandSource
 		return new ConstantByteSource(bytes, offset, size);
 	}
 	
-	public String getBase(int i, DetailsTicket ticket)
+	public int getBaseValue(ProgramState state, int i)
 	{
 		int signExtend = (bytes[bytes.length - 1] & 0x80) != 0 ? 0xFF : 0x00;
-		if (bytes.length <= i) return "#$" + String.format("%02x", signExtend).repeat(ticket.is16Bit() ?  2 : 1);
-		if (ticket.is16Bit())
+		if (bytes.length <= i) return signExtend * (state.testProcessorFlag(ProgramState.ProcessorFlag.M) ? 0x0101 : 0x01);
+		if (state.testProcessorFlag(ProgramState.ProcessorFlag.M))
 		{
-			if (bytes.length - 1 == i) return "#$" + String.format("%02x%02x", signExtend, bytes[i]);
-			else return "#$" + String.format("%02x%02x", bytes[i + 1], bytes[i]);
+			if (bytes.length - 1 == i) return signExtend * 0x100 + bytes[i];
+			else return bytes[i + 1] * 0x100 + bytes[i];
 		}
-		else return "#$" + String.format("%02x", bytes[i]);
+		else return bytes[i];
 	}
-	public String getBase(DetailsTicket ticket)
+	public String getBase(ProgramState state, int i)
 	{
-		return getBase(0, ticket);
+		if (state.testProcessorFlag(ProgramState.ProcessorFlag.M))
+			return "#$" + String.format("%04x", getBaseValue(state, i));
+		else
+			return "#$" + String.format("%02x", getBaseValue(state, i));
 	}
 	@Override
 	public String getBase()
 	{
-		return getBase(0, new DetailsTicket());
+		return getBase(new ProgramState(), 0);
 	}
 	
+
 	@Override
-	public String getInstruction(String whitespace, String operation, Integer i, DetailsTicket ticket)
+	public AssemblyStatePair getInstruction(ProgramState state, String operation, Integer i)
 	{
-		return whitespace + operation + "\t" + getBase(i, ticket) + "\n";
+		if (operation.equals("LDA"))
+		{
+			int baseValue = getBaseValue(state, i);
+			if (state.testKnownFlag(ProgramState.PreserveFlag.A) && state.getA() == baseValue)
+				return new AssemblyStatePair("", state);
+			else
+				state = state.fixAReg(baseValue);
+		}
+		String assembly = state.getWhitespace() + operation + "\t" + getBase(state, i) + "\n";
+		return new AssemblyStatePair(assembly, state);
 	}
 }

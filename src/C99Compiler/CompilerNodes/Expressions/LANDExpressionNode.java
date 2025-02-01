@@ -4,10 +4,10 @@ package C99Compiler.CompilerNodes.Expressions;
 
 import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.Definitions.Type.CastContext;
-import C99Compiler.Utils.AssemblyUtils;
-import C99Compiler.Utils.AssemblyUtils.DetailsTicket;
 import C99Compiler.Utils.CompUtils;
-import C99Compiler.Utils.ScratchManager;
+import C99Compiler.Utils.ProgramState;
+import C99Compiler.Utils.AssemblyUtils.AssemblyUtils;
+import C99Compiler.Utils.AssemblyUtils.BytewiseOperator;
 import C99Compiler.Utils.OperandSources.OperandSource;
 import Grammar.C99.C99Parser.Land_expressionContext;
 import Grammar.C99.C99Parser.Or_expressionContext;
@@ -15,6 +15,29 @@ import Grammar.C99.C99Parser.Or_expressionContext;
 public class LANDExpressionNode extends LogicalBinaryExpressionNode
 <Or_expressionContext, Land_expressionContext, Or_expressionContext, Land_expressionContext>
 {
+	private static class LANDOperator extends BytewiseOperator
+	{
+		private OperandSource source;
+
+		protected LANDOperator(OperandSource source)
+		{
+			super(source.getSize(), source.getSize(), false);
+			this.source = source;
+		}
+
+		@Override
+		protected AssemblyStatePair getAssemblyAndState(ProgramState state, int i) throws Exception
+		{
+			AssemblyStatePair tmpPair;
+			String assembly = "";
+			tmpPair = source.getLDA(state, i);
+			assembly += tmpPair.assembly;
+			state = tmpPair.state;
+			assembly += state.getWhitespace() + "BNE:\n";
+			return new AssemblyStatePair(assembly, state);
+		}
+		
+	}
 
 	public LANDExpressionNode(ComponentNode<?> parent) {super(parent);}
 
@@ -33,43 +56,47 @@ public class LANDExpressionNode extends LogicalBinaryExpressionNode
 	@Override public CastContext getCastContext() {return CastContext.logical;}
 	
 	@Override
-	public Object getPropValue()
+	public Object getPropValue(ProgramState state)
 	{
-		boolean a = x.getPropBool();
-		boolean b = y.getPropBool();
+		boolean a = x.getPropBool(state);
+		boolean b = y.getPropBool(state);
 		return a && b;
 	}
 	@Override
-	protected String getAssembly(String whitespace, OperandSource destSource, OperandSource sourceX, OperandSource sourceY, ScratchManager scratchManager, DetailsTicket ticket) throws Exception
+	protected AssemblyStatePair getAssemblyAndState(ProgramState state, OperandSource sourceX, OperandSource sourceY) throws Exception
 	{
+		AssemblyStatePair tmpPair;
 		String assembly = "";
-		assembly += ticket.save(whitespace, DetailsTicket.saveA | DetailsTicket.saveX);
-		DetailsTicket innerTicket = new DetailsTicket(ticket, DetailsTicket.saveX, DetailsTicket.saveA); // All of our uses of A are LDA so it's fine
+		String whitespace = state.getWhitespace();
+		assembly += AssemblyUtils.store(state, (byte) (ProgramState.PreserveFlag.A | ProgramState.PreserveFlag.X));
+		byte flags = state.getPreserveFlags();
+		state = state.clearPreserveFlags((byte) (ProgramState.PreserveFlag.A | ProgramState.PreserveFlag.X));
+
 		assembly += whitespace + "LDX\t#$01\n";
-		assembly += AssemblyUtils.bytewiseOperation(whitespace, sourceX.getSize(), (Integer i, DetailsTicket ticket2) ->
-		{
-			return new String[]
-			{
-				sourceX.getLDA(i, ticket2),
-				"BNE\t:+",
-			};
-		}, innerTicket);
+
+		tmpPair = new LANDOperator(sourceX).getAssemblyAndState(state);
+		assembly += tmpPair.assembly;
+		state = tmpPair.state;
+		
 		assembly += whitespace + "DEX\n";
 		assembly += whitespace + "BRA\t:++\n"; // If above never jumped, we're done here
 		assembly += whitespace.substring(1) + ":\n";
-		assembly += AssemblyUtils.bytewiseOperation(whitespace, sourceY.getSize(), (Integer i, DetailsTicket ticket2) ->
-		{
-			return new String[]
-			{
-				sourceY.getLDA(i, ticket2),
-				"BNE\t:+",
-			};
-		}, innerTicket);
+		
+		tmpPair = new LANDOperator(sourceY).getAssemblyAndState(state);
+		assembly += tmpPair.assembly;
+		state = tmpPair.state;
+		
 		assembly += whitespace + "DEX\n";
 		assembly += ":" + whitespace.substring(1) + "TXA\n";
 		assembly += whitespace + CompUtils.setA8 + "\n";
-		assembly += destSource.getSTA(whitespace, 0, innerTicket);
-		assembly += whitespace + ticket.restore(whitespace, DetailsTicket.saveA | DetailsTicket.saveX);
-		return assembly;
+
+		tmpPair = state.destSource().getSTA(state, 0);
+		assembly += tmpPair.assembly;
+		state = tmpPair.state;
+
+		 state = state.addPreserveFlags(flags);
+		assembly += AssemblyUtils.restore(state, (byte) (ProgramState.PreserveFlag.A | ProgramState.PreserveFlag.X));
+		
+		return new AssemblyStatePair(assembly, state);
 	}
 }

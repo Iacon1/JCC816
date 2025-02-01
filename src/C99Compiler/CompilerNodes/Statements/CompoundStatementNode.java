@@ -5,19 +5,17 @@ package C99Compiler.CompilerNodes.Statements;
 import java.util.LinkedList;
 import java.util.List;
 
-import C99Compiler.CompConfig.DebugLevel;
 import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.FunctionDefinitionNode;
-import C99Compiler.CompilerNodes.InterpretingNode;
 import C99Compiler.CompilerNodes.Declarations.DeclarationNode;
 import C99Compiler.CompilerNodes.Definitions.Scope;
 import C99Compiler.CompilerNodes.Interfaces.AssemblableNode;
-import C99Compiler.Utils.AssemblyUtils;
-import C99Compiler.Utils.LineInfo;
+import C99Compiler.CompilerNodes.Interfaces.UnvaluedAssemblableNode;
+import C99Compiler.Utils.ProgramState;
 import Grammar.C99.C99Parser.Block_itemContext;
 import Grammar.C99.C99Parser.Compound_statementContext;
 
-public class CompoundStatementNode extends StatementNode<Compound_statementContext> implements AssemblableNode
+public class CompoundStatementNode extends StatementNode<Compound_statementContext> implements UnvaluedAssemblableNode
 {
 	private List<AssemblableNode> assemblables;
 	private List<Integer> lines; // Line number for each assemblable
@@ -60,31 +58,34 @@ public class CompoundStatementNode extends StatementNode<Compound_statementConte
 		else return super.getScope();
 	}
 	@Override
-	public boolean canCall(FunctionDefinitionNode function)
+	public boolean canCall(ProgramState state, FunctionDefinitionNode function)
 	{
 		for (AssemblableNode assemblable : assemblables)
-			if (assemblable.canCall(function)) return true;
+			if (assemblable.canCall(state, function)) return true;
 		return false;
 	}
 
 	@Override
-	public boolean hasAssembly()
+	public boolean hasAssembly(ProgramState state)
 	{
 		for (AssemblableNode assemblable : assemblables)
-			if (assemblable.hasAssembly()) return true;
+			if (assemblable.hasAssembly(state)) return true;
 		return false;
 	}
-	public String getAssembly(int leadingWhitespace, String returnAddr) throws Exception
+	
+	@Override
+	public AssemblyStatePair getAssemblyAndState(ProgramState state) throws Exception
 	{
 		String assembly = "";
 		int i = 0;
 		for (AssemblableNode assemblable : assemblables)
 		{
-			assembly += labelLine(leadingWhitespace, lines.get(i++));
-			if (StatementNode.class.isAssignableFrom(assemblable.getClass())) assembly += ((StatementNode) assemblable).getAssembly(leadingWhitespace, returnAddr);
-			else
-				assembly += assemblable.getAssembly(leadingWhitespace);
+			assembly += labelLine(state, lines.get(i++));
+			state = state.setDestSource(null);
+			AssemblyStatePair pair = assemblable.getAssemblyAndState(state);
+			assembly += pair.assembly;
+			state = pair.state;
 		}
-		return assembly;
+		return new AssemblyStatePair(assembly, state);
 	}
 }

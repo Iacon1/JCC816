@@ -2,18 +2,15 @@
 //
 package C99Compiler.CompilerNodes.Expressions;
 
-import java.util.LinkedList;
-import java.util.List;
-
 import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.Definitions.Type;
 import C99Compiler.CompilerNodes.Definitions.Type.CastContext;
 import C99Compiler.CompilerNodes.Dummies.DummyType;
-import C99Compiler.Utils.AssemblyUtils;
-import C99Compiler.Utils.AssemblyUtils.DetailsTicket;
+import C99Compiler.CompilerNodes.Dummies.DummyExpressionNode;
 import C99Compiler.Utils.CompUtils;
-import C99Compiler.Utils.ScratchManager;
-import C99Compiler.Utils.OperandSources.ConstantSource;
+import C99Compiler.Utils.ProgramState;
+import C99Compiler.Utils.AssemblyUtils.AssemblyUtils;
+import C99Compiler.Utils.AssemblyUtils.BytewiseOperator;
 import C99Compiler.Utils.OperandSources.OperandSource;
 import Grammar.C99.C99Parser.Equality_expressionContext;
 import Grammar.C99.C99Parser.Relational_expressionContext;
@@ -21,8 +18,50 @@ import Grammar.C99.C99Parser.Relational_expressionContext;
 public class EqualityExpressionNode extends BinaryExpressionNode
 <Equality_expressionContext, Relational_expressionContext, Relational_expressionContext, Equality_expressionContext>
 {
+	private static class EqualityOperator extends BytewiseOperator
+	{
+		private OperandSource sourceX, sourceY;
+		
+		protected EqualityOperator(OperandSource sourceX, OperandSource sourceY)
+		{
+			super(sourceX.getSize(), sourceX.getSize(), false);
+			this.sourceX = sourceX;
+			this.sourceY = sourceY;
+		}
 
+
+		@Override
+		protected AssemblyStatePair getAssemblyAndState(ProgramState state, int i) throws Exception
+		{
+			AssemblyStatePair tmpPair;
+			String assembly = "";
+			tmpPair = sourceX.getLDA(state, i);					// Get X
+			assembly += tmpPair.assembly;
+			state = tmpPair.state;
+			
+			tmpPair = sourceY.getInstruction(state, "CMP", i); 	// Cmp X & Y?
+			assembly += tmpPair.assembly;
+			state = tmpPair.state;
+			
+			assembly += state.getWhitespace() + "BNE\t:+\n";			// if [not op] then no
+			return new AssemblyStatePair(assembly, state);
+		}
+		
+	}
 	public EqualityExpressionNode(ComponentNode<?> parent) {super(parent);}
+	public EqualityExpressionNode(ComponentNode<?> parent, BaseExpressionNode<?> x, BaseExpressionNode<?> y)
+	{
+		super(parent);
+		this.x = x;
+		this.y = y;
+	}
+	public EqualityExpressionNode(ComponentNode<?> parent, BaseExpressionNode<?> x)
+	{
+		super(parent);
+		this.x = x;
+		this.y = new DummyExpressionNode(this, x.getType(), 0);
+		this.operator = "==";
+	}
 
 	@Override
 	protected BaseExpressionNode<Equality_expressionContext> getC1Node(Equality_expressionContext node) throws Exception
@@ -42,97 +81,53 @@ public class EqualityExpressionNode extends BinaryExpressionNode
 		return new DummyType("char");
 	}
 	@Override
-	public Object getPropValue()
+	public Object getPropValue(ProgramState state)
 	{
 		switch (operator)
 		{
 		case "==":
-			return x.getPropValue().equals(y.getPropValue());
+			return x.getPropValue(state).equals(y.getPropValue(state));
 		case "!=":
-			return x.getPropValue().equals(y.getPropValue());
+			return x.getPropValue(state).equals(y.getPropValue(state));
 		default: return null;
 		}
 	}
 	
 	@Override public CastContext getCastContext() {return CastContext.equality;}
 	
-	/** Gets whether the input source is zero.
-	 * If destSource is null the result is placed in the CPU's zero flag, otherwise it's placed in destSource.
-	 * Note that this means the result of bne or beq will depend on whether destSource is null!
-	 * @param whitespace
-	 * @param destSource
-	 * @param scratchManager
-	 * @param source
-	 * @param ticket
-	 * @return
-	 */
-	public static String getIsZero(String whitespace, OperandSource destSource, ScratchManager scratchManager, OperandSource source, DetailsTicket ticket)
-	{
-		String assembly = "";
-		int offset = 0;
-		
-		if (source.getSize() == 1)
-		{
-			DetailsTicket ticket2 = new DetailsTicket(ticket, 0, DetailsTicket.isA16Bit);
-			assembly += whitespace + CompUtils.setA8 + "\n";
-			assembly += source.getLDA(whitespace, 0, ticket2);
-		}
-		else
-		{
-			DetailsTicket ticket2;
-			if (source.getSize() % 2 != 0) // Odd number
-			{
-				ticket2 = new DetailsTicket(ticket, 0, DetailsTicket.isA16Bit);
-				assembly += source.getLDA(whitespace, 0, ticket2);
-				ticket2 = new DetailsTicket(ticket, DetailsTicket.isA16Bit, 0);
-				assembly += AssemblyUtils.bytewiseOperation(whitespace, source.getSize() - 1, (Integer i, DetailsTicket ticket3) -> {return new String[]{source.getInstruction("ORA", i + 1, ticket3)};});
-			}
-			else
-			{
-				ticket2 = new DetailsTicket(ticket, DetailsTicket.isA16Bit, 0);
-				assembly += source.getLDA(whitespace, 0, ticket2);
-				if (source.getSize() > 2)
-					assembly += AssemblyUtils.bytewiseOperation(whitespace, source.getSize() - 2, (Integer i, DetailsTicket ticket3) -> {return new String[]{source.getInstruction("ORA", i + 2, ticket3)};});
-			}			
-		}
-		if (destSource != null)
-		{
-			assembly += whitespace + "BEQ\t:+\n";
-			assembly += AssemblyUtils.byteCopier(whitespace, destSource.getSize(), destSource, new ConstantSource(0, destSource.getSize()));
-			assembly += whitespace + "BRA\t:++\n";
-			assembly += whitespace + ":\n";
-			assembly += AssemblyUtils.byteCopier(whitespace, destSource.getSize(), destSource, new ConstantSource(1, destSource.getSize()));
-			assembly += whitespace + ":\n";
-		}
-		return assembly;
-	}
-	
 	@Override
-	protected String getAssembly(String whitespace, OperandSource destSource, OperandSource sourceX, OperandSource sourceY, ScratchManager scratchManager, DetailsTicket ticket) throws Exception
+	protected AssemblyStatePair getAssemblyAndState(ProgramState state, OperandSource sourceX, OperandSource sourceY) throws Exception
 	{
 		String assembly = "";
 
-		assembly += whitespace + CompUtils.setXY8 + "\n";
-		assembly += ticket.save(whitespace, DetailsTicket.saveA | DetailsTicket.saveX);
-		if (operator.equals("==")) assembly += whitespace + "LDX\t#$00\n";
-		else if (operator.equals("!=")) assembly += whitespace + "LDX\t#$01\n";
-		DetailsTicket innerTicket = new DetailsTicket(ticket, DetailsTicket.saveX, DetailsTicket.saveA);
-		assembly += AssemblyUtils.bytewiseOperation(whitespace, sourceX.getSize(), (Integer i, DetailsTicket ticket2) -> 
-		{	
-			List<String> lines = new LinkedList<String>();
-			lines.add(sourceX.getLDA(i, ticket2));	// Get X
-			lines.add(sourceY.getInstruction("CMP", i, ticket2)); // Cmp X & Y?
-			lines.add("BNE\t:+");							// if [not op] then no
-			// else maybe
-			return lines.toArray(new String[] {});
-		}, innerTicket);
-		if (operator.equals("==")) assembly += whitespace + "INX\n";
-		else if (operator.equals("!=")) assembly += whitespace + "DEX\n";
-		assembly += ":" + whitespace.substring(1) + "TXA\n";
-		assembly += whitespace + CompUtils.setA8 + "\n";
-		if (destSource != null) assembly += destSource.getSTA(whitespace, 0, ticket);
-		assembly += ticket.restore(whitespace, DetailsTicket.saveA | DetailsTicket.saveX);
+		assembly += AssemblyUtils.store(state, (byte) (ProgramState.PreserveFlag.A | ProgramState.PreserveFlag.X));
+		byte flags = state.getPreserveFlags();
+		state = state.clearPreserveFlags((byte) (ProgramState.PreserveFlag.A | ProgramState.PreserveFlag.X));
 		
-		return assembly;
+		assembly += state.getWhitespace() + CompUtils.setXY8 + "\n";
+		if (operator.equals("==")) assembly += state.getWhitespace() + "LDX\t#$00\n";
+		else if (operator.equals("!=")) assembly += state.getWhitespace() + "LDX\t#$01\n";
+		
+		EqualityOperator op = new EqualityOperator(sourceX, sourceY);
+		assembly += op.getAssembly(state);
+		state = op.getStateAfter(state);
+		if (operator.equals("==")) assembly += state.getWhitespace() + "INX\n";
+		else if (operator.equals("!=")) assembly += state.getWhitespace() + "DEX\n";
+		if (state.getWhitespace().length() >= 2)
+			assembly += ":" + state.getWhitespace().substring(1) + "TXA\n";
+		else
+			assembly += ":TXA\n";
+		assembly += state.getWhitespace() + CompUtils.setA8 + "\n";
+		if (state.destSource() != null)
+		{
+			AssemblyStatePair tmpPair = state.destSource().getSTA(state, 0);
+			assembly += tmpPair.assembly;
+			state = tmpPair.state;
+		}
+		
+		state = state.addPreserveFlags(flags);
+		assembly += AssemblyUtils.restore(state, (byte) (ProgramState.PreserveFlag.A | ProgramState.PreserveFlag.X));
+		
+		return new AssemblyStatePair(assembly, state);
 	}
 }

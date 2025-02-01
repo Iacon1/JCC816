@@ -6,16 +6,13 @@ package C99Compiler.CompilerNodes.Expressions;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 
-import C99Compiler.CompConfig;
 import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.InterpretingNode;
 import C99Compiler.CompilerNodes.Interfaces.AssemblableNode;
 import C99Compiler.CompilerNodes.Interfaces.TypedNode;
 import C99Compiler.CompilerNodes.LValues.LValueNode;
-import C99Compiler.Utils.AssemblyUtils.DetailsTicket;
+import C99Compiler.Utils.ProgramState;
 import C99Compiler.Utils.PropPointer;
-import C99Compiler.Utils.ScratchManager;
-import C99Compiler.Utils.OperandSources.OperandSource;
 
 public abstract class BaseExpressionNode<C extends ParserRuleContext> extends InterpretingNode<BaseExpressionNode<C>, C> implements AssemblableNode, TypedNode
 {
@@ -31,45 +28,38 @@ public abstract class BaseExpressionNode<C extends ParserRuleContext> extends In
 
 	public boolean hasLValue() {return false;}
 	public LValueNode<?> getLValue() {return null;}
-	@Override
-	public abstract boolean hasPropValue();
-	@Override
-	public abstract Object getPropValue();
-	public long getPropLong()
+
+	public long getPropLong(ProgramState state)
 	{
-		try {return ((Number) getPropValue()).longValue();}
+		try {return ((Number) getPropValue(state)).longValue();}
 		catch (Exception e) {return 0;}
 	}
-	public boolean getPropBool()
+	@Deprecated
+	public long getPropLong()
 	{
-		try {return (Boolean) getPropValue();}
+		return getPropLong(new ProgramState());
+	}
+	public boolean getPropBool(ProgramState state)
+	{
+		try {return (Boolean) getPropValue(state);}
 		catch (Exception e) {return false;}
 	}
-	public PropPointer getPropPointer()
+	@Deprecated
+	public boolean getPropBool()
 	{
-		try {return (PropPointer) getPropValue();}
+		return getPropBool(new ProgramState());
+	}
+	public PropPointer getPropPointer(ProgramState state)
+	{
+		try {return (PropPointer) getPropValue(state);}
 		catch (Exception e) {return null;}
 	}
+	@Deprecated
+	public PropPointer getPropPointer()
+	{
+		return getPropPointer(new ProgramState());
+	}
 	public boolean isIndirect() {return false;} // Will this L-Value be indirect?
-	public abstract String getAssembly(int leadingWhitespace, OperandSource destSource, ScratchManager scratchManager, DetailsTicket ticket) throws Exception;
-	public String getAssembly(int leadingWhitespace, OperandSource destSource, DetailsTicket ticket) throws Exception
-	{
-		return getAssembly(leadingWhitespace, destSource, new ScratchManager(), ticket);
-	}
-	public String getAssembly(int leadingWhitespace, OperandSource destSource) throws Exception
-	{
-		return getAssembly(leadingWhitespace, destSource, new ScratchManager(), new DetailsTicket());
-	}
-	protected String getAssembly(int leadingWhitespace, ScratchManager scratchManager, DetailsTicket ticket) throws Exception
-	{
-		return getAssembly(leadingWhitespace, null,  scratchManager, ticket);
-	}
-	@Override
-	public String getAssembly(int leadingWhitespace) throws Exception
-	{
-		ScratchManager scratchManager = new ScratchManager();
-		return getAssembly(leadingWhitespace, scratchManager, new DetailsTicket());
-	}
 
 	
 }

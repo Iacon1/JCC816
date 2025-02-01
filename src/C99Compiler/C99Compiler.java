@@ -16,6 +16,7 @@ import C99Compiler.CompConfig.VerbosityLevel;
 import C99Compiler.CompilerNodes.TranslationUnitNode;
 import C99Compiler.CompilerNodes.Statements.CompoundStatementNode;
 import C99Compiler.Utils.LineInfo;
+import C99Compiler.Utils.ProgramState;
 import Grammar.C99.C99Lexer;
 import Grammar.C99.C99Parser;
 import Grammar.C99.C99Parser.Compound_statementContext;
@@ -105,13 +106,13 @@ public class C99Compiler
 	 * @return The ASM equivalent of the C code provided.
 	 * @throws Exception
 	 */
-	public static String compileSnippet(int leadingWhitespace, String source, Object... parameters) throws Exception
+	public static String compileSnippet(ProgramState startState, String source, Object... parameters) throws Exception
 	{ 
 		source = Preprocessor.removeComments(source);
 		CommonTokenStream tokens = lex(source.formatted(parameters));
 		CompoundStatementNode statement = parseSnippet(tokens);
 
-		return statement.getAssembly(leadingWhitespace);
+		return statement.getAssembly(startState);
 	}
 	
 	public static String getCurrFilename()

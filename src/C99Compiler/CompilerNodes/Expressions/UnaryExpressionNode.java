@@ -16,12 +16,12 @@ import C99Compiler.CompilerNodes.Definitions.PointerType;
 import C99Compiler.Exceptions.ConstraintException;
 import C99Compiler.Exceptions.ScratchOverflowException;
 import C99Compiler.PreprocNodes.PreProcComponentNode;
-import C99Compiler.Utils.AssemblyUtils;
 import C99Compiler.Utils.CompUtils;
-import C99Compiler.Utils.AssemblyUtils.DetailsTicket;
+import C99Compiler.Utils.ProgramState;
+import C99Compiler.Utils.ProgramState.ScratchSource;
 import C99Compiler.Utils.PropPointer;
-import C99Compiler.Utils.ScratchManager;
-import C99Compiler.Utils.ScratchManager.ScratchSource;
+import C99Compiler.Utils.AssemblyUtils.AssemblyUtils;
+import C99Compiler.Utils.AssemblyUtils.ByteCopier;
 import C99Compiler.Utils.OperandSources.AddressSource;
 import C99Compiler.Utils.OperandSources.ConstantSource;
 import C99Compiler.Utils.OperandSources.NumericAddressSource;
@@ -30,6 +30,7 @@ import Grammar.C99.C99Parser.Unary_expressionContext;
 import C99Compiler.CompilerNodes.Dummies.DummyValueNode;
 import C99Compiler.CompilerNodes.Dummies.DummyVariableNode;
 import C99Compiler.CompilerNodes.Expressions.PostfixExpressionNode.PFType;
+import C99Compiler.CompilerNodes.Interfaces.AddressableNode;
 
 public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionContext>
 {
@@ -125,12 +126,12 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 		{
 			if (UnaryExpressionNode.class.isAssignableFrom(expr.getClass()) && ((UnaryExpressionNode) expr).operator.equals("&"))
 				return ((UnaryExpressionNode) expr).expr.getLValue(); // These two cancel each other out
-			else if (expr.hasPropValue())
+			else if (expr.hasPropValue(new ProgramState()))
 			{
-				if (expr.getPropPointer() != null) // Pointer
-					return new DummyVariableNode(this, getType(), new ConstantSource(expr.getPropPointer(), getSize()));
-				else if (expr.getPropLong() != 0) // Numeric
-					return new DummyVariableNode(this, getType(), new NumericAddressSource((int) expr.getPropLong(), getSize()));
+				if (expr.getPropPointer(new ProgramState()) != null) // Pointer
+					return new DummyVariableNode(this, getType(), new ConstantSource(expr.getPropPointer(new ProgramState()), getSize()));
+				else if (expr.getPropLong(new ProgramState()) != 0) // Numeric
+					return new DummyVariableNode(this, getType(), new NumericAddressSource((int) expr.getPropLong(new ProgramState()), getSize()));
 				else return null;
 			}
 			else return pointerRef;
@@ -145,36 +146,31 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 	}
 
 	@Override
-	public boolean canCall(FunctionDefinitionNode function)
+	public boolean canCall(ProgramState state, FunctionDefinitionNode function)
 	{
-		return expr.canCall(function);
+		return expr.canCall(state, function);
 	}
 	@Override
-	public boolean hasPropValue()
+	public boolean hasPropValue(ProgramState state)
 	{
 		if (operator.equals("sizeof") || operator.equals("defined") || operator.equals("__has_embed") || operator.equals("__offset_of")) return true;
 		else if (operator.equals("*"))
-			if (pointerRef != null && pointerRef.hasPossibleValues() && pointerRef.getPossibleValues().size() == 1)
+			if (pointerRef != null && state.getOnlyValue(pointerRef) != null) // if expr can only point to one thing...
 			{
-				// if expr can only point to one thing...
-				if (VariableNode.class.isAssignableFrom(((PropPointer<?>) pointerRef.getPossibleValues().toArray()[0]).getNode().getClass()))
-				{
-					VariableNode n = ((PropPointer<VariableNode>) pointerRef.getPossibleValues().toArray()[0]).getNode();
-					if (n.hasPossibleValues() && n.getPossibleValues().size() == 1)
-						return true;
-					else return false;
-				}
+				VariableNode n = ((PropPointer<VariableNode>) state.getOnlyValue(pointerRef)).getNode();
+				if (state.getOnlyValue(n) != null)
+					return true;
 				else return false;
 			}
 			else return false;
 		else if (operator.equals("&"))
 		{
-			return expr.hasPropValue() || (expr.hasLValue() && VariableNode.class.isAssignableFrom(expr.getLValue().getClass()) && !expr.hasAssembly() && !PostfixExpressionNode.class.isAssignableFrom(expr.getClass()));
+			return expr.hasPropValue(state) || (expr.hasLValue() && VariableNode.class.isAssignableFrom(expr.getLValue().getClass()) && !expr.hasAssembly() && !PostfixExpressionNode.class.isAssignableFrom(expr.getClass()));
 		}
-		else return expr.hasPropValue();
+		else return expr.hasPropValue(state);
 	}
 	@Override
-	public Object getPropValue()
+	public Object getPropValue(ProgramState state)
 	{
 		if (operator.equals("sizeof"))
 		{
@@ -193,28 +189,26 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 		{
 			return type.getStruct().getOffset(identifier);
 		}
-		else if (operator.equals("-")) return Long.valueOf(-1 * expr.getPropLong());
-		else if (operator.equals("~")) return Long.valueOf(~expr.getPropLong());
-		else if (operator.equals("!")) return Boolean.valueOf(expr.getPropBool());
+		else if (operator.equals("-")) return Long.valueOf(-1 * expr.getPropLong(state));
+		else if (operator.equals("~")) return Long.valueOf(~expr.getPropLong(state));
+		else if (operator.equals("!")) return Boolean.valueOf(expr.getPropBool(state));
 		else if (operator.equals("*"))
 		{
-			if (pointerRef != null && pointerRef.hasPossibleValues() && pointerRef.getPossibleValues().size() == 1)
+			if (pointerRef != null && state.getOnlyValue(pointerRef) != null)
 			{
-				// if expr can only point to one thing...
-				if (VariableNode.class.isAssignableFrom(((PropPointer<?>) pointerRef.getPossibleValues().toArray()[0]).getNode().getClass()))
+				AddressableNode node = ((PropPointer<?>) state.getOnlyValue(pointerRef)).getNode();
+				// Variable TODO
+				if (VariableNode.class.isAssignableFrom(node.getClass()))
 				{
-					VariableNode node = ((PropPointer<VariableNode>) pointerRef.getPossibleValues().toArray()[0]).getNode();
-					if (node.hasPossibleValues() && node.getPossibleValues().size() == 1)
-					{
-						// And that thing can only have one value...
-						return node.getPossibleValues().toArray()[0]; // Then return that
-					}
+					VariableNode vNode = (VariableNode) node;
+					if (state.getOnlyValue(vNode) != null)
+						return state.getOnlyValue(vNode);
 					else return null;
 				}
-				else if (FunctionDefinitionNode.class.isAssignableFrom(((PropPointer<?>) pointerRef.getPossibleValues().toArray()[0]).getNode().getClass()))
+				else if (FunctionDefinitionNode.class.isAssignableFrom(node.getClass()))
 				{
-					FunctionDefinitionNode node = ((PropPointer<FunctionDefinitionNode>) pointerRef.getPossibleValues().toArray()[0]).getNode();
-					return node;
+					FunctionDefinitionNode fNode = (FunctionDefinitionNode) node;
+					return fNode;
 				}
 				
 				else return null;
@@ -228,126 +222,156 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 				VariableNode var = (VariableNode) expr.getLValue();
 				return new PropPointer<VariableNode>(var, 0);
 			}
-			else if (FunctionDefinitionNode.class.isAssignableFrom(expr.getPropValue().getClass())) // A function pointer
+			else if (FunctionDefinitionNode.class.isAssignableFrom(expr.getPropValue(state).getClass())) // A function pointer
 			{
-				FunctionDefinitionNode func = (FunctionDefinitionNode) expr.getPropValue();
+				FunctionDefinitionNode func = (FunctionDefinitionNode) expr.getPropValue(state);
 				func.requireStackLoader();
 				return new PropPointer<FunctionDefinitionNode>(func, 0);
 			}
 			else
-				return expr.getPropLong();
+				return expr.getPropLong(state);
 		}
-		else return expr.getPropValue();
+		else return expr.getPropValue(state);
 	}
 	
 	@Override
-	public boolean hasAssembly()
+	public boolean hasAssembly(ProgramState state)
 	{
-		if (operator.equals("*")) return expr.hasAssembly() || !expr.hasPropValue();
+		if (operator.equals("*")) return expr.hasAssembly(state) || !expr.hasPropValue(state);
 		else if (operator.equals("&"))
-			return expr.hasAssembly() || PostfixExpressionNode.class.isAssignableFrom(expr.getClass());
+			return expr.hasAssembly(state) || PostfixExpressionNode.class.isAssignableFrom(expr.getClass());
 		else if (!operator.equals("++") && !operator.equals("--"))
-			return (expr == null ? false : expr.hasAssembly()) || !hasPropValue();
+			return (expr == null ? false : expr.hasAssembly(state)) || !hasPropValue(state);
 		else return true;
 	}
+
 	@Override
-	public String getAssembly(int leadingWhitespace, OperandSource destSource, ScratchManager scratchManager, DetailsTicket ticket) throws Exception
+	public AssemblyStatePair getAssemblyAndState(ProgramState state) throws Exception
 	{
-		String whitespace = AssemblyUtils.getWhitespace(leadingWhitespace);
+		ProgramState oState = state;
+		AdditiveExpressionNode tmpNode;
+		AssemblyStatePair tmpPair;
+		ByteCopier copier;
+		OperandSource destSource = state.destSource();
+		String whitespace = state.getWhitespace();
 		String assembly = "";
 		OperandSource sourceX;
 		ScratchSource scratchX;
-		if (expr.hasAssembly())
+		if (expr.hasAssembly(state))
 		{
-			scratchX = scratchManager.reserveScratchBlock(expr.getSize());
-			assembly += expr.getAssembly(leadingWhitespace, scratchX, scratchManager, ticket);
+			state = state.reserveScratchBlock(expr.getSize());
+			scratchX = state.lastScratchSource();
+			state = state.setDestSource(scratchX);
+			tmpPair = expr.getAssemblyAndState(state);
+			assembly += tmpPair.assembly;
+			state = tmpPair.state;
+			
 			if (expr.hasLValue())
 				sourceX = expr.getLValue().getSource();
 			else sourceX = scratchX;
 		}
-		else if (expr.hasPropValue())
-			sourceX = new ConstantSource(expr.getPropValue(), expr.getType().getSize());
+		else if (expr.hasPropValue(state) && !(operator.equals("++") || operator.equals("--"))) // These two need LValue
+			sourceX = new ConstantSource(expr.getPropValue(state), expr.getType().getSize());
 		else if (expr.hasLValue())
 			sourceX = expr.getLValue().getSource();
 		else sourceX = null;
-
+		state = expr.getStateAfter(state);
+		
 		DummyExpressionNode dX = new DummyExpressionNode(this, expr.getType(), 1);
 		switch (operator)
 		{
-		case "++":
-			assembly += new AdditiveExpressionNode("+", dX, expr).getAssembly(leadingWhitespace, sourceX, ticket);
+		case "++": case "--":
+			tmpNode = new AdditiveExpressionNode((operator.equals("++") ? "+" : "-"), expr, dX);
+			if (tmpNode.hasPropValue(state))
+			{
+				tmpPair = new ByteCopier(sourceX.getSize(), sourceX, new ConstantSource(tmpNode.getPropValue(state), sourceX.getSize())).getAssemblyAndState(state);
+				state = state.setPossibleValue(expr.getLValue(), tmpNode.getPropValue(state));
+			}
+			else
+			{
+				state = state.setDestSource(sourceX);
+				tmpPair = tmpNode.getAssemblyAndState(state);
+				state = state.setDestSource(destSource);
+			}
+				
+			assembly += tmpPair.assembly;
+			state = tmpPair.state;
+			
 			if (destSource != null && !destSource.equals(sourceX))
-				assembly += AssemblyUtils.byteCopier(whitespace, sourceX.getSize(), destSource, sourceX);
-			break;
-		case "--":
-			assembly += new AdditiveExpressionNode("-", expr, dX).getAssembly(leadingWhitespace, sourceX, ticket);
-			if (destSource != null && !destSource.equals(sourceX))
-				assembly += AssemblyUtils.byteCopier(whitespace, sourceX.getSize(), destSource, sourceX);
+			{
+				if (tmpNode.hasPropValue(state))
+					copier = new ByteCopier(sourceX.getSize(), destSource, tmpNode.getPropValue(state));
+				else
+					copier = new ByteCopier(sourceX.getSize(), destSource, sourceX);
+				tmpPair = copier.getAssemblyAndState(state);
+				assembly += tmpPair.assembly;
+				state = tmpPair.state;
+			}
 			break;
 		case "-": // -x = ~(x-1)
 			if (destSource != null)
 			{
 				dX = new DummyExpressionNode(this, expr.getType(), 0);
-				assembly += new AdditiveExpressionNode("-", dX, expr).getAssembly(leadingWhitespace, sourceX, ticket);
+				tmpPair = new AdditiveExpressionNode("-", dX, expr).getAssemblyAndState(state);
 				sourceX = destSource;
-				break;
+				assembly += tmpPair.assembly;
+				state = tmpPair.state;
 			}
+			break;
 		case "~":
 			if (destSource != null)
 			{
-				assembly += XOrExpressionNode.getComplementer(whitespace, destSource, sourceX, ticket);
-				break;
+				// TODO
+				tmpPair = new XOrExpressionNode(this).getAssemblyAndState(state);
+				assembly += tmpPair.assembly;
+				state = tmpPair.state;
 			}
+			break;
 		case "!":
 			if (destSource != null)
 			{
-				assembly += EqualityExpressionNode.getIsZero(whitespace, destSource, scratchManager, sourceX, ticket);
-				break;
+				// TODO
+				tmpPair = new EqualityExpressionNode(this).getAssemblyAndState(state);
+				assembly += tmpPair.assembly;
+				state = tmpPair.state;
 			}
+			break;
 		case "*":
 			ScratchSource sourceI;
-			if (!ScratchManager.hasPointer(sourceX))
+			if (!state.hasPointer(sourceX))
 			{
-				try
-				{
-					sourceI = ScratchManager.reservePointer(sourceX);
-				}
-				catch (ScratchOverflowException e)
-				{
-					ScratchManager.popPointer();
-					sourceI = ScratchManager.reservePointer(sourceX);
-				}
-				assembly += AssemblyUtils.byteCopier(whitespace, CompConfig.pointerSize, sourceI, sourceX, ticket);
+				state = state.reservePointer(sourceX);
+				sourceI = state.lastScratchSource();
+				copier = new ByteCopier(CompConfig.pointerSize, sourceI, sourceX);
+				tmpPair = copier.getAssemblyAndState(state);
+				assembly += tmpPair.assembly;
+				state = tmpPair.state;
 			}
-			else sourceI = ScratchManager.getPointer(sourceX);
+			else sourceI = state.getPointer(sourceX);
 		
 			pointerRef = new IndirectLValueNode(this, expr.getLValue(), sourceI, ((PointerType) expr.getType()).getType());
 			if (destSource != null)
-				assembly += AssemblyUtils.byteCopier(whitespace, ((PointerType) expr.getType()).getType().getSize(), destSource, pointerRef.getSource(), ticket);
+			{
+				copier = new ByteCopier(((PointerType) expr.getType()).getType().getSize(), destSource, pointerRef.getSource());
+				tmpPair = copier.getAssemblyAndState(state);
+				assembly += tmpPair.assembly;
+				state = tmpPair.state;
+			}
 			break;
 		case "&":
 			if (destSource != null)
 				if (expr.hasLValue())
 				{
 					PropPointer<LValueNode<?>> p = new PropPointer<LValueNode<?>>(expr.getLValue(), 0);
-					assembly += AssemblyUtils.byteCopier(whitespace, CompConfig.pointerSize, destSource, new ConstantSource(p, CompConfig.pointerSize), ticket);
+					copier = new ByteCopier(CompConfig.pointerSize, destSource, new ConstantSource(p, CompConfig.pointerSize));
+					tmpPair = copier.getAssemblyAndState(state);
+					assembly += tmpPair.assembly;
+					state = tmpPair.state;
 				}
 			break;
-		default: return "";
+		default: return new AssemblyStatePair("", oState);
 		}
-
-		ScratchManager.releasePointer(destSource); // A copy of the destination, if it's a pointer, has gone stale
-		return assembly;
+		state = state.setDestSource(destSource);
+		return new AssemblyStatePair(assembly, state);
 	}
-	
-	@Override
-	public String getAssembly(int leadingWhitespace) throws Exception
-	{
-		if (operator.equals("++") || operator.equals("--"))
-			return getAssembly(leadingWhitespace, expr.getLValue().getSource(), new ScratchManager(), new DetailsTicket());
-		else return super.getAssembly(leadingWhitespace);
-	}
-
-	
-
 }

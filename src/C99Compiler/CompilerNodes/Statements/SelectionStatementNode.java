@@ -11,17 +11,19 @@ import C99Compiler.CompConfig;
 import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.FunctionDefinitionNode;
 import C99Compiler.CompilerNodes.Dummies.DummyExpressionNode;
+import C99Compiler.CompilerNodes.Dummies.DummyValueNode;
 import C99Compiler.CompilerNodes.Expressions.BaseExpressionNode;
 import C99Compiler.CompilerNodes.Expressions.BranchingExpressionNode;
 import C99Compiler.CompilerNodes.Expressions.EqualityExpressionNode;
 import C99Compiler.CompilerNodes.Expressions.ExpressionNode;
 import C99Compiler.CompilerNodes.Expressions.RelationalExpressionNode;
 import C99Compiler.CompilerNodes.Expressions.ShiftExpressionNode;
-import C99Compiler.Utils.AssemblyUtils;
-import C99Compiler.Utils.AssemblyUtils.DetailsTicket;
 import C99Compiler.Utils.CompUtils;
-import C99Compiler.Utils.ScratchManager;
-import C99Compiler.Utils.ScratchManager.ScratchSource;
+import C99Compiler.Utils.ProgramState;
+import C99Compiler.Utils.ProgramState.ScratchSource;
+import C99Compiler.Utils.AssemblyUtils.AssemblyUtils;
+import C99Compiler.Utils.AssemblyUtils.ByteCopier;
+import C99Compiler.Utils.AssemblyUtils.ComparitiveJump;
 import C99Compiler.Utils.OperandSources.ConstantSource;
 import C99Compiler.Utils.OperandSources.OperandSource;
 import Grammar.C99.C99Parser.Selection_statementContext;
@@ -69,16 +71,16 @@ public class SelectionStatementNode extends SequencePointStatementNode<Selection
 	}
 	
 	public boolean isSwitch() {return isSwitch;}
-	public String getCaseLabel(long value)
+	private String getCaseLabel(long value)
 	{
 		if (value < 0)
 			return "__CASE_" + selId + "_N" + -value;
 		else
 			return "__CASE_" + selId + "_" + value;
 	}
-	public String getCaseLabel(BaseExpressionNode<?> constExpr)
+	public String getCaseLabel(ProgramState state, BaseExpressionNode<?> constExpr)
 	{
-		cases.put(constExpr, getCaseLabel(constExpr.getPropLong()));
+		cases.put(constExpr, getCaseLabel(constExpr.getPropLong(state)));
 		return cases.get(constExpr);
 	}
 	public String getTableLabel()
@@ -100,68 +102,75 @@ public class SelectionStatementNode extends SequencePointStatementNode<Selection
 	}
 	
 	@Override
-	public boolean canCall(FunctionDefinitionNode function)
+	public boolean canCall(ProgramState state, FunctionDefinitionNode function)
 	{
-		return expression.canCall(function) || (switchStm != null && switchStm.canCall(function)) || (ifStm != null && ifStm.canCall(function)) || (elseStm != null && elseStm.canCall(function));
+		return expression.canCall(state, function) || (switchStm != null && switchStm.canCall(state, function)) || (ifStm != null && ifStm.canCall(state, function)) || (elseStm != null && elseStm.canCall(state, function));
 	}
 	
 	@Override
-	public boolean hasAssembly()
+	public boolean hasAssembly(ProgramState state)
 	{
-		if (expression.hasAssembly()) return true;
+		if (expression.hasAssembly(state)) return true;
 		if (!isSwitch)
 		{
-			if (expression.hasPropValue() && expression.getPropBool()) return ifStm.hasAssembly();
-			else if (expression.hasPropValue() && elseStm != null) return elseStm.hasAssembly();
-			else if (elseStm != null) return ifStm.hasAssembly() || elseStm.hasAssembly();
-			else return ifStm.hasAssembly();
+			if (expression.hasPropValue(state) && expression.getPropBool(state)) return ifStm.hasAssembly(state);
+			else if (expression.hasPropValue(state) && elseStm != null) return elseStm.hasAssembly(state);
+			else if (elseStm != null) return ifStm.hasAssembly(state) || elseStm.hasAssembly(state);
+			else return ifStm.hasAssembly(state);
 		}
-		else return switchStm.hasAssembly();
+		else return switchStm.hasAssembly(state);
 	}
 	@Override
-	public String getAssembly(int leadingWhitespace, String returnAddr) throws Exception
+	public AssemblyStatePair getAssemblyAndState(ProgramState state) throws Exception
 	{
-		String whitespace = AssemblyUtils.getWhitespace(leadingWhitespace);
-		String assembly = "";
+		AssemblyStatePair pair = new AssemblyStatePair("", state);
 		
+		String whitespace = state.getWhitespace();
+
 		if (!isSwitch) // If statement
 		{
-			if (expression.hasPropValue() && (expression.getPropBool() || expression.getPropLong() != 0)) // It's always true
+			if (expression.hasPropValue(pair.state) && (expression.getPropBool(pair.state) || expression.getPropLong(pair.state) != 0)) // It's always true
 			{
-				assembly += labelLine(leadingWhitespace + CompConfig.indentSize, ifLineNo);
-				assembly += ifStm.getAssembly(leadingWhitespace);
+				pair = pair.addAssembly(labelLine(state.indent(), ifLineNo));
+				pair = ifStm.apply(pair);
 			}
-			else if (expression.hasPropValue() && elseStm != null) // It's always false
+			else if (expression.hasPropValue(pair.state) && elseStm != null) // It's always false
 			{
-				assembly += labelLine(leadingWhitespace + CompConfig.indentSize, elseLineNo);
-				assembly += elseStm.getAssembly(leadingWhitespace, returnAddr);
+				pair = pair.addAssembly(labelLine(pair.state.indent(), elseLineNo));
+				pair = elseStm.apply(pair);
 			}
-			else if (!expression.hasPropValue()) // Unknown
+			else if (!expression.hasPropValue(pair.state)) // Unknown
 			{
 				String skipName = "__IFNOT_" + selId;
-				if (expression.hasAssembly())
+				ProgramState ifState, elseState;
+				elseState = pair.state;
+				
+				if (expression.hasAssembly(pair.state))
 				{
-					ScratchManager scratchManager = new ScratchManager();
-					ScratchSource exprSource = scratchManager.reserveScratchBlock(expression.getSize());
-					assembly = getAssemblyWithSequence(expression, leadingWhitespace, exprSource, scratchManager);
-					assembly += EqualityExpressionNode.getIsZero(whitespace, null, scratchManager, exprSource, new DetailsTicket());
+					pair = pair.replaceState(pair.state.reserveScratchBlock(expression.getSize()));
+					ScratchSource exprSource = pair.state.lastScratchSource();
+					pair = pair.replaceState(pair.state.setDestSource(exprSource));
+					pair = new EqualityExpressionNode(this, expression).apply(pair);
+					pair = applyWithRegistered(pair, expression);
+					pair = new ByteCopier(exprSource.getSize(), exprSource, exprSource).apply(pair);
+					
 				}
 				else
-					assembly += EqualityExpressionNode.getIsZero(whitespace, null, new ScratchManager(), expression.getLValue().getSource(), new DetailsTicket());
+					pair = new EqualityExpressionNode(expression).apply(pair);
 				
-				assembly += AssemblyUtils.getCompJump(whitespace, skipName,
-						ifStm.getAssembly(leadingWhitespace + CompConfig.indentSize, returnAddr),
-						true,
-						elseStm != null ? getEndLabel() : null,
-						labelLine(leadingWhitespace + CompConfig.indentSize, ifLineNo));
+				ComparitiveJump cmpJump = new ComparitiveJump(ifStm, skipName, elseStm != null ? getEndLabel() : null, true, labelLine(pair.state, ifLineNo));
+				pair = cmpJump.apply(pair);
+				pair = pair.replaceState(ifStm.clearPossibleValues(pair.state));
+				ifState = pair.state;
 				
-				ifStm.clearPossibleValues();
 				if (elseStm != null)
 				{
-					assembly += labelLine(leadingWhitespace + CompConfig.indentSize, elseLineNo);
-					assembly += elseStm.getAssembly(leadingWhitespace + CompConfig.indentSize, returnAddr);
-					elseStm.clearPossibleValues();
-					assembly += whitespace + getEndLabel() + ":\n";
+					pair = pair.replaceState(elseState.indent());
+					pair.addAssembly(labelLine(pair.state, elseLineNo));
+					pair = elseStm.apply(pair);
+					pair = pair.replaceState(elseStm.clearPossibleValues(pair.state));
+					pair = pair.addAssembly(whitespace + getEndLabel() + ":\n");
+					pair = pair.replaceState(ifState.combine(elseState));
 				}
 			}
 		}
@@ -172,7 +181,7 @@ public class SelectionStatementNode extends SequencePointStatementNode<Selection
 			BaseExpressionNode<?> largestExpr = null;
 			for (BaseExpressionNode<?> node : cases.keySet()) // Determine case values
 			{
-				long l = node.getPropLong();
+				long l = node.getPropLong(pair.state);
 				smallestCase = Math.min(smallestCase, l);
 				largestCase = Math.max(largestCase, l);
 				if (largestCase == l)
@@ -180,39 +189,44 @@ public class SelectionStatementNode extends SequencePointStatementNode<Selection
 				caseValues.add(l);
 			}
 			if (largestExpr == null)
-				return "";
-			ScratchManager scratchManager = new ScratchManager();
-			ScratchSource exprSource = scratchManager.reserveScratchBlock(expression.getSize());
+				return pair;
+			pair = pair.replaceState(pair.state.reserveScratchBlock(expression.getSize()));
+			ScratchSource exprSource = pair.state.lastScratchSource();
 			// If greater than largest case, skip
 			String miscLabel = CompUtils.getMiscLabel();
-			if (expression.hasAssembly())
-				assembly = getAssemblyWithSequence(expression, leadingWhitespace, exprSource, scratchManager);
-			else if (expression.hasPropValue())
-				assembly += AssemblyUtils.byteCopier(whitespace, exprSource.getSize(), exprSource, new ConstantSource(expression.getPropValue(), exprSource.getSize()));
+			if (expression.hasAssembly(pair.state))
+				pair = applyWithRegistered(pair, expression);
+			else if (expression.hasPropValue(pair.state))
+				pair = new ByteCopier(exprSource.getSize(), exprSource, new ConstantSource(expression.getPropValue(state), exprSource.getSize())).apply(pair);
 			else if (expression.hasLValue())
-				assembly += AssemblyUtils.byteCopier(whitespace, leadingWhitespace, exprSource, expression.getLValue().getSource());
-			assembly += new RelationalExpressionNode(this, "<=", largestExpr, new DummyExpressionNode(this, expression.getType(), exprSource)).getAssembly(leadingWhitespace, hasDefault? getDefaultLabel(false) : getEndLabel(), miscLabel, scratchManager, new DetailsTicket());
-			assembly += whitespace + miscLabel + ":\n";
+				pair = new ByteCopier(exprSource.getSize(), exprSource, expression.getLValue().getSource()).apply(pair);
+			pair = new RelationalExpressionNode(this, "<=", 
+					largestExpr, 
+					new DummyExpressionNode(this, expression.getType(), exprSource),
+					hasDefault? getDefaultLabel(false) : getEndLabel(), miscLabel, false).apply(pair);
+			pair = pair.addAssembly(whitespace + miscLabel + ":\n");
 			
-			ScratchSource sourceS = scratchManager.reserveScratchBlock(expression.getSize());
-			assembly += new ShiftExpressionNode(this, "<<", new DummyExpressionNode(this, expression.getType(), exprSource), new DummyExpressionNode(this, 1)).getAssembly(leadingWhitespace, sourceS);
-			assembly += whitespace + "TAX\n";
-			assembly += whitespace + "JMP\t(" + getTableLabel() + ",x)\n";
-			scratchManager.releaseScratchBlock(sourceS);
-			assembly += whitespace + getTableLabel() + ":\n";
+			pair = pair.replaceState(pair.state.reserveScratchBlock(expression.getSize()));
+			ScratchSource sourceS = pair.state.lastScratchSource();
+			pair = pair.replaceState(pair.state.setDestSource(sourceS));
+			pair = new ShiftExpressionNode(this, "<<", new DummyExpressionNode(this, expression.getType(), exprSource), new DummyExpressionNode(this, 1)).apply(pair);
+			pair = pair.addAssembly(whitespace + "TAX\n");
+			pair = pair.addAssembly(whitespace + "JMP\t(" + getTableLabel() + ",x)\n");
+			pair = pair.replaceState(pair.state.releaseScratchBlock(sourceS));
+			pair = pair.addAssembly(whitespace + getTableLabel() + ":\n");
 			for (long i = smallestCase; i <= largestCase; ++i)
 			{
 				if (caseValues.contains(i))
-					assembly += whitespace + AssemblyUtils.getWhitespace(CompConfig.indentSize) + ".word\t.LoWord(" + getCaseLabel(i) + ")\n";
-				else assembly += whitespace + AssemblyUtils.getWhitespace(CompConfig.indentSize) + ".word\t.LoWord(" + getDefaultLabel(false) + ")\n";
+					pair = pair.addAssembly(whitespace + whitespace + ".word\t.LoWord(" + getCaseLabel(i) + ")\n");
+				else pair = pair.addAssembly(whitespace + whitespace + ".word\t.LoWord(" + getDefaultLabel(false) + ")\n");
 			}
-			assembly += switchStm.getAssembly(leadingWhitespace + CompConfig.indentSize, returnAddr);
-			switchStm.clearPossibleValues();
-			if (!hasDefault) assembly += whitespace + getDefaultLabel(false) + ":\n";
-			assembly += whitespace + getEndLabel() + ":\n";
+			pair = switchStm.apply(pair);
+			pair = pair.replaceState(switchStm.clearPossibleValues(pair.state));
+			if (!hasDefault) pair.addAssembly(whitespace + getDefaultLabel(false) + ":\n");
+			pair = pair.addAssembly(whitespace + getEndLabel() + ":\n");
 		}
 		
-		ScratchManager.releasePointers();
-		return assembly;
+		pair = pair.replaceState(pair.state.wipe());
+		return pair;
 	}	
 }

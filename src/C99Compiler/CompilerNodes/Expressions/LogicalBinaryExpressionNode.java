@@ -12,20 +12,19 @@ import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.Definitions.Type;
 import C99Compiler.CompilerNodes.Dummies.DummyType;
 import C99Compiler.CompilerNodes.Interfaces.SequencePointNode;
-import C99Compiler.Utils.AssemblyUtils;
 import C99Compiler.Utils.CompUtils;
-import C99Compiler.Utils.ScratchManager;
-import C99Compiler.Utils.AssemblyUtils.DetailsTicket;
+import C99Compiler.Utils.ProgramState;
+import C99Compiler.Utils.ProgramState.ScratchSource;
+import C99Compiler.Utils.AssemblyUtils.AssemblyUtils;
 import C99Compiler.Utils.OperandSources.ConstantSource;
 import C99Compiler.Utils.OperandSources.OperandSource;
-import C99Compiler.Utils.ScratchManager.ScratchSource;
 
 public abstract class LogicalBinaryExpressionNode<
 C1 extends ParserRuleContext,
 C2 extends ParserRuleContext,
 PC extends ParserRuleContext,
 CC extends ParserRuleContext
-> extends BinaryExpressionNode<C1, C2, PC, CC> implements SequencePointNode
+> extends SPBinaryExpressionNode<C1, C2, PC, CC>
 {
 	private List<String> sequenceQueue;
 	private boolean isSP;
@@ -36,60 +35,71 @@ CC extends ParserRuleContext
 		sequenceQueue = new LinkedList<String>();
 		isSP = false;
 	}
-	@Override public boolean isSequencePoint() {return isSP;}
-	@Override public void registerSequence(String assembly) {sequenceQueue.add(assembly);}
-	@Override public void clearSequence() {sequenceQueue.clear();}
-	@Override public String getAccumulatedSequences() {String assembly = ""; for (String queued : sequenceQueue) assembly += queued; return assembly;}
-
+	
 	@Override public Type getType() {return new DummyType("int");}
+	
 	@Override
-	public String getAssembly(int leadingWhitespace, OperandSource destSource, ScratchManager scratchManager, DetailsTicket ticket) throws Exception
+	public String getAssembly(ProgramState state) throws Exception
 	{
-		String whitespace = AssemblyUtils.getWhitespace(leadingWhitespace);
+		AssemblyStatePair queuedPair;
+		String whitespace = state.getWhitespace();
 		ScratchSource scratchX = null, scratchY = null;
 		final OperandSource sourceX, sourceY;
+		OperandSource destSource = state.destSource();
 		String assembly = "";
 
 		// figure out X
-		clearSequence();
+		clearAssemblables();
 		isSP = true;
-		if (x.hasAssembly())
+		if (x.hasAssembly(state))
 		{
-			scratchX = scratchManager.reserveScratchBlock(y.getType().getSize());
-			assembly += x.getAssembly(leadingWhitespace, scratchX, scratchManager, ticket);
+			state = state.reserveScratchBlock(y.getType().getSize());
+			scratchX = state.lastScratchSource();
+			state = state.setDestSource(scratchX);
+			assembly += x.getAssembly(state);
 			if (x.hasLValue())
 				sourceX = x.getLValue().getSource();
 			else sourceX = scratchX;
 		}
-		else if (x.hasPropValue())
-			sourceX = new ConstantSource(x.getPropValue(), x.getType().getSize());
+		else if (x.hasPropValue(state))
+			sourceX = new ConstantSource(x.getPropValue(state), x.getType().getSize());
 		else if (x.hasLValue())
 			sourceX = x.getLValue().getSource();
 		else sourceX = null;
-		assembly += getAccumulatedSequences();
-		clearSequence();
+		
+		queuedPair = getRegisteredAssemblyAndState(state);
+		assembly += queuedPair.assembly;
+		state = queuedPair.state;
+		
+		clearAssemblables();
 		isSP = false;
 		
 		// figure out Y		
-		if (y.hasAssembly())
+		if (y.hasAssembly(state))
 		{
-			scratchY = scratchManager.reserveScratchBlock(y.getType().getSize());
-			assembly += y.getAssembly(leadingWhitespace, scratchY, scratchManager, ticket);
+			state = state.reserveScratchBlock(y.getType().getSize());
+			scratchY = state.lastScratchSource();
+			state = state.setDestSource(scratchY);
+			assembly += y.getAssembly(state);
 			if (y.hasLValue())
 				sourceY = y.getLValue().getSource();
 			else sourceY = scratchY;
 		}
-		else if (y.hasPropValue())
-			sourceY = new ConstantSource(y.getPropValue(), y.getType().getSize());
+		else if (y.hasPropValue(state))
+			sourceY = new ConstantSource(y.getPropValue(state), y.getType().getSize());
 		else if (y.hasLValue())
 			sourceY = y.getLValue().getSource();
 		else sourceY = null;
 		
-		assembly += getAssembly(whitespace, destSource, sourceX, sourceY, scratchManager, ticket);
-		if (scratchX != null) scratchManager.releaseScratchBlock(scratchX);
-		if (scratchY != null) scratchManager.releaseScratchBlock(scratchY);
+		state = state.setDestSource(destSource);
+		assembly += getAssemblyAndState(state, sourceX, sourceY);
 		
-		ScratchManager.releasePointer(destSource); // A copy of the destination, if it's a pointer, has gone stale
+		if (scratchX != null)
+			state = state.releaseScratchBlock(scratchX);
+		if (scratchY != null)
+			state = state.releaseScratchBlock(scratchY);
+		
+		state = state.releasePointer(destSource); // A copy of the destination, if it's a pointer, has gone stale
 		return assembly;
 	}
 }

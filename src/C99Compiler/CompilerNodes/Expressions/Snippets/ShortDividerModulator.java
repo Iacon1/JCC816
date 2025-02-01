@@ -2,112 +2,139 @@
 //
 package C99Compiler.CompilerNodes.Expressions.Snippets;
 
-import C99Compiler.Utils.AssemblyUtils;
+import C99Compiler.CompConfig;
+import C99Compiler.CompilerNodes.Interfaces.Assemblable;
+import C99Compiler.CompilerNodes.Interfaces.Assemblable.AssemblyStatePair;
 import C99Compiler.Utils.CompUtils;
+import C99Compiler.Utils.ProgramState;
+import C99Compiler.Utils.ProgramState.ProcessorFlag;
 import C99Compiler.Utils.SNESRegisters;
+import C99Compiler.Utils.AssemblyUtils.BytewiseOperator;
 import C99Compiler.Utils.OperandSources.OperandSource;
-import C99Compiler.Utils.AssemblyUtils.DetailsTicket;
-
 
 //Uses hardware div registers, but only for 8-bit divisor
-public class ShortDividerModulator
+public class ShortDividerModulator implements Assemblable
 {
-	private ShortDividerModulator() {}
-	public static String generate(String whitespace, OperandSource destSource, OperandSource sourceX, OperandSource sourceY, boolean isModulo, DetailsTicket ticket) throws Exception
+	private static class ShortDividerModulatorOperator extends BytewiseOperator
 	{
-		String assembly = "";
+		private final OperandSource sourceX, sourceY, destSource;
 		SNESRegisters RRegL;
 		SNESRegisters RRegH;
-		if (isModulo)
-		{
-			RRegL = SNESRegisters.RDMPYL;
-			RRegH = SNESRegisters.RDMPYH;
-		}
-		else
-		{
-			RRegL = SNESRegisters.RDDIVL;
-			RRegH = SNESRegisters.RDDIVH;
-		}
 		
-		assembly += ticket.save(whitespace, DetailsTicket.saveA | DetailsTicket.saveX); // Both modified hereafter
-		DetailsTicket innerTicket = new DetailsTicket(ticket, DetailsTicket.saveA | DetailsTicket.saveX | DetailsTicket.saveY, 0); // "Please don't break these"
-
-		assembly += AssemblyUtils.bytewiseOperation(whitespace, sourceX.getSize(), (Integer i, DetailsTicket ticket2) ->
+		ShortDividerModulatorOperator(OperandSource destSource, OperandSource sourceX, OperandSource sourceY, boolean isModulo)
 		{
+			super(sourceX.getSize(), sourceX.getSize(), false);
+			this.sourceX = sourceX;
+			this.sourceY = sourceY;
+			this.destSource = destSource;
+			
+			if (isModulo)
+			{
+				RRegL = SNESRegisters.RDMPYL;
+				RRegH = SNESRegisters.RDMPYH;
+			}
+			else
+			{
+				RRegL = SNESRegisters.RDDIVL;
+				RRegH = SNESRegisters.RDDIVH;
+			}
+		}
+		@Override
+		protected AssemblyStatePair getAssemblyAndState(ProgramState state, int i) throws Exception
+		{
+			MutableAssemblyStatePair pair = new MutableAssemblyStatePair("", state);
+			String assembly = "";
+			
 			if (i < sourceX.getSize() - 1 || sourceX.getSize() % 2 == 0) // We start in 16-bit mode
 			{
 				if (i == 0) // First iteration
-					return new String[]
-					{
-						sourceX.getLDA(i, ticket2),		// Load X-the-variable
-						"STA\t" + SNESRegisters.WRDIVL,	// Place in reg
-						CompUtils.setA8,
-						sourceY.getLDA(0, ticket2),		// Load Y-the-variable
-						"STA\t" + SNESRegisters.WRDIVB, // Place in reg, begin 16-cycle calc
-						CompUtils.setA16,				// 3 cycles - 3
-						sourceX.getLDA(i + 1, ticket2),		// 4-6 cycles - 7-9 Load X-the-variable for next iteration
-						"TAX",							// 2 cycles - 9-11
-						"NOP",							// 2 cycles - 11-13
-						"NOP",							// 2 cycles - 13-15
-						"LDA\t" + RRegL,				// 4-6 cycles - 17-21, get result
-						destSource.getSTA(i, ticket2),	// Store result
-						"TXA",							// Swap X-the-variable back in
-					};
-				if (i != sourceX.getSize() - 1) // Not the last iteration
-					return new String[]
-					{
-						"STA\t" + SNESRegisters.WRDIVL,			// Place in reg
-						CompUtils.setA8,
-						"CLC",									// For addition later
-						sourceY.getLDA(0, ticket2),				// Load Y-the-variable
-						"STA\t" + SNESRegisters.WRDIVB, 		// Place in reg, begin 16-cycle calc
-						CompUtils.setA16,						// 3 cycles - 3
-						"LDA\t" + RRegH,						// 4-6 cycles - 7-9, Get high byte of previous iteration
-						"NOP",									// 2 cycles - 9-11
-						"NOP",									// 2 cycles - 11-13
-						"NOP",									// 2 cycles - 13-15
-						"ADC\t" + RRegL,						// 4-6 cycles - 17-21, Add result
-						destSource.getSTA(i, ticket2),			// Store result
-						sourceX.getLDA(i, ticket2),				// 6 cycles,- 8 Load X-the-variable for next iteration
-					};
-				else // Last iteration
-					return new String[]
-					{
-						"TXA",									// Recover X-the-variable from last iteration.
-						"STA\t" + SNESRegisters.WRDIVL,			// Place in reg
-						CompUtils.setA8,
-						"CLC",									// For addition later
-						sourceY.getLDA(0, ticket2),				// Load Y-the-variable
-						"STA\t" + SNESRegisters.WRDIVB, 		// Place in reg, begin 16-cycle calc
-						"LDA\t" + RRegH,						// 4-6 cycles - 6-8, get high byte of previous iteration
-						CompUtils.setA16,						// 3 cycles - 9-11
-						"NOP",									// 2 cycles - 11-13
-						"NOP",									// 2 cycles - 13-15
-						"ADC\t" + RRegL,						// 4-6 cycles - 17-21, add new result
-						destSource.getSTA(i, ticket2),			// Store result
-					};
-			}
-			else // We start in 8-bit mode
-				return new String[]
 				{
-					sourceX.getLDA(i, ticket2),	// Load X-the-variable
-					"STA\t" + SNESRegisters.WRDIVL,			// Place in reg
-					sourceY.getLDA(0, ticket2),				// Load Y-the-variable
-					"STA\t" + SNESRegisters.WRDIVB, 		// Place in reg, begin 16-cycle calc
-					"NOP",									// 2 cycles - 2
-					"NOP",									// 2 cycles - 4
-					"NOP",									// 2 cycles - 6
-					"NOP",									// 2 cycles - 8
-					"NOP",									// 2 cycles - 10
-					"NOP",									// 2 cycles - 11
-					"NOP",									// 2 cycles - 12
-					"LDA\t" + RRegL,						// 5 cycles - 17, get result
-					destSource.getSTA(i, ticket2),			// Store result
-				};
-		}, innerTicket);
-		assembly += ticket.restore(whitespace, DetailsTicket.saveA | DetailsTicket.saveX);
-		
-		return assembly;
+					sourceX.applyLDA(pair, i);																// Load X-the-variable
+					pair.assembly += pair.state.getWhitespace() + "STA\t" + SNESRegisters.WRDIVL + "\n";	// Place in reg
+					pair.assembly += pair.state.getWhitespace() + CompUtils.setA8 + "\n";
+					pair.state = pair.state.clearProcessorFlags(ProcessorFlag.M);
+					sourceY.applyLDA(pair, 0);																// Load Y-the-variable
+					pair.assembly += "STA\t" + SNESRegisters.WRDIVB;									 	// Place in reg, begin 16-cycle calc
+					pair.assembly += pair.state.getWhitespace() + CompUtils.setA16 + "\n";					// 3 cycles - 3
+					pair.state = pair.state.setProcessorFlags(ProcessorFlag.M);
+					sourceX.applyLDA(pair, i + 1);															// 4-6 cycles - 7-9 Load X-the-variable for next iteration
+					pair.assembly += pair.state.getWhitespace() + "TAX\n";									// 2 cycles - 9-11
+					pair.assembly += pair.state.getWhitespace() + "NOP\n";									// 2 cycles - 11-13
+					pair.assembly += pair.state.getWhitespace() + "NOP\n";									// 2 cycles - 13-15
+					pair.assembly += pair.state.getWhitespace() + "LDA\t" + RRegL + "\n";					// 4-6 cycles - 17-21, get result
+					destSource.applySTA(pair, i);															// Store result
+					pair.assembly += pair.state.getWhitespace() + "TXA\n";									// Swap X-the-variable back in
+				}
+				else if (i != sourceX.getSize() - 1) // Not the last iteration
+				{
+					pair.assembly += pair.state.getWhitespace() + "STA\t" + SNESRegisters.WRDIVL + "\n";	// Place in reg
+					pair.assembly += pair.state.getWhitespace() + CompUtils.setA8 + "\n";
+					pair.state = pair.state.clearProcessorFlags(ProcessorFlag.M);
+					pair.assembly += pair.state.getWhitespace() + "CLC\n";									// For addition later
+					sourceY.applyLDA(pair, 0);																// Load Y-the-variable
+					pair.assembly += "STA\t" + SNESRegisters.WRDIVB;									 	// Place in reg, begin 16-cycle calc
+					pair.assembly += pair.state.getWhitespace() + "LDA\t" + RRegH + "\n";					// 4-6 cycles - 4-6, get high byte of previous iteration
+					pair.assembly += pair.state.getWhitespace() + CompUtils.setA16 + "\n";					// 3 cycles - 7-9
+					pair.state = pair.state.setProcessorFlags(ProcessorFlag.M);
+					pair.assembly += pair.state.getWhitespace() + "NOP\n";									// 2 cycles - 9-11
+					pair.assembly += pair.state.getWhitespace() + "NOP\n";									// 2 cycles - 11-13
+					pair.assembly += pair.state.getWhitespace() + "NOP\n";									// 2 cycles - 13-15
+					pair.assembly += pair.state.getWhitespace() + "ADC\t" + RRegL + "\n";					// 4-6 cycles - 17-21, get result
+					destSource.applySTA(pair, i);															// Store result
+					sourceX.applyLDA(pair, i);																// 6 cycles - 8 Load X-the-variable for next iteration
+				}
+				else // Last iteration
+				{
+					pair.assembly += pair.state.getWhitespace() + "TXA\n";									// Recover X-the-variable from last iteration
+					pair.assembly += pair.state.getWhitespace() + "STA\t" + SNESRegisters.WRDIVL + "\n";	// Place in reg
+					pair.assembly += pair.state.getWhitespace() + CompUtils.setA8 + "\n";
+					pair.state = pair.state.clearProcessorFlags(ProcessorFlag.M);
+					pair.assembly += pair.state.getWhitespace() + "CLC\n";									// For addition later
+					sourceY.applyLDA(pair, 0);																// Load Y-the-variable
+					pair.assembly += "STA\t" + SNESRegisters.WRDIVB;									 	// Place in reg, begin 16-cycle calc
+					pair.assembly += pair.state.getWhitespace() + "LDA\t" + RRegH + "\n";					// 4-6 cycles - 4-6, get high byte of previous iteration
+					pair.assembly += pair.state.getWhitespace() + CompUtils.setA16 + "\n";					// 3 cycles - 7-9
+					pair.state = pair.state.setProcessorFlags(ProcessorFlag.M);
+					pair.assembly += pair.state.getWhitespace() + "NOP\n";									// 2 cycles - 9-11
+					pair.assembly += pair.state.getWhitespace() + "NOP\n";									// 2 cycles - 11-13
+					pair.assembly += pair.state.getWhitespace() + "NOP\n";									// 2 cycles - 13-15
+					pair.assembly += pair.state.getWhitespace() + "ADC\t" + RRegL + "\n";					// 4-6 cycles - 17-21, get result
+					destSource.applySTA(pair, i);															// Store result
+				}
+			}
+			else // 8-bit mode
+			{
+				sourceX.applyLDA(pair, i);																// Load X-the-variable
+				pair.assembly += pair.state.getWhitespace() + "STA\t" + SNESRegisters.WRDIVL + "\n";	// Place in reg
+				sourceY.applyLDA(pair, i);																// Load Y-the-variable
+				pair.assembly += pair.state.getWhitespace() + "STA\t" + SNESRegisters.WRDIVB + "\n";	// Place in reg, begin 16-cycle calc
+				pair.assembly += pair.state.getWhitespace() + "NOP\n";									// 2 cycles - 2
+				pair.assembly += pair.state.getWhitespace() + "NOP\n";									// 2 cycles - 4
+				pair.assembly += pair.state.getWhitespace() + "NOP\n";									// 2 cycles - 6
+				pair.assembly += pair.state.getWhitespace() + "NOP\n";									// 2 cycles - 8
+				pair.assembly += pair.state.getWhitespace() + "NOP\n";									// 2 cycles - 10
+				pair.assembly += pair.state.getWhitespace() + "NOP\n";									// 2 cycles - 12
+				pair.assembly += pair.state.getWhitespace() + "NOP\n";									// 2 cycles - 14
+				pair.assembly += pair.state.getWhitespace() + "STA\t" + RRegL + "\n";					// 5 cycles - 17, get result
+				destSource.applyLDA(pair, i);
+			}
+			
+			return pair.getImmutable();
+		}	
+	}
+	private OperandSource sourceX, sourceY;
+	private boolean isModulo;
+	public ShortDividerModulator(OperandSource sourceX, OperandSource sourceY, boolean isModulo)
+	{
+		this.sourceX = sourceX;
+		this.sourceY = sourceY;
+		this.isModulo = isModulo;
+	}
+	@Override
+	public AssemblyStatePair getAssemblyAndState(ProgramState state) throws Exception
+	{
+		OperandSource destSource = state.destSource();
+		return new ShortDividerModulatorOperator(destSource, sourceX, sourceY, isModulo).getAssemblyAndState(state);
 	}
 
 }

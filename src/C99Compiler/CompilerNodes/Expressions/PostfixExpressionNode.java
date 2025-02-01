@@ -14,6 +14,7 @@ import C99Compiler.CompilerNodes.FunctionDefinitionNode;
 import C99Compiler.CompilerNodes.Definitions.PointerType;
 import C99Compiler.CompilerNodes.Definitions.FunctionType;
 import C99Compiler.CompilerNodes.Definitions.Type;
+import C99Compiler.CompilerNodes.Interfaces.Assemblable;
 import C99Compiler.CompilerNodes.Interfaces.SequencePointNode;
 import C99Compiler.CompilerNodes.LValues.IndirectLValueNode;
 import C99Compiler.CompilerNodes.LValues.LValueNode;
@@ -21,14 +22,13 @@ import C99Compiler.CompilerNodes.LValues.VariableNode;
 import C99Compiler.Exceptions.ConstraintException;
 import C99Compiler.Exceptions.ScratchOverflowException;
 import C99Compiler.Exceptions.UnsupportedFeatureException;
-import C99Compiler.Utils.AssemblyUtils;
-import C99Compiler.Utils.AssemblyUtils.DetailsTicket;
 import C99Compiler.Utils.CompUtils;
+import C99Compiler.Utils.ProgramState;
 import C99Compiler.Utils.PropPointer;
-import C99Compiler.Utils.ScratchManager;
+import C99Compiler.Utils.AssemblyUtils.AssemblyUtils;
+import C99Compiler.Utils.AssemblyUtils.ByteCopier;
 import C99Compiler.Utils.OperandSources.ConstantSource;
 import C99Compiler.Utils.OperandSources.OperandSource;
-import C99Compiler.Utils.ScratchManager.ScratchSource;
 import Grammar.C99.C99Parser.Assignment_expressionContext;
 import Grammar.C99.C99Parser.Postfix_expressionContext;
 import C99Compiler.CompilerNodes.Dummies.DummyExpressionNode;
@@ -36,7 +36,7 @@ import C99Compiler.CompilerNodes.Dummies.DummyLValueNode;
 import C99Compiler.CompilerNodes.LValues.WrapperLValueNode;
 import C99Compiler.CompilerNodes.Definitions.ArrayType;
 
-public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expressionContext> implements SequencePointNode
+public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressionContext>
 {
 	public static enum PFType
 	{
@@ -49,20 +49,17 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 	private PFType type;
 	
 	private BaseExpressionNode<?> expr, indexExpr;
-	private List<String> sequenceQueue;
-	
 	private List<BaseExpressionNode<?>> params;
-	
-	private OperandSource destSource;
-	
+
 	private IndirectLValueNode pointerRef; // For arrays and pointers to structs
 	String memberName;
 	
 	private FunctionDefinitionNode getReferencedFunction()
 	{
-		if (expr.hasPropValue())
+		ProgramState state = new ProgramState();
+		if (expr.hasPropValue(state))
 		{
-			Object obj = expr.getPropValue();
+			Object obj = expr.getPropValue(state);
 			if (FunctionDefinitionNode.class.equals(obj.getClass())) // Object is a function so this was a function reference or function pointer
 				return (FunctionDefinitionNode) obj;
 		} // Really hacky way to get the full name of the function
@@ -72,7 +69,6 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 	{
 		super(parent);
 		params = new ArrayList<BaseExpressionNode<?>>();
-		sequenceQueue = new LinkedList<String>();
 		pointerRef = null;
 	}
 
@@ -115,12 +111,7 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 		}
 		return this;
 	}
-	
-	@Override public boolean isSequencePoint() {return type == PFType.funcCall;}
-	@Override public void registerSequence(String assembly) {sequenceQueue.add(assembly);}
-	@Override public void clearSequence() {sequenceQueue.clear();}
-	@Override public String getAccumulatedSequences() {String assembly = ""; for (String queued : sequenceQueue) assembly += queued; return assembly;}
-	
+
 	@Override
 	public Type getType()
 	{
@@ -142,7 +133,7 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 	}
 
 	@Override
-	public boolean canCall(FunctionDefinitionNode function)
+	public boolean canCall(ProgramState state, FunctionDefinitionNode function)
 	{
 		if (type == PFType.funcCall)
 		{
@@ -150,11 +141,11 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 				return getReferencedFunction().getFullName().equals(function.getFullName());
 			else return true;
 		}
-		else return expr.canCall(function);
+		else return expr.canCall(state, function);
 	}
 	@Override public boolean isIndirect() {return type == PFType.arraySubscript;}
 	@Override
-	public boolean hasPropValue()
+	public boolean hasPropValue(ProgramState state)
 	{
 		if (type == PFType.structMember)
 			if (getType().isArray())
@@ -162,7 +153,7 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 		return false;
 	}
 	@Override
-	public Object getPropValue()
+	public Object getPropValue(ProgramState state)
 	{
 		if (type == PFType.structMember)
 			if (getType().isArray())
@@ -188,9 +179,9 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 		switch (type)
 		{
 		case arraySubscript:
-			if (indexExpr.hasPropValue() && expr.getType().isArray())
+			if (indexExpr.hasPropValue(new ProgramState()) && expr.getType().isArray())
 			{
-				int offset = getType().getSize() * (int) indexExpr.getPropLong();
+				int offset = getType().getSize() * (int) indexExpr.getPropLong(new ProgramState());
 				return new WrapperLValueNode(this, ((ArrayType) expr.getType()).getType(), expr.getLValue(), offset);
 			}
 			return pointerRef;
@@ -203,67 +194,89 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 		}
 	}
 	@Override
-	public boolean hasAssembly()
+	public boolean hasAssembly(ProgramState state)
 	{
 		switch (type)
 		{
 		case arraySubscript:
-			return expr.hasAssembly() || indexExpr.hasAssembly() || expr.getLValue() == null || !expr.getType().isArray() || !indexExpr.hasPropValue();
+			return expr.hasAssembly(state) || indexExpr.hasAssembly(state) || expr.getLValue() == null || !expr.getType().isArray() || !indexExpr.hasPropValue(state);
 		 case funcCall: return true;
-		case structMember: return expr.hasAssembly();
+		case structMember: return expr.hasAssembly(state);
 		case structMemberP: return true;
 		case incr: case decr: return true;
 		default: return false; // TODO
 		}
 	}
 	@Override
-	public String getAssembly(int leadingWhitespace, OperandSource destSource, ScratchManager scratchManager, DetailsTicket ticket) throws Exception
+	public AssemblyStatePair getAssemblyAndState(ProgramState state) throws Exception
 	{
-		clearSequence();
-		String whitespace = AssemblyUtils.getWhitespace(leadingWhitespace);
+		clearAssemblables();
+		OperandSource destSource = state.destSource();
+		AssemblyStatePair tmpPair;
 		String assembly = "";
 		switch (type)
 		{
 		case arraySubscript:
-			if (destSource != null) this.destSource = destSource; // Initialize LValue
-		
 			if (!getType().isArray()) // return element of an array
 			{
-				OperandSource dummySource = new ConstantSource(0, 1); // Just to keep track of the pointer
-				OperandSource addrSource = ScratchManager.reservePointer(dummySource);
-				assembly += new AdditiveExpressionNode(this, "+", expr, indexExpr).getAssembly(leadingWhitespace, addrSource);
+				OperandSource addrSource;
+				if (!state.hasPointer(expr.getLValue().getSource()))
+				{
+					state = state.reservePointer(expr.getLValue().getSource());
+					addrSource = state.lastScratchSource();
+					state = state.setDestSource(addrSource);
+					tmpPair = new AdditiveExpressionNode(this, "+", expr, indexExpr).getAssemblyAndState(state);
+					assembly += tmpPair.assembly;
+					state = tmpPair.state;
+				}
+				else
+					addrSource = state.getPointer(expr.getLValue().getSource());
 				pointerRef = new IndirectLValueNode(this, new DummyLValueNode(this, getType(), addrSource), addrSource, getType());
 				if (destSource != null)
 				{
-					assembly += AssemblyUtils.byteCopier(whitespace, destSource.getSize(), destSource, pointerRef.getSource());
+					state = state.setDestSource(destSource);
+					tmpPair = new ByteCopier(destSource.getSize(), destSource, pointerRef.getSource()).getAssemblyAndState(state);
+					assembly += tmpPair.assembly;
+					state = tmpPair.state;
 				}
 			}
 			else // Return head of an array
-				assembly += new AdditiveExpressionNode(this, "+", expr, indexExpr).getAssembly(leadingWhitespace, destSource);
-			break;
-		case funcCall:
-			ScratchManager.releasePointers();
-			if (getReferencedFunction() != null && !getReferencedFunction().canCall(getEnclosingFunction())) // We can know the variables to copy parameters to
 			{
-				if (expr.hasAssembly()) expr.getAssembly(leadingWhitespace, scratchManager, ticket);
+				state = state.setDestSource(destSource);
+				tmpPair = new AdditiveExpressionNode(this, "+", expr, indexExpr).getAssemblyAndState(state);
+				assembly += tmpPair.assembly;
+				state = tmpPair.state;
+			}
+			break;
+/*		case funcCall:
+			state = state.wipe(); // TODO only need to wipe pointers here
+			if (getReferencedFunction() != null && !getReferencedFunction().canCall(state, getEnclosingFunction())) // We can know the variables to copy parameters to
+			{
+				if (expr.hasAssembly(state))
+				{
+					state = state.setDestSource(destSource);
+					tmpPair = expr.getAssemblyAndState(state);
+					assembly += tmpPair.assembly;
+					state = tmpPair.state;
+				}
 				FunctionDefinitionNode func = getReferencedFunction();
 				
-				if (func.canCall(getEnclosingFunction())) // Prepare for possible recursion
+				if (func.canCall(state, getEnclosingFunction())) // Prepare for possible recursion
 				{
 					List<VariableNode> variables = new LinkedList<VariableNode>(getEnclosingFunction().getChildVariables().values());
 					for (VariableNode parameter : variables)
-						assembly += AssemblyUtils.stackLoader(whitespace, leadingWhitespace, parameter.getSource());
+					;//	assembly += AssemblyUtils.stackLoader(whitespace, leadingWhitespace, parameter.getSource()); TODO
 				}
 				
 				List<VariableNode> funcParams = new LinkedList<VariableNode>(func.getParameters().values());
 				for (int i = 0; i < params.size(); ++i)
 				{
 					OperandSource sourceV = funcParams.get(i).getSource();
-					if (params.get(i).hasAssembly()) assembly += params.get(i).getAssembly(leadingWhitespace, sourceV, scratchManager, ticket);
+					if (params.get(i).hasAssembly(state)) assembly += params.get(i).getAssembly(leadingWhitespace, sourceV, scratchManager, ticket);
 					else
 					{
 						OperandSource sourceP = null;
-						if (params.get(i).hasPropValue()) sourceP = new ConstantSource(params.get(i).getPropValue(), params.get(i).getSize());
+						if (params.get(i).hasPropValue(state)) sourceP = new ConstantSource(params.get(i).getPropValue(state), params.get(i).getSize());
 						else if (params.get(i).hasLValue()) sourceP = params.get(i).getLValue().castTo(funcParams.get(i).getType()).getSource();
 						assembly += AssemblyUtils.byteCopier(whitespace, sourceV.getSize(), sourceV, sourceP);
 						
@@ -387,20 +400,13 @@ public class PostfixExpressionNode extends BaseExpressionNode<Postfix_expression
 			}
 			if (scratchX != null) scratchManager.releaseScratchBlock(scratchX);
 			break;
-		default:
+*/		default:
 			break;
 		}
 		
-		ScratchManager.releasePointer(destSource); // A copy of the destination, if it's a pointer, has gone stale
-		return assembly;
+		state = state.releasePointer(destSource); // A copy of the destination, if it's a pointer, has gone stale
+		return new AssemblyStatePair(assembly, state);
 	}
-	@Override
-	public String getAssembly(int leadingWhitespace) throws Exception
-	{
-		if (type == PFType.incr || type == PFType.decr)
-			return getAssembly(leadingWhitespace, expr.getLValue().getSource(), new ScratchManager(), new DetailsTicket());
-		else return super.getAssembly(leadingWhitespace);
-	}
-	
+
 	public PFType getPFType() {return type;}
 }

@@ -7,7 +7,7 @@ import C99Compiler.CompilerNodes.FunctionDefinitionNode;
 import C99Compiler.CompilerNodes.Expressions.BaseExpressionNode;
 import C99Compiler.CompilerNodes.Expressions.ConstantExpressionNode;
 import C99Compiler.Exceptions.ConstraintException;
-import C99Compiler.Utils.AssemblyUtils;
+import C99Compiler.Utils.ProgramState;
 import Grammar.C99.C99Parser.Labeled_statementContext;
 
 public class LabeledStatementNode extends StatementNode<Labeled_statementContext>
@@ -29,7 +29,7 @@ public class LabeledStatementNode extends StatementNode<Labeled_statementContext
 			if (node.constant_expression() != null)
 			{
 				BaseExpressionNode<?> constExpr = new ConstantExpressionNode(this).interpret(node.constant_expression());
-				label = getEnclosingSelection().getCaseLabel(constExpr);
+				label = getEnclosingSelection().getCaseLabel(new ProgramState(), constExpr);
 			}
 			else label = getEnclosingSelection().getDefaultLabel(true);
 		}
@@ -39,16 +39,19 @@ public class LabeledStatementNode extends StatementNode<Labeled_statementContext
 	}
 	
 	@Override
-	public boolean canCall(FunctionDefinitionNode function) {return statement.canCall(function);}
+	public boolean canCall(ProgramState state, FunctionDefinitionNode function) {return statement.canCall(state, function);}
 
 	@Override
-	public boolean hasAssembly()
+	public boolean hasAssembly(ProgramState state)
 	{
 		return true; // Always there as a label
 	}
+	
 	@Override
-	public String getAssembly(int leadingWhitespace, String returnAddr) throws Exception
+	public AssemblyStatePair getAssemblyAndState(ProgramState state) throws Exception
 	{
-		return AssemblyUtils.getWhitespace(leadingWhitespace) + label + ":\n" + (statement.hasAssembly()? statement.getAssembly(leadingWhitespace, returnAddr) : "");
+		AssemblyStatePair pair = new AssemblyStatePair(label + ":\n", state);
+		if (statement.hasAssembly(state)) pair = statement.apply(pair);
+		return pair;
 	}
 }

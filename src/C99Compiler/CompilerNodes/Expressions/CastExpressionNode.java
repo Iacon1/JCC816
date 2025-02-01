@@ -5,14 +5,12 @@ package C99Compiler.CompilerNodes.Expressions;
 import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.FunctionDefinitionNode;
 import C99Compiler.CompilerNodes.Declarations.TypeNameNode;
-import C99Compiler.CompilerNodes.Definitions.PointerType;
 import C99Compiler.CompilerNodes.Definitions.Type;
 import C99Compiler.CompilerNodes.LValues.LValueNode;
-import C99Compiler.Utils.AssemblyUtils;
-import C99Compiler.Utils.AssemblyUtils.DetailsTicket;
-import C99Compiler.Utils.ScratchManager;
+import C99Compiler.Utils.ProgramState;
+import C99Compiler.Utils.AssemblyUtils.AssemblyUtils;
+import C99Compiler.Utils.AssemblyUtils.ByteCopier;
 import C99Compiler.Utils.OperandSources.ConstantSource;
-import C99Compiler.Utils.OperandSources.OperandSource;
 import Grammar.C99.C99Parser.Cast_expressionContext;
 
 public class CastExpressionNode extends BaseExpressionNode<Cast_expressionContext>
@@ -42,9 +40,9 @@ public class CastExpressionNode extends BaseExpressionNode<Cast_expressionContex
 	}
 	
 	@Override
-	public boolean canCall(FunctionDefinitionNode function)
+	public boolean canCall(ProgramState state, FunctionDefinitionNode function)
 	{
-		return expr.canCall(function);
+		return expr.canCall(state, function);
 	}
 
 	@Override
@@ -62,32 +60,40 @@ public class CastExpressionNode extends BaseExpressionNode<Cast_expressionContex
 		return expr.getLValue();
 	}
 	@Override
-	public boolean hasPropValue()
+	public boolean hasPropValue(ProgramState state)
 	{
-		return expr.hasPropValue();
+		return expr.hasPropValue(state);
 	}
 	@Override
-	public Object getPropValue()
+	public Object getPropValue(ProgramState state)
 	{
-		return expr.getPropValue();
+		return expr.getPropValue(state);
 	}
 	@Override
-	public boolean hasAssembly()
+	public boolean hasAssembly(ProgramState state)
 	{
-		return expr.hasAssembly() || (!hasPropValue() && getType().getSize() > expr.getType().getSize());
+		return expr.hasAssembly(state) || (!hasPropValue(state) && getType().getSize() > expr.getType().getSize());
 	}
+	
 	@Override
-	public String getAssembly(int leadingWhitespace, OperandSource destSource, ScratchManager scratchManager, DetailsTicket ticket) throws Exception
+	public AssemblyStatePair getAssemblyAndState(ProgramState state) throws Exception
 	{
-		String whitespace = AssemblyUtils.getWhitespace(leadingWhitespace);
+		AssemblyStatePair tmpPair;
 		String assembly = "";
 		if (getType().getSize() > expr.getType().getSize()) // Need to make space
-			assembly += AssemblyUtils.byteCopier(whitespace, getType().getSize(), destSource, new ConstantSource(0, getType().getSize()));
-		if (expr.hasAssembly())
-			assembly += expr.getAssembly(leadingWhitespace, destSource, scratchManager, ticket);
+		{
+			tmpPair = new ByteCopier(getType().getSize(), state.destSource(), new ConstantSource(0, getType().getSize())).getAssemblyAndState(state);
+			assembly += tmpPair.assembly;
+			state = tmpPair.state;
+		}
+		if (expr.hasAssembly(state))
+			assembly += expr.getAssembly(state);
 		else if (expr.hasLValue())
-			assembly += AssemblyUtils.byteCopier(whitespace, getType().getSize(), destSource, expr.getLValue().getSource());
-		
-		return assembly;
+		{
+			tmpPair = new ByteCopier(getType().getSize(), state.destSource(), expr.getLValue().getSource()).getAssemblyAndState(state);
+			assembly += tmpPair.assembly;
+			state = tmpPair.state;
+		}
+		return new AssemblyStatePair(assembly, state);
 	}
 }

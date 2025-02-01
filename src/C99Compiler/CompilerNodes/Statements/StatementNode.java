@@ -5,18 +5,17 @@ package C99Compiler.CompilerNodes.Statements;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 
-import C99Compiler.CompConfig;
 import C99Compiler.CompConfig.DebugLevel;
 import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.InterpretingNode;
-import C99Compiler.CompilerNodes.Interfaces.AssemblableNode;
+import C99Compiler.CompilerNodes.Interfaces.UnvaluedAssemblableNode;
 import C99Compiler.CompilerNodes.LValues.VariableNode;
-import C99Compiler.Utils.AssemblyUtils;
-import C99Compiler.Utils.FileIO;
+import C99Compiler.Exceptions.ScratchOverflowException;
 import C99Compiler.Utils.LineInfo;
+import C99Compiler.Utils.ProgramState;
 import Grammar.C99.C99Parser.StatementContext;
 
-public abstract class StatementNode<C extends ParserRuleContext> extends InterpretingNode<StatementNode<C>, C> implements AssemblableNode
+public abstract class StatementNode<C extends ParserRuleContext> extends InterpretingNode<StatementNode<C>, C> implements UnvaluedAssemblableNode
 {
 	public StatementNode(ComponentNode<?> parent) {super(parent);}
 	
@@ -38,28 +37,21 @@ public abstract class StatementNode<C extends ParserRuleContext> extends Interpr
 			return new AssemblyStatementNode(parent).interpret(node.asm_statement());
 		else return null;
 	}
-	
-	public void clearPossibleValues()
-	{
-		for (VariableNode var : getReferencedVariables().values())
-			var.clearPossibleValues();
-	}
 
-	public abstract String getAssembly(int leadingWhitespace, String returnAddr) throws Exception;
-	@Override public String getAssembly(int leadingWhitespace) throws Exception
-	{
-		if (getEnclosingFunction() != null)
-			return getAssembly(leadingWhitespace, getEnclosingFunction().getEndLabel());
-		else return getAssembly(leadingWhitespace, null);
-	}
-	
-	public String labelLine(int leadingWhitespace, int lineNo)
+	public String labelLine(ProgramState state, int lineNo)
 	{
 		if (DebugLevel.isAtLeast(DebugLevel.low))
 		{
 			LineInfo info = getTranslationUnit().getInfo(lineNo);
-			return AssemblyUtils.getWhitespace(leadingWhitespace) + ".dbg\tline, " + info.getLine() + "\n";
+			return state.getWhitespace() + ".dbg\tline, " + info.getLine() + "\n";
 		}
 		else return "";
+	}
+	
+	ProgramState clearPossibleValues(ProgramState state)
+	{
+		for (VariableNode v : this.getReferencedVariables().values())
+			state = state.clearPossibleValues(v);
+		return state;
 	}
 }

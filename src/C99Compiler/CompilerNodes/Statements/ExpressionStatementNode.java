@@ -7,7 +7,7 @@ import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.FunctionDefinitionNode;
 import C99Compiler.CompilerNodes.Expressions.BaseExpressionNode;
 import C99Compiler.CompilerNodes.Expressions.ExpressionNode;
-import C99Compiler.CompilerNodes.Interfaces.AssemblableNode;
+import C99Compiler.Utils.ProgramState;
 import Grammar.C99.C99Parser.Expression_statementContext;
 
 public class ExpressionStatementNode extends SequencePointStatementNode<Expression_statementContext>
@@ -24,19 +24,29 @@ public class ExpressionStatementNode extends SequencePointStatementNode<Expressi
 	}
 	
 	@Override
-	public boolean canCall(FunctionDefinitionNode function)
+	public boolean canCall(ProgramState state, FunctionDefinitionNode function)
 	{
-		return expression != null && expression.canCall(function);
+		return expression != null && expression.canCall(state, function);
 	}
 
 	@Override
-	public boolean hasAssembly()
+	public boolean hasAssembly(ProgramState state)
 	{
-		return expression != null && expression.hasAssembly();
+		return expression != null && expression.hasAssembly(state);
 	}
+	
 	@Override
-	public String getAssembly(int leadingWhitespace, String returnAddr) throws Exception
+	public ProgramState getStateAfter(ProgramState state) throws Exception
 	{
-		return getAssemblyWithSequence(expression, leadingWhitespace);
+		if (expression != null)
+			return expression.getStateAfter(state);
+		else
+			return state;
+	}
+	
+	@Override
+	public AssemblyStatePair getAssemblyAndState(ProgramState state) throws Exception
+	{
+		return getAssemblyAndStateWithRegistered(state, expression);
 	}
 }

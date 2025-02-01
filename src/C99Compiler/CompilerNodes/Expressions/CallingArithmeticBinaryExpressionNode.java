@@ -6,8 +6,10 @@ import org.antlr.v4.runtime.ParserRuleContext;
 
 import C99Compiler.CompConfig;
 import C99Compiler.CompilerNodes.ComponentNode;
-import C99Compiler.Utils.AssemblyUtils.DetailsTicket;
-import C99Compiler.Utils.AssemblyUtils;
+import C99Compiler.Utils.ProgramState;
+import C99Compiler.Utils.AssemblyUtils.AssemblyUtils;
+import C99Compiler.Utils.AssemblyUtils.ByteCopier;
+import C99Compiler.Utils.AssemblyUtils.ZeroCopier;
 import C99Compiler.Utils.OperandSources.OperandSource;
 
 public abstract class CallingArithmeticBinaryExpressionNode<
@@ -35,25 +37,43 @@ CC extends ParserRuleContext
 	@Override
 	protected abstract int getRetSize(int sizeX, int sizeY);
 	
-	public abstract String getSubAssembly(int sizeX, int sizeY) throws Exception;
+	public abstract String getSub(int sizeX, int sizeY) throws Exception;
 	public abstract String getSubName(int sizeX, int sizeY);
-	public abstract String getCall(String whitespace, int sizeR, int sizeX, int sizeY) throws Exception;
+	public abstract AssemblyStatePair getCall(ProgramState state, int sizeR, int sizeX, int sizeY) throws Exception;
 	@Override
-	protected String getAssembly(String whitespace, OperandSource destSource, OperandSource sourceX,
-			OperandSource sourceY, DetailsTicket ticket) throws Exception
+	protected AssemblyStatePair getAssemblyAndState(ProgramState state, OperandSource sourceX, OperandSource sourceY) throws Exception
 	{
+		AssemblyStatePair callPair; 
+		
+		MutableAssemblyStatePair pair = new MutableAssemblyStatePair("", state);
+		OperandSource destSource = pair.state.destSource();
+		
 		String assembly = "";
-		assembly += ticket.save(whitespace, 0xFF);
-		DetailsTicket innerTicket = new DetailsTicket(ticket, 0, 0xFF);
-		assembly += AssemblyUtils.byteCopier(whitespace, sourceX.getSize(), CompConfig.specSubSource(true, sourceX.getSize()), sourceX, innerTicket);
-		assembly += AssemblyUtils.byteCopier(whitespace, sourceY.getSize(), CompConfig.specSubSource(false, sourceY.getSize()), sourceY, innerTicket);
+		assembly += AssemblyUtils.store(state, (byte) 0xFF);
+		byte preserveFlags = pair.state.getPreserveFlags();
+		pair.state = pair.state.clearPreserveFlags();
+		
+		ByteCopier xCopier, yCopier;
+		xCopier = new ByteCopier(sourceX.getSize(), CompConfig.specSubSource(true, sourceX.getSize()), sourceX);
+		yCopier = new ByteCopier(sourceY.getSize(), CompConfig.specSubSource(true, sourceY.getSize()), sourceY);
+		
+		xCopier.apply(pair);
+		yCopier.apply(pair);
+
+		
 		int retSize = Math.min(destSource.getSize(), getRetSize(sourceX.getSize(), sourceY.getSize()));
-		assembly += getCall(whitespace, retSize, sourceX.getSize(), sourceY.getSize());
-		assembly += AssemblyUtils.byteCopier(whitespace, retSize, destSource, CompConfig.callResultSource(retSize), innerTicket);
+		callPair = getCall(pair.state, retSize, sourceX.getSize(), sourceY.getSize());
+		pair.assembly += callPair.assembly;
+		pair.state = callPair.state;
+		
+		new ByteCopier(retSize, destSource, CompConfig.callResultSource(retSize)).apply(pair);
+
 		if (retSize < destSource.getSize())
-			assembly += AssemblyUtils.zeroCopier(whitespace, destSource.getSize() - retSize, destSource.getShifted(retSize), innerTicket);
-		getTranslationUnit().requireSub(getSubName(sourceX.getSize(), sourceY.getSize()), getSubAssembly(sourceX.getSize(), sourceY.getSize()));
-		assembly += ticket.restore(whitespace, 0xFF);
-		return assembly;
+			new ZeroCopier(destSource.getSize() - retSize, destSource.getShifted(retSize)).apply(pair);
+
+		getTranslationUnit().requireSub(getSubName(sourceX.getSize(), sourceY.getSize()), getSub(sourceX.getSize(), sourceY.getSize()));
+		assembly += AssemblyUtils.restore(state, preserveFlags);
+		state = state.setPreserveFlags(preserveFlags);
+		return new AssemblyStatePair(assembly, state);
 	}
 }

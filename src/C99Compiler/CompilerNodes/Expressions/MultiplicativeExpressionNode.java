@@ -7,15 +7,15 @@ import C99Compiler.CompConfig.OptimizationLevel;
 import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.Dummies.DummyExpressionNode;
 import C99Compiler.CompilerNodes.Definitions.Type.CastContext;
-import C99Compiler.CompilerNodes.Expressions.Snippets.DivisionMultiplicationHeaderFooter;
+import C99Compiler.CompilerNodes.Expressions.Snippets.DivisionMultiplicationFooter;
+import C99Compiler.CompilerNodes.Expressions.Snippets.DivisionMultiplicationHeader;
 import C99Compiler.CompilerNodes.Expressions.Snippets.LongDividerModulator;
 import C99Compiler.CompilerNodes.Expressions.Snippets.Multiplier;
 import C99Compiler.CompilerNodes.Expressions.Snippets.ShortDividerModulator;
+import C99Compiler.CompilerNodes.Interfaces.Assemblable;
 import C99Compiler.CompilerNodes.LValues.LValueNode;
 import C99Compiler.Exceptions.UnsupportedFeatureException;
-import C99Compiler.Utils.AssemblyUtils;
-import C99Compiler.Utils.AssemblyUtils.DetailsTicket;
-import C99Compiler.Utils.ScratchManager;
+import C99Compiler.Utils.ProgramState;
 import C99Compiler.Utils.OperandSources.OperandSource;
 import Grammar.C99.C99Parser.Cast_expressionContext;
 import Grammar.C99.C99Parser.Multiplicative_expressionContext;
@@ -52,25 +52,25 @@ public class MultiplicativeExpressionNode extends CallingArithmeticBinaryExpress
 		return (startOdd ? 2 : 1) +  optimizedComplexity(l);
 	}
 	
-	private void optimizeMult() // Optimize constant mults
+	private void optimizeMult(ProgramState state) // Optimize constant mults
 	{
 		if (operator.equals("%")) return; // Don't do for modulo
-		if (x.hasPropValue() && operator.equals("*")) // We need x to be the variable one
+		if (x.hasPropValue(state) && operator.equals("*")) // We need x to be the variable one
 		{
 			BaseExpressionNode<?> t = y;
 			y = x;
 			x = t;
 		}
-		else if (x.hasPropValue()) // There's no way to fix this in division
+		else if (x.hasPropValue(state)) // There's no way to fix this in division
 			return;
 		
-		if (x.hasPropValue()) return; // Gonna get fully optimized anyway
+		if (x.hasPropValue(state)) return; // Gonna get fully optimized anyway
 		
 		if (operator.equals("*"))
 		{
-			if (y.hasPropValue() && 1 < y.getPropLong() && optimizedComplexity(y.getPropLong()) <= CompConfig.maxOptimizedMultComplexity)
+			if (y.hasPropValue(state) && 1 < y.getPropLong(state) && optimizedComplexity(y.getPropLong(state)) <= CompConfig.maxOptimizedMultComplexity)
 			{	
-				long l = y.getPropLong();
+				long l = y.getPropLong(state);
 				int i = 0;
 				boolean startOdd = (l % 2 == 1);
 				do
@@ -95,14 +95,14 @@ public class MultiplicativeExpressionNode extends CallingArithmeticBinaryExpress
 					s1.swapParent(optimized);
 				}
 			}
-			else if (y.hasPropValue() && 1 == y.getPropLong())
+			else if (y.hasPropValue(state) && 1 == y.getPropLong(state))
 				optimized = x;	
 		}
-		else if (operator.equals("/") && ((y.getPropLong() & (y.getPropLong() - 1)) == 0)) // y is power of 2
+		else if (operator.equals("/") && ((y.getPropLong(state) & (y.getPropLong(state) - 1)) == 0)) // y is power of 2
 		{
-			assert y.getPropLong() != 0; // Should be caught by parsing
+			assert y.getPropLong(state) != 0; // Should be caught by parsing
 			DummyExpressionNode d1;
-			d1 = new DummyExpressionNode(this, y.getType(), (int) (Math.log(y.getPropLong()) / Math.log(2)));
+			d1 = new DummyExpressionNode(this, y.getType(), (int) (Math.log(y.getPropLong(state)) / Math.log(2)));
 			ShiftExpressionNode s1 = new ShiftExpressionNode(this, ">>", x, d1);
 			optimized = s1;
 		}
@@ -113,17 +113,13 @@ public class MultiplicativeExpressionNode extends CallingArithmeticBinaryExpress
 		super(parent, operator, x, y);
 		x.swapParent(this);
 		y.swapParent(this);
-		if (OptimizationLevel.isAtLeast(OptimizationLevel.medium))
-			optimizeMult();
 	}
 	@Override
 	public BaseExpressionNode<Multiplicative_expressionContext> interpret(Multiplicative_expressionContext node) throws Exception
 	{
 		BaseExpressionNode<Multiplicative_expressionContext> result = super.interpret(node);
 		if (result != this) return result;
-		if (OptimizationLevel.isAtLeast(OptimizationLevel.medium))
-			optimizeMult();
-		if (operator.equals("/") && y.hasPropValue() && y.getPropLong() == 0) // Divide by zero
+		if (operator.equals("/") && y.hasPropValue(new ProgramState()) && y.getPropLong(new ProgramState()) == 0) // Divide by zero
 			throw new UnsupportedFeatureException("Division by zero", true, node.start);
 		return result;
 	}
@@ -173,104 +169,102 @@ public class MultiplicativeExpressionNode extends CallingArithmeticBinaryExpress
 		}
 	}
 	@Override
-	public String getCall(String whitespace, int sizeR, int sizeX, int sizeY) throws Exception
+	public AssemblyStatePair getCall(ProgramState state, int sizeR, int sizeX, int sizeY) throws Exception
 	{
+		MutableAssemblyStatePair pair = new MutableAssemblyStatePair("", state);
 		switch (operator)
 		{
 		case "*":
 		case "/":
 		case "%":
-		{
 			if ((x.getType().isSigned() || y.getType().isSigned()))// &&
-//					!(operator.equals("*") && x.getSize() == y.getSize() && x.getSize() <= 0)) TODO we shoudln't need sign checks for 1- or 2-byte mults
+//					!(operator.equals("*") && x.getSize() == y.getSize() && x.getSize() <= 0)) TODO we shouldn't need sign checks for 1- or 2-byte mults
 			{
-				String assembly = "";
 				String divMulHeader = "__divMulHeader@" + sizeX + "@" + sizeY;
-				String headerASM = divMulHeader + ":\n";
-				headerASM += DivisionMultiplicationHeaderFooter.divisionMultiplicationHeader(
-						AssemblyUtils.getWhitespace(CompConfig.indentSize),
+				AssemblyStatePair headerPair = new AssemblyStatePair(divMulHeader + ":\n", new ProgramState().indent());
+				headerPair = new DivisionMultiplicationHeader(
 						CompConfig.specSubSource(true, sizeX),
-						CompConfig.specSubSource(false, sizeY), 
-						new DetailsTicket());
-				headerASM += "RTL\n";
+						CompConfig.specSubSource(true, sizeY)).apply(headerPair);
+				headerPair = headerPair.addAssembly("RTL\n");
 				
 				String divMulFooter = "__divMulFooter@" + sizeR;
-				String footerASM = divMulFooter + ":\n";
-				footerASM += DivisionMultiplicationHeaderFooter.divisionMultiplicationFooter(
-						AssemblyUtils.getWhitespace(CompConfig.indentSize),
+				AssemblyStatePair footerPair = new AssemblyStatePair(divMulFooter + ":\n", new ProgramState().indent());
+				footerPair = new DivisionMultiplicationFooter(
 						CompConfig.callResultSource(sizeR), 
-						CompConfig.callResultSource(sizeR), 
-						new DetailsTicket());
-				footerASM += "RTL\n";
+						CompConfig.callResultSource(sizeR)).apply(footerPair); 
+				footerPair = footerPair.addAssembly("RTL\n");
 				
-				getTranslationUnit().requireSub(divMulHeader, headerASM);
-				getTranslationUnit().requireSub(divMulFooter, footerASM);
+				getTranslationUnit().requireSub(divMulHeader, headerPair.assembly);
+				getTranslationUnit().requireSub(divMulFooter, footerPair.assembly);
 				
-				assembly += whitespace + "JSL\t" + divMulHeader + "\n";
-				assembly += whitespace + "JSL\t" + getSubName(sizeX, sizeY) + "\n";
-				assembly += whitespace + "JSL\t" + divMulFooter + "\n";
-				return assembly;
+				pair.assembly += pair.state.getWhitespace() + "JSL\t" + divMulHeader + "\n";
+				pair.assembly += pair.state.getWhitespace() + "JSL\t" + getSubName(sizeX, sizeY) + "\n";
+				pair.assembly += pair.state.getWhitespace() + "JSL\t" + divMulFooter + "\n";
+				return pair.getImmutable();
 			}
-			else return whitespace + "JSL\t" + getSubName(sizeX, sizeY) + "\n";
-		}
+			else
+			{
+				pair.assembly += pair.state.getWhitespace() + "JSL\t" + getSubName(sizeX, sizeY) + "\n";
+				return pair.getImmutable();
+			}
 		default: return null;
 		}
 	}
 	@Override
-	public String getSubAssembly(int sizeX, int sizeY) throws Exception
+	public String getSub(int sizeX, int sizeY) throws Exception
 	{
 		String assembly = "";
 		
 		assembly += getSubName(sizeX, sizeY) + ":\n";
+		ProgramState state = new ProgramState().indent();
+		OperandSource destSource, sourceX, sourceY;
+		
+		destSource = CompConfig.callResultSource(getRetSize(sizeX, sizeY));
+		sourceX = CompConfig.specSubSource(true, sizeX);
+		sourceY = CompConfig.specSubSource(false, sizeY);
+
+		Assemblable assemblable;
 		
 		boolean isModulo = false;
 		switch (operator)
 		{
 		case "*":
-			assembly += Multiplier.generate(
-					AssemblyUtils.getWhitespace(CompConfig.indentSize),
-					CompConfig.callResultSource(getRetSize(sizeX, sizeY)),
-					CompConfig.specSubSource(true, sizeX),
-					CompConfig.specSubSource(false, sizeY), new DetailsTicket());
+			assemblable = new Multiplier(sourceX, sourceY);
 			break;
 		case "%":
 			isModulo = true;
 		case "/":
 			if (sizeY > 1)
-				assembly += LongDividerModulator.generate(
-					AssemblyUtils.getWhitespace(CompConfig.indentSize),
-					CompConfig.callResultSource(getRetSize(sizeX, sizeY)),
-					CompConfig.specSubSource(true, sizeX),
-					CompConfig.specSubSource(false, sizeY), isModulo, new DetailsTicket());
+				assemblable = new LongDividerModulator(sourceX, sourceY, isModulo);
 			else
-				assembly += ShortDividerModulator.generate(
-						AssemblyUtils.getWhitespace(CompConfig.indentSize),
-						CompConfig.callResultSource(getRetSize(sizeX, sizeY)),
-						CompConfig.specSubSource(true, sizeX),
-						CompConfig.specSubSource(false, sizeY), isModulo, new DetailsTicket());
+				assemblable = new ShortDividerModulator(sourceX, sourceY, isModulo);
 				break;
+		default:
+			assemblable = null;
 		}		
+		state = state.setDestSource(destSource);
+		assembly += assemblable.getAssembly(state);
 		assembly += "RTL\n";
 		
 		return assembly;
 	}
 	@Override
-	public boolean hasAssembly()
+	public boolean hasAssembly(ProgramState state)
 	{
-		if (optimized != null) return optimized.hasAssembly();
-		else return super.hasAssembly();
+		if (optimized != null) return optimized.hasAssembly(state);
+		else return super.hasAssembly(state);
 	}
 	@Override
-	public boolean hasPropValue()
+	public boolean hasPropValue(ProgramState state)
 	{
-		if (optimized != null) return optimized.hasPropValue();
-		else return super.hasPropValue();
+		if (optimized != null) return optimized.hasPropValue(state);
+		else return super.hasPropValue(state);
 	}
 	@Override
-	public Object getPropValue()
+	public Object getPropValue(ProgramState state)
 	{
-		if (optimized != null) return optimized.getPropValue();
-		else return super.getPropValue();
+		if (optimized != null) return optimized.getPropValue(state);
+		else return super.getPropValue(state);
 	}
 	@Override
 	public boolean hasLValue()
@@ -285,11 +279,14 @@ public class MultiplicativeExpressionNode extends CallingArithmeticBinaryExpress
 		else return super.getLValue();
 	}
 	@Override
-	public String getAssembly(int leadingWhitespace, OperandSource destSource, ScratchManager scratchManager, DetailsTicket ticket) throws Exception
+	public String getAssembly(ProgramState state) throws Exception
 	{
+		if (OptimizationLevel.isAtLeast(OptimizationLevel.medium))
+			optimizeMult(state);
+		
 		if (optimized != null)
-			return optimized.getAssembly(leadingWhitespace, destSource, scratchManager, ticket);
+			return optimized.getAssembly(state);
 		else 
-			return super.getAssembly(leadingWhitespace, destSource, scratchManager, ticket);
+			return super.getAssembly(state);
 	}
 }

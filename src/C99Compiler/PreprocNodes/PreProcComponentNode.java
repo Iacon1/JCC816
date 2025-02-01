@@ -35,7 +35,7 @@ public abstract class PreProcComponentNode<T extends PreProcComponentNode<T>>
 	
 	public static void resetLineNo(String file, int line, boolean isStd)
 	{
-		PreProcComponentNode.file = file.replace("/", "\\");
+		PreProcComponentNode.file = file;
 		PreProcComponentNode.line = line;
 		PreProcComponentNode.isStd = isStd;
 		defines.put("__FILE__", new DefineNode(file)); // Change each file

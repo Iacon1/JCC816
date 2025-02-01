@@ -9,50 +9,55 @@ import org.antlr.v4.runtime.ParserRuleContext;
 
 import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.Expressions.BaseExpressionNode;
+import C99Compiler.CompilerNodes.Interfaces.Assemblable;
 import C99Compiler.CompilerNodes.Interfaces.SequencePointNode;
-import C99Compiler.Utils.AssemblyUtils.DetailsTicket;
-import C99Compiler.Utils.ScratchManager;
-import C99Compiler.Utils.OperandSources.OperandSource;
+import C99Compiler.Utils.ProgramState;
 
 public abstract class SequencePointStatementNode<C extends ParserRuleContext> extends StatementNode<C> implements SequencePointNode
 {
-	private List<String> sequenceQueue;
+	private List<Assemblable> assemblableQueue;
 	private boolean isSP;
 	
 	public SequencePointStatementNode(ComponentNode<?> parent)
 	{
 		super(parent);
-		sequenceQueue = new LinkedList<String>();
+		assemblableQueue = new LinkedList<Assemblable>();
 		isSP = false;
 	}
 
 	@Override public boolean isSequencePoint() {return isSP;}
-	@Override public void registerSequence(String assembly) {sequenceQueue.add(assembly);}
-	@Override public void clearSequence() {sequenceQueue.clear();}
-	@Override public String getAccumulatedSequences() {String assembly = ""; for (String queued : sequenceQueue) assembly += queued; return assembly;}
-
-	public String getAssemblyWithSequence(BaseExpressionNode<?> expr, int leadingWhitespace, OperandSource destSource, ScratchManager scratchManager) throws Exception
+	@Override public void registerAssemblable(Assemblable assemblable) {assemblableQueue.add(assemblable);}
+	@Override public void clearAssemblables() {assemblableQueue.clear();}
+	@Override public AssemblyStatePair getRegisteredAssemblyAndState(ProgramState state) throws Exception
 	{
 		String assembly = "";
-		isSP = true;
-		clearSequence();
-		if (expr.hasAssembly())
-			assembly = expr.getAssembly(leadingWhitespace, destSource, scratchManager, new DetailsTicket());
-		assembly += getAccumulatedSequences();
-		clearSequence();
-		isSP = false;
-		return assembly;
+		for (Assemblable queued : assemblableQueue)
+		{
+			AssemblyStatePair pair = queued.getAssemblyAndState(state);
+			assembly += pair.assembly;
+			state = pair.state;
+		}
+		
+		return new AssemblyStatePair(assembly, state);
 	}
 	
-	public String getAssemblyWithSequence(BaseExpressionNode<?> expr, int leadingWhitespace) throws Exception
+	public AssemblyStatePair applyWithRegistered(AssemblyStatePair pair, BaseExpressionNode<?> expr) throws Exception
 	{
-		String assembly = "";
 		isSP = true;
-		clearSequence();
-		assembly = expr.getAssembly(leadingWhitespace);
-		assembly += getAccumulatedSequences();
-		clearSequence();
+		clearAssemblables();
+		if (expr.hasAssembly(pair.state))
+			pair = expr.apply(pair);
+
+		AssemblyStatePair tmpPair = getRegisteredAssemblyAndState(pair.state);
+		pair = new AssemblyStatePair(pair.assembly + tmpPair.assembly, tmpPair.state);
+		
+		clearAssemblables();
 		isSP = false;
-		return assembly;
+		return pair;
+	}
+	
+	public AssemblyStatePair getAssemblyAndStateWithRegistered(ProgramState state, BaseExpressionNode<?> expr) throws Exception
+	{
+		return applyWithRegistered(new AssemblyStatePair("", state), expr);
 	}
 }

@@ -2,88 +2,142 @@
 //
 package C99Compiler.CompilerNodes.Expressions.Snippets;
 
-import C99Compiler.Utils.AssemblyUtils;
+import C99Compiler.CompilerNodes.Interfaces.Assemblable;
+import C99Compiler.Utils.ProgramState;
 import C99Compiler.Utils.SNESRegisters;
+import C99Compiler.Utils.AssemblyUtils.BytewiseOperator;
 import C99Compiler.Utils.OperandSources.OperandSource;
-import C99Compiler.Utils.AssemblyUtils.DetailsTicket;
-
 
 //Uses hardware div registers, but only for 8-bit divisor
-public class Multiplier
+public class Multiplier implements Assemblable
 {
-	protected Multiplier() {}
-	
-	public static String generate(String whitespace, OperandSource destSource, OperandSource sourceX, OperandSource sourceY, DetailsTicket ticket) throws Exception
+	private static class MultiplierOperator extends BytewiseOperator
 	{
-		String assembly = "";
+		private final int offset;
+		private final OperandSource sourceX, sourceY, destSource;
 		
-		assembly += ticket.save(whitespace, DetailsTicket.saveA | DetailsTicket.saveX);
-		DetailsTicket innerTicket = new DetailsTicket(ticket, DetailsTicket.saveX, DetailsTicket.saveA); // "Please don't break these"
-		
-		for (int i = 0; i < sourceX.getSize(); ++i)
+		public MultiplierOperator(int offset, OperandSource destSource, OperandSource sourceX, OperandSource sourceY)
 		{
-			final int ii = i;
-			assembly += AssemblyUtils.bytewiseOperation(whitespace, sourceX.getSize() - i, (Integer j, DetailsTicket ticket2) ->
-			{
-				if (j != 0)
-					if (ii != 0)
-						return new String[]
-						{
-							"LDA\t" + SNESRegisters.RDMPYH, 			// Load previous high byte as carryover
-							"TAX",										// Store in X
-							sourceX.getLDA(ii, ticket2),				// Load X-the-variable
-							"STA\t" + SNESRegisters.WRMPYA,				// Place in reg
-							sourceY.getLDA(ii + j, ticket2),			// Load Y-the-variable
-							"STA\t" + SNESRegisters.WRMPYB, 			// Place in reg, begin 8-cycle calc
-							"TXA",										// 2 cycles - 2
-							destSource.getLDA(ii + j, ticket2),			// >=5 cycles - 7, add previous value of result
-							"ADC\t" + SNESRegisters.RDMPYL,				// 5 cycles - 12, get result and add carryover
-							destSource.getSTA(ii + j, ticket2), 		// Store result
-						};
-					else
-						return new String[]
-						{
-							"LDA\t" + SNESRegisters.RDMPYH, 			// Load previous high byte as carryover
-							"TAX",										// Store in X
-							sourceX.getLDA(ii, ticket2),				// Load X-the-variable
-							"STA\t" + SNESRegisters.WRMPYA,				// Place in reg
-							sourceY.getLDA(ii + j, ticket2),			// Load Y-the-variable
-							"STA\t" + SNESRegisters.WRMPYB, 			// Place in reg, begin 8-cycle calc
-							"TXA",										// 2 cycles - 2
-							"NOP",										// 2 cycles - 4
-							"LDA\t" + SNESRegisters.RDMPYL,				// 5 cycles - 9, get result and add carryover
-							destSource.getSTA(ii + j, ticket2),			// Store result
-						};
-				else
-					if (ii != 0)
-						return new String[]
-						{
-							sourceX.getLDA(ii, ticket2),				// Load X-the-variable
-							"STA\t" + SNESRegisters.WRMPYA,				// Place in reg
-							sourceY.getLDA(ii + j, ticket2),	// Load Y-the-variable
-							"STA\t" + SNESRegisters.WRMPYB, 			// Place in reg, begin 8-cycle calc
-							"CLC",										// 2 cycles - 2
-							destSource.getLDA(ii + j, ticket2),			// >=5 cycles - 7, add previous value of result
-							"ADC\t" + SNESRegisters.RDMPYL,				// 5 cycles - 12, get result
-							destSource.getSTA(ii + j, ticket2),// Store result
-						};
-					else	// Last byte
-						return new String[]
-						{
-							sourceX.getLDA(ii, ticket2),		// Load X-the-variable
-							"STA\t" + SNESRegisters.WRMPYA,		// Place in reg
-							sourceY.getLDA(ii + j, ticket2),	// Load Y-the-variable
-							"STA\t" + SNESRegisters.WRMPYB, 	// Place in reg, begin 8-cycle calc
-							"NOP",								// 2 cycles - 2
-							"NOP",								// 2 cycles - 4
-							"LDA\t" + SNESRegisters.RDMPYL,		// 5 cycles - 9, get result
-							destSource.getSTA(ii + j, ticket2),	// Store result
-							"LDA\t" + SNESRegisters.RDMPYH,		// Get result
-							destSource.getSTA(ii + j + 1, ticket2),	// Store result
-						};
-			}, false, false, innerTicket);
+			super(sourceX.getSize() - 1, sourceX.getSize() - 1, false);
+			this.offset = offset;
+			this.destSource = destSource;
+			this.sourceX = sourceX;
+			this.sourceY = sourceY;
 		}
-		return assembly;
+
+		@Override
+		protected AssemblyStatePair getAssemblyAndState(ProgramState state, int i) throws Exception
+		{
+			AssemblyStatePair tmpPair;
+			String assembly = "";
+			if (i != 0)
+			{
+				if (offset != 0)
+				{
+					assembly += state.getWhitespace() + "LDA\t" + SNESRegisters.RDMPYH + "\n";	// Load previous high byte as carryover
+					assembly += state.getWhitespace() + "TAX\n";								// Store in X
+					tmpPair = sourceX.getLDA(state, offset);									// Load X-the-variable
+					assembly += tmpPair.assembly;
+					state = tmpPair.state;
+					assembly += state.getWhitespace() + "STA\t" + SNESRegisters.WRMPYA + "\n";	// Place in reg
+					tmpPair = sourceY.getLDA(state, offset + i);								// Load Y-the-variable
+					assembly += tmpPair.assembly;
+					state = tmpPair.state;
+					assembly += state.getWhitespace() + "STA\t" + SNESRegisters.WRMPYB + "\n";	// Place in reg, begin 8-cycle calc
+					assembly += state.getWhitespace() + "TXA\n";								// 2 cycles - 2
+					tmpPair = destSource.getLDA(state, offset + i);								// >=5 cycles - 7, add previous value of result
+					assembly += tmpPair.assembly;
+					state = tmpPair.state;
+					assembly += state.getWhitespace() + "ADC\t" + SNESRegisters.RDMPYL + "\n";	// 5 cycles - 12, get result and add carryover
+					tmpPair = destSource.getSTA(state, offset + i); 							// Store result
+					assembly += tmpPair.assembly;
+					state = tmpPair.state;
+				}
+				else
+				{
+					assembly += state.getWhitespace() + "LDA\t" + SNESRegisters.RDMPYH + "\n";	// Load previous high byte as carryover
+					assembly += state.getWhitespace() + "TAX\n";								// Store in X
+					tmpPair = sourceX.getLDA(state, offset);									// Load X-the-variable
+					assembly += tmpPair.assembly;
+					state = tmpPair.state;
+					assembly += state.getWhitespace() + "STA\t" + SNESRegisters.WRMPYA + "\n";	// Place in reg
+					tmpPair = sourceY.getLDA(state, offset + i);								// Load Y-the-variable
+					assembly += tmpPair.assembly;
+					state = tmpPair.state;
+					assembly += state.getWhitespace() + "STA\t" + SNESRegisters.WRMPYB + "\n";	// Place in reg, begin 8-cycle calc
+					assembly += state.getWhitespace() + "TXA\n";								// 2 cycles - 2
+					assembly += state.getWhitespace() + "NOP\n";								// 2 cycles - 4
+					assembly += state.getWhitespace() + "LDA\t" + SNESRegisters.RDMPYL + "\n";	// 5 cycles - 9, get result and add carryover
+					tmpPair = destSource.getSTA(state, offset + i);								// Store result
+					assembly += tmpPair.assembly;
+					state = tmpPair.state;
+				}
+			}
+			else
+			{
+				if (offset != 0)
+				{
+					assembly += state.getWhitespace() + "LDA\t" + SNESRegisters.RDMPYH + "\n";	// Load previous high byte as carryover
+					tmpPair = sourceX.getLDA(state, offset);									// Load X-the-variable
+					assembly += tmpPair.assembly;
+					state = tmpPair.state;
+					assembly += state.getWhitespace() + "STA\t" + SNESRegisters.WRMPYA + "\n";	// Place in reg
+					tmpPair = sourceY.getLDA(state, offset + i);								// Load Y-the-variable
+					assembly += tmpPair.assembly;
+					state = tmpPair.state;
+					assembly += state.getWhitespace() + "STA\t" + SNESRegisters.WRMPYB + "\n";	// Place in reg, begin 8-cycle calc
+					assembly += state.getWhitespace() + "CLC\n";								// 2 cycles - 2
+					tmpPair = destSource.getLDA(state, offset + i);								// >=5 cycles - 7, add previous value of result
+					assembly += tmpPair.assembly;
+					state = tmpPair.state;
+					assembly += state.getWhitespace() + "ADC\t" + SNESRegisters.RDMPYL + "\n";	// 5 cycles - 12, get result and add carryover
+					tmpPair = destSource.getSTA(state, offset + i); 							// Store result
+					assembly += tmpPair.assembly;
+					state = tmpPair.state;
+				}
+				else
+				{
+					assembly += state.getWhitespace() + "LDA\t" + SNESRegisters.RDMPYH + "\n";	// Load previous high byte as carryover
+					tmpPair = sourceX.getLDA(state, offset);									// Load X-the-variable
+					assembly += tmpPair.assembly;
+					state = tmpPair.state;
+					assembly += state.getWhitespace() + "STA\t" + SNESRegisters.WRMPYA + "\n";	// Place in reg
+					tmpPair = sourceY.getLDA(state, offset + i);								// Load Y-the-variable
+					assembly += tmpPair.assembly;
+					state = tmpPair.state;
+					assembly += state.getWhitespace() + "STA\t" + SNESRegisters.WRMPYB + "\n";	// Place in reg, begin 8-cycle calc
+					assembly += state.getWhitespace() + "NOP\n";								// 2 cycles - 2
+					assembly += state.getWhitespace() + "NOP\n";								// 2 cycles - 4
+					assembly += state.getWhitespace() + "LDA\t" + SNESRegisters.RDMPYL + "\n";	// 5 cycles - 9, get result and add carryover
+					tmpPair = destSource.getSTA(state, offset + i); 							// Store result
+					assembly += tmpPair.assembly;
+					state = tmpPair.state;
+					assembly += state.getWhitespace() + "LDA\t" + SNESRegisters.RDMPYH + "\n";	// 5 cycles - 9, get result and add carryover
+					tmpPair = destSource.getSTA(state, offset + i); 							// Store result
+					assembly += tmpPair.assembly;
+					state = tmpPair.state;
+				}
+			}
+			return new AssemblyStatePair(assembly, state);
+		}
+	}
+	
+	private OperandSource sourceX, sourceY;
+	
+	public Multiplier(OperandSource sourceX, OperandSource sourceY)
+	{
+		this.sourceX = sourceX;
+		this.sourceY = sourceY;
+	}
+
+	@Override
+	public AssemblyStatePair getAssemblyAndState(ProgramState state) throws Exception {
+		MutableAssemblyStatePair pair = new MutableAssemblyStatePair("", state);
+
+		OperandSource destSource = pair.state.destSource();
+		for (int i = 0; i < sourceX.getSize(); ++i)
+			new MultiplierOperator(i, destSource, sourceX, sourceY).apply(pair);
+		return pair.getImmutable();
 	}
 
 }

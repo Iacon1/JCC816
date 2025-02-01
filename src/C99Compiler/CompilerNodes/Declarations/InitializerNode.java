@@ -19,14 +19,15 @@ import C99Compiler.CompilerNodes.Definitions.Type;
 import C99Compiler.CompilerNodes.Expressions.AssignmentExpressionNode;
 import C99Compiler.CompilerNodes.Expressions.BaseExpressionNode;
 import C99Compiler.CompilerNodes.Expressions.ConstantExpressionNode;
+import C99Compiler.CompilerNodes.Interfaces.Assemblable;
 import C99Compiler.CompilerNodes.Interfaces.AssemblableNode;
 import C99Compiler.CompilerNodes.Interfaces.SequencePointNode;
 import C99Compiler.CompilerNodes.Interfaces.TypedNode;
 import C99Compiler.CompilerNodes.LValues.LValueNode;
 import C99Compiler.CompilerNodes.LValues.VariableNode;
 import C99Compiler.Exceptions.ConstraintException;
-import C99Compiler.Utils.AssemblyUtils;
-import C99Compiler.Utils.AssemblyUtils.DetailsTicket;
+import C99Compiler.Utils.ProgramState;
+import C99Compiler.Utils.AssemblyUtils.ByteCopier;
 import C99Compiler.Utils.OperandSources.ConstantSource;
 import Grammar.C99.C99Parser.DesignationContext;
 import Grammar.C99.C99Parser.DesignatorContext;
@@ -39,13 +40,13 @@ public class InitializerNode extends InterpretingNode<InitializerNode, Initializ
 	private Map<String, InitializerNode> structInitializers;
 	
 	private BaseExpressionNode<?> expr;
-	private List<String> sequenceQueue;
+	private List<Assemblable> assemblableQueue;
 	
 	public InitializerNode(ComponentNode<?> parent, LValueNode<?> LValue)
 	{
 		super(parent);
 		expr = null;
-		sequenceQueue = new LinkedList<String>();
+		assemblableQueue = new LinkedList<Assemblable>();
 		if (LValue.getType().isArray())
 		{
 			arrayInitializers = new LinkedHashMap<Integer, InitializerNode>();
@@ -106,9 +107,20 @@ public class InitializerNode extends InterpretingNode<InitializerNode, Initializ
 	}
 	
 	@Override public boolean isSequencePoint() {return true;}
-	@Override public void registerSequence(String assembly) {sequenceQueue.add(assembly);}
-	@Override public void clearSequence() {sequenceQueue.clear();}
-	@Override public String getAccumulatedSequences() {String assembly = ""; for (String queued : sequenceQueue) assembly += queued; return assembly;}
+	@Override public void registerAssemblable(Assemblable assemblable) {assemblableQueue.add(assemblable);}
+	@Override public void clearAssemblables() {assemblableQueue.clear();}
+	@Override public AssemblyStatePair getRegisteredAssemblyAndState(ProgramState state) throws Exception
+	{
+		String assembly = "";
+		for (Assemblable queued : assemblableQueue)
+		{
+			AssemblyStatePair pair = queued.getAssemblyAndState(state);
+			assembly += pair.assembly;
+			state = pair.state;
+		}
+		
+		return new AssemblyStatePair(assembly, state);
+	}
 	
 	@Override
 	public InitializerNode interpret(InitializerContext node) throws Exception
@@ -117,7 +129,7 @@ public class InitializerNode extends InterpretingNode<InitializerNode, Initializ
 		if (node.children.size() == 1) // Can't be an initializer, which would at least have brackets
 		{
 			expr = new AssignmentExpressionNode(this).interpret(node.assignment_expression());
-			if (expr.getType().isArray() && !expr.getType().isIncomplete()) // Expression is fixed-size array
+			if (LValue.getType().isArray() && expr.getType().isArray() && !expr.getType().isIncomplete()) // Expression is fixed-size array
 			{
 				ArrayType arrayType = (ArrayType) LValue.getType();
 				arrayType.setLength(((ArrayType) expr.getType()).getLength());
@@ -180,9 +192,9 @@ public class InitializerNode extends InterpretingNode<InitializerNode, Initializ
 	}
 	
 	@Override
-	public boolean canCall(FunctionDefinitionNode function)
+	public boolean canCall(ProgramState state, FunctionDefinitionNode function)
 	{
-		return expr != null && expr.canCall(function);
+		return expr != null && expr.canCall(state, function);
 	}
 	
 	@Override
@@ -197,114 +209,144 @@ public class InitializerNode extends InterpretingNode<InitializerNode, Initializ
 	}
 	
 	@Override
-	public boolean hasAssembly()
+	public boolean hasAssembly(ProgramState state)
 	{
 		return !LValue.getType().isIncomplete();
 	}
 
 	@Override
-	public boolean hasPropValue()
+	public boolean hasPropValue(ProgramState state)
 	{
-		if (expr != null) return expr.hasPropValue();
+		if (expr != null) return expr.hasPropValue(state);
 		else if (LValue.getType().isIncomplete()) return false;
 		else if (arrayInitializers != null) // Array
 		{
 			for (InitializerNode initializer : arrayInitializers.values())
-				if (!initializer.hasPropValue()) return false;
+				if (!initializer.hasPropValue(state)) return false;
 			return true;
 		}
 		else if (structInitializers != null) // Struct
 		{
 			for (InitializerNode initializer : structInitializers.values())
-				if (!initializer.hasPropValue()) return false;
+				if (!initializer.hasPropValue(state)) return false;
 			return true;
 		}
 		else return true;
 	}
 
 	@Override
-	public Object getPropValue()
+	public Object getPropValue(ProgramState state)
 	{
-		if (expr != null) return expr.getPropValue();
+		if (expr != null) return expr.getPropValue(state);
 		else if (arrayInitializers != null) // Array
 		{
 			List<Object> propVals = new ArrayList<Object>();
 			for (InitializerNode initializer : arrayInitializers.values())
-				propVals.add(initializer.getPropValue());
+				propVals.add(initializer.getPropValue(state));
 			return propVals.toArray();
 		}
 		else if (structInitializers != null) // Struct
 		{
 			List<Object> propVals = new ArrayList<Object>();
 			for (InitializerNode initializer : structInitializers.values())
-				propVals.add(initializer.getPropValue());
+				propVals.add(initializer.getPropValue(state));
 			return propVals.toArray();
 		}
 		else return Long.valueOf(0);
 	}
 
 	@Override
-	public String getAssembly(int leadingWhitespace) throws Exception
+	public AssemblyStatePair getAssemblyAndState(ProgramState state) throws Exception
 	{
-		clearSequence();
+		clearAssemblables();
+		state = state.setDestSource(LValue.getSource());
 		if (!getScope().isRoot() || !isROM()) // Normal RAM one
 		{
 			if (expr != null)
 			{
-				if (expr.hasAssembly())
-					return expr.getAssembly(leadingWhitespace, LValue.getSource()) + getAccumulatedSequences();
-				else if (expr.hasPropValue())
-					return AssemblyUtils.byteCopier(
-							AssemblyUtils.getWhitespace(leadingWhitespace),
-							LValue.getSize(),
-							LValue.getSource(),
-							new ConstantSource(expr.getPropValue(), LValue.getSize())) + getAccumulatedSequences();
-				else if (expr.hasLValue())
-					return AssemblyUtils.byteCopier(
-							AssemblyUtils.getWhitespace(leadingWhitespace),
-							LValue.getSize(),
-							LValue.getSource(),
-							expr.getLValue().castTo(getType()).getSource()) + getAccumulatedSequences();
-				else return "";
+				AssemblyStatePair pair;
+				String assembly = "";
+
+				if (expr.hasAssembly(state))
+				{
+					pair = expr.getAssemblyAndState(state);
+					assembly += pair.assembly;
+					state = pair.state;
+				}
+				else
+				{
+					ByteCopier copier;
+					if (expr.hasPropValue(state))
+					{
+						copier = new ByteCopier(LValue.getSize(), LValue.getSource(), new ConstantSource(expr.getPropValue(state), LValue.getSize()));
+						state = state.setPossibleValue(LValue, expr.getPropValue(state));
+					}
+					else if (expr.hasLValue())
+						copier = new ByteCopier(LValue.getSize(), LValue.getSource(), expr.getLValue().castTo(getType()).getSource());
+					else return new AssemblyStatePair("", state);
+					
+					pair = copier.getAssemblyAndState(state);
+					assembly += pair.assembly;
+					state = pair.state;
+				}
+
+				pair = getRegisteredAssemblyAndState(state);
+				assembly += pair.assembly;
+				state = pair.state;
+				return new AssemblyStatePair(assembly, state);
 			}	
 			else if (arrayInitializers != null) // Array
 			{
 				String assembly = "";
 				for (InitializerNode initializer : arrayInitializers.values())
-					assembly += initializer.getAssembly(leadingWhitespace);
-				return assembly;
+				{
+					assembly += initializer.getAssembly(state);
+					state = initializer.getStateAfter(state);
+				}
+				return new AssemblyStatePair(assembly, state);
 			}
 			else if (structInitializers != null) // Struct
 			{
 				String assembly = "";
 				for (InitializerNode initializer : structInitializers.values())
-					assembly += initializer.getAssembly(leadingWhitespace);
-				return assembly;
+				{
+					assembly += initializer.getAssembly(state);
+					state = initializer.getStateAfter(state);
+				}
+				return new AssemblyStatePair(assembly, state);
 			}
 			else if (LValue.getType().isStatic() && CompConfig.initializeStatics) // Statics are initialized always when compliant
-				return AssemblyUtils.byteCopier(
-					AssemblyUtils.getWhitespace(leadingWhitespace),
-					LValue.getSize(),
-					LValue.getSource(),
-					new ConstantSource(0, LValue.getSize())) + getAccumulatedSequences();
-			else return "";
+			{
+				AssemblyStatePair pair;
+				String assembly = "";
+				ByteCopier copier = new ByteCopier(LValue.getSize(), LValue.getSource(), new ConstantSource(0, LValue.getSize()));
+				pair = copier.getAssemblyAndState(state);
+				assembly += pair.assembly;
+				state = pair.state;
+				
+				pair = getRegisteredAssemblyAndState(state);
+				assembly += pair.assembly;
+				state = pair.state;
+				return new AssemblyStatePair(assembly, state);
+			}
+			else return new AssemblyStatePair("", state);
 		}
 		else // ROM one
 		{
-			String whitespace = AssemblyUtils.getWhitespace(leadingWhitespace);
-			ConstantSource source = new ConstantSource(getPropValue(), LValue.getSize());
+			String whitespace = state.getWhitespace();
+			ConstantSource source = new ConstantSource(getPropValue(state), LValue.getSize());
 			String assembly = whitespace + ((VariableNode) LValue).getFullName() + ":";
-			whitespace = AssemblyUtils.getWhitespace(leadingWhitespace + CompConfig.indentSize);
+			whitespace = state.indent().getWhitespace();
 			for (int i = 0; i < source.getSize(); ++i)
 			{
 				if (i % CompConfig.bytesPerDataLine == 0) // New line needed
 					assembly += "\n" + whitespace + ".byte\t";
-				assembly += source.getBase(i, new DetailsTicket()).replace("#", "");
+				assembly += source.getBase(state, i).replace("#", "");
 				if (i != source.getSize() - 1 && (i + 1) % CompConfig.bytesPerDataLine != 0)
 					assembly += ", "; // There will be another and on the same line
 			}
 			assembly += "\n";
-			return assembly;
+			return new AssemblyStatePair(assembly, state);
 		}
 	}
 

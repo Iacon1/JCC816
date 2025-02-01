@@ -154,7 +154,7 @@ public class DirectDeclaratorNode extends InterpretingNode<DirectDeclaratorNode,
 			infoList.addAll(subDec.getInfo());
 		if (info != null)
 		{
-			int i = 0;
+/*			int i = 0;
 			// Arrays get added in reverse order for some reason
 			for (i = 0; i < infoList.size(); ++i)
 				if (infoList.get(i).type != DeclaratorType.array)
@@ -164,7 +164,8 @@ public class DirectDeclaratorNode extends InterpretingNode<DirectDeclaratorNode,
 				infoList.add(info);
 			else
 				infoList.add(i, info);
-			
+*/
+			infoList.add(0, info);
 		}
 		
 		return infoList;

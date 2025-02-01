@@ -8,7 +8,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
@@ -33,7 +32,7 @@ public final class FileIO
 	private static String fixFilepath(String filepath, boolean forResource) // If for resource, use /. If for file, use \.
 	{
 		if (!forResource)
-			return filepath.replace("/", "\\");
+			return filepath;//filepath.replace("\\", "/");
 		else
 			return filepath.replace("\\", "/");
 	}

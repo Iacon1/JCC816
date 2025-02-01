@@ -2,8 +2,8 @@
 //
 package C99Compiler.Utils.OperandSources;
 
-import C99Compiler.Utils.AssemblyUtils.DetailsTicket;
 import C99Compiler.Utils.CompUtils;
+import C99Compiler.Utils.ProgramState;
 import C99Compiler.Utils.PropPointer;
 
 public class ConstantSource extends ConstantByteSource
@@ -82,9 +82,9 @@ public class ConstantSource extends ConstantByteSource
 		return new ConstantSource(constant, offset, size);
 	}
 	
-	public String getBase(int i, DetailsTicket ticket)
+	public String getBase(ProgramState state, int i)
 	{
-		if (pointer != null) return pointer.apply(i, ticket);
-		else return super.getBase(i, ticket);
+		if (pointer != null) return pointer.apply(state, i);
+		else return super.getBase(state, i);
 	}
 }

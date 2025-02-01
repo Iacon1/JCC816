@@ -10,26 +10,19 @@ import java.util.List;
 import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.FunctionDefinitionNode;
 import C99Compiler.CompilerNodes.Definitions.Type;
-import C99Compiler.CompilerNodes.Interfaces.SequencePointNode;
 import C99Compiler.CompilerNodes.LValues.LValueNode;
-import C99Compiler.Utils.AssemblyUtils.DetailsTicket;
-import C99Compiler.Utils.ScratchManager;
-import C99Compiler.Utils.OperandSources.OperandSource;
+import C99Compiler.Utils.ProgramState;
 import Grammar.C99.C99Parser.Assignment_expressionContext;
 import Grammar.C99.C99Parser.ExpressionContext;
-import Logging.Logging;
 
-public class ExpressionNode extends BaseExpressionNode<ExpressionContext> implements SequencePointNode
+public class ExpressionNode extends SPBaseExpressionNode<ExpressionContext>
 {
 	private List<BaseExpressionNode<?>> expressions;
-	private List<String> sequenceQueue;
-	private boolean isSP;
-	
+
 	public ExpressionNode(ComponentNode<?> parent)
 	{
 		super(parent);
 		expressions = new LinkedList<BaseExpressionNode<?>>();
-		sequenceQueue = new LinkedList<String>();
 		isSP = false;
 	}
 
@@ -42,18 +35,14 @@ public class ExpressionNode extends BaseExpressionNode<ExpressionContext> implem
 		return this;
 	}
 	
-	@Override public void registerSequence(String assembly) {sequenceQueue.add(assembly);}
-	@Override public void clearSequence() {sequenceQueue.clear();}
-	@Override public String getAccumulatedSequences() {String assembly = ""; for (String queued : sequenceQueue) assembly += queued; return assembly;}
-
 	@Override
 	public Type getType() {return null;}
 	
 	@Override
-	public boolean canCall(FunctionDefinitionNode function)
+	public boolean canCall(ProgramState state, FunctionDefinitionNode function)
 	{
 		for (BaseExpressionNode<?> expression : expressions)
-			if (expression.canCall(function)) return true;
+			if (expression.canCall(state, function)) return true;
 		return false;
 	}
 	
@@ -62,43 +51,28 @@ public class ExpressionNode extends BaseExpressionNode<ExpressionContext> implem
 	@Override
 	public LValueNode<?> getLValue() {return null;}
 	@Override
-	public boolean hasPropValue() {return false;}
+	public boolean hasPropValue(ProgramState state) {return false;}
 	@Override
-	public Object getPropValue() {return null;}
+	public Object getPropValue(ProgramState state) {return null;}
 	@Override
-	public boolean hasAssembly()
+	public boolean hasAssembly(ProgramState state)
 	{
 		for (BaseExpressionNode<?> expression : expressions)
-			if (expression.hasAssembly()) return true;
+			if (expression.hasAssembly(state)) return true;
 		return false;
 	}
 	@Override
-	public String getAssembly(int leadingWhitespace, OperandSource destSource, ScratchManager scratchManager, DetailsTicket ticket) throws Exception
+	public AssemblyStatePair getAssemblyAndState(ProgramState state) throws Exception
 	{
-		String assembly = "";
-		clearSequence();
-		assembly += expressions.get(0).getAssembly(leadingWhitespace,  scratchManager, ticket);
-		assembly += getAccumulatedSequences();
-		
-		for (BaseExpressionNode<?> expression : expressions.subList(1, expressions.size()))
+		AssemblyStatePair pair = new AssemblyStatePair("", state);
+
+		for (BaseExpressionNode<?> expression : expressions.subList(0, expressions.size()))
 		{
-			clearSequence();
-			assembly += expression.getAssembly(leadingWhitespace, scratchManager, ticket);
-			assembly += getAccumulatedSequences();
+			clearAssemblables();
+			pair = expression.apply(pair);
+			pair = applyRegistered(pair);
 		}
 		
-		return assembly;
+		return pair;
 	}
-	@Override
-	public String getAssembly(int leadingWhitespace) throws Exception
-	{
-		String assembly = "";
-		for (BaseExpressionNode<?> expression : expressions)
-		{
-			clearSequence();
-			assembly += expression.getAssembly(leadingWhitespace);
-			assembly += getAccumulatedSequences();
-		}
-		return assembly;
-	}	
 }

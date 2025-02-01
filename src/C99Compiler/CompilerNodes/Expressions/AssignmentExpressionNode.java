@@ -7,13 +7,11 @@ import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.Definitions.Type;
 import C99Compiler.CompilerNodes.Definitions.Type.CastContext;
 import C99Compiler.CompilerNodes.LValues.LValueNode;
-import C99Compiler.CompilerNodes.LValues.VariableNode;
 import C99Compiler.Exceptions.ConstraintException;
-import C99Compiler.Exceptions.TypeMismatchException;
-import C99Compiler.Utils.AssemblyUtils;
-import C99Compiler.Utils.AssemblyUtils.DetailsTicket;
-import C99Compiler.Utils.ScratchManager;
-import C99Compiler.Utils.ScratchManager.ScratchSource;
+import C99Compiler.Exceptions.ScratchOverflowException;
+import C99Compiler.Utils.ProgramState;
+import C99Compiler.Utils.ProgramState.ScratchSource;
+import C99Compiler.Utils.AssemblyUtils.ByteCopier;
 import C99Compiler.Utils.OperandSources.ConstantSource;
 import C99Compiler.Utils.OperandSources.OperandSource;
 import Grammar.C99.C99Parser.Assignment_expressionContext;
@@ -116,80 +114,78 @@ public class AssignmentExpressionNode extends BinaryExpressionNode
 	@Override public CastContext getCastContext() {return CastContext.assignment;}
 	@Override public Type getType() {return x.getType();}
 	@Override
-	public Object getPropValue() {return null;} // Should never happen
+	public Object getPropValue(ProgramState state) {return null;}
 	
-	public static void equateLValue(LValueNode<?> x, BaseExpressionNode<?> y) // Binds tracking data from y to x for optimization purposes
+	@Override
+	public boolean hasAssembly(ProgramState state)
 	{
-		if (x.getScope().isRoot()); // Don't do for globals
-		else if (y.getEnclosingIteration() != null) // Skip if in a loop
-			x.clearPossibleValues();
-		else if (y.hasPropValue())
-			x.setOnlyPossibleValue(y.getPropValue());
-		else if (ConditionalExpressionNode.class.equals(y.getClass()))
+		if (x.hasPropValue(state) && y.hasPropValue(state))
 		{
-			ConditionalExpressionNode condExp = (ConditionalExpressionNode) y;
-			if (condExp.x.hasPropValue() && condExp.y.hasPropValue())
-			{
-				x.setOnlyPossibleValue(condExp.x.getPropValue());
-				x.addPossibleValue(condExp.y.getPropValue());
-			}
+			if (x.getPropValue(state).equals(y.getPropValue(state)))
+				return false;
 		}
-		else if (y.hasLValue() && y.getLValue().hasPossibleValues())
-			x.setPossibleValues(y.getLValue().getPossibleValues());
-		else // We simply can't know what y might be
-			x.clearPossibleValues();
+		return true;
 	}
 	
 	@Override
-	protected String getAssembly(String whitespace, OperandSource destSource, OperandSource sourceX, OperandSource sourceY, ScratchManager scratchManager, DetailsTicket ticket) throws Exception
-	{throw new UnsupportedOperationException();} // This is never directly called.
+	protected AssemblyStatePair getAssemblyAndState(ProgramState state, OperandSource sourceX, OperandSource sourceY) throws Exception {return null;}
 	@Override
-	public String getAssembly(int leadingWhitespace, OperandSource destSource, ScratchManager scratchManager, DetailsTicket ticket) throws Exception
+	public AssemblyStatePair getAssemblyAndState(ProgramState state) throws Exception
 	{
-		String whitespace = AssemblyUtils.getWhitespace(leadingWhitespace);
+		AssemblyStatePair tmpPair;
 		final OperandSource sourceY;
 		String assembly = "";
 		
-		if (x.hasAssembly()) assembly += x.getAssembly(leadingWhitespace, scratchManager, ticket);
+		if (x.hasAssembly(state))
+		{
+			tmpPair = x.getAssemblyAndState(state);
+			assembly += tmpPair.assembly;
+			state = tmpPair.state;
+		}
 		
 //		if (!y.getType().canCastTo(x.getType()))
 //			throw new TypeMismatchException(y.getType(), x.getType());
-		if (y.hasAssembly() && !x.getType().isTwice())
+		state = state.setDestSource(x.getLValue().getSource());
+		if (y.hasAssembly(state) && !x.getType().isTwice())
 		{
-			assembly += y.getAssembly(leadingWhitespace, x.getLValue().getSource(), scratchManager, ticket);
-			if (!y.hasLValue()) sourceY = x.getLValue().getSource();
-			else sourceY = y.getLValue().castTo(x.getType()).getSource();
+			sourceY = x.getLValue().getSource();
+			state = state.setDestSource(sourceY);
+			tmpPair = y.getAssemblyAndState(state);
+			assembly += tmpPair.assembly;
+			state = tmpPair.state;
 		}
-		else if (y.hasAssembly())
+		else if (y.hasAssembly(state))
 		{
-			ScratchSource scratchX = scratchManager.reserveScratchBlock(x.getSize());
-			assembly += y.getAssembly(leadingWhitespace, scratchX, scratchManager, ticket);
+			state = state.reserveScratchBlock(x.getSize());
+			ScratchSource scratchX = state.lastScratchSource();
+			tmpPair = y.getAssemblyAndState(state);
+			assembly += tmpPair.assembly;
+			state = tmpPair.state;
+			state = y.getStateAfter(state);
 			if (!y.hasLValue()) sourceY = scratchX;
 			else sourceY = y.getLValue().castTo(x.getType()).getSource();
-			assembly += AssemblyUtils.byteCopier(whitespace, x.getLValue().getSize(), x.getLValue().getSource(), scratchX, ticket);
+			ByteCopier copier = new ByteCopier(x.getLValue().getSize(), x.getLValue().getSource(), sourceY);
+			tmpPair = copier.getAssemblyAndState(state);
+			assembly += tmpPair.assembly;
+			state = tmpPair.state;
 		}
 		else
 		{
-			if (y.hasPropValue())
-				sourceY = new ConstantSource(y.getPropValue(), x.getType().getSize());
+			if (y.hasPropValue(state))
+				sourceY = new ConstantSource(y.getPropValue(state), x.getType().getSize());
 			else if (y.hasLValue())
 				sourceY = y.getLValue().castTo(x.getType()).getSource();
 			else sourceY = null;
-			assembly += AssemblyUtils.byteCopier(whitespace, x.getLValue().getSize(), x.getLValue().getSource(), sourceY, ticket);
+			state = y.getStateAfter(state);
+			ByteCopier copier = new ByteCopier(x.getLValue().getSize(), x.getLValue().getSource(), sourceY);
+			tmpPair = copier.getAssemblyAndState(state);
+			assembly += tmpPair.assembly;
+			state = tmpPair.state;
 		}
 		
-		if (destSource != null && !destSource.equals(x.getLValue().getSource()))
-			assembly += AssemblyUtils.byteCopier(whitespace, x.getLValue().getSize(), destSource, sourceY, ticket);
-		
-		equateLValue(x.getLValue(), y);
-		
-		ScratchManager.releasePointer(destSource); // A copy of the destination, if it's a pointer, has gone stale
-		return assembly;
+		if (y.hasPropValue(state))
+			state = state.setPossibleValue(x.getLValue(), y.getPropValue(state));
+
+		return new AssemblyStatePair(assembly, state);
 	}
-	@Override
-	protected String getAssembly(int leadingWhitespace, ScratchManager scratchManager, DetailsTicket ticket) throws Exception
-	{
-		return getAssembly(leadingWhitespace, null, scratchManager, ticket);
-	}
-	
 }

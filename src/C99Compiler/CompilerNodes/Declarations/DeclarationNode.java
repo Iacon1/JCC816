@@ -5,24 +5,19 @@ package C99Compiler.CompilerNodes.Declarations;
 import java.util.ArrayList;
 import java.util.List;
 
-import C99Compiler.CompilerNodes.Expressions.AssignmentExpressionNode;
-import C99Compiler.CompilerNodes.Expressions.BaseExpressionNode;
 import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.FunctionDefinitionNode;
 import C99Compiler.CompilerNodes.InterpretingNode;
 import C99Compiler.CompilerNodes.Definitions.Type;
-import C99Compiler.CompilerNodes.Interfaces.AssemblableNode;
+import C99Compiler.CompilerNodes.Interfaces.UnvaluedAssemblableNode;
 import C99Compiler.CompilerNodes.LValues.VariableNode;
 import C99Compiler.Exceptions.CompilerMultipleDefinitionException;
 import C99Compiler.Exceptions.ConstraintException;
-import C99Compiler.Utils.AssemblyUtils;
-import C99Compiler.Utils.AssemblyUtils.DetailsTicket;
-import C99Compiler.Utils.OperandSources.ConstantSource;
-import C99Compiler.Utils.OperandSources.OperandSource;
+import C99Compiler.Utils.ProgramState;
 import Grammar.C99.C99Parser.DeclarationContext;
-import Grammar.C99.C99Parser.Assignment_expressionContext;
 import Grammar.C99.C99Parser.Init_declaratorContext;
-public class DeclarationNode extends InterpretingNode<DeclarationNode, DeclarationContext> implements AssemblableNode
+
+public class DeclarationNode extends InterpretingNode<DeclarationNode, DeclarationContext> implements UnvaluedAssemblableNode
 {
 	private List<VariableNode> variables;
 	private List<InitializerNode> initializers;
@@ -85,29 +80,36 @@ public class DeclarationNode extends InterpretingNode<DeclarationNode, Declarati
 	}
 	
 	@Override
-	public boolean canCall(FunctionDefinitionNode function)
+	public boolean canCall(ProgramState state, FunctionDefinitionNode function)
 	{
 		for (InitializerNode initializer : initializers) if (
 				initializer != null &&
-				initializer.hasAssembly() &&
-				initializer.canCall(function)) return true;
+				initializer.hasAssembly(state) &&
+				initializer.canCall(state, function)) return true;
 		return false;
 	}
 	@Override
-	public boolean hasAssembly()
+	public boolean hasAssembly(ProgramState state)
 	{
 		for (InitializerNode initializer : initializers) if (
 				initializer != null &&
-				initializer.hasAssembly()) return true;
+				initializer.hasAssembly(state)) return true;
 		return false;
 	}
+	
 	@Override
-	public String getAssembly(int leadingWhitespace) throws Exception
+	public AssemblyStatePair getAssemblyAndState(ProgramState state) throws Exception
 	{
+		AssemblyStatePair tmpPair;
+		
 		String assembly = "";
 		for (InitializerNode initializer : initializers)
-			if (initializer.hasAssembly()) assembly += initializer.getAssembly(leadingWhitespace);
+		{
+			tmpPair = initializer.getAssemblyAndState(state);
+			assembly += tmpPair.assembly;
+			state = tmpPair.state;
+		}
 				
-		return assembly;
+		return new AssemblyStatePair(assembly, state);
 	}
 }

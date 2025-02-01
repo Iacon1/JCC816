@@ -2,16 +2,13 @@
 //
 package C99Compiler.CompilerNodes.Expressions;
 
-import java.util.LinkedList;
-import java.util.List;
-
 import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.Definitions.Type.CastContext;
-import C99Compiler.CompilerNodes.Interfaces.SequencePointNode;
-import C99Compiler.Utils.AssemblyUtils;
-import C99Compiler.Utils.AssemblyUtils.DetailsTicket;
 import C99Compiler.Utils.CompUtils;
-import C99Compiler.Utils.ScratchManager;
+import C99Compiler.Utils.ProgramState;
+import C99Compiler.Utils.ProgramState.PreserveFlag;
+import C99Compiler.Utils.AssemblyUtils.AssemblyUtils;
+import C99Compiler.Utils.AssemblyUtils.BytewiseOperator;
 import C99Compiler.Utils.OperandSources.OperandSource;
 import Grammar.C99.C99Parser.Land_expressionContext;
 import Grammar.C99.C99Parser.Lor_expressionContext;
@@ -19,6 +16,37 @@ import Grammar.C99.C99Parser.Lor_expressionContext;
 public class LORExpressionNode extends LogicalBinaryExpressionNode
 <Lor_expressionContext, Land_expressionContext, Land_expressionContext, Lor_expressionContext>
 {
+	private static class LOROperator extends BytewiseOperator
+	{
+		private OperandSource sourceX, sourceY;
+		
+		protected LOROperator(int size, OperandSource sourceX, OperandSource sourceY)
+		{
+			super(Math.max(sourceX.getSize(), sourceY.getSize()), Math.min(sourceX.getSize(), sourceY.getSize()), false);
+			this.sourceX = sourceX;
+			this.sourceY = sourceY;
+		}
+
+		@Override
+		protected AssemblyStatePair getAssemblyAndState(ProgramState state, int i) throws Exception
+		{
+			AssemblyStatePair tmpPair;
+			String assembly = "";
+			
+			tmpPair = sourceX.getLDA(state, i);
+			assembly += tmpPair.assembly;
+			state = tmpPair.state;
+			
+			tmpPair = sourceY.getInstruction(state, "ORA", i);
+			assembly += tmpPair.assembly;
+			state = tmpPair.state;
+			
+			assembly += state.getWhitespace() + "BNE\t:+\n";
+			
+			return new AssemblyStatePair(assembly, state);
+		}
+	}
+	
 	public LORExpressionNode(ComponentNode<?> parent) {super(parent);}
 
 	@Override
@@ -36,36 +64,46 @@ public class LORExpressionNode extends LogicalBinaryExpressionNode
 	@Override public CastContext getCastContext() {return CastContext.logical;}
 	
 	@Override
-	public Object getPropValue()
+	public Object getPropValue(ProgramState state)
 	{
-		boolean a = x.getPropBool();
-		boolean b = y.getPropBool();
+		boolean a = x.getPropBool(state);
+		boolean b = y.getPropBool(state);
 		return a || b;
 	}
+	
 	@Override
-	protected String getAssembly(String whitespace, OperandSource destSource, OperandSource sourceX, OperandSource sourceY, ScratchManager scratchManager, DetailsTicket ticket) throws Exception
+	protected AssemblyStatePair getAssemblyAndState(ProgramState state, OperandSource sourceX, OperandSource sourceY) throws Exception
 	{
+		AssemblyStatePair tmpPair;
 		String assembly = "";
-		assembly += ticket.save(whitespace, DetailsTicket.saveA | DetailsTicket.saveX);
+		String whitespace = state.getWhitespace();
+		
+		byte flags = state.getPreserveFlags();
+		assembly += AssemblyUtils.store(state, (byte) (PreserveFlag.A | PreserveFlag.X));
+		state = state.clearPreserveFlags((byte) (PreserveFlag.A | PreserveFlag.X));
+
 		assembly += whitespace + CompUtils.setXY8 + "\n";
 		if (operator.equals("==")) assembly += whitespace + "LDX\t#$00\n";
 		else if (operator.equals("!=")) assembly += whitespace + "LDX\t#$01\n";
-		DetailsTicket innerTicket = new DetailsTicket(ticket, DetailsTicket.saveX, DetailsTicket.saveA); // All of our uses of A are LDA so it's fine
+		state = state.addPreserveFlags(PreserveFlag.X);
+
 		assembly += whitespace + "LDX\t#$01\n";
-		assembly += AssemblyUtils.bytewiseOperation(whitespace, sourceX.getSize(), (Integer i, DetailsTicket ticket2) ->
-		{
-			return new String[]
-			{
-				sourceX.getLDA(i, ticket2),
-				sourceY.getInstruction("ORA", i, ticket2),
-				"BNE\t:+",
-			};
-		}, ticket);
+		
+		AssemblyStatePair pair = new LOROperator(sourceX.getSize(), sourceX, sourceY).getAssemblyAndState(state);
+		assembly += pair;
+		state = pair.state;
+		
 		assembly += whitespace + "DEX\n";
 		assembly += ":" + whitespace.substring(1) + "TXA\n";
 		assembly += whitespace + CompUtils.setA8 + "\n";
-		assembly += destSource.getSTA(whitespace, 0, innerTicket);
-		assembly += ticket.restore(whitespace, DetailsTicket.saveA | DetailsTicket.saveX);
-		return assembly;
+		
+		tmpPair = state.destSource().getSTA(state, 0);
+		assembly += tmpPair.assembly;
+		state = tmpPair.state;
+		
+		assembly += AssemblyUtils.restore(state, (byte) (PreserveFlag.A | PreserveFlag.X));
+		state = state.setPreserveFlags(flags);
+		
+		return new AssemblyStatePair(assembly, state);
 	}
 }

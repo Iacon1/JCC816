@@ -7,13 +7,8 @@ import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.Definitions.Type;
 import C99Compiler.CompilerNodes.Definitions.Type.CastContext;
 import C99Compiler.CompilerNodes.Dummies.DummyExpressionNode;
-import C99Compiler.CompilerNodes.Dummies.DummyVariableNode;
-import C99Compiler.Utils.AssemblyUtils;
-import C99Compiler.Utils.AssemblyUtils.DetailsTicket;
 import C99Compiler.Utils.CompUtils;
-import C99Compiler.Utils.ScratchManager;
-import C99Compiler.Utils.OperandSources.ConstantSource;
-import C99Compiler.Utils.OperandSources.OperandSource;
+import C99Compiler.Utils.ProgramState;
 import Grammar.C99.C99Parser.Additive_expressionContext;
 import Grammar.C99.C99Parser.Multiplicative_expressionContext;
 import C99Compiler.CompilerNodes.Definitions.PointerType;
@@ -95,31 +90,31 @@ public class AdditiveExpressionNode extends ArithmeticBinaryExpressionNode
 	}	
 	
 	@Override
-	public Object getPropValue()
+	public Object getPropValue(ProgramState state)
 	{
-		if (x.getPropPointer() != null)
+		if (x.getPropPointer(state) != null)
 		{
-			int offset = (int) y.getPropLong();
+			int offset = (int) y.getPropLong(state);
 			
 			switch (operator)
 			{
-			case "+": return x.getPropPointer().addOffset(offset);
-			case "-": return x.getPropPointer().addOffset(-offset);
+			case "+": return x.getPropPointer(state).addOffset(offset);
+			case "-": return x.getPropPointer(state).addOffset(-offset);
 			default: return null;
 			}
 		}
-		else if (y.getPropPointer() != null)
+		else if (y.getPropPointer(state) != null)
 		{
-			int offset = (int) x.getPropLong();
+			int offset = (int) x.getPropLong(state);
 			
 			switch (operator)
 			{
-			case "+": return y.getPropPointer().addOffset(offset);
-			case "-": return y.getPropPointer().addOffset(-offset);
+			case "+": return y.getPropPointer(state).addOffset(offset);
+			case "-": return y.getPropPointer(state).addOffset(-offset);
 			default: return null;
 			}
 		}
-		else return super.getPropValue();
+		else return super.getPropValue(state);
 	}
 
 	@Override

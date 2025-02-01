@@ -2,8 +2,9 @@
 // Address source that doesn't actually move
 package C99Compiler.Utils.OperandSources;
 
-import C99Compiler.Utils.AssemblyUtils.DetailsTicket;
+import C99Compiler.CompilerNodes.Interfaces.Assemblable.AssemblyStatePair;
 import C99Compiler.Utils.CompUtils;
+import C99Compiler.Utils.ProgramState;
 
 public class StationaryAddressSource extends AddressSource
 {
@@ -17,37 +18,55 @@ public class StationaryAddressSource extends AddressSource
 	}
 	
 	@Override
-	public String getLDA(String whitespace, Integer i, DetailsTicket ticket)
+	public AssemblyStatePair getLDA(ProgramState state, Integer i)
 	{
-		if (ticket.is16Bit())
+		AssemblyStatePair tmpPair;
+		String whitespace = state.getWhitespace();
+		if (state.testProcessorFlag(ProgramState.ProcessorFlag.M))
 		{
-			
 			String assembly = whitespace + CompUtils.setA8 + "\n";
-			assembly += getInstruction(whitespace, "LDA", 0, ticket);
+			
+			tmpPair = getInstruction(state, "LDA", 0);
+			assembly += tmpPair.assembly;
+			state = tmpPair.state;
+			
 			assembly += whitespace + "XBA\n";
-			assembly += getInstruction(whitespace, "LDA", 0, ticket);
+			
+			tmpPair = getInstruction(state, "LDA", 0);
+			assembly += tmpPair.assembly;
+			state = tmpPair.state;
+			
 			assembly += whitespace + "XBA\n";
 			assembly += whitespace + CompUtils.setA16 + "\n";
-			return assembly;
+			return new AssemblyStatePair(assembly, state);
 		}
-		else return getInstruction(whitespace, "LDA", 0, ticket);
+		else return getInstruction(state, "LDA", 0);
 	}
 	
 	@Override
-	public String getSTA(String whitespace, Integer i, DetailsTicket ticket)
+	public AssemblyStatePair getSTA(ProgramState state, Integer i)
 	{
-		if (ticket.is16Bit())
+		AssemblyStatePair tmpPair;
+		String whitespace = state.getWhitespace();
+		if (state.testProcessorFlag(ProgramState.ProcessorFlag.M))
 		{
-			
 			String assembly = whitespace + CompUtils.setA8 + "\n";
-			assembly += getInstruction(whitespace, "STA", 0, ticket);
+			
+			tmpPair = getInstruction(state, "STA", 0);
+			assembly += tmpPair.assembly;
+			state = tmpPair.state;
+			
 			assembly += whitespace + "XBA\n";
-			assembly += getInstruction(whitespace, "STA", 0, ticket);
+			
+			tmpPair = getInstruction(state, "STA", 0);
+			assembly += tmpPair.assembly;
+			state = tmpPair.state;
+			
 			assembly += whitespace + "XBA\n";
 			assembly += whitespace + CompUtils.setA16 + "\n";
-			return assembly;
+			return new AssemblyStatePair(assembly, state);
 		}
-		else return getInstruction(whitespace, "STA", 0, ticket);
+		else return getInstruction(state, "STA", 0);
 	}
 	
 	@Override

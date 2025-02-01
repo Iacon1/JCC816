@@ -7,11 +7,9 @@ import java.io.Serializable;
 import java.util.function.BiFunction;
 
 import C99Compiler.CompilerNodes.Interfaces.AddressableNode;
-import C99Compiler.CompilerNodes.Interfaces.NamedNode;
 import C99Compiler.CompilerNodes.Interfaces.TypedNode;
-import C99Compiler.Utils.AssemblyUtils.DetailsTicket;
 
-public class PropPointer<T extends AddressableNode & TypedNode> implements BiFunction<Integer, DetailsTicket, String>, Serializable
+public class PropPointer<T extends AddressableNode & TypedNode> implements BiFunction<ProgramState, Integer, String>, Serializable
 {
 	private T node;
 	private int offset;
@@ -34,13 +32,13 @@ public class PropPointer<T extends AddressableNode & TypedNode> implements BiFun
 		return node;
 	}
 	
-	public String apply(Integer i, DetailsTicket ticket)
+	public String apply(ProgramState state, Integer i)
 	{
 		String address = node.getAddress(offset);
 		if (i == 0)
-			return "#" + (ticket.is16Bit() ? ".loWord(" : ".loByte(") + address + ")";
+			return "#" + (state.testProcessorFlag(ProgramState.ProcessorFlag.M) ? ".loWord(" : ".loByte(") + address + ")";
 		else if (i == 1)
-			return "#" + (ticket.is16Bit() ? ".hiWord(" : ".hiByte(") + address + ")";
+			return "#" + (state.testProcessorFlag(ProgramState.ProcessorFlag.M) ? ".hiWord(" : ".hiByte(") + address + ")";
 		else if (i == 2)
 			return "#.bankByte(" + address + ")";
 		else return "#$00";

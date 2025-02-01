@@ -8,14 +8,12 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 
 import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.FunctionDefinitionNode;
-import C99Compiler.CompilerNodes.Definitions.Type;
 import C99Compiler.CompilerNodes.Definitions.Type.CastContext;
-import C99Compiler.Utils.AssemblyUtils;
-import C99Compiler.Utils.AssemblyUtils.DetailsTicket;
-import C99Compiler.Utils.ScratchManager;
+import C99Compiler.Exceptions.ScratchOverflowException;
+import C99Compiler.Utils.ProgramState;
+import C99Compiler.Utils.ProgramState.ScratchSource;
 import C99Compiler.Utils.OperandSources.ConstantSource;
 import C99Compiler.Utils.OperandSources.OperandSource;
-import C99Compiler.Utils.ScratchManager.ScratchSource;
 
 public abstract class BinaryExpressionNode<
 	C1 extends ParserRuleContext,
@@ -66,66 +64,86 @@ public abstract class BinaryExpressionNode<
 	protected abstract CastContext getCastContext();
 	
 	@Override
-	public boolean canCall(FunctionDefinitionNode function)
+	public boolean canCall(ProgramState state, FunctionDefinitionNode function)
 	{
-		return x.canCall(function) || y.canCall(function);
+		return x.canCall(state, function) || y.canCall(state, function);
 	}
 	
 	@Override
-	public boolean hasPropValue()
+	public boolean hasPropValue(ProgramState state)
 	{
-		return x.hasPropValue() && y.hasPropValue();
+		return x.hasPropValue(state) && y.hasPropValue(state);
 	}
 	
 	@Override
-	public boolean hasAssembly() {return x.hasAssembly() || y.hasAssembly() || !hasPropValue();}
-	protected abstract String getAssembly(String whitespace, OperandSource destSource, OperandSource sourceX, OperandSource sourceY, ScratchManager scratchManager, DetailsTicket ticket) throws Exception;
+	public boolean hasAssembly(ProgramState state) {return x.hasAssembly(state) || y.hasAssembly(state) || !hasPropValue(state);}
+	
+	protected abstract AssemblyStatePair getAssemblyAndState(ProgramState state, OperandSource sourceX, OperandSource sourceY) throws Exception;
+	
 	@Override
-	public String getAssembly(int leadingWhitespace, OperandSource destSource, ScratchManager scratchManager, DetailsTicket ticket) throws Exception
+	public AssemblyStatePair getAssemblyAndState(ProgramState state) throws Exception
 	{
-		String whitespace = AssemblyUtils.getWhitespace(leadingWhitespace);
+		AssemblyStatePair tmpPair; // To store generated pairs
+		String assembly = "";
+		
+		OperandSource destSource = state.destSource();
+		
 		ScratchSource scratchX = null, scratchY = null;
 		final OperandSource sourceX, sourceY;
-		String assembly = "";
-
+		
 		// figure out X
-		if (x.hasAssembly())
+		if (x.hasAssembly(state))
 		{
 			int xSize = Math.min(x.getSize(), lockToDestSize? destSource.getSize() : x.getSize());
-			scratchX = scratchManager.reserveScratchBlock(xSize);
-			assembly += x.getAssembly(leadingWhitespace, scratchX, scratchManager, ticket);
+			state = state.reserveScratchBlock(xSize);
+			scratchX = state.lastScratchSource();
+			state = state.setDestSource(scratchX);
+			
+			tmpPair = x.getAssemblyAndState(state);
+			assembly += tmpPair.assembly;
+			state = tmpPair.state;
+			
 			if (x.hasLValue())
 				sourceX = x.getLValue().getSource();
 			else sourceX = scratchX;
 		}
-		else if (x.hasPropValue())
-			sourceX = new ConstantSource(x.getPropValue(), x.getType().getSize());
+		else if (x.hasPropValue(state))
+			sourceX = new ConstantSource(x.getPropValue(state), x.getType().getSize());
 		else if (x.hasLValue())
 			sourceX = x.getLValue().getSource();
 		else sourceX = null;
 		
 		// figure out Y		
-		if (y.hasAssembly())
+		if (y.hasAssembly(state))
 		{
 			int ySize = Math.min(y.getSize(), lockToDestSize? destSource.getSize() : y.getSize());
-			scratchY = scratchManager.reserveScratchBlock(ySize);
-			assembly += y.getAssembly(leadingWhitespace, scratchY, scratchManager, ticket);
+			state = state.reserveScratchBlock(ySize);
+			scratchY = state.lastScratchSource();
+			state = state.setDestSource(scratchY);
+			
+			tmpPair = x.getAssemblyAndState(state);
+			assembly += tmpPair.assembly;
+			state = tmpPair.state;
+			
 			if (y.hasLValue())
 				sourceY = y.getLValue().getSource();
 			else sourceY = scratchY;
 		}
-		else if (y.hasPropValue())
-			sourceY = new ConstantSource(y.getPropValue(), y.getType().getSize());
+		else if (y.hasPropValue(state))
+			sourceY = new ConstantSource(y.getPropValue(state), y.getType().getSize());
 		else if (y.hasLValue())
 			sourceY = y.getLValue().getSource();
 		else sourceY = null;
+
+		tmpPair = getAssemblyAndState(state, sourceX, sourceY);
+		assembly += tmpPair.assembly;
+		state = tmpPair.state;
 		
+		if (scratchX != null)
+			state = state.releaseScratchBlock(scratchX);
+		if (scratchY != null)
+			state = state.releaseScratchBlock(scratchY);
 		
-		assembly += getAssembly(whitespace, destSource, sourceX, sourceY, scratchManager, ticket);
-		if (scratchX != null) scratchManager.releaseScratchBlock(scratchX);
-		if (scratchY != null) scratchManager.releaseScratchBlock(scratchY);
-		
-		ScratchManager.releasePointer(destSource); // A copy of the destination, if it's a pointer, has gone stale
-		return assembly;
+		return new AssemblyStatePair(assembly, state);
 	}
 }

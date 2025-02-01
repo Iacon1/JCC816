@@ -4,13 +4,23 @@
 package C99Compiler.CompilerNodes.Interfaces;
 
 import C99Compiler.CompilerNodes.FunctionDefinitionNode;
+import C99Compiler.Utils.ProgramState;
 
-public interface AssemblableNode
+public interface AssemblableNode extends Assemblable
 {
-	public default boolean canCall(FunctionDefinitionNode function) {return false;}
-	public default boolean hasPropValue() {return true;}
-	public boolean hasAssembly();
-	public default Object getPropValue() {return null;}
-	public String getAssembly(int leadingWhitespace) throws Exception;
-	public default String getAssembly() throws Exception {return getAssembly(0);}
+	public boolean canCall(ProgramState state, FunctionDefinitionNode function);
+	@Deprecated
+	public default boolean canCall(FunctionDefinitionNode function) {return canCall(new ProgramState(), function);}
+	
+	public boolean hasPropValue(ProgramState state);
+	@Deprecated
+	public default boolean hasPropValue() {return hasPropValue(new ProgramState());}
+	
+	public Object getPropValue(ProgramState state);
+	@Deprecated
+	public default Object getPropValue() {return getPropValue(new ProgramState());}
+	
+	public boolean hasAssembly(ProgramState state);
+	@Deprecated
+	public default boolean hasAssembly() {return hasAssembly(new ProgramState());}
 }

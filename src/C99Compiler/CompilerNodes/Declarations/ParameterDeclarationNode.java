@@ -5,30 +5,16 @@ package C99Compiler.CompilerNodes.Declarations;
 import java.util.ArrayList;
 import java.util.List;
 
-import C99Compiler.CompilerNodes.Expressions.AssignmentExpressionNode;
-import C99Compiler.CompilerNodes.Expressions.BaseExpressionNode;
 import C99Compiler.CompilerNodes.ComponentNode;
-import C99Compiler.CompilerNodes.FunctionDefinitionNode;
 import C99Compiler.CompilerNodes.InterpretingNode;
 import C99Compiler.CompilerNodes.Definitions.Scope;
 import C99Compiler.CompilerNodes.Definitions.Type;
 import C99Compiler.CompilerNodes.Dummies.DummyVariableNode;
-import C99Compiler.CompilerNodes.Interfaces.AssemblableNode;
 import C99Compiler.CompilerNodes.LValues.VariableNode;
 import C99Compiler.Exceptions.CompilerMultipleDefinitionException;
-import C99Compiler.Exceptions.ConstraintException;
-import C99Compiler.Utils.AssemblyUtils;
-import C99Compiler.Utils.AssemblyUtils.DetailsTicket;
-import C99Compiler.Utils.OperandSources.ConstantSource;
-import C99Compiler.Utils.OperandSources.OperandSource;
 import Grammar.C99.C99Parser.Abstract_declaratorContext;
-import Grammar.C99.C99Parser.DeclarationContext;
 import Grammar.C99.C99Parser.DeclaratorContext;
-import Grammar.C99.C99Parser.Assignment_expressionContext;
-import Grammar.C99.C99Parser.Init_declaratorContext;
 import Grammar.C99.C99Parser.Parameter_declarationContext;
-import Grammar.C99.C99Parser.Struct_declarationContext;
-import Grammar.C99.C99Parser.Struct_declaratorContext;
 
 public class ParameterDeclarationNode extends InterpretingNode<ParameterDeclarationNode, Parameter_declarationContext>
 {

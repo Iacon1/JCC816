@@ -4,6 +4,7 @@
 package C99Compiler.CompilerNodes.Dummies;
 
 import C99Compiler.CompilerNodes.FunctionDefinitionNode;
+import C99Compiler.Utils.ProgramState;
 
 public class DummyFunctionNode extends FunctionDefinitionNode
 {
@@ -18,5 +19,7 @@ public class DummyFunctionNode extends FunctionDefinitionNode
 	@Override public boolean isInline() {return false;}
 	@Override public boolean canCall(FunctionDefinitionNode function) {return true;}
 	@Override public boolean isImplemented() {return true;}
-	@Override public String getAssembly(int leadingWhitespace) {return "";}
+	
+	@Override public ProgramState getStateAfter(ProgramState state) {return state;}
+	@Override public String getAssembly(ProgramState state) {return "";}
 }

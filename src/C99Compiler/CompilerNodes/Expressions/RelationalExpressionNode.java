@@ -11,26 +11,142 @@ import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.Definitions.Type;
 import C99Compiler.CompilerNodes.Definitions.Type.CastContext;
 import C99Compiler.CompilerNodes.Dummies.DummyType;
-import C99Compiler.Utils.AssemblyUtils;
 import C99Compiler.Utils.CompUtils;
 import C99Compiler.Utils.FileIO;
-import C99Compiler.Utils.ScratchManager;
-import C99Compiler.Utils.ScratchManager.ScratchSource;
-import C99Compiler.Utils.AssemblyUtils.DetailsTicket;
+import C99Compiler.Utils.ProgramState;
+import C99Compiler.Utils.ProgramState.ScratchSource;
+import C99Compiler.Utils.AssemblyUtils.AssemblyUtils;
+import C99Compiler.Utils.AssemblyUtils.BytewiseOperator;
 import C99Compiler.Utils.OperandSources.ConstantByteSource;
 import C99Compiler.Utils.OperandSources.ConstantSource;
 import C99Compiler.Utils.OperandSources.OperandSource;
 import Grammar.C99.C99Parser.Relational_expressionContext;
 import Grammar.C99.C99Parser.Shift_expressionContext;
 
-public class RelationalExpressionNode extends BranchingExpressionNode
+public class RelationalExpressionNode extends BinaryExpressionNode
 <Relational_expressionContext, Shift_expressionContext, Shift_expressionContext, Relational_expressionContext>
 {
+	private String yesLabel, noLabel;
+	private String endLabel;
+	private boolean shortJump, hasEnd;
+	
+	private class RelationalOperator extends BytewiseOperator
+	{
+		private OperandSource sourceX, sourceY, tempSource;
 
-	public RelationalExpressionNode(ComponentNode<?> parent) {super(parent);}
-	public RelationalExpressionNode(ComponentNode<?> parent, String operator, BaseExpressionNode<?> x, BaseExpressionNode<?> y)
+		private boolean isSigned;
+		public RelationalOperator(int n1, int n2, OperandSource sourceX, OperandSource sourceY, OperandSource tempSource)
+		{
+			super(n1, n2, true);
+			this.sourceX = sourceX;
+			this.sourceY = sourceY;
+			this.tempSource = tempSource;
+			this.isSigned = x.getType().isSigned() || y.getType().isSigned();
+		}
+		
+		@Override
+		protected AssemblyStatePair getAssemblyAndState(ProgramState state, int i) throws Exception
+		{
+			AssemblyStatePair tmpPair;
+			String assembly = "";
+			
+			if (isSigned && (i == n1 - 2) || (i == 0 && n1 == 1)) // First comparison and signed, must EOR y by 0x80
+			{
+				String XOR = state.getWhitespace() + (state.testProcessorFlag(ProgramState.ProcessorFlag.M) ? "EOR\t#$8000\n" : "EOR\t#$80\n");
+				if (sourceY.isLiteral()) // Optimizable for literals
+				{
+					// Get X
+					tmpPair = sourceX.getLDA(state, i);
+					assembly += tmpPair.assembly;
+					state = tmpPair.state;
+					assembly += XOR;
+					
+					// Get Y
+					String oldY = ((ConstantByteSource) sourceY).getBase(state, i).substring(2);
+					int yVal = Integer.valueOf(oldY, 16);
+					
+					// Compare
+					assembly += "CMP\t#$";
+					if (state.testProcessorFlag(ProgramState.ProcessorFlag.M)) // 16-bit
+						assembly += String.format("%04x", yVal ^ 0x8000);
+					else
+						assembly += String.format("%02x", yVal ^ 0x80);
+					assembly += "\n";
+				}
+				else
+				{
+					// Get Y
+					tmpPair = sourceY.getLDA(state, i);
+					assembly += tmpPair.assembly;
+					state = tmpPair.state;
+					assembly += XOR;
+					
+					// Store result in buffer
+					tmpPair = tempSource.getSTA(state, 0);
+					assembly += tmpPair.assembly;
+					state = tmpPair.state;
+					
+					// Get X
+					tmpPair = sourceX.getLDA(state, i);
+					assembly += tmpPair.assembly;
+					state = tmpPair.state;
+					assembly += XOR;
+					
+					// Compare
+					tmpPair = tempSource.getInstruction(state, "CMP", i);
+					assembly += tmpPair.assembly;
+					state = tmpPair.state;
+				}
+			}
+			else // Don't need to XOR
+			{
+				// Get X
+				tmpPair = sourceX.getLDA(state, i);
+				assembly += tmpPair.assembly;
+				state = tmpPair.state;
+				
+				// Compare
+				tmpPair = sourceY.getInstruction(state, "CMP", i);
+				assembly += tmpPair.assembly;
+				state = tmpPair.state;
+			}
+			
+			// Jump appropriately
+			if (!shortJump)
+			{
+			assembly += state.getWhitespace() + "BCC\t:+\n";  // Done this way to enable med-jumps
+			assembly += state.getWhitespace() + "BRA\t:++\n";
+			assembly += state.getWhitespace() + ":JMP\t" + yesLabel + "\n"; // If x < y then yes
+			assembly += state.getWhitespace() + ":BEQ\t:+\n";
+			assembly += state.getWhitespace() + "JMP\t" + noLabel + "\n";	// If x >= y then no
+			assembly += state.getWhitespace() + ":\n";
+			}
+			else
+			{
+				assembly += state.getWhitespace() + "BCC\t" + yesLabel + "\n";  // If x < y then yes
+				assembly += state.getWhitespace() + "BNE\t" + noLabel + "\n";  // If x >= y then no
+			}
+			
+			return new AssemblyStatePair(assembly, state);
+		}
+	}
+	public RelationalExpressionNode(ComponentNode<?> parent)
+	{
+		super(parent);
+		String uuid = CompUtils.getSafeUUID();
+		this.yesLabel = "__CMP_YES_" + uuid;
+		this.noLabel = "__CMP_NO_" + uuid;
+		this.endLabel = "__CMP_END_" + uuid;
+		this.shortJump = true;
+		this.hasEnd = true;
+	}
+	public RelationalExpressionNode(ComponentNode<?> parent, String operator, BaseExpressionNode<?> x, BaseExpressionNode<?> y, String yesLabel, String noLabel, Boolean shortJump)
 	{
 		super(parent, operator, x, y);
+		this.yesLabel = yesLabel;
+		this.noLabel = noLabel;
+		this.shortJump = shortJump;
+		this.hasEnd = false;
 	}
 	
 	@Override
@@ -48,10 +164,10 @@ public class RelationalExpressionNode extends BranchingExpressionNode
 	@Override public CastContext getCastContext() {return CastContext.relational;}
 	
 	@Override
-	public Object getPropValue()
+	public Object getPropValue(ProgramState state)
 	{
-		Long a = x.getPropLong();
-		Long b = y.getPropLong();
+		Long a = x.getPropLong(state);
+		Long b = y.getPropLong(state);
 		switch (operator)
 		{
 		case "<": return Boolean.valueOf(a < b);
@@ -68,121 +184,70 @@ public class RelationalExpressionNode extends BranchingExpressionNode
 		return new DummyType("int");
 	}
 	
-	private static String getComparison(String whitespace, String yesLabel, String noLabel, OperandSource sourceX, String operator, OperandSource sourceY, boolean isSignedX, boolean isSignedY, ScratchManager scratchManager, DetailsTicket ticket) throws Exception
+	private AssemblyStatePair getAssemblyAndStateRec(ProgramState state, OperandSource sourceX, OperandSource sourceY, String operator) throws Exception
 	{
-		if (sourceX.isLiteral() && !sourceY.isLiteral()) switch (operator)
-		{
-			case "<": return getComparison(whitespace, yesLabel, noLabel, sourceY, ">=", sourceX, isSignedX, isSignedY, scratchManager, ticket);
-			case "<=": return getComparison(whitespace, yesLabel, noLabel, sourceY, ">", sourceX, isSignedX, isSignedY, scratchManager, ticket);
-			case ">": return getComparison(whitespace, yesLabel, noLabel, sourceY, "<=", sourceX, isSignedX, isSignedY, scratchManager, ticket);
-			case ">=": return getComparison(whitespace, yesLabel, noLabel, sourceY, "<", sourceX, isSignedX, isSignedY, scratchManager, ticket);
-		}
+		if (sourceX.isLiteral() && !sourceY.isLiteral())
+			switch (operator) // Always put literal on RHS
+			{
+			case "<": return getAssemblyAndStateRec(state, sourceY, sourceX, ">=");
+			case "<=": return getAssemblyAndStateRec(state, sourceY, sourceX, ">");
+			case ">": return getAssemblyAndStateRec(state, sourceY,  sourceX, "<=");
+			case ">=": return getAssemblyAndStateRec(state, sourceY, sourceX, "<");
+			}
 		switch (operator) // Let's always do variants of <
 		{
-		case ">": return getComparison(whitespace, noLabel, yesLabel,sourceX, "<=", sourceY, isSignedX, isSignedY, scratchManager, ticket);
-		case ">=": return getComparison(whitespace, noLabel, yesLabel, sourceX, "<", sourceY, isSignedX, isSignedY, scratchManager, ticket);
+		case ">": return getAssemblyAndStateRec(state, sourceX, sourceY, "<=");
+		case ">=": return getAssemblyAndStateRec(state, sourceX, sourceY, "<");
 		}
 
 		String assembly = "";
-
-		assembly += ticket.save(whitespace, DetailsTicket.saveA);
-		DetailsTicket innerTicket = new DetailsTicket(ticket, 0, DetailsTicket.saveA);
-		assembly += AssemblyUtils.setSignExtend(whitespace, sourceX, sourceY, isSignedX, isSignedY, innerTicket);
-		ScratchSource tempSource = scratchManager.reserveScratchBlock(2);
-		assembly += whitespace + "CLC\n";
+		
+		assert !state.testPreserveFlag(ProgramState.PreserveFlag.A); // Since we jump out of here we have no way to preserve this
+		
+		//assembly += AssemblyUtils.setSignExtend(state.getWhitespace(), sourceX, sourceY, isSignedX, isSignedY, null);
+		
+		state = state.reserveScratchBlock(2);
+		ScratchSource tempSource = state.lastScratchSource();
 		int max = Math.max(sourceX.getSize(), sourceY.getSize());
 		int min = Math.min(sourceX.getSize(), sourceY.getSize());
-		assembly += AssemblyUtils.bytewiseOperation(whitespace, max - min, min, (Integer i, DetailsTicket ticket2) -> 
-		{	
-			List<String> lines = new LinkedList<String>();
-			if ((isSignedX || isSignedY) && i >= max - (min == 1 ? 1 : 2)) // Are we signed and at the last byte of an odd-size number, i. e. in 8-bit mode?
-			{
-				String toXOR = ticket2.is16Bit() ? "#$8000" : "#$80"; // If so we have to invert MSB to deal w/ 2's complement stuff
-				// Start at MSB
-				if (sourceY.isLiteral())
-				{
-					String oldY = ((ConstantByteSource) sourceY).getBase(i, ticket2).substring(2);
-					int yVal = Integer.valueOf(oldY, 16);
-					String newY = "#$" + String.format("%0" + (ticket2.is16Bit() ? 4 : 2) + "x", yVal ^ (ticket2.is16Bit() ? 0x8000 : 0x80));
-					lines.add(sourceX.getLDA(i, ticket2));	// Get X
-					lines.add("EOR\t" + toXOR);				// Flip sign
-					lines.add("CMP\t" + newY);				// Cmp X & Y?
-				}
-				else
-				{
-					lines.add(sourceY.getLDA(i, ticket2));							// Get Y
-					lines.add("EOR\t" + toXOR);										// Flip sign
-					lines.add(tempSource.getSTA(0, ticket2));
-					lines.add(sourceX.getLDA(i, ticket2));							// Get X
-					lines.add("EOR\t" + toXOR);										// Flip sign
-					lines.add(tempSource.getInstruction("CMP", 0, ticket2));		// Cmp Y & X?
-				}
-			}
-			else
-			{
-				if (i == sourceX.getSize() - 1 && i < sourceY.getSize() - 1)
-				{
-					lines.add(CompUtils.setA8);
-					lines.add(sourceX.getLDA(i, ticket2)); 					// Get X
-					lines.add(sourceY.getInstruction("CMP", i, ticket2));	// Cmp X & Y?
-					lines.add("BCC\t:+");									// Done this way to enable med-jumps
-					lines.add("BRA\t:++");
-					lines.add(":JMP\t" + yesLabel);								// If x < y then yes
-					lines.add(":BEQ\t:+");
-					lines.add("JMP\t" + noLabel);							// If x >= y then no
-					lines.add(":");
-				}
-				lines.add(sourceX.getLDA(i, ticket2)); 					// Get X
-				lines.add(sourceY.getInstruction("CMP", i, ticket2));	// Cmp X & Y?
-			}
-			lines.add("BCC\t:+");									// Done this way to enable med-jumps
-			lines.add("BRA\t:++");
-			lines.add(":JMP\t" + yesLabel);								// If x < y then yes
-			lines.add(":BEQ\t:+");
-			lines.add("JMP\t" + noLabel);							// If x >= y then no
-			lines.add(":");
-			// else maybe
-			return lines.toArray(new String[] {});
-		}, true, true);
+		assembly += state.getWhitespace() + "CLC\n";
+		BytewiseOperator o = new RelationalOperator(max, min, sourceX, sourceY, tempSource);
+		assembly += o.getAssembly(state);
+		state = o.getStateAfter(state);
+		
 		// The above actually always checks for "<". This is due to the behavior of the carry flag, it being set when the two words are equal.
 		switch (operator)
 		{
 		case "<":
-			assembly += whitespace + "JMP\t" + noLabel + "\n"; // If equal, false
+			assembly += state.getWhitespace() + "JMP\t" + noLabel + "\n"; // If equal, false
 			break;
 		case "<=":
-			assembly += whitespace + "JMP\t" + yesLabel + "\n"; // If equal, true
+			assembly += state.getWhitespace() + "JMP\t" + yesLabel + "\n"; // If equal, true
 			break;
 		}
-		ScratchManager.releasePointer(tempSource);
 		
-		assembly += ticket.restore(whitespace, DetailsTicket.saveA);
-		
-		return assembly;
+		return new AssemblyStatePair(assembly, state);
 	}
 	@Override
-	protected String getAssembly(String whitespace, String yesLabel, String noLabel, OperandSource sourceX, OperandSource sourceY, ScratchManager scratchManager, DetailsTicket ticket) throws Exception
+	protected AssemblyStatePair getAssemblyAndState(ProgramState state, OperandSource sourceX, OperandSource sourceY) throws Exception
 	{
-		return getComparison(whitespace, yesLabel, noLabel, sourceX, operator, sourceY, x.getType().isSigned(), y.getType().isSigned(), scratchManager, ticket);
-	}
-	@Override
-	protected String getAssembly(String whitespace, OperandSource destSource, OperandSource sourceX, OperandSource sourceY, ScratchManager scratchManager, DetailsTicket ticket) throws Exception
-	{
-		String uuid = CompUtils.getSafeUUID();
-		String yesLabel = "__CMP_YES_" + uuid, noLabel = "__CMP_NO_" + uuid, endLabel = "__CMP_END_" + uuid;
 		String assembly = "";
-		assembly += whitespace + getAssembly(whitespace, yesLabel, noLabel, sourceX, sourceY, scratchManager, ticket);
+		String whitespace = state.getWhitespace();
+		AssemblyStatePair tmpPair = getAssemblyAndStateRec(state, sourceX, sourceY, operator);
+		assembly += tmpPair.assembly;
+		state = tmpPair.state;
 		
-		assembly += whitespace + yesLabel + ":\n";
-		assembly += AssemblyUtils.byteCopier(whitespace, destSource.getSize(), destSource, new ConstantSource(1, destSource.getSize()));
-		assembly += whitespace + "BRA\t" + endLabel + "\n";
-		
-		assembly += whitespace + noLabel + ":\n";
-		assembly += AssemblyUtils.byteCopier(whitespace, destSource.getSize(), destSource, new ConstantSource(0, destSource.getSize()));
-		
-		assembly += whitespace + endLabel + ":\n";
-		return assembly;
+		if (hasEnd)
+		{
+			assembly += state.getWhitespace() + yesLabel + ":\n";
+//			assembly += new ByteCopier(whitespace, state.destSource().getSize(), state.destSource(), new ConstantSource(1, state.destSource().getSize()));
+			assembly += whitespace + "BRA\t" + endLabel + "\n";
+			
+			assembly += whitespace + noLabel + ":\n";
+//			assembly += AssemblyUtils.byteCopier(whitespace, state.destSource().getSize(), state.destSource(), new ConstantSource(0, state.destSource().getSize()));
+			
+			assembly += whitespace + endLabel + ":\n";
+		}
+		return new AssemblyStatePair(assembly, state);
 	}
-
-	
 }

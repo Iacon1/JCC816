@@ -10,11 +10,12 @@ import C99Compiler.CompilerNodes.Expressions.BaseExpressionNode;
 import C99Compiler.CompilerNodes.Expressions.BranchingExpressionNode;
 import C99Compiler.CompilerNodes.Expressions.EqualityExpressionNode;
 import C99Compiler.CompilerNodes.Expressions.ExpressionNode;
-import C99Compiler.Utils.AssemblyUtils;
-import C99Compiler.Utils.AssemblyUtils.DetailsTicket;
+import C99Compiler.CompilerNodes.Dummies.DummyExpressionNode;
 import C99Compiler.Utils.CompUtils;
-import C99Compiler.Utils.ScratchManager;
-import C99Compiler.Utils.ScratchManager.ScratchSource;
+import C99Compiler.Utils.ProgramState;
+import C99Compiler.Utils.AssemblyUtils.AssemblyUtils;
+import C99Compiler.Utils.OperandSources.OperandSource;
+import C99Compiler.Utils.ProgramState.ScratchSource;
 import Grammar.C99.C99Parser.Iteration_statementContext;
 
 public class IterationStatementNode extends SequencePointStatementNode<Iteration_statementContext>
@@ -46,13 +47,13 @@ public class IterationStatementNode extends SequencePointStatementNode<Iteration
 	}
 
 	@Override
-	public boolean canCall(FunctionDefinitionNode function)
+	public boolean canCall(ProgramState state, FunctionDefinitionNode function)
 	{
-		return (stmNode != null && stmNode.canCall(function)) ||
-				(condExpNode != null && condExpNode.canCall(function)) ||
-				(initExpNode != null && initExpNode.canCall(function)) ||
-				(iterExpNode != null && iterExpNode.canCall(function)) ||
-				(declNode != null && declNode.canCall(function));
+		return (stmNode != null && stmNode.canCall(state, function)) ||
+				(condExpNode != null && condExpNode.canCall(state, function)) ||
+				(initExpNode != null && initExpNode.canCall(state, function)) ||
+				(iterExpNode != null && iterExpNode.canCall(state, function)) ||
+				(declNode != null && declNode.canCall(state, function));
 	}
 
 	@Override
@@ -113,105 +114,147 @@ public class IterationStatementNode extends SequencePointStatementNode<Iteration
 	}
 
 	@Override
-	public boolean hasAssembly()
+	public boolean hasAssembly(ProgramState state)
 	{
 		switch (iterType)
 		{
 		case while_:
-			if (condExpNode.hasPropValue())
-				return condExpNode.getPropBool() || condExpNode.hasAssembly();
+			if (condExpNode.hasPropValue(state))
+				return condExpNode.getPropBool(state) || condExpNode.hasAssembly(state);
 				// Is this a forever loop or a never loop? Even if never, still need to run ASM for the check.
 		case doWhile:
-			return stmNode.hasAssembly() || condExpNode.hasAssembly(); // Runs ASM for both at least once.
+			return stmNode.hasAssembly(state) || condExpNode.hasAssembly(state); // Runs ASM for both at least once.
 		case for_:
 			if (initExpNode == null) return true; // Another forever-loop case
-			else return stmNode.hasAssembly() || condExpNode.hasAssembly() || initExpNode.hasAssembly() || iterExpNode.hasAssembly();
+			else return stmNode.hasAssembly(state) || condExpNode.hasAssembly(state) || initExpNode.hasAssembly(state) || iterExpNode.hasAssembly(state);
 		default: return false;
 		}
 	}
 	
 	@Override
-	public String getAssembly(int leadingWhitespace, String returnAddr) throws Exception
+	public AssemblyStatePair getAssemblyAndState(ProgramState state) throws Exception
 	{
-		String whitespace = AssemblyUtils.getWhitespace(leadingWhitespace);
+		AssemblyStatePair tmpPair;
+		String whitespace = state.getWhitespace();
 		String assembly = "";
-		ScratchManager scratchManager = new ScratchManager();
-		ScratchSource exprSource = scratchManager.reserveScratchBlock(condExpNode.getSize());
-		
-		ScratchManager.releasePointers();
+		state = state.reserveScratchBlock(condExpNode.getSize());
+		ScratchSource exprSource = state.lastScratchSource();
+		state = state.wipe();
+		ProgramState oldState = state;
 		
 		switch (iterType)
 		{
 		case while_:
 			assembly += whitespace + getStartLabel() + ":\n";
 			
-			if (condExpNode.hasPropValue()); // We wouldn't be making this assembly if it was assumed to be 0.
+			if (condExpNode.hasPropValue(state)); // We wouldn't be making this assembly if it was assumed to be 0.
 			else
 			{
-				if (condExpNode.hasAssembly())
+				state = state.setDestSource(exprSource);
+				if (condExpNode.hasAssembly(state))
 				{
-					assembly += getAssemblyWithSequence(condExpNode, leadingWhitespace, exprSource, scratchManager);
-					assembly += EqualityExpressionNode.getIsZero(whitespace, exprSource, new ScratchManager(), exprSource, new DetailsTicket());
+					tmpPair = getAssemblyAndStateWithRegistered(state, condExpNode);
+					tmpPair = new EqualityExpressionNode(this, new DummyExpressionNode(this, condExpNode.getType(), exprSource)).apply(tmpPair);
 				}
-				else assembly += EqualityExpressionNode.getIsZero(whitespace, null, new ScratchManager(), condExpNode.getLValue().getSource(), new DetailsTicket());
+				else
+					tmpPair = new EqualityExpressionNode(this, new DummyExpressionNode(this, condExpNode.getType(), exprSource)).getAssemblyAndState(state);
+				assembly += tmpPair.assembly;
+				state = tmpPair.state;
+	
 				assembly += whitespace + "BEQ\t:+\n";
 				assembly += whitespace + "JMP\t" + getEndLabel() + "\n";
 				assembly += whitespace + ":\n";
 			}
-			stmNode.clearPossibleValues();
-			if (stmNode.hasAssembly()) assembly += stmNode.getAssembly(leadingWhitespace + CompConfig.indentSize, returnAddr);
+			state = stmNode.clearPossibleValues(state);
+			if (stmNode.hasAssembly(state))
+			{
+				tmpPair = stmNode.getAssemblyAndState(state);
+				assembly += tmpPair.assembly;
+				state = tmpPair.state;
+			}
 			assembly += whitespace + "JMP\t" + getStartLabel() + "\n";
 			assembly += whitespace + getEndLabel() + ":\n";
 			break;
 		case doWhile:
 			assembly += whitespace + getStartLabel() + ":\n";
-			stmNode.clearPossibleValues();
-			if (stmNode.hasAssembly()) assembly += stmNode.getAssembly(leadingWhitespace + CompConfig.indentSize, returnAddr);
+			state = stmNode.clearPossibleValues(state);
+			if (stmNode.hasAssembly(state))
+			{
+				tmpPair = stmNode.getAssemblyAndState(state);
+				assembly += tmpPair.assembly;
+				state = tmpPair.state;
+			}
 			assembly += whitespace + getIterLabel() + ":\n";
-			assembly += getAssemblyWithSequence(condExpNode, leadingWhitespace, exprSource, scratchManager);
-			assembly += EqualityExpressionNode.getIsZero(whitespace, null, new ScratchManager(), exprSource, new DetailsTicket());
+
+			state = state.setDestSource(exprSource);
+			tmpPair = getAssemblyAndStateWithRegistered(state, condExpNode);
+			tmpPair = new EqualityExpressionNode(this, new DummyExpressionNode(this, condExpNode.getType(), exprSource)).apply(tmpPair);
+			assembly += tmpPair.assembly;
+			state = tmpPair.state;
+			
 			assembly += whitespace + "BEQ\t" + getEndLabel() + "\n";
 			assembly += whitespace + "JMP\t" + getStartLabel() + "\n";
 			assembly += whitespace + getEndLabel() + ":\n";
 			break;
 		case for_:
 			// Declaration / initial node
-			if (declNode != null && declNode.hasAssembly()) assembly += declNode.getAssembly(leadingWhitespace);
-			else if (initExpNode != null && initExpNode.hasAssembly()) assembly += getAssemblyWithSequence(initExpNode, leadingWhitespace);
+			if (declNode != null && declNode.hasAssembly(state))
+			{
+				tmpPair = declNode.getAssemblyAndState(state);
+				assembly += tmpPair.assembly;
+				state = tmpPair.state;
+			}
+			else if (initExpNode != null && initExpNode.hasAssembly(state))
+			{
+				tmpPair = initExpNode.getAssemblyAndState(state);
+				assembly += tmpPair.assembly;
+				state = tmpPair.state;
+			}
 
 			assembly += whitespace + getStartLabel() + ":\n";
 			if (condExpNode != null) // Run forever if condition not provided
 			{
-				if (condExpNode.hasPropValue() && condExpNode.getPropLong() == 0) return ""; // Don't run if 0, otherwise run forever
-				else if (!condExpNode.hasPropValue())
+				if (condExpNode.hasPropValue(state) && condExpNode.getPropLong(state) == 0)
+					return new AssemblyStatePair("", oldState); // Don't run if 0, otherwise run forever
+				else if (!condExpNode.hasPropValue(state))
 				{
-					if (condExpNode.hasAssembly())
+					if (condExpNode.hasAssembly(state))
 					{
-						assembly += getAssemblyWithSequence(condExpNode, leadingWhitespace, exprSource, scratchManager);
-						assembly += EqualityExpressionNode.getIsZero(whitespace, null, new ScratchManager(), exprSource, new DetailsTicket());
+						tmpPair = getAssemblyAndStateWithRegistered(state, condExpNode);
+						tmpPair = new EqualityExpressionNode(this, new DummyExpressionNode(this, condExpNode.getType(), exprSource)).apply(tmpPair);
 						assembly += whitespace + "BNE\t:+\n";
 						assembly += whitespace + "JMP\t" + getEndLabel() + "\n";
 						assembly += whitespace + ":\n";
 					}
 					else
 					{
-						assembly += AssemblyUtils.byteCopier(whitespace, condExpNode.getSize(), exprSource, condExpNode.getLValue().getSource());
-						assembly += EqualityExpressionNode.getIsZero(whitespace, null, new ScratchManager(), CompConfig.callResultSource(condExpNode.getSize()), new DetailsTicket());
+						tmpPair = getAssemblyAndStateWithRegistered(state, condExpNode);
+						tmpPair = new EqualityExpressionNode(this, new DummyExpressionNode(this, condExpNode.getType(), exprSource)).apply(tmpPair);
 						assembly += whitespace + "BNE\t:+\n";
 						assembly += whitespace + "JMP\t" + getEndLabel() + "\n";
 						assembly += whitespace + ":\n";
 					}
 				}
 			}
-			stmNode.clearPossibleValues();
-			if (stmNode.hasAssembly()) assembly += stmNode.getAssembly(leadingWhitespace + CompConfig.indentSize, returnAddr);
+			state = stmNode.clearPossibleValues(state);
+			if (stmNode.hasAssembly(state))
+			{
+				tmpPair = stmNode.getAssemblyAndState(state);
+				assembly += tmpPair.assembly;
+				state = tmpPair.state;
+			}
 			assembly += whitespace + getIterLabel() + ":\n";
-			if (iterExpNode != null && iterExpNode.hasAssembly()) assembly += getAssemblyWithSequence(iterExpNode, leadingWhitespace); 
-			assembly += whitespace + "JMP\t" + getStartLabel() + "\n";
+			if (iterExpNode != null && iterExpNode.hasAssembly(state))
+			{
+				tmpPair = getAssemblyAndStateWithRegistered(state, iterExpNode);
+				tmpPair = new EqualityExpressionNode(this, new DummyExpressionNode(this, condExpNode.getType(), exprSource)).apply(tmpPair);
+				assembly += tmpPair.assembly;
+				state = tmpPair.state;
+			}
 			assembly += whitespace + getEndLabel() + ":\n";
 			break;
 		}
 		
-		return assembly;
+		return new AssemblyStatePair(assembly, state);
 	}
 }

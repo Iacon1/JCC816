@@ -3,18 +3,15 @@
 package C99Compiler.CompilerNodes.Dummies;
 
 import C99Compiler.CompilerNodes.ComponentNode;
+import C99Compiler.CompilerNodes.FunctionDefinitionNode;
 import C99Compiler.CompilerNodes.Definitions.Type;
 import C99Compiler.CompilerNodes.Expressions.BaseExpressionNode;
 import C99Compiler.CompilerNodes.LValues.LValueNode;
-import C99Compiler.Utils.AssemblyUtils.DetailsTicket;
 import C99Compiler.Utils.CompUtils;
-import C99Compiler.Utils.ScratchManager;
+import C99Compiler.Utils.ProgramState;
 import C99Compiler.Utils.OperandSources.OperandSource;
 import Grammar.C99.C99Parser.ExpressionContext;
 
-/**
- * 
- */
 public class DummyExpressionNode extends BaseExpressionNode<ExpressionContext>
 {
 	private Type type;
@@ -41,7 +38,7 @@ public class DummyExpressionNode extends BaseExpressionNode<ExpressionContext>
 		this.type = CompUtils.getSmallestType(value);
 		this.value = Long.valueOf(value);
 	}
-	@Override public boolean hasAssembly() {return false;}
+	@Override public boolean hasAssembly(ProgramState state) {return false;}
 
 	@Override
 	public BaseExpressionNode<ExpressionContext> interpret(ExpressionContext node) throws Exception {return this;}
@@ -50,16 +47,26 @@ public class DummyExpressionNode extends BaseExpressionNode<ExpressionContext>
 	public Type getType() {return type;}
 
 	@Override
-	public boolean hasPropValue() {return value != null;}
+	public boolean hasPropValue(ProgramState state) {return value != null;}
 
 	@Override
-	public Object getPropValue() {return value;}
+	public Object getPropValue(ProgramState state) {return value;}
 
 	@Override
 	public boolean hasLValue() {return source != null;}
 	
 	@Override
 	public LValueNode<?> getLValue() {return new DummyLValueNode(this, type, source);}
+	
+	@Override 
+	public boolean canCall(ProgramState state, FunctionDefinitionNode function) {return false;}
+
+	
 	@Override
-	public String getAssembly(int leadingWhitespace, OperandSource destSource, ScratchManager scratchManager, DetailsTicket ticket) throws Exception {return "";}
-}
+	public ProgramState getStateAfter(ProgramState state) {return state;}
+	@Override
+	public AssemblyStatePair getAssemblyAndState(ProgramState state) throws Exception
+	{
+		return new AssemblyStatePair("", state);
+	}
+	}

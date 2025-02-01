@@ -35,9 +35,10 @@ import C99Compiler.CompilerNodes.LValues.VariableNode;
 import C99Compiler.Exceptions.BuilderException;
 import C99Compiler.Exceptions.BuilderMultipleDefinitionException;
 import C99Compiler.Exceptions.UndefinedFunctionException;
-import C99Compiler.Utils.AssemblyUtils;
 import C99Compiler.Utils.CompUtils;
+import C99Compiler.Utils.ProgramState;
 import C99Compiler.Utils.SNESRegisters;
+import C99Compiler.Utils.AssemblyUtils.AssemblyUtils;
 import Logging.Logging;
 
 public final class AsmBuilder implements Catalogger
@@ -301,7 +302,7 @@ public final class AsmBuilder implements Catalogger
 		for (TranslationUnit unit : translationUnits)
 			for (InitializerNode init : unit.getGlobalInitializers())
 				if (!init.isROM()) // Only RAM ones up here, to save space in 0 bank
-					assembly += init.getAssembly();
+					assembly += init.getAssembly(new ProgramState());
 		assembly += "JML\tmain\n";
 		
 		// Required special subs
@@ -349,7 +350,7 @@ public final class AsmBuilder implements Catalogger
 			}
 			else if (isPreassembled(funcNode)) continue;
 			
-			assembly += funcNode.getAssembly();
+			assembly += funcNode.getAssembly(new ProgramState());
 		}
 		
 		// Get raw assembly
@@ -363,7 +364,7 @@ public final class AsmBuilder implements Catalogger
 			for (TranslationUnit unit : translationUnits)
 				for (InitializerNode init : unit.getGlobalInitializers())
 					if (!init.getType().isExtern() && init.isROM()) // Rom ones go last
-						assembly += init.getAssembly();
+						assembly += init.getAssembly(new ProgramState());
 		
 			Map<String, Integer> varPoses = mapVariables(cartConfig, memorySize);
 			if (CompConfig.wordAddresses && memorySize.WRAMSize > 0xFFFF)
