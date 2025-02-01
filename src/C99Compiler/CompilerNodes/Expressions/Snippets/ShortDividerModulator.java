@@ -2,9 +2,7 @@
 //
 package C99Compiler.CompilerNodes.Expressions.Snippets;
 
-import C99Compiler.CompConfig;
 import C99Compiler.CompilerNodes.Interfaces.Assemblable;
-import C99Compiler.CompilerNodes.Interfaces.Assemblable.AssemblyStatePair;
 import C99Compiler.Utils.CompUtils;
 import C99Compiler.Utils.ProgramState;
 import C99Compiler.Utils.ProgramState.ProcessorFlag;
@@ -54,7 +52,7 @@ public class ShortDividerModulator implements Assemblable
 					pair.assembly += pair.state.getWhitespace() + CompUtils.setA8 + "\n";
 					pair.state = pair.state.clearProcessorFlags(ProcessorFlag.M);
 					sourceY.applyLDA(pair, 0);																// Load Y-the-variable
-					pair.assembly += "STA\t" + SNESRegisters.WRDIVB;									 	// Place in reg, begin 16-cycle calc
+					pair.assembly += "STA\t" + SNESRegisters.WRDIVB + "\n";								 	// Place in reg, begin 16-cycle calc
 					pair.assembly += pair.state.getWhitespace() + CompUtils.setA16 + "\n";					// 3 cycles - 3
 					pair.state = pair.state.setProcessorFlags(ProcessorFlag.M);
 					sourceX.applyLDA(pair, i + 1);															// 4-6 cycles - 7-9 Load X-the-variable for next iteration
@@ -72,7 +70,7 @@ public class ShortDividerModulator implements Assemblable
 					pair.state = pair.state.clearProcessorFlags(ProcessorFlag.M);
 					pair.assembly += pair.state.getWhitespace() + "CLC\n";									// For addition later
 					sourceY.applyLDA(pair, 0);																// Load Y-the-variable
-					pair.assembly += "STA\t" + SNESRegisters.WRDIVB;									 	// Place in reg, begin 16-cycle calc
+					pair.assembly += "STA\t" + SNESRegisters.WRDIVB + "\n";								 	// Place in reg, begin 16-cycle calc
 					pair.assembly += pair.state.getWhitespace() + "LDA\t" + RRegH + "\n";					// 4-6 cycles - 4-6, get high byte of previous iteration
 					pair.assembly += pair.state.getWhitespace() + CompUtils.setA16 + "\n";					// 3 cycles - 7-9
 					pair.state = pair.state.setProcessorFlags(ProcessorFlag.M);
@@ -91,7 +89,7 @@ public class ShortDividerModulator implements Assemblable
 					pair.state = pair.state.clearProcessorFlags(ProcessorFlag.M);
 					pair.assembly += pair.state.getWhitespace() + "CLC\n";									// For addition later
 					sourceY.applyLDA(pair, 0);																// Load Y-the-variable
-					pair.assembly += "STA\t" + SNESRegisters.WRDIVB;									 	// Place in reg, begin 16-cycle calc
+					pair.assembly += "STA\t" + SNESRegisters.WRDIVB + "\n";									// Place in reg, begin 16-cycle calc
 					pair.assembly += pair.state.getWhitespace() + "LDA\t" + RRegH + "\n";					// 4-6 cycles - 4-6, get high byte of previous iteration
 					pair.assembly += pair.state.getWhitespace() + CompUtils.setA16 + "\n";					// 3 cycles - 7-9
 					pair.state = pair.state.setProcessorFlags(ProcessorFlag.M);
