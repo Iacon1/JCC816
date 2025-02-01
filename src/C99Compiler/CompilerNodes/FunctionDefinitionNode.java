@@ -269,7 +269,7 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 		
 		if (code != null)
 		{
-			AssemblyStatePair codePair = code.getAssemblyAndState(pair.state.indent());
+			AssemblyStatePair codePair = code.getAssemblyAndState(pair.state.indent().setExitFuncLabel(getEndLabel()));
 			String codeAssembly = codePair.assembly;
 			if (OptimizationLevel.isAtLeast(OptimizationLevel.all))
 				pair.assembly += new ASMGraphBuilder(codeAssembly).clearDeadCode(getChildVariables());

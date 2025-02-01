@@ -824,6 +824,22 @@ public class ProgramState
 				a, x, y);
 		return s;
 	}
+	public ProgramState setExitFuncLabel(String exitFuncLabel)
+	{
+		ProgramState s = new ProgramState(
+				whitespaceLevel,
+				blockList, lastScratchSource,
+				pointerMap,
+				possibleValues,
+				destSource,
+				exitFuncLabel,
+				processorFlags,
+				preserveFlags,
+				knownFlags,
+				a, x, y);
+		return s;
+	}
+	
 	/** Wipes the processor and memory states.
 	 * 
 	 * @return A copy of the state with the processor and memory states wiped.
