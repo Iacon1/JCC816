@@ -26,7 +26,7 @@ CC extends ParserRuleContext
 		
 		protected ArithmeticOperator(int size, OperandSource destSource, OperandSource sourceX, OperandSource sourceY, boolean reversed)
 		{
-			super(Math.max(sourceX.getSize(), sourceY.getSize()), Math.min(sourceX.getSize(), sourceY.getSize()), reversed);
+			super(size, size, reversed);
 			this.destSource = destSource;
 			this.sourceX = sourceX;
 			this.sourceY = sourceY;
@@ -119,8 +119,10 @@ CC extends ParserRuleContext
 			size = getRetSize(sourceX.getSize(), sourceY.getSize());
 		ArithmeticOperator operator = new ArithmeticOperator(size, destSource, sourceX, sourceY, isReversed());
 		
-		assembly += operator.getAssembly(state);
-		state = operator.getStateAfter(state);
+		AssemblyStatePair tmpPair = operator.getAssemblyAndState(state);
+		assembly += tmpPair.assembly;
+		state = tmpPair.state;
+		
 		if (size < destSource.getSize())
 		{
 			ZeroCopier zeroCopier = new ZeroCopier(destSource.getSize(), destSource.getShifted(size), false);
