@@ -145,7 +145,11 @@ public class Type implements Serializable
 			// Otherwise it's the right parts, just in the wrong order
 			throw new ConstraintException("6.7.2", 2, start);
 		}
-			
+		if ((isStructOrUnion() || isEnum()) && getSUEName() == null)
+		{
+			throw new UndefinedTypeException("", start);
+		}
+		
 		if (typeSpecifiers.contains("double") || typeSpecifiers.contains("float")) // Floats not supported
 		{
 			Exception e = new UnsupportedFeatureException("Floating-point numbers", false, start);
@@ -219,8 +223,11 @@ public class Type implements Serializable
 		int baseSize;
 		if (isStructOrUnion())
 		{
+			if (context.resolveStructOrUnionRelative(getSUEName()) == null)
+				baseSize = 0;
 			baseSize = context.resolveStructOrUnionRelative(getSUEName()).getSize();
 		}
+			
 		else if (isEnum())
 			baseSize = context.resolveEnumRelative(getSUEName()).getType().getSize();
 		else baseSize = CompConfig.sizeOf(typeSpecifiers);

@@ -52,6 +52,7 @@ public class StructUnionDefinitionNode extends InterpretingNode<StructUnionDefin
 		int sizeBits = 0;
 		for (int i = 0; i < members.size(); ++i)
 			if (isUnion) sizeBits = Math.max(sizeBits, members.get(i).getSizeBits());
+			else if (members.get(i).getType().isTwice()) sizeBits += members.get(i).getSizeBits() / 2;
 			else sizeBits += members.get(i).getSizeBits();
 		return sizeBits;
 	}
