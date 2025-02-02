@@ -3,6 +3,7 @@
 package C99Compiler.CompilerNodes.Interfaces;
 
 import C99Compiler.CompilerNodes.Interfaces.Assemblable.AssemblyStatePair;
+import C99Compiler.CompilerNodes.Interfaces.Assemblable.MutableAssemblyStatePair;
 import C99Compiler.Utils.ProgramState;
 
 public interface SequencePointNode
@@ -14,5 +15,12 @@ public interface SequencePointNode
 	{
 		AssemblyStatePair reg = getRegisteredAssemblyAndState(pair.state);
 		return new AssemblyStatePair(pair.assembly + reg. assembly, reg.state);
+	}
+	default MutableAssemblyStatePair applyRegistered(MutableAssemblyStatePair pair) throws Exception
+	{
+		AssemblyStatePair reg = getRegisteredAssemblyAndState(pair.state);
+		pair.assembly += reg.assembly;
+		pair.state = reg.state;
+		return pair;
 	}
 }
