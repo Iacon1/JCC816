@@ -55,6 +55,21 @@ public abstract class SequencePointStatementNode<C extends ParserRuleContext> ex
 		isSP = false;
 		return pair;
 	}
+	public MutableAssemblyStatePair applyWithRegistered(MutableAssemblyStatePair pair, BaseExpressionNode<?> expr) throws Exception
+	{
+		isSP = true;
+		clearAssemblables();
+		if (expr.hasAssembly(pair.state))
+			expr.apply(pair);
+
+		AssemblyStatePair tmpPair = getRegisteredAssemblyAndState(pair.state);
+		pair.assembly += tmpPair.assembly;
+		pair.state = tmpPair.state;
+		
+		clearAssemblables();
+		isSP = false;
+		return pair;
+	}
 	
 	public AssemblyStatePair getAssemblyAndStateWithRegistered(ProgramState state, BaseExpressionNode<?> expr) throws Exception
 	{
