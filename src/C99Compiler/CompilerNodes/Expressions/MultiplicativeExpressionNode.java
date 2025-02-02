@@ -16,6 +16,7 @@ import C99Compiler.CompilerNodes.Interfaces.Assemblable;
 import C99Compiler.CompilerNodes.LValues.LValueNode;
 import C99Compiler.Exceptions.UnsupportedFeatureException;
 import C99Compiler.Utils.ProgramState;
+import C99Compiler.Utils.AssemblyUtils.ByteCopier;
 import C99Compiler.Utils.OperandSources.OperandSource;
 import Grammar.C99.C99Parser.Cast_expressionContext;
 import Grammar.C99.C99Parser.Multiplicative_expressionContext;
@@ -279,14 +280,18 @@ public class MultiplicativeExpressionNode extends CallingArithmeticBinaryExpress
 		else return super.getLValue();
 	}
 	@Override
-	public String getAssembly(ProgramState state) throws Exception
+	public AssemblyStatePair getAssemblyAndState(ProgramState state) throws Exception
 	{
 		if (OptimizationLevel.isAtLeast(OptimizationLevel.medium))
 			optimizeMult(state);
 		
-		if (optimized != null)
-			return optimized.getAssembly(state);
+		if (optimized != null && optimized.hasAssembly(state))
+			return optimized.getAssemblyAndState(state);
+		else if (optimized != null && optimized.hasPropValue(state))
+			return new ByteCopier(state.destSource().getSize(), state.destSource(), optimized.getPropValue(state)).getAssemblyAndState(state);
+		else if (optimized != null)
+			return new ByteCopier(state.destSource().getSize(), state.destSource(), optimized.getLValue()).getAssemblyAndState(state);
 		else 
-			return super.getAssembly(state);
+			return super.getAssemblyAndState(state);
 	}
 }
