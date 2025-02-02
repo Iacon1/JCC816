@@ -76,7 +76,7 @@ public abstract class OperandSource implements Serializable
 	public MutableAssemblyStatePair applyLDA(MutableAssemblyStatePair pair, Integer i)
 	{
 		assert !isLiteral; // Can't store into numbers
-		return applyInstruction(pair, "STA", i);
+		return applyInstruction(pair, "LDA", i);
 	}
 	/** Returns assembly to store the value of the A register into the region represented by the source and the state of the program afterwards
 	 * 
