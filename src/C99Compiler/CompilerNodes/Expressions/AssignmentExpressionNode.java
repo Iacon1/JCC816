@@ -6,6 +6,7 @@ package C99Compiler.CompilerNodes.Expressions;
 import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.Definitions.Type;
 import C99Compiler.CompilerNodes.Definitions.Type.CastContext;
+import C99Compiler.CompilerNodes.Dummies.DummyExpressionNode;
 import C99Compiler.CompilerNodes.LValues.LValueNode;
 import C99Compiler.Exceptions.ConstraintException;
 import C99Compiler.Exceptions.ScratchOverflowException;
@@ -33,6 +34,12 @@ public class AssignmentExpressionNode extends BinaryExpressionNode
 	
 	public AssignmentExpressionNode(ComponentNode<?> parent) {super(parent);}
 	
+	public AssignmentExpressionNode(ComponentNode<?> parent,
+			BaseExpressionNode<?> x, BaseExpressionNode<?> y)
+	{
+		this.x = x;
+		this.y = y;
+	}
 	@Override
 	public BaseExpressionNode<Assignment_expressionContext> interpret(Assignment_expressionContext node) throws Exception
 	{
@@ -175,7 +182,6 @@ public class AssignmentExpressionNode extends BinaryExpressionNode
 			else if (y.hasLValue())
 				sourceY = y.getLValue().castTo(x.getType()).getSource();
 			else sourceY = null;
-			state = y.getStateAfter(state);
 			ByteCopier copier = new ByteCopier(x.getLValue().getSize(), x.getLValue().getSource(), sourceY);
 			tmpPair = copier.getAssemblyAndState(state);
 			assembly += tmpPair.assembly;
