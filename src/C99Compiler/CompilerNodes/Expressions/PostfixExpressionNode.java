@@ -24,9 +24,12 @@ import C99Compiler.Exceptions.ScratchOverflowException;
 import C99Compiler.Exceptions.UnsupportedFeatureException;
 import C99Compiler.Utils.CompUtils;
 import C99Compiler.Utils.ProgramState;
+import C99Compiler.Utils.ProgramState.ScratchSource;
 import C99Compiler.Utils.PropPointer;
 import C99Compiler.Utils.AssemblyUtils.AssemblyUtils;
 import C99Compiler.Utils.AssemblyUtils.ByteCopier;
+import C99Compiler.Utils.AssemblyUtils.StackLoader;
+import C99Compiler.Utils.AssemblyUtils.StackPusher;
 import C99Compiler.Utils.OperandSources.ConstantSource;
 import C99Compiler.Utils.OperandSources.OperandSource;
 import Grammar.C99.C99Parser.Assignment_expressionContext;
@@ -248,8 +251,8 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 				state = tmpPair.state;
 			}
 			break;
-/*		case funcCall:
-			state = state.wipe(); // TODO only need to wipe pointers here
+		case funcCall:
+			state = state.releasePointers(); // TODO only need to wipe pointers here
 			if (getReferencedFunction() != null && !getReferencedFunction().canCall(state, getEnclosingFunction())) // We can know the variables to copy parameters to
 			{
 				if (expr.hasAssembly(state))
@@ -272,33 +275,58 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 				for (int i = 0; i < params.size(); ++i)
 				{
 					OperandSource sourceV = funcParams.get(i).getSource();
-					if (params.get(i).hasAssembly(state)) assembly += params.get(i).getAssembly(leadingWhitespace, sourceV, scratchManager, ticket);
+					if (params.get(i).hasAssembly(state))
+					{
+						state = state.setDestSource(sourceV);
+						tmpPair = params.get(i).getAssemblyAndState(state);
+						assembly = tmpPair.assembly;
+						state = tmpPair.state;
+						state = state.setDestSource(destSource);
+					}
 					else
 					{
 						OperandSource sourceP = null;
 						if (params.get(i).hasPropValue(state)) sourceP = new ConstantSource(params.get(i).getPropValue(state), params.get(i).getSize());
 						else if (params.get(i).hasLValue()) sourceP = params.get(i).getLValue().castTo(funcParams.get(i).getType()).getSource();
-						assembly += AssemblyUtils.byteCopier(whitespace, sourceV.getSize(), sourceV, sourceP);
+						tmpPair = new ByteCopier(sourceV.getSize(), sourceV, sourceP).getAssemblyAndState(state);
+						assembly += tmpPair.assembly;
+						state = tmpPair.state;
 						
-						if (func.isInline())
-							AssignmentExpressionNode.equateLValue(funcParams.get(i), params.get(i));
+						if (func.isInline() && state.getOnlyValue(params.get(i).getLValue()) != null) // TODO
+							state = state.setPossibleValue(funcParams.get(i), state.getOnlyValue(params.get(i).getLValue()));
 					}
 				}
-				assembly += getAccumulatedSequences();
+				tmpPair = getRegisteredAssemblyAndState(state);
+				assembly += tmpPair.assembly;
+				state = tmpPair.state;
+				
 				if (func.isInline())
 				{
 					String endLabel = "__inline_end_" + CompUtils.getSafeUUID();
-					assembly += func.getCode().getAssembly(leadingWhitespace, endLabel);
-					assembly += whitespace + endLabel + ":" + "\n";
+					String e = state.exitFuncLabel();
+					state = state.setExitFuncLabel(endLabel);
+					tmpPair = func.getCode().getAssemblyAndState(state);
+					assembly += tmpPair.assembly;
+					state = tmpPair.state;
+					assembly += state.getWhitespace() + endLabel + ":" + "\n";
+					state = state.setExitFuncLabel(e);
 				}
-				else assembly += whitespace + "JSL\t" + func.getStartLabel() + "\n";
+				else
+				{
+					assembly += state.getWhitespace() + "JSL\t" + func.getStartLabel() + "\n";
+					state = state.clearKnownFlags();
+				}
 				
-				if (func.canCall(getEnclosingFunction())) // Finish possible recursion
+				if (func.canCall(state, getEnclosingFunction())) // Finish possible recursion
 				{
 					List<VariableNode> variables = new LinkedList<VariableNode>(getEnclosingFunction().getChildVariables().values());
 					Collections.reverse(variables);
 					for (VariableNode parameter : variables)
-						assembly += AssemblyUtils.stackLoader(whitespace, leadingWhitespace, parameter.getSource());
+					{
+						tmpPair = new StackLoader(parameter.getSize(), parameter.getSource()).getAssemblyAndState(state);
+						assembly += tmpPair.assembly;
+						state = tmpPair.state;
+					}
 				}
 			}
 			else // TODO Unpredictable function pointer or recursion, need to use the stack
@@ -307,100 +335,167 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 				if (getReferencedFunction() == null) // Unpredictable function pointer
 				{
 					BaseExpressionNode<?> addrExpr = new UnaryExpressionNode(this, "&", expr);
-					if (addrExpr.hasAssembly()) assembly += addrExpr.getAssembly(leadingWhitespace, CompConfig.funcPointerSource(), scratchManager, ticket);
-					else if (addrExpr.hasPropValue())
-						assembly += AssemblyUtils.byteCopier(whitespace, CompConfig.pointerSize, CompConfig.funcPointerSource(), new ConstantSource(addrExpr.getPropValue(), CompConfig.pointerSize));
+					if (addrExpr.hasAssembly(state))
+					{
+						state = state.setDestSource(CompConfig.funcPointerSource());
+						tmpPair = addrExpr.getAssemblyAndState(state);
+						assembly += tmpPair.assembly;
+						state = tmpPair.state.setDestSource(destSource);
+					}
+					else if (addrExpr.hasPropValue(state))
+					{
+						tmpPair = new ByteCopier(CompConfig.pointerSize, CompConfig.funcPointerSource(), new ConstantSource(addrExpr.getPropValue(state), CompConfig.pointerSize)).getAssemblyAndState(state);
+						assembly += tmpPair.assembly;
+						state = tmpPair.state;
+					}
 					else if (addrExpr.hasLValue())
-						assembly += AssemblyUtils.byteCopier(whitespace, CompConfig.pointerSize, CompConfig.funcPointerSource(), addrExpr.getLValue().getSource());
-					assembly += whitespace + "PHK\n";
-					assembly += whitespace + "PEA\t:+\n";
+					{
+						tmpPair = new ByteCopier(CompConfig.pointerSize, CompConfig.funcPointerSource(), addrExpr.getLValue().getSource()).getAssemblyAndState(state);
+						assembly += tmpPair.assembly;
+						state = tmpPair.state;
+					}
+					assembly += state.getWhitespace() + "PHK\n";
+					assembly += state.getWhitespace() + "PEA\t:+\n";
 				}
 				List<VariableNode> variables = new LinkedList<VariableNode>(getEnclosingFunction().getChildVariables().values()); // Prepare for possible recursion
 				for (VariableNode parameter : variables)
-					assembly += AssemblyUtils.stackPusher(whitespace, leadingWhitespace, parameter.getSource());
-
+				{
+					tmpPair = new StackPusher(parameter.getSize(), parameter.getSource()).getAssemblyAndState(state);
+					assembly += tmpPair.assembly;
+					state = tmpPair.state;
+				}
+					
 				for (BaseExpressionNode<?> param : params)
 				{
 					OperandSource sourceP = null;
 					ScratchSource sourceV = null;
-					if (param.hasPropValue()) sourceP = new ConstantSource(param.getPropValue(), param.getSize());
+					if (param.hasPropValue(state)) sourceP = new ConstantSource(param.getPropValue(state), param.getSize());
 					else if (param.hasLValue()) sourceP = param.getLValue().getSource();
-					if (param.hasAssembly())
+					if (param.hasAssembly(state))
 					{
-						sourceV = scratchManager.reserveScratchBlock(param.getSize());
-						assembly += param.getAssembly(leadingWhitespace, sourceV, scratchManager, ticket);
+						state = state.reserveScratchBlock(param.getSize());
+						sourceV = state.lastScratchSource();
+						state.setDestSource(sourceV);
+						tmpPair = param.getAssemblyAndState(state);
+						assembly += tmpPair.assembly;
+						state = tmpPair.state.setDestSource(destSource);
 						if (!param.hasLValue()) sourceP = sourceV;
 					}
-					assembly += AssemblyUtils.stackPusher(whitespace, leadingWhitespace, sourceP);
-					if (sourceV != null) scratchManager.releaseScratchBlock(sourceV);
+					tmpPair = new StackPusher(param.getSize(), sourceP).getAssemblyAndState(state);
+					assembly += tmpPair.assembly;
+					state = tmpPair.state;
+					if (sourceV != null) state = state.releaseScratchBlock(sourceV);
 				}
-				assembly += getAccumulatedSequences();
-				if (getReferencedFunction() == null)
-					assembly += whitespace + "JML\t[" + CompConfig.funcPointer + "]\n" + whitespace + ":\n";
-				else assembly += whitespace + "JSL\t" + getReferencedFunction().getStartLabel() + "\n";
+				tmpPair = getRegisteredAssemblyAndState(state);
+				assembly += tmpPair.assembly;
+				state = tmpPair.state;
 				
-				Collections.reverse(variables);
+				if (getReferencedFunction() == null)
+					assembly += state.getWhitespace() + "JML\t[" + CompConfig.funcPointer + "]\n" + state.getWhitespace() + ":\n";
+				else assembly += state.getWhitespace() + "JSL\t" + getReferencedFunction().getStartLabel() + "\n";
+
 				for (VariableNode parameter : variables)
-					assembly += AssemblyUtils.stackLoader(whitespace, leadingWhitespace, parameter.getSource());
+				{
+					tmpPair = new StackLoader(parameter.getSize(), parameter.getSource()).getAssemblyAndState(state);
+					assembly += tmpPair.assembly;
+					state = tmpPair.state;
+				}
+
 			}
 			
-			if (destSource != null) assembly += AssemblyUtils.byteCopier(whitespace, destSource.getSize(), destSource, CompConfig.callResultSource(destSource.getSize()));
+			if (destSource != null)
+			{
+				tmpPair = new ByteCopier(destSource.getSize(), destSource, CompConfig.callResultSource(destSource.getSize())).getAssemblyAndState(state);
+				assembly += tmpPair.assembly;
+				state = tmpPair.state;
+			}
 			break;
 		case structMember:
-			if (expr.hasAssembly()) assembly += expr.getAssembly(leadingWhitespace, scratchManager, ticket);
-			if (destSource != null) assembly += AssemblyUtils.byteCopier(whitespace, destSource.getSize(), destSource, getLValue().getSource());
+			if (expr.hasAssembly(state))
+			{
+				tmpPair = expr.getAssemblyAndState(state);
+				if (destSource != null)
+					tmpPair = new ByteCopier(destSource.getSize(), destSource, getLValue().getSource()).apply(tmpPair);
+				assembly += tmpPair.assembly;
+				state = tmpPair.state;
+			}
 			break;
 		case structMemberP:
-			if (expr.hasAssembly()) assembly += expr.getAssembly(leadingWhitespace, scratchManager, ticket);
+			if (expr.hasAssembly(state))
+			{
+				tmpPair = expr.getAssemblyAndState(state);
+				assembly += tmpPair.assembly;
+				state = tmpPair.state;
+			}
 			ScratchSource sourceP;
-			if (!ScratchManager.hasPointer(expr.getLValue().getSource()))
+			if (!state.hasPointer(expr.getLValue().getSource()))
 			{
 				try
 				{
-					sourceP = ScratchManager.reservePointer(expr.getLValue().getSource());
+					state = state.reservePointer(expr.getLValue().getSource());
+					sourceP = state.getPointer(expr.getLValue().getSource());
 				}
 				catch (ScratchOverflowException e)
 				{
-					ScratchManager.popPointer();
-					sourceP = ScratchManager.reservePointer(expr.getLValue().getSource());
+					state.releasePointers();
+					state = state.reservePointer(expr.getLValue().getSource());
+					sourceP = state.getPointer(expr.getLValue().getSource());
 				}
-				assembly += AssemblyUtils.byteCopier(whitespace, CompConfig.pointerSize, sourceP, expr.getLValue().getSource());
+				tmpPair = new ByteCopier(CompConfig.pointerSize, sourceP, expr.getLValue().getSource()).getAssemblyAndState(state);
+				assembly += tmpPair.assembly;
+				state = tmpPair.state;
 			}
-			else sourceP = ScratchManager.getPointer(expr.getLValue().getSource());
+			else sourceP = state.getPointer(expr.getLValue().getSource());
 			pointerRef = new IndirectLValueNode(this, expr.getLValue(), sourceP, ((PointerType) expr.getType()).getType());
-			if (destSource != null) assembly += AssemblyUtils.byteCopier(whitespace, destSource.getSize(), destSource, getLValue().getSource());
+			if (destSource != null)
+			{
+				tmpPair = new ByteCopier(destSource.getSize(), destSource, getLValue().getSource()).getAssemblyAndState(state);
+				assembly += tmpPair.assembly;
+				state = tmpPair.state;
+			}
 			break;
 		case incr: case decr:
 			OperandSource sourceX;
 			ScratchSource scratchX = null;
-			if (expr.hasAssembly())
+			if (expr.hasAssembly(state))
 			{
-				scratchX = scratchManager.reserveScratchBlock(expr.getSize());
-				assembly += expr.getAssembly(leadingWhitespace, scratchX, scratchManager, ticket);
+				state = state.reserveScratchBlock(expr.getSize());
+				scratchX = state.lastScratchSource();
+				state = state.setDestSource(scratchX);
+				tmpPair = expr.getAssemblyAndState(state);
+				assembly += tmpPair.assembly;
+				state = tmpPair.state;
+				state = state.setDestSource(destSource);
+				
 				if (expr.hasLValue())
 					sourceX = expr.getLValue().getSource();
 				else sourceX = scratchX;
 			}
-			else if (expr.hasPropValue())
-				sourceX = new ConstantSource(expr.getPropValue(), expr.getType().getSize());
+			else if (expr.hasPropValue(state))
+				sourceX = new ConstantSource(expr.getPropValue(state), expr.getType().getSize());
 			else if (expr.hasLValue())
 				sourceX = expr.getLValue().getSource();
 			else sourceX = null;
 			
-			if (destSource != null && !destSource.equals(sourceX)) assembly += AssemblyUtils.byteCopier(whitespace, expr.getSize(), destSource, sourceX);
+			if (destSource != null && !destSource.equals(sourceX))
+			{
+				tmpPair = new ByteCopier(expr.getSize(), destSource, sourceX).getAssemblyAndState(state);
+				assembly += tmpPair.assembly;
+				state = tmpPair.state;
+			}
 			if (type == PFType.incr)
 			{
 				DummyExpressionNode dX = new DummyExpressionNode(this, CompUtils.getPointerType(), 1);
-				getEnclosingSequencePoint().registerSequence(new AdditiveExpressionNode("+", expr, dX).getAssembly(leadingWhitespace, sourceX, ticket));
+				getEnclosingSequencePoint().registerAssemblable(new AdditiveExpressionNode("+", expr, dX));
 			}
 			else if (type == PFType.decr)
 			{
 				DummyExpressionNode dX = new DummyExpressionNode(this, CompUtils.getPointerType(), 1);
-				getEnclosingSequencePoint().registerSequence(new AdditiveExpressionNode("-", expr, dX).getAssembly(leadingWhitespace, sourceX, ticket));
+				getEnclosingSequencePoint().registerAssemblable(new AdditiveExpressionNode("-", expr, dX));
 			}
-			if (scratchX != null) scratchManager.releaseScratchBlock(scratchX);
+			if (scratchX != null) state = state.releaseScratchBlock(scratchX);
 			break;
-*/		default:
+		default:
 			break;
 		}
 		
