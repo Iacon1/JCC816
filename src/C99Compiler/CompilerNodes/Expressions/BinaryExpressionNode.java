@@ -135,6 +135,7 @@ public abstract class BinaryExpressionNode<
 			sourceY = y.getLValue().getSource();
 		else sourceY = null;
 
+		state = state.setDestSource(destSource);
 		tmpPair = getAssemblyAndState(state, sourceX, sourceY);
 		assembly += tmpPair.assembly;
 		state = tmpPair.state;

@@ -145,7 +145,6 @@ public class AssignmentExpressionNode extends BinaryExpressionNode
 		
 //		if (!y.getType().canCastTo(x.getType()))
 //			throw new TypeMismatchException(y.getType(), x.getType());
-		state = state.setDestSource(x.getLValue().getSource());
 		if (y.hasAssembly(state) && !x.getType().isTwice())
 		{
 			sourceY = x.getLValue().getSource();
@@ -158,10 +157,10 @@ public class AssignmentExpressionNode extends BinaryExpressionNode
 		{
 			state = state.reserveScratchBlock(x.getSize());
 			ScratchSource scratchX = state.lastScratchSource();
+			state = state.setDestSource(x.getLValue().getSource());
 			tmpPair = y.getAssemblyAndState(state);
 			assembly += tmpPair.assembly;
 			state = tmpPair.state;
-			state = y.getStateAfter(state);
 			if (!y.hasLValue()) sourceY = scratchX;
 			else sourceY = y.getLValue().castTo(x.getType()).getSource();
 			ByteCopier copier = new ByteCopier(x.getLValue().getSize(), x.getLValue().getSource(), sourceY);
