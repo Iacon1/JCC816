@@ -53,7 +53,9 @@ public abstract class OperandSource implements Serializable
 	public MutableAssemblyStatePair applyInstruction(MutableAssemblyStatePair pair, String operation, Integer i)
 	{
 		AssemblyStatePair myPair = getInstruction(pair.state, operation, i);
-		return new MutableAssemblyStatePair(pair.assembly + myPair.assembly, myPair.state);
+		pair.assembly += myPair.assembly;
+		pair.state = myPair.state;
+		return pair;
 	}
 	/** Returns assembly to load the the value or region represented by the source into the A register.
 	 * 
