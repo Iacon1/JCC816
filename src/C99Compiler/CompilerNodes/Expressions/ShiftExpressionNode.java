@@ -209,23 +209,22 @@ public class ShiftExpressionNode extends BinaryExpressionNode
 		switch (operator)
 		{
 		case "<<":
-			tmpPair = new ShiftOperator(true, isOne, getType().isSigned(), tempSource, sourceX).getAssemblyAndState(state.indent());
+			tmpPair = new ShiftOperator(true, isOne, getType().isSigned(), tempSource, sourceX).getAssemblyAndState(isOne ? state : state.indent());
 			assembly += tmpPair.assembly;
-			state = tmpPair.state.undent();
+			state = tmpPair.state;
 			break;
 		case ">>":
-			tmpPair = new ShiftOperator(false, isOne, getType().isSigned(), tempSource, sourceX).getAssemblyAndState(state.indent());
+			tmpPair = new ShiftOperator(false, isOne, getType().isSigned(), tempSource, sourceX).getAssemblyAndState(isOne ? state : state.indent());
 			assembly += tmpPair.assembly;
-			state = tmpPair.state.undent();
+			state = tmpPair.state;
 			break;
 		}
 		
 		if (!isOne)
 		{
-			whitespace = state.indent().getWhitespace();
 			assembly += whitespace + "DEX\n";
 			assembly += whitespace + "BNE\t:-\n";
-			whitespace = state.getWhitespace();
+			whitespace = state.undent().getWhitespace();
 			assembly += whitespace + ":\n"; // A loop
 		}
 
