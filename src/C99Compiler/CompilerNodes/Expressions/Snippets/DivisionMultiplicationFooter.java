@@ -5,13 +5,13 @@ package C99Compiler.CompilerNodes.Expressions.Snippets;
 import C99Compiler.Utils.CompUtils;
 import C99Compiler.Utils.ProgramState;
 import C99Compiler.Utils.OperandSources.OperandSource;
+import Shared.Assemblable;
+import Shared.Assemblable.AssemblyStatePair;
+import Shared.Assemblable.MutableAssemblyStatePair;
 import C99Compiler.CompConfig;
 import C99Compiler.CompilerNodes.Definitions.Type;
 import C99Compiler.CompilerNodes.Dummies.DummyExpressionNode;
 import C99Compiler.CompilerNodes.Expressions.UnaryExpressionNode;
-import C99Compiler.CompilerNodes.Interfaces.Assemblable;
-import C99Compiler.CompilerNodes.Interfaces.Assemblable.AssemblyStatePair;
-import C99Compiler.CompilerNodes.Interfaces.Assemblable.MutableAssemblyStatePair;
 
 //Uses hardware div registers, but only for 8-bit divisor
 public class DivisionMultiplicationFooter implements Assemblable

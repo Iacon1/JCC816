@@ -1,6 +1,6 @@
 // Created by Iacon1 on 10/25/2023.
 // SNES Header
-package Assembler;
+package Shared;
 
 import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
@@ -8,7 +8,6 @@ import java.util.Arrays;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
-import C99Compiler.CartConfig;
 import C99Compiler.CompConfig.VerbosityLevel;
 import C99Compiler.Utils.AssemblyUtils.AssemblyUtils;
 import Logging.Logging;

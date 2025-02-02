@@ -2,16 +2,15 @@
 // Created 10/13/2023
 // Cartridge configuration info that the compiler needs to know.
 
-package C99Compiler;
+package Shared;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
-import C99Compiler.MapModes.ExHiROM;
-import C99Compiler.MapModes.HiROM;
-import C99Compiler.MapModes.LoROM;
-import C99Compiler.MapModes.MapModeInterface;
-import Logging.Logging;
+import Shared.MapModes.ExHiROM;
+import Shared.MapModes.HiROM;
+import Shared.MapModes.LoROM;
+import Shared.MapModes.MapModeInterface;
 
 public class CartConfig
 {

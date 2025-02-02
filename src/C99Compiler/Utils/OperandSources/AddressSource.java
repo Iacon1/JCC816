@@ -3,8 +3,8 @@
 package C99Compiler.Utils.OperandSources;
 
 import C99Compiler.CompConfig;
-import C99Compiler.CompilerNodes.Interfaces.Assemblable.AssemblyStatePair;
 import C99Compiler.Utils.ProgramState;
+import Shared.Assemblable.AssemblyStatePair;
 
 public class AddressSource extends OperandSource
 {

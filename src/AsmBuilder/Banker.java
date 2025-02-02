@@ -4,10 +4,10 @@ package AsmBuilder;
 
 import java.util.ArrayList;
 
-import C99Compiler.CartConfig;
 import C99Compiler.CompConfig;
 import C99Compiler.ASMGrapher.ASMGraphBuilder;
 import C99Compiler.Exceptions.UnsupportedFeatureException;
+import Shared.CartConfig;
 
 public final class Banker
 {

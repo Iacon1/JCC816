@@ -18,8 +18,6 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
 import Assembler.Assembler;
-import Assembler.Header;
-import Assembler.MemorySize;
 import AsmBuilder.AssemblyUnit;
 import AsmBuilder.ModuleAssemblyUnit;
 import AsmBuilder.AsmBuilder;
@@ -31,11 +29,13 @@ import C99Compiler.CompConfig.DebugLevel;
 import C99Compiler.CompConfig.OptimizationLevel;
 import C99Compiler.CompConfig.VerbosityLevel;
 import C99Compiler.CompilerNodes.Dummies.DummyTranslationUnit;
-import C99Compiler.CompilerNodes.Interfaces.TranslationUnit;
 import C99Compiler.Utils.FileIO;
 import C99Compiler.Utils.LineInfo;
 import Logging.DebugLogger;
 import Logging.Logging;
+import Shared.Header;
+import Shared.MemorySize;
+import Shared.TranslationUnit;
 
 public class JCC816
 {

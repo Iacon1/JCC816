@@ -1,6 +1,6 @@
 // Created by Iacon1 on 02/14/2024.
 // Generalized Translation Unit
-package C99Compiler.CompilerNodes.Interfaces;
+package Shared;
 
 import java.util.LinkedHashMap;
 import java.util.List;

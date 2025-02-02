@@ -19,7 +19,6 @@ import C99Compiler.CompilerNodes.Definitions.Type;
 import C99Compiler.CompilerNodes.Expressions.AssignmentExpressionNode;
 import C99Compiler.CompilerNodes.Expressions.BaseExpressionNode;
 import C99Compiler.CompilerNodes.Expressions.ConstantExpressionNode;
-import C99Compiler.CompilerNodes.Interfaces.Assemblable;
 import C99Compiler.CompilerNodes.Interfaces.AssemblableNode;
 import C99Compiler.CompilerNodes.Interfaces.SequencePointNode;
 import C99Compiler.CompilerNodes.Interfaces.TypedNode;
@@ -32,6 +31,7 @@ import C99Compiler.Utils.OperandSources.ConstantSource;
 import Grammar.C99.C99Parser.DesignationContext;
 import Grammar.C99.C99Parser.DesignatorContext;
 import Grammar.C99.C99Parser.InitializerContext;
+import Shared.Assemblable;
 
 public class InitializerNode extends InterpretingNode<InitializerNode, InitializerContext> implements AssemblableNode, TypedNode, SequencePointNode
 {

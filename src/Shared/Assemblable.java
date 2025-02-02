@@ -1,7 +1,7 @@
 // By Iacon1
 // Created 09/30/2023
 //
-package C99Compiler.CompilerNodes.Interfaces;
+package Shared;
 
 import C99Compiler.Utils.ProgramState;
 

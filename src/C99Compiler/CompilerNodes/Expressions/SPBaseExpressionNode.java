@@ -8,9 +8,9 @@ import java.util.List;
 import org.antlr.v4.runtime.ParserRuleContext;
 
 import C99Compiler.CompilerNodes.ComponentNode;
-import C99Compiler.CompilerNodes.Interfaces.Assemblable;
 import C99Compiler.CompilerNodes.Interfaces.SequencePointNode;
 import C99Compiler.Utils.ProgramState;
+import Shared.Assemblable;
 
 public abstract class SPBaseExpressionNode<C extends ParserRuleContext> extends BaseExpressionNode<C> implements SequencePointNode
 {

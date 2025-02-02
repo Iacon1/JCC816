@@ -2,11 +2,11 @@
 //
 package C99Compiler.CompilerNodes.Expressions.Snippets;
 
-import C99Compiler.CompilerNodes.Interfaces.Assemblable;
 import C99Compiler.Utils.ProgramState;
 import C99Compiler.Utils.SNESRegisters;
 import C99Compiler.Utils.AssemblyUtils.BytewiseOperator;
 import C99Compiler.Utils.OperandSources.OperandSource;
+import Shared.Assemblable;
 
 //Uses hardware div registers, but only for 8-bit divisor
 public class Multiplier implements Assemblable

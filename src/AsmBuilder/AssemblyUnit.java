@@ -18,8 +18,8 @@ import C99Compiler.CompilerNodes.Definitions.StructUnionDefinitionNode;
 import C99Compiler.CompilerNodes.Definitions.Type;
 import C99Compiler.CompilerNodes.Dummies.DummyFunctionNode;
 import C99Compiler.CompilerNodes.Dummies.EnumeratorNode;
-import C99Compiler.CompilerNodes.Interfaces.TranslationUnit;
 import C99Compiler.CompilerNodes.LValues.VariableNode;
+import Shared.TranslationUnit;
 
 public class AssemblyUnit implements TranslationUnit {
 
@@ -65,5 +65,4 @@ public class AssemblyUnit implements TranslationUnit {
 	{
 		return assembly;
 	}
-	
 }

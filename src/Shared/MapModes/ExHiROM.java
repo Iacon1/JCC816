@@ -1,6 +1,6 @@
 // Created by Iacon1 on 01/23/2024.
 // ExHiROM cartridge type
-package C99Compiler.MapModes;
+package Shared.MapModes;
 
 public class ExHiROM extends HiROM
 {

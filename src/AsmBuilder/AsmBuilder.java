@@ -11,8 +11,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.AbstractMap.SimpleEntry;
 
-import Assembler.MemorySize;
-import C99Compiler.CartConfig;
 import C99Compiler.CompConfig;
 import C99Compiler.CompConfig.DebugLevel;
 import C99Compiler.CompConfig.DefinableInterrupt;
@@ -29,8 +27,6 @@ import C99Compiler.CompilerNodes.Definitions.EnumDefinitionNode;
 import C99Compiler.CompilerNodes.Definitions.StructUnionDefinitionNode;
 import C99Compiler.CompilerNodes.Definitions.Type;
 import C99Compiler.CompilerNodes.Dummies.EnumeratorNode;
-import C99Compiler.CompilerNodes.Interfaces.Catalogger;
-import C99Compiler.CompilerNodes.Interfaces.TranslationUnit;
 import C99Compiler.CompilerNodes.LValues.VariableNode;
 import C99Compiler.Exceptions.BuilderException;
 import C99Compiler.Exceptions.BuilderMultipleDefinitionException;
@@ -40,6 +36,10 @@ import C99Compiler.Utils.ProgramState;
 import C99Compiler.Utils.SNESRegisters;
 import C99Compiler.Utils.AssemblyUtils.AssemblyUtils;
 import Logging.Logging;
+import Shared.CartConfig;
+import Shared.Catalogger;
+import Shared.MemorySize;
+import Shared.TranslationUnit;
 
 public final class AsmBuilder implements Catalogger
 {

@@ -1,11 +1,9 @@
 // Created by Iacon1 on 01/14/2024.
 // Creates a config file
-package Assembler;
+package Shared;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
-
-import C99Compiler.CartConfig;
 
 public interface Configurer
 {

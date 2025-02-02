@@ -15,14 +15,14 @@ import C99Compiler.CompilerNodes.Definitions.EnumDefinitionNode;
 import C99Compiler.CompilerNodes.Definitions.StructUnionDefinitionNode;
 import C99Compiler.CompilerNodes.Definitions.Type;
 import C99Compiler.CompilerNodes.Dummies.EnumeratorNode;
-import C99Compiler.CompilerNodes.Interfaces.Assemblable.AssemblyStatePair;
-import C99Compiler.CompilerNodes.Interfaces.TranslationUnit;
 import C99Compiler.CompilerNodes.LValues.VariableNode;
 import C99Compiler.Exceptions.CompilerMultipleDefinitionException;
 import C99Compiler.Utils.CompUtils;
 import C99Compiler.Utils.LineInfo;
 import Grammar.C99.C99Parser.External_declarationContext;
 import Grammar.C99.C99Parser.Translation_unitContext;
+import Shared.TranslationUnit;
+import Shared.Assemblable.AssemblyStatePair;
 
 public class TranslationUnitNode extends InterpretingNode<TranslationUnitNode, Translation_unitContext> implements TranslationUnit
 {	

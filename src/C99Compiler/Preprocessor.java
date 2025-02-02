@@ -13,7 +13,6 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.DiagnosticErrorListener;
 import org.antlr.v4.runtime.Token;
 
-import Assembler.Header;
 import C99Compiler.PreprocNodes.GroupNode;
 import C99Compiler.PreprocNodes.PreProcComponentNode;
 import C99Compiler.Utils.LineInfo;
@@ -21,6 +20,7 @@ import Grammar.C99A3.C99A3Lexer;
 import Grammar.C99A3.C99A3Parser;
 import Grammar.C99A3.C99A3Parser.GroupContext;
 import Logging.Logging;
+import Shared.Header;
 
 public final class Preprocessor
 {

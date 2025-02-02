@@ -10,13 +10,15 @@ import java.io.InputStream;
 import java.util.LinkedList;
 import java.util.List;
 
-import Assembler.Header.DestinationCode;
-import C99Compiler.CartConfig;
 import C99Compiler.CompConfig.DebugLevel;
 import C99Compiler.CompConfig.VerbosityLevel;
 import C99Compiler.Exceptions.AssemblerException;
 import C99Compiler.Utils.FileIO;
 import Logging.Logging;
+import Shared.CartConfig;
+import Shared.Header;
+import Shared.MemorySize;
+import Shared.Header.DestinationCode;
 
 public class Assembler
 {

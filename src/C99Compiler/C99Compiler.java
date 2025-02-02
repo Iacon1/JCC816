@@ -11,7 +11,6 @@ import java.util.Set;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 
-import Assembler.Header;
 import C99Compiler.CompConfig.VerbosityLevel;
 import C99Compiler.CompilerNodes.TranslationUnitNode;
 import C99Compiler.CompilerNodes.Statements.CompoundStatementNode;
@@ -22,6 +21,7 @@ import Grammar.C99.C99Parser;
 import Grammar.C99.C99Parser.Compound_statementContext;
 import Grammar.C99.C99Parser.Translation_unitContext;
 import Logging.Logging;
+import Shared.Header;
 
 public class C99Compiler
 {

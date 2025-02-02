@@ -4,9 +4,9 @@ package C99Compiler.Utils.OperandSources;
 
 import java.io.Serializable;
 
-import C99Compiler.CompilerNodes.Interfaces.Assemblable.AssemblyStatePair;
-import C99Compiler.CompilerNodes.Interfaces.Assemblable.MutableAssemblyStatePair;
 import C99Compiler.Utils.ProgramState;
+import Shared.Assemblable.AssemblyStatePair;
+import Shared.Assemblable.MutableAssemblyStatePair;
 
 public abstract class OperandSource implements Serializable
 {

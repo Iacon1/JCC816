@@ -1,7 +1,7 @@
 // Created by Iacon1 on 01/15/2024.
 // Catalogs types, variables, and functions
 
-package C99Compiler.CompilerNodes.Interfaces;
+package Shared;
 
 import java.util.LinkedHashMap;
 

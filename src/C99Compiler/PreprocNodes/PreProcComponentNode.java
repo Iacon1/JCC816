@@ -15,10 +15,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import Assembler.Header;
 import C99Compiler.CompConfig.DebugLevel;
 import C99Compiler.PragmaProcessor;
 import C99Compiler.Utils.LineInfo;
+import Shared.Header;
 
 public abstract class PreProcComponentNode<T extends PreProcComponentNode<T>>
 {

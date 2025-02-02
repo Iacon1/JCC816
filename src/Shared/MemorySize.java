@@ -1,6 +1,6 @@
 // Created by Iacon1 on 01/21/2024.
 //
-package Assembler;
+package Shared;
 
 public class MemorySize
 {

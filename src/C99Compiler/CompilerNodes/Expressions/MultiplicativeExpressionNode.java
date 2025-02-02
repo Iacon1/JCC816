@@ -12,7 +12,6 @@ import C99Compiler.CompilerNodes.Expressions.Snippets.DivisionMultiplicationHead
 import C99Compiler.CompilerNodes.Expressions.Snippets.LongDividerModulator;
 import C99Compiler.CompilerNodes.Expressions.Snippets.Multiplier;
 import C99Compiler.CompilerNodes.Expressions.Snippets.ShortDividerModulator;
-import C99Compiler.CompilerNodes.Interfaces.Assemblable;
 import C99Compiler.CompilerNodes.LValues.LValueNode;
 import C99Compiler.Exceptions.UnsupportedFeatureException;
 import C99Compiler.Utils.ProgramState;
@@ -20,6 +19,7 @@ import C99Compiler.Utils.AssemblyUtils.ByteCopier;
 import C99Compiler.Utils.OperandSources.OperandSource;
 import Grammar.C99.C99Parser.Cast_expressionContext;
 import Grammar.C99.C99Parser.Multiplicative_expressionContext;
+import Shared.Assemblable;
 
 public class MultiplicativeExpressionNode extends CallingArithmeticBinaryExpressionNode
 <Multiplicative_expressionContext, Cast_expressionContext, Cast_expressionContext, Multiplicative_expressionContext>

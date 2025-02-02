@@ -3,10 +3,10 @@
 package C99Compiler.Utils.AssemblyUtils;
 
 import C99Compiler.CompConfig;
-import C99Compiler.CompilerNodes.Interfaces.Assemblable;
 import C99Compiler.Utils.CompUtils;
 import C99Compiler.Utils.ProgramState;
 import C99Compiler.Utils.ProgramState.PreserveFlag;
+import Shared.Assemblable;
 import C99Compiler.Utils.OperandSources.OperandSource;
 
 /**

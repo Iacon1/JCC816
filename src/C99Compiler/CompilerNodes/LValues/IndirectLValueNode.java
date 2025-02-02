@@ -7,10 +7,10 @@ import C99Compiler.CompConfig;
 import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.ValueNode;
 import C99Compiler.CompilerNodes.Definitions.Type;
-import C99Compiler.CompilerNodes.Interfaces.Assemblable.AssemblyStatePair;
 import C99Compiler.Utils.ProgramState;
 import C99Compiler.Utils.ProgramState.PreserveFlag;
 import C99Compiler.Utils.ProgramState.ProcessorFlag;
+import Shared.Assemblable.AssemblyStatePair;
 import C99Compiler.Utils.OperandSources.OperandSource;
 
 public class IndirectLValueNode extends LValueNode<IndirectLValueNode>

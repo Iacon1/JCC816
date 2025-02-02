@@ -4,7 +4,7 @@
 package C99Compiler.CompilerNodes.Dummies;
 
 import AsmBuilder.AssemblyUnit;
-import C99Compiler.CompilerNodes.Interfaces.TranslationUnit;
+import Shared.TranslationUnit;
 
 public class DummyTranslationUnit extends AssemblyUnit implements TranslationUnit
 {

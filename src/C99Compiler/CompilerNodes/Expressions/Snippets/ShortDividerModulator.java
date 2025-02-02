@@ -2,10 +2,10 @@
 //
 package C99Compiler.CompilerNodes.Expressions.Snippets;
 
-import C99Compiler.CompilerNodes.Interfaces.Assemblable;
 import C99Compiler.Utils.CompUtils;
 import C99Compiler.Utils.ProgramState;
 import C99Compiler.Utils.ProgramState.ProcessorFlag;
+import Shared.Assemblable;
 import C99Compiler.Utils.SNESRegisters;
 import C99Compiler.Utils.AssemblyUtils.BytewiseOperator;
 import C99Compiler.Utils.OperandSources.OperandSource;

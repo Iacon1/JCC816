@@ -5,7 +5,6 @@ package C99Compiler.CompilerNodes.Expressions.Snippets;
 
 import C99Compiler.CompConfig;
 import C99Compiler.C99Compiler;
-import C99Compiler.CompilerNodes.Interfaces.Assemblable;
 import C99Compiler.CompilerNodes.Definitions.Type;
 import C99Compiler.CompilerNodes.Expressions.AdditiveExpressionNode;
 import C99Compiler.CompilerNodes.Expressions.EqualityExpressionNode;
@@ -18,6 +17,7 @@ import C99Compiler.Utils.CompUtils;
 import C99Compiler.Utils.FileIO;
 import C99Compiler.Utils.ProgramState;
 import C99Compiler.Utils.ProgramState.ScratchSource;
+import Shared.Assemblable;
 import C99Compiler.Utils.OperandSources.ConstantSource;
 import C99Compiler.Utils.OperandSources.OperandSource;
 import C99Compiler.CompilerNodes.Dummies.DummyExpressionNode;

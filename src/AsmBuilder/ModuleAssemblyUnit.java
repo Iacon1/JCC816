@@ -18,9 +18,9 @@ import C99Compiler.CompilerNodes.Definitions.EnumDefinitionNode;
 import C99Compiler.CompilerNodes.Definitions.StructUnionDefinitionNode;
 import C99Compiler.CompilerNodes.Definitions.Type;
 import C99Compiler.CompilerNodes.Dummies.EnumeratorNode;
-import C99Compiler.CompilerNodes.Interfaces.TranslationUnit;
 import C99Compiler.CompilerNodes.LValues.VariableNode;
 import C99Compiler.Utils.FileIO;
+import Shared.TranslationUnit;
 
 public class ModuleAssemblyUnit extends AssemblyUnit
 {

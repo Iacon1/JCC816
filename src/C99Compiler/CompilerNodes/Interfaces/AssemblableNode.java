@@ -5,6 +5,7 @@ package C99Compiler.CompilerNodes.Interfaces;
 
 import C99Compiler.CompilerNodes.FunctionDefinitionNode;
 import C99Compiler.Utils.ProgramState;
+import Shared.Assemblable;
 
 public interface AssemblableNode extends Assemblable
 {

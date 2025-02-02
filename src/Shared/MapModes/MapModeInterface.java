@@ -1,6 +1,6 @@
 // Created by Iacon1 on 01/23/2024.
 //
-package C99Compiler.MapModes;
+package Shared.MapModes;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -8,14 +8,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.AbstractMap.SimpleEntry;
 
-import Assembler.MemorySize;
-import Assembler.Configurer;
 import C99Compiler.CompConfig;
 import C99Compiler.CompConfig.VerbosityLevel;
 import C99Compiler.CompilerNodes.FunctionDefinitionNode;
 import C99Compiler.CompilerNodes.LValues.VariableNode;
 import C99Compiler.Utils.OverlaySolver;
 import Logging.Logging;
+import Shared.Configurer;
+import Shared.MemorySize;
 
 public interface MapModeInterface extends Configurer
 {
