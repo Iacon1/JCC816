@@ -6,10 +6,12 @@ import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.FunctionDefinitionNode;
 import C99Compiler.CompilerNodes.Definitions.Type;
 import C99Compiler.CompilerNodes.Definitions.Type.CastContext;
+import C99Compiler.CompilerNodes.Dummies.DummyExpressionNode;
 import C99Compiler.Utils.CompUtils;
 import C99Compiler.Utils.ProgramState;
 import C99Compiler.Utils.ProgramState.ScratchSource;
 import C99Compiler.Utils.AssemblyUtils.ByteCopier;
+import C99Compiler.Utils.AssemblyUtils.ComparitiveJump;
 import C99Compiler.Utils.OperandSources.ConstantSource;
 import C99Compiler.Utils.OperandSources.OperandSource;
 import Grammar.C99.C99Parser.Conditional_expressionContext;
@@ -21,7 +23,8 @@ public class ConditionalExpressionNode extends SPBinaryExpressionNode
 <ExpressionContext, Conditional_expressionContext, Lor_expressionContext, Conditional_expressionContext>
 {
 	private BaseExpressionNode<?> z;
-
+	private String condId;
+	
 	@Override
 	protected BaseExpressionNode<ExpressionContext> getC1Node(Conditional_expressionContext node) throws Exception
 	{return new ExpressionNode(this).interpret(node.expression());}
@@ -36,6 +39,7 @@ public class ConditionalExpressionNode extends SPBinaryExpressionNode
 	{
 		super(parent);
 		isSP = false;
+		condId = CompUtils.getSafeUUID();
 	}
 	
 	@Override
@@ -80,91 +84,41 @@ public class ConditionalExpressionNode extends SPBinaryExpressionNode
 	@Override
 	public AssemblyStatePair getAssemblyAndState(ProgramState state) throws Exception
 	{
-		OperandSource destSource = state.destSource();
-		String whitespace = state.getWhitespace();
-		ScratchSource scratchX = null, scratchY = null;
-		final OperandSource sourceX, sourceY, sourceZ;
-		AssemblyStatePair pair = new AssemblyStatePair("", state);
-		// Figure out Z
-		if (z.hasAssembly(state))
+		MutableAssemblyStatePair pair = new MutableAssemblyStatePair("", state);
+		OperandSource destSource = pair.state.destSource();
+		
+		// Figure out Z and put whether it's zero or not in the A register
+		pair.state = pair.state.setDestSource(null);
+		EqualityExpressionNode equ = new EqualityExpressionNode(this, z);
+		if (equ.hasAssembly(state))
 		{
 			isSP = true;
-			state = state.reserveScratchBlock(z.getSize());
-			sourceZ = state.lastScratchSource();
 			clearAssemblables();
-			state = state.setDestSource(sourceZ);
-			pair = z.apply(pair);
-			//assembly += getAccumulatedSequences();
+			pair = equ.apply(pair);
+			applyRegistered(pair);
 			clearAssemblables(); isSP = false;
 		}
-		else if (z.hasLValue())
-			sourceZ = z.getLValue().getSource();
-		else
-			sourceZ = null;
-		
-		String noLabel = null, endLabel = null;
-		if (!z.hasPropValue(state))
-		{
-			noLabel = "__condSkip" + CompUtils.getSafeUUID();
-			state = state.setDestSource(sourceZ);
-			EqualityExpressionNode n = new EqualityExpressionNode(this, z);
-			pair = n.apply(pair);
-			pair = pair.addAssembly(whitespace + "BNE\t:+\n");
-			pair = pair.addAssembly(whitespace + "JMP\t" + noLabel + "\n");
-			pair = pair.addAssembly(whitespace + ":\n");
-		}
-		if (!z.hasPropValue(state) || z.getPropBool(state) == true)
-		{
-			// figure out X
-			if (x.hasAssembly(state))
-			{
-				state = state.reserveScratchBlock(x.getType().getSize());
-				scratchX = state.lastScratchSource();
-				state = state.setDestSource(scratchX);
-				pair = x.apply(pair);
-				if (x.hasLValue())
-					sourceX = x.getLValue().getSource();
-				else sourceX = scratchX;
-			}
-			else if (x.hasPropValue(state))
-				sourceX = new ConstantSource(x.getPropValue(state), x.getType().getSize());
-			else if (x.hasLValue())
-				sourceX = x.getLValue().getSource();
-			else sourceX = null;
-			ByteCopier copier = new ByteCopier(sourceX.getSize(), destSource, sourceX);
-			pair = copier.apply(pair);
-		}
-		if (!z.hasPropValue(state))
-		{
-			endLabel = "__condEnd" + CompUtils.getSafeUUID();
-			pair = pair.addAssembly(whitespace + "JMP\t" + endLabel + "\n");
-			pair = pair.addAssembly(whitespace + noLabel + ":\n");
-		}
-		if (!z.hasPropValue(state) || z.getPropBool(state) == false)
-		{
-			// figure out Y		
-			if (y.hasAssembly(state))
-			{
-				state = state.reserveScratchBlock(y.getType().getSize());
-				scratchY = state.lastScratchSource();
-				state = state.setDestSource(scratchY);
-				pair = y.apply(pair);
-				if (y.hasLValue())
-					sourceY = y.getLValue().getSource();
-				else sourceY = scratchY;
-			}
-			else if (y.hasPropValue(state))
-				sourceY = new ConstantSource(y.getPropValue(state), y.getType().getSize());
-			else if (y.hasLValue())
-				sourceY = y.getLValue().getSource();
-			else sourceY = null;
-			ByteCopier copier = new ByteCopier(sourceY.getSize(), destSource, sourceY);
-			pair = copier.apply(pair);
-		}
-		if (!z.hasPropValue(state))
-			pair = pair.addAssembly(whitespace + endLabel + ":\n");
 
-		return pair;
+		if (z.hasPropValue(pair.state) && (z.getPropBool(pair.state) == true || z.getPropLong(state) != 0)) // Always true
+			new ByteCopier(destSource.getSize(), destSource, x.getPropValue(pair.state)).apply(pair);
+		else if (z.hasPropValue(pair.state)) // Always false
+			new ByteCopier(destSource.getSize(), destSource, y.getPropValue(pair.state)).apply(pair);		
+		else
+		{
+			String noLabel = "__condSkip" + condId;
+			String endLabel = "__condEnd" + condId;
+			new ComparitiveJump(
+					new AssignmentExpressionNode(this,
+							new DummyExpressionNode(this, getType(), destSource),
+							x),
+					new AssignmentExpressionNode(this,
+							new DummyExpressionNode(this, getType(), destSource),
+							y),
+					noLabel,
+					endLabel, false).apply(pair);
+
+		}
+		return pair.getImmutable();
 	}
-	
+
 }

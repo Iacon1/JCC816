@@ -7,13 +7,10 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import C99Compiler.CompConfig;
 import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.FunctionDefinitionNode;
 import C99Compiler.CompilerNodes.Dummies.DummyExpressionNode;
-import C99Compiler.CompilerNodes.Dummies.DummyValueNode;
 import C99Compiler.CompilerNodes.Expressions.BaseExpressionNode;
-import C99Compiler.CompilerNodes.Expressions.BranchingExpressionNode;
 import C99Compiler.CompilerNodes.Expressions.EqualityExpressionNode;
 import C99Compiler.CompilerNodes.Expressions.ExpressionNode;
 import C99Compiler.CompilerNodes.Expressions.RelationalExpressionNode;
@@ -21,11 +18,9 @@ import C99Compiler.CompilerNodes.Expressions.ShiftExpressionNode;
 import C99Compiler.Utils.CompUtils;
 import C99Compiler.Utils.ProgramState;
 import C99Compiler.Utils.ProgramState.ScratchSource;
-import C99Compiler.Utils.AssemblyUtils.AssemblyUtils;
 import C99Compiler.Utils.AssemblyUtils.ByteCopier;
 import C99Compiler.Utils.AssemblyUtils.ComparitiveJump;
 import C99Compiler.Utils.OperandSources.ConstantSource;
-import C99Compiler.Utils.OperandSources.OperandSource;
 import Grammar.C99.C99Parser.Selection_statementContext;
 
 public class SelectionStatementNode extends SequencePointStatementNode<Selection_statementContext>
@@ -123,22 +118,14 @@ public class SelectionStatementNode extends SequencePointStatementNode<Selection
 	@Override
 	public AssemblyStatePair getAssemblyAndState(ProgramState state) throws Exception
 	{
-		AssemblyStatePair pair = new AssemblyStatePair("", state);
-		
-		String whitespace = state.getWhitespace();
+		MutableAssemblyStatePair pair = new MutableAssemblyStatePair("", state);
 
 		if (!isSwitch) // If statement
 		{
 			if (expression.hasPropValue(pair.state) && (expression.getPropBool(pair.state) || expression.getPropLong(pair.state) != 0)) // It's always true
-			{
-				pair = pair.addAssembly(labelLine(state.indent(), ifLineNo));
-				pair = ifStm.apply(pair);
-			}
+				ifStm.apply(pair);
 			else if (expression.hasPropValue(pair.state) && elseStm != null) // It's always false
-			{
-				pair = pair.addAssembly(labelLine(pair.state.indent(), elseLineNo));
-				pair = elseStm.apply(pair);
-			}
+				elseStm.apply(pair);
 			else if (!expression.hasPropValue(pair.state)) // Unknown
 			{
 				String skipName = "__IFNOT_" + selId;
@@ -147,34 +134,25 @@ public class SelectionStatementNode extends SequencePointStatementNode<Selection
 				
 				if (expression.hasAssembly(pair.state))
 				{
-					pair = pair.replaceState(pair.state.reserveScratchBlock(expression.getSize()));
+					pair.state = pair.state.reserveScratchBlock(expression.getSize());
 					ScratchSource exprSource = pair.state.lastScratchSource();
-					pair = pair.replaceState(pair.state.setDestSource(exprSource));
-					pair = new EqualityExpressionNode(this, expression).apply(pair);
-					pair = applyWithRegistered(pair, expression);
-					pair = new ByteCopier(exprSource.getSize(), exprSource, exprSource).apply(pair);
+					pair.state = pair.state.setDestSource(exprSource);
+					applyWithRegistered(pair, new EqualityExpressionNode(this, expression));
+					new ByteCopier(exprSource.getSize(), exprSource, exprSource).apply(pair);
 					
 				}
 				else
-					pair = new EqualityExpressionNode(expression).apply(pair);
+					new EqualityExpressionNode(null, expression).apply(pair);
 				
-				ComparitiveJump cmpJump = new ComparitiveJump(ifStm, skipName, elseStm != null ? getEndLabel() : null, true, labelLine(pair.state, ifLineNo));
-				pair = cmpJump.apply(pair);
-				pair = pair.replaceState(ifStm.clearPossibleValues(pair.state));
-				ifState = pair.state;
-				
+				ComparitiveJump cmpJump;
 				if (elseStm != null)
-				{
-					pair = pair.replaceState(elseState.indent());
-					pair.addAssembly(labelLine(pair.state, elseLineNo));
-					pair = elseStm.apply(pair);
-					pair = pair.replaceState(elseStm.clearPossibleValues(pair.state));
-					pair = pair.addAssembly(whitespace + getEndLabel() + ":\n");
-					pair = pair.replaceState(ifState.combine(elseState));
-				}
+					cmpJump = new ComparitiveJump(ifStm, elseStm, skipName, getEndLabel(), true, labelLine(pair.state, ifLineNo));
+				else
+					cmpJump = new ComparitiveJump(ifStm, null, skipName, null, true, labelLine(pair.state, ifLineNo));
+				cmpJump.apply(pair);
 			}
 		}
-		else
+		else // Switch
 		{
 			long smallestCase = 0, largestCase = 0;
 			Set<Long> caseValues = new HashSet<Long>();
@@ -189,7 +167,8 @@ public class SelectionStatementNode extends SequencePointStatementNode<Selection
 				caseValues.add(l);
 			}
 			if (largestExpr == null)
-				return pair;
+				return pair.getImmutable();
+/*			
 			pair = pair.replaceState(pair.state.reserveScratchBlock(expression.getSize()));
 			ScratchSource exprSource = pair.state.lastScratchSource();
 			// If greater than largest case, skip
@@ -224,9 +203,10 @@ public class SelectionStatementNode extends SequencePointStatementNode<Selection
 			pair = pair.replaceState(switchStm.clearPossibleValues(pair.state));
 			if (!hasDefault) pair.addAssembly(whitespace + getDefaultLabel(false) + ":\n");
 			pair = pair.addAssembly(whitespace + getEndLabel() + ":\n");
+			*/
 		}
 		
-		pair = pair.replaceState(pair.state.wipe());
-		return pair;
+		pair.state = pair.state.wipe();
+		return pair.getImmutable();
 	}	
 }
