@@ -14,6 +14,7 @@ import C99Compiler.CompilerNodes.Dummies.DummyExpressionNode;
 import C99Compiler.Utils.CompUtils;
 import C99Compiler.Utils.ProgramState;
 import C99Compiler.Utils.AssemblyUtils.AssemblyUtils;
+import C99Compiler.Utils.AssemblyUtils.ComparitiveJump;
 import C99Compiler.Utils.OperandSources.OperandSource;
 import C99Compiler.Utils.ProgramState.ScratchSource;
 import Grammar.C99.C99Parser.Iteration_statementContext;
@@ -137,8 +138,6 @@ public class IterationStatementNode extends SequencePointStatementNode<Iteration
 		AssemblyStatePair tmpPair;
 		String whitespace = state.getWhitespace();
 		String assembly = "";
-		state = state.reserveScratchBlock(condExpNode.getSize());
-		ScratchSource exprSource = state.lastScratchSource();
 		state = state.wipe();
 		ProgramState oldState = state;
 		
@@ -146,18 +145,15 @@ public class IterationStatementNode extends SequencePointStatementNode<Iteration
 		{
 		case while_:
 			assembly += whitespace + getStartLabel() + ":\n";
+			state = stmNode.clearPossibleValues(state);
+			state = state.clearKnownFlags();
 			
 			if (condExpNode.hasPropValue(state)); // We wouldn't be making this assembly if it was assumed to be 0.
 			else
 			{
-				state = state.setDestSource(exprSource);
-				if (condExpNode.hasAssembly(state))
-				{
-					tmpPair = getAssemblyAndStateWithRegistered(state, condExpNode);
-					tmpPair = new EqualityExpressionNode(this, new DummyExpressionNode(this, condExpNode.getType(), exprSource)).apply(tmpPair);
-				}
-				else
-					tmpPair = new EqualityExpressionNode(this, new DummyExpressionNode(this, condExpNode.getType(), exprSource)).getAssemblyAndState(state);
+				state = state.setDestSource(null);
+				state = state.reserveScratchBlock(condExpNode.getSize());
+				tmpPair = getAssemblyAndStateWithRegistered(state, new EqualityExpressionNode(this, condExpNode));
 				assembly += tmpPair.assembly;
 				state = tmpPair.state;
 	
@@ -165,7 +161,7 @@ public class IterationStatementNode extends SequencePointStatementNode<Iteration
 				assembly += whitespace + "JMP\t" + getEndLabel() + "\n";
 				assembly += whitespace + ":\n";
 			}
-			state = stmNode.clearPossibleValues(state);
+
 			if (stmNode.hasAssembly(state))
 			{
 				tmpPair = stmNode.getAssemblyAndState(state);
@@ -178,6 +174,7 @@ public class IterationStatementNode extends SequencePointStatementNode<Iteration
 		case doWhile:
 			assembly += whitespace + getStartLabel() + ":\n";
 			state = stmNode.clearPossibleValues(state);
+			state = state.clearKnownFlags();
 			if (stmNode.hasAssembly(state))
 			{
 				tmpPair = stmNode.getAssemblyAndState(state);
@@ -186,9 +183,8 @@ public class IterationStatementNode extends SequencePointStatementNode<Iteration
 			}
 			assembly += whitespace + getIterLabel() + ":\n";
 
-			state = state.setDestSource(exprSource);
-			tmpPair = getAssemblyAndStateWithRegistered(state, condExpNode);
-			tmpPair = new EqualityExpressionNode(this, new DummyExpressionNode(this, condExpNode.getType(), exprSource)).apply(tmpPair);
+			state = state.setDestSource(null);
+			tmpPair = getAssemblyAndStateWithRegistered(state, new EqualityExpressionNode(this, condExpNode));
 			assembly += tmpPair.assembly;
 			state = tmpPair.state;
 			
@@ -206,51 +202,49 @@ public class IterationStatementNode extends SequencePointStatementNode<Iteration
 			}
 			else if (initExpNode != null && initExpNode.hasAssembly(state))
 			{
+				state = state.setDestSource(null);
 				tmpPair = initExpNode.getAssemblyAndState(state);
 				assembly += tmpPair.assembly;
 				state = tmpPair.state;
 			}
 
 			assembly += whitespace + getStartLabel() + ":\n";
-			if (condExpNode != null) // Run forever if condition not provided
+			state = stmNode.clearPossibleValues(state);
+			state = state.clearKnownFlags();
+			if (condExpNode != null)
 			{
+				if (iterExpNode != null) // Don't count on the value of anything in the iteration node
+					state = iterExpNode.clearPossibleValues(state);
+
 				if (condExpNode.hasPropValue(state) && condExpNode.getPropLong(state) == 0)
 					return new AssemblyStatePair("", oldState); // Don't run if 0, otherwise run forever
-				else if (!condExpNode.hasPropValue(state))
+				else if (!condExpNode.hasPropValue(state) || condExpNode.hasAssembly(state))
 				{
-					if (condExpNode.hasAssembly(state))
-					{
-						tmpPair = getAssemblyAndStateWithRegistered(state, condExpNode);
-						tmpPair = new EqualityExpressionNode(this, new DummyExpressionNode(this, condExpNode.getType(), exprSource)).apply(tmpPair);
-						assembly += whitespace + "BNE\t:+\n";
-						assembly += whitespace + "JMP\t" + getEndLabel() + "\n";
-						assembly += whitespace + ":\n";
-					}
-					else
-					{
-						tmpPair = getAssemblyAndStateWithRegistered(state, condExpNode);
-						tmpPair = new EqualityExpressionNode(this, new DummyExpressionNode(this, condExpNode.getType(), exprSource)).apply(tmpPair);
-						assembly += whitespace + "BNE\t:+\n";
-						assembly += whitespace + "JMP\t" + getEndLabel() + "\n";
-						assembly += whitespace + ":\n";
-					}
+					state = state.setDestSource(null);
+					tmpPair = getAssemblyAndStateWithRegistered(state, new EqualityExpressionNode(this, condExpNode));
+					// Jump to end if equality is 1, i. e. result is 0
+					tmpPair = new ComparitiveJump(stmNode, null, getEndLabel(), null, false).apply(tmpPair);					
+					assembly += tmpPair.assembly;
+					assembly = assembly.substring(0, assembly.lastIndexOf('\n', assembly.length() - 2) + 1); // Remove last line
+					state = tmpPair.state;
 				}
 			}
-			state = stmNode.clearPossibleValues(state);
-			if (stmNode.hasAssembly(state))
+			if (stmNode.hasAssembly(state)) // Go forever
 			{
 				tmpPair = stmNode.getAssemblyAndState(state);
 				assembly += tmpPair.assembly;
 				state = tmpPair.state;
 			}
 			assembly += whitespace + getIterLabel() + ":\n";
+			
 			if (iterExpNode != null && iterExpNode.hasAssembly(state))
 			{
+				state = state.setDestSource(null);
 				tmpPair = getAssemblyAndStateWithRegistered(state, iterExpNode);
-				tmpPair = new EqualityExpressionNode(this, new DummyExpressionNode(this, condExpNode.getType(), exprSource)).apply(tmpPair);
 				assembly += tmpPair.assembly;
 				state = tmpPair.state;
 			}
+			assembly += whitespace + "JMP\t" + getStartLabel() + "\n";
 			assembly += whitespace + getEndLabel() + ":\n";
 			break;
 		}
