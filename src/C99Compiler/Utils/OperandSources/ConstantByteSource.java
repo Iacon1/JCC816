@@ -54,7 +54,6 @@ public class ConstantByteSource extends OperandSource
 		return getBase(new ProgramState(), 0);
 	}
 	
-
 	@Override
 	public AssemblyStatePair getInstruction(ProgramState state, String operation, Integer i)
 	{

@@ -5,6 +5,8 @@ package C99Compiler.Utils.OperandSources;
 import C99Compiler.Utils.CompUtils;
 import C99Compiler.Utils.ProgramState;
 import C99Compiler.Utils.PropPointer;
+import C99Compiler.Utils.ProgramState.PreserveFlag;
+import Shared.Assemblable.AssemblyStatePair;
 
 public class ConstantSource extends ConstantByteSource
 {
@@ -84,7 +86,17 @@ public class ConstantSource extends ConstantByteSource
 	
 	public String getBase(ProgramState state, int i)
 	{
-		if (pointer != null) return pointer.apply(state, i);
+		if (pointer != null)
+			return pointer.apply(state, i);
 		else return super.getBase(state, i);
+	}
+	
+	@Override
+	public AssemblyStatePair getInstruction(ProgramState state, String operation, Integer i)
+	{
+		AssemblyStatePair pair = super.getInstruction(state, operation, i);
+		if (pointer != null && operation == "LDA")
+			pair = new AssemblyStatePair(pair.assembly, pair.state.clearKnownFlags(PreserveFlag.A));
+		return pair;
 	}
 }
