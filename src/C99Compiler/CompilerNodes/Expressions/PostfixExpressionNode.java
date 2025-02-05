@@ -483,16 +483,14 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 				assembly += tmpPair.assembly;
 				state = tmpPair.state;
 			}
+			BaseExpressionNode<?> dX = new DummyExpressionNode(this, expr.getType(), 1);
 			if (type == PFType.incr)
-			{
-				DummyExpressionNode dX = new DummyExpressionNode(this, CompUtils.getPointerType(), 1);
-				getEnclosingSequencePoint().registerAssemblable(new AdditiveExpressionNode("+", expr, dX));
-			}
+				dX = new AdditiveExpressionNode("+", expr, dX);
 			else if (type == PFType.decr)
-			{
-				DummyExpressionNode dX = new DummyExpressionNode(this, CompUtils.getPointerType(), 1);
-				getEnclosingSequencePoint().registerAssemblable(new AdditiveExpressionNode("-", expr, dX));
-			}
+				dX = new AdditiveExpressionNode("-", expr, dX);
+			dX = new AssignmentExpressionNode(this, expr, dX);
+			getEnclosingSequencePoint().registerAssemblable(dX);
+			
 			if (scratchX != null) state = state.releaseScratchBlock(scratchX);
 			break;
 		default:
