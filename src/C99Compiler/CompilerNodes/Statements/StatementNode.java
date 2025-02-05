@@ -47,11 +47,4 @@ public abstract class StatementNode<C extends ParserRuleContext> extends Interpr
 		}
 		else return "";
 	}
-	
-	ProgramState clearPossibleValues(ProgramState state)
-	{
-		for (VariableNode v : this.getReferencedVariables().values())
-			state = state.clearPossibleValues(v);
-		return state;
-	}
 }

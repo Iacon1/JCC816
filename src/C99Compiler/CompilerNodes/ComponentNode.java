@@ -364,4 +364,11 @@ public class ComponentNode<C extends ComponentNode<C>> implements Serializable
 		else if (parent != null) return parent.getEnclosingSequencePoint();
 		else return null;
 	}
+	
+	public ProgramState clearPossibleValues(ProgramState state)
+	{
+		for (VariableNode v : this.getReferencedVariables().values())
+			state = state.clearPossibleValues(v);
+		return state;
+	}
 }
