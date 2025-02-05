@@ -2,21 +2,15 @@
 //
 package C99Compiler.CompilerNodes.Expressions;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.UUID;
-
-import C99Compiler.CompConfig.DebugLevel;
 import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.Definitions.Type;
 import C99Compiler.CompilerNodes.Definitions.Type.CastContext;
 import C99Compiler.CompilerNodes.Dummies.DummyType;
 import C99Compiler.Utils.CompUtils;
-import C99Compiler.Utils.FileIO;
 import C99Compiler.Utils.ProgramState;
 import C99Compiler.Utils.ProgramState.ScratchSource;
-import C99Compiler.Utils.AssemblyUtils.AssemblyUtils;
 import C99Compiler.Utils.AssemblyUtils.BytewiseOperator;
+import C99Compiler.Utils.AssemblyUtils.ByteCopier;
 import C99Compiler.Utils.OperandSources.ConstantByteSource;
 import C99Compiler.Utils.OperandSources.ConstantSource;
 import C99Compiler.Utils.OperandSources.OperandSource;
@@ -240,11 +234,17 @@ public class RelationalExpressionNode extends BinaryExpressionNode
 		if (hasEnd)
 		{
 			assembly += state.getWhitespace() + yesLabel + ":\n";
-//			assembly += new ByteCopier(whitespace, state.destSource().getSize(), state.destSource(), new ConstantSource(1, state.destSource().getSize()));
+			tmpPair = new ByteCopier(state.destSource().getSize(), state.destSource(), new ConstantSource(1, state.destSource().getSize())).getAssemblyAndState(state);
+			assembly += tmpPair.assembly;
+			state = tmpPair.state;
 			assembly += whitespace + "BRA\t" + endLabel + "\n";
 			
+			state = state.wipe();
+			
 			assembly += whitespace + noLabel + ":\n";
-//			assembly += AssemblyUtils.byteCopier(whitespace, state.destSource().getSize(), state.destSource(), new ConstantSource(0, state.destSource().getSize()));
+			tmpPair = new ByteCopier(state.destSource().getSize(), state.destSource(), new ConstantSource(0, state.destSource().getSize())).getAssemblyAndState(state);
+			assembly += tmpPair.assembly;
+			state = tmpPair.state;
 			
 			assembly += whitespace + endLabel + ":\n";
 		}
