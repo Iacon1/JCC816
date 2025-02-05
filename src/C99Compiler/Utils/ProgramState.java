@@ -855,7 +855,7 @@ public class ProgramState
 				exitFuncLabel,
 				processorFlags,
 				preserveFlags,
-				knownFlags,
+				(byte) 0,
 				a, x, y);
 		return s;
 	}
