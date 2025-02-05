@@ -60,8 +60,11 @@ public class ComparitiveJump implements Assemblable
 			tmpPair = assemblable2.getAssemblyAndState(state);
 			assembly += tmpPair.assembly;
 			state2 = tmpPair.state;
+			state = state1.combine(state2);
 		}
-		state = state1.combine(state2);
+		else
+			state = state1;
+		
 		if (jumpAfter != null)
 			assembly += whitespace + jumpAfter + ":\n";
 		
