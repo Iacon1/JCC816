@@ -48,14 +48,13 @@ CC extends ParserRuleContext
 		MutableAssemblyStatePair pair = new MutableAssemblyStatePair("", state);
 		OperandSource destSource = pair.state.destSource();
 		
-		String assembly = "";
-		assembly += AssemblyUtils.store(state, (byte) 0xFF);
+		pair.assembly += AssemblyUtils.store(state, (byte) 0xFF);
 		byte preserveFlags = pair.state.getPreserveFlags();
 		pair.state = pair.state.clearPreserveFlags();
 		
 		ByteCopier xCopier, yCopier;
 		xCopier = new ByteCopier(sourceX.getSize(), CompConfig.specSubSource(true, sourceX.getSize()), sourceX);
-		yCopier = new ByteCopier(sourceY.getSize(), CompConfig.specSubSource(true, sourceY.getSize()), sourceY);
+		yCopier = new ByteCopier(sourceY.getSize(), CompConfig.specSubSource(false, sourceY.getSize()), sourceY);
 		
 		xCopier.apply(pair);
 		yCopier.apply(pair);
@@ -72,8 +71,8 @@ CC extends ParserRuleContext
 			new ZeroCopier(destSource.getSize() - retSize, destSource.getShifted(retSize)).apply(pair);
 
 		getTranslationUnit().requireSub(getSubName(sourceX.getSize(), sourceY.getSize()), getSub(sourceX.getSize(), sourceY.getSize()));
-		assembly += AssemblyUtils.restore(state, preserveFlags);
+		pair.assembly += AssemblyUtils.restore(state, preserveFlags);
 		state = state.setPreserveFlags(preserveFlags);
-		return new AssemblyStatePair(assembly, state);
+		return pair.getImmutable();
 	}
 }
