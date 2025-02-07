@@ -1,7 +1,6 @@
-// This one's just for debug purposes and only printf is implemented for now.
 #include <stdio.h>
 
-int printf(const char* string)
+int puts(const char* s)
 {
 	extern char destination;
 	int len = 0;
