@@ -50,7 +50,8 @@ public class LabeledStatementNode extends StatementNode<Labeled_statementContext
 	@Override
 	public AssemblyStatePair getAssemblyAndState(ProgramState state) throws Exception
 	{
-		AssemblyStatePair pair = new AssemblyStatePair(label + ":\n", state);
+		state = state.wipe().clearKnownFlags();
+		AssemblyStatePair pair = new AssemblyStatePair(getEnclosingFunction().getLabel(label) + ":\n", state);
 		if (statement.hasAssembly(state)) pair = statement.apply(pair);
 		return pair;
 	}

@@ -23,6 +23,7 @@ import C99Compiler.CompilerNodes.Interfaces.SequencePointNode;
 import C99Compiler.CompilerNodes.LValues.VariableNode;
 import C99Compiler.CompilerNodes.Statements.IterationStatementNode;
 import C99Compiler.CompilerNodes.Statements.SelectionStatementNode;
+import C99Compiler.Utils.ProgramState;
 
 public class ComponentNode<C extends ComponentNode<C>> implements Serializable
 {
