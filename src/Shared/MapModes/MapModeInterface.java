@@ -13,6 +13,7 @@ import C99Compiler.CompConfig.VerbosityLevel;
 import C99Compiler.CompilerNodes.FunctionDefinitionNode;
 import C99Compiler.CompilerNodes.LValues.VariableNode;
 import C99Compiler.Utils.OverlaySolver;
+import C99Compiler.Utils.ProgramState;
 import Logging.Logging;
 import Shared.Configurer;
 import Shared.MemorySize;
@@ -48,7 +49,7 @@ public interface MapModeInterface extends Configurer
 			else
 			{
 				// If either func can call the other then no overlaying
-				boolean value = aFunc.canCall(bFunc) || bFunc.canCall(aFunc);
+				boolean value = aFunc.canCall(new ProgramState(), bFunc) || bFunc.canCall(new ProgramState(), aFunc);
 				dynamicMap.put(entry, !value);
 				return !value;
 			}

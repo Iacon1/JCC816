@@ -41,7 +41,7 @@ public class AddressSource extends OperandSource
 		if (i >= size)
 			assembly = state.getWhitespace() + operation + "\t" + CompConfig.signExtend + "\n";
 		else if (CompConfig.wordAddresses)
-			assembly = state.getWhitespace() + operation + "\t.loWord(" + address + ") + " + (i + offset) + "\n";
+			assembly = state.getWhitespace() + operation + "\ta:" + address + " + " + (i + offset) + "\n";
 		else
 			assembly = state.getWhitespace() + operation + "\t" + address + " + " + (i + offset) + "\n";
 		

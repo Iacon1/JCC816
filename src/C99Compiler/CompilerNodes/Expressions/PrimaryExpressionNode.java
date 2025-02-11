@@ -40,7 +40,7 @@ public class PrimaryExpressionNode extends BaseExpressionNode<Primary_expression
 			identifier = node.Identifier().getText();
 			// Valid uses of identifier
 			if (resolveEnumeratorRelative(identifier) != null); // Enumerator
-			else if (hasLValue()); // Variable
+			else if (hasLValue(new ProgramState())); // Variable
 			else if (resolveFunctionRelative(identifier) != null); // Function
 			else throw new UndefinedVariableException(identifier, node.start);
 		}
@@ -61,7 +61,7 @@ public class PrimaryExpressionNode extends BaseExpressionNode<Primary_expression
 		if (identifier != null)
 			if (resolveEnumeratorRelative(identifier) != null)
 				return resolveEnumeratorRelative(identifier).getType();
-			else if (hasLValue()) return getLValue().getType();
+			else if (hasLValue(new ProgramState())) return getLValue(new ProgramState()).getType();
 			else // Probably function pointer
 				return resolveFunctionRelative(identifier).getType();
 		else if (constant != null) return CompUtils.getSmallestType((Number) constant);
@@ -71,15 +71,6 @@ public class PrimaryExpressionNode extends BaseExpressionNode<Primary_expression
 			t.setLength(stringLiteral.length() + 1);
 			return t;
 		}
-		else return null;
-	}
-
-	@Override
-	public boolean hasLValue() {return identifier != null && resolveVariableRelative(identifier) != null;}
-	@Override
-	public LValueNode<?> getLValue()
-	{
-		if (identifier != null) return resolveVariableRelative(identifier);
 		else return null;
 	}
 	
@@ -107,7 +98,7 @@ public class PrimaryExpressionNode extends BaseExpressionNode<Primary_expression
 				return true; // Arrays can degrade to pointers
 			if (resolveEnumeratorRelative(identifier) != null)
 				return true; // Enumerator
-			else if (hasLValue() && state.getOnlyValue(getLValue()) != null && OptimizationLevel.isAtLeast(OptimizationLevel.medium))
+			else if (hasLValue(new ProgramState()) && state.getOnlyValue(getLValue(new ProgramState())) != null && OptimizationLevel.isAtLeast(OptimizationLevel.medium))
 				return true;
 			else if (resolveFunctionRelative(identifier) != null)
 				return true;
@@ -126,8 +117,8 @@ public class PrimaryExpressionNode extends BaseExpressionNode<Primary_expression
 				return new PropPointer<VariableNode>(resolveVariableRelative(identifier), 0);
 			if (resolveEnumeratorRelative(identifier) != null)
 				return resolveEnumeratorRelative(identifier).getValue();
-			else if (getLValue() != null)
-				return state.getOnlyValue(getLValue());
+			else if (getLValue(state) != null)
+				return state.getOnlyValue(getLValue(state));
 			else if (resolveFunctionRelative(identifier) != null)
 				return resolveFunctionRelative(identifier);
 			else
@@ -138,7 +129,17 @@ public class PrimaryExpressionNode extends BaseExpressionNode<Primary_expression
 	}
 	
 	@Override
-	public ProgramState getStateAfter(ProgramState state) {return state;}
+	public boolean hasLValue(ProgramState state) 
+	{
+		return identifier != null && resolveVariableRelative(identifier) != null;
+	}
 	@Override
-	public AssemblyStatePair getAssemblyAndState(ProgramState state) throws Exception {return null;}
+	public LValueNode<?> getLValue(ProgramState state)
+	{
+		if (identifier != null) return resolveVariableRelative(identifier);
+		else return null;
+	}
+	
+	@Override
+	public AssemblyStatePair getAssemblyAndState(ProgramState state) throws Exception {throw new UnsupportedOperationException();}
 }

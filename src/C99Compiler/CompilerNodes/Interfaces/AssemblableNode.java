@@ -5,6 +5,7 @@ package C99Compiler.CompilerNodes.Interfaces;
 
 import C99Compiler.CompilerNodes.FunctionDefinitionNode;
 import C99Compiler.Utils.ProgramState;
+import C99Compiler.Utils.PropPointer;
 import Shared.Assemblable;
 
 public interface AssemblableNode extends Assemblable
@@ -20,6 +21,37 @@ public interface AssemblableNode extends Assemblable
 	public Object getPropValue(ProgramState state);
 	@Deprecated
 	public default Object getPropValue() {return getPropValue(new ProgramState());}
+	
+	public default long getPropLong(ProgramState state)
+	{
+		try {return ((Number) getPropValue(state)).longValue();}
+		catch (Exception e) {return 0;}
+	}
+	@Deprecated
+	public default long getPropLong()
+	{
+		return getPropLong(new ProgramState());
+	}
+	public default boolean getPropBool(ProgramState state)
+	{
+		try {return (Boolean) getPropValue(state);}
+		catch (Exception e) {return false;}
+	}
+	@Deprecated
+	public default boolean getPropBool()
+	{
+		return getPropBool(new ProgramState());
+	}
+	public default PropPointer<?> getPropPointer(ProgramState state)
+	{
+		try {return (PropPointer<?>) getPropValue(state);}
+		catch (Exception e) {return null;}
+	}
+	@Deprecated
+	public default PropPointer<?> getPropPointer()
+	{
+		return getPropPointer(new ProgramState());
+	}
 	
 	public boolean hasAssembly(ProgramState state);
 	@Deprecated

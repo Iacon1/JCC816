@@ -281,8 +281,8 @@ public class InitializerNode extends InterpretingNode<InitializerNode, Initializ
 						copier = new ByteCopier(LValue.getSize(), LValue.getSource(), new ConstantSource(expr.getPropValue(state), LValue.getSize()));
 						state = state.setPossibleValue(LValue, expr.getPropValue(state));
 					}
-					else if (expr.hasLValue())
-						copier = new ByteCopier(LValue.getSize(), LValue.getSource(), expr.getLValue().castTo(getType()).getSource());
+					else if (expr.hasLValue(state))
+						copier = new ByteCopier(LValue.getSize(), LValue.getSource(), expr.getLValue(state).castTo(getType()).getSource());
 					else return new AssemblyStatePair("", state);
 					
 					pair = copier.getAssemblyAndState(state);

@@ -268,16 +268,16 @@ public class MultiplicativeExpressionNode extends CallingArithmeticBinaryExpress
 		else return super.getPropValue(state);
 	}
 	@Override
-	public boolean hasLValue()
+	public boolean hasLValue(ProgramState state)
 	{
-		if (optimized != null) return optimized.hasLValue();
-		else return super.hasLValue();
+		if (optimized != null) return optimized.hasLValue(state);
+		else return super.hasLValue(state);
 	}
 	@Override
-	public LValueNode<?> getLValue()
+	public LValueNode<?> getLValue(ProgramState state)
 	{
-		if (optimized != null) return optimized.getLValue();
-		else return super.getLValue();
+		if (optimized != null) return optimized.getLValue(state);
+		else return super.getLValue(state);
 	}
 	@Override
 	public AssemblyStatePair getAssemblyAndState(ProgramState state) throws Exception
@@ -290,7 +290,7 @@ public class MultiplicativeExpressionNode extends CallingArithmeticBinaryExpress
 		else if (optimized != null && optimized.hasPropValue(state))
 			return new ByteCopier(state.destSource().getSize(), state.destSource(), optimized.getPropValue(state)).getAssemblyAndState(state);
 		else if (optimized != null)
-			return new ByteCopier(state.destSource().getSize(), state.destSource(), optimized.getLValue()).getAssemblyAndState(state);
+			return new ByteCopier(state.destSource().getSize(), state.destSource(), optimized.getLValue(state)).getAssemblyAndState(state);
 		else 
 			return super.getAssemblyAndState(state);
 	}

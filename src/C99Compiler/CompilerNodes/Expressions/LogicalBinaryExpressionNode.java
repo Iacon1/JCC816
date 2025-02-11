@@ -57,14 +57,14 @@ CC extends ParserRuleContext
 			scratchX = state.lastScratchSource();
 			state = state.setDestSource(scratchX);
 			assembly += x.getAssembly(state);
-			if (x.hasLValue())
-				sourceX = x.getLValue().getSource();
+			if (x.hasLValue(state))
+				sourceX = x.getLValue(state).getSource();
 			else sourceX = scratchX;
 		}
 		else if (x.hasPropValue(state))
 			sourceX = new ConstantSource(x.getPropValue(state), x.getType().getSize());
-		else if (x.hasLValue())
-			sourceX = x.getLValue().getSource();
+		else if (x.hasLValue(state))
+			sourceX = x.getLValue(state).getSource();
 		else sourceX = null;
 		
 		queuedPair = getRegisteredAssemblyAndState(state);
@@ -81,14 +81,14 @@ CC extends ParserRuleContext
 			scratchY = state.lastScratchSource();
 			state = state.setDestSource(scratchY);
 			assembly += y.getAssembly(state);
-			if (y.hasLValue())
-				sourceY = y.getLValue().getSource();
+			if (y.hasLValue(state))
+				sourceY = y.getLValue(state).getSource();
 			else sourceY = scratchY;
 		}
 		else if (y.hasPropValue(state))
 			sourceY = new ConstantSource(y.getPropValue(state), y.getType().getSize());
-		else if (y.hasLValue())
-			sourceY = y.getLValue().getSource();
+		else if (y.hasLValue(state))
+			sourceY = y.getLValue(state).getSource();
 		else sourceY = null;
 		
 		state = state.setDestSource(destSource);

@@ -9,6 +9,7 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.FunctionDefinitionNode;
 import C99Compiler.CompilerNodes.Definitions.Type.CastContext;
+import C99Compiler.CompilerNodes.LValues.LValueNode;
 import C99Compiler.Exceptions.ScratchOverflowException;
 import C99Compiler.Utils.ProgramState;
 import C99Compiler.Utils.ProgramState.ScratchSource;
@@ -74,6 +75,16 @@ public abstract class BinaryExpressionNode<
 	{
 		return x.hasPropValue(state) && y.hasPropValue(state);
 	}
+	@Override
+	public boolean hasLValue(ProgramState state)
+	{
+		return false;
+	}
+	@Override
+	public LValueNode<?> getLValue(ProgramState state)
+	{
+		throw new UnsupportedOperationException();
+	}
 	
 	@Override
 	public boolean hasAssembly(ProgramState state) {return x.hasAssembly(state) || y.hasAssembly(state) || !hasPropValue(state);}
@@ -103,14 +114,14 @@ public abstract class BinaryExpressionNode<
 			assembly += tmpPair.assembly;
 			state = tmpPair.state;
 			
-			if (x.hasLValue())
-				sourceX = x.getLValue().getSource();
+			if (x.hasLValue(state))
+				sourceX = x.getLValue(state).getSource();
 			else sourceX = scratchX;
 		}
 		else if (x.hasPropValue(state))
 			sourceX = new ConstantSource(x.getPropValue(state), x.getType().getSize());
-		else if (x.hasLValue())
-			sourceX = x.getLValue().getSource();
+		else if (x.hasLValue(state))
+			sourceX = x.getLValue(state).getSource();
 		else sourceX = null;
 		
 		// figure out Y		
@@ -125,14 +136,14 @@ public abstract class BinaryExpressionNode<
 			assembly += tmpPair.assembly;
 			state = tmpPair.state;
 			
-			if (y.hasLValue())
-				sourceY = y.getLValue().getSource();
+			if (y.hasLValue(state))
+				sourceY = y.getLValue(state).getSource();
 			else sourceY = scratchY;
 		}
 		else if (y.hasPropValue(state))
 			sourceY = new ConstantSource(y.getPropValue(state), y.getType().getSize());
-		else if (y.hasLValue())
-			sourceY = y.getLValue().getSource();
+		else if (y.hasLValue(state))
+			sourceY = y.getLValue(state).getSource();
 		else sourceY = null;
 
 		state = state.setDestSource(destSource);

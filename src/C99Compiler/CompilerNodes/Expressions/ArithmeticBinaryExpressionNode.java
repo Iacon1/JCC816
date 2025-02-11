@@ -101,8 +101,8 @@ CC extends ParserRuleContext
 	@Override
 	protected AssemblyStatePair getAssemblyAndState(ProgramState state, OperandSource sourceX, OperandSource sourceY) throws Exception
 	{
-		if (!sourceY.isLiteral() && y.hasLValue() && OptimizationLevel.isAtLeast(OptimizationLevel.medium)) sourceY = AssemblyUtils.getShrinkWrapped(state, y.getLValue());
-		if (!sourceX.isLiteral() && x.hasLValue() && OptimizationLevel.isAtLeast(OptimizationLevel.medium)) sourceX = AssemblyUtils.getShrinkWrapped(state, x.getLValue());
+		if (!sourceY.isLiteral() && y.hasLValue(state) && OptimizationLevel.isAtLeast(OptimizationLevel.medium)) sourceY = AssemblyUtils.getShrinkWrapped(state, y.getLValue(state));
+		if (!sourceX.isLiteral() && x.hasLValue(state) && OptimizationLevel.isAtLeast(OptimizationLevel.medium)) sourceX = AssemblyUtils.getShrinkWrapped(state, x.getLValue(state));
 
 		String assembly = "";
 		OperandSource destSource = state.destSource();

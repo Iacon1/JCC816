@@ -26,39 +26,13 @@ public abstract class BaseExpressionNode<C extends ParserRuleContext> extends In
 	public BaseExpressionNode(ComponentNode<?> parent) {super(parent);}
 	public BaseExpressionNode() {super();}
 
-	public boolean hasLValue() {return false;}
-	public LValueNode<?> getLValue() {return null;}
+	public abstract boolean hasLValue(ProgramState state);
+	@Deprecated
+	public boolean hasLValue() {return hasLValue(new ProgramState());}
+	public abstract LValueNode<?> getLValue(ProgramState state);
+	@Deprecated
+	public LValueNode<?> getLValue() {return getLValue(new ProgramState());}
 
-	public long getPropLong(ProgramState state)
-	{
-		try {return ((Number) getPropValue(state)).longValue();}
-		catch (Exception e) {return 0;}
-	}
-	@Deprecated
-	public long getPropLong()
-	{
-		return getPropLong(new ProgramState());
-	}
-	public boolean getPropBool(ProgramState state)
-	{
-		try {return (Boolean) getPropValue(state);}
-		catch (Exception e) {return false;}
-	}
-	@Deprecated
-	public boolean getPropBool()
-	{
-		return getPropBool(new ProgramState());
-	}
-	public PropPointer getPropPointer(ProgramState state)
-	{
-		try {return (PropPointer) getPropValue(state);}
-		catch (Exception e) {return null;}
-	}
-	@Deprecated
-	public PropPointer getPropPointer()
-	{
-		return getPropPointer(new ProgramState());
-	}
 	public boolean isIndirect() {return false;} // Will this L-Value be indirect?
 
 	

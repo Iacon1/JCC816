@@ -51,15 +51,6 @@ public class CastExpressionNode extends BaseExpressionNode<Cast_expressionContex
 		return type;
 	}
 	@Override
-	public boolean hasLValue()
-	{
-		return expr.hasLValue();
-	}
-	public LValueNode<?> getLValue()
-	{
-		return expr.getLValue();
-	}
-	@Override
 	public boolean hasPropValue(ProgramState state)
 	{
 		return expr.hasPropValue(state);
@@ -68,6 +59,15 @@ public class CastExpressionNode extends BaseExpressionNode<Cast_expressionContex
 	public Object getPropValue(ProgramState state)
 	{
 		return expr.getPropValue(state);
+	}
+	@Override
+	public boolean hasLValue(ProgramState state)
+	{
+		return expr.hasLValue(state);
+	}
+	public LValueNode<?> getLValue(ProgramState state)
+	{
+		return expr.getLValue(state);
 	}
 	@Override
 	public boolean hasAssembly(ProgramState state)
@@ -88,9 +88,9 @@ public class CastExpressionNode extends BaseExpressionNode<Cast_expressionContex
 		}
 		if (expr.hasAssembly(state))
 			assembly += expr.getAssembly(state);
-		else if (expr.hasLValue())
+		else if (expr.hasLValue(state))
 		{
-			tmpPair = new ByteCopier(getType().getSize(), state.destSource(), expr.getLValue().getSource()).getAssemblyAndState(state);
+			tmpPair = new ByteCopier(getType().getSize(), state.destSource(), expr.getLValue(state).getSource()).getAssemblyAndState(state);
 			assembly += tmpPair.assembly;
 			state = tmpPair.state;
 		}

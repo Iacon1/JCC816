@@ -5,6 +5,7 @@ package C99Compiler.CompilerNodes.Expressions;
 import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.FunctionDefinitionNode;
 import C99Compiler.CompilerNodes.Definitions.Type;
+import C99Compiler.CompilerNodes.LValues.LValueNode;
 import C99Compiler.Exceptions.ConstraintException;
 import C99Compiler.Utils.ProgramState;
 import C99Compiler.Utils.OperandSources.OperandSource;
@@ -34,6 +35,10 @@ public class ConstantExpressionNode extends BaseExpressionNode<Constant_expressi
 	@Override
 	public Object getPropValue(ProgramState state) {throw new UnsupportedOperationException();}
 	@Override
+	public boolean hasLValue(ProgramState state) {return false;}
+	@Override
+	public LValueNode<?> getLValue(ProgramState state) {throw new UnsupportedOperationException();}
+
 	public boolean hasAssembly(ProgramState state) {throw new UnsupportedOperationException();}
 	@Override
 	public AssemblyStatePair getAssemblyAndState(ProgramState state) throws Exception {throw new UnsupportedOperationException();}

@@ -53,10 +53,10 @@ public class DummyExpressionNode extends BaseExpressionNode<ExpressionContext>
 	public Object getPropValue(ProgramState state) {return value;}
 
 	@Override
-	public boolean hasLValue() {return source != null;}
+	public boolean hasLValue(ProgramState state) {return source != null;}
 	
 	@Override
-	public LValueNode<?> getLValue() {return new DummyLValueNode(this, type, source);}
+	public LValueNode<?> getLValue(ProgramState state) {return new DummyLValueNode(this, type, source);}
 	
 	@Override 
 	public boolean canCall(ProgramState state, FunctionDefinitionNode function) {return false;}

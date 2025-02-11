@@ -46,7 +46,7 @@ public class AssignmentExpressionNode extends BinaryExpressionNode
 		BaseExpressionNode sInt = super.interpret(node);
 		if (sInt != this) return sInt;
 		
-		if (!x.hasLValue()) throw new ConstraintException("6.5.16", 2, node.getStart());
+		if (!x.hasLValue(new ProgramState())) throw new ConstraintException("6.5.16", 2, node.getStart());
 		BinaryExpressionNode<?,?,?,?> newY = null;
 		switch (operator)
 		{
@@ -121,7 +121,20 @@ public class AssignmentExpressionNode extends BinaryExpressionNode
 	@Override public CastContext getCastContext() {return CastContext.assignment;}
 	@Override public Type getType() {return x.getType();}
 	@Override
-	public Object getPropValue(ProgramState state) {return null;}
+	public boolean hasPropValue(ProgramState state) {return y.hasPropValue(state);}
+	@Override
+	public Object getPropValue(ProgramState state) {return y.getPropValue(state);}
+	
+	@Override
+	public boolean hasLValue(ProgramState state)
+	{
+		return true;
+	}
+	@Override
+	public LValueNode<?> getLValue(ProgramState state)
+	{
+		return x.getLValue(state);
+	}
 	
 	@Override
 	public boolean hasAssembly(ProgramState state)
@@ -154,7 +167,7 @@ public class AssignmentExpressionNode extends BinaryExpressionNode
 //			throw new TypeMismatchException(y.getType(), x.getType());
 		if (y.hasAssembly(state) && !x.getType().isTwice())
 		{
-			sourceY = x.getLValue().getSource();
+			sourceY = x.getLValue(state).getSource();
 			state = state.setDestSource(sourceY);
 			tmpPair = y.getAssemblyAndState(state);
 			assembly += tmpPair.assembly;
@@ -164,13 +177,13 @@ public class AssignmentExpressionNode extends BinaryExpressionNode
 		{
 			state = state.reserveScratchBlock(x.getSize());
 			ScratchSource scratchX = state.lastScratchSource();
-			state = state.setDestSource(x.getLValue().getSource());
+			state = state.setDestSource(x.getLValue(state).getSource());
 			tmpPair = y.getAssemblyAndState(state);
 			assembly += tmpPair.assembly;
 			state = tmpPair.state;
-			if (!y.hasLValue()) sourceY = scratchX;
-			else sourceY = y.getLValue().castTo(x.getType()).getSource();
-			ByteCopier copier = new ByteCopier(x.getLValue().getSize(), x.getLValue().getSource(), sourceY);
+			if (!y.hasLValue(state)) sourceY = scratchX;
+			else sourceY = y.getLValue(state).castTo(x.getType()).getSource();
+			ByteCopier copier = new ByteCopier(x.getLValue(state).getSize(), x.getLValue(state).getSource(), sourceY);
 			tmpPair = copier.getAssemblyAndState(state);
 			assembly += tmpPair.assembly;
 			state = tmpPair.state;
@@ -179,17 +192,17 @@ public class AssignmentExpressionNode extends BinaryExpressionNode
 		{
 			if (y.hasPropValue(state))
 				sourceY = new ConstantSource(y.getPropValue(state), x.getType().getSize());
-			else if (y.hasLValue())
-				sourceY = y.getLValue().castTo(x.getType()).getSource();
+			else if (y.hasLValue(state))
+				sourceY = y.getLValue(state).castTo(x.getType()).getSource();
 			else sourceY = null;
-			ByteCopier copier = new ByteCopier(x.getLValue().getSize(), x.getLValue().getSource(), sourceY);
+			ByteCopier copier = new ByteCopier(x.getLValue(state).getSize(), x.getLValue(state).getSource(), sourceY);
 			tmpPair = copier.getAssemblyAndState(state);
 			assembly += tmpPair.assembly;
 			state = tmpPair.state;
 		}
 		
 		if (y.hasPropValue(state))
-			state = state.setPossibleValue(x.getLValue(), y.getPropValue(state));
+			state = state.setPossibleValue(x.getLValue(state), y.getPropValue(state));
 
 		return new AssemblyStatePair(assembly, state);
 	}

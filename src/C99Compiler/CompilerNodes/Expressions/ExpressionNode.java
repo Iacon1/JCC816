@@ -47,10 +47,6 @@ public class ExpressionNode extends SPBaseExpressionNode<ExpressionContext>
 	}
 	
 	@Override
-	public boolean hasLValue() {return false;}
-	@Override
-	public LValueNode<?> getLValue() {return null;}
-	@Override
 	public boolean hasPropValue(ProgramState state) {return false;}
 	@Override
 	public Object getPropValue(ProgramState state) {return null;}
@@ -61,6 +57,11 @@ public class ExpressionNode extends SPBaseExpressionNode<ExpressionContext>
 			if (expression.hasAssembly(state)) return true;
 		return false;
 	}
+	@Override
+	public boolean hasLValue(ProgramState state) {return false;}
+	@Override
+	public LValueNode<?> getLValue(ProgramState state) {throw new UnsupportedOperationException();}
+
 	@Override
 	public AssemblyStatePair getAssemblyAndState(ProgramState state) throws Exception
 	{
