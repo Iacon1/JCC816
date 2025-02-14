@@ -38,16 +38,16 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 	private Type type;
 	private String operator;
 	private String identifier, embName; // Only useful in preproc mode
-	private IndirectLValueNode pointerRef; // LValue if this is a pointer reference (*x)
+	IndirectLValueNode indirect;
 	
-	public UnaryExpressionNode(ComponentNode<?> parent) {super(parent); pointerRef = null;}
+	public UnaryExpressionNode(ComponentNode<?> parent) {super(parent); indirect = null;}
 	
 	public UnaryExpressionNode(ComponentNode<?> parent, String operator, BaseExpressionNode<?> expr)
 	{
 		super(parent);
 		this.operator = operator;
 		this.expr = expr;
-		pointerRef = null;
+		this.indirect = null;
 	}
 
 	@Override
@@ -134,7 +134,9 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 					return new DummyVariableNode(this, getType(), new NumericAddressSource((int) expr.getPropLong(new ProgramState()), getSize()));
 				else return null;
 			}
-			else return pointerRef;
+			else
+				return indirect;
+				
 		}
 		else if (operator.equals("&"))
 		{
@@ -155,9 +157,9 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 	{
 		if (operator.equals("sizeof") || operator.equals("defined") || operator.equals("__has_embed") || operator.equals("__offset_of")) return true;
 		else if (operator.equals("*"))
-			if (pointerRef != null && state.getOnlyValue(pointerRef) != null) // if expr can only point to one thing...
+			if (expr.hasPropValue(state)) // if expr can only point to one thing...
 			{
-				VariableNode n = ((PropPointer<VariableNode>) state.getOnlyValue(pointerRef)).getNode();
+				VariableNode n = ((PropPointer<VariableNode>) expr.getPropValue(state)).getNode();
 				if (state.getOnlyValue(n) != null)
 					return true;
 				else return false;
@@ -165,7 +167,7 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 			else return false;
 		else if (operator.equals("&"))
 		{
-			return expr.hasPropValue(state) || (expr.hasLValue(state) && VariableNode.class.isAssignableFrom(expr.getLValue(state).getClass()) && !expr.hasAssembly() && !PostfixExpressionNode.class.isAssignableFrom(expr.getClass()));
+			return expr.hasPropValue(state) || (expr.hasLValue(state) && VariableNode.class.isAssignableFrom(expr.getLValue(state).getClass()) && !expr.hasAssembly(state) && !PostfixExpressionNode.class.isAssignableFrom(expr.getClass()));
 		}
 		else return expr.hasPropValue(state);
 	}
@@ -194,26 +196,8 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 		else if (operator.equals("!")) return Boolean.valueOf(expr.getPropBool(state));
 		else if (operator.equals("*"))
 		{
-			if (pointerRef != null && state.getOnlyValue(pointerRef) != null)
-			{
-				AddressableNode node = ((PropPointer<?>) state.getOnlyValue(pointerRef)).getNode();
-				// Variable TODO
-				if (VariableNode.class.isAssignableFrom(node.getClass()))
-				{
-					VariableNode vNode = (VariableNode) node;
-					if (state.getOnlyValue(vNode) != null)
-						return state.getOnlyValue(vNode);
-					else return null;
-				}
-				else if (FunctionDefinitionNode.class.isAssignableFrom(node.getClass()))
-				{
-					FunctionDefinitionNode fNode = (FunctionDefinitionNode) node;
-					return fNode;
-				}
-				
-				else return null;
-			}
-			else return null;
+			VariableNode n = ((PropPointer<VariableNode>) state.getOnlyValue(expr.getLValue(state))).getNode();
+			return state.getOnlyValue(n);
 		}
 		else if (operator.equals("&"))
 		{
@@ -275,7 +259,7 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 		else if (expr.hasLValue(state))
 			sourceX = expr.getLValue(state).getSource();
 		else sourceX = null;
-		state = expr.getStateAfter(state);
+
 		
 		DummyExpressionNode dX = new DummyExpressionNode(this, expr.getType(), 1);
 		switch (operator)
@@ -348,11 +332,10 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 				state = tmpPair.state;
 			}
 			else sourceI = state.getPointer(sourceX);
-		
-			pointerRef = new IndirectLValueNode(this, expr.getLValue(state), sourceI, ((PointerType) expr.getType()).getType());
+			indirect = new IndirectLValueNode(this, sourceX, getType());
 			if (destSource != null)
 			{
-				copier = new ByteCopier(((PointerType) expr.getType()).getType().getSize(), destSource, pointerRef.getSource());
+				copier = new ByteCopier(((PointerType) expr.getType()).getType().getSize(), destSource, indirect.getSource());
 				tmpPair = copier.getAssemblyAndState(state);
 				assembly += tmpPair.assembly;
 				state = tmpPair.state;
