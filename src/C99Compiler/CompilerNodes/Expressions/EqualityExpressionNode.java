@@ -117,9 +117,9 @@ public class EqualityExpressionNode extends BinaryExpressionNode
 			assembly += ":" + state.getWhitespace().substring(1) + "TXA\n";
 		else
 			assembly += ":TXA\n";
-		assembly += state.getWhitespace() + CompUtils.setA8 + "\n";
 		if (state.destSource() != null)
 		{
+			assembly += state.getWhitespace() + CompUtils.setA8 + "\n";
 			AssemblyStatePair tmpPair = state.destSource().getSTA(state, 0);
 			assembly += tmpPair.assembly;
 			state = tmpPair.state;
