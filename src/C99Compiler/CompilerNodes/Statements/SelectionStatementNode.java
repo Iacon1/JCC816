@@ -118,6 +118,7 @@ public class SelectionStatementNode extends SequencePointStatementNode<Selection
 	@Override
 	public AssemblyStatePair getAssemblyAndState(ProgramState state) throws Exception
 	{
+		String whitespace = state.getWhitespace();
 		MutableAssemblyStatePair pair = new MutableAssemblyStatePair("", state);
 
 		if (!isSwitch) // If statement
@@ -167,43 +168,43 @@ public class SelectionStatementNode extends SequencePointStatementNode<Selection
 				caseValues.add(l);
 			}
 			if (largestExpr == null)
-				return pair.getImmutable();
-/*			
-			pair = pair.replaceState(pair.state.reserveScratchBlock(expression.getSize()));
+				return pair.getImmutable();			
+			pair.state = pair.state.reserveScratchBlock(expression.getSize());
 			ScratchSource exprSource = pair.state.lastScratchSource();
+			
 			// If greater than largest case, skip
 			String miscLabel = CompUtils.getMiscLabel();
 			if (expression.hasAssembly(pair.state))
-				pair = applyWithRegistered(pair, expression);
+				applyWithRegistered(pair, expression);
 			else if (expression.hasPropValue(pair.state))
-				pair = new ByteCopier(exprSource.getSize(), exprSource, new ConstantSource(expression.getPropValue(state), exprSource.getSize())).apply(pair);
-			else if (expression.hasLValue())
-				pair = new ByteCopier(exprSource.getSize(), exprSource, expression.getLValue().getSource()).apply(pair);
-			pair = new RelationalExpressionNode(this, "<=", 
+				new ByteCopier(exprSource.getSize(), exprSource, new ConstantSource(expression.getPropValue(state), exprSource.getSize())).apply(pair);
+			else if (expression.hasLValue(state))
+				new ByteCopier(exprSource.getSize(), exprSource, expression.getLValue(state).getSource()).apply(pair);
+			new RelationalExpressionNode(this, "<", 
 					largestExpr, 
 					new DummyExpressionNode(this, expression.getType(), exprSource),
 					hasDefault? getDefaultLabel(false) : getEndLabel(), miscLabel, false).apply(pair);
-			pair = pair.addAssembly(whitespace + miscLabel + ":\n");
+			pair.assembly += whitespace + miscLabel + ":\n";
 			
-			pair = pair.replaceState(pair.state.reserveScratchBlock(expression.getSize()));
+			// Calculate jump table address
+			pair.state = pair.state.reserveScratchBlock(expression.getSize());
 			ScratchSource sourceS = pair.state.lastScratchSource();
-			pair = pair.replaceState(pair.state.setDestSource(sourceS));
-			pair = new ShiftExpressionNode(this, "<<", new DummyExpressionNode(this, expression.getType(), exprSource), new DummyExpressionNode(this, 1)).apply(pair);
-			pair = pair.addAssembly(whitespace + "TAX\n");
-			pair = pair.addAssembly(whitespace + "JMP\t(" + getTableLabel() + ",x)\n");
-			pair = pair.replaceState(pair.state.releaseScratchBlock(sourceS));
-			pair = pair.addAssembly(whitespace + getTableLabel() + ":\n");
+			pair.state = pair.state.setDestSource(sourceS);
+			new ShiftExpressionNode(this, "<<", new DummyExpressionNode(this, expression.getType(), exprSource), new DummyExpressionNode(this, 1)).apply(pair);
+			pair.assembly += whitespace + "TAX\n";
+			pair.assembly += whitespace + "JMP\t(" + getTableLabel() + ",x)\n";
+			pair.state = pair.state.releaseScratchBlock(sourceS);
+			pair.assembly += whitespace + getTableLabel() + ":\n";
 			for (long i = smallestCase; i <= largestCase; ++i)
 			{
 				if (caseValues.contains(i))
-					pair = pair.addAssembly(whitespace + whitespace + ".word\t.LoWord(" + getCaseLabel(i) + ")\n");
-				else pair = pair.addAssembly(whitespace + whitespace + ".word\t.LoWord(" + getDefaultLabel(false) + ")\n");
+					pair.assembly += whitespace + whitespace + ".word\t.LoWord(" + getCaseLabel(i) + ")\n";
+				else pair.assembly += whitespace + whitespace + ".word\t.LoWord(" + getDefaultLabel(false) + ")\n";
 			}
-			pair = switchStm.apply(pair);
-			pair = pair.replaceState(switchStm.clearPossibleValues(pair.state));
-			if (!hasDefault) pair.addAssembly(whitespace + getDefaultLabel(false) + ":\n");
-			pair = pair.addAssembly(whitespace + getEndLabel() + ":\n");
-			*/
+			switchStm.apply(pair);
+			pair.state = pair.state.wipe();
+			if (!hasDefault) pair.assembly += whitespace + getDefaultLabel(false) + ":\n";
+			pair.assembly += whitespace + getEndLabel() + ":\n";
 		}
 		
 		pair.state = pair.state.wipe();
