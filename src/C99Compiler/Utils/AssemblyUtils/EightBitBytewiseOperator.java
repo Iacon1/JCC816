@@ -41,7 +41,7 @@ public abstract class EightBitBytewiseOperator implements Assemblable
 		pair.state = pair.state.clearPreserveFlags(ProgramState.PreserveFlag.A);
 
 		{
-			if (!state.testKnownFlag(ProgramState.PreserveFlag.M) || state.testProcessorFlag(ProgramState.ProcessorFlag.M)) // Not already in 8-bit mode
+			if (!pair.state.testKnownFlag(ProgramState.PreserveFlag.M) || pair.state.testProcessorFlag(ProgramState.ProcessorFlag.M)) // Not already in 8-bit mode
 			{
 				pair.assembly += pair.state.getWhitespace() + CompUtils.setA8 + "\n";
 				pair.state = pair.state.clearProcessorFlags(ProgramState.ProcessorFlag.M);
@@ -54,8 +54,8 @@ public abstract class EightBitBytewiseOperator implements Assemblable
 					apply(pair, i);
 		}
 		
-		state = state.setPreserveFlags(flags);
-		pair.assembly += AssemblyUtils.restore(state, ProgramState.PreserveFlag.A);
+		pair.state = pair.state.setPreserveFlags(flags);
+		pair.assembly += AssemblyUtils.restore(pair.state, ProgramState.PreserveFlag.A);
 		
 		return pair.getImmutable();
 	}
