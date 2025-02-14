@@ -15,6 +15,7 @@ public class LabeledStatementNode extends StatementNode<Labeled_statementContext
 	private StatementNode<?> statement;
 	
 	private String label;
+	private boolean isCase;
 	
 	public LabeledStatementNode(ComponentNode<?> parent) {super(parent);}
 
@@ -24,6 +25,7 @@ public class LabeledStatementNode extends StatementNode<Labeled_statementContext
 		statement = StatementNode.manufacture(this, node.statement());
 		if (node.constant_expression() != null || node.getChild(0).getText().equals("default")) // case
 		{
+			isCase = true;
 			if (getEnclosingSelection() == null || !getEnclosingSelection().isSwitch())
 				throw new ConstraintException("6.8.1", 2, node.start);
 			if (node.constant_expression() != null)
@@ -33,7 +35,11 @@ public class LabeledStatementNode extends StatementNode<Labeled_statementContext
 			}
 			else label = getEnclosingSelection().getDefaultLabel(true);
 		}
-		else label = getEnclosingFunction().getScope().getPrefix() + node.Identifier().getText();
+		else
+		{
+			isCase = false;
+			label = getEnclosingFunction().getScope().getPrefix() + node.Identifier().getText();
+		}
 		
 		return this;
 	}
@@ -51,7 +57,9 @@ public class LabeledStatementNode extends StatementNode<Labeled_statementContext
 	public AssemblyStatePair getAssemblyAndState(ProgramState state) throws Exception
 	{
 		state = state.wipe().clearKnownFlags();
-		AssemblyStatePair pair = new AssemblyStatePair(getEnclosingFunction().getLabel(label) + ":\n", state);
+		AssemblyStatePair pair;
+		if (!isCase) pair = new AssemblyStatePair(getEnclosingFunction().getLabel(label) + ":\n", state);
+		else pair = new AssemblyStatePair(label + ":\n", state);
 		if (statement.hasAssembly(state)) pair = statement.apply(pair);
 		return pair;
 	}
