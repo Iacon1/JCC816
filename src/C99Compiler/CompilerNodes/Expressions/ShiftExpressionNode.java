@@ -2,7 +2,6 @@
 //
 package C99Compiler.CompilerNodes.Expressions;
 
-import C99Compiler.CompConfig;
 import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.Definitions.Type;
 import C99Compiler.CompilerNodes.Definitions.Type.CastContext;
@@ -16,24 +15,21 @@ import C99Compiler.Utils.AssemblyUtils.SignExtender;
 import C99Compiler.Utils.AssemblyUtils.ZeroCopier;
 import C99Compiler.Utils.OperandSources.ConstantSource;
 import C99Compiler.Utils.OperandSources.OperandSource;
-import C99Compiler.Utils.OperandSources.StationaryAddressSource;
 import Grammar.C99.C99Parser.Additive_expressionContext;
-import Grammar.C99.C99Parser.Or_expressionContext;
 import Grammar.C99.C99Parser.Shift_expressionContext;
-import Grammar.C99.C99Parser.Xor_expressionContext;
 
 public class ShiftExpressionNode extends BinaryExpressionNode
 <Shift_expressionContext, Additive_expressionContext, Additive_expressionContext, Shift_expressionContext>
 {
 	private static class ShiftOperator extends BytewiseOperator
 	{
-		private OperandSource tempSource, sourceX;
+		private OperandSource sourceTo, sourceFrom;
 		private boolean left, one, signed;
-		public ShiftOperator(boolean left, boolean one, boolean signed, OperandSource tempSource, OperandSource sourceX)
+		public ShiftOperator(boolean left, boolean one, boolean signed, OperandSource sourceTo, OperandSource sourceFrom)
 		{
-			super(tempSource.getSize(), tempSource.getSize(), !left);
-			this.tempSource = tempSource;
-			this.sourceX = sourceX;
+			super(sourceTo.getSize(), sourceTo.getSize(), !left);
+			this.sourceTo = sourceTo;
+			this.sourceFrom = sourceFrom;
 			
 			this.left = left;
 			this.one = one;
@@ -46,22 +42,22 @@ public class ShiftExpressionNode extends BinaryExpressionNode
 			MutableAssemblyStatePair pair = new MutableAssemblyStatePair("", state);
 			if (left)
 			{
-				((one && tempSource.getSize() <= sourceX.getSize()) ? sourceX : tempSource).applyLDA(pair, i);
+				((one && sourceTo.getSize() <= sourceFrom.getSize()) ? sourceFrom : sourceTo).applyLDA(pair, i);
 				pair.assembly += pair.state.getWhitespace() + ((i == 0) ? "ASL\n" : "ROL\n");
 			}
 			else if (signed)
 			{
-				(one ? sourceX : tempSource).applyLDA(pair, i);
+				(one ? sourceFrom : sourceTo).applyLDA(pair, i);
 				pair.assembly += pair.state.getWhitespace() + (state.testProcessorFlag(ProgramState.ProcessorFlag.M) ? "CMP\t#$8000\n" : "CMP\t#$80\n");
 				pair.assembly += pair.state.getWhitespace() + "ROR\n";
 			}
 			else
 			{
-				(one ? sourceX : tempSource).applyLDA(pair, i);
-				pair.assembly += pair.state.getWhitespace() + (i >= sourceX.getSize() - 2 ? "LSR\n" : "ROR\n");
+				(one ? sourceFrom : sourceTo).applyLDA(pair, i);
+				pair.assembly += pair.state.getWhitespace() + (i >= sourceFrom.getSize() - 2 ? "LSR\n" : "ROR\n");
 			}
 			pair.state = pair.state.clearKnownFlags(ProgramState.PreserveFlag.A);
-			tempSource.applySTA(pair, i);
+			sourceTo.applySTA(pair, i);
 			
 			return pair.getImmutable();
 		}
@@ -205,6 +201,7 @@ public class ShiftExpressionNode extends BinaryExpressionNode
 			assembly += whitespace + "BEQ\t:++\n";
 			assembly += whitespace + "TAX\t\n";
 			assembly += whitespace + ":\n"; // A loop
+			state = state.clearKnownFlags();
 		}
 		switch (operator)
 		{
