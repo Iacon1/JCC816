@@ -53,4 +53,10 @@ public class AddressSource extends OperandSource
 	{
 		return address + (offset != 0? " + " + offset : "");
 	}
+	
+	@Override
+	public String getSpec()
+	{
+		return getBase();
+	}
 }

@@ -68,4 +68,12 @@ public class ConstantByteSource extends OperandSource
 		String assembly = state.getWhitespace() + operation + "\t" + getBase(state, i) + "\n";
 		return new AssemblyStatePair(assembly, state);
 	}
+	
+	@Override
+	public String getSpec()
+	{
+		String s = "#$";
+		for (int b : bytes) s += String.format("%02x", b);
+		return s;
+	}
 }

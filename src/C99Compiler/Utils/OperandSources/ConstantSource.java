@@ -24,8 +24,13 @@ public class ConstantSource extends ConstantByteSource
 			for (int i = 0; i < s.length(); i += 2) // Fix reversed bytes
 			{
 				char a = s.charAt(i);
-				char b = s.charAt(i + 1);
-				s2 += "" + b + "" + a;
+				if (i < s.length() - 1)
+				{
+					char b = s.charAt(i + 1);
+					s2 += "" + b + "" + a;
+				}
+				else
+					s2 += a;
 			}
 			s = s2;
 			for (int i = 0; i < size; ++i)
@@ -98,5 +103,13 @@ public class ConstantSource extends ConstantByteSource
 		if (pointer != null && operation == "LDA")
 			pair = new AssemblyStatePair(pair.assembly, pair.state.clearKnownFlags(PreserveFlag.A));
 		return pair;
+	}
+	
+	@Override
+	public String getSpec()
+	{
+		if (pointer != null)
+			return pointer.getSpec();
+		else return super.getSpec();
 	}
 }

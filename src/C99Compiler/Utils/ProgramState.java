@@ -486,7 +486,21 @@ public class ProgramState
 	 */
 	public ProgramState reservePointer(OperandSource source) throws ScratchOverflowException
 	{
-		if (pointerMap.containsKey(source)) return this;
+		if (pointerMap.containsKey(source))
+		{
+			ProgramState s = new ProgramState(
+					whitespaceLevel,
+					blockList, getPointer(source),
+					pointerMap,
+					possibleValues,
+					destSource,
+					exitFuncLabel,
+					processorFlags,
+					preserveFlags,
+					knownFlags,
+					a, x, y);
+			return s;
+		}
 		List<SimpleEntry<Boolean, Integer>> blockList = cloneBlockList(this.blockList);
 		LinkedHashMap<OperandSource, ScratchSource> pointerMap = clonePointerMap(this.pointerMap);
 		ScratchSource scratchSource = reservePointer(blockList, pointerMap, source);

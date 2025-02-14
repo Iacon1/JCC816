@@ -43,4 +43,9 @@ public class PropPointer<T extends AddressableNode & TypedNode> implements BiFun
 			return "#.bankByte(" + address + ")";
 		else return "#$00";
 	}
+	
+	public String getSpec()
+	{
+		return "ptr:" + node.getAddress(offset);
+	}
 }

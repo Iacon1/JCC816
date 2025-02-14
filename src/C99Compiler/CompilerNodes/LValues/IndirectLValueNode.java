@@ -36,6 +36,11 @@ public class IndirectLValueNode extends LValueNode<IndirectLValueNode>
 		{
 			return "[" + source.getBase() + "]";
 		}
+		@Override
+		public String getSpec()
+		{
+			return "[" + source.getSpec() + "]";
+		}
 		
 		@Override
 		public AssemblyStatePair getInstruction(ProgramState state, String operation, Integer i)

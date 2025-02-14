@@ -49,4 +49,10 @@ public class NumericAddressSource extends OperandSource
 	{
 		return "\t$" + String.format("%06x", address + offset);
 	}
+	
+	@Override
+	public String getSpec()
+	{
+		return getBase();
+	}
 }
