@@ -99,10 +99,16 @@ public class ConstantSource extends ConstantByteSource
 	@Override
 	public AssemblyStatePair getInstruction(ProgramState state, String operation, Integer i)
 	{
-		AssemblyStatePair pair = super.getInstruction(state, operation, i);
+		AssemblyStatePair pair;
 		if (pointer != null && operation == "LDA")
+		{
+			pair = new AssemblyStatePair("", state.clearKnownFlags(PreserveFlag.A));
+			pair = super.getInstruction(pair.state, operation, i);
 			pair = new AssemblyStatePair(pair.assembly, pair.state.clearKnownFlags(PreserveFlag.A));
-		return pair;
+			return pair;
+		}
+		else
+			return super.getInstruction(state, operation, i);
 	}
 	
 	@Override
