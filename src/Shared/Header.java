@@ -216,7 +216,7 @@ public class Header extends CartConfig
 		for (int i = bytes.length - 1; i >= getOffset() + getSize() + interSize; --i)
 			if (bytes[i] != 0x00) break;
 			else sizeB -= 1;
-		for (int i = getOffset() - 1; i >= 0; --i)
+		for (int i = getOffset() - 24 - 1; i >= 0; --i)
 			if (bytes[i] != 0x00) break;
 			else sizeB -= 1;
 		
