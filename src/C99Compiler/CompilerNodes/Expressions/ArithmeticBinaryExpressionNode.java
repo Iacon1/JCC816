@@ -10,6 +10,7 @@ import C99Compiler.CompilerNodes.Definitions.Type;
 import C99Compiler.Utils.ProgramState;
 import C99Compiler.Utils.AssemblyUtils.AssemblyUtils;
 import C99Compiler.Utils.AssemblyUtils.BytewiseOperator;
+import C99Compiler.Utils.AssemblyUtils.SignExtender;
 import C99Compiler.Utils.AssemblyUtils.ZeroCopier;
 import C99Compiler.Utils.OperandSources.OperandSource;
 
@@ -24,9 +25,9 @@ CC extends ParserRuleContext
 	{
 		private OperandSource destSource, sourceX, sourceY;
 		
-		protected ArithmeticOperator(int size, OperandSource destSource, OperandSource sourceX, OperandSource sourceY, boolean reversed)
+		protected ArithmeticOperator(int n1, int n2, OperandSource destSource, OperandSource sourceX, OperandSource sourceY, boolean reversed)
 		{
-			super(size, size, reversed);
+			super(n1, n2, reversed);
 			this.destSource = destSource;
 			this.sourceX = sourceX;
 			this.sourceY = sourceY;
@@ -111,21 +112,26 @@ CC extends ParserRuleContext
 		assembly += AssemblyUtils.store(state, ProgramState.PreserveFlag.A);
 		state = state.clearPreserveFlags(ProgramState.PreserveFlag.A);
 		
-		assembly += state.getWhitespace() + getPreface() + "\n";
-		int size;
-		if (destSource != null)
-			size = Math.min(destSource.getSize(), getRetSize(sourceX.getSize(), sourceY.getSize()));
-		else
-			size = getRetSize(sourceX.getSize(), sourceY.getSize());
-		ArithmeticOperator operator = new ArithmeticOperator(size, destSource, sourceX, sourceY, isReversed());
-		
-		AssemblyStatePair tmpPair = operator.getAssemblyAndState(state);
+		AssemblyStatePair tmpPair = new SignExtender(sourceX, sourceY, x.getType().isSigned(), y.getType().isSigned()).getAssemblyAndState(state);
 		assembly += tmpPair.assembly;
 		state = tmpPair.state;
 		
-		if (size < destSource.getSize())
+		assembly += state.getWhitespace() + getPreface() + "\n";
+		int size1, size2;
+		if (destSource != null)
+			size1 = Math.min(destSource.getSize(), getRetSize(sourceX.getSize(), sourceY.getSize()));
+		else
+			size1 = getRetSize(sourceX.getSize(), sourceY.getSize());
+		size2 = Math.min(Math.min(sourceX.getSize(), sourceY.getSize()), size1);
+		ArithmeticOperator operator = new ArithmeticOperator(size1, size2, destSource, sourceX, sourceY, isReversed());
+		
+		tmpPair = operator.getAssemblyAndState(state);
+		assembly += tmpPair.assembly;
+		state = tmpPair.state;
+		
+		if (size1 < destSource.getSize())
 		{
-			ZeroCopier zeroCopier = new ZeroCopier(destSource.getSize(), destSource.getShifted(size), false);
+			ZeroCopier zeroCopier = new ZeroCopier(destSource.getSize(), destSource.getShifted(size1), false);
 			assembly += zeroCopier.getAssembly(state);
 			state = zeroCopier.getStateAfter(state);
 		}
