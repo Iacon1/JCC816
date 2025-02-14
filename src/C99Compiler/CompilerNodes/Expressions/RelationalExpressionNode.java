@@ -28,14 +28,15 @@ public class RelationalExpressionNode extends BinaryExpressionNode
 	{
 		private OperandSource sourceX, sourceY, tempSource;
 
-		private boolean isSigned;
-		public RelationalOperator(int n1, int n2, OperandSource sourceX, OperandSource sourceY, OperandSource tempSource)
+		private boolean isSigned, invert;
+		public RelationalOperator(int n1, int n2, OperandSource sourceX, OperandSource sourceY, OperandSource tempSource, boolean invert)
 		{
 			super(n1, n2, true);
 			this.sourceX = sourceX;
 			this.sourceY = sourceY;
 			this.tempSource = tempSource;
 			this.isSigned = x.getType().isSigned() || y.getType().isSigned();
+			this.invert = invert;
 		}
 		
 		@Override
@@ -44,7 +45,7 @@ public class RelationalExpressionNode extends BinaryExpressionNode
 			AssemblyStatePair tmpPair;
 			String assembly = "";
 			
-			if (isSigned && (i == n1 - 2) || (i == 0 && n1 == 1)) // First comparison and signed, must EOR y by 0x80
+			if (isSigned && ((i == n1 - 2) || (i == 0 && n1 == 1))) // First comparison and signed, must EOR y by 0x80
 			{
 				String XOR = state.getWhitespace() + (state.testProcessorFlag(ProgramState.ProcessorFlag.M) ? "EOR\t#$8000\n" : "EOR\t#$80\n");
 				if (sourceY.isLiteral()) // Optimizable for literals
@@ -60,7 +61,7 @@ public class RelationalExpressionNode extends BinaryExpressionNode
 					int yVal = Integer.valueOf(oldY, 16);
 					
 					// Compare
-					assembly += "CMP\t#$";
+					assembly += state.getWhitespace() + "CMP\t#$";
 					if (state.testProcessorFlag(ProgramState.ProcessorFlag.M)) // 16-bit
 						assembly += String.format("%04x", yVal ^ 0x8000);
 					else
@@ -108,17 +109,17 @@ public class RelationalExpressionNode extends BinaryExpressionNode
 			// Jump appropriately
 			if (!shortJump)
 			{
-			assembly += state.getWhitespace() + "BCC\t:+\n";  // Done this way to enable med-jumps
-			assembly += state.getWhitespace() + "BRA\t:++\n";
-			assembly += state.getWhitespace() + ":JMP\t" + yesLabel + "\n"; // If x < y then yes
-			assembly += state.getWhitespace() + ":BEQ\t:+\n";
-			assembly += state.getWhitespace() + "JMP\t" + noLabel + "\n";	// If x >= y then no
-			assembly += state.getWhitespace() + ":\n";
+				assembly += state.getWhitespace() + "BCC\t:+\n";  // Done this way to enable med-jumps
+				assembly += state.getWhitespace() + "BRA\t:++\n";
+				assembly += state.getWhitespace() + ":JMP\t" + (invert ? noLabel : yesLabel) + "\n"; // If x < y then yes
+				assembly += state.getWhitespace() + ":BEQ\t:+\n";
+				assembly += state.getWhitespace() + "JMP\t" + (invert ? yesLabel : noLabel) + "\n";	// If x >= y then no
+				assembly += state.getWhitespace() + ":\n";
 			}
 			else
 			{
-				assembly += state.getWhitespace() + "BCC\t" + yesLabel + "\n";  // If x < y then yes
-				assembly += state.getWhitespace() + "BNE\t" + noLabel + "\n";  // If x >= y then no
+				assembly += state.getWhitespace() + "BCC\t" + (invert ? noLabel : yesLabel) + "\n";  // If x < y then yes
+				assembly += state.getWhitespace() + "BNE\t" + (invert ? yesLabel : noLabel) + "\n";  // If x >= y then no
 			}
 			
 			return new AssemblyStatePair(assembly, state);
@@ -178,22 +179,22 @@ public class RelationalExpressionNode extends BinaryExpressionNode
 		return new DummyType("int");
 	}
 	
-	private AssemblyStatePair getAssemblyAndStateRec(ProgramState state, OperandSource sourceX, OperandSource sourceY, String operator) throws Exception
+	private AssemblyStatePair getAssemblyAndStateRec(ProgramState state, OperandSource sourceX, OperandSource sourceY, String operator, boolean invert) throws Exception
 	{
 		if (sourceX.isLiteral() && !sourceY.isLiteral())
 			switch (operator) // Always put literal on RHS
 			{
-			case "<": return getAssemblyAndStateRec(state, sourceY, sourceX, ">=");
-			case "<=": return getAssemblyAndStateRec(state, sourceY, sourceX, ">");
-			case ">": return getAssemblyAndStateRec(state, sourceY,  sourceX, "<=");
-			case ">=": return getAssemblyAndStateRec(state, sourceY, sourceX, "<");
+			case "<": return getAssemblyAndStateRec(state, sourceY, sourceX, ">", invert);
+			case "<=": return getAssemblyAndStateRec(state, sourceY, sourceX, ">=", invert);
+			case ">": return getAssemblyAndStateRec(state, sourceY,  sourceX, "<", invert);
+			case ">=": return getAssemblyAndStateRec(state, sourceY, sourceX, "<=", invert);
 			}
 		switch (operator) // Let's always do variants of <
 		{
-		case ">": return getAssemblyAndStateRec(state, sourceX, sourceY, "<=");
-		case ">=": return getAssemblyAndStateRec(state, sourceX, sourceY, "<");
+		case ">": return getAssemblyAndStateRec(state, sourceX, sourceY, "<=", !invert);
+		case ">=": return getAssemblyAndStateRec(state, sourceX, sourceY, "<", !invert);
 		}
-
+		
 		String assembly = "";
 		
 		assert !state.testPreserveFlag(ProgramState.PreserveFlag.A); // Since we jump out of here we have no way to preserve this
@@ -205,18 +206,19 @@ public class RelationalExpressionNode extends BinaryExpressionNode
 		int max = Math.max(sourceX.getSize(), sourceY.getSize());
 		int min = Math.min(sourceX.getSize(), sourceY.getSize());
 		assembly += state.getWhitespace() + "CLC\n";
-		BytewiseOperator o = new RelationalOperator(max, min, sourceX, sourceY, tempSource);
-		assembly += o.getAssembly(state);
-		state = o.getStateAfter(state);
+		BytewiseOperator o = new RelationalOperator(max, min, sourceX, sourceY, tempSource, invert);
+		AssemblyStatePair tmpPair = o.getAssemblyAndState(state);
+		assembly += tmpPair.assembly;
+		state = tmpPair.state;
 		
 		// The above actually always checks for "<". This is due to the behavior of the carry flag, it being set when the two words are equal.
 		switch (operator)
 		{
 		case "<":
-			assembly += state.getWhitespace() + "JMP\t" + noLabel + "\n"; // If equal, false
+			assembly += state.getWhitespace() + "JMP\t" + (invert ? yesLabel : noLabel) + "\n"; // If equal, false
 			break;
 		case "<=":
-			assembly += state.getWhitespace() + "JMP\t" + yesLabel + "\n"; // If equal, true
+			assembly += state.getWhitespace() + "JMP\t" + (invert ? noLabel : yesLabel) + "\n"; // If equal, true
 			break;
 		}
 		
@@ -227,7 +229,7 @@ public class RelationalExpressionNode extends BinaryExpressionNode
 	{
 		String assembly = "";
 		String whitespace = state.getWhitespace();
-		AssemblyStatePair tmpPair = getAssemblyAndStateRec(state, sourceX, sourceY, operator);
+		AssemblyStatePair tmpPair = getAssemblyAndStateRec(state, sourceX, sourceY, operator, false);
 		assembly += tmpPair.assembly;
 		state = tmpPair.state;
 		
