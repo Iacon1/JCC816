@@ -106,10 +106,17 @@ public abstract class OperandSource implements Serializable
 	}
 	
 	public abstract String getSpec();
+	@Override
 	public boolean equals(Object other)
 	{
 		if (!OperandSource.class.isAssignableFrom(other.getClass()))
 			return false;
 		return getSpec().equals(((OperandSource) other).getSpec());
 	}
+	@Override
+	public int hashCode()
+	{
+		return getSpec().hashCode();
+	}
+	
 }
