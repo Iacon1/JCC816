@@ -58,7 +58,7 @@ public class Multiplier implements Assemblable
 			}
 			else // Not first mult of the set
 			{
-				pair.assembly += whitespace + "CLC\n";
+				pair.assembly += whitespace + "NOP\n";
 				pair.assembly += whitespace + "TXA\n";
 				pair.assembly += whitespace + "ADC\tf:" + SNESRegisters.RDMPYL + "\n";
 			}
@@ -86,11 +86,13 @@ public class Multiplier implements Assemblable
 		MutableAssemblyStatePair pair = new MutableAssemblyStatePair("", state);
 
 		OperandSource destSource = pair.state.destSource();
+		pair.assembly += pair.state.getWhitespace() + "CLC\n";
 		for (int i = 0; i < sourceX.getSize(); ++i)
 			new MultiplierOperator(i, destSource, sourceX, sourceY).apply(pair);
 		
 		// High byte
 		pair.assembly += pair.state.getWhitespace() + "LDA\t" + SNESRegisters.RDMPYH + "\n";
+		pair.assembly += pair.state.getWhitespace() + "ADC\t#$00\n";
 		destSource.applySTA(pair, destSource.getSize() - 1);
 		
 		return pair.getImmutable();

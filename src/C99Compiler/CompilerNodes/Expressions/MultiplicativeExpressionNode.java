@@ -66,7 +66,7 @@ public class MultiplicativeExpressionNode extends CallingArithmeticBinaryExpress
 			return;
 		
 		if (x.hasPropValue(state)) return; // Gonna get fully optimized anyway
-		
+		if (!y.hasPropValue(state)) return; // Can't optimize this
 		if (operator.equals("*"))
 		{
 			if (y.hasPropValue(state) && 1 < y.getPropLong(state) && optimizedComplexity(y.getPropLong(state)) <= CompConfig.maxOptimizedMultComplexity)
@@ -99,7 +99,7 @@ public class MultiplicativeExpressionNode extends CallingArithmeticBinaryExpress
 			else if (y.hasPropValue(state) && 1 == y.getPropLong(state))
 				optimized = x;	
 		}
-		else if (operator.equals("/") && ((y.getPropLong(state) & (y.getPropLong(state) - 1)) == 0)) // y is power of 2
+		else if (operator.equals("/") && (y.getPropLong(state) & (y.getPropLong(state) - 1)) == 0) // y is power of 2
 		{
 			assert y.getPropLong(state) != 0; // Should be caught by parsing
 			DummyExpressionNode d1;
