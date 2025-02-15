@@ -7,6 +7,7 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import C99Compiler.CompConfig.OptimizationLevel;
 import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.Definitions.Type;
+import C99Compiler.Utils.CompUtils;
 import C99Compiler.Utils.ProgramState;
 import C99Compiler.Utils.AssemblyUtils.AssemblyUtils;
 import C99Compiler.Utils.AssemblyUtils.BytewiseOperator;
@@ -74,11 +75,11 @@ CC extends ParserRuleContext
 		this.y = y;
 	}
 	@Override public Type getType()
-	{/*
-		if (hasPropValue() && !hasAssembly())
-			return CompUtils.getSmallestSignedType(getPropLong());
+	{
+		if (hasPropValue(new ProgramState()) && !hasAssembly(new ProgramState()))
+			return CompUtils.getSmallestType(getPropLong(new ProgramState()));
 		else
-	*/		return Type.convertArithmetic(x.getType(), y.getType());
+			return Type.convertArithmetic(x.getType(), y.getType());
 	}
 	
 	protected abstract long doOperation(long x, long y);
