@@ -6,7 +6,7 @@
 	<revision specialVersion="0">0</revision>
 	<region>USA</region>
 	<cartConfig>
-		<mapMode fastROM="false" battery="false">loROM</mapMode>
+		<mapMode fastROM="true" battery="false">exHiROM</mapMode>
 		<addonChip>none</addonChip>
 	</cartConfig>
 </header>
