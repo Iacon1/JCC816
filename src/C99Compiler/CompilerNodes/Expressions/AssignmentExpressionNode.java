@@ -201,7 +201,7 @@ public class AssignmentExpressionNode extends BinaryExpressionNode
 			state = tmpPair.state;
 		}
 		
-		if (y.hasPropValue(state))
+		if (y.hasPropValue(state) && !x.isIndirect() && !x.getType().isVolatile())
 			state = state.setPossibleValue(x.getLValue(state), y.getPropValue(state));
 
 		return new AssemblyStatePair(assembly, state);
