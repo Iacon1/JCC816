@@ -96,6 +96,9 @@ public class EqualityExpressionNode extends BinaryExpressionNode
 	@Override public CastContext getCastContext() {return CastContext.equality;}
 	
 	@Override
+	public boolean isLogical() {return true;}
+	
+	@Override
 	protected AssemblyStatePair getAssemblyAndState(ProgramState state, OperandSource sourceX, OperandSource sourceY) throws Exception
 	{
 		String assembly = "";

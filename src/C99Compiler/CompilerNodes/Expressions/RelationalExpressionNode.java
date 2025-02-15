@@ -179,6 +179,9 @@ public class RelationalExpressionNode extends BinaryExpressionNode
 		return new DummyType("int");
 	}
 	
+	@Override
+	public boolean isLogical() {return true;}
+	
 	private AssemblyStatePair getAssemblyAndStateRec(ProgramState state, OperandSource sourceX, OperandSource sourceY, String operator, boolean invert) throws Exception
 	{
 		if (sourceX.isLiteral() && !sourceY.isLiteral())
@@ -236,17 +239,27 @@ public class RelationalExpressionNode extends BinaryExpressionNode
 		if (hasEnd)
 		{
 			assembly += state.getWhitespace() + yesLabel + ":\n";
-			tmpPair = new ByteCopier(state.destSource().getSize(), state.destSource(), new ConstantSource(1, state.destSource().getSize())).getAssemblyAndState(state);
-			assembly += tmpPair.assembly;
-			state = tmpPair.state;
-			assembly += whitespace + "BRA\t" + endLabel + "\n";
+			if (state.destSource() != null)
+			{
+				tmpPair = new ByteCopier(state.destSource().getSize(), state.destSource(), new ConstantSource(1, state.destSource().getSize())).getAssemblyAndState(state);
+				assembly += tmpPair.assembly;
+				state = tmpPair.state;
+			}
+			else
+				assembly += state.getWhitespace() + "LDA\t#$01\n";
 			
+			assembly += whitespace + "BRA\t" + endLabel + "\n";	
 			state = state.wipe();
 			
 			assembly += whitespace + noLabel + ":\n";
-			tmpPair = new ByteCopier(state.destSource().getSize(), state.destSource(), new ConstantSource(0, state.destSource().getSize())).getAssemblyAndState(state);
-			assembly += tmpPair.assembly;
-			state = tmpPair.state;
+			if (state.destSource() != null)
+			{
+				tmpPair = new ByteCopier(state.destSource().getSize(), state.destSource(), new ConstantSource(0, state.destSource().getSize())).getAssemblyAndState(state);
+				assembly += tmpPair.assembly;
+				state = tmpPair.state;
+			}
+			else
+				assembly += state.getWhitespace() + "LDA\t#$00\n";
 			
 			assembly += whitespace + endLabel + ":\n";
 		}

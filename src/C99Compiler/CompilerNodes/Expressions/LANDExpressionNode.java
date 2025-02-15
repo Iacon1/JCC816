@@ -90,11 +90,14 @@ public class LANDExpressionNode extends LogicalBinaryExpressionNode
 		assembly += ":" + whitespace.substring(1) + "TXA\n";
 		assembly += whitespace + CompUtils.setA8 + "\n";
 
-		tmpPair = state.destSource().getSTA(state, 0);
-		assembly += tmpPair.assembly;
-		state = tmpPair.state;
-
-		 state = state.addPreserveFlags(flags);
+		if(state.destSource() != null)
+		{
+			tmpPair = state.destSource().getSTA(state, 0);
+			assembly += tmpPair.assembly;
+			state = tmpPair.state;
+		}
+		
+		state = state.addPreserveFlags(flags);
 		assembly += AssemblyUtils.restore(state, (byte) (ProgramState.PreserveFlag.A | ProgramState.PreserveFlag.X));
 		
 		return new AssemblyStatePair(assembly, state);

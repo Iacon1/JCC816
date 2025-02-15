@@ -135,21 +135,28 @@ public class SelectionStatementNode extends SequencePointStatementNode<Selection
 				
 				if (expression.hasAssembly(pair.state))
 				{
-					pair.state = pair.state.reserveScratchBlock(expression.getSize());
-					ScratchSource exprSource = pair.state.lastScratchSource();
-					pair.state = pair.state.setDestSource(exprSource);
-					applyWithRegistered(pair, new EqualityExpressionNode(this, expression));
-					new ByteCopier(exprSource.getSize(), exprSource, exprSource).apply(pair);
-					
+					if (!expression.isLogical())
+					{
+						pair.state = pair.state.reserveScratchBlock(expression.getSize());
+						ScratchSource exprSource = pair.state.lastScratchSource();
+						pair.state = pair.state.setDestSource(exprSource);
+						applyWithRegistered(pair, new EqualityExpressionNode(this, expression));
+						new ByteCopier(exprSource.getSize(), exprSource, exprSource).apply(pair);
+					}
+					else
+					{
+						pair.state = pair.state.setDestSource(null);
+						applyWithRegistered(pair, expression);
+					}
 				}
 				else
 					new EqualityExpressionNode(null, expression).apply(pair);
 				
 				ComparitiveJump cmpJump;
 				if (elseStm != null)
-					cmpJump = new ComparitiveJump(ifStm, elseStm, skipName, getEndLabel(), true, labelLine(pair.state, ifLineNo));
+					cmpJump = new ComparitiveJump(ifStm, elseStm, skipName, getEndLabel(), expression.isLogical(), labelLine(pair.state, ifLineNo));
 				else
-					cmpJump = new ComparitiveJump(ifStm, null, skipName, null, true, labelLine(pair.state, ifLineNo));
+					cmpJump = new ComparitiveJump(ifStm, null, skipName, null, expression.isLogical(), labelLine(pair.state, ifLineNo));
 				cmpJump.apply(pair);
 			}
 		}

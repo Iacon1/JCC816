@@ -7,6 +7,7 @@ import C99Compiler.CompilerNodes.Definitions.Type.CastContext;
 import C99Compiler.Utils.CompUtils;
 import C99Compiler.Utils.ProgramState;
 import C99Compiler.Utils.ProgramState.PreserveFlag;
+import C99Compiler.Utils.ProgramState.ProcessorFlag;
 import C99Compiler.Utils.AssemblyUtils.AssemblyUtils;
 import C99Compiler.Utils.AssemblyUtils.BytewiseOperator;
 import C99Compiler.Utils.OperandSources.OperandSource;
@@ -96,11 +97,13 @@ public class LORExpressionNode extends LogicalBinaryExpressionNode
 		assembly += whitespace + "DEX\n";
 		assembly += ":" + whitespace.substring(1) + "TXA\n";
 		assembly += whitespace + CompUtils.setA8 + "\n";
-		
-		tmpPair = state.destSource().getSTA(state, 0);
-		assembly += tmpPair.assembly;
-		state = tmpPair.state;
-		
+		state = state.setProcessorFlags(ProcessorFlag.M);
+		if(state.destSource() != null)
+		{
+			tmpPair = state.destSource().getSTA(state, 0);
+			assembly += tmpPair.assembly;
+			state = tmpPair.state;
+		}
 		assembly += AssemblyUtils.restore(state, (byte) (PreserveFlag.A | PreserveFlag.X));
 		state = state.setPreserveFlags(flags);
 		

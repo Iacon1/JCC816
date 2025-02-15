@@ -26,14 +26,10 @@ PC extends ParserRuleContext,
 CC extends ParserRuleContext
 > extends SPBinaryExpressionNode<C1, C2, PC, CC>
 {
-	private List<String> sequenceQueue;
-	private boolean isSP;
 	
 	public LogicalBinaryExpressionNode(ComponentNode<?> parent)
 	{
 		super(parent);
-		sequenceQueue = new LinkedList<String>();
-		isSP = false;
 	}
 	
 	@Override public Type getType() {return new DummyType("int");}
@@ -42,7 +38,6 @@ CC extends ParserRuleContext
 	public String getAssembly(ProgramState state) throws Exception
 	{
 		AssemblyStatePair queuedPair;
-		String whitespace = state.getWhitespace();
 		ScratchSource scratchX = null, scratchY = null;
 		final OperandSource sourceX, sourceY;
 		OperandSource destSource = state.destSource();
@@ -102,4 +97,7 @@ CC extends ParserRuleContext
 		state = state.releasePointer(destSource); // A copy of the destination, if it's a pointer, has gone stale
 		return assembly;
 	}
+	
+	@Override
+	public boolean isLogical() {return true;}
 }
