@@ -54,7 +54,6 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 	private BaseExpressionNode<?> expr, indexExpr;
 	private List<BaseExpressionNode<?>> params;
 
-	private IndirectLValueNode pointerRef; // For arrays and pointers to structs
 	String memberName;
 	
 	private FunctionDefinitionNode getReferencedFunction()
@@ -72,7 +71,6 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 	{
 		super(parent);
 		params = new ArrayList<BaseExpressionNode<?>>();
-		pointerRef = null;
 	}
 
 	@Override
@@ -180,6 +178,7 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 	@Override
 	public LValueNode<?> getLValue(ProgramState state) // Warning: Only returns meaningful result after getAssembly
 	{
+		OperandSource addrSource;
 		switch (type)
 		{
 		case arraySubscript:
@@ -188,15 +187,26 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 				int offset = getType().getSize() * (int) indexExpr.getPropLong(new ProgramState());
 				return new WrapperLValueNode(this, ((ArrayType) expr.getType()).getType(), expr.getLValue(state), offset);
 			}
-			return pointerRef;
+			addrSource = state.getPointer(expr.getLValue(state).getSource());
+			return new IndirectLValueNode(this, new DummyLValueNode(this, getType(), addrSource), addrSource, getType());
 		case structMember:
 			return getTranslationUnit().resolveStructOrUnion(expr.getType().getSUEName()).getMember(memberName).getInstance(expr.getLValue(state));
 		case structMemberP:
-			return getTranslationUnit().resolveStructOrUnion(((PointerType) expr.getType()).getType().getSUEName()).getMember(memberName).getInstance(pointerRef);	
+			addrSource = state.getPointer(expr.getLValue(state).getSource());
+			return getTranslationUnit().resolveStructOrUnion(
+					((PointerType) expr.getType()).getType().getSUEName())
+					.getMember(memberName).getInstance(
+							new IndirectLValueNode(this, expr.getLValue(state), addrSource, ((PointerType) expr.getType()).getType()));	
 		default:
 			return null;
 		}
 	}
+	
+	private boolean canUseIndexReg()
+	{
+		return expr.getType().isArray() && CompUtils.getSmallestType(expr.getSize()).getSize() <= 2;
+	}
+	
 	@Override
 	public boolean hasAssembly(ProgramState state)
 	{
@@ -211,6 +221,7 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 		default: return false; // TODO
 		}
 	}
+	
 	@Override
 	public AssemblyStatePair getAssemblyAndState(ProgramState state) throws Exception
 	{
@@ -224,22 +235,17 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 			if (!getType().isArray()) // return element of an array
 			{
 				OperandSource addrSource;
-				if (!state.hasPointer(expr.getLValue(state).getSource()))
-				{
-					state = state.reservePointer(expr.getLValue(state).getSource());
-					addrSource = state.lastScratchSource();
-					state = state.setDestSource(addrSource);
-					tmpPair = new AdditiveExpressionNode(this, "+", expr, indexExpr).getAssemblyAndState(state);
-					assembly += tmpPair.assembly;
-					state = tmpPair.state;
-				}
-				else
-					addrSource = state.getPointer(expr.getLValue(state).getSource());
-				pointerRef = new IndirectLValueNode(this, new DummyLValueNode(this, getType(), addrSource), addrSource, getType());
+				state = state.reservePointer(expr.getLValue(state).getSource());
+				addrSource = state.lastScratchSource();
+				state = state.setDestSource(addrSource);
+				tmpPair = new AdditiveExpressionNode(this, "+", expr, indexExpr).getAssemblyAndState(state);
+				assembly += tmpPair.assembly;
+				state = tmpPair.state;
+				state = state.setDestSource(destSource);
+
 				if (destSource != null)
 				{
-					state = state.setDestSource(destSource);
-					tmpPair = new ByteCopier(destSource.getSize(), destSource, pointerRef.getSource()).getAssemblyAndState(state);
+					tmpPair = new ByteCopier(destSource.getSize(), destSource, getLValue(state).getSource()).getAssemblyAndState(state);
 					assembly += tmpPair.assembly;
 					state = tmpPair.state;
 				}
@@ -447,7 +453,6 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 				state = tmpPair.state;
 			}
 			else sourceP = state.getPointer(expr.getLValue(state).getSource());
-			pointerRef = new IndirectLValueNode(this, expr.getLValue(state), sourceP, ((PointerType) expr.getType()).getType());
 			if (destSource != null)
 			{
 				tmpPair = new ByteCopier(destSource.getSize(), destSource, getLValue(state).getSource()).getAssemblyAndState(state);
