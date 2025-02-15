@@ -91,7 +91,7 @@ public class LORExpressionNode extends LogicalBinaryExpressionNode
 		assembly += whitespace + "LDX\t#$01\n";
 		
 		AssemblyStatePair pair = new LOROperator(sourceX.getSize(), sourceX, sourceY).getAssemblyAndState(state);
-		assembly += pair;
+		assembly += pair.assembly;
 		state = pair.state;
 		
 		assembly += whitespace + "DEX\n";
