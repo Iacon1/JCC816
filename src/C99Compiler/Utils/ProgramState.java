@@ -6,8 +6,10 @@ package C99Compiler.Utils;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.AbstractMap.SimpleEntry;
 
 import C99Compiler.CompConfig;
@@ -141,10 +143,12 @@ public class ProgramState
 			blockList.remove(i - 1);
 			i -= 1;
 		}
-		
+		List<OperandSource> toRemove = new LinkedList<OperandSource>();
 		for (OperandSource o : pointerMap.keySet())
 			if (pointerMap.get(o).equals(s))
-				pointerMap.remove(o);
+				toRemove.add(o);
+		for (OperandSource o : toRemove)
+			pointerMap.remove(o);
 		
 		blockList.set(i, new SimpleEntry<Boolean, Integer>(false, size));
 	}
@@ -554,8 +558,11 @@ public class ProgramState
 		boolean wasLastPointer = pointerMap.containsValue(lastScratchSource);
  		List<SimpleEntry<Boolean, Integer>> blockList = cloneBlockList(this.blockList);
 		LinkedHashMap<OperandSource, ScratchSource> pointerMap = clonePointerMap(this.pointerMap);
+		List<OperandSource> toRemove = new LinkedList<OperandSource>();
 		for (OperandSource p : pointerMap.keySet())
-			releasePointer(blockList, pointerMap, p);
+			toRemove.add(p);
+		for (OperandSource p : toRemove)
+			releasePointer(p);
 		
 		ProgramState s = new ProgramState(
 				whitespaceLevel,
