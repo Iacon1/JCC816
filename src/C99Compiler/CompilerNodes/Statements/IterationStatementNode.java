@@ -229,7 +229,7 @@ public class IterationStatementNode extends SequencePointStatementNode<Iteration
 					state = tmpPair.state;
 				}
 			}
-			if (stmNode.hasAssembly(state)) // Go forever
+			else if (stmNode.hasAssembly(state)) // Go forever
 			{
 				tmpPair = stmNode.getAssemblyAndState(state);
 				assembly += tmpPair.assembly;
