@@ -9,6 +9,7 @@ import C99Compiler.CompilerNodes.Expressions.BaseExpressionNode;
 import C99Compiler.CompilerNodes.Expressions.ExpressionNode;
 import C99Compiler.CompilerNodes.Interfaces.AssemblableNode;
 import C99Compiler.Utils.OperandSources.ConstantSource;
+import C99Compiler.Utils.OperandSources.OperandSource;
 import C99Compiler.Utils.ProgramState;
 import C99Compiler.Utils.AssemblyUtils.ByteCopier;
 import Grammar.C99.C99Parser.Jump_statementContext;
@@ -94,10 +95,15 @@ public class JumpStatementNode extends StatementNode<Jump_statementContext> impl
 				assembly += whitespace + "JMP\t" + iterNode.getEndLabel() + "\n";
 			break;
 		case returnM:
-			if (expr != null && expr.hasAssembly(state)) assembly += expr.getAssembly(state);
+			OperandSource s = CompConfig.callResultSource(this.getEnclosingFunction().getSize());
+			if (expr != null && expr.hasAssembly(state))
+			{
+				state = state.setDestSource(s);
+				assembly += expr.getAssembly(state);
+			}
 			else if (expr != null && expr.hasPropValue(state))
 			{
-				ByteCopier copier = new ByteCopier(funcNode.getSize(), CompConfig.callResultSource(funcNode.getSize()), new ConstantSource(expr.getPropLong(state), funcNode.getSize()));
+				ByteCopier copier = new ByteCopier(funcNode.getSize(), s, new ConstantSource(expr.getPropLong(state), funcNode.getSize()));
 				AssemblyStatePair tmpPair = copier.getAssemblyAndState(state);
 				assembly += tmpPair.assembly;
 				state = tmpPair.state;
