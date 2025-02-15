@@ -177,6 +177,14 @@ public class ProgramState
 		pointerMap.put(s, scratchSource);
 		return scratchSource;
 	}
+	private static ScratchSource markPointer(List<SimpleEntry<Boolean, Integer>> blockList, LinkedHashMap<OperandSource, ScratchSource> pointerMap, OperandSource s, ScratchSource scratchSource) throws ScratchOverflowException
+	{
+		if (pointerMap.containsKey(s))
+			return pointerMap.get(s);
+		
+		pointerMap.put(s, scratchSource);
+		return scratchSource;
+	}
 	private static void releasePointer(List<SimpleEntry<Boolean, Integer>> blockList, LinkedHashMap<OperandSource, ScratchSource> pointerMap, OperandSource s) throws ScratchOverflowException
 	{
 		if (!pointerMap.containsKey(s))
@@ -522,7 +530,46 @@ public class ProgramState
 				a, x, y);
 		return s;
 	}
-	/** Releases a pointer-usable copy of a sourc, if it exists.
+	/** Marks a scratch source as a pointer-usable copy of a source.
+	 * 
+	 * @param source Source to reserve a pointer for.
+	 * @return A copy of the state with the pointer reserved.
+	 */
+	public ProgramState markPointer(OperandSource source, ScratchSource scratchSource) throws ScratchOverflowException
+	{
+		if (pointerMap.containsKey(source))
+		{
+			ProgramState s = new ProgramState(
+					whitespaceLevel,
+					blockList, getPointer(source),
+					pointerMap,
+					possibleValues,
+					destSource,
+					exitFuncLabel,
+					processorFlags,
+					preserveFlags,
+					knownFlags,
+					a, x, y);
+			return s;
+		}
+		List<SimpleEntry<Boolean, Integer>> blockList = cloneBlockList(this.blockList);
+		LinkedHashMap<OperandSource, ScratchSource> pointerMap = clonePointerMap(this.pointerMap);
+		scratchSource = markPointer(blockList, pointerMap, source, scratchSource);
+		
+		ProgramState s = new ProgramState(
+				whitespaceLevel,
+				blockList, scratchSource,
+				pointerMap,
+				possibleValues,
+				destSource,
+				exitFuncLabel,
+				processorFlags,
+				preserveFlags,
+				knownFlags,
+				a, x, y);
+		return s;
+	}
+	/** Releases a pointer-usable copy of a source, if it exists.
 	 * 
 	 * @param source Source to release any pointer to.
 	 * @return A copy of the state with the pointer released.
