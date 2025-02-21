@@ -69,6 +69,7 @@ public class ExpressionNode extends SPBaseExpressionNode<ExpressionContext>
 
 		for (BaseExpressionNode<?> expression : expressions.subList(0, expressions.size()))
 		{
+			if (!expression.hasAssembly(pair.state)) continue;
 			clearAssemblables();
 			pair = expression.apply(pair);
 			pair = applyRegistered(pair);

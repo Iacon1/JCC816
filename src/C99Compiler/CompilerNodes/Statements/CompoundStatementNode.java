@@ -80,6 +80,7 @@ public class CompoundStatementNode extends StatementNode<Compound_statementConte
 		int i = 0;
 		for (AssemblableNode assemblable : assemblables)
 		{
+			if (!assemblable.hasAssembly(state)) continue;
 			assembly += labelLine(state, lines.get(i++));
 			state = state.setDestSource(null);
 			AssemblyStatePair pair = assemblable.getAssemblyAndState(state);
