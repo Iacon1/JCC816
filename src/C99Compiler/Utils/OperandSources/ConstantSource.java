@@ -70,6 +70,7 @@ public class ConstantSource extends ConstantByteSource
 		super(asBytes(constant, size), offset, size);
 		if (PropPointer.class.isAssignableFrom(constant.getClass()))
 			pointer = (PropPointer<?>) constant;
+		this.constant = constant;
 	}
 	
 	public ConstantSource(Object constant, int size)
@@ -77,6 +78,7 @@ public class ConstantSource extends ConstantByteSource
 		super(asBytes(constant, size), size);
 		if (PropPointer.class.isAssignableFrom(constant.getClass()))
 			pointer = (PropPointer<?>) constant;
+		this.constant = constant;
 	}
 	@Override
 	public OperandSource getShifted(int offset, int size)
