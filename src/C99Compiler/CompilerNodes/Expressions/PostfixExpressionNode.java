@@ -56,9 +56,8 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 
 	String memberName;
 	
-	private FunctionDefinitionNode getReferencedFunction()
+	private FunctionDefinitionNode getReferencedFunction(ProgramState state)
 	{
-		ProgramState state = new ProgramState();
 		if (expr.hasPropValue(state))
 		{
 			Object obj = expr.getPropValue(state);
@@ -90,11 +89,11 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 			if (node.argument_expression_list() != null)
 				for (Assignment_expressionContext expr : node.argument_expression_list().assignment_expression())
 					params.add(new AssignmentExpressionNode(this).interpret(expr));
-			if (params.size() != getReferencedFunction().getParameters().size())
+			if (params.size() != getReferencedFunction(new ProgramState()).getParameters().size())
 				throw new ConstraintException("6.5.2.2", 2, node.start);
-			if (getReferencedFunction() != null && getReferencedFunction().isSA1() && !getEnclosingFunction().isSA1())
+			if (getReferencedFunction(new ProgramState()) != null && getReferencedFunction(new ProgramState()).isSA1() && !getEnclosingFunction().isSA1())
 				throw new UnsupportedFeatureException("Calling an SA1 function outside an SA1 context", true, node.start);
-			else if (getReferencedFunction() != null && !getReferencedFunction().isSA1() && getEnclosingFunction().isSA1())
+			else if (getReferencedFunction(new ProgramState()) != null && !getReferencedFunction(new ProgramState()).isSA1() && getEnclosingFunction().isSA1())
 				throw new UnsupportedFeatureException("Calling a non-SA1 function inside an SA1 context", true, node.start);
 			break;
 		case ".":
@@ -138,8 +137,8 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 	{
 		if (type == PFType.funcCall)
 		{
-			if (getReferencedFunction() != null)
-				return getReferencedFunction().getFullName().equals(function.getFullName());
+			if (getReferencedFunction(state) != null)
+				return getReferencedFunction(state).getFullName().equals(function.getFullName());
 			else return true;
 		}
 		else return expr.canCall(state, function);
@@ -260,7 +259,7 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 			break;
 		case funcCall:
 			state = state.releasePointers(); // TODO only need to wipe pointers here
-			if (getReferencedFunction() != null && !getReferencedFunction().canCall(state, getEnclosingFunction())) // We can know the variables to copy parameters to
+			if (getReferencedFunction(state) != null && !getReferencedFunction(state).canCall(state, getEnclosingFunction())) // We can know the variables to copy parameters to
 			{
 				if (expr.hasAssembly(state))
 				{
@@ -269,7 +268,7 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 					assembly += tmpPair.assembly;
 					state = tmpPair.state;
 				}
-				FunctionDefinitionNode func = getReferencedFunction();
+				FunctionDefinitionNode func = getReferencedFunction(state);
 				
 				if (func.canCall(state, getEnclosingFunction())) // Prepare for possible recursion
 				{
@@ -339,7 +338,7 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 			else // TODO Unpredictable function pointer or recursion, need to use the stack
 			{
 				// Copy pointer
-				if (getReferencedFunction() == null) // Unpredictable function pointer
+				if (getReferencedFunction(state) == null) // Unpredictable function pointer
 				{
 					BaseExpressionNode<?> addrExpr = new UnaryExpressionNode(this, "&", expr);
 					if (addrExpr.hasAssembly(state))
@@ -397,9 +396,9 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 				assembly += tmpPair.assembly;
 				state = tmpPair.state;
 				
-				if (getReferencedFunction() == null)
+				if (getReferencedFunction(state) == null)
 					assembly += state.getWhitespace() + "JML\t[" + CompConfig.funcPointer + "]\n" + state.getWhitespace() + ":\n";
-				else assembly += state.getWhitespace() + "JSL\t" + getReferencedFunction().getStartLabel() + "\n";
+				else assembly += state.getWhitespace() + "JSL\t" + getReferencedFunction(state).getStartLabel() + "\n";
 
 				for (VariableNode parameter : variables)
 				{
