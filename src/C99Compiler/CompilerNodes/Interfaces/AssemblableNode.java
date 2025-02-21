@@ -3,6 +3,7 @@
 //
 package C99Compiler.CompilerNodes.Interfaces;
 
+import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.FunctionDefinitionNode;
 import C99Compiler.Utils.ProgramState;
 import C99Compiler.Utils.PropPointer;
@@ -56,4 +57,6 @@ public interface AssemblableNode extends Assemblable
 	public boolean hasAssembly(ProgramState state);
 	@Deprecated
 	public default boolean hasAssembly() {return hasAssembly(new ProgramState());}
+	
+	public ProgramState getStateBefore(ProgramState state, ComponentNode<?> child) throws Exception;
 }

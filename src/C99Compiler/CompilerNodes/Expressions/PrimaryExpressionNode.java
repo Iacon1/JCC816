@@ -141,5 +141,11 @@ public class PrimaryExpressionNode extends BaseExpressionNode<Primary_expression
 	}
 	
 	@Override
+	public ProgramState getStateBefore(ProgramState state, ComponentNode<?> child) throws Exception
+	{
+		throw new UnsupportedOperationException();
+	}
+	
+	@Override
 	public AssemblyStatePair getAssemblyAndState(ProgramState state) throws Exception {throw new UnsupportedOperationException();}
 }

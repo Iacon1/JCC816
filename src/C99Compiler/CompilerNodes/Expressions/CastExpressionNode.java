@@ -74,7 +74,19 @@ public class CastExpressionNode extends BaseExpressionNode<Cast_expressionContex
 	{
 		return expr.hasAssembly(state) || (!hasPropValue(state) && getType().getSize() > expr.getType().getSize());
 	}
-	
+	@Override
+	public ProgramState getStateBefore(ProgramState state, ComponentNode<?> child) throws Exception
+	{
+		if (!children.contains(child))
+			throw new IllegalArgumentException();
+		
+		if (getType().getSize() > expr.getType().getSize()) // Need to make space
+			state = new ByteCopier(getType().getSize(), state.destSource(), new ConstantSource(0, getType().getSize())).getStateAfter(state);
+		
+		if (child != expr && expr.hasAssembly(state))
+			state = expr.getStateAfter(state);
+		return state;
+	}
 	@Override
 	public AssemblyStatePair getAssemblyAndState(ProgramState state) throws Exception
 	{

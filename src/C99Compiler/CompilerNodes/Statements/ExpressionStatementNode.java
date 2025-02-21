@@ -45,6 +45,15 @@ public class ExpressionStatementNode extends SequencePointStatementNode<Expressi
 	}
 	
 	@Override
+	public ProgramState getStateBefore(ProgramState state, ComponentNode<?> child) throws Exception
+	{
+		if (!children.contains(child))
+			throw new IllegalArgumentException();
+
+		return state;
+	}
+	
+	@Override
 	public AssemblyStatePair getAssemblyAndState(ProgramState state) throws Exception
 	{
 		return getAssemblyAndStateWithRegistered(state, expression);

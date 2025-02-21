@@ -98,6 +98,21 @@ public class DeclarationNode extends InterpretingNode<DeclarationNode, Declarati
 	}
 	
 	@Override
+	public ProgramState getStateBefore(ProgramState state, ComponentNode<?> child) throws Exception
+	{
+		if (!children.contains(child))
+			throw new IllegalArgumentException();
+
+		for (InitializerNode initializer : initializers)
+		{
+			if (child == initializer)
+				break;
+			state = initializer.getStateAfter(state);
+		}
+		return state;
+	}
+	
+	@Override
 	public AssemblyStatePair getAssemblyAndState(ProgramState state) throws Exception
 	{
 		AssemblyStatePair tmpPair;

@@ -61,9 +61,8 @@ public class DummyExpressionNode extends BaseExpressionNode<ExpressionContext>
 	@Override 
 	public boolean canCall(ProgramState state, FunctionDefinitionNode function) {return false;}
 
-	
 	@Override
-	public ProgramState getStateAfter(ProgramState state) {return state;}
+	public ProgramState getStateBefore(ProgramState state, ComponentNode<?> child) {return state;}
 	@Override
 	public AssemblyStatePair getAssemblyAndState(ProgramState state) throws Exception
 	{

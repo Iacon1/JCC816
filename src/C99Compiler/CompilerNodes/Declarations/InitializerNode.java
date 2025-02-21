@@ -256,6 +256,39 @@ public class InitializerNode extends InterpretingNode<InitializerNode, Initializ
 	}
 
 	@Override
+	public ProgramState getStateBefore(ProgramState state, ComponentNode<?> child) throws Exception
+	{
+		if (!children.contains(child))
+			throw new IllegalArgumentException();
+
+		if (expr != null)
+		{
+			if (child == expr)
+				return state;
+			if (expr.hasAssembly(state))
+				state = expr.getStateAfter(state);
+		}
+		else if (arrayInitializers != null)
+		{
+			for (InitializerNode initializer : arrayInitializers.values())
+			{
+				if (child == initializer)
+					break;
+				state = initializer.getStateAfter(state);
+			}
+		}
+		else if (structInitializers != null)
+		{
+			for (InitializerNode initializer : structInitializers.values())
+			{
+				if (child == initializer)
+					break;
+				state = initializer.getStateAfter(state);
+			}
+		}
+		return state;
+	}
+	@Override
 	public AssemblyStatePair getAssemblyAndState(ProgramState state) throws Exception
 	{
 		clearAssemblables();

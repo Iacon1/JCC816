@@ -28,6 +28,7 @@ import C99Compiler.CompConfig.OptimizationLevel;
 import C99Compiler.ASMGrapher.ASMGraphBuilder;
 import C99Compiler.CompilerNodes.Declarations.DeclarationSpecifiersNode;
 import C99Compiler.CompilerNodes.Declarations.DeclaratorNode;
+import C99Compiler.CompilerNodes.Declarations.InitializerNode;
 import C99Compiler.CompilerNodes.Definitions.Type;
 import C99Compiler.CompilerNodes.Interfaces.UnvaluedAssemblableNode;
 import C99Compiler.CompilerNodes.Interfaces.NamedNode;
@@ -225,6 +226,21 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 		return variables;
 	}
 
+	@Override
+	public ProgramState getStateBefore(ProgramState state, ComponentNode<?> child) throws Exception
+	{
+		if (!children.contains(child))
+			throw new IllegalArgumentException();
+
+		if (child == signature)
+			return state;
+		if (child == code)
+			return state;
+		if (code.hasAssembly(state))
+			state = code.getStateAfter(state);
+		return state;
+	}
+	
 	@Override
 	public AssemblyStatePair getAssemblyAndState(ProgramState state) throws Exception
 	{

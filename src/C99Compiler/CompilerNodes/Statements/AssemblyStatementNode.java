@@ -31,6 +31,8 @@ public class AssemblyStatementNode extends StatementNode<Asm_statementContext>
 	{
 		return state.wipe();
 	}
+	@Override
+	public ProgramState getStateBefore(ProgramState state, ComponentNode<?> child) throws Exception {throw new UnsupportedOperationException();}
 	
 	@Override
 	public AssemblyStatePair getAssemblyAndState(ProgramState state) throws Exception

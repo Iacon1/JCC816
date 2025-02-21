@@ -38,7 +38,8 @@ public class ConstantExpressionNode extends BaseExpressionNode<Constant_expressi
 	public boolean hasLValue(ProgramState state) {return false;}
 	@Override
 	public LValueNode<?> getLValue(ProgramState state) {throw new UnsupportedOperationException();}
-
+	@Override
+	public ProgramState getStateBefore(ProgramState state, ComponentNode<?> child) {throw new UnsupportedOperationException();}
 	public boolean hasAssembly(ProgramState state) {throw new UnsupportedOperationException();}
 	@Override
 	public AssemblyStatePair getAssemblyAndState(ProgramState state) throws Exception {throw new UnsupportedOperationException();}

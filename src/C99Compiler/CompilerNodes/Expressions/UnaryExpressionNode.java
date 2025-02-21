@@ -230,6 +230,17 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 	}
 
 	@Override
+	public ProgramState getStateBefore(ProgramState state, ComponentNode<?> child) throws Exception
+	{
+		if (!children.contains(child))
+			throw new IllegalArgumentException();
+		
+		if (child != expr)
+			state = getStateAfter(state);
+		return state;
+	}
+	
+	@Override
 	public AssemblyStatePair getAssemblyAndState(ProgramState state) throws Exception
 	{
 		ProgramState oState = state;

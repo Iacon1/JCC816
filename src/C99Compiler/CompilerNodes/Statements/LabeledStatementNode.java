@@ -54,6 +54,15 @@ public class LabeledStatementNode extends StatementNode<Labeled_statementContext
 	}
 	
 	@Override
+	public ProgramState getStateBefore(ProgramState state, ComponentNode<?> child) throws Exception
+	{
+		if (!children.contains(child))
+			throw new IllegalArgumentException();
+
+		return state;
+	}
+	
+	@Override
 	public AssemblyStatePair getAssemblyAndState(ProgramState state) throws Exception
 	{
 		state = state.wipe().clearKnownFlags();

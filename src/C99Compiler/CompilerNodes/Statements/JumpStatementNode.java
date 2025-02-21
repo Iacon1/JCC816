@@ -75,6 +75,16 @@ public class JumpStatementNode extends StatementNode<Jump_statementContext> impl
 	{
 		return true; // Always does *something*
 	}
+	
+	@Override
+	public ProgramState getStateBefore(ProgramState state, ComponentNode<?> child) throws Exception
+	{
+		if (!children.contains(child))
+			throw new IllegalArgumentException();
+
+		return state;
+	}
+	
 	public AssemblyStatePair getAssemblyAndState(ProgramState state) throws Exception
 	{
 		String whitespace = state.getWhitespace();

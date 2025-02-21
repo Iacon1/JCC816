@@ -222,6 +222,49 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 	}
 	
 	@Override
+	public ProgramState getStateBefore(ProgramState state, ComponentNode<?> child) throws Exception
+	{
+		if (!children.contains(child))
+			throw new IllegalArgumentException();
+		
+		switch (type)
+		{
+		case arraySubscript:
+			if (child == expr)
+				return state;
+			if (expr.hasAssembly(state))
+				state = expr.getStateAfter(state);
+			
+			if (child == indexExpr)
+				return state;
+			if (indexExpr.hasAssembly(state))
+				state = indexExpr.getStateAfter(state);
+			return state;
+		case funcCall:
+			if (child == expr)
+				return state;
+			if (expr.hasAssembly(state))
+				state = expr.getStateAfter(state);
+			
+			for (BaseExpressionNode<?> param : params)
+			{
+				if (child == param)
+					return state;
+				if (param.hasAssembly(state))
+					state = param.getStateAfter(state);
+			}
+			return state;
+		case structMember: case structMemberP: case incr: case decr:
+			if (child == expr)
+				return state;
+			if (expr.hasAssembly(state))
+				state = expr.getStateAfter(state);
+			return state;
+		}
+		return state;
+	}
+	
+	@Override
 	public AssemblyStatePair getAssemblyAndState(ProgramState state) throws Exception
 	{
 		clearAssemblables();

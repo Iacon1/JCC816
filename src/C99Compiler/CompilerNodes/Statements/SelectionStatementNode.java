@@ -103,6 +103,19 @@ public class SelectionStatementNode extends SequencePointStatementNode<Selection
 	}
 	
 	@Override
+	public ProgramState getStateBefore(ProgramState state, ComponentNode<?> child) throws Exception
+	{
+		if (!children.contains(child))
+			throw new IllegalArgumentException();
+		
+		if (child == expression)
+			return state;
+		if (expression.hasAssembly(state))
+			state = expression.getStateAfter(state);
+		return state;
+	}
+	
+	@Override
 	public boolean hasAssembly(ProgramState state)
 	{
 		if (expression.hasAssembly(state)) return true;

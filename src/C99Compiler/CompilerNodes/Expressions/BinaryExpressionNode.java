@@ -92,6 +92,21 @@ public abstract class BinaryExpressionNode<
 	protected abstract AssemblyStatePair getAssemblyAndState(ProgramState state, OperandSource sourceX, OperandSource sourceY) throws Exception;
 	
 	@Override
+	public ProgramState getStateBefore(ProgramState state, ComponentNode<?> child) throws Exception
+	{
+		if (!children.contains(child))
+			throw new IllegalArgumentException();
+		if (child == x)
+			return state;
+		if (x.hasAssembly(state))
+			state = x.getStateAfter(state);
+		if (child == y)
+			return state;
+		if (y.hasAssembly(state))
+			state = y.getStateAfter(state);
+		return state;
+	}
+	@Override
 	public AssemblyStatePair getAssemblyAndState(ProgramState state) throws Exception
 	{
 		AssemblyStatePair tmpPair; // To store generated pairs

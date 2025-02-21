@@ -74,6 +74,22 @@ public class CompoundStatementNode extends StatementNode<Compound_statementConte
 	}
 	
 	@Override
+	public ProgramState getStateBefore(ProgramState state, ComponentNode<?> child) throws Exception
+	{
+		if (!children.contains(child))
+			throw new IllegalArgumentException();
+
+		for (AssemblableNode assemblable : assemblables)
+		{
+			if (child == assemblable)
+				return state;
+			if (assemblable.hasAssembly(state))
+				state = assemblable.getStateAfter(state);
+		}
+		return state;
+	}
+	
+	@Override
 	public AssemblyStatePair getAssemblyAndState(ProgramState state) throws Exception
 	{
 		String assembly = "";

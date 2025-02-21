@@ -61,7 +61,21 @@ public class ExpressionNode extends SPBaseExpressionNode<ExpressionContext>
 	public boolean hasLValue(ProgramState state) {return false;}
 	@Override
 	public LValueNode<?> getLValue(ProgramState state) {throw new UnsupportedOperationException();}
-
+	@Override
+	public ProgramState getStateBefore(ProgramState state, ComponentNode<?> child) throws Exception
+	{
+		AssemblyStatePair pair = new AssemblyStatePair("", state);
+		
+		for (BaseExpressionNode<?> expression : expressions.subList(0, expressions.size()))
+		{
+			if (expression == child) break;
+			if (!expression.hasAssembly(pair.state)) continue;
+			clearAssemblables();
+			pair = expression.apply(pair);
+			pair = applyRegistered(pair);
+		}
+		return pair.state;
+	}
 	@Override
 	public AssemblyStatePair getAssemblyAndState(ProgramState state) throws Exception
 	{

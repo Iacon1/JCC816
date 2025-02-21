@@ -133,6 +133,69 @@ public class IterationStatementNode extends SequencePointStatementNode<Iteration
 	}
 	
 	@Override
+	public ProgramState getStateBefore(ProgramState state, ComponentNode<?> child) throws Exception
+	{
+		if (!children.contains(child))
+			throw new IllegalArgumentException();
+
+		state = state.wipe();
+		
+		switch (iterType)
+		{
+		case while_:
+			if (child == condExpNode)
+				return state;
+			if (condExpNode.hasAssembly(state))
+				state = condExpNode.getStateAfter(state);
+			return state;
+		case doWhile:
+			if (child == stmNode)
+				return state;
+			if (stmNode.hasAssembly(state))
+				state = stmNode.getStateAfter(state);
+			return state;
+		case for_:
+			if (declNode != null)
+			{
+				if (child == declNode)
+					return state;
+				if (declNode.hasAssembly(state))
+					state = declNode.getStateAfter(state);
+			}
+			else if (initExpNode != null)
+			{
+				if (child == initExpNode)
+					return state;
+				if (initExpNode.hasAssembly(state))
+					state = initExpNode.getStateAfter(state);
+			}
+			
+			if (condExpNode != null)
+			{
+				if (child == condExpNode)
+					return state;
+				if (condExpNode.hasAssembly(state))
+					state = condExpNode.getStateAfter(state);
+			}
+			
+			if (child == stmNode)
+				return state;
+			if (stmNode.hasAssembly(state))
+				state = stmNode.getStateAfter(state);
+			
+			if (iterExpNode != null)
+			{
+				if (child == iterExpNode)
+					return state;
+				if (iterExpNode.hasAssembly(state))
+					state = iterExpNode.getStateAfter(state);
+			}
+			return state;
+		}
+		return state;
+	}
+	
+	@Override
 	public AssemblyStatePair getAssemblyAndState(ProgramState state) throws Exception
 	{
 		AssemblyStatePair tmpPair;

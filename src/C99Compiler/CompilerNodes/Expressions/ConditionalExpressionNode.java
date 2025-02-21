@@ -78,6 +78,18 @@ public class ConditionalExpressionNode extends SPBinaryExpressionNode
 		if (z.getPropBool(state)) return x.getPropValue(state);
 		else return y.getPropValue(state);
 	}
+	@Override
+	public ProgramState getStateBefore(ProgramState state, ComponentNode<?> child) throws Exception
+	{
+		if (!children.contains(child))
+			throw new IllegalArgumentException();
+		if (child == z)
+			return state;
+		if (z.hasAssembly(state))
+			state = z.getStateAfter(state);
+		
+		return state;
+	}
 	
 	@Override
 	protected AssemblyStatePair getAssemblyAndState(ProgramState state, OperandSource sourceX, OperandSource sourceY) {return null;}
