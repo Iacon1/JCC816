@@ -13,6 +13,7 @@ import C99Compiler.Exceptions.ScratchOverflowException;
 import C99Compiler.Utils.ProgramState;
 import C99Compiler.Utils.ProgramState.ScratchSource;
 import C99Compiler.Utils.AssemblyUtils.ByteCopier;
+import C99Compiler.Utils.AssemblyUtils.SignExtender;
 import C99Compiler.Utils.OperandSources.ConstantSource;
 import C99Compiler.Utils.OperandSources.OperandSource;
 import Grammar.C99.C99Parser.Assignment_expressionContext;
@@ -195,7 +196,12 @@ public class AssignmentExpressionNode extends BinaryExpressionNode
 			else if (y.hasLValue(state))
 				sourceY = y.getLValue(state).castTo(x.getType()).getSource();
 			else sourceY = null;
-			ByteCopier copier = new ByteCopier(x.getLValue(state).getSize(), x.getLValue(state).getSource(), sourceY);
+			
+			tmpPair = new SignExtender(x.getLValue(state).getSource(), sourceY, x.getType().isSigned(), y.getType().isSigned()).getAssemblyAndState(state);
+			assembly += tmpPair.assembly;
+			state = tmpPair.state;
+			
+			ByteCopier copier = new ByteCopier(x.getLValue(state).getSource(), sourceY);
 			tmpPair = copier.getAssemblyAndState(state);
 			assembly += tmpPair.assembly;
 			state = tmpPair.state;

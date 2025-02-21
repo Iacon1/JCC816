@@ -71,21 +71,28 @@ public abstract class BytewiseOperator implements Assemblable
 			}
 			if (!reversed) // Go from offset 0 up
 			{
-				for (int i = 0; i < n1 - (n1 % 2); i += 2)
+				int i;
+				for (i = 0; i < n1 - (n1 % 2); i += 2)
 				{
 					if (i == n2 - 1) // Halfway between in n2 and not
 					{
 						pair.assembly += pair.state.getWhitespace() + CompUtils.setA8 + "\n";
 						pair.state = pair.state.clearProcessorFlags(ProgramState.ProcessorFlag.M);
 						apply(pair, i);
-						apply(pair, i + 1);
-						pair.assembly += pair.state.getWhitespace() + CompUtils.setA16 + "\n";
-						pair.state = pair.state.setProcessorFlags(ProgramState.ProcessorFlag.M);
+						i -= 1;
 					}
 					else
+					{
+						if (!(pair.state.testKnownFlag(ProgramState.PreserveFlag.M) && pair.state.testProcessorFlag(ProgramState.ProcessorFlag.M))) // Not already in 16-bit mode
+						{
+							pair.assembly += pair.state.getWhitespace() + CompUtils.setA16 + "\n";
+							pair.state = pair.state.setProcessorFlags(ProgramState.ProcessorFlag.M);
+						}
+						
 						apply(pair, i);
+					}
 				}
-				if (n1 % 2 != 0) // One more
+				if (i != n1) // One more
 				{
 					pair.assembly += pair.state.getWhitespace() + CompUtils.setA8 + "\n";
 					pair.state = pair.state.clearProcessorFlags(ProgramState.ProcessorFlag.M);
@@ -101,12 +108,17 @@ public abstract class BytewiseOperator implements Assemblable
 						pair.assembly += pair.state.getWhitespace() + CompUtils.setA8 + "\n";
 						pair.state = pair.state.clearProcessorFlags(ProgramState.ProcessorFlag.M);
 						apply(pair, i + 1);
-						apply(pair, i);
-						pair.assembly += pair.state.getWhitespace() + CompUtils.setA16 + "\n";
-						pair.state = pair.state.setProcessorFlags(ProgramState.ProcessorFlag.M);
+						i += 1;
 					}
 					else
+					{
+						if (!(state.testKnownFlag(ProgramState.PreserveFlag.M) && state.testProcessorFlag(ProgramState.ProcessorFlag.M))) // Not already in 16-bit mode
+						{
+							pair.assembly += pair.state.getWhitespace() + CompUtils.setA16 + "\n";
+							pair.state = pair.state.setProcessorFlags(ProgramState.ProcessorFlag.M);
+						}
 						apply(pair, i);
+					}
 				}
 				if (n1 % 2 != 0) // One more
 				{

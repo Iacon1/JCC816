@@ -9,7 +9,7 @@ import C99Compiler.Utils.OperandSources.OperandSource;
 public class ByteCopier extends BytewiseOperator
 {
 	private OperandSource sourceFrom, sourceTo;
-	
+		
 	public ByteCopier(int n, OperandSource sourceTo, OperandSource sourceFrom, boolean reversed)
 	{
 		super(n, n, reversed);
@@ -22,6 +22,18 @@ public class ByteCopier extends BytewiseOperator
 		this.sourceFrom = sourceFrom;
 		this.sourceTo = sourceTo;
 	}
+	public ByteCopier(OperandSource sourceTo, OperandSource sourceFrom, boolean reversed)
+	{
+		super(Math.max(sourceTo.getSize(), sourceFrom.getSize()), Math.min(sourceTo.getSize(), sourceFrom.getSize()), reversed);
+		this.sourceFrom = sourceFrom;
+		this.sourceTo = sourceTo;
+	}
+	public ByteCopier(OperandSource sourceTo, OperandSource sourceFrom)
+	{
+		super(Math.max(sourceTo.getSize(), sourceFrom.getSize()), Math.min(sourceTo.getSize(), sourceFrom.getSize()), false);
+		this.sourceFrom = sourceFrom;
+		this.sourceTo = sourceTo;
+	}
 
 	public ByteCopier(int n, OperandSource sourceTo, Object constValue)
 	{
@@ -29,6 +41,7 @@ public class ByteCopier extends BytewiseOperator
 		this.sourceFrom = new ConstantSource(constValue, n);
 		this.sourceTo = sourceTo;
 	}
+	
 	@Override
 	protected AssemblyStatePair getAssemblyAndState(ProgramState state, int i) throws Exception
 	{
