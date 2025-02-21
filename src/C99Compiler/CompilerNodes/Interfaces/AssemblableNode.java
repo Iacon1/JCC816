@@ -36,7 +36,12 @@ public interface AssemblableNode extends Assemblable
 	public default boolean getPropBool(ProgramState state)
 	{
 		try {return (Boolean) getPropValue(state);}
-		catch (Exception e) {return false;}
+		catch (Exception e)
+		{
+			if (getPropLong(state) != 0)
+				return true;
+			return false;
+		}
 	}
 	@Deprecated
 	public default boolean getPropBool()

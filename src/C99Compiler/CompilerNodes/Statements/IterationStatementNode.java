@@ -123,6 +123,8 @@ public class IterationStatementNode extends SequencePointStatementNode<Iteration
 			if (condExpNode.hasPropValue(state))
 				return condExpNode.getPropBool(state) || condExpNode.hasAssembly(state);
 				// Is this a forever loop or a never loop? Even if never, still need to run ASM for the check.
+			else
+				return true;
 		case doWhile:
 			return stmNode.hasAssembly(state) || condExpNode.hasAssembly(state); // Runs ASM for both at least once.
 		case for_:
