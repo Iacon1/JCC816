@@ -24,9 +24,8 @@ import Shared.Assemblable;
 public class MultiplicativeExpressionNode extends CallingArithmeticBinaryExpressionNode
 <Multiplicative_expressionContext, Cast_expressionContext, Cast_expressionContext, Multiplicative_expressionContext>
 {
-	private BaseExpressionNode<?> optimized = null;
-	
-	public MultiplicativeExpressionNode(ComponentNode<?> parent) {super(parent);}
+	public MultiplicativeExpressionNode(ComponentNode<?> parent) {
+		super(parent);}
 
 	@Override
 	protected BaseExpressionNode<Multiplicative_expressionContext> getC1Node(Multiplicative_expressionContext node) throws Exception
@@ -39,75 +38,6 @@ public class MultiplicativeExpressionNode extends CallingArithmeticBinaryExpress
 	@Override
 	protected BaseExpressionNode<Cast_expressionContext> getPCNode(Multiplicative_expressionContext node) throws Exception
 	{return new CastExpressionNode(this).interpret(node.cast_expression());}
-
-	private static int optimizedComplexity(long l) // Simualates below const-mult optimization to see if it's worth the trouble
-	{
-		if (l <= 1)
-			return 1;
-		
-		boolean startOdd = (l % 2 == 1);
-		
-		do l /= 2;
-		while (l % 2 == 0 && 1 < l); // How many times can we divide by zero?
-
-		return (startOdd ? 2 : 1) +  optimizedComplexity(l);
-	}
-	
-	private void optimizeMult(ProgramState state) // Optimize constant mults
-	{
-		if (operator.equals("%")) return; // Don't do for modulo
-		if (x.hasPropValue(state) && operator.equals("*")) // We need x to be the variable one
-		{
-			BaseExpressionNode<?> t = y;
-			y = x;
-			x = t;
-		}
-		else if (x.hasPropValue(state)) // There's no way to fix this in division
-			return;
-		
-		if (x.hasPropValue(state)) return; // Gonna get fully optimized anyway
-		if (!y.hasPropValue(state)) return; // Can't optimize this
-		if (operator.equals("*"))
-		{
-			if (y.hasPropValue(state) && 1 < y.getPropLong(state) && optimizedComplexity(y.getPropLong(state)) <= CompConfig.maxOptimizedMultComplexity)
-			{	
-				long l = y.getPropLong(state);
-				int i = 0;
-				boolean startOdd = (l % 2 == 1);
-				do
-				{
-					l /= 2;
-					i += 1;
-				}
-				while (l % 2 == 0 && 1 < l); // How many times can we divide by two?
-				DummyExpressionNode d1, d2;
-				d1 = new DummyExpressionNode(this, y.getType(), l);
-				d2 = new DummyExpressionNode(this, y.getType(), i);
-				MultiplicativeExpressionNode m1 = new MultiplicativeExpressionNode(this, "*", x, d1);
-				
-				ShiftExpressionNode s1 = new ShiftExpressionNode(this, "<<", m1, d2);
-				m1.swapParent(s1);
-				d2.swapParent(d2);
-				
-				optimized = s1;
-				if (startOdd)
-				{
-					optimized = new AdditiveExpressionNode(this, "+", s1, x);
-					s1.swapParent(optimized);
-				}
-			}
-			else if (y.hasPropValue(state) && 1 == y.getPropLong(state))
-				optimized = x;	
-		}
-		else if (operator.equals("/") && (y.getPropLong(state) & (y.getPropLong(state) - 1)) == 0) // y is power of 2
-		{
-			assert y.getPropLong(state) != 0; // Should be caught by parsing
-			DummyExpressionNode d1;
-			d1 = new DummyExpressionNode(this, y.getType(), (int) (Math.log(y.getPropLong(state)) / Math.log(2)));
-			ShiftExpressionNode s1 = new ShiftExpressionNode(this, ">>", x, d1);
-			optimized = s1;
-		}
-	}
 	
 	public MultiplicativeExpressionNode(ComponentNode<?> parent, String operator, BaseExpressionNode<?> x, BaseExpressionNode<?> y)
 	{
@@ -248,50 +178,5 @@ public class MultiplicativeExpressionNode extends CallingArithmeticBinaryExpress
 		assembly += "RTL\n";
 		
 		return assembly;
-	}
-	@Override
-	public boolean hasAssembly(ProgramState state)
-	{
-		if (optimized != null) return optimized.hasAssembly(state);
-		else return super.hasAssembly(state);
-	}
-	@Override
-	public boolean hasPropValue(ProgramState state)
-	{
-		if (optimized != null) return optimized.hasPropValue(state);
-		else return super.hasPropValue(state);
-	}
-	@Override
-	public Object getPropValue(ProgramState state)
-	{
-		if (optimized != null) return optimized.getPropValue(state);
-		else return super.getPropValue(state);
-	}
-	@Override
-	public boolean hasLValue(ProgramState state)
-	{
-		if (optimized != null) return optimized.hasLValue(state);
-		else return super.hasLValue(state);
-	}
-	@Override
-	public LValueNode<?> getLValue(ProgramState state)
-	{
-		if (optimized != null) return optimized.getLValue(state);
-		else return super.getLValue(state);
-	}
-	@Override
-	public AssemblyStatePair getAssemblyAndState(ProgramState state) throws Exception
-	{
-		if (OptimizationLevel.isAtLeast(OptimizationLevel.medium))
-			optimizeMult(state);
-		
-		if (optimized != null && optimized.hasAssembly(state))
-			return optimized.getAssemblyAndState(state);
-		else if (optimized != null && optimized.hasPropValue(state))
-			return new ByteCopier(state.destSource().getSize(), state.destSource(), optimized.getPropValue(state)).getAssemblyAndState(state);
-		else if (optimized != null)
-			return new ByteCopier(state.destSource().getSize(), state.destSource(), optimized.getLValue(state)).getAssemblyAndState(state);
-		else 
-			return super.getAssemblyAndState(state);
 	}
 }
