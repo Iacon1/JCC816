@@ -132,7 +132,7 @@ CC extends ParserRuleContext
 		
 		if (size1 < destSource.getSize())
 		{
-			ZeroCopier zeroCopier = new ZeroCopier(destSource.getSize(), destSource.getShifted(size1), false);
+			ZeroCopier zeroCopier = new ZeroCopier(destSource.getSize() - size1, destSource.getShifted(size1), false);
 			assembly += zeroCopier.getAssembly(state);
 			state = zeroCopier.getStateAfter(state);
 		}
