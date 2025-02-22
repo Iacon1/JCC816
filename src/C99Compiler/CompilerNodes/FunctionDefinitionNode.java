@@ -236,7 +236,7 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 			return state;
 		if (child == code)
 			return state;
-		if (code.hasAssembly(state))
+		if (code != null && code.hasAssembly(state))
 			state = code.getStateAfter(state);
 		return state;
 	}
