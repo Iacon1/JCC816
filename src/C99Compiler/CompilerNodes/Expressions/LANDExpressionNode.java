@@ -80,14 +80,14 @@ public class LANDExpressionNode extends LogicalBinaryExpressionNode
 		
 		assembly += whitespace + "DEX\n";
 		assembly += whitespace + "BRA\t:++\n"; // If above never jumped, we're done here
-		assembly += whitespace.substring(1) + ":\n";
+		assembly += (whitespace.length() > 1? whitespace.substring(1) : whitespace) + ":\n";
 		
 		tmpPair = new LANDOperator(sourceY).getAssemblyAndState(state);
 		assembly += tmpPair.assembly;
 		state = tmpPair.state;
 		
 		assembly += whitespace + "DEX\n";
-		assembly += ":" + whitespace.substring(1) + "TXA\n";
+		assembly += ":" + (whitespace.length() > 1? whitespace.substring(1) : whitespace) + "TXA\n";
 		assembly += whitespace + CompUtils.setA8 + "\n";
 
 		if(state.destSource() != null)

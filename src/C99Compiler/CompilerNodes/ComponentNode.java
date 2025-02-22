@@ -45,17 +45,28 @@ public class ComponentNode<C extends ComponentNode<C>> implements Serializable
 		this.parent = null;
 		invalidateSearchCaches();
 	}
+	public List<ComponentNode<?>> getChildren()
+	{
+		return children;
+	}
 	public void removeChild(ComponentNode<?> child)
 	{
 		children.remove(child);
 		invalidateSearchCaches();
 	}
+	protected void onSwap(ComponentNode<?> from, ComponentNode<?> to) {}
+	/** Replaces this node with another
+	 * 
+	 * @param replacement
+	 */
 	public void swap(ComponentNode<?> replacement)
 	{
 		if (this.parent != null)
 		{
+			parent.onSwap(this, replacement);
 			int i = parent.children.indexOf(this);
 			parent.children.set(i, replacement);
+			replacement.swapParent(parent);
 			parent.invalidateSearchCaches();
 			parent = null;
 		}

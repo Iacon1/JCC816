@@ -19,7 +19,6 @@ public abstract class BaseExpressionNode<C extends ParserRuleContext> extends In
 
 	protected BaseExpressionNode delegate(BaseExpressionNode<?> delegatee)
 	{
-		delegatee.parent = parent;
 		swap(delegatee);
 		return (BaseExpressionNode) delegatee;
 	}
