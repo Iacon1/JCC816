@@ -62,6 +62,16 @@ public abstract class BinaryExpressionNode<
 		}
 		return this;
 	}
+	
+	@Override
+	protected void onSwap(ComponentNode<?> from, ComponentNode<?> to)
+	{
+		if (x == from)
+			x = (BaseExpressionNode<?>) to;
+		else if (y == from)
+			y = (BaseExpressionNode<?>) to;	
+	}
+	
 	protected abstract CastContext getCastContext();
 	
 	@Override
@@ -173,4 +183,8 @@ public abstract class BinaryExpressionNode<
 		
 		return new AssemblyStatePair(assembly, state);
 	}
+	
+	public BaseExpressionNode<?> getX() {return x;}
+	public BaseExpressionNode<?> getY() {return y;}
+	public String getOperator() {return operator;}
 }
