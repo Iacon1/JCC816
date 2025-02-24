@@ -11,6 +11,7 @@ import C99Compiler.Utils.CompUtils;
 import C99Compiler.Utils.ProgramState;
 import Grammar.C99.C99Parser.Additive_expressionContext;
 import Grammar.C99.C99Parser.Multiplicative_expressionContext;
+import C99Compiler.CompilerNodes.Definitions.ArrayType;
 import C99Compiler.CompilerNodes.Definitions.PointerType;
 
 public class AdditiveExpressionNode extends ArithmeticBinaryExpressionNode
@@ -27,6 +28,8 @@ public class AdditiveExpressionNode extends ArithmeticBinaryExpressionNode
 		if (x.getType().isPointer()) // RHS must be multiplied by size of pointer base type
 		{
 			int size = ((PointerType) x.getType()).getType().getSize();
+			if (x.getType().isArray())
+				this.x = new CastExpressionNode(this, new PointerType(((ArrayType) x.getType()).getType()), x);
 			if (size != 1)
 			{
 				Type t = CompUtils.getSmallestType(size);
@@ -65,6 +68,8 @@ public class AdditiveExpressionNode extends ArithmeticBinaryExpressionNode
 		
 		if (x.getType().isPointer()) // RHS must be multiplied by size of pointer base type
 		{
+			if (x.getType().isArray())
+				x = new CastExpressionNode(this, new PointerType(((ArrayType) x.getType()).getType()), x);
 			int size = ((PointerType) x.getType()).getType().getSize();
 			if (size != 1)
 				y = new MultiplicativeExpressionNode(this, "*", y, new DummyExpressionNode(this, CompUtils.getSmallestType(size), size));
