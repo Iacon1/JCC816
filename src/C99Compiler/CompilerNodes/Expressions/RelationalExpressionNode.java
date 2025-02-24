@@ -45,7 +45,7 @@ public class RelationalExpressionNode extends BinaryExpressionNode
 			AssemblyStatePair tmpPair;
 			String assembly = "";
 			
-			if (isSigned && ((i == n1 - 2) || (i == 0 && n1 == 1))) // First comparison and signed, must EOR y by 0x80
+			if (isSigned && ((i >= n1 - 1) || (i == 0 && n1 == 1))) // First comparison and signed, must EOR y by 0x80
 			{
 				String XOR = state.getWhitespace() + (state.testProcessorFlag(ProgramState.ProcessorFlag.M) ? "EOR\t#$8000\n" : "EOR\t#$80\n");
 				if (sourceY.isLiteral()) // Optimizable for literals
