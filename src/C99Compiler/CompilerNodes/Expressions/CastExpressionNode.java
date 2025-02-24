@@ -10,6 +10,7 @@ import C99Compiler.CompilerNodes.LValues.LValueNode;
 import C99Compiler.Utils.ProgramState;
 import C99Compiler.Utils.AssemblyUtils.AssemblyUtils;
 import C99Compiler.Utils.AssemblyUtils.ByteCopier;
+import C99Compiler.Utils.AssemblyUtils.SignExtender;
 import C99Compiler.Utils.OperandSources.ConstantSource;
 import Grammar.C99.C99Parser.Cast_expressionContext;
 
@@ -90,22 +91,18 @@ public class CastExpressionNode extends BaseExpressionNode<Cast_expressionContex
 	@Override
 	public AssemblyStatePair getAssemblyAndState(ProgramState state) throws Exception
 	{
-		AssemblyStatePair tmpPair;
-		String assembly = "";
-		if (getType().getSize() > expr.getType().getSize()) // Need to make space
-		{
-			tmpPair = new ByteCopier(getType().getSize(), state.destSource(), new ConstantSource(0, getType().getSize())).getAssemblyAndState(state);
-			assembly += tmpPair.assembly;
-			state = tmpPair.state;
-		}
+		AssemblyStatePair pair = null;
+		
 		if (expr.hasAssembly(state))
-			assembly += expr.getAssembly(state);
+		{
+			pair = expr.getAssemblyAndState(state);
+		}
 		else if (expr.hasLValue(state))
 		{
-			tmpPair = new ByteCopier(getType().getSize(), state.destSource(), expr.getLValue(state).getSource()).getAssemblyAndState(state);
-			assembly += tmpPair.assembly;
-			state = tmpPair.state;
+			pair = new SignExtender(state.destSource(), expr.getLValue(state).getSource(), getType().isSigned(), expr.getType().isSigned()).getAssemblyAndState(state);
+			pair = new ByteCopier(state.destSource(), expr.getLValue(state).getSource()).apply(pair);
 		}
-		return new AssemblyStatePair(assembly, state);
+		
+		return pair;
 	}
 }
