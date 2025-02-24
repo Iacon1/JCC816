@@ -4,6 +4,7 @@ This is a C Compiler for the 65c816 - specifically, the Ricoh 5a22 processor ins
 This README is incomplete.
 
 # Usage
+```
 JCC816 [-c] [-D <level>] [--fast-byte-count] [-h] [-H <output>] [-l
    <output> <header>] [--no-node-caching] [--no-static-initialization]
    [-O <level>] [--optimize-addresses] [-p <output>] [-r <path>] [-s
@@ -51,7 +52,7 @@ A C compiler for the WDC 65c816 and especially Ricoh 5a22 processor.
                                     0 to 1.
 
 Version 0.X; Source code available at https://github.com/Iacon1/JCC816.
-
+```
 # Caveats
 It is currently riddled with bugs, hence why it's version 0.X.
 
