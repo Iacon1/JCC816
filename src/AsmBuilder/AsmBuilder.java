@@ -31,6 +31,7 @@ import C99Compiler.CompilerNodes.LValues.VariableNode;
 import C99Compiler.Exceptions.BuilderException;
 import C99Compiler.Exceptions.BuilderMultipleDefinitionException;
 import C99Compiler.Exceptions.UndefinedFunctionException;
+import C99Compiler.Exceptions.UnsupportedFeatureException;
 import C99Compiler.Utils.CompUtils;
 import C99Compiler.Utils.ProgramState;
 import C99Compiler.Utils.SNESRegisters;
@@ -40,6 +41,7 @@ import Shared.CartConfig;
 import Shared.Catalogger;
 import Shared.MemorySize;
 import Shared.TranslationUnit;
+import Shared.CartConfig.AddonChip;
 
 public final class AsmBuilder implements Catalogger
 {
@@ -165,6 +167,7 @@ public final class AsmBuilder implements Catalogger
 	private Map<String, Integer> mapVariables(CartConfig cartConfig, MemorySize memorySize)
 	{
 		int offset = CompConfig.stackSize;
+		int sOffset = cartConfig.containsChip(AddonChip.SA1) ? 256 + CompConfig.stackSize : 0; // SA1 needs its own DP
 		List<VariableNode> WRAMVars = new LinkedList<VariableNode>(), SRAMVars = new LinkedList<VariableNode>();
 		for (VariableNode var : getVariables().values())
 		{
@@ -177,7 +180,7 @@ public final class AsmBuilder implements Catalogger
 		}
 		List<Integer> WRAMPoses = null, SRAMPoses = null;
 		if (WRAMVars.size() > 0) WRAMPoses = cartConfig.getType().mapWRAM(WRAMVars, offset, memorySize);
-		if (SRAMVars.size() > 0) SRAMPoses = cartConfig.getType().mapSRAM(SRAMVars, 0, memorySize);
+		if (SRAMVars.size() > 0) SRAMPoses = cartConfig.getType().mapSRAM(SRAMVars, sOffset, memorySize);
 		
 		Map<String, Integer> map = new HashMap<String, Integer>();
 		for (int i = 0; i < WRAMVars.size(); ++i)
@@ -295,6 +298,27 @@ public final class AsmBuilder implements Catalogger
 		{
 			assembly += "LDA\t#$FFFF\n";
 			assembly += "STA\t$00420D\n";
+		}
+		if (cartConfig.containsChip(AddonChip.SA1)) // Initialize SA1
+		{
+			// Memory mapping
+			switch (cartConfig.getType())
+			{
+			case loROM:
+				assembly += "LDA\t#$8180\n";
+				assembly += "STA\t$2220\n";
+				assembly += "STA\t$2222\n";
+				break;
+			case hiROM:
+				assembly += "LDA\t#$0100\n";
+				assembly += "STA\t$2220\n";
+				assembly += "LDA\t#$0302\n";
+				assembly += "STA\t$2222\n";
+				break;
+			default:
+				throw new BuilderException(cartConfig.getType().getName() + " with SA1 is not supported on version " + CompConfig.version);
+			}
+			
 		}
 		assembly += "PHK\n"; // Set return address to RESET so that when main ends it restarts
 		assembly += "PEA\tRESET\n";

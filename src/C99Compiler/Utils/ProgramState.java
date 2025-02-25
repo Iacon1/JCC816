@@ -336,6 +336,8 @@ public class ProgramState
 			return null;
 	}
 	
+	private final boolean isSA1;
+	
 	// Constructors
 	private ProgramState(
 			int whitespaceLevel,
@@ -347,7 +349,8 @@ public class ProgramState
 			byte processorFlags,
 			byte preserveFlags,
 			byte knownFlags,
-			int a, int x, int y
+			int a, int x, int y,
+			boolean isSA1
 			)
 	{
 		this.whitespaceLevel = whitespaceLevel;
@@ -363,6 +366,7 @@ public class ProgramState
 		this.a = a;
 		this.x = x;
 		this.y = y;
+		this.isSA1 = isSA1;
 	}
 	public ProgramState()
 	{
@@ -379,6 +383,7 @@ public class ProgramState
 		this.a = 0;
 		this.x = 0;
 		this.y = 0;
+		this.isSA1 = false;
 	}
 	
 	// Transformations
@@ -398,7 +403,8 @@ public class ProgramState
 				processorFlags,
 				preserveFlags,
 				knownFlags,
-				a, x, y);
+				a, x, y,
+				isSA1);
 		return s;
 	}
 	public ProgramState undent()
@@ -413,7 +419,8 @@ public class ProgramState
 				processorFlags,
 				preserveFlags,
 				knownFlags,
-				a, x, y);
+				a, x, y,
+				isSA1);
 		return s;
 	}
 	/** Reserves a block of scratch memory.
@@ -440,7 +447,8 @@ public class ProgramState
 				processorFlags,
 				preserveFlags,
 				knownFlags,
-				a, x, y);
+				a, x, y,
+				isSA1);
 		return s;
 	}
 	/** Reserves a block of scratch memory.
@@ -464,7 +472,8 @@ public class ProgramState
 				processorFlags,
 				preserveFlags,
 				knownFlags,
-				a, x, y);
+				a, x, y,
+				isSA1);
 		return s;
 	}
 	/** Releases a block of scratch memory.
@@ -488,7 +497,8 @@ public class ProgramState
 				processorFlags,
 				preserveFlags,
 				knownFlags,
-				a, x, y);
+				a, x, y,
+				isSA1);
 		return s;
 	}
 	/** Reserves a pointer-usable copy of a source.
@@ -510,7 +520,8 @@ public class ProgramState
 					processorFlags,
 					preserveFlags,
 					knownFlags,
-					a, x, y);
+					a, x, y,
+					isSA1);
 			return s;
 		}
 		List<SimpleEntry<Boolean, Integer>> blockList = cloneBlockList(this.blockList);
@@ -527,7 +538,8 @@ public class ProgramState
 				processorFlags,
 				preserveFlags,
 				knownFlags,
-				a, x, y);
+				a, x, y,
+				isSA1);
 		return s;
 	}
 	/** Marks a scratch source as a pointer-usable copy of a source.
@@ -549,7 +561,8 @@ public class ProgramState
 					processorFlags,
 					preserveFlags,
 					knownFlags,
-					a, x, y);
+					a, x, y,
+					isSA1);
 			return s;
 		}
 		List<SimpleEntry<Boolean, Integer>> blockList = cloneBlockList(this.blockList);
@@ -566,7 +579,8 @@ public class ProgramState
 				processorFlags,
 				preserveFlags,
 				knownFlags,
-				a, x, y);
+				a, x, y,
+				isSA1);
 		return s;
 	}
 	/** Releases a pointer-usable copy of a source, if it exists.
@@ -593,7 +607,8 @@ public class ProgramState
 				processorFlags,
 				preserveFlags,
 				knownFlags,
-				a, x, y);
+				a, x, y,
+				isSA1);
 		return s;
 	}
 	/** Releases all pointers
@@ -621,7 +636,8 @@ public class ProgramState
 				processorFlags,
 				preserveFlags,
 				knownFlags,
-				a, x, y);
+				a, x, y,
+				isSA1);
 		return s;
 	}
 	/** Sets the destination source for subsequent writes.
@@ -641,7 +657,8 @@ public class ProgramState
 				processorFlags,
 				preserveFlags,
 				knownFlags,
-				a, x, y);
+				a, x, y,
+				isSA1);
 		return s;
 	}
 	public ProgramState clearProcessorFlags(byte flags)
@@ -661,7 +678,8 @@ public class ProgramState
 				(byte) (processorFlags & ~flags),
 				preserveFlags,
 				knownFlags,
-				a, x, y);
+				a, x, y,
+				isSA1);
 		return s;
 	}
 	public ProgramState setProcessorFlags(byte flags)
@@ -681,7 +699,8 @@ public class ProgramState
 				(byte) (processorFlags | flags),
 				preserveFlags,
 				knownFlags,
-				a, x, y);
+				a, x, y,
+				isSA1);
 		return s;
 	}
 	public ProgramState clearPreserveFlags(byte flags)
@@ -696,7 +715,8 @@ public class ProgramState
 				processorFlags,
 				(byte) (preserveFlags & ~flags),
 				knownFlags,
-				a, x, y);
+				a, x, y,
+				isSA1);
 		return s;
 	}
 	public ProgramState clearPreserveFlags()
@@ -711,7 +731,8 @@ public class ProgramState
 				processorFlags,
 				(byte) 0,
 				knownFlags,
-				a, x, y);
+				a, x, y,
+				isSA1);
 		return s;
 	}
 	public byte getPreserveFlags()
@@ -730,7 +751,8 @@ public class ProgramState
 				processorFlags,
 				(byte) (preserveFlags | flags),
 				knownFlags,
-				a, x, y);
+				a, x, y,
+				isSA1);
 		return s;
 	}
 	public ProgramState setPreserveFlags(byte flags)
@@ -745,7 +767,8 @@ public class ProgramState
 				processorFlags,
 				flags,
 				knownFlags,
-				a, x, y);
+				a, x, y,
+				isSA1);
 		return s;
 	}
 	public ProgramState clearKnownFlags(byte flags)
@@ -760,7 +783,8 @@ public class ProgramState
 				processorFlags,
 				preserveFlags,
 				(byte) (knownFlags & ~flags),
-				a, x, y);
+				a, x, y,
+				isSA1);
 		return s;
 	}
 	public ProgramState clearKnownFlags()
@@ -775,7 +799,8 @@ public class ProgramState
 				processorFlags,
 				preserveFlags,
 				(byte) 0,
-				a, x, y);
+				a, x, y,
+				isSA1);
 		return s;
 	}
 	public ProgramState fixAReg(int a)
@@ -790,7 +815,8 @@ public class ProgramState
 				processorFlags,
 				preserveFlags,
 				(byte) (knownFlags | PreserveFlag.A),
-				a, x, y);
+				a, x, y,
+				isSA1);
 		return s;
 	}
 	public ProgramState fixXReg(int x)
@@ -805,7 +831,8 @@ public class ProgramState
 				processorFlags,
 				preserveFlags,
 				(byte) (knownFlags | PreserveFlag.X),
-				a, x, y);
+				a, x, y,
+				isSA1);
 		return s;
 	}
 	public ProgramState fixYReg(int y)
@@ -820,7 +847,8 @@ public class ProgramState
 				processorFlags,
 				preserveFlags,
 				(byte) (knownFlags | PreserveFlag.Y),
-				a, x, y);
+				a, x, y,
+				isSA1);
 		return s;
 	}
 	/** Clears the list of possible values for a LValue.
@@ -843,7 +871,8 @@ public class ProgramState
 				processorFlags,
 				preserveFlags,
 				knownFlags,
-				a, x, y);
+				a, x, y,
+				isSA1);
 		return s;
 	}
 	/** Sets the list of possible values for a LValue.
@@ -866,7 +895,8 @@ public class ProgramState
 				processorFlags,
 				preserveFlags,
 				knownFlags,
-				a, x, y);
+				a, x, y,
+				isSA1);
 		return s;
 	}
 	/** Sets one known value for a LValue.
@@ -889,7 +919,8 @@ public class ProgramState
 				processorFlags,
 				preserveFlags,
 				knownFlags,
-				a, x, y);
+				a, x, y,
+				isSA1);
 		return s;
 	}
 	public ProgramState setExitFuncLabel(String exitFuncLabel)
@@ -904,7 +935,8 @@ public class ProgramState
 				processorFlags,
 				preserveFlags,
 				knownFlags,
-				a, x, y);
+				a, x, y,
+				isSA1);
 		return s;
 	}
 	
@@ -924,7 +956,8 @@ public class ProgramState
 				processorFlags,
 				preserveFlags,
 				(byte) 0,
-				a, x, y);
+				a, x, y,
+				isSA1);
 		return s;
 	}
 	public ProgramState combine(ProgramState other)
@@ -950,7 +983,41 @@ public class ProgramState
 				processorFlags,
 				preserveFlags,
 				knownFlags,
-				a, x, y);
+				a, x, y,
+				isSA1);
+		return s;
+	}
+	
+	public ProgramState as5a22()
+	{
+		ProgramState s = new ProgramState(
+				whitespaceLevel,
+				blockList, lastScratchSource,
+				pointerMap,
+				possibleValues,
+				destSource,
+				exitFuncLabel,
+				processorFlags,
+				preserveFlags,
+				knownFlags,
+				a, x, y,
+				false);
+		return s;
+	}
+	public ProgramState asSA1()
+	{
+		ProgramState s = new ProgramState(
+				whitespaceLevel,
+				blockList, lastScratchSource,
+				pointerMap,
+				possibleValues,
+				destSource,
+				exitFuncLabel,
+				processorFlags,
+				preserveFlags,
+				knownFlags,
+				a, x, y,
+				true);
 		return s;
 	}
 }
