@@ -94,7 +94,7 @@ public class CartConfig
 	
 	public boolean containsChip(AddonChip addonChip)
 	{
-		return addonChip.equals(addonChip);
+		return this.addonChip.equals(addonChip);
 	}
 
 	public MapMode getType()
