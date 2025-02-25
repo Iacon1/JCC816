@@ -154,7 +154,7 @@ public interface MapModeInterface extends Configurer
 		{
 			float ROMSizeKB = (float) memorySize.ROMSize / 1024f;
 			float WRAMSizeKB = (float) memorySize.WRAMSize / 1024f;
-			float SRAMSizeKB = (float) memorySize.WRAMSize / 1024f;
+			float SRAMSizeKB = (float) memorySize.SRAMSize / 1024f;
 			Logging.logNotice("\n" +
 					"ROM size:  " + memorySize.ROMSize + " B (" + String.format("%.02f", ROMSizeKB) + " KB)\n" +
 					"WRAM size: " + memorySize.WRAMSize + " B (" + String.format("%.02f", WRAMSizeKB) + " KB)\n" +
