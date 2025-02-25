@@ -54,8 +54,33 @@ public class IndirectLValueNode extends LValueNode<IndirectLValueNode>
 			{
 				if (state.testPreserveFlag(PreserveFlag.Y))
 					assembly += whitespace + "PHY\n";
-				if (Math.abs(i + offset) >= 128 && !state.testProcessorFlag(ProcessorFlag.I))
-					assembly += whitespace + "REP\t#$10\n";
+				if (state.testKnownFlag(PreserveFlag.I))
+				{
+					if (Math.abs(i + offset) >= 128 && !state.testProcessorFlag(ProcessorFlag.I))
+					{
+						assembly += whitespace + "REP\t#$10\n";
+						state = state.setProcessorFlags(ProcessorFlag.I);
+					}
+					else if (Math.abs(i + offset) < 128 && state.testProcessorFlag(ProcessorFlag.I))
+					{
+						assembly += whitespace + "SEP\t#$10\n";
+						state = state.clearProcessorFlags(ProcessorFlag.I);
+					}
+				}
+				else
+				{
+					if (Math.abs(i + offset) >= 128)
+					{
+						assembly += whitespace + "REP\t#$10\n";
+						state = state.setProcessorFlags(ProcessorFlag.I);
+					}
+					else if (Math.abs(i + offset) < 128)
+					{
+						assembly += whitespace + "SEP\t#$10\n";
+						state = state.clearProcessorFlags(ProcessorFlag.I);
+					}
+				}
+				
 				if (!(state.testKnownFlag(PreserveFlag.Y) && state.getY() == i + offset))
 					assembly += whitespace + "LDY\t#$" + String.format(state.testProcessorFlag(ProcessorFlag.M) ? "%04x" : "%02x", i + offset) + "\n";
 				assembly += whitespace + operation + "\t[" + source.getBase() + "],y" + "\n";
@@ -63,6 +88,8 @@ public class IndirectLValueNode extends LValueNode<IndirectLValueNode>
 					assembly += whitespace + "SEP\t#$10\n";
 				if (state.testPreserveFlag(PreserveFlag.Y))
 					assembly += whitespace + "PLY\n";
+				else
+					state = state.fixYReg(i + offset);
 			}
 			return new AssemblyStatePair(assembly, state);
 		}
