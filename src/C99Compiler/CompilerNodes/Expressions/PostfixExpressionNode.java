@@ -130,9 +130,9 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 		case funcCall:
 			return ((FunctionType) expr.getType()).getType();
 		case structMember:
-			return getTranslationUnit().resolveStructOrUnion(expr.getType().getSUEName()).getMember(memberName).getType();
+			return expr.getType().getStruct().getMember(memberName).getType();
 		case structMemberP:
-			return getTranslationUnit().resolveStructOrUnion(((PointerType) expr.getType()).getType().getSUEName()).getMember(memberName).getType();	
+			return (((PointerType) expr.getType()).getType()).getStruct().getMember(memberName).getType();	
 		case incr: case decr:
 			return expr.getType();
 		default:
