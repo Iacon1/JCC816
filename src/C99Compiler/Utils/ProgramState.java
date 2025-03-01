@@ -624,7 +624,7 @@ public class ProgramState
 		for (OperandSource p : pointerMap.keySet())
 			toRemove.add(p);
 		for (OperandSource p : toRemove)
-			releasePointer(p);
+			releasePointer(blockList, pointerMap, p);
 		
 		ProgramState s = new ProgramState(
 				whitespaceLevel,
