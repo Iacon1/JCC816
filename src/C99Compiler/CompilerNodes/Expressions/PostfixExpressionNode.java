@@ -382,6 +382,7 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 				else
 				{
 					assembly += state.getWhitespace() + "JSL\t" + func.getStartLabel() + "\n";
+					state = state.releasePointers();
 					state = state.clearKnownFlags();
 				}
 				
@@ -461,7 +462,7 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 				if (getReferencedFunction(state) == null)
 					assembly += state.getWhitespace() + "JML\t[" + CompConfig.funcPointer + "]\n" + state.getWhitespace() + ":\n";
 				else assembly += state.getWhitespace() + "JSL\t" + getReferencedFunction(state).getStartLabel() + "\n";
-
+				state = state.releasePointers();
 				for (VariableNode parameter : variables)
 				{
 					tmpPair = new StackLoader(parameter.getSize(), parameter.getSource()).getAssemblyAndState(state);
