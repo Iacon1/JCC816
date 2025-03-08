@@ -70,16 +70,10 @@ public class AssignmentExpressionNode extends BinaryExpressionNode
 			newY.y = y;
 			break;
 		case "+=":
-			newY = new AdditiveExpressionNode(this);
-			newY.x = x;
-			newY.operator = "+";
-			newY.y = y;
+			newY = new AdditiveExpressionNode(this, "+", x, y);
 			break;
 		case "-=":
-			newY = new AdditiveExpressionNode(this);
-			newY.x = x;
-			newY.operator = "-";
-			newY.y = y;
+			newY = new AdditiveExpressionNode(this, "-", x, y);
 			break;
 		case "<<=":
 			newY = new ShiftExpressionNode(this);

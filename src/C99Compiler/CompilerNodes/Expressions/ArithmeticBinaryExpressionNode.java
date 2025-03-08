@@ -112,7 +112,11 @@ CC extends ParserRuleContext
 		byte pFlags = state.getPreserveFlags();
 		assembly += AssemblyUtils.store(state, ProgramState.PreserveFlag.A);
 		state = state.clearPreserveFlags(ProgramState.PreserveFlag.A);
-		
+
+		if (y.hasPropValue(state) && sourceY.getSize() < sourceX.getSize())
+			sourceY = sourceY.respec(sourceX.getSize());
+		if (x.hasPropValue(state) && sourceX.getSize() < sourceY.getSize())
+			sourceX = sourceX.respec(sourceY.getSize());
 		AssemblyStatePair tmpPair = new SignExtender(sourceX, sourceY, x.getType().isSigned(), y.getType().isSigned()).getAssemblyAndState(state);
 		assembly += tmpPair.assembly;
 		state = tmpPair.state;
