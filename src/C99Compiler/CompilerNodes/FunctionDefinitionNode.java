@@ -263,6 +263,13 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 		pair.assembly += pair.state.getWhitespace() + getStartLabel() + ":" + "\t; " + CompConfig.functionTag + 
 				(DebugLevel.isAtLeast(DebugLevel.medium) ? " " + getType().getSignature() : "") + 
 				"\n";
+		if (isInterruptHandler() && !attributes.contains(Attributes.noISR2))
+		{
+			pair.assembly += pair.state.getWhitespace() + "PHY\n";
+			pair.assembly += pair.state.getWhitespace() + "PHX\n";
+			pair.assembly += pair.state.getWhitespace() + "PHA\n";
+			pair.assembly += pair.state.getWhitespace() + "PHP\n";
+		}
 		if (isInterruptHandler() && isISR()) // Have to push *everything* to the stack
 		{
 			// Using MVP to save space
@@ -322,7 +329,19 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 			pair.assembly += pair.state.getWhitespace() + "TXS\n";			// Move stack to new location
 		}
 		
-		pair.assembly += pair.state.getWhitespace() + getEndLabel() + ": " + (isInterruptHandler() && !attributes.contains(Attributes.noISR2) ? "RTI\n" : "RTL") + "\n";
+		pair.assembly += pair.state.getWhitespace() + getEndLabel() + ":\n";
+		if (isInterruptHandler() && !attributes.contains(Attributes.noISR2))
+		{
+			pair.assembly += pair.state.getWhitespace() + "PLP\n";
+			pair.assembly += pair.state.getWhitespace() + "PLA\n";
+			pair.assembly += pair.state.getWhitespace() + "PLX\n";
+			pair.assembly += pair.state.getWhitespace() + "PLY\n";
+			pair.assembly += pair.state.getWhitespace() + "RTI\n";
+		}
+		else
+		{
+			pair.assembly += pair.state.getWhitespace() + "RTL\n";
+		}
 		
 ;//		ScratchManager.releasePointers();
 
