@@ -265,10 +265,11 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 				"\n";
 		if (isInterruptHandler() && !attributes.contains(Attributes.noISR2))
 		{
+			pair.assembly += pair.state.getWhitespace() + "REP\t#$30\n";
+			pair.state = pair.state.setProcessorFlags((byte) (ProcessorFlag.M | ProcessorFlag.I));
 			pair.assembly += pair.state.getWhitespace() + "PHY\n";
 			pair.assembly += pair.state.getWhitespace() + "PHX\n";
 			pair.assembly += pair.state.getWhitespace() + "PHA\n";
-			pair.assembly += pair.state.getWhitespace() + "PHP\n";
 		}
 		if (isInterruptHandler() && isISR()) // Have to push *everything* to the stack
 		{
@@ -332,7 +333,8 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 		pair.assembly += pair.state.getWhitespace() + getEndLabel() + ":\n";
 		if (isInterruptHandler() && !attributes.contains(Attributes.noISR2))
 		{
-			pair.assembly += pair.state.getWhitespace() + "PLP\n";
+			pair.assembly += pair.state.getWhitespace() + "REP\t#$30\n";
+			pair.state = pair.state.setProcessorFlags((byte) (ProcessorFlag.M | ProcessorFlag.I));
 			pair.assembly += pair.state.getWhitespace() + "PLA\n";
 			pair.assembly += pair.state.getWhitespace() + "PLX\n";
 			pair.assembly += pair.state.getWhitespace() + "PLY\n";
