@@ -45,7 +45,7 @@ public class RelationalExpressionNode extends BinaryExpressionNode
 			AssemblyStatePair tmpPair;
 			String assembly = "";
 			
-			if (isSigned && ((i >= n1 - 1) || (i == 0 && n1 == 1))) // First comparison and signed, must EOR y by 0x80
+			if (isSigned && ((i >= n1 - 2) || (i == 0 && n1 == 1))) // First comparison and signed, must EOR y by 0x80
 			{
 				String XOR = state.getWhitespace() + (state.testProcessorFlag(ProgramState.ProcessorFlag.M) ? "EOR\t#$8000\n" : "EOR\t#$80\n");
 				if (sourceY.isLiteral()) // Optimizable for literals
@@ -235,7 +235,8 @@ public class RelationalExpressionNode extends BinaryExpressionNode
 		AssemblyStatePair tmpPair = getAssemblyAndStateRec(state, sourceX, sourceY, operator, false);
 		assembly += tmpPair.assembly;
 		state = tmpPair.state;
-		
+		state = state.wipe();
+		state = state.clearKnownFlags();
 		if (hasEnd)
 		{
 			assembly += state.getWhitespace() + yesLabel + ":\n";
@@ -246,10 +247,13 @@ public class RelationalExpressionNode extends BinaryExpressionNode
 				state = tmpPair.state;
 			}
 			else
+			{
+				assembly += state.getWhitespace() + "SEP\t#$20\n";
 				assembly += state.getWhitespace() + "LDA\t#$01\n";
-			
+			}
 			assembly += whitespace + "BRA\t" + endLabel + "\n";	
 			state = state.wipe();
+			state = state.clearKnownFlags();
 			
 			assembly += whitespace + noLabel + ":\n";
 			if (state.destSource() != null)
@@ -259,8 +263,10 @@ public class RelationalExpressionNode extends BinaryExpressionNode
 				state = tmpPair.state;
 			}
 			else
+			{
+				assembly += state.getWhitespace() + "SEP\t#$20\n";
 				assembly += state.getWhitespace() + "LDA\t#$00\n";
-			
+			}
 			assembly += whitespace + endLabel + ":\n";
 		}
 		return new AssemblyStatePair(assembly, state);
