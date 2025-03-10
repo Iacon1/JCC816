@@ -151,7 +151,7 @@ public final class AssemblyOptimizer
 					lines.set(i, "");
 				else lines.set(i, line.replace(String.format("%02x", newFlags), String.format("%02x", delta)));
 			}
-			else if (line.contains("ADC\t") || line.contains("SBS\t"))
+			else if (line.contains("ADC\t") || line.contains("SBC\t"))
 				knownFlags &= ~1;
 		}
 		
