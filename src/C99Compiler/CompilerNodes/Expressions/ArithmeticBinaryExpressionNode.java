@@ -134,9 +134,15 @@ CC extends ParserRuleContext
 		assembly += tmpPair.assembly;
 		state = tmpPair.state;
 		
-		if (size1 < destSource.getSize())
+		if (size1 < destSource.getSize() && !destSource.isStationary())
 		{
 			ZeroCopier zeroCopier = new ZeroCopier(destSource.getSize() - size1, destSource.getShifted(size1), false);
+			assembly += zeroCopier.getAssembly(state);
+			state = zeroCopier.getStateAfter(state);
+		}
+		else if (size1 < destSource.getSize())
+		{
+			ZeroCopier zeroCopier = new ZeroCopier(destSource.getSize() - size1, destSource, false);
 			assembly += zeroCopier.getAssembly(state);
 			state = zeroCopier.getStateAfter(state);
 		}
