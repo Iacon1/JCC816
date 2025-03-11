@@ -4,6 +4,7 @@ package C99Compiler.CompilerNodes.Expressions;
 
 import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.Definitions.Type.CastContext;
+import C99Compiler.CompilerNodes.Dummies.DummyExpressionNode;
 import Grammar.C99.C99Parser.And_expressionContext;
 import Grammar.C99.C99Parser.Xor_expressionContext;
 
@@ -12,6 +13,11 @@ public class XOrExpressionNode extends ArithmeticBinaryExpressionNode
 {
 
 	public XOrExpressionNode(ComponentNode<?> parent) {super(parent);}
+
+	public XOrExpressionNode(ComponentNode<?> parent, BaseExpressionNode<?> x, BaseExpressionNode<?> y)
+	{
+		super(parent, "^", x, y);
+	}
 
 	@Override
 	protected BaseExpressionNode<And_expressionContext> getC1Node(Xor_expressionContext node) throws Exception

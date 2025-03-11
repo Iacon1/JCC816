@@ -316,8 +316,8 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 		case "~":
 			if (destSource != null)
 			{
-				// TODO
-				tmpPair = new XOrExpressionNode(this).getAssemblyAndState(state);
+				dX = new DummyExpressionNode(this, expr.getType(), Long.valueOf("FF".repeat(expr.getSize()), 16));
+				tmpPair = new XOrExpressionNode(this, expr, dX).getAssemblyAndState(state);
 				assembly += tmpPair.assembly;
 				state = tmpPair.state;
 			}
