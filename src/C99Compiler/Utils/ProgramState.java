@@ -106,7 +106,7 @@ public class ProgramState
 			{
 				int oldSize = blockList.get(i).getValue();
 				blockList.set(i, new SimpleEntry<Boolean, Integer>(true, size));
-				blockList.add(i + 1, new SimpleEntry<Boolean, Integer>(false, oldSize));
+				blockList.add(i + 1, new SimpleEntry<Boolean, Integer>(false, oldSize - 1));
 
 				return new ScratchSource(offset, size);
 			}
