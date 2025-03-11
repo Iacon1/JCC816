@@ -12,6 +12,7 @@ import C99Compiler.Utils.ProgramState;
 import C99Compiler.Utils.AssemblyUtils.AssemblyUtils;
 import C99Compiler.Utils.AssemblyUtils.BytewiseOperator;
 import C99Compiler.Utils.OperandSources.OperandSource;
+import C99Compiler.Utils.ProgramState.ProcessorFlag;
 import Grammar.C99.C99Parser.Equality_expressionContext;
 import Grammar.C99.C99Parser.Relational_expressionContext;
 
@@ -123,9 +124,23 @@ public class EqualityExpressionNode extends BinaryExpressionNode
 		if (state.destSource() != null)
 		{
 			assembly += state.getWhitespace() + CompUtils.setA8 + "\n";
-			AssemblyStatePair tmpPair = state.destSource().getSTA(state, 0);
+			state = state.clearProcessorFlags(ProcessorFlag.M);
+			AssemblyStatePair tmpPair;
+			tmpPair = state.destSource().getSTA(state, 0);
 			assembly += tmpPair.assembly;
 			state = tmpPair.state;
+			if (state.destSource().getSize() > 1)
+			{
+				assembly += state.getWhitespace() + "LDA\t#$00\n";
+				state = tmpPair.state;
+			}
+			for (int i = 1; i < state.destSource().getSize(); ++i)
+			{
+				
+				tmpPair = state.destSource().getSTA(state, i);
+				assembly += tmpPair.assembly;
+				state = tmpPair.state;
+			}
 		}
 		
 		state = state.addPreserveFlags(flags);
