@@ -59,25 +59,37 @@ public class RelationalExpressionNode extends BinaryExpressionNode
 				String XOR = state.getWhitespace() + (state.testProcessorFlag(ProgramState.ProcessorFlag.M) ? "EOR\t#$8000\n" : "EOR\t#$80\n");
 				if (sourceY.isLiteral())
 				{
-					// Get X
-					tmpPair = sourceX.getLDA(state, i);
-					assembly += tmpPair.assembly;
-					state = tmpPair.state;
-					assembly += XOR;
-					
-					// Get Y
-					String oldY = ((ConstantByteSource) sourceY).getBase(state, i).substring(2);
-					int yVal = Integer.valueOf(oldY, 16);
-					
-					// Compare
-					assembly += state.getWhitespace() + "CMP\t#$";
-					if (state.testProcessorFlag(ProgramState.ProcessorFlag.M)) // 16-bit
-						assembly += String.format("%04x", yVal ^ 0x8000);
-					else
-						assembly += String.format("%02x", yVal ^ 0x80);
-					assembly += "\n";
+					String oldAssembly = assembly;
+					ProgramState oldState = state;
+					try // Optimizable for literals	
+					{
+						// Get X
+						tmpPair = sourceX.getLDA(state, i);
+						assembly += tmpPair.assembly;
+						state = tmpPair.state;
+						assembly += XOR;
+						
+						// Get Y
+						String oldY = ((ConstantSource) sourceY).getBase(state, i).substring(2);
+						int yVal = Integer.valueOf(oldY, 16);
+						
+						// Compare
+						assembly += state.getWhitespace() + "CMP\t#$";
+						if (state.testProcessorFlag(ProgramState.ProcessorFlag.M)) // 16-bit
+							assembly += String.format("%04x", yVal ^ 0x8000);
+						else
+							assembly += String.format("%02x", yVal ^ 0x80);
+						assembly += "\n";
+						optimized = true;
+					}
+					catch (Exception e) // Bad literal
+					{
+						optimized = false;
+						assembly = oldAssembly;
+						state = oldState;
+					}
 				}
-				else
+				if (!optimized)
 				{
 					// Get Y
 					tmpPair = sourceY.getLDA(state, i);
