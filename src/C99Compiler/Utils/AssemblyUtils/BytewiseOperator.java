@@ -72,7 +72,7 @@ public abstract class BytewiseOperator implements Assemblable
 			if (!reversed) // Go from offset 0 up
 			{
 				int i;
-				for (i = 0; i < n1 - (n1 % 2); i += 2)
+				for (i = 0; i < n1 - 1; i += 2)
 				{
 					if (i == n2 - 1) // Halfway between in n2 and not
 					{
@@ -92,7 +92,7 @@ public abstract class BytewiseOperator implements Assemblable
 						apply(pair, i);
 					}
 				}
-				if (i != n1) // One more
+				if (i < n1) // One more
 				{
 					pair.assembly += pair.state.getWhitespace() + CompUtils.setA8 + "\n";
 					pair.state = pair.state.clearProcessorFlags(ProgramState.ProcessorFlag.M);
@@ -102,7 +102,7 @@ public abstract class BytewiseOperator implements Assemblable
 			else // Go from offset n - 2 down
 			{
 				int i;
-				for (i = n1 - 2; i >= (n1 % 2); i -= 2)
+				for (i = n1 - 2; i >= 0; i -= 2)
 				{
 					if (i == n2 - 1) // Halfway between in n2 and not
 					{
@@ -121,7 +121,7 @@ public abstract class BytewiseOperator implements Assemblable
 						apply(pair, i);
 					}
 				}
-				if (i != 0) // One more
+				if (i == -1) // One or two more
 				{
 					pair.assembly += pair.state.getWhitespace() + CompUtils.setA8 + "\n";
 					pair.state = pair.state.clearProcessorFlags(ProgramState.ProcessorFlag.M);

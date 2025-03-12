@@ -29,6 +29,7 @@ public class RelationalExpressionNode extends BinaryExpressionNode
 		private OperandSource sourceX, sourceY, tempSource;
 
 		private boolean isSigned, invert;
+		boolean firstOp;
 		public RelationalOperator(int n1, int n2, OperandSource sourceX, OperandSource sourceY, OperandSource tempSource, boolean invert)
 		{
 			super(n1, n2, true);
@@ -38,17 +39,25 @@ public class RelationalExpressionNode extends BinaryExpressionNode
 			this.isSigned = x.getType().isSigned() || y.getType().isSigned();
 			this.invert = invert;
 		}
-		
+
+		@Override
+		public AssemblyStatePair getAssemblyAndState(ProgramState state) throws Exception
+		{
+			firstOp = true;
+			return super.getAssemblyAndState(state);
+		}
 		@Override
 		protected AssemblyStatePair getAssemblyAndState(ProgramState state, int i) throws Exception
 		{
 			AssemblyStatePair tmpPair;
 			String assembly = "";
 			
-			if (isSigned && ((i >= n1 - 2) || (i == 0 && n1 == 1))) // First comparison and signed, must EOR y by 0x80
+			if (isSigned && firstOp) // First comparison and signed, must EOR y by 0x80
 			{
+				firstOp = false;
+				boolean optimized = false;
 				String XOR = state.getWhitespace() + (state.testProcessorFlag(ProgramState.ProcessorFlag.M) ? "EOR\t#$8000\n" : "EOR\t#$80\n");
-				if (sourceY.isLiteral()) // Optimizable for literals
+				if (sourceY.isLiteral())
 				{
 					// Get X
 					tmpPair = sourceX.getLDA(state, i);
@@ -88,7 +97,7 @@ public class RelationalExpressionNode extends BinaryExpressionNode
 					assembly += XOR;
 					
 					// Compare
-					tmpPair = tempSource.getInstruction(state, "CMP", i);
+					tmpPair = tempSource.getInstruction(state, "CMP", 0);
 					assembly += tmpPair.assembly;
 					state = tmpPair.state;
 				}
