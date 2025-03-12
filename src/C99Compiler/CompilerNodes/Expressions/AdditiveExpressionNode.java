@@ -42,12 +42,6 @@ public class AdditiveExpressionNode extends ArithmeticBinaryExpressionNode
 		lockToDestSize = true;
 	}
 
-	public AdditiveExpressionNode(String operator, BaseExpressionNode<?> x, BaseExpressionNode<?> y)
-	{
-		super(null, operator, x, y);
-		lockToDestSize = true;
-	}
-
 	@Override
 	protected BaseExpressionNode<Additive_expressionContext> getC1Node(Additive_expressionContext node) throws Exception
 	{return new AdditiveExpressionNode(this).interpret(node.additive_expression());}

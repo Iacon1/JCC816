@@ -553,9 +553,9 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 			}
 			BaseExpressionNode<?> dX = new DummyExpressionNode(this, expr.getType(), 1);
 			if (type == PFType.incr)
-				dX = new AdditiveExpressionNode("+", expr, dX);
+				dX = new AdditiveExpressionNode(this, "+", expr, dX);
 			else if (type == PFType.decr)
-				dX = new AdditiveExpressionNode("-", expr, dX);
+				dX = new AdditiveExpressionNode(this, "-", expr, dX);
 			dX = new AssignmentExpressionNode(this, expr, dX);
 			getEnclosingSequencePoint().registerAssemblable(dX);
 			

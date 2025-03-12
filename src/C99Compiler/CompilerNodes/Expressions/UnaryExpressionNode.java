@@ -276,7 +276,7 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 		switch (operator)
 		{
 		case "++": case "--":
-			tmpNode = new AdditiveExpressionNode((operator.equals("++") ? "+" : "-"), expr, dX);
+			tmpNode = new AdditiveExpressionNode(this, (operator.equals("++") ? "+" : "-"), expr, dX);
 			if (tmpNode.hasPropValue(state))
 			{
 				tmpPair = new ByteCopier(sourceX.getSize(), sourceX, new ConstantSource(tmpNode.getPropValue(state), sourceX.getSize())).getAssemblyAndState(state);
@@ -307,7 +307,7 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 			if (destSource != null)
 			{
 				dX = new DummyExpressionNode(this, expr.getType(), 0);
-				tmpPair = new AdditiveExpressionNode("-", dX, expr).getAssemblyAndState(state);
+				tmpPair = new AdditiveExpressionNode(this, "-", dX, expr).getAssemblyAndState(state);
 				sourceX = destSource;
 				assembly += tmpPair.assembly;
 				state = tmpPair.state;
