@@ -335,8 +335,13 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 				if (func.canCall(state, getEnclosingFunction())) // Prepare for possible recursion
 				{
 					List<VariableNode> variables = new LinkedList<VariableNode>(getEnclosingFunction().getChildVariables().values());
+					tmpPair = new AssemblyStatePair("", state);
 					for (VariableNode parameter : variables)
-					;//	assembly += AssemblyUtils.stackLoader(whitespace, leadingWhitespace, parameter.getSource()); TODO
+					{
+						tmpPair = new StackLoader(parameter.getSource().getSize(), parameter.getSource()).apply(tmpPair);
+					}
+					assembly += tmpPair.assembly;
+					state = tmpPair.state;
 				}
 				
 				List<VariableNode> funcParams = new LinkedList<VariableNode>(func.getParameters().values());
@@ -390,12 +395,13 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 				{
 					List<VariableNode> variables = new LinkedList<VariableNode>(getEnclosingFunction().getChildVariables().values());
 					Collections.reverse(variables);
+					tmpPair = new AssemblyStatePair("", state);
 					for (VariableNode parameter : variables)
 					{
-						tmpPair = new StackLoader(parameter.getSize(), parameter.getSource()).getAssemblyAndState(state);
-						assembly += tmpPair.assembly;
-						state = tmpPair.state;
+						tmpPair = new StackLoader(parameter.getSize(), parameter.getSource()).apply(tmpPair);					
 					}
+					assembly += tmpPair.assembly;
+					state = tmpPair.state;
 				}
 			}
 			else // TODO Unpredictable function pointer or recursion, need to use the stack
