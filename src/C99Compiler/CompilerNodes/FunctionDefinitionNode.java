@@ -176,6 +176,26 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 		if (this.implementation != null) return this.implementation.isSA1();
 		else return attributes.contains(Attributes.SA1);
 	}
+	public boolean needsA8()
+	{
+		if (this.implementation != null) return this.implementation.needsA8();
+		else return attributes.contains(Attributes.A8);
+	}
+	public boolean needsA16()
+	{
+		if (this.implementation != null) return this.implementation.needsA16();
+		else return attributes.contains(Attributes.A16);
+	}
+	public boolean needsXY8()
+	{
+		if (this.implementation != null) return this.implementation.needsA8();
+		else return attributes.contains(Attributes.XY8);
+	}
+	public boolean needsXY16()
+	{
+		if (this.implementation != null) return this.implementation.needsA8();
+		else return attributes.contains(Attributes.XY16);
+	}
 	public boolean isInline()
 	{
 		return specifiers.functionSpecifiers.length > 0 && specifiers.functionSpecifiers[0].equals("inline");

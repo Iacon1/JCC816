@@ -23,6 +23,8 @@ import C99Compiler.Exceptions.ScratchOverflowException;
 import C99Compiler.Exceptions.UnsupportedFeatureException;
 import C99Compiler.Utils.CompUtils;
 import C99Compiler.Utils.ProgramState;
+import C99Compiler.Utils.ProgramState.PreserveFlag;
+import C99Compiler.Utils.ProgramState.ProcessorFlag;
 import C99Compiler.Utils.ProgramState.ScratchSource;
 import C99Compiler.Utils.PropPointer;
 import C99Compiler.Utils.AssemblyUtils.AssemblyUtils;
@@ -372,6 +374,28 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 				tmpPair = getRegisteredAssemblyAndState(state);
 				assembly += tmpPair.assembly;
 				state = tmpPair.state;
+				
+				if (func.needsA8() && !(state.testKnownFlag(PreserveFlag.M) && !state.testProcessorFlag(ProcessorFlag.M)))
+				{
+					assembly += state.getWhitespace() + "SEP\t#$20\n";
+					state = state.clearProcessorFlags(ProcessorFlag.M);
+				}
+				else if (func.needsA16() && !(state.testKnownFlag(PreserveFlag.M) && state.testProcessorFlag(ProcessorFlag.M)))
+				{
+					assembly += state.getWhitespace() + "REP\t#$20\n";
+					state = state.setProcessorFlags(ProcessorFlag.M);
+				}
+				
+				if (func.needsXY8() && !(state.testKnownFlag(PreserveFlag.I) && !state.testProcessorFlag(ProcessorFlag.I)))
+				{
+					assembly += state.getWhitespace() + "SEP\t#$10\n";
+					state = state.clearProcessorFlags(ProcessorFlag.I);
+				}
+				else if (func.needsXY16() && !(state.testKnownFlag(PreserveFlag.I) && state.testProcessorFlag(ProcessorFlag.I)))
+				{
+					assembly += state.getWhitespace() + "REP\t#$10\n";
+					state = state.setProcessorFlags(ProcessorFlag.I);
+				}
 				
 				if (func.isInline())
 				{

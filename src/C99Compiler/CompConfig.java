@@ -181,6 +181,10 @@ public final class CompConfig
 		public static final String noISR1 = "no_ISR1"; // Level 1 noISR - removes normal stack pushers / loaders from interrupt handler
 		public static final String noISR2 = "no_ISR2"; // Level 2 noISR - like level 1, but replaces RTI with RTL
 		public static final String SA1 = "SA1";	// Specifies that a function can only be called on the SA1 coprocessor
+		public static final String A8 = "A8"; // Function starts in 8-bit A mode
+		public static final String A16 = "A16"; // Function starts in 16-bit A mode
+		public static final String XY8 = "XY8"; // Function starts in 8-bit A mode
+		public static final String XY16 = "XY16"; // Function starts in 16-bit A mode
 		
 		public static final boolean isInterrupt(Set<String> attributes)
 		{
