@@ -116,6 +116,7 @@ public class RelationalExpressionNode extends BinaryExpressionNode
 			}
 			else // Don't need to XOR
 			{
+				firstOp = false;
 				// Get X
 				tmpPair = sourceX.getLDA(state, i);
 				assembly += tmpPair.assembly;
