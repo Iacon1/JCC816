@@ -3,24 +3,24 @@
 
 package C99Compiler.ASMGrapher.Nodes;
 
-import C99Compiler.ASMGrapher.Address;
+import C99Compiler.ASMGrapher.Value;
 import C99Compiler.Utils.CompUtils;
-import Grammar.C816.C816Parser.AddressContext;
 import Grammar.C816.C816Parser.ParameterContext;
+import Grammar.C816.C816Parser.ValueContext;
 import Logging.Logging;
 
 public class ParameterNode extends ASMNode<ParameterContext>
 {
 	private boolean referencesX, referencesY, referencesS;
 	private boolean isImmediate;
-	private Address address;
+	private Value value;
 	private int immValue;
 	private int size;
 	
 	public ParameterNode()
 	{
 		super(-1); // TODO
-		address = null;
+		value = null;
 	}
 
 	@Override
@@ -37,34 +37,13 @@ public class ParameterNode extends ASMNode<ParameterContext>
 		if (upper.contains(",#"))
 			isImmediate = true;
 
-		if (node.address().size() > 0)
+		if (node.value().size() > 0)
 		{
-			AddressContext c = node.address().get(0);
-			if (c.Symbol() != null)
-			{
-				String symbol = c.Symbol().getText();
-				size = CompUtils.isInZeroPage(symbol) ? 1 : 3; // Todo 2-byte address?
-				int offset = 0;
-				if (c.Number() != null)
-				{
-					offset = procNumber(c.Number());
-					size = Math.max(size, sizeOfNumber(c.Number()));
-				}
-				address = new Address(symbol, offset);
-			}
-			else if (c.Number() != null)
-			{
-				int addr = procNumber(c.Number());
-				size = sizeOfNumber(c.Number());
-				address = new Address(addr);
-				if (isImmediate)
-					immValue = addr;
-			}
-			else
-			{
-				address = new Address(c.getText());
-				size = CompUtils.isInZeroPage(c.getText()) ? 1 : 3; // Todo 2-byte address?
-			}
+			ValueNode v = (ValueNode) new ValueNode(lineNo()).interpret(node.value(0));
+			value = v.getValue();
+			size = v.getSize();
+			if (isImmediate)
+				immValue = v.getImmediate();
 		}
 		return this;
 	}
@@ -102,9 +81,9 @@ public class ParameterNode extends ASMNode<ParameterContext>
 	public boolean affectsParameter() {return false;}
 
 	@Override
-	public Address getAddress()
+	public Value getValue()
 	{
-		return address;
+		return value;
 	}
 
 	@Override

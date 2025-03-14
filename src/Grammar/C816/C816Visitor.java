@@ -17,11 +17,11 @@ public interface C816Visitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitParameter(C816Parser.ParameterContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link C816Parser#address}.
+	 * Visit a parse tree produced by {@link C816Parser#value}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitAddress(C816Parser.AddressContext ctx);
+	T visitValue(C816Parser.ValueContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link C816Parser#instruction}.
 	 * @param ctx the parse tree
@@ -34,6 +34,12 @@ public interface C816Visitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitPreprocInstruction(C816Parser.PreprocInstructionContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link C816Parser#macroInstruction}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitMacroInstruction(C816Parser.MacroInstructionContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link C816Parser#label}.
 	 * @param ctx the parse tree

@@ -401,6 +401,10 @@ public final class AsmBuilder implements Catalogger
 	}
 	private static String postprocess(CartConfig cartConfig, String assembly, MemorySize memorySize) throws Exception
 	{
+		assembly = assembly.replace("\r\n", "\n");
+		assembly = assembly.replace("\n\r", "\n");
+		assembly = assembly.replace("\r", "\n");
+
 		ArrayList<String> lines = new ArrayList<String>(Arrays.asList(assembly.split("\n")));
 
 		if (OptimizationLevel.isAtLeast(OptimizationLevel.low))

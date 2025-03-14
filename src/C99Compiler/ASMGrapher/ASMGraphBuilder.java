@@ -16,6 +16,7 @@ import javax.swing.JPanel;
 import org.antlr.v4.gui.TreeViewer;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.InputMismatchException;
 import org.antlr.v4.runtime.Parser;
 import org.antlr.v4.runtime.tree.ParseTree;
 
@@ -27,12 +28,14 @@ import Grammar.C816.C816Lexer;
 import Grammar.C816.C816Parser;
 import Grammar.C816.C816Parser.ProgramContext;
 import Logging.Logging;
+import Shared.ErrorCollector;
 import C99Compiler.ASMGrapher.Nodes.LabelNode;
 import C99Compiler.ASMGrapher.Nodes.Operation;
 import C99Compiler.ASMGrapher.Nodes.PreprocNode;
 
 public class ASMGraphBuilder
 {
+	private static ErrorCollector e = new ErrorCollector();
 	private List<ASMNode<?>> lines;
 	private List<String> textLines;
 	private Set<Integer> busyLines; // To keep infinite recursion from happening
@@ -67,23 +70,23 @@ public class ASMGraphBuilder
 			for (int i = 0; i < lines.size(); ++i)
 			{
 				ASMNode<?> line = lines.get(i);
-				if ((line.getType() == ASMType.jump || line.getType() == ASMType.branch) && line.getAddress().toString().equals(label))
+				if ((line.getType() == ASMType.jump || line.getType() == ASMType.branch) && line.getValue().toString().equals(label))
 					jumpsTo.add(i);
 			}
 				
 		return jumpsTo;
 	}
 
-	private void buildGraph(int i, List<Address> internalAddresses, Set<Address> importantAddresses, byte importantRegisters, byte importantFlags)
+	private void buildGraph(int i, List<Value> internalAddresses, Set<Value> importantAddresses, byte importantRegisters, byte importantFlags)
 	{
 		ASMNode<?> line = lines.get(i);
 		busyLines.add(i);
 		
 		importantRegisters |= line.affectingRegisters();
 		importantFlags |= line.affectingFlags();
-		if (line.affectedByParameter()) importantAddresses.add(line.getAddress());
+		if (line.affectedByParameter()) importantAddresses.add(line.getValue());
 		
-		if (line.affectsParameter() && !internalAddresses.contains(line.getAddress()))
+		if (line.affectsParameter() && !internalAddresses.contains(line.getValue()))
 			line.setExport();
 		int j = i - 1;
 		while (j >= 0) // For each line before this one
@@ -101,10 +104,10 @@ public class ASMGraphBuilder
 					required = true;
 				if ((prevLine.affectedFlags() & importantFlags) != 0)
 					required = true;
-				if (prevLine.affectsParameter() && importantAddresses.contains(prevLine.getAddress()))
+				if (prevLine.affectsParameter() && importantAddresses.contains(prevLine.getValue()))
 				{
 					required = true;
-					importantAddresses.remove(prevLine.getAddress());
+					importantAddresses.remove(prevLine.getValue());
 				}
 				
 				if (required)
@@ -117,17 +120,17 @@ public class ASMGraphBuilder
 					
 					if (prevLine.affectedByParameter())
 					{
-						importantAddresses.add(prevLine.getAddress());
+						importantAddresses.add(prevLine.getValue());
 						if ((prevLine.affectedRegisters() & InstructionNode.registerA) != 0 && prevLine.is16A())
-							importantAddresses.add(prevLine.getAddress().increment());
+							importantAddresses.add(prevLine.getValue().increment());
 						if ((prevLine.affectedRegisters() & (InstructionNode.registerX | InstructionNode.registerY)) != 0 && prevLine.is16XY())
-							importantAddresses.add(prevLine.getAddress().increment());
+							importantAddresses.add(prevLine.getValue().increment());
 					}
 				}
 				break;
 			case label:
 				line.setExport(); // Hack
-				for (Integer k : jumpsTo(prevLine.getAddress().toString(), j))
+				for (Integer k : jumpsTo(prevLine.getValue().toString(), j))
 				{
 					prevLine.require(lines.get(k));
 					if (!busyLines.contains(k)) buildGraph(k, internalAddresses, importantAddresses, importantRegisters, importantFlags);
@@ -150,10 +153,10 @@ public class ASMGraphBuilder
 		}
 		busyLines.remove(i);
 	}
-	private void buildGraph(List<Address> internalAddresses)
+	private void buildGraph(List<Value> internalAddresses)
 	{
 		for (int i = lines.size() - 1; i >= 0; --i)
-			buildGraph(i, internalAddresses, new HashSet<Address>(), (byte) 0, (byte) 0);
+			buildGraph(i, internalAddresses, new HashSet<Value>(), (byte) 0, (byte) 0);
 	}
 	
 	private static String capitalize(String assembly) // capitalize all operations.
@@ -171,9 +174,16 @@ public class ASMGraphBuilder
 		assembly = assembly.replaceAll("\n+", "\n");
 		for (String line : assembly.split("\n"))
 			textLines.add(line);
+
+		e.reset();
 		C816Lexer lexer = new C816Lexer(CharStreams.fromString(assembly));
+		lexer.addErrorListener(e);
 		C816Parser parser = new C816Parser(new CommonTokenStream(lexer));
+		parser.addErrorListener(e);
 		ProgramContext context = parser.program();
+		if (e.hasFailed())
+;//			Logging.logError(assembly);
+		
 //		Logging.viewParseTree(parser, context);
 		int labels = 0, instrs = 0, preprocs = 0;
 		for (int i = 0; i < context.getChildCount(); ++i)
@@ -199,13 +209,13 @@ public class ASMGraphBuilder
 	 */
 	public String clearDeadCode(LinkedHashMap<String, VariableNode> internalVariables)
 	{
-		List<Address> internalAddresses = new ArrayList<Address>();
+		List<Value> internalAddresses = new ArrayList<Value>();
 		String functionAssembly;
 		
 		// List internal addresses
 		for (VariableNode internalVar : internalVariables.values())
 			for (int i = 0; i < internalVar.getSize(); ++i)
-				internalAddresses.add(new Address(internalVar.getFullName(), i));
+				internalAddresses.add(new Value(internalVar.getFullName(), i));
 		
 		// Tell each line whether it's 16 bit or not
 		boolean is16A = false, is16XY = false;
@@ -226,7 +236,7 @@ public class ASMGraphBuilder
 		}
 				
 		// Remove redundancies
-		Address addrA = null, addrX = null, addrY = null;
+		Value addrA = null, addrX = null, addrY = null;
 		for (int i = 0; i < lines.size(); ++i)
 		{
 			ASMNode<?> line = lines.get(i);
@@ -234,25 +244,25 @@ public class ASMGraphBuilder
 			{
 			case load:
 				if ((line.affectedRegisters() & InstructionNode.registerA) != 0)
-					if (line.getAddress().equals(addrA)) line.hide();
-					else addrA = line.getAddress();
+					if (line.getValue().equals(addrA)) line.hide();
+					else addrA = line.getValue();
 				if ((line.affectedRegisters() & InstructionNode.registerX) != 0)
-					if (line.getAddress().equals(addrX)) line.hide();
-					else addrX = line.getAddress();
+					if (line.getValue().equals(addrX)) line.hide();
+					else addrX = line.getValue();
 				if ((line.affectedRegisters() & InstructionNode.registerY) != 0)
-					if (line.getAddress().equals(addrY)) line.hide();
-					else addrY = line.getAddress();
+					if (line.getValue().equals(addrY)) line.hide();
+					else addrY = line.getValue();
 				break;
 			case store:
 				if ((line.affectingRegisters() & InstructionNode.registerA) != 0)
-					if (line.getAddress().equals(addrA)) line.hide();
-					else addrA = line.getAddress();
+					if (line.getValue().equals(addrA)) line.hide();
+					else addrA = line.getValue();
 				if ((line.affectingRegisters() & InstructionNode.registerX) != 0)
-					if (line.getAddress().equals(addrX)) line.hide();
-					else addrX = line.getAddress();
+					if (line.getValue().equals(addrX)) line.hide();
+					else addrX = line.getValue();
 				if ((line.affectingRegisters() & InstructionNode.registerY) != 0)
-					if (line.getAddress().equals(addrY)) line.hide();
-					else addrY = line.getAddress();
+					if (line.getValue().equals(addrY)) line.hide();
+					else addrY = line.getValue();
 				break;				
 			case other:
 				if ((line.affectedRegisters() & InstructionNode.registerA) != 0)

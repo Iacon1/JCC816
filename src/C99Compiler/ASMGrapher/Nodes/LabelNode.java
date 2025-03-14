@@ -2,7 +2,7 @@
 //
 package C99Compiler.ASMGrapher.Nodes;
 
-import C99Compiler.ASMGrapher.Address;
+import C99Compiler.ASMGrapher.Value;
 import Grammar.C816.C816Parser.LabelContext;
 public class LabelNode extends ASMNode<LabelContext>
 {
@@ -41,7 +41,7 @@ public class LabelNode extends ASMNode<LabelContext>
 	public boolean affectsParameter() {return false;}
 
 	@Override
-	public Address getAddress() {return new Address(name, 0);}
+	public Value getValue() {return new Value(name, 0);}
 	@Override
 	public int getImmediate() {return 0;}
 	

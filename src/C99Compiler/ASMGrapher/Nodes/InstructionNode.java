@@ -2,7 +2,7 @@
 //
 package C99Compiler.ASMGrapher.Nodes;
 
-import C99Compiler.ASMGrapher.Address;
+import C99Compiler.ASMGrapher.Value;
 import Grammar.C816.C816Parser.InstructionContext;
 
 public class InstructionNode extends ASMNode<InstructionContext>
@@ -89,9 +89,9 @@ public class InstructionNode extends ASMNode<InstructionContext>
 	}
 
 	@Override
-	public Address getAddress()
+	public Value getValue()
 	{
-		return parameter.getAddress();
+		return parameter.getValue();
 	}
 	@Override
 	public int getImmediate()

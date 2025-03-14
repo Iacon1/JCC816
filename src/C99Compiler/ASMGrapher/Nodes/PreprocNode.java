@@ -2,7 +2,7 @@
 //
 package C99Compiler.ASMGrapher.Nodes;
 
-import C99Compiler.ASMGrapher.Address;
+import C99Compiler.ASMGrapher.Value;
 import Grammar.C816.C816Parser.LabelContext;
 import Grammar.C816.C816Parser.PreprocInstructionContext;
 public class PreprocNode extends ASMNode<PreprocInstructionContext>
@@ -43,7 +43,7 @@ public class PreprocNode extends ASMNode<PreprocInstructionContext>
 	public boolean affectsParameter() {return false;}
 
 	@Override
-	public Address getAddress() {return null;}
+	public Value getValue() {return null;}
 	@Override
 	public int getImmediate() {return 0;}
 	
