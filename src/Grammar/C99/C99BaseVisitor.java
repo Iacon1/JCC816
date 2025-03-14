@@ -158,6 +158,13 @@ public class C99BaseVisitor<T> extends AbstractParseTreeVisitor<T> implements C9
 	 * <p>The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
+	@Override public T visitAttributes_declaration(C99Parser.Attributes_declarationContext ctx) { return visitChildren(ctx); }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
 	@Override public T visitDeclaration(C99Parser.DeclarationContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
@@ -390,13 +397,6 @@ public class C99BaseVisitor<T> extends AbstractParseTreeVisitor<T> implements C9
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
 	@Override public T visitDesignator(C99Parser.DesignatorContext ctx) { return visitChildren(ctx); }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.</p>
-	 */
-	@Override public T visitAttributes_declaration(C99Parser.Attributes_declarationContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *

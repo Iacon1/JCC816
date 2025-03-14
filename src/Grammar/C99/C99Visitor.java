@@ -131,6 +131,12 @@ public interface C99Visitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitConstant_expression(C99Parser.Constant_expressionContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link C99Parser#attributes_declaration}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitAttributes_declaration(C99Parser.Attributes_declarationContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link C99Parser#declaration}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -334,12 +340,6 @@ public interface C99Visitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitDesignator(C99Parser.DesignatorContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link C99Parser#attributes_declaration}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitAttributes_declaration(C99Parser.Attributes_declarationContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link C99Parser#statement}.
 	 * @param ctx the parse tree

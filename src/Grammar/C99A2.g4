@@ -77,7 +77,8 @@ expression : assignment_expression (Comma assignment_expression)* ;
 constant_expression : conditional_expression ;
 
 // A.2.2 Declarations
-declaration : declaration_specifiers init_declarator_list? Semico ;
+attributes_declaration : TwoLSB identifier_list TwoRSB ;
+declaration : attributes_declaration* declaration_specifiers init_declarator_list? Semico ;
 declaration_specifiers
 	: (storage_class_specifier
 	| type_specifier
@@ -153,7 +154,6 @@ designator_list : designator+ ;
 designator
 	: LeSqBr constant_expression RiSqBr
 	| Period Identifier ;
-attributes_declaration : TwoLSB identifier_list TwoRSB ;
 
 // A.2.3 Statements
 statement

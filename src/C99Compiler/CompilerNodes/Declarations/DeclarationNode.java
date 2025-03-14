@@ -48,14 +48,14 @@ public class DeclarationNode extends InterpretingNode<DeclarationNode, Declarati
 				{
 					Exception innerException = new Exception();
 					FunctionDefinitionNode oldFunction = checkRepeatFunctions((ComponentNode<?> c) -> {
-						try {return new FunctionDefinitionNode(c).interpret(node.declaration_specifiers(), initDeclarator.declarator());}
+						try {return new FunctionDefinitionNode(c).interpret(node.attributes_declaration(), node.declaration_specifiers(), initDeclarator.declarator());}
 						catch (Exception e) {innerException.addSuppressed(e); return null;}});
 					if (innerException.getSuppressed().length > 0) throw (Exception) innerException.getSuppressed()[0]; // Weird hack I know
 
 					if (oldFunction == null) // Ignore subsequent identical declarations without definitions
 					{
 						removeChild(declaratorNode);
-						new FunctionDefinitionNode(this).interpret(node.declaration_specifiers(), initDeclarator.declarator());
+						new FunctionDefinitionNode(this).interpret(node.attributes_declaration(), node.declaration_specifiers(), initDeclarator.declarator());
 					}
 				}
 				else

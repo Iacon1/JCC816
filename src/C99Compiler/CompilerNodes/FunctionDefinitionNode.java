@@ -11,6 +11,7 @@ import Grammar.C99.C99Parser.Direct_declaratorContext;
 import Grammar.C99.C99Parser.Function_definitionContext;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -98,8 +99,11 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 			
 		return this;
 	}
-	public FunctionDefinitionNode interpret(Declaration_specifiersContext declarationSpecifiers, DeclaratorContext declarator) throws Exception // Load from declaration
+	public FunctionDefinitionNode interpret(Collection<Attributes_declarationContext> attributes, Declaration_specifiersContext declarationSpecifiers, DeclaratorContext declarator) throws Exception // Load from declaration
 	{
+		for (Attributes_declarationContext attributes_declaration : attributes)
+			for (TerminalNode attribute : attributes_declaration.identifier_list().Identifier())
+				this.attributes.add(attribute.getText());
 		specifiers = new DeclarationSpecifiersNode(this).interpret(declarationSpecifiers).getSpecifiers();
 		signature = new DeclaratorNode(this, getName(declarator.direct_declarator())).interpret(declarator);
 
