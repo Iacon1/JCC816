@@ -102,7 +102,7 @@ public final class CompConfig
 		return sizeOf(Arrays.asList(typeSpecifiers));
 	}
 	
-	public static final int stackSize = 0x2000;
+	public static final int stackSize = 0x1F00; // Would be 0x2000 but 0x100 bytes are for the ZP
 	public static final int maxOptimizedMultComplexity = 7; // Most complex chain allowed in constant-multiplier optimization
 	
 	public static enum DefinableInterrupt // Interrupts the user is allowed to assign functions to

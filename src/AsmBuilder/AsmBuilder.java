@@ -36,7 +36,11 @@ import C99Compiler.Utils.CompUtils;
 import C99Compiler.Utils.ProgramState;
 import C99Compiler.Utils.SNESRegisters;
 import C99Compiler.Utils.AssemblyUtils.AssemblyUtils;
+import C99Compiler.Utils.AssemblyUtils.ByteCopier;
+import C99Compiler.Utils.OperandSources.ConstantSource;
+import C99Compiler.Utils.OperandSources.NumericAddressSource;
 import Logging.Logging;
+import Shared.Assemblable.AssemblyStatePair;
 import Shared.CartConfig;
 import Shared.Catalogger;
 import Shared.MemorySize;
@@ -166,7 +170,7 @@ public final class AsmBuilder implements Catalogger
 	}
 	private Map<String, Integer> mapVariables(CartConfig cartConfig, MemorySize memorySize)
 	{
-		int offset = CompConfig.stackSize;
+		int offset = CompConfig.stackSize + 0x100;
 		int sOffset = cartConfig.containsChip(AddonChip.SA1) ? 256 + CompConfig.stackSize : 0; // SA1 needs its own DP
 		List<VariableNode> WRAMVars = new LinkedList<VariableNode>(), SRAMVars = new LinkedList<VariableNode>();
 		for (VariableNode var : getVariables().values())
@@ -263,7 +267,7 @@ public final class AsmBuilder implements Catalogger
 				assembly += interrupt.longLabel + ":JML\tRESET\n";
 		return assembly;
 	}
-	private String getAssemblyPreface(CartConfig cartConfig, Map<String, Integer> varPoses) throws Exception
+	private String getAssemblyPreface(CartConfig cartConfig, Map<String, Integer> varPoses, int BSSSize) throws Exception
 	{
 		String assembly = "";
 
@@ -322,11 +326,21 @@ public final class AsmBuilder implements Catalogger
 		}
 		assembly += "PHK\n"; // Set return address to RESET so that when main ends it restarts
 		assembly += "PEA\tRESET\n";
+
+		AssemblyStatePair pair = new AssemblyStatePair("", new ProgramState());
+		// Clear BSS space
+		if (BSSSize > 0)
+			pair = new ByteCopier(
+					new NumericAddressSource(
+							cartConfig.getType().getWRAMBankStart(0) + 0x100, BSSSize),
+					new ConstantSource(0, BSSSize)).apply(pair);
 		// Load initialized globals
 		for (TranslationUnit unit : translationUnits)
 			for (InitializerNode init : unit.getGlobalInitializers())
 				if (!init.isROM()) // Only RAM ones up here, to save space in 0 bank
-					assembly += init.getAssembly(new ProgramState());
+					pair = init.apply(pair);
+		assembly += pair.assembly;
+		
 		assembly += "JML\tmain\n";
 		
 		// Required special subs
@@ -395,7 +409,7 @@ public final class AsmBuilder implements Catalogger
 				throw new BuilderException("Cannot use 16-bit addressing, more than 64 KB RAM required.");
 			if (resolveFunction("main") == null)
 				throw new BuilderException("Program must have \"" + CompConfig.mainName + "\" function.");
-			return getAssemblyPreface(cartConfig, varPoses) + assembly;
+			return getAssemblyPreface(cartConfig, varPoses, memorySize.BSSSize) + assembly;
 		}
 		else return assembly;
 	}
