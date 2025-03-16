@@ -40,6 +40,10 @@ public class CastExpressionNode extends BaseExpressionNode<Cast_expressionContex
 		else return delegate(new UnaryExpressionNode(this).interpret(node.unary_expression()));
 	}
 	
+	private boolean specifiesConversion()
+	{
+		return getType().getSize() != expr.getType().getSize();
+	}
 	@Override
 	public boolean canCall(ProgramState state, FunctionDefinitionNode function)
 	{
@@ -64,7 +68,7 @@ public class CastExpressionNode extends BaseExpressionNode<Cast_expressionContex
 	@Override
 	public boolean hasLValue(ProgramState state)
 	{
-		return expr.hasLValue(state);
+		return expr.hasLValue(state) && !specifiesConversion();
 	}
 	public LValueNode<?> getLValue(ProgramState state)
 	{
@@ -73,7 +77,7 @@ public class CastExpressionNode extends BaseExpressionNode<Cast_expressionContex
 	@Override
 	public boolean hasAssembly(ProgramState state)
 	{
-		return expr.hasAssembly(state) || (!hasPropValue(state) && getType().getSize() > expr.getType().getSize());
+		return expr.hasAssembly(state) || (!hasPropValue(state) && specifiesConversion());
 	}
 	@Override
 	public ProgramState getStateBefore(ProgramState state, ComponentNode<?> child) throws Exception
@@ -102,7 +106,7 @@ public class CastExpressionNode extends BaseExpressionNode<Cast_expressionContex
 			pair = new SignExtender(state.destSource(), expr.getLValue(state).getSource(), getType().isSigned(), expr.getType().isSigned()).getAssemblyAndState(state);
 			pair = new ByteCopier(state.destSource(), expr.getLValue(state).getSource()).apply(pair);
 		}
-		
+			
 		return pair;
 	}
 }
