@@ -40,6 +40,12 @@ public final class Banker
 			line = (i == lines.size() ? "" : lines.get(i));
 			prevLine = (i == 0 ? "" : lines.get(i - 1));
 
+			if (line.trim().startsWith(";")) // Comment
+			{
+				i += 1;
+				continue;
+			}
+			
 			if (prevLine.contains("RTL"))
 			{
 				inBlock = false;
