@@ -113,7 +113,7 @@ public class JumpStatementNode extends StatementNode<Jump_statementContext> impl
 			}
 			else if (expr != null && expr.hasPropValue(state))
 			{
-				ByteCopier copier = new ByteCopier(funcNode.getSize(), s, new ConstantSource(expr.getPropLong(state), funcNode.getSize()));
+				ByteCopier copier = new ByteCopier(funcNode.getSize(), s, new ConstantSource(expr.getPropValue(state), funcNode.getSize()));
 				AssemblyStatePair tmpPair = copier.getAssemblyAndState(state);
 				assembly += tmpPair.assembly;
 				state = tmpPair.state;
