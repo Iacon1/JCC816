@@ -53,6 +53,20 @@ public final class AsmBuilder implements Catalogger
 	{
 		for (int i = 0; i < info.length; ++i) Logging.logNotice(info[i].toString() + (i == info.length - 1 ? "" : ", ") + "\n");
 	}
+	private void printCanCalls(ProgramState state)
+	{
+		for (FunctionDefinitionNode i : getFunctions().values())
+		{
+			String list = "";
+			for (FunctionDefinitionNode j : getFunctions().values())
+				if (i.canCall(state, j) && i != j)
+					list = list + (list.isEmpty() ? "" : ", ") + j.getFullName();
+			if (list != "")
+				Logging.logNotice("Function " + i.getFullName() + " can call: " + list);
+			else
+				Logging.logNotice("Function " + i.getFullName() + " can call nothing");
+		}
+	}
 	
 	private List<TranslationUnit> translationUnits;
 	
@@ -445,6 +459,8 @@ public final class AsmBuilder implements Catalogger
 			printInfo("Postprocessed in " + (System.currentTimeMillis() - t) + " ms. Assembly length: " + assembly.length() + ".");
 		if (VerbosityLevel.isAtLeast(VerbosityLevel.medium))
 			printInfo("Linking done.");
+		if (VerbosityLevel.isAtLeast(VerbosityLevel.high))
+			printCanCalls(new ProgramState());
 		return assembly;
 	}
 	
