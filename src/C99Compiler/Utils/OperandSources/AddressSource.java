@@ -3,6 +3,8 @@
 package C99Compiler.Utils.OperandSources;
 
 import C99Compiler.CompConfig;
+import C99Compiler.ASMGrapher.Nodes.InstructionNode;
+import C99Compiler.ASMGrapher.Nodes.Operation;
 import C99Compiler.Utils.ProgramState;
 import Shared.Assemblable.AssemblyStatePair;
 
@@ -36,7 +38,8 @@ public class AddressSource extends OperandSource
 	public AssemblyStatePair getInstruction(ProgramState state, String operation, Integer i)
 	{
 		String assembly = "";
-		if (operation.equals("LDA"))
+		if ((Operation.valueOf(operation).affectedRegisters() & InstructionNode.registerA) != 0 ||
+				(Operation.valueOf(operation).affectedFlags() & InstructionNode.flagM) != 0)
 			state = state.clearKnownFlags(ProgramState.PreserveFlag.A);
 		if (i >= size)
 			assembly = state.getWhitespace() + operation + "\t" + CompConfig.signExtend + "\n";
