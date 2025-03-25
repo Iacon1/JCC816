@@ -29,6 +29,7 @@ import C99Compiler.Utils.ProgramState.ScratchSource;
 import C99Compiler.Utils.PropPointer;
 import C99Compiler.Utils.AssemblyUtils.AssemblyUtils;
 import C99Compiler.Utils.AssemblyUtils.ByteCopier;
+import C99Compiler.Utils.AssemblyUtils.SignExtender;
 import C99Compiler.Utils.AssemblyUtils.StackLoader;
 import C99Compiler.Utils.AssemblyUtils.StackPusher;
 import C99Compiler.Utils.OperandSources.AddressSource;
@@ -148,7 +149,7 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 		if (type == PFType.funcCall)
 		{
 			if (getReferencedFunction(state) != null)
-				return getReferencedFunction(state).getFullName().equals(function.getFullName());
+				return getReferencedFunction(state).getFullName().equals(function.getFullName()) || getReferencedFunction(state).canCall(state, function);
 			else return true;
 		}
 		else return expr.canCall(state, function);
