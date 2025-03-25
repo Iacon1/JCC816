@@ -522,9 +522,11 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 		case structMemberP:
 			if (expr.hasAssembly(state))
 			{
+				state = state.setDestSource(null);
 				tmpPair = expr.getAssemblyAndState(state);
 				assembly += tmpPair.assembly;
 				state = tmpPair.state;
+				state = state.setDestSource(destSource);
 			}
 			ScratchSource sourceP;
 			if (!state.hasPointer(expr.getLValue(state).getSource()))
@@ -547,7 +549,10 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 			else sourceP = state.getPointer(expr.getLValue(state).getSource());
 			if (destSource != null)
 			{
-				tmpPair = new ByteCopier(destSource.getSize(), destSource, getLValue(state).getSource()).getAssemblyAndState(state);
+				tmpPair = new AssemblyStatePair("", state);
+				if (destSource.getSize() > getLValue(state).getSource().getSize())
+					tmpPair = new SignExtender(destSource, getLValue(state).getSource(), getType().isSigned(), getLValue(state).getType().isSigned()).apply(tmpPair);
+				tmpPair = new ByteCopier(destSource, getLValue(state).getSource()).apply(tmpPair);
 				assembly += tmpPair.assembly;
 				state = tmpPair.state;
 			}
