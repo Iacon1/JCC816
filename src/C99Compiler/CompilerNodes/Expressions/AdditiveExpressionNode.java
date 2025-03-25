@@ -158,13 +158,6 @@ public class AdditiveExpressionNode extends ArithmeticBinaryExpressionNode
 	@Override
 	public boolean isReversed()
 	{
-		switch (operator)
-		{
-		case "+":
-			return false;
-		case "-":
-			return true;
-		default: return false;
-		}
+		return false;
 	}
 }
