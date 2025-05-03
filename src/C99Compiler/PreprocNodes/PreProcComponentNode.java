@@ -50,6 +50,11 @@ public abstract class PreProcComponentNode<T extends PreProcComponentNode<T>>
 		line += 1;
 		defines.put("__LINE__", new DefineNode(String.valueOf(line))); // Change each newline
 	}
+	public static void addLines(int n)
+	{
+		line += n;
+		defines.put("__LINE__", new DefineNode(String.valueOf(line))); // Change each newline
+	}
 	public static LineInfo getCurrLineInfo()
 	{
 		return new LineInfo(file, line, isStd);
