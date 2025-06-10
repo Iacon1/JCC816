@@ -68,6 +68,7 @@ public abstract class PreProcComponentNode<T extends PreProcComponentNode<T>>
 		defines.put("__STDC_HOSTED__", new DefineNode("0"));
 		defines.put("__STDC_MB_MIGHT_NEQ_WC__", new DefineNode("1"));
 		defines.put("__STDC_VERSION__", new DefineNode("199901L"));
+		defines.put("__JCC__", new DefineNode("1"));
 //		defines.put("__TIME__", new DefineNode(LocalDate.now().format(DateTimeFormatter.ofPattern("HH':mm':ss'\""))));
 		
 		defines.put("__STDC_IEC_559__", new DefineNode("0"));
