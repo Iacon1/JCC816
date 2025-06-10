@@ -64,6 +64,47 @@ public class DeclarationSpecifiersNode extends InterpretingNode<DeclarationSpeci
 		return specifiers;
 	}
 	
+	private boolean processChild(ParseTree r) throws Exception
+	{
+		if (r.getClass().equals(Storage_class_specifierContext.class))
+			storageClassSpecifiers.add(((Storage_class_specifierContext) r).getText());
+		else if (r.getClass().equals(Type_specifierContext.class))
+		{
+			Type_specifierContext typeSpecifier = (Type_specifierContext) r;
+			if (typeSpecifier.struct_or_union_specifier() != null && typeSpecifier.struct_or_union_specifier().struct_declaration_list() != null) // Struct declaration
+			{
+				StructUnionDefinitionNode definition = new StructUnionDefinitionNode(this).interpret(typeSpecifier.struct_or_union_specifier());
+				if (definition.isUnion()) typeSpecifiers.add("union");
+				else typeSpecifiers.add("struct");
+				typeSpecifiers.add(definition.getName());
+			}
+			else if (typeSpecifier.enum_specifier() != null && typeSpecifier.enum_specifier().enumerator_list() != null) // Enum declaration
+			{
+				EnumDefinitionNode definition = new EnumDefinitionNode(this).interpret(typeSpecifier.enum_specifier());
+				typeSpecifiers.add("enum");
+				typeSpecifiers.add(definition.getName());
+			}
+			else if (typeSpecifier.struct_or_union_specifier() != null)
+			{
+				typeSpecifiers.add(typeSpecifier.struct_or_union_specifier().getChild(0).getText());
+				typeSpecifiers.add(typeSpecifier.struct_or_union_specifier().getChild(1).getText());
+			}
+			else if (typeSpecifier.enum_specifier() != null)
+			{
+				typeSpecifiers.add(typeSpecifier.enum_specifier().getChild(0).getText());
+				typeSpecifiers.add(typeSpecifier.enum_specifier().getChild(1).getText());
+			}
+			else typeSpecifiers.add(((Type_specifierContext) r).getText());
+		}
+		else if (r.getClass().equals(Type_qualifierContext.class))
+			typeQualifiers.add(((Type_qualifierContext) r).getText());
+		else if (r.getClass().equals(Function_specifierContext.class))
+			functionSpecifiers.add(((Function_specifierContext) r).getText());
+		else return false;
+	
+		return true;
+	}
+	
 	@Override
 	public DeclarationSpecifiersNode interpret(Declaration_specifiersContext node) throws Exception
 	{
@@ -71,42 +112,8 @@ public class DeclarationSpecifiersNode extends InterpretingNode<DeclarationSpeci
 		{
 			ParseTree r = node.getChild(i);
 			// Find type of r
-			if (r.getClass().equals(Storage_class_specifierContext.class))
-				storageClassSpecifiers.add(((Storage_class_specifierContext) r).getText());
-			else if (r.getClass().equals(Type_specifierContext.class))
-			{
-				Type_specifierContext typeSpecifier = (Type_specifierContext) r;
-				if (typeSpecifier.struct_or_union_specifier() != null && typeSpecifier.struct_or_union_specifier().struct_declaration_list() != null) // Struct declaration
-				{
-					StructUnionDefinitionNode definition = new StructUnionDefinitionNode(this).interpret(typeSpecifier.struct_or_union_specifier());
-					if (definition.isUnion()) typeSpecifiers.add("union");
-					else typeSpecifiers.add("struct");
-					typeSpecifiers.add(definition.getName());
-				}
-				else if (typeSpecifier.enum_specifier() != null && typeSpecifier.enum_specifier().enumerator_list() != null) // Enum declaration
-				{
-					EnumDefinitionNode definition = new EnumDefinitionNode(this).interpret(typeSpecifier.enum_specifier());
-					typeSpecifiers.add("enum");
-					typeSpecifiers.add(definition.getName());
-				}
-				else if (typeSpecifier.struct_or_union_specifier() != null)
-				{
-					typeSpecifiers.add(typeSpecifier.struct_or_union_specifier().getChild(0).getText());
-					typeSpecifiers.add(typeSpecifier.struct_or_union_specifier().getChild(1).getText());
-				}
-				else if (typeSpecifier.enum_specifier() != null)
-				{
-					typeSpecifiers.add(typeSpecifier.enum_specifier().getChild(0).getText());
-					typeSpecifiers.add(typeSpecifier.enum_specifier().getChild(1).getText());
-				}
-				else typeSpecifiers.add(((Type_specifierContext) r).getText());
-			}
-			else if (r.getClass().equals(Type_qualifierContext.class))
-				typeQualifiers.add(((Type_qualifierContext) r).getText());
-			else if (r.getClass().equals(Function_specifierContext.class))
-				functionSpecifiers.add(((Function_specifierContext) r).getText());
+			processChild(r);
 		}
-		
 		// Constraints
 		if (storageClassSpecifiers.size() > 1)
 			throw new ConstraintException("6.7.1", 2, node.start);
@@ -120,31 +127,12 @@ public class DeclarationSpecifiersNode extends InterpretingNode<DeclarationSpeci
 		{
 			ParseTree r = node.getChild(i++);
 			// Find type of r
-			if (r.getClass().equals(Storage_class_specifierContext.class))
-				storageClassSpecifiers.add(((Storage_class_specifierContext) r).getText());
-			else if (r.getClass().equals(Type_specifierContext.class))
-			{
-				if (((Type_specifierContext) r).struct_or_union_specifier() != null)
-				{
-					typeSpecifiers.add(((Type_specifierContext) r).struct_or_union_specifier().getChild(0).getText());
-					typeSpecifiers.add(((Type_specifierContext) r).struct_or_union_specifier().getChild(1).getText());
-				}
-				else if (((Type_specifierContext) r).enum_specifier() != null)
-				{
-					typeSpecifiers.add(((Type_specifierContext) r).enum_specifier().getChild(0).getText());
-					typeSpecifiers.add(((Type_specifierContext) r).enum_specifier().getChild(1).getText());
-				}
-				else typeSpecifiers.add(((Type_specifierContext) r).getText());
-			}
+			if (processChild(r));
 			else if (r.getClass().equals(Specifier_qualifier_listContext.class))
 			{
 				node = (Specifier_qualifier_listContext) r;
 				i = 0;
 			}
-			else if (r.getClass().equals(Type_qualifierContext.class))
-				typeQualifiers.add(((Type_qualifierContext) r).getText());
-			else if (r.getClass().equals(Function_specifierContext.class))
-				functionSpecifiers.add(((Function_specifierContext) r).getText());
 		}
 		
 		// Constraints
