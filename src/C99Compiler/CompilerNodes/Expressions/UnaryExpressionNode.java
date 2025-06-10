@@ -116,7 +116,7 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 				return ((UnaryExpressionNode) expr).expr.hasLValue(state);
 			else return false;
 		}
-		else return expr.hasLValue(state);
+		else return false;
 	}
 
 	@Override
@@ -129,9 +129,9 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 			else if (expr.hasPropValue(new ProgramState()))
 			{
 				if (expr.getPropPointer(new ProgramState()) != null) // Pointer
-					return new DummyVariableNode(this, getType(), new ConstantSource(expr.getPropPointer(new ProgramState()), getSize()));
+					return new DummyVariableNode(this, getType(), new ConstantSource(expr.getPropPointer(state), getSize()));
 				else if (expr.getPropLong(new ProgramState()) != 0) // Numeric
-					return new DummyVariableNode(this, getType(), new NumericAddressSource((int) expr.getPropLong(new ProgramState()), getSize()));
+					return new DummyVariableNode(this, getType(), new NumericAddressSource((int) expr.getPropLong(state), getSize()));
 				else return null;
 			}
 			else
@@ -144,7 +144,7 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 				return ((UnaryExpressionNode) expr).expr.getLValue(state); // These two cancel each other out
 			else return null;
 		}
-		else return expr.getLValue(state);
+		else return null;
 	}
 
 	@Override
@@ -159,10 +159,15 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 		else if (operator.equals("*"))
 			if (expr.hasPropValue(state)) // if expr can only point to one thing...
 			{
-				VariableNode n = ((PropPointer<VariableNode>) expr.getPropValue(state)).getNode();
-				if (state.getOnlyValue(n) != null)
-					return true;
-				else return false;
+				if (PropPointer.class.isAssignableFrom(expr.getPropValue(state).getClass())) // Is it a prop-pointer?
+				{
+					VariableNode n = ((PropPointer<VariableNode>) expr.getPropValue(state)).getNode();
+					if (state.getOnlyValue(n) != null)
+						return true;
+					else return false;
+				}
+				else
+					return false;
 			}
 			else return false;
 		else if (operator.equals("&"))
