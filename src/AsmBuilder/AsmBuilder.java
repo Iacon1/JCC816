@@ -67,6 +67,16 @@ public final class AsmBuilder implements Catalogger
 				Logging.logNotice("Function " + i.getFullName() + " can call nothing");
 		}
 	}
+	private boolean isCalled(FunctionDefinitionNode funcNode, ProgramState state)
+	{
+				for (FunctionDefinitionNode i : getFunctions().values())
+		{
+			if (i == funcNode) continue;
+			if (i.canCall(state, funcNode))
+				return true;
+		}
+				return false;
+	}
 	
 	private List<TranslationUnit> translationUnits;
 	
@@ -86,6 +96,7 @@ public final class AsmBuilder implements Catalogger
 		
 		return variables;
 	}
+	
 	public LinkedHashMap<String, VariableNode> getGlobalVariables()
 	{
 		LinkedHashMap<String, VariableNode> variables = new LinkedHashMap<String, VariableNode>();
@@ -394,7 +405,7 @@ public final class AsmBuilder implements Catalogger
 		{
 			if (funcNode.isImplemented() && funcNode.isInline()) continue;
 			else if (funcNode.getType().isExtern()) continue;
-			else if (!funcNode.isImplemented())
+			else if (!funcNode.isImplemented() && isCalled(funcNode, new ProgramState()))
 			{
 				if (!isModule)
 					throw new UndefinedFunctionException(funcNode);
