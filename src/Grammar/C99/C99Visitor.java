@@ -47,6 +47,18 @@ public interface C99Visitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitCast_expression(C99Parser.Cast_expressionContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link C99Parser#declarator}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitDeclarator(C99Parser.DeclaratorContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link C99Parser#pointer}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitPointer(C99Parser.PointerContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link C99Parser#multiplicative_expression}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -239,23 +251,11 @@ public interface C99Visitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitType_qualifier(C99Parser.Type_qualifierContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link C99Parser#declarator}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitDeclarator(C99Parser.DeclaratorContext ctx);
-	/**
 	 * Visit a parse tree produced by {@link C99Parser#direct_declarator}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitDirect_declarator(C99Parser.Direct_declaratorContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link C99Parser#pointer}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitPointer(C99Parser.PointerContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link C99Parser#type_qualifier_list}.
 	 * @param ctx the parse tree

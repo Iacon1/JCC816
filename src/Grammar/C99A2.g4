@@ -37,6 +37,9 @@ cast_expression
 	: LeRoBr type_name RiRoBr cast_expression
 	| unary_expression
 	;	
+// Above mult. expression so initializers work.
+declarator : pointer? direct_declarator ;
+pointer : (Star type_qualifier_list?)+ ;
 multiplicative_expression
 	: cast_expression
 	| multiplicative_expression (Star|BckSla|Percnt) cast_expression ;	
@@ -109,7 +112,7 @@ enum_specifier
 enumerator_list : enumerator (Comma enumerator)* ;
 enumerator : Identifier (Assign constant_expression)? ;
 type_qualifier : (Const|Restrict|Volatile|RWTWICE|ROTWICE|WOTWICE) ;
-declarator : pointer? direct_declarator ;
+
 direct_declarator
 	: Identifier
 	| LeRoBr declarator RiRoBr
@@ -119,7 +122,7 @@ direct_declarator
 	| direct_declarator LeSqBr type_qualifier_list? Star RiSqBr
 	| direct_declarator LeRoBr parameter_type_list RiRoBr
 	| direct_declarator LeRoBr identifier_list? RiRoBr ;
-pointer : (Star type_qualifier_list?)+ ;
+
 type_qualifier_list : type_qualifier+ ;
 parameter_type_list : parameter_list (Comma ThreeP)? ;
 parameter_list : parameter_declaration (Comma parameter_declaration)* ;
