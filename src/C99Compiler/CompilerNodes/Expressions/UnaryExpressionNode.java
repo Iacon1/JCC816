@@ -94,7 +94,12 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 		{
 			return new PointerType(expr.getType());
 		}
-		else return expr.getType();
+		else if (operator.equals("sizeof") || operator.equals("defined") || operator.equals("__has_embed") || operator.equals("__offset_of"))
+		{
+			return new DummyType("int");
+		}
+		else
+			return expr.getType();
 	}
 	@Override public boolean isIndirect()
 	{
