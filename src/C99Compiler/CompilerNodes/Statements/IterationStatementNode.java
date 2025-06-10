@@ -288,7 +288,7 @@ public class IterationStatementNode extends SequencePointStatementNode<Iteration
 					state = state.setDestSource(null);
 					tmpPair = getAssemblyAndStateWithRegistered(state, new EqualityExpressionNode(this, condExpNode));
 					// Jump to end if equality is 1, i. e. result is 0
-					tmpPair = new ComparitiveJump(stmNode, null, getEndLabel(), null, false).apply(tmpPair);					
+					tmpPair = new ComparitiveJump(stmNode, null, getEndLabel(), null, false).apply(tmpPair);
 					assembly += tmpPair.assembly;
 					assembly = assembly.substring(0, assembly.lastIndexOf('\n', assembly.length() - 2) + 1); // Remove last line
 					state = tmpPair.state;
