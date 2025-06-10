@@ -116,8 +116,10 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 			break;
 		case "++":
 			type = PFType.incr;
+			break;
 		case "--":
 			type = PFType.decr;
+			break;
 		}
 		dummySource.respec(getSize());
 		return this;
