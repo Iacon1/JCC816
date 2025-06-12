@@ -98,6 +98,8 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 		{
 			return new DummyType("unsigned", "int");
 		}
+		else if (operator.equals("+") || operator.equals("-"))
+			return expr.getType().promote();
 		else
 			return expr.getType();
 	}

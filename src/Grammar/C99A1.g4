@@ -24,7 +24,10 @@ Constant
 	| Enumeration_constant {!Grammar.GrammarFlags.isPreproc}?
 	| Character_constant ;
 fragment Integer_constant : ([1-9][0-9]* | '0' [0-7]* | ('0x'|'0X') [0-9a-fA-F]+) Integer_suffix?;
-fragment Integer_suffix : [uU] ([lL]|'ll'|'LL')? | ([lL]|'ll'|'LL') ;
+fragment Integer_suffix
+	: [uU] ([lL]|'ll'|'LL'|[hH]|'hh'|'HH')?
+	| ([lL]|'ll'|'LL'|[hH]|'hh'|'HH')
+	| [uU] ([lL]|'ll'|'LL'|[hH]|'hh'|'HH')? [uU];
 fragment Floating_constant
 	: Decimal_floating_constant
 	| Hexadecimal_floating_constant  ;

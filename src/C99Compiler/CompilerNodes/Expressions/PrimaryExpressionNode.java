@@ -26,6 +26,7 @@ public class PrimaryExpressionNode extends BaseExpressionNode<Primary_expression
 {
 	private String identifier;
 	private Object constant;
+	private Type constantType;
 	private String stringLiteral;
 	
 	public PrimaryExpressionNode(ComponentNode<?> parent) {super(parent);}
@@ -45,7 +46,10 @@ public class PrimaryExpressionNode extends BaseExpressionNode<Primary_expression
 			else throw new UndefinedVariableException(identifier, node.start);
 		}
 		else if (node.Constant() != null)
+		{
 			constant = CompUtils.parseLiteral(node.Constant().getText());
+			constantType = CompUtils.getLiteralType(node.Constant().getText());
+		}
 		else if (node.String_literal() != null)
 		{
 			stringLiteral = node.String_literal().getText();
@@ -64,7 +68,7 @@ public class PrimaryExpressionNode extends BaseExpressionNode<Primary_expression
 			else if (hasLValue(new ProgramState())) return getLValue(new ProgramState()).getType();
 			else // Probably function pointer
 				return resolveFunctionRelative(identifier).getType();
-		else if (constant != null) return CompUtils.getSmallestType((Number) constant);
+		else if (constant != null) return constantType;
 		else if (stringLiteral != null)
 		{
 			ArrayType t = new ArrayType(new DummyType("char"));
