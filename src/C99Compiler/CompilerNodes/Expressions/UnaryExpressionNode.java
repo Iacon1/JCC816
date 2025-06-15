@@ -355,7 +355,7 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 				state = tmpPair.state;
 			}
 			else sourceI = state.getPointer(sourceX);
-			indirect = new IndirectLValueNode(this, sourceX, getType());
+			indirect = new IndirectLValueNode(this, sourceI, getType());
 			if (destSource != null)
 			{
 				copier = new ByteCopier(((PointerType) expr.getType()).getType().getSize(), destSource, indirect.getSource());
