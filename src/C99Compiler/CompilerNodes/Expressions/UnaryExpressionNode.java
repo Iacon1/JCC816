@@ -205,7 +205,7 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 		}
 		else if (operator.equals("-")) return Long.valueOf(-1 * expr.getPropLong(state));
 		else if (operator.equals("~")) return Long.valueOf(~expr.getPropLong(state));
-		else if (operator.equals("!")) return Boolean.valueOf(expr.getPropBool(state));
+		else if (operator.equals("!")) return !Boolean.valueOf(expr.getPropBool(state));
 		else if (operator.equals("*"))
 		{
 			VariableNode n = ((PropPointer<VariableNode>) state.getOnlyValue(expr.getLValue(state))).getNode();
