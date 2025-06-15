@@ -10,6 +10,7 @@ import C99Compiler.Utils.CompUtils;
 import C99Compiler.Utils.ProgramState;
 import C99Compiler.Utils.ProgramState.ScratchSource;
 import C99Compiler.Utils.AssemblyUtils.BytewiseOperator;
+import C99Compiler.Utils.AssemblyUtils.SignExtender;
 import C99Compiler.Utils.AssemblyUtils.ByteCopier;
 import C99Compiler.Utils.OperandSources.ConstantByteSource;
 import C99Compiler.Utils.OperandSources.ConstantSource;
@@ -231,8 +232,9 @@ public class RelationalExpressionNode extends BinaryExpressionNode
 		int max = Math.max(sourceX.getSize(), sourceY.getSize());
 		int min = Math.min(sourceX.getSize(), sourceY.getSize());
 		assembly += state.getWhitespace() + "CLC\n";
+		SignExtender e = new SignExtender(sourceX, sourceY, x.getType().isSigned(), y.getType().isSigned());
 		BytewiseOperator o = new RelationalOperator(max, min, sourceX, sourceY, tempSource, invert);
-		AssemblyStatePair tmpPair = o.getAssemblyAndState(state);
+		AssemblyStatePair tmpPair = o.apply(e.getAssemblyAndState(state));
 		assembly += tmpPair.assembly;
 		state = tmpPair.state;
 		
