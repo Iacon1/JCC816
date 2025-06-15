@@ -11,6 +11,7 @@ import java.util.Map;
 
 import C99Compiler.CompConfig;
 import C99Compiler.CompilerNodes.ComponentNode;
+import C99Compiler.CompilerNodes.Dummies.DummyExpressionNode;
 import C99Compiler.CompilerNodes.FunctionDefinitionNode;
 import C99Compiler.CompilerNodes.InterpretingNode;
 import C99Compiler.CompilerNodes.Definitions.ArrayType;
@@ -140,6 +141,12 @@ public class InitializerNode extends InterpretingNode<InitializerNode, Initializ
 			int arrayIndex = 0;
 			int arraySize = -1;
 			int j = 0, k = 0;
+			if (arrayInitializers != null) // Set all array initializers to be zero
+				for (InitializerNode initializer : arrayInitializers.values())
+					initializer.expr = new DummyExpressionNode(this, initializer.getType(), 0);
+			else if (arrayInitializers != null) // Set all struct initializers to be zero
+				for (InitializerNode initializer : structInitializers.values())
+					initializer.expr = new DummyExpressionNode(this, initializer.getType(), 0);
 			for (int i = 0; i < node.initializer_list().getChildCount(); i += 2)
 			{
 				if (i == node.initializer_list().getChildCount() - 1 &&
@@ -330,23 +337,19 @@ public class InitializerNode extends InterpretingNode<InitializerNode, Initializ
 			}	
 			else if (arrayInitializers != null) // Array
 			{
-				String assembly = "";
+				AssemblyStatePair pair = new AssemblyStatePair("", state);
 				for (InitializerNode initializer : arrayInitializers.values())
-				{
-					assembly += initializer.getAssembly(state);
-					state = initializer.getStateAfter(state);
-				}
-				return new AssemblyStatePair(assembly, state);
+					pair = initializer.apply(pair);
+				
+				return pair;
 			}
 			else if (structInitializers != null) // Struct
 			{
-				String assembly = "";
+				AssemblyStatePair pair = new AssemblyStatePair("", state);
 				for (InitializerNode initializer : structInitializers.values())
-				{
-					assembly += initializer.getAssembly(state);
-					state = initializer.getStateAfter(state);
-				}
-				return new AssemblyStatePair(assembly, state);
+					pair = initializer.apply(pair);
+				
+				return pair;
 			}
 			else if (LValue.getType().isStatic() && CompConfig.initializeStatics) // Statics are initialized always when compliant
 			{
