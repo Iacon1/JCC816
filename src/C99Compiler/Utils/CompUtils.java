@@ -140,6 +140,8 @@ public final class CompUtils
 	public static Number parseLiteral(String literal)
 	{
 		literal = literal.toLowerCase();
+		if (literal.contains("'")) // Character constant
+			return Long.valueOf((int) processEscapes(literal.substring(1, literal.length() - 1)).charAt(0));
 		literal = literal.replace("h", "");
 		literal = literal.replace("l", "");
 		literal = literal.replace("u", "");
@@ -147,8 +149,6 @@ public final class CompUtils
 			return Long.valueOf(literal.substring(2), 16);
 		else if (literal.startsWith("0")) // Octal???
 			return Long.valueOf(literal, 8);
-		else if (literal.contains("'")) // Character constant
-			return Long.valueOf((int) processEscapes(literal.substring(1, literal.length() - 1)).charAt(0));
 		else // Decimal
 			return Long.valueOf(literal);	
 	}
