@@ -21,7 +21,7 @@ public class CastExpressionNode extends BaseExpressionNode<Cast_expressionContex
 	
 	public CastExpressionNode(ComponentNode<?> parent) {super(parent);}
 
-	public CastExpressionNode(BaseExpressionNode<?> parent, Type type, BaseExpressionNode<?> expr)
+	public CastExpressionNode(ComponentNode<?> parent, Type type, BaseExpressionNode<?> expr)
 	{
 		super(parent);
 		this.type = type;

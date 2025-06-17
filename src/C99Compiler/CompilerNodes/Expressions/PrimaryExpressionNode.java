@@ -5,20 +5,25 @@ package C99Compiler.CompilerNodes.Expressions;
 import java.util.LinkedHashMap;
 import java.util.List;
 
+import org.antlr.v4.runtime.Token;
+
 import C99Compiler.CompConfig;
 import C99Compiler.CompConfig.OptimizationLevel;
 import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.FunctionDefinitionNode;
+import C99Compiler.CompilerNodes.Declarations.InitializerNode;
 import C99Compiler.CompilerNodes.Definitions.ArrayType;
 import C99Compiler.CompilerNodes.Definitions.PointerType;
 import C99Compiler.CompilerNodes.Definitions.Type;
 import C99Compiler.CompilerNodes.Dummies.DummyType;
+import C99Compiler.CompilerNodes.Dummies.DummyVariableNode;
 import C99Compiler.CompilerNodes.LValues.LValueNode;
 import C99Compiler.CompilerNodes.LValues.VariableNode;
 import C99Compiler.Exceptions.UndefinedVariableException;
 import C99Compiler.Utils.CompUtils;
 import C99Compiler.Utils.ProgramState;
 import C99Compiler.Utils.PropPointer;
+import C99Compiler.Utils.AssemblyUtils.ByteCopier;
 import C99Compiler.Utils.OperandSources.OperandSource;
 import Grammar.C99.C99Parser.Primary_expressionContext;
 
@@ -28,12 +33,16 @@ public class PrimaryExpressionNode extends BaseExpressionNode<Primary_expression
 	private Object constant;
 	private Type constantType;
 	private String stringLiteral;
+	private VariableNode stringLiteralNodeV;
+	private InitializerNode stringLiteralNodeI;
+	private Token token;
 	
 	public PrimaryExpressionNode(ComponentNode<?> parent) {super(parent);}
 
 	@Override
 	public BaseExpressionNode<Primary_expressionContext> interpret(Primary_expressionContext node) throws Exception
 	{
+		token = node.start;
 		if (node.expression() != null)
 			return delegate(new ExpressionNode(this).interpret(node.expression()));
 		else if (node.Identifier() != null)
@@ -54,11 +63,18 @@ public class PrimaryExpressionNode extends BaseExpressionNode<Primary_expression
 		{
 			stringLiteral = node.String_literal().getText();
 			stringLiteral = stringLiteral.substring(1, stringLiteral.length() - 1);
+			ArrayType t = new ArrayType(new DummyType(new String[] {"const"}, new String[] {"char"}));
+			t.setLength(stringLiteral.length() + 1);
+			if (stringLiteralNodeI == null)
+			{
+				stringLiteralNodeV = new VariableNode(getTranslationUnit(), "__StringLiteral_" + CompUtils.getSafeUUID(), t);
+				stringLiteralNodeI = new InitializerNode(getTranslationUnit(), stringLiteralNodeV, stringLiteral);
+			}
 		}
 		
 		return this;
 	}
-	
+
 	@Override
 	public Type getType()
 	{
@@ -89,9 +105,20 @@ public class PrimaryExpressionNode extends BaseExpressionNode<Primary_expression
 	}
 	
 	@Override
-	public boolean canCall(ProgramState state, FunctionDefinitionNode function) {return false;}
+	public boolean canCall(ProgramState state, FunctionDefinitionNode function)
+	{
+		if (stringLiteralNodeI != null)
+			return stringLiteralNodeI.canCall(state, function);
+		return false;
+	}
 	@Override
-	public boolean hasAssembly(ProgramState state) {return false;}
+	public boolean hasAssembly(ProgramState state)
+	{
+		if (stringLiteralNodeI != null)
+			return stringLiteralNodeI.hasAssembly(state);
+		else
+			return false;
+	}
 	@Override
 	public boolean hasPropValue(ProgramState state)
 	{
@@ -135,11 +162,15 @@ public class PrimaryExpressionNode extends BaseExpressionNode<Primary_expression
 	@Override
 	public boolean hasLValue(ProgramState state) 
 	{
+		if (stringLiteralNodeV != null)
+			return true;
 		return identifier != null && resolveVariableRelative(identifier) != null;
 	}
 	@Override
 	public LValueNode<?> getLValue(ProgramState state)
 	{
+		if (stringLiteralNodeV != null)
+			return stringLiteralNodeV;
 		if (identifier != null) return resolveVariableRelative(identifier);
 		else return null;
 	}
@@ -147,9 +178,36 @@ public class PrimaryExpressionNode extends BaseExpressionNode<Primary_expression
 	@Override
 	public ProgramState getStateBefore(ProgramState state, ComponentNode<?> child) throws Exception
 	{
+		if (stringLiteralNodeI != null)
+			return stringLiteralNodeI.getStateBefore(state, child);
 		throw new UnsupportedOperationException();
 	}
 	
 	@Override
-	public AssemblyStatePair getAssemblyAndState(ProgramState state) throws Exception {throw new UnsupportedOperationException();}
+	public AssemblyStatePair getAssemblyAndState(ProgramState state) throws Exception
+	{
+		if (stringLiteralNodeV != null)
+		{
+			OperandSource destSource = state.destSource();
+			getTranslationUnit().addGlobalInitializer(stringLiteralNodeI); // TODO bad workaround
+			MutableAssemblyStatePair pair = new MutableAssemblyStatePair("", state);
+			ByteCopier copier = new ByteCopier(destSource.getSize(), destSource, stringLiteralNodeV.getSource());
+			copier.apply(pair);
+			return pair.getImmutable();
+		}
+		throw new UnsupportedOperationException();
+	}
+	
+	public boolean isStringLiteral() {return stringLiteral != null;}
+	public void killStringLiteralNode()
+	{
+		if (stringLiteralNodeI == null) return;
+		getTranslationUnit().removeGlobalInitializer(stringLiteralNodeI);
+		stringLiteralNodeV.swapParent(this);
+		stringLiteralNodeI.swapParent(this);
+		removeChild(stringLiteralNodeV);
+		removeChild(stringLiteralNodeI);
+		stringLiteralNodeV = null;
+		stringLiteralNodeI = null;
+	}
 }

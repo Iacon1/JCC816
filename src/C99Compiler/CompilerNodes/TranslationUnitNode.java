@@ -85,7 +85,16 @@ public class TranslationUnitNode extends InterpretingNode<TranslationUnitNode, T
 	{
 		interrupts.put(interrupt, funcName);
 	}
-	
+	public void addGlobalInitializer(InitializerNode n)
+	{
+		n.swapParent(this);
+		globalInitializers.add(n);
+	}
+	public void removeGlobalInitializer(InitializerNode n)
+	{
+		removeChild(n);
+		globalInitializers.remove(n);
+	}
 	@Override
 	public TranslationUnitNode interpret(Translation_unitContext node) throws Exception
 	{

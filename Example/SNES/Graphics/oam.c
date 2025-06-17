@@ -54,12 +54,12 @@ void updateOAM()
 	DMACHN[0].DMAP = DMATransferOneTwice; // Set to write mode compatible with OAM
 	OAMADDL = 0;
 	OAMADDH = 0; // Access low table
-	DMACHN[0].writeAddr = &OAMDATA; // Which address on the B-bus do we write to
-	DMACHN[0].sourceAddr = lowOAMBuffer;
+	DMACHN[0].writeAddr = (uint24_t) &OAMDATA; // Which address on the B-bus do we write to
+	DMACHN[0].sourceAddr = (uint24_t) lowOAMBuffer;
 	DMACHN[0].byteCount = 512; // 512 bytes
 	MDMAEN = 0x01;
 
-	DMACHN[0].sourceAddr = highOAMBuffer;
+	DMACHN[0].sourceAddr = (uint24_t) highOAMBuffer;
 	DMACHN[0].byteCount = 32; // 32 bytes
 	MDMAEN = 0x01;
 }

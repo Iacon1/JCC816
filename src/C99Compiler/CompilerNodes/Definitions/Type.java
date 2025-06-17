@@ -30,7 +30,7 @@ public class Type implements Serializable
 	
 	private String storageClassSpecifier;
 	protected List<String> typeSpecifiers;
-	private Set<String> typeQualifiers;
+	protected Set<String> typeQualifiers;
 //	private Set<String> functionSpecifiers;
 	
 	private static List<String> toList(String... members)
@@ -443,7 +443,7 @@ public class Type implements Serializable
 	}
 	public boolean isArray() {return false;} // To be overriden
 	public boolean isFunction() {return false;} // To be overriden
-	protected boolean isStructOrUnion()
+	public boolean isStructOrUnion()
 	{
 		return containsSpecifier("struct") || containsSpecifier("union");
 	}
