@@ -29,7 +29,10 @@ import C99Compiler.CompConfig.OptimizationLevel;
 import C99Compiler.ASMGrapher.ASMGraphBuilder;
 import C99Compiler.CompilerNodes.Declarations.DeclarationSpecifiersNode;
 import C99Compiler.CompilerNodes.Declarations.DeclaratorNode;
+import C99Compiler.CompilerNodes.Declarations.DeclaratorNode.DeclaratorInfo;
 import C99Compiler.CompilerNodes.Declarations.InitializerNode;
+import C99Compiler.CompilerNodes.Declarations.ParameterDeclarationNode;
+import C99Compiler.CompilerNodes.Definitions.FunctionType;
 import C99Compiler.CompilerNodes.Definitions.Type;
 import C99Compiler.CompilerNodes.Interfaces.UnvaluedAssemblableNode;
 import C99Compiler.CompilerNodes.Interfaces.NamedNode;
@@ -80,10 +83,25 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 		type = Type.manufacture(specifiers, signature, node.declaration_specifiers().start);
 
 		if (type.isArray()) throw new ConstraintException("6.9.1", 3, node.start);
+		Type retType = ((FunctionType) type).getType();
 		if (getName().equals(CompConfig.mainName)) // If main
-			if (!getType().getSignature().equals("void()")) // Must be void with no arguments
-				throw new UnsupportedFeatureException("Function \"main\" having a signature other than \"void()\"", true, node.start);
-
+		{
+			if (!retType.isVoid() ||
+				 signature.getChildVariables().size() != 0) // Must be void with no arguments
+			{
+				// Could be void(void), which counts same as void()
+				boolean failedTest = true;
+				if (retType.isVoid() && signature.getChildVariables().size() == 1)
+				{
+					VariableNode v = (VariableNode) signature.getChildVariables().values().toArray()[0];
+					if (v.getType().isVoid() && v.getName() == null)
+						failedTest = false;
+				}
+				if (failedTest)
+					throw new UnsupportedFeatureException("Function \"main\" having a signature other than \"void()\"", true, node.start);
+			}
+		}
+		
 		code = new CompoundStatementNode(this, getName()).interpret(node.compound_statement());
 		
 		if (attributes.contains(Attributes.interruptCOP))
@@ -110,9 +128,10 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 		type = Type.manufacture(specifiers, signature, declarationSpecifiers.start);
 
 		if (type.isArray()) throw new ConstraintException("6.9.1", 3, declarator.start);
-		if (getName().equals(CompConfig.mainName)) // If main
-			if (!getType().getSignature().equals("void()")) // Must be void with no arguments
-				throw new UnsupportedFeatureException("Function \"main\" having a signature other than \"void()\"", true, declarator.start);
+// Below only applies to definitions, not declarations
+//		if (getName().equals(CompConfig.mainName)) // If main
+//			if (!getType().getSignature().equals("void()")) // Must be void with no arguments
+//				throw new UnsupportedFeatureException("Function \"main\" having a signature other than \"void()\"", true, declarator.start);
 
 		return this;
 	}

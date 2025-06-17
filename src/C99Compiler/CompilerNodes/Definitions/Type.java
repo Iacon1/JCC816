@@ -483,6 +483,10 @@ public class Type implements Serializable
 	{
 		return isArray() || isStructOrUnion();
 	}
+	public boolean isVoid()
+	{
+		return typeSpecifiers.contains("void") && !isPointer();
+	}
 	
 	public String getSignature()
 	{
