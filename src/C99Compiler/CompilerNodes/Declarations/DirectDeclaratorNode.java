@@ -11,6 +11,7 @@ import C99Compiler.CompilerNodes.Declarations.DeclaratorNode.DeclaratorInfo;
 import C99Compiler.CompilerNodes.Declarations.DeclaratorNode.DeclaratorType;
 import C99Compiler.CompilerNodes.Expressions.AssignmentExpressionNode;
 import C99Compiler.CompilerNodes.Expressions.BaseExpressionNode;
+import C99Compiler.CompilerNodes.LValues.VariableNode;
 import C99Compiler.Exceptions.UnsupportedFeatureException;
 import Grammar.C99.C99Parser.Direct_abstract_declaratorContext;
 import Grammar.C99.C99Parser.Direct_declaratorContext;
@@ -60,6 +61,15 @@ public class DirectDeclaratorNode extends InterpretingNode<DirectDeclaratorNode,
 			{
 				for (Parameter_declarationContext paramDecl : node.parameter_type_list().parameter_list().parameter_declaration())
 					parameters.add(new ParameterDeclarationNode(this, scopeOverride).interpret(paramDecl));
+			}
+			if (parameters.size() == 1) // Possibly only 1 variable
+			{
+				if (parameters.get(0).getChildVariables().size() == 1) // Only 1 variable
+				{
+					VariableNode v = parameters.get(0).getChildVariables().firstEntry().getValue();
+					if (v.getType().isVoid() && v.getName() == null) // Unnamed void
+						parameters.clear();
+				}
 			}
 			info.paramDecls = parameters.toArray(new ParameterDeclarationNode[] {});
 			subDirDec = new DirectDeclaratorNode(this, scopeOverride).interpret(node.direct_declarator());
