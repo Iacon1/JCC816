@@ -4851,11 +4851,11 @@ public class C99Parser extends Parser {
 
 	@SuppressWarnings("CheckReturnValue")
 	public static class Block_itemContext extends ParserRuleContext {
-		public StatementContext statement() {
-			return getRuleContext(StatementContext.class,0);
-		}
 		public DeclarationContext declaration() {
 			return getRuleContext(DeclarationContext.class,0);
+		}
+		public StatementContext statement() {
+			return getRuleContext(StatementContext.class,0);
 		}
 		public Block_itemContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -4879,14 +4879,14 @@ public class C99Parser extends Parser {
 				enterOuterAlt(_localctx, 1);
 				{
 				setState(775);
-				statement();
+				declaration();
 				}
 				break;
 			case 2:
 				enterOuterAlt(_localctx, 2);
 				{
 				setState(776);
-				declaration();
+				statement();
 				}
 				break;
 			}
@@ -6257,7 +6257,7 @@ public class C99Parser extends Parser {
 		"\u0301s\u0001\u0000\u0000\u0000\u0302\u0304\u0003v;\u0000\u0303\u0302"+
 		"\u0001\u0000\u0000\u0000\u0304\u0305\u0001\u0000\u0000\u0000\u0305\u0303"+
 		"\u0001\u0000\u0000\u0000\u0305\u0306\u0001\u0000\u0000\u0000\u0306u\u0001"+
-		"\u0000\u0000\u0000\u0307\u030a\u0003n7\u0000\u0308\u030a\u0003.\u0017"+
+		"\u0000\u0000\u0000\u0307\u030a\u0003.\u0017\u0000\u0308\u030a\u0003n7"+
 		"\u0000\u0309\u0307\u0001\u0000\u0000\u0000\u0309\u0308\u0001\u0000\u0000"+
 		"\u0000\u030aw\u0001\u0000\u0000\u0000\u030b\u030d\u0003(\u0014\u0000\u030c"+
 		"\u030b\u0001\u0000\u0000\u0000\u030c\u030d\u0001\u0000\u0000\u0000\u030d"+

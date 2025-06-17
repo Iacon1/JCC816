@@ -175,8 +175,8 @@ labeled_statement
 compound_statement : LeCuBr block_item_list? RiCuBr ;
 block_item_list : block_item+ ;
 block_item
-	: statement
-	| declaration ;
+	: declaration
+	| statement;
 expression_statement : expression? Semico ;
 selection_statement
 	: If LeRoBr expression RiRoBr statement
