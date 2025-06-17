@@ -141,6 +141,7 @@ public class ControlNode extends InterpretingNode<ControlNode, Control_lineConte
 			throw new ErrorException(error, PreProcComponentNode.file, PreProcComponentNode.line);
 		case "pragma":
 			pragmaOutput = PragmaProcessor.procPragma(getPPTokens(node), PreProcComponentNode.file, PreProcComponentNode.line);
+			if (pragmaOutput == null) break;
 			for (int i = 0; i < pragmaOutput.split("\n").length; ++i)
 				lineInfo.add(getCurrLineInfo());
 			break;
