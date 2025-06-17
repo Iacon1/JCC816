@@ -14,6 +14,20 @@ public class ConstraintException extends TokenException
 		case "6.5.3.1.1": return
 				"The operand of the prefix increment or decrement operator shall have qualified or " +
 				"unqualified real or pointer type and shall be a modifiable lvalue";
+		case "6.5.16.1.1": return
+				"One of the following shall hold:\n" +
+				"— the left operand has qualified or unqualified arithmetic type and the right has\n" +
+				"arithmetic type;\n" +
+				"— the left operand has a qualified or unqualified version of a structure or union type\n" +
+				"compatible with the type of the right;\n" +
+				"— both operands are pointers to qualified or unqualified versions of compatible types,\n" +
+				"and the type pointed to by the left has all the qualifiers of the type pointed to by the\n" +
+				"right;\n" +
+				"— one operand is a pointer to an object or incomplete type and the other is a pointer to a\n" +
+				"qualified or unqualified version of void, and the type pointed to by the left has all\n" +
+				"the qualifiers of the type pointed to by the right;\n" +
+				"— the left operand is a pointer and the right is a null pointer constant; or\n" +
+				"— the left operand has type _Bool and the right is a pointer.";
 		case "6.6.4": return
 				"Each constant expression shall evaluate to a constant that is in the range of representable values for its type.";
 		case "6.7.2": return

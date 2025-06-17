@@ -4,6 +4,7 @@
 package C99Compiler.CompilerNodes.Expressions;
 
 import C99Compiler.CompilerNodes.ComponentNode;
+import C99Compiler.CompilerNodes.Definitions.PointerType;
 import C99Compiler.CompilerNodes.Definitions.Type;
 import C99Compiler.CompilerNodes.Definitions.Type.CastContext;
 import C99Compiler.CompilerNodes.Dummies.DummyExpressionNode;
@@ -47,7 +48,39 @@ public class AssignmentExpressionNode extends BinaryExpressionNode
 		BaseExpressionNode sInt = super.interpret(node);
 		if (sInt != this) return sInt;
 		
-		if (!x.hasLValue(new ProgramState())) throw new ConstraintException("6.5.16", 2, node.getStart());
+		if (!x.hasLValue(new ProgramState()) || x.getType().isConstant())
+			throw new ConstraintException("6.5.16", 2, node.getStart());
+		
+		boolean goodOperands = false; // Test as per 6.5.16.1.1
+		Type xType = x.getType();
+		Type yType = y.getType();
+		if (xType.isArithmetic() && yType.isArithmetic())
+			goodOperands = true;
+		else if (xType.isStructOrUnion() &&
+			yType.isStructOrUnion() &&
+			yType.canCastTo(xType, getCastContext()))
+			goodOperands = true;
+		else if (xType.isPointer() && !xType.isArray() &&
+			yType.isPointer())
+		{
+			Type xTypeP = ((PointerType) xType).getType();
+			Type yTypeP = ((PointerType) yType).getType();
+			if (yTypeP.canCastTo(xTypeP, getCastContext()))
+				goodOperands = true;
+			if (xTypeP.isVoid() || yTypeP.isVoid())
+				goodOperands = true;
+		}
+		else if (xType.isPointer() &&
+				yType.isArithmetic() &&
+				y.hasPropValue(new ProgramState()) &&
+				y.getPropLong(new ProgramState(), yType) == 0)
+			goodOperands = true;
+		else if (xType.containsSpecifier("_Bool") && yType.isPointer())
+			goodOperands = true;
+		
+		if (!goodOperands)
+			throw new ConstraintException("6.5.16.1", 1, node.getStart());
+		
 		BinaryExpressionNode<?,?,?,?> newY = null;
 		switch (operator)
 		{
