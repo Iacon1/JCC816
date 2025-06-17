@@ -4,10 +4,10 @@ int puts(const char* s)
 {
 	extern char destination;
 	int len = 0;
-	asm("printf@destination = $006000");
+	asm("puts@destination = $006000");
 	while (*s != '\0')
 	{
-		destination = *string;
+		destination = *s;
 		s += 1;
 		len += 1;
 	}
