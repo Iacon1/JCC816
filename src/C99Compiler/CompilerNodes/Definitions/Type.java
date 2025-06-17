@@ -40,9 +40,11 @@ public class Type implements Serializable
 		return list;
 	}
 	private static final List<String> recognizedStrings = toList("unsigned", "signed", "void", "char", "short", "int", "long", "float", "double", "_Bool", "struct", "union", "enum", "_Complex");
+	private static List<List<String>> allowedLists = null;
 	private static List<List<String>> allowedTypeSpecLists() // As per 6.7.2.2
 	{
-		List<List<String>> allowedLists = new ArrayList<List<String>>();
+		if (allowedLists != null) return allowedLists;
+		allowedLists = new ArrayList<List<String>>();
 		allowedLists.add(toList("void"));
 		
 		allowedLists.add(toList("char"));
