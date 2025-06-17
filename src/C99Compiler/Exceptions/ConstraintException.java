@@ -28,6 +28,10 @@ public class ConstraintException extends TokenException
 				"the qualifiers of the type pointed to by the right;\n" +
 				"— the left operand is a pointer and the right is a null pointer constant; or\n" +
 				"— the left operand has type _Bool and the right is a pointer.";
+		case "6.5.16.2.1": return
+				"For the operators += and -= only, either the left operand shall be a pointer to an object\n" +
+				"type and the right shall have integer type, or the left operand shall have qualified or\n" +
+				"unqualified arithmetic type and the right shall have arithmetic type.";
 		case "6.6.4": return
 				"Each constant expression shall evaluate to a constant that is in the range of representable values for its type.";
 		case "6.7.2": return
@@ -41,12 +45,12 @@ public class ConstraintException extends TokenException
 		case "6.7.2.3": return
 				"The type specifier _Complex shall not be used if the implementation does not provide complex types.";
 		default:
-			return section + "." + number;
+			return "";
 		}
 	}
 	
 	public ConstraintException(String section, int constraintNumber, Token location)
 	{
-		super(getDesc(section, constraintNumber), location);
+		super(section + "." + constraintNumber + "\n" + getDesc(section, constraintNumber), location);
 	}
 }
