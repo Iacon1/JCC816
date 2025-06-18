@@ -10,6 +10,7 @@ import Grammar.C99A3.C99A3Parser.If_sectionContext;
 import Grammar.C99A3.C99A3Parser.Pp_tokenContext;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -105,9 +106,49 @@ public class IfNode extends InterpretingNode<IfNode, If_sectionContext> implemen
 				for (Pp_tokenContext token : node.if_group().pp_token())
 					tokens.add(token.getText());
 			
+			//Resolve defined first
+			List<String> wordList = new ArrayList<String>(Arrays.asList(tokens.toArray(new String[] {})));
+			int i = 0;
+			while (i < (wordList.size()-3)) {
+				String word = wordList.get(i);
+				
+				
+				if ( word.equals("defined") ) {
+					boolean isDef1 = (i+3 < wordList.size()) && wordList.get(i + 1).equals("(") && wordList.get(i + 3).equals(")");
+					boolean isDef2 = (i+1 < wordList.size()) && (Character.isLetter(wordList.get(i+1).charAt(0)) || (wordList.get(i+1).charAt(0) == '_'));
+					
+					if (isDef1) {
+						if (defines.containsKey(wordList.get(i+2))) {
+							wordList.set(i,"1");
+						}
+						else {
+							wordList.set(i,"0");
+						}						
+						wordList.remove(i+3);						
+						wordList.remove(i+2);
+						wordList.remove(i+1);
+						//wordList.remove(i); Already overwritten
+					}
+					else if (isDef2) {
+						if (defines.containsKey(wordList.get(i+2))) {
+							wordList.set(i,"1");
+						}
+						else {
+							wordList.set(i,"0");
+						}
+						wordList.remove(i+1);												
+					}
+					else {
+						throw new Exception("error malformed defined macro call");
+					}
+				}
+				i++;
+			}
+			
+			
 			BaseExpressionNode<?> expr = new ConstantExpressionNode().interpret // Process macros before trying to parse
 			(
-				convert(resolveDefines(tokens.toArray(new String[] {})))
+				convert(resolveDefines(String.join("", wordList)))
 			);
 			
 			IfEntry e = new IfEntry();
