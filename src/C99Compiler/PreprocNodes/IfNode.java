@@ -111,8 +111,13 @@ public class IfNode extends InterpretingNode<IfNode, If_sectionContext> implemen
 			int i = 0;
 			while (i < (wordList.size()-3)) {
 				String word = wordList.get(i);
+				
+				
 				if ( word.equals("defined") ) {
-					if (wordList.get(i + 1).equals("(") && wordList.get(i + 3).equals(")")) {
+					boolean isDef1 = (i+3 < wordList.size()) && wordList.get(i + 1).equals("(") && wordList.get(i + 3).equals(")");
+					boolean isDef2 = (i+1 < wordList.size()) && (Character.isLetter(wordList.get(i+1).charAt(0)) || (wordList.get(i+1).charAt(0) == '_'));
+					
+					if (isDef1) {
 						if (defines.containsKey(wordList.get(i+2))) {
 							wordList.set(i,"1");
 						}
@@ -123,6 +128,15 @@ public class IfNode extends InterpretingNode<IfNode, If_sectionContext> implemen
 						wordList.remove(i+2);
 						wordList.remove(i+1);
 						//wordList.remove(i); Already overwritten
+					}
+					else if (isDef2) {
+						if (defines.containsKey(wordList.get(i+2))) {
+							wordList.set(i,"1");
+						}
+						else {
+							wordList.set(i,"0");
+						}
+						wordList.remove(i+1);												
 					}
 					else {
 						throw new Exception("error malformed defined macro call");
