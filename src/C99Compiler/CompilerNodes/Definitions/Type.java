@@ -466,7 +466,9 @@ public class Type implements Serializable
 				containsSpecifier("_Bool") ||
 				containsSpecifier("short") ||
 				containsSpecifier("long") ||
-				containsSpecifier("int");
+				containsSpecifier("int") ||
+				containsSpecifier("unsigned") ||
+				containsSpecifier("signed");
 	}
 	public boolean isArithmetic()
 	{

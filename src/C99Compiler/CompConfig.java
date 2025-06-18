@@ -85,7 +85,7 @@ public final class CompConfig
 	public static int sizeOf(List<String> typeSpecifiers)
 	{
 		if (typeSpecifiers.contains("char") || typeSpecifiers.contains("_Bool")) return charSize;
-		else if (typeSpecifiers.contains("int") || typeSpecifiers.contains("short") || typeSpecifiers.contains("long"))
+		else
 		{
 			int shortCount = 0, longCount = 0;
 			for (String specifier : typeSpecifiers) if (specifier.equals("short")) return shortSize;
@@ -95,7 +95,6 @@ public final class CompConfig
 			else if (longCount == 2) return longLongSize;
 			return intSize;
 		}
-		else return 0;
 	}
 	public static int sizeOf(String... typeSpecifiers)
 	{
