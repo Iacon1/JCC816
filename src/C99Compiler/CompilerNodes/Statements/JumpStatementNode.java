@@ -109,7 +109,9 @@ public class JumpStatementNode extends StatementNode<Jump_statementContext> impl
 			if (expr != null && expr.hasAssembly(state))
 			{
 				state = state.setDestSource(s);
-				assembly += expr.getAssembly(state);
+				AssemblyStatePair tmpPair = expr.getAssemblyAndState(state);
+				assembly += tmpPair.assembly;
+				state = tmpPair.state;
 			}
 			else if (expr != null && expr.hasPropValue(state))
 			{
