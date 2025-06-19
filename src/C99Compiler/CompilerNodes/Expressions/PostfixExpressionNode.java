@@ -95,12 +95,19 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 			if (node.argument_expression_list() != null)
 				for (Assignment_expressionContext expr : node.argument_expression_list().assignment_expression())
 					params.add(new AssignmentExpressionNode(this).interpret(expr));
-			if (params.size() != getReferencedFunction(new ProgramState()).getParameters().size())
-				throw new ConstraintException("6.5.2.2", 2, node.start);
-			if (getReferencedFunction(new ProgramState()) != null && getReferencedFunction(new ProgramState()).isSA1() && !getEnclosingFunction().isSA1())
-				throw new UnsupportedFeatureException("Calling an SA1 function outside an SA1 context", true, node.start);
-			else if (getReferencedFunction(new ProgramState()) != null && !getReferencedFunction(new ProgramState()).isSA1() && getEnclosingFunction().isSA1())
-				throw new UnsupportedFeatureException("Calling a non-SA1 function inside an SA1 context", true, node.start);
+			ProgramState state = new ProgramState();
+			if (getReferencedFunction(state) != null)
+			{
+				if (getReferencedFunction(state).canCall(state, getEnclosingFunction())) // This function will need parameters from the stack
+					getReferencedFunction(state).requireStackLoader();
+				
+				if (params.size() != getReferencedFunction(new ProgramState()).getParameters().size())
+					throw new ConstraintException("6.5.2.2", 2, node.start);
+				if (getReferencedFunction(new ProgramState()).isSA1() && !getEnclosingFunction().isSA1())
+					throw new UnsupportedFeatureException("Calling an SA1 function outside an SA1 context", true, node.start);
+				else if (!getReferencedFunction(new ProgramState()).isSA1() && getEnclosingFunction().isSA1())
+					throw new UnsupportedFeatureException("Calling a non-SA1 function inside an SA1 context", true, node.start);
+			}
 			break;
 		case ".":
 			type = PFType.structMember;
@@ -133,7 +140,10 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 		case arraySubscript:
 			return ((PointerType) expr.getType()).getType();
 		case funcCall:
-			return ((FunctionType) expr.getType()).getType();
+			if (expr.getType().isPointer())
+				return ((FunctionType) ((PointerType) expr.getType()).getType()).getType();
+			else
+				return ((FunctionType) expr.getType()).getType();
 		case structMember:
 			return expr.getType().getStruct().getMember(memberName).getType();
 		case structMemberP:
@@ -495,7 +505,7 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 				
 				if (getReferencedFunction(state) == null)
 					assembly += state.getWhitespace() + "JML\t[" + CompConfig.funcPointer + "]\n" + state.getWhitespace() + ":\n";
-				else assembly += state.getWhitespace() + "JSL\t" + getReferencedFunction(state).getStartLabel() + "\n";
+				else assembly += state.getWhitespace() + "JSL\t" + getReferencedFunction(state).getLoaderLabel() + "\n";
 				state = state.releasePointers();
 				for (VariableNode parameter : variables)
 				{

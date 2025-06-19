@@ -79,6 +79,15 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 					throw new ConstraintException("6.5.3.2", 1, node.start);
 			}
 		}
+		ProgramState state = new ProgramState();
+		if (operator.equals("&") && expr.hasPropValue(state))
+		{
+			if (FunctionDefinitionNode.class.isAssignableFrom(expr.getPropValue(state).getClass())) // A function pointer
+			{
+				FunctionDefinitionNode func = (FunctionDefinitionNode) expr.getPropValue(state);
+				func.requireStackLoader();
+			}
+		}
 		return this;
 	}
 
