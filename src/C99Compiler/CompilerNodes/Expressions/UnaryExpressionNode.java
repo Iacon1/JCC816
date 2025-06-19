@@ -250,7 +250,11 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 			return (expr == null ? false : expr.hasAssembly(state)) || !hasPropValue(state);
 		else return true;
 	}
-
+	@Override
+	public boolean isLogical()
+	{
+		return operator.equals("!");
+	}
 	@Override
 	public ProgramState getStateBefore(ProgramState state, ComponentNode<?> child) throws Exception
 	{
@@ -333,11 +337,7 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 			}
 			break;
 		case "!":
-			if (destSource != null)
-			{
-				// TODO
-				pair = new EqualityExpressionNode(this, expr).apply(pair);
-			}
+			pair = new EqualityExpressionNode(this, expr).apply(pair);
 			break;
 		case "*":
 			ScratchSource sourceI;
