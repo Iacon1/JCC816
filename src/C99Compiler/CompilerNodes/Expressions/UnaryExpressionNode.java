@@ -142,11 +142,11 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 		{
 			if (UnaryExpressionNode.class.isAssignableFrom(expr.getClass()) && ((UnaryExpressionNode) expr).operator.equals("&"))
 				return ((UnaryExpressionNode) expr).expr.getLValue(state); // These two cancel each other out
-			else if (expr.hasPropValue(new ProgramState()))
+			else if (expr.hasPropValue(state))
 			{
-				if (expr.getPropPointer(new ProgramState()) != null) // Pointer
-					return new DummyVariableNode(this, getType(), new ConstantSource(expr.getPropPointer(state), getSize()));
-				else if (expr.getPropLong(new ProgramState()) != 0) // Numeric
+				if (expr.getPropPointer(state) != null) // Pointer
+					return (LValueNode<?>) expr.getPropPointer(state).getNode();
+				else if (expr.getPropLong(state) != 0) // Numeric
 					return new DummyVariableNode(this, getType(), new NumericAddressSource((int) expr.getPropLong(state), getSize()));
 				else return null;
 			}
@@ -242,7 +242,8 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 	@Override
 	public boolean hasAssembly(ProgramState state)
 	{
-		if (operator.equals("*")) return expr.hasAssembly(state) || !expr.hasPropValue(state);
+		if (operator.equals("*"))
+			return expr.hasAssembly(state) || !expr.hasPropValue(state);
 		else if (operator.equals("&"))
 			return expr.hasAssembly(state) || PostfixExpressionNode.class.isAssignableFrom(expr.getClass());
 		else if (!operator.equals("++") && !operator.equals("--"))
