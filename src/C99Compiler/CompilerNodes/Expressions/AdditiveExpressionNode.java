@@ -74,6 +74,7 @@ public class AdditiveExpressionNode extends ArithmeticBinaryExpressionNode
 	@Override public Type getType()
 	{
 		if (x.getType().isPointer()) return x.getType();
+		else if (y.getType().isPointer()) return y.getType();
 		else return super.getType();
 	}
 	
