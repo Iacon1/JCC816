@@ -89,7 +89,7 @@ public final class CompUtils
 		long value = parseLiteral(literal).longValue();
 		int signedMode = 0; // 0 - only signed 1 - only unsigned 2 - both
 		
-		if (literal.startsWith("0x") || literal.startsWith("0")) // Hex or octal
+		if (literal.startsWith("0x") || literal.startsWith("0") || literal.startsWith("0b")) // Hex or octal or binary
 			signedMode = 2;
 		
 		String suffix = "";
@@ -147,7 +147,9 @@ public final class CompUtils
 		literal = literal.replace("u", "");
 		if (literal.startsWith("0x")) // Hex;
 			return Long.valueOf(literal.substring(2), 16);
-		else if (literal.startsWith("0")) // Octal???
+		if (literal.startsWith("0b")) // Binary;
+			return Long.valueOf(literal.substring(2), 2);
+		else if (literal.startsWith("0")) // Octal
 			return Long.valueOf(literal, 8);
 		else // Decimal
 			return Long.valueOf(literal);	
