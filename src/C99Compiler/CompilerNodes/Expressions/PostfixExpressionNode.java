@@ -321,7 +321,7 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 
 				if (destSource != null)
 				{
-					tmpPair = new ByteCopier(destSource.getSize(), destSource, getLValue(state).getSource()).getAssemblyAndState(state);
+					tmpPair = new ByteCopier(destSource, getLValue(state).getSource()).getAssemblyAndState(state);
 					assembly += tmpPair.assembly;
 					state = tmpPair.state;
 				}
