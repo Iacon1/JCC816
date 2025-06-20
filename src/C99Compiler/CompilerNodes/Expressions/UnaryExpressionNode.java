@@ -310,6 +310,7 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 			else
 			{
 				pair.state = pair.state.setDestSource(sourceX);
+				pair = tmpNode.apply(pair);
 				pair.state = pair.state.setDestSource(destSource);
 			}
 							
