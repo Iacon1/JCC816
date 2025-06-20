@@ -218,7 +218,10 @@ public class IterationStatementNode extends SequencePointStatementNode<Iteration
 			{
 				state = state.setDestSource(null);
 				state = state.reserveScratchBlock(condExpNode.getSize());
-				tmpPair = getAssemblyAndStateWithRegistered(state, new EqualityExpressionNode(this, condExpNode));
+				if (condExpNode.isLogical())
+					tmpPair = getAssemblyAndStateWithRegistered(state, condExpNode);
+				else
+					tmpPair = getAssemblyAndStateWithRegistered(state, new EqualityExpressionNode(this, condExpNode));
 				assembly += tmpPair.assembly;
 				state = tmpPair.state;
 	
@@ -249,11 +252,15 @@ public class IterationStatementNode extends SequencePointStatementNode<Iteration
 			assembly += whitespace + getIterLabel() + ":\n";
 
 			state = state.setDestSource(null);
-			tmpPair = getAssemblyAndStateWithRegistered(state, new EqualityExpressionNode(this, condExpNode));
+			if (condExpNode.isLogical())
+				tmpPair = getAssemblyAndStateWithRegistered(state, condExpNode);
+			else
+				tmpPair = getAssemblyAndStateWithRegistered(state, new EqualityExpressionNode(this, condExpNode));
+			
 			assembly += tmpPair.assembly;
 			state = tmpPair.state;
 			
-			assembly += whitespace + "BEQ\t" + getEndLabel() + "\n";
+			assembly += whitespace + "BNE\t" + getEndLabel() + "\n";
 			assembly += whitespace + "JMP\t" + getStartLabel() + "\n";
 			assembly += whitespace + getEndLabel() + ":\n";
 			break;
