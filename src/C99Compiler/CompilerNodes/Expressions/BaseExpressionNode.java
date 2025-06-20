@@ -33,6 +33,10 @@ public abstract class BaseExpressionNode<C extends ParserRuleContext> extends In
 	public LValueNode<?> getLValue() {return getLValue(new ProgramState());}
 
 	public boolean isIndirect() {return false;} // Will this L-Value be indirect?
-	public boolean isLogical() {return false;} // Does this return a 1 to the A register when destSource is null and the expression evaluates to true?
+	/** If an expression node is "logical" then when destSource is null the A register will be 1 if the expression is "true".
+	 * 
+	 * @return Whether this expression is logical.
+	 */
+	public boolean isLogical() {return false;}
 	
 }

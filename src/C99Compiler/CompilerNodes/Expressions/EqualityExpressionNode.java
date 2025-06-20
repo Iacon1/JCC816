@@ -6,6 +6,7 @@ import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.Definitions.Type;
 import C99Compiler.CompilerNodes.Definitions.Type.CastContext;
 import C99Compiler.CompilerNodes.Dummies.DummyType;
+import C99Compiler.CompilerNodes.Statements.IterationStatementNode;
 import C99Compiler.CompilerNodes.Dummies.DummyExpressionNode;
 import C99Compiler.Utils.CompUtils;
 import C99Compiler.Utils.ProgramState;
@@ -64,6 +65,13 @@ public class EqualityExpressionNode extends BinaryExpressionNode
 		this.operator = "==";
 	}
 
+	public EqualityExpressionNode(ComponentNode<?> parent, BaseExpressionNode<?> x, String operator)
+	{
+		super(parent);
+		this.x = x;
+		this.y = new DummyExpressionNode(this, x.getType(), 0);
+		this.operator = "!=";
+	}
 	@Override
 	protected BaseExpressionNode<Equality_expressionContext> getC1Node(Equality_expressionContext node) throws Exception
 	{return new EqualityExpressionNode(this).interpret(node.equality_expression());}

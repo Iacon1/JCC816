@@ -221,11 +221,11 @@ public class IterationStatementNode extends SequencePointStatementNode<Iteration
 				if (condExpNode.isLogical())
 					tmpPair = getAssemblyAndStateWithRegistered(state, condExpNode);
 				else
-					tmpPair = getAssemblyAndStateWithRegistered(state, new EqualityExpressionNode(this, condExpNode));
+					tmpPair = getAssemblyAndStateWithRegistered(state, new EqualityExpressionNode(this, condExpNode, "!="));
 				assembly += tmpPair.assembly;
 				state = tmpPair.state;
-	
-				assembly += whitespace + "BEQ\t:+\n";
+				assembly += whitespace + "CMP\t#$00\n";
+				assembly += whitespace + "BNE" + "\t:+\n";
 				assembly += whitespace + "JMP\t" + getEndLabel() + "\n";
 				assembly += whitespace + ":\n";
 			}
@@ -255,12 +255,12 @@ public class IterationStatementNode extends SequencePointStatementNode<Iteration
 			if (condExpNode.isLogical())
 				tmpPair = getAssemblyAndStateWithRegistered(state, condExpNode);
 			else
-				tmpPair = getAssemblyAndStateWithRegistered(state, new EqualityExpressionNode(this, condExpNode));
+				tmpPair = getAssemblyAndStateWithRegistered(state, new EqualityExpressionNode(this, condExpNode, "!="));
 			
 			assembly += tmpPair.assembly;
 			state = tmpPair.state;
-			
-			assembly += whitespace + "BNE\t" + getEndLabel() + "\n";
+			assembly += whitespace + "CMP\t#$00\n";
+			assembly += whitespace + "BEQ\t" + getEndLabel() + "\n";
 			assembly += whitespace + "JMP\t" + getStartLabel() + "\n";
 			assembly += whitespace + getEndLabel() + ":\n";
 			break;
