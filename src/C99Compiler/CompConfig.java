@@ -184,7 +184,7 @@ public final class CompConfig
 		public static final String A16 = "A16"; // Function starts in 16-bit A mode
 		public static final String XY8 = "XY8"; // Function starts in 8-bit A mode
 		public static final String XY16 = "XY16"; // Function starts in 16-bit A mode
-		
+		public static final String optional = "optional";
 		public static final boolean isInterrupt(Set<String> attributes)
 		{
 			return

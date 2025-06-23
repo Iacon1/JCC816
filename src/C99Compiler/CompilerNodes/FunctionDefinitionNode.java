@@ -177,6 +177,10 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 	{
 		return Attributes.isInterrupt(attributes);
 	}
+	public boolean isOptional()
+	{
+		return attributes.contains(Attributes.optional);
+	}
 	private boolean isISR()
 	{
 		if (this.implementation != null) return this.implementation.isISR();

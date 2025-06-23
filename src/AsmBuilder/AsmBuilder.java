@@ -411,6 +411,8 @@ public final class AsmBuilder implements Catalogger
 					throw new UndefinedFunctionException(funcNode);
 				else continue;
 			}
+			else if (funcNode.isOptional() && !isCalled(funcNode, new ProgramState())) // Function can be left out if unneeded
+				continue;
 			else if (isPreassembled(funcNode)) continue;
 			
 			assembly += funcNode.getAssembly(new ProgramState());
