@@ -81,7 +81,10 @@ constant_expression : conditional_expression ;
 
 // A.2.2 Declarations
 attributes_declaration : TwoLSB identifier_list TwoRSB ;
-declaration : attributes_declaration* declaration_specifiers init_declarator_list? Semico ;
+declaration : attributes_declaration* declaration_specifiers init_declarator_list? Semico
+	{
+		C99Compiler.C99Compiler.tryRegisterTypedef($ctx);
+	};
 declaration_specifiers
 	: (storage_class_specifier
 	| type_specifier
@@ -147,7 +150,7 @@ direct_abstract_declarator
 	| direct_abstract_declarator LeRoBr identifier_list? RiRoBr
 	| LeRoBr identifier_list? RiRoBr
 	;
-typedef_name : Identifier ;
+typedef_name : {C99Compiler.C99Compiler.hasTypedef(getCurrentToken().getText())}? Identifier ;
 initializer
 	: assignment_expression
 	| LeCuBr initializer_list Comma? RiCuBr ;
@@ -175,8 +178,8 @@ labeled_statement
 compound_statement : LeCuBr block_item_list? RiCuBr ;
 block_item_list : block_item+ ;
 block_item
-	: declaration
-	| statement;
+	: statement
+	| declaration ;
 expression_statement : expression? Semico ;
 selection_statement
 	: If LeRoBr expression RiRoBr statement

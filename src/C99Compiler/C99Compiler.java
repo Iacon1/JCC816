@@ -5,11 +5,13 @@ package C99Compiler;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.ParserRuleContext;
 
 import C99Compiler.CompConfig.VerbosityLevel;
 import C99Compiler.CompilerNodes.TranslationUnitNode;
@@ -19,6 +21,11 @@ import C99Compiler.Utils.ProgramState;
 import Grammar.C99.C99Lexer;
 import Grammar.C99.C99Parser;
 import Grammar.C99.C99Parser.Compound_statementContext;
+import Grammar.C99.C99Parser.DeclarationContext;
+import Grammar.C99.C99Parser.Direct_declaratorContext;
+import Grammar.C99.C99Parser.Init_declaratorContext;
+import Grammar.C99.C99Parser.Init_declarator_listContext;
+import Grammar.C99.C99Parser.Storage_class_specifierContext;
 import Grammar.C99.C99Parser.Translation_unitContext;
 import Logging.Logging;
 import Shared.Header;
@@ -26,6 +33,49 @@ import Shared.Header;
 public class C99Compiler
 {
 	private static String currFilename;
+	private static List<String> currTypedefs = new LinkedList<String>(); // Typedefs for this module
+	
+	public static void registerTypedef(String typedef) {currTypedefs.add(typedef);}
+	public static void tryRegisterTypedef(ParserRuleContext context) // See if a context is a typedef declaration and, if so, add it to the list.
+	{
+		if (DeclarationContext.class.isAssignableFrom(context.getClass()))
+		{
+			DeclarationContext c = (DeclarationContext) context;
+			if (c.declaration_specifiers() != null)
+			{
+				boolean isTypedef = false;
+				// Does this declaration context the specifier "typedef"?
+				for (Storage_class_specifierContext i : c.declaration_specifiers().storage_class_specifier())
+				{
+					if (i.getText().equals("typedef"))
+					{
+						isTypedef = true;
+						break;
+					}
+				}
+				// If so, for each declarator...
+				if (isTypedef && c.init_declarator_list() != null)
+				{
+					// Each declarator is one typedef
+					for (Init_declaratorContext i : c.init_declarator_list().init_declarator())
+					{
+						Direct_declaratorContext j = i.declarator().direct_declarator();
+						do
+						{
+							if (j.Identifier() != null)
+								registerTypedef(j.Identifier().getText());
+							else if (j.direct_declarator() != null)
+								j = j.direct_declarator();
+							else
+								j = null;
+						}
+						while (j != null && j.Identifier() == null);
+					}
+				}
+			}
+		}
+	}
+	public static boolean hasTypedef(String typedef) {return currTypedefs.contains(typedef);}
 	
 	private static void printInfo(Object... info)
 	{
@@ -40,6 +90,7 @@ public class C99Compiler
 	}
 	private static TranslationUnitNode parse(String filename, List<LineInfo> lineInfo, CommonTokenStream tokens) throws Exception
 	{
+		currTypedefs.clear();;
 		SyntaxErrorCollector collector = new SyntaxErrorCollector();
 		C99Parser parser = new C99Parser(tokens);
 		parser.removeErrorListeners(); // Removes default error listener
