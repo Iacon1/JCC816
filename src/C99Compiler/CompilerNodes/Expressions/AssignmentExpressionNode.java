@@ -51,46 +51,16 @@ public class AssignmentExpressionNode extends BinaryExpressionNode
 		if (!x.hasLValue(new ProgramState()) || x.getType().isConstant())
 			throw new ConstraintException("6.5.16", 2, node.getStart());
 		
-		boolean goodOperands = false; // Test as per 6.5.16.1.1
+		// Test as per 6.5.16.1.1
 		Type xType = x.getType();
 		Type yType = y.getType();
+		
 		if (!operator.startsWith("+") && !operator.startsWith("-"))
-		{
-			if (xType.isArithmetic() && yType.isArithmetic())
-				goodOperands = true;
-			else if (xType.isStructOrUnion() &&
-				yType.isStructOrUnion() &&
-				yType.canCastTo(xType, getCastContext()))
-				goodOperands = true;
-			else if (xType.isPointer() && !xType.isArray() &&
-				yType.isPointer())
-			{
-				Type xTypeP = ((PointerType) xType).getType();
-				Type yTypeP = ((PointerType) yType).getType();
-				if (yTypeP.canCastTo(xTypeP, getCastContext()))
-					goodOperands = true;
-				if (xTypeP.isVoid() || yTypeP.isVoid())
-					goodOperands = true;
-			}
-			else if (xType.isPointer() &&
-					yType.isArithmetic() &&
-					y.hasPropValue(new ProgramState()) &&
-					y.getPropLong(new ProgramState(), yType) == 0)
-				goodOperands = true;
-			else if (xType.containsSpecifier("_Bool") && yType.isPointer())
-				goodOperands = true;
-			if (!goodOperands)
+			if (!xType.canCastTo(yType, CastContext.assignment))
 				throw new ConstraintException("6.5.16.1", 1, node.getStart());
-		}
 		else
-		{
-			if (xType.isArithmetic() && yType.isArithmetic())
-				goodOperands = true;
-			if (xType.isPointer() && yType.isInteger())
-				goodOperands = true;
-			if (!goodOperands)
+			if (!xType.canCastFrom(yType, CastContext.assignment))
 				throw new ConstraintException("6.5.16.2", 1, node.getStart());
-		}
 		
 		
 		BinaryExpressionNode<?,?,?,?> newY = null;

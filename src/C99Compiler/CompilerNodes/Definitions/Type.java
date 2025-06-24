@@ -264,7 +264,8 @@ public class Type implements Serializable
 		equality,
 		logical,
 		conditional,
-		assignment
+		assignment,
+		add_assignment
 	}
 	public boolean canCastTo(Type type, CastContext context)
 	{
@@ -319,10 +320,14 @@ public class Type implements Serializable
 				isArithmetic() && type.isArithmetic() ||
 				isStructOrUnion() && type.isStructOrUnion() && getSUEName().equals(type.getSUEName()) ||
 				isPointer() && type.isPointer() && ((PointerType) this).getType().canCastFrom(((PointerType) type).getType(), CastContext.assignment) ||
-				isPointer() && type.isPointer() && ((PointerType) this).getType().canCastFrom(context, "void") ||
-				isPointer() && type.isPointer() && ((PointerType) type).getType().canCastFrom(context, "void") ||
+				isPointer() && type.isPointer() && ((PointerType) this).getType().isVoid() ||
+				isPointer() && type.isPointer() && ((PointerType) type).getType().isVoid() ||
 				isPointer() && type.isConstant() && type.isInteger() || // Null pointer
 				typeSpecifiers.contains("_Bool") && type.isPointer();
+		case add_assignment: // Defined by 6.5.16.1
+			return
+				isArithmetic() && type.isArithmetic() ||
+				isPointer() && type.isInteger();
 		default:
 			return true;
 		}
