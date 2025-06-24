@@ -169,7 +169,8 @@ public final class CompConfig
 		}
 	}
 	public static VerbosityLevel verbosityLevel = VerbosityLevel.none;
-
+	public static boolean showParseTree = false; 
+	
 	public static final class Attributes
 	{
 		public static final String interruptCOP = "interrupt_COP";

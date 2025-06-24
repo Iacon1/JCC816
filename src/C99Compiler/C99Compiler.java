@@ -103,7 +103,8 @@ public class C99Compiler
 		parser.addErrorListener(collector);
 		
 		Translation_unitContext tree = parser.translation_unit();
-//		Logging.viewParseTree(parser, tree);
+		if (CompConfig.showParseTree)
+			Logging.viewParseTree(parser, tree);
 		if (collector.getException() != null) throw collector.getException();
 		return new TranslationUnitNode(filename, lineInfo).interpret(tree);
 	}
@@ -115,7 +116,8 @@ public class C99Compiler
 		parser.addErrorListener(collector);
 		
 		Compound_statementContext tree = parser.compound_statement();
-//		Logging.viewParseTree(parser, tree);
+		if (CompConfig.showParseTree)
+			Logging.viewParseTree(parser, tree);
 		if (collector.getException() != null) throw collector.getException();
 		return new CompoundStatementNode(new TranslationUnitNode("INTERNAL", null)).interpret(tree);
 	}

@@ -169,6 +169,12 @@ public class JCC816
 				.build();
 		options.addOption(option);
 		
+		option = Option.builder()
+				.longOpt("show-parse-tree")
+				.desc("Displays a parse tree for every translation unit compiled.")
+				.build();
+		options.addOption(option);
+		
 		return options;
 	}
 	
@@ -376,6 +382,8 @@ public class JCC816
 			CompConfig.cacheSearches = false;
 		if (commandLine.hasOption("no-static-initialization"))
 			CompConfig.initializeStatics = false;
+		if (commandLine.hasOption("show-parse-tree"))
+			CompConfig.showParseTree = true;
 		
 		if (commandLine.hasOption("l") || commandLine.hasOption("s")) // Link to executable or to assembly
 		{	
