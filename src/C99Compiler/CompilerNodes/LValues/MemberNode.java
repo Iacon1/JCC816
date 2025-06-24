@@ -18,6 +18,8 @@ public class MemberNode extends VariableNode
 		public MemberInstanceNode(LValueNode<?> parent)
 		{
 			super(parent, MemberNode.this.getType());
+			if (parent.getSource() == null)
+				source = null;
 			source = parent.getSource().getShifted(owner.getOffset(name)).respec(MemberNode.this.getType().getSize());
 			if (owner.getMember(name).getType().isTwice())
 				source = new StationaryAddressSource(source.getBase(), 0, source.getSize());

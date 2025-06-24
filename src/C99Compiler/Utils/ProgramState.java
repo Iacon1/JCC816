@@ -179,8 +179,8 @@ public class ProgramState
 	}
 	private static ScratchSource markPointer(List<SimpleEntry<Boolean, Integer>> blockList, LinkedHashMap<OperandSource, ScratchSource> pointerMap, OperandSource s, ScratchSource scratchSource) throws ScratchOverflowException
 	{
-		if (pointerMap.containsKey(s))
-			return pointerMap.get(s);
+		// Release any pre-existing pointer to this
+		releasePointer(blockList, pointerMap, pointerMap.get(s));
 		
 		pointerMap.put(s, scratchSource);
 		return scratchSource;

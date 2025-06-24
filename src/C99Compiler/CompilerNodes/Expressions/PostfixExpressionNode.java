@@ -301,14 +301,10 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 		case arraySubscript:
 			if (!getType().isArray()) // return element of an array
 			{
-				ScratchSource addrSource = null;
-				if (expr.hasLValue(state))
-					addrSource = state.getPointer(expr.getLValue(state).getSource());
-				if (addrSource == null)
-				{
-					state = state.reserveScratchBlock(CompConfig.pointerSize);
-					addrSource = state.lastScratchSource();
-				}
+				ScratchSource addrSource = null;	
+				state = state.reserveScratchBlock(CompConfig.pointerSize);
+				addrSource = state.lastScratchSource();
+				
 				state = state.setDestSource(addrSource);
 				tmpPair = new AdditiveExpressionNode(this, "+", expr, indexExpr).getAssemblyAndState(state);
 				assembly += tmpPair.assembly;
