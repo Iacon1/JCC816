@@ -11,7 +11,7 @@ public class TokenException extends CompilerException
 	public TokenException(String message, Token location)
 	{
 		super("At " + C99Compiler.getCurrFilename() + " " + location.getLine() + ":" + location.getCharPositionInLine() + "\n" +
-				message);
+				message + "\n" + location.getText());
 	}
 	public TokenException(String message, int line, int charPositionInLine)
 	{

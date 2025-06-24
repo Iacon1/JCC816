@@ -95,7 +95,7 @@ public class InitializerNode extends InterpretingNode<InitializerNode, Initializ
 		{
 			if (currNode.arrayInitializers != null) // Array
 			{
-				if (designator.Identifier() != null) // Must be struct to use struct references
+				if (designator.identifier() != null) // Must be struct to use struct references
 					throw new ConstraintException("6.7.8", 7, designator.start);
 				
 				int index = (int) new ConstantExpressionNode(currNode).interpret(designator.constant_expression()).getPropLong();
@@ -111,7 +111,7 @@ public class InitializerNode extends InterpretingNode<InitializerNode, Initializ
 				if (designator.constant_expression() != null) // Must be array to use array references
 					throw new ConstraintException("6.7.8", 6, designator.start);
 				
-				String memberName = designator.Identifier().getText();
+				String memberName = designator.identifier().getText();
 				
 				if (currNode.LValue.getType().getStruct().getMember(memberName) == null)
 					throw new ConstraintException("6.7.8", 7, designator.start); // This is not a member of this struct
@@ -203,8 +203,8 @@ public class InitializerNode extends InterpretingNode<InitializerNode, Initializ
 					DesignatorContext designator0 = node.initializer_list().designation(j).designator_list().designator(0);
 					if (designator0.constant_expression() != null) // Skip forward in array list
 						arrayIndex = (int) new ConstantExpressionNode(this).interpret(designator0.constant_expression()).getPropLong();
-					else if (designator0.Identifier() != null)
-						arrayIndex = LValue.getType().getStruct().getMemberNames().indexOf(designator0.Identifier().getText());
+					else if (designator0.identifier() != null)
+						arrayIndex = LValue.getType().getStruct().getMemberNames().indexOf(designator0.identifier().getText());
 					InitializerNode initializer = resolveInitializer(this, node.initializer_list().designation(j++));
 					initializer.interpret(node.initializer_list().initializer(k++));
 					arrayIndex += 1;

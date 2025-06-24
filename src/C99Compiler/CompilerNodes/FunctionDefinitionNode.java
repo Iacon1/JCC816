@@ -9,6 +9,7 @@ import Grammar.C99.C99Parser.Declaration_specifiersContext;
 import Grammar.C99.C99Parser.DeclaratorContext;
 import Grammar.C99.C99Parser.Direct_declaratorContext;
 import Grammar.C99.C99Parser.Function_definitionContext;
+import Grammar.C99.C99Parser.IdentifierContext;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -74,7 +75,7 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 	public FunctionDefinitionNode interpret(Function_definitionContext node) throws Exception
 	{
 		for (Attributes_declarationContext attributes_declaration : node.attributes_declaration())
-			for (TerminalNode attribute : attributes_declaration.identifier_list().Identifier())
+			for (IdentifierContext attribute : attributes_declaration.identifier_list().identifier())
 				attributes.add(attribute.getText());
 
 		specifiers = new DeclarationSpecifiersNode(this).interpret(node.declaration_specifiers()).getSpecifiers();
@@ -108,7 +109,7 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 	public FunctionDefinitionNode interpret(Collection<Attributes_declarationContext> attributes, Declaration_specifiersContext declarationSpecifiers, DeclaratorContext declarator) throws Exception // Load from declaration
 	{
 		for (Attributes_declarationContext attributes_declaration : attributes)
-			for (TerminalNode attribute : attributes_declaration.identifier_list().Identifier())
+			for (IdentifierContext attribute : attributes_declaration.identifier_list().identifier())
 				this.attributes.add(attribute.getText());
 		specifiers = new DeclarationSpecifiersNode(this).interpret(declarationSpecifiers).getSpecifiers();
 		signature = new DeclaratorNode(this, getName(declarator.direct_declarator())).interpret(declarator);
@@ -133,9 +134,9 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 	}
 	private String getName(Direct_declaratorContext node)
 	{
-		while (node.Identifier() == null)
+		while (node.identifier() == null)
 			node = node.direct_declarator();
-		return node.Identifier().getText();
+		return node.identifier().getText();
 	}
 	
 	@Override

@@ -45,9 +45,9 @@ public class PrimaryExpressionNode extends BaseExpressionNode<Primary_expression
 		token = node.start;
 		if (node.expression() != null)
 			return delegate(new ExpressionNode(this).interpret(node.expression()));
-		else if (node.Identifier() != null)
+		else if (node.identifier() != null)
 		{
-			identifier = node.Identifier().getText();
+			identifier = node.identifier().getText();
 			// Valid uses of identifier
 			if (resolveEnumeratorRelative(identifier) != null); // Enumerator
 			else if (hasLValue(new ProgramState())); // Variable

@@ -95,6 +95,12 @@ public interface C99A3Visitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitPunctuator(C99A3Parser.PunctuatorContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link C99A3Parser#identifier}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitIdentifier(C99A3Parser.IdentifierContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link C99A3Parser#primary_expression}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -124,18 +130,6 @@ public interface C99A3Visitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitCast_expression(C99A3Parser.Cast_expressionContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link C99A3Parser#declarator}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitDeclarator(C99A3Parser.DeclaratorContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link C99A3Parser#pointer}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitPointer(C99A3Parser.PointerContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link C99A3Parser#multiplicative_expression}.
 	 * @param ctx the parse tree
@@ -329,11 +323,23 @@ public interface C99A3Visitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitType_qualifier(C99A3Parser.Type_qualifierContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link C99A3Parser#declarator}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitDeclarator(C99A3Parser.DeclaratorContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link C99A3Parser#direct_declarator}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitDirect_declarator(C99A3Parser.Direct_declaratorContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link C99A3Parser#pointer}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitPointer(C99A3Parser.PointerContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link C99A3Parser#type_qualifier_list}.
 	 * @param ctx the parse tree

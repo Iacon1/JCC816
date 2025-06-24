@@ -35,7 +35,10 @@ public class C99Compiler
 	private static String currFilename;
 	private static List<String> currTypedefs = new LinkedList<String>(); // Typedefs for this module
 	
-	public static void registerTypedef(String typedef) {currTypedefs.add(typedef);}
+	public static void registerTypedef(String typedef)
+	{
+		currTypedefs.add(typedef);
+	}
 	public static void tryRegisterTypedef(ParserRuleContext context) // See if a context is a typedef declaration and, if so, add it to the list.
 	{
 		if (DeclarationContext.class.isAssignableFrom(context.getClass()))
@@ -62,20 +65,23 @@ public class C99Compiler
 						Direct_declaratorContext j = i.declarator().direct_declarator();
 						do
 						{
-							if (j.Identifier() != null)
-								registerTypedef(j.Identifier().getText());
+							if (j.identifier() != null)
+								registerTypedef(j.identifier().getText());
 							else if (j.direct_declarator() != null)
 								j = j.direct_declarator();
 							else
 								j = null;
 						}
-						while (j != null && j.Identifier() == null);
+						while (j != null && j.identifier() == null);
 					}
 				}
 			}
 		}
 	}
-	public static boolean hasTypedef(String typedef) {return currTypedefs.contains(typedef);}
+	public static boolean hasTypedef(String typedef) 
+	{
+		return currTypedefs.contains(typedef);
+	}
 	
 	private static void printInfo(Object... info)
 	{
@@ -90,14 +96,14 @@ public class C99Compiler
 	}
 	private static TranslationUnitNode parse(String filename, List<LineInfo> lineInfo, CommonTokenStream tokens) throws Exception
 	{
-		currTypedefs.clear();;
+		currTypedefs.clear();
 		SyntaxErrorCollector collector = new SyntaxErrorCollector();
 		C99Parser parser = new C99Parser(tokens);
 		parser.removeErrorListeners(); // Removes default error listener
 		parser.addErrorListener(collector);
 		
 		Translation_unitContext tree = parser.translation_unit();
-//		Logging.viewParseTree(parser, tree);
+		Logging.viewParseTree(parser, tree);
 		if (collector.getException() != null) throw collector.getException();
 		return new TranslationUnitNode(filename, lineInfo).interpret(tree);
 	}

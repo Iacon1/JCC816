@@ -36,7 +36,7 @@ public class JumpStatementNode extends StatementNode<Jump_statementContext> impl
 		switch (node.getChild(0).getText())
 		{
 		case "goto":
-			gotoLabel = node.Identifier().getText();
+			gotoLabel = node.identifier().getText();
 			funcNode = getEnclosingFunction();
 			mode = Mode.gotoM;
 			break;

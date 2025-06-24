@@ -111,13 +111,13 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 			break;
 		case ".":
 			type = PFType.structMember;
-			memberName = node.Identifier().getText();
+			memberName = node.identifier().getText();
 			if (expr.getType().getStruct().getMember(memberName) == null)
 				throw new ConstraintException("6.5.2.3", 1, node.start);
 			break;
 		case "->": // Struct member
 			type = PFType.structMemberP;
-			memberName = node.Identifier().getText();
+			memberName = node.identifier().getText();
 			if (((PointerType) expr.getType()).getType().getStruct().getMember(memberName) == null)
 				throw new ConstraintException("6.5.2", 2, node.start);
 			break;

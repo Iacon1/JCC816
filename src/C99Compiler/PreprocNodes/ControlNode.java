@@ -14,6 +14,7 @@ import C99Compiler.PragmaProcessor;
 import C99Compiler.Preprocessor;
 import C99Compiler.Exceptions.ErrorException;
 import Grammar.C99A3.C99A3Parser.Control_lineContext;
+import Grammar.C99A3.C99A3Parser.IdentifierContext;
 import Grammar.C99A3.C99A3Parser.Pp_tokenContext;
 import C99Compiler.Utils.FileIO;
 import C99Compiler.Utils.LineInfo;
@@ -112,7 +113,7 @@ public class ControlNode extends InterpretingNode<ControlNode, Control_lineConte
 			if (node.identifier_list() != null)
 			{
 				List<String> parameters = new ArrayList<String>();
-				for (TerminalNode identifier : node.identifier_list().Identifier()) parameters.add(identifier.getText());
+				for (IdentifierContext identifier : node.identifier_list().identifier()) parameters.add(identifier.getText());
 				parameters = resolveDefines(parameters.toArray(new String[] {}));
 				defines.put(name, new DefineNode(this, parameters.toArray(new String[] {}), replacements.toArray(new String[] {})));
 			}

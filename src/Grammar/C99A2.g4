@@ -4,10 +4,10 @@
 
 parser grammar C99A2;
 // import C99A1, C99A11, C99A17;
-
+identifier : {!C99Compiler.C99Compiler.hasTypedef(getCurrentToken().getText())}? Identifier;
 // A.2.1 Expressions
 primary_expression
-	: Identifier
+	: identifier
 	| Constant
 	| String_literal
 	| LeRoBr expression RiRoBr ;	
@@ -15,8 +15,8 @@ postfix_expression
 	: primary_expression
 	| postfix_expression LeSqBr expression RiSqBr
 	| postfix_expression LeRoBr argument_expression_list? RiRoBr
-	| postfix_expression Period Identifier
-	| postfix_expression Arrow Identifier
+	| postfix_expression Period identifier
+	| postfix_expression Arrow identifier
 	| postfix_expression Incrmn
 	| postfix_expression Decrmn
 	| LeRoBr type_name RiRoBr LeCuBr initializer_list Comma? RiCuBr ;	
@@ -29,17 +29,14 @@ unary_expression
 	| Sizeof unary_expression
 	| Sizeof LeRoBr type_name RiRoBr
 	| HasEmbed LeRoBr (Header_name|String_literal) RiRoBr
-	| Defined Identifier
-	| Defined LeRoBr Identifier RiRoBr
-	| Offsetof LeRoBr type_name Comma Identifier RiRoBr
+	| Defined identifier
+	| Defined LeRoBr identifier RiRoBr
+	| Offsetof LeRoBr type_name Comma identifier RiRoBr
 	;
 cast_expression
-	: LeRoBr type_name RiRoBr cast_expression
+	: LeRoBr type_name RiRoBr cast_expression 
 	| unary_expression
 	;	
-// Above mult. expression so initializers work.
-declarator : pointer? direct_declarator ;
-pointer : (Star type_qualifier_list?)+ ;
 multiplicative_expression
 	: cast_expression
 	| multiplicative_expression (Star|BckSla|Percnt) cast_expression ;	
@@ -98,10 +95,11 @@ type_specifier
 	: (Void|Char|Short|Int|Long|Float|Double|Signed|Unsigned|Bool|Complex)
 	| struct_or_union_specifier
 	| enum_specifier
-	| typedef_name ;
+	| typedef_name
+	;
 struct_or_union_specifier
-	: (Struct|Union) Identifier? LeCuBr struct_declaration_list RiCuBr
-	| (Struct|Union) Identifier ;
+	: (Struct|Union) identifier? LeCuBr struct_declaration_list RiCuBr
+	| (Struct|Union) identifier ;
 struct_declaration_list : struct_declaration+ ;
 struct_declaration : specifier_qualifier_list struct_declarator_list Semico ;
 specifier_qualifier_list : (type_specifier|type_qualifier) specifier_qualifier_list? ;
@@ -110,14 +108,14 @@ struct_declarator
 	: declarator
 	| declarator? Colon constant_expression ;
 enum_specifier
-	: Enum Identifier? LeCuBr enumerator_list Comma? RiCuBr
-	| Enum Identifier ;
+	: Enum identifier? LeCuBr enumerator_list Comma? RiCuBr
+	| Enum identifier ;
 enumerator_list : enumerator (Comma enumerator)* ;
-enumerator : Identifier (Assign constant_expression)? ;
+enumerator : identifier (Assign constant_expression)? ;
 type_qualifier : (Const|Restrict|Volatile|RWTWICE|ROTWICE|WOTWICE) ;
-
+declarator : pointer? direct_declarator ;
 direct_declarator
-	: Identifier
+	: identifier
 	| LeRoBr declarator RiRoBr
 	| direct_declarator LeSqBr type_qualifier_list? assignment_expression? RiSqBr
 	| direct_declarator LeSqBr Static type_qualifier_list? assignment_expression RiSqBr
@@ -125,12 +123,12 @@ direct_declarator
 	| direct_declarator LeSqBr type_qualifier_list? Star RiSqBr
 	| direct_declarator LeRoBr parameter_type_list RiRoBr
 	| direct_declarator LeRoBr identifier_list? RiRoBr ;
-
+pointer : (Star type_qualifier_list?)+ ;
 type_qualifier_list : type_qualifier+ ;
 parameter_type_list : parameter_list (Comma ThreeP)? ;
 parameter_list : parameter_declaration (Comma parameter_declaration)* ;
 parameter_declaration : declaration_specifiers (declarator|abstract_declarator?) ;
-identifier_list : Identifier (Comma Identifier)* ;
+identifier_list : identifier (Comma identifier)* ;
 type_name : specifier_qualifier_list abstract_declarator? ;
 abstract_declarator
 	: pointer
@@ -150,7 +148,9 @@ direct_abstract_declarator
 	| direct_abstract_declarator LeRoBr identifier_list? RiRoBr
 	| LeRoBr identifier_list? RiRoBr
 	;
-typedef_name : {C99Compiler.C99Compiler.hasTypedef(getCurrentToken().getText())}? Identifier ;
+
+typedef_name : {C99Compiler.C99Compiler.hasTypedef(getCurrentToken().getText())}? Identifier;
+	
 initializer
 	: assignment_expression
 	| LeCuBr initializer_list Comma? RiCuBr ;
@@ -159,7 +159,7 @@ designation : designator_list Assign ;
 designator_list : designator+ ;
 designator
 	: LeSqBr constant_expression RiSqBr
-	| Period Identifier ;
+	| Period identifier ;
 
 // A.2.3 Statements
 statement
@@ -172,14 +172,14 @@ statement
 	| jump_statement 
 	;
 labeled_statement
-	: Identifier Colon statement
+	: identifier Colon statement
 	| Case constant_expression Colon statement
 	| Default Colon statement ;
 compound_statement : LeCuBr block_item_list? RiCuBr ;
 block_item_list : block_item+ ;
 block_item
-	: statement
-	| declaration ;
+	: declaration
+	| statement ;
 expression_statement : expression? Semico ;
 selection_statement
 	: If LeRoBr expression RiRoBr statement
@@ -191,7 +191,7 @@ iteration_statement
 	| For LeRoBr expression? Semico expression? Semico expression? RiRoBr statement
 	| For LeRoBr declaration expression? Semico expression? RiRoBr statement ;
 jump_statement
-	: Goto Identifier Semico
+	: Goto identifier Semico
 	| Continue Semico
 	| Break Semico
 	| Return expression? Semico ;

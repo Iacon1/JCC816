@@ -42,10 +42,10 @@ public class DirectDeclaratorNode extends InterpretingNode<DirectDeclaratorNode,
 	@Override
 	public DirectDeclaratorNode interpret(Direct_declaratorContext node) throws Exception
 	{
-		if (node.Identifier() != null) // id
+		if (node.identifier() != null) // id
 		{
 			type = DeclaratorType.identifier;
-			identifier = node.Identifier().getText();
+			identifier = node.identifier().getText();
 		}
 		else if (node.declarator() != null) // dec
 		{

@@ -11,7 +11,7 @@ typedef unsigned long long uint64_t;	typedef signed long long int64_t;
 
 typedef uint8_t uint_least8_t;			typedef int8_t int_least8_t;
 typedef uint16_t uint_least16_t;		typedef int16_t int_least16_t;
-typedef uint24_t uint_least16_t;		typedef int16_t int_least24_t;
+typedef uint24_t uint_least24_t;		typedef int16_t int_least24_t;
 typedef uint32_t uint_least32_t;		typedef int32_t int_least32_t;
 typedef uint64_t uint_least64_t;		typedef int64_t int_least64_t;
 

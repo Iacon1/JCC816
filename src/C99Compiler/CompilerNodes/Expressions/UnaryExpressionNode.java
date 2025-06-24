@@ -67,8 +67,8 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 				this.embName = node.Header_name().getText();
 			else if (node.String_literal() != null)
 				this.embName = node.String_literal().getText();
-			if (node.Identifier() != null)
-				this.identifier = node.Identifier().getText();
+			if (node.identifier() != null)
+				this.identifier = node.identifier().getText();
 			operator = node.getChild(0).getText();
 			
 			if ((operator.equals("++") || operator.equals("--")) && !expr.hasLValue(new ProgramState()))
