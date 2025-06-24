@@ -7,6 +7,7 @@ import C99Compiler.CompilerNodes.FunctionDefinitionNode;
 import C99Compiler.CompilerNodes.Declarations.TypeNameNode;
 import C99Compiler.CompilerNodes.Definitions.Type;
 import C99Compiler.CompilerNodes.LValues.LValueNode;
+import C99Compiler.Utils.CompUtils;
 import C99Compiler.Utils.ProgramState;
 import C99Compiler.Utils.AssemblyUtils.AssemblyUtils;
 import C99Compiler.Utils.AssemblyUtils.ByteCopier;
@@ -63,7 +64,10 @@ public class CastExpressionNode extends BaseExpressionNode<Cast_expressionContex
 	@Override
 	public Object getPropValue(ProgramState state)
 	{
-		return expr.getPropValue(state);
+		if (expr.getType().isInteger())
+			return expr.getPropLong(state, type);
+		else
+			return expr.getPropValue(state);
 	}
 	@Override
 	public boolean hasLValue(ProgramState state)
