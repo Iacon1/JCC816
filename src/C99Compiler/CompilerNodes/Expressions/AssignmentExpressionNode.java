@@ -4,6 +4,7 @@
 package C99Compiler.CompilerNodes.Expressions;
 
 import C99Compiler.CompilerNodes.ComponentNode;
+import C99Compiler.CompilerNodes.Definitions.ArrayType;
 import C99Compiler.CompilerNodes.Definitions.PointerType;
 import C99Compiler.CompilerNodes.Definitions.Type;
 import C99Compiler.CompilerNodes.Definitions.Type.CastContext;
@@ -51,6 +52,8 @@ public class AssignmentExpressionNode extends BinaryExpressionNode
 		if (!x.hasLValue(new ProgramState()) || x.getType().isConstant())
 			throw new ConstraintException("6.5.16", 2, node.getStart());
 		
+		if (y.getType().isArray()) // Decay array
+			y = new CastExpressionNode(this, ((ArrayType) y.getType()).decay(), y);
 		// Test as per 6.5.16.1.1
 		Type xType = x.getType();
 		Type yType = y.getType();

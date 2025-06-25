@@ -560,9 +560,14 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 			if (destSource != null)
 			{
 				tmpPair = new AssemblyStatePair("", state);
-				if (destSource.getSize() > getLValue(state).getSource().getSize())
-					tmpPair = new SignExtender(destSource, getLValue(state).getSource(), getType().isSigned(), getLValue(state).getType().isSigned()).apply(tmpPair);
-				tmpPair = new ByteCopier(destSource, getLValue(state).getSource()).apply(tmpPair);
+				if (!getType().isArray())
+				{
+					if (destSource.getSize() > getLValue(state).getSource().getSize())
+						tmpPair = new SignExtender(destSource, getLValue(state).getSource(), getType().isSigned(), getLValue(state).getType().isSigned()).apply(tmpPair);
+					tmpPair = new ByteCopier(destSource, getLValue(state).getSource()).apply(tmpPair);
+				}
+				else
+					tmpPair = new ByteCopier(destSource, sourceP).apply(tmpPair);
 				assembly += tmpPair.assembly;
 				state = tmpPair.state;
 			}
