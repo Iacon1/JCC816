@@ -3,6 +3,7 @@
 package AsmBuilder;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import C99Compiler.CompConfig;
 import C99Compiler.ASMGrapher.ASMGraphBuilder;
@@ -13,76 +14,112 @@ public final class Banker
 {
 	public static final int splitBanks(CartConfig cartConfig, ArrayList<String> lines) throws Exception // Returns # of banks
 	{
-		int banks = 1;
 		int sizeEstimate = 0; // Estimated ROM size
-		int remainingBank = 0; // How much space is left in the current bank
-		
+
 		boolean inBlock = false, leftBlock = false; // Whether we're in a block of code and whether we just left a block
+		boolean inData = false; // Whether the block we're in is data
 		int blockStart = 0; // Which line did the block start with?
 		String blockBuffer = ""; // Current block buffer
 		
 		int lineSize = 0; // Current line's size
-		int i = 0;
+		int lineNo = 0;
 		String line, prevLine;
 
-		remainingBank = cartConfig.getType().getROMBankLength(cartConfig.isFast(), banks - 1);
-
-		while (!lines.get(++i).equals("RESET:"));
-		remainingBank -= 104; // Header and vectors and long vectors
+		// Empty space left in each bank
+		List<Integer> emptySpace = new ArrayList<Integer>();
+		List<Boolean> bankUsed = new ArrayList<Boolean>(emptySpace.size());
+		for (int i = 0; i < cartConfig.getType().getMaxROMBanks(cartConfig.isFast()); ++i)
+		{
+			emptySpace.add(cartConfig.getType().getROMBankLength(cartConfig.isFast(), lineNo));
+			bankUsed.add(false);
+		}
+		int currBank = 0;
+		
+		while (!lines.get(++lineNo).equals("RESET:"));
+		emptySpace.set(currBank, emptySpace.get(currBank) - 104); // Header and vectors and long vectors
+		bankUsed.set(currBank, true);
 		sizeEstimate += 104;
 		
-		blockStart = i;
+		blockStart = lineNo;
 		blockBuffer = "";
-		inBlock = true; 
+		inBlock = false;
+		inData = true; // In data specifically
 		leftBlock = false;
-		while (i <= lines.size())
+		while (lineNo <= lines.size())
 		{
-			line = (i == lines.size() ? "" : lines.get(i));
-			prevLine = (i == 0 ? "" : lines.get(i - 1));
+			line = (lineNo == lines.size() ? "" : lines.get(lineNo));
+			prevLine = (lineNo == 0 ? "" : lines.get(lineNo - 1));
 
+			if (line.trim().startsWith(";")) // Comment
+			{
+				lineNo += 1;
+				continue;
+			}
+			
 			if (prevLine.contains("RTL"))
 			{
 				inBlock = false;
 				leftBlock = true;
 			}
-			if (
-					line.contains("; " + CompConfig.functionTag) ||
-					(!inBlock && line.contains(":") && !cartConfig.getType().isContiguous(banks - 1)) // Data segment beginning and in a non-contiguous bank
-				)
+			if (line.contains("; " + CompConfig.functionTag))
 			{
 				inBlock = true;
+				inData = false;
 				leftBlock = true;
 			}
-			if (i == lines.size())
-				leftBlock = true;
+			if (line.contains(":") && (!inBlock || inData))
+			{
+				if (inBlock)
+					leftBlock = true;
+				inData = true;
+				inBlock = true;
+			}
+			else if (!line.contains(".byte"))
+				inData = false;
 			
-			if (leftBlock)
+			if (lineNo == lines.size())
+				leftBlock = true;
+
+			if (leftBlock) // A block has ended
 			{
 				int blockSize = new ASMGraphBuilder(blockBuffer).getSize();
-				if (blockSize > remainingBank)
+				if (blockSize > emptySpace.get(currBank)) // We don't have this much space in the bank
 				{
-					banks += 1;
-					lines.add(blockStart, ".SEGMENT\t\"" + CompConfig.codeBankName(banks - 1) + "\"");
-					remainingBank = cartConfig.getType().getROMBankLength(cartConfig.isFast(), banks - 1);
-					
-					if (blockSize > remainingBank)
-					{
-						if (!cartConfig.getType().isContiguous(banks - 2))
-							throw new UnsupportedFeatureException("Data segments cannot cross out of bank " + (banks - 2) + " in " + cartConfig.getType().getName() + " mapping mode", false, i, 0);
-						else
-							throw new UnsupportedFeatureException("Functions larger than " + remainingBank / 1024 + " KB in bank " + (banks - 2) + " in " + cartConfig.getType().getName() + " mapping mode", false, i, 0);
-					}
-						
-					i += 1;
+					boolean foundSpace = false;
+					for (int i = 0; i < emptySpace.size(); ++i)
+						if (blockSize <= emptySpace.get(i))
+						{
+							lines.add(blockStart, ".SEGMENT\t\"" + CompConfig.codeBankName(i) + "\"");
+							lineNo += 1;
+							emptySpace.set(currBank, emptySpace.get(i) - blockSize);
+							bankUsed.set(i, true);
+							sizeEstimate += blockSize;
+							foundSpace = true;
+			
+							if (emptySpace.get(currBank) > 0) // Empty space remains here
+							{
+								lines.add(lineNo, ".SEGMENT\t\"" + CompConfig.codeBankName(currBank) + "\"");
+								lineNo += 1;
+							}
+							else
+								currBank = i;
+							break;
+						}
+					if (!foundSpace)
+						throw new UnsupportedFeatureException("Couldn't find anywhere to put segment of size " + blockSize + "B in " + cartConfig.getType().getName() + " mapping mode", false, lineNo, 0);
 				}
-				remainingBank -= blockSize;
-				sizeEstimate += blockSize;
+				else
+				{
+					emptySpace.set(currBank, emptySpace.get(currBank) - blockSize);
+					sizeEstimate += blockSize;
+				}
+				blockBuffer = "";
 			}
 			leftBlock = false;
 			
 			if (line.contains("; " + CompConfig.functionTag))
 			{
-				blockStart = i;
+				blockStart = lineNo;
 				blockBuffer = "";
 			}
 			
@@ -92,24 +129,44 @@ public final class Banker
 					lineSize = 0;
 				else
 					lineSize = new ASMGraphBuilder(line + "\n").getSize();
+
+					if (lineSize > emptySpace.get(currBank)) // We don't have this much space in the bank
+					{
+						boolean foundSpace = false;
+						for (int i = 0; i < emptySpace.size(); ++i)
+							if (lineSize <= emptySpace.get(i))
+							{
+								lines.add(blockStart, ".SEGMENT\t\"" + CompConfig.codeBankName(i) + "\"");
+								lineNo += 1;
+								emptySpace.set(currBank, emptySpace.get(i) - lineSize);
+								bankUsed.set(i, true);
+								sizeEstimate += lineSize;
+								foundSpace = true;
 				
-				if (lineSize > remainingBank) // Need to make a new bank
-				{
-					banks += 1;
-					lines.add(i, ".SEGMENT\t\"" + CompConfig.codeBankName(banks - 1) + "\"");
-					remainingBank = cartConfig.getType().getROMBankLength(cartConfig.isFast(), banks - 1);
-					i += 1;
+								if (emptySpace.get(currBank) > 0) // Empty space remains here
+								{
+									lines.add(blockStart, ".SEGMENT\t\"" + CompConfig.codeBankName(currBank) + "\"");
+									lineNo += 1;
+								}
+								else
+									currBank = i;
+								break;
+							}
+						if (!foundSpace)
+							throw new UnsupportedFeatureException("Couldn't find anywhere to put segment of size " + lineSize + "B in " + cartConfig.getType().getName() + " mapping mode", false, lineNo, 0);
+					}
+					else
+					{
+						emptySpace.set(currBank, emptySpace.get(currBank) - lineSize);
+						sizeEstimate += lineSize;
+					}
 				}
-				remainingBank -= lineSize;
-				sizeEstimate += lineSize;
-			}
 			else
 				blockBuffer += line + "\n";
 			
-			i += 1;
+			lineNo += 1;
 		}
-		
-		
+
 		return sizeEstimate;
 	}
 }

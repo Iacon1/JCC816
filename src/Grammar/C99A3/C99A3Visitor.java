@@ -95,6 +95,12 @@ public interface C99A3Visitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitPunctuator(C99A3Parser.PunctuatorContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link C99A3Parser#identifier}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitIdentifier(C99A3Parser.IdentifierContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link C99A3Parser#primary_expression}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -208,6 +214,12 @@ public interface C99A3Visitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitConstant_expression(C99A3Parser.Constant_expressionContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link C99A3Parser#attributes_declaration}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitAttributes_declaration(C99A3Parser.Attributes_declarationContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link C99A3Parser#declaration}.
 	 * @param ctx the parse tree
@@ -412,12 +424,6 @@ public interface C99A3Visitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitDesignator(C99A3Parser.DesignatorContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link C99A3Parser#attributes_declaration}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitAttributes_declaration(C99A3Parser.Attributes_declarationContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link C99A3Parser#statement}.
 	 * @param ctx the parse tree

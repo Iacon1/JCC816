@@ -21,6 +21,10 @@ public class ArrayType extends PointerType
 		this.length = -1;
 	}
 
+	public PointerType decay()
+	{
+		return new PointerType(type);
+	}
 	@Override
 	public int getSizeBits() {return 8 * getSize();}
 	@Override

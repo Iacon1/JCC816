@@ -30,7 +30,7 @@ public class Type implements Serializable
 	
 	private String storageClassSpecifier;
 	protected List<String> typeSpecifiers;
-	private Set<String> typeQualifiers;
+	protected Set<String> typeQualifiers;
 //	private Set<String> functionSpecifiers;
 	
 	private static List<String> toList(String... members)
@@ -40,9 +40,11 @@ public class Type implements Serializable
 		return list;
 	}
 	private static final List<String> recognizedStrings = toList("unsigned", "signed", "void", "char", "short", "int", "long", "float", "double", "_Bool", "struct", "union", "enum", "_Complex");
+	private static List<List<String>> allowedLists = null;
 	private static List<List<String>> allowedTypeSpecLists() // As per 6.7.2.2
 	{
-		List<List<String>> allowedLists = new ArrayList<List<String>>();
+		if (allowedLists != null) return allowedLists;
+		allowedLists = new ArrayList<List<String>>();
 		allowedLists.add(toList("void"));
 		
 		allowedLists.add(toList("char"));
@@ -262,7 +264,8 @@ public class Type implements Serializable
 		equality,
 		logical,
 		conditional,
-		assignment
+		assignment,
+		add_assignment
 	}
 	public boolean canCastTo(Type type, CastContext context)
 	{
@@ -317,10 +320,14 @@ public class Type implements Serializable
 				isArithmetic() && type.isArithmetic() ||
 				isStructOrUnion() && type.isStructOrUnion() && getSUEName().equals(type.getSUEName()) ||
 				isPointer() && type.isPointer() && ((PointerType) this).getType().canCastFrom(((PointerType) type).getType(), CastContext.assignment) ||
-				isPointer() && type.isPointer() && ((PointerType) this).getType().canCastFrom(context, "void") ||
-				isPointer() && type.isPointer() && ((PointerType) type).getType().canCastFrom(context, "void") ||
+				isPointer() && type.isPointer() && ((PointerType) this).getType().isVoid() ||
+				isPointer() && type.isPointer() && ((PointerType) type).getType().isVoid() ||
 				isPointer() && type.isConstant() && type.isInteger() || // Null pointer
 				typeSpecifiers.contains("_Bool") && type.isPointer();
+		case add_assignment: // Defined by 6.5.16.1
+			return
+				isArithmetic() && type.isArithmetic() ||
+				isPointer() && type.isInteger();
 		default:
 			return true;
 		}
@@ -441,7 +448,7 @@ public class Type implements Serializable
 	}
 	public boolean isArray() {return false;} // To be overriden
 	public boolean isFunction() {return false;} // To be overriden
-	protected boolean isStructOrUnion()
+	public boolean isStructOrUnion()
 	{
 		return containsSpecifier("struct") || containsSpecifier("union");
 	}
@@ -464,7 +471,9 @@ public class Type implements Serializable
 				containsSpecifier("_Bool") ||
 				containsSpecifier("short") ||
 				containsSpecifier("long") ||
-				containsSpecifier("int");
+				containsSpecifier("int") ||
+				containsSpecifier("unsigned") ||
+				containsSpecifier("signed");
 	}
 	public boolean isArithmetic()
 	{
@@ -482,6 +491,10 @@ public class Type implements Serializable
 	public boolean isAggregate()
 	{
 		return isArray() || isStructOrUnion();
+	}
+	public boolean isVoid()
+	{
+		return typeSpecifiers.contains("void") && !isPointer();
 	}
 	
 	public String getSignature()

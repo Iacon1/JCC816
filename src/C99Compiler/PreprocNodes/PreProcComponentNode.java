@@ -50,6 +50,11 @@ public abstract class PreProcComponentNode<T extends PreProcComponentNode<T>>
 		line += 1;
 		defines.put("__LINE__", new DefineNode(String.valueOf(line))); // Change each newline
 	}
+	public static void addLines(int n)
+	{
+		line += n;
+		defines.put("__LINE__", new DefineNode(String.valueOf(line))); // Change each newline
+	}
 	public static LineInfo getCurrLineInfo()
 	{
 		return new LineInfo(file, line, isStd);
@@ -63,6 +68,7 @@ public abstract class PreProcComponentNode<T extends PreProcComponentNode<T>>
 		defines.put("__STDC_HOSTED__", new DefineNode("0"));
 		defines.put("__STDC_MB_MIGHT_NEQ_WC__", new DefineNode("1"));
 		defines.put("__STDC_VERSION__", new DefineNode("199901L"));
+		defines.put("__JCC__", new DefineNode("1"));
 //		defines.put("__TIME__", new DefineNode(LocalDate.now().format(DateTimeFormatter.ofPattern("HH':mm':ss'\""))));
 		
 		defines.put("__STDC_IEC_559__", new DefineNode("0"));

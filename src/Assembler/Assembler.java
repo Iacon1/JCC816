@@ -62,7 +62,8 @@ public class Assembler
 		}
 		proc = Runtime.getRuntime().exec(parameters.toArray(new String[] {}), null, sfcFile.getParentFile());
 		String error = new String(proc.getErrorStream().readAllBytes());
-		if (!error.isEmpty()) throw new AssemblerException(error);
+		if (!error.isEmpty() && error.contains("Error:"))
+			throw new AssemblerException(error);
 		// Logging.logNotice(new String(proc.getInputStream().readAllBytes()));
 		while (proc.isAlive());
 		sfcStream = new FileInputStream(sfcFile);

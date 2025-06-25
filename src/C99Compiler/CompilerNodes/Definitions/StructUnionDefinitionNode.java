@@ -34,7 +34,7 @@ public class StructUnionDefinitionNode extends InterpretingNode<StructUnionDefin
 		if (node.getChild(0).getText().equals("union")) isUnion = true;
 		else isUnion = false;
 		
-		if (node.Identifier() != null) name = node.Identifier().getText();
+		if (node.identifier() != null) name = node.identifier().getText();
 		else
 			name = "__" + UUID.randomUUID() + "struct";
 		for (Struct_declarationContext decl : node.struct_declaration_list().struct_declaration())

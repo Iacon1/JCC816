@@ -119,7 +119,7 @@ public interface MapModeInterface extends Configurer
 	public default String getRegions(MemorySize memorySize) // init size in bytes
 	{
 		int WRAMBanks, SRAMBanks, ROMBanks = 0;
-		WRAMBanks = (int) Math.ceil((double) memorySize.WRAMSize / (double) getWRAMBankLength());
+		WRAMBanks = (int) Math.ceil((double) (memorySize.WRAMSize + memorySize.BSSSize) / (double) getWRAMBankLength());
 		SRAMBanks = (int) Math.ceil((double) memorySize.SRAMSize / (double) getSRAMBankLength());
 		int ROMSize = memorySize.ROMSize;
 		while (ROMSize > 0)
@@ -127,12 +127,14 @@ public interface MapModeInterface extends Configurer
 
 		String regions = "";
 		regions += (whitespace + "ZEROPAGE: start = $000000, size = $000100 ;\n").replace(" ", "\t");
-		regions += (whitespace + "STACK: start = $000000, size = $" + String.format("%06x", CompConfig.stackSize) + ";\n").replace(" ", "\t");
+		if (memorySize.BSSSize != 0)
+			regions += (whitespace + "BSS: start = $000100, size = $" + String.format("%06x", memorySize.BSSSize) + ";\n").replace(" ", "\t");
+		regions += (whitespace + "STACK: start = $" + String.format("%06x",  memorySize.BSSSize + 0x100) + ", size = $" + String.format("%06x", CompConfig.stackSize - memorySize.BSSSize) + ";\n").replace(" ", "\t");
 		
-		String regionLength = String.format("%06x", getWRAMBankLength() - CompConfig.stackSize);
+		String regionLength = String.format("%06x", getWRAMBankLength() - CompConfig.stackSize - 0x100);
 		for (int i = 0; i < WRAMBanks; ++i)
 		{
-			String regionStart = String.format("%06x",  (i == 0 ? CompConfig.stackSize : 0) + getWRAMBankStart(i));
+			String regionStart = String.format("%06x",  (i == 0 ? CompConfig.stackSize + 0x100: 0x100) + getWRAMBankStart(i));
 			regions += (whitespace + "WRAM" + String.format("%03d",i) + ": start = $" + regionStart + ", size = $" + regionLength + ";\n").replace(" ", "\t");
 			if (i == 0) regionLength = String.format("%06x",  getWRAMBankLength());
 		}
@@ -154,7 +156,7 @@ public interface MapModeInterface extends Configurer
 		{
 			float ROMSizeKB = (float) memorySize.ROMSize / 1024f;
 			float WRAMSizeKB = (float) memorySize.WRAMSize / 1024f;
-			float SRAMSizeKB = (float) memorySize.WRAMSize / 1024f;
+			float SRAMSizeKB = (float) memorySize.SRAMSize / 1024f;
 			Logging.logNotice("\n" +
 					"ROM size:  " + memorySize.ROMSize + " B (" + String.format("%.02f", ROMSizeKB) + " KB)\n" +
 					"WRAM size: " + memorySize.WRAMSize + " B (" + String.format("%.02f", WRAMSizeKB) + " KB)\n" +
@@ -173,7 +175,8 @@ public interface MapModeInterface extends Configurer
 		
 		String segments = "";
 		segments += (whitespace + "ZEROPAGE: load = ZEROPAGE, type=zp;\n").replace(" ", "\t");
-		
+		if (memorySize.BSSSize > 0)
+			segments += (whitespace + "BSS: load = BSS, type=BSS;\n").replace(" ", "\t");
 		
 		for (int i = 0; i < ROMBanks; ++i)
 		{

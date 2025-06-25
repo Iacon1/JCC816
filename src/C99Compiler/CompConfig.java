@@ -85,7 +85,7 @@ public final class CompConfig
 	public static int sizeOf(List<String> typeSpecifiers)
 	{
 		if (typeSpecifiers.contains("char") || typeSpecifiers.contains("_Bool")) return charSize;
-		else if (typeSpecifiers.contains("int") || typeSpecifiers.contains("short") || typeSpecifiers.contains("long"))
+		else
 		{
 			int shortCount = 0, longCount = 0;
 			for (String specifier : typeSpecifiers) if (specifier.equals("short")) return shortSize;
@@ -95,14 +95,13 @@ public final class CompConfig
 			else if (longCount == 2) return longLongSize;
 			return intSize;
 		}
-		else return 0;
 	}
 	public static int sizeOf(String... typeSpecifiers)
 	{
 		return sizeOf(Arrays.asList(typeSpecifiers));
 	}
 	
-	public static final int stackSize = 0x2000;
+	public static final int stackSize = 0x1F00; // Would be 0x2000 but 0x100 bytes are for the ZP
 	public static final int maxOptimizedMultComplexity = 7; // Most complex chain allowed in constant-multiplier optimization
 	
 	public static enum DefinableInterrupt // Interrupts the user is allowed to assign functions to
@@ -170,7 +169,8 @@ public final class CompConfig
 		}
 	}
 	public static VerbosityLevel verbosityLevel = VerbosityLevel.none;
-
+	public static boolean showParseTree = false; 
+	
 	public static final class Attributes
 	{
 		public static final String interruptCOP = "interrupt_COP";
@@ -181,7 +181,11 @@ public final class CompConfig
 		public static final String noISR1 = "no_ISR1"; // Level 1 noISR - removes normal stack pushers / loaders from interrupt handler
 		public static final String noISR2 = "no_ISR2"; // Level 2 noISR - like level 1, but replaces RTI with RTL
 		public static final String SA1 = "SA1";	// Specifies that a function can only be called on the SA1 coprocessor
-		
+		public static final String A8 = "A8"; // Function starts in 8-bit A mode
+		public static final String A16 = "A16"; // Function starts in 16-bit A mode
+		public static final String XY8 = "XY8"; // Function starts in 8-bit A mode
+		public static final String XY16 = "XY16"; // Function starts in 16-bit A mode
+		public static final String optional = "optional";
 		public static final boolean isInterrupt(Set<String> attributes)
 		{
 			return

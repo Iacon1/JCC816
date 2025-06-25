@@ -51,11 +51,19 @@ public final class Preprocessor
 			}
 			else
 			{
-				line = line.replaceFirst("//.*", " ");
-				if (line.contains("/*"))
+				int smallCommentInd = line.indexOf("//");
+				int bigCommentInd = line.indexOf("/*");
+				if (smallCommentInd != -1 && smallCommentInd < bigCommentInd)
+				{
+					line = line.replaceFirst("//.*", " ");
+					smallCommentInd = line.indexOf("//");
+					bigCommentInd = line.indexOf("/*");
+				}
+				if (bigCommentInd != -1)
+				{
 					if (line.contains("*/"))
 					{
-						int i = line.indexOf("/*");
+						int i = bigCommentInd;
 						int j = line.indexOf("*/");
 						line = line.replace(line.substring(i, j + 2), " ");
 					}
@@ -64,6 +72,10 @@ public final class Preprocessor
 						bigComment = true;
 						line = line.replaceFirst("/\\*.*", " ");
 					}
+					smallCommentInd = line.indexOf("//");
+				}
+				if (smallCommentInd != -1)
+					line = line.replaceFirst("//.*", " ");
 			}
 			if (!line.isEmpty()) source += line + "\n";
 		}

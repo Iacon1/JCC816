@@ -6,8 +6,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import C99Compiler.CompConfig.VerbosityLevel;
 import C99Compiler.PreprocNodes.PreProcComponentNode;
 import C99Compiler.Utils.CompUtils;
+import Logging.Logging;
 
 public final class PragmaProcessor
 {
@@ -41,7 +43,14 @@ public final class PragmaProcessor
 				else output += input.charAt(i);
 			return output + output.charAt(0);
 		}
-		
+		else // Unrecognized
+			if (VerbosityLevel.isAtLeast(VerbosityLevel.low))
+			{
+				String report = "Unrecognized pragma: ";
+				for (String parameter : parameters)
+					report += parameter + " ";
+				Logging.logNotice(report);
+			}
 		return null;
 	}
 }

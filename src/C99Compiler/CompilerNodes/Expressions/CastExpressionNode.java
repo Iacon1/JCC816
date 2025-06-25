@@ -7,9 +7,11 @@ import C99Compiler.CompilerNodes.FunctionDefinitionNode;
 import C99Compiler.CompilerNodes.Declarations.TypeNameNode;
 import C99Compiler.CompilerNodes.Definitions.Type;
 import C99Compiler.CompilerNodes.LValues.LValueNode;
+import C99Compiler.Utils.CompUtils;
 import C99Compiler.Utils.ProgramState;
 import C99Compiler.Utils.AssemblyUtils.AssemblyUtils;
 import C99Compiler.Utils.AssemblyUtils.ByteCopier;
+import C99Compiler.Utils.AssemblyUtils.SignExtender;
 import C99Compiler.Utils.OperandSources.ConstantSource;
 import Grammar.C99.C99Parser.Cast_expressionContext;
 
@@ -20,7 +22,7 @@ public class CastExpressionNode extends BaseExpressionNode<Cast_expressionContex
 	
 	public CastExpressionNode(ComponentNode<?> parent) {super(parent);}
 
-	public CastExpressionNode(BaseExpressionNode<?> parent, Type type, BaseExpressionNode<?> expr)
+	public CastExpressionNode(ComponentNode<?> parent, Type type, BaseExpressionNode<?> expr)
 	{
 		super(parent);
 		this.type = type;
@@ -39,6 +41,10 @@ public class CastExpressionNode extends BaseExpressionNode<Cast_expressionContex
 		else return delegate(new UnaryExpressionNode(this).interpret(node.unary_expression()));
 	}
 	
+	private boolean specifiesConversion()
+	{
+		return getType().getSize() != expr.getType().getSize();
+	}
 	@Override
 	public boolean canCall(ProgramState state, FunctionDefinitionNode function)
 	{
@@ -58,12 +64,15 @@ public class CastExpressionNode extends BaseExpressionNode<Cast_expressionContex
 	@Override
 	public Object getPropValue(ProgramState state)
 	{
-		return expr.getPropValue(state);
+		if (expr.getType().isInteger())
+			return expr.getPropLong(state, type);
+		else
+			return expr.getPropValue(state);
 	}
 	@Override
 	public boolean hasLValue(ProgramState state)
 	{
-		return expr.hasLValue(state);
+		return expr.hasLValue(state) && !specifiesConversion();
 	}
 	public LValueNode<?> getLValue(ProgramState state)
 	{
@@ -72,7 +81,7 @@ public class CastExpressionNode extends BaseExpressionNode<Cast_expressionContex
 	@Override
 	public boolean hasAssembly(ProgramState state)
 	{
-		return expr.hasAssembly(state) || (!hasPropValue(state) && getType().getSize() > expr.getType().getSize());
+		return expr.hasAssembly(state) || (!hasPropValue(state) && specifiesConversion());
 	}
 	@Override
 	public ProgramState getStateBefore(ProgramState state, ComponentNode<?> child) throws Exception
@@ -90,22 +99,18 @@ public class CastExpressionNode extends BaseExpressionNode<Cast_expressionContex
 	@Override
 	public AssemblyStatePair getAssemblyAndState(ProgramState state) throws Exception
 	{
-		AssemblyStatePair tmpPair;
-		String assembly = "";
-		if (getType().getSize() > expr.getType().getSize()) // Need to make space
-		{
-			tmpPair = new ByteCopier(getType().getSize(), state.destSource(), new ConstantSource(0, getType().getSize())).getAssemblyAndState(state);
-			assembly += tmpPair.assembly;
-			state = tmpPair.state;
-		}
+		AssemblyStatePair pair = null;
+		
 		if (expr.hasAssembly(state))
-			assembly += expr.getAssembly(state);
+		{
+			pair = expr.getAssemblyAndState(state);
+		}
 		else if (expr.hasLValue(state))
 		{
-			tmpPair = new ByteCopier(getType().getSize(), state.destSource(), expr.getLValue(state).getSource()).getAssemblyAndState(state);
-			assembly += tmpPair.assembly;
-			state = tmpPair.state;
+			pair = new SignExtender(state.destSource(), expr.getLValue(state).getSource(), getType().isSigned(), expr.getType().isSigned()).getAssemblyAndState(state);
+			pair = new ByteCopier(state.destSource(), expr.getLValue(state).getSource()).apply(pair);
 		}
-		return new AssemblyStatePair(assembly, state);
+			
+		return pair;
 	}
 }

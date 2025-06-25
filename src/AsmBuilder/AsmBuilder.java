@@ -31,21 +31,51 @@ import C99Compiler.CompilerNodes.LValues.VariableNode;
 import C99Compiler.Exceptions.BuilderException;
 import C99Compiler.Exceptions.BuilderMultipleDefinitionException;
 import C99Compiler.Exceptions.UndefinedFunctionException;
+import C99Compiler.Exceptions.UnsupportedFeatureException;
 import C99Compiler.Utils.CompUtils;
 import C99Compiler.Utils.ProgramState;
 import C99Compiler.Utils.SNESRegisters;
 import C99Compiler.Utils.AssemblyUtils.AssemblyUtils;
+import C99Compiler.Utils.AssemblyUtils.ByteCopier;
+import C99Compiler.Utils.OperandSources.ConstantSource;
+import C99Compiler.Utils.OperandSources.NumericAddressSource;
 import Logging.Logging;
+import Shared.Assemblable.AssemblyStatePair;
 import Shared.CartConfig;
 import Shared.Catalogger;
 import Shared.MemorySize;
 import Shared.TranslationUnit;
+import Shared.CartConfig.AddonChip;
 
 public final class AsmBuilder implements Catalogger
 {
 	private static void printInfo(Object... info)
 	{
 		for (int i = 0; i < info.length; ++i) Logging.logNotice(info[i].toString() + (i == info.length - 1 ? "" : ", ") + "\n");
+	}
+	private void printCanCalls(ProgramState state)
+	{
+		for (FunctionDefinitionNode i : getFunctions().values())
+		{
+			String list = "";
+			for (FunctionDefinitionNode j : getFunctions().values())
+				if (i.canCall(state, j) && i != j)
+					list = list + (list.isEmpty() ? "" : ", ") + j.getFullName();
+			if (list != "")
+				Logging.logNotice("Function " + i.getFullName() + " can call: " + list);
+			else
+				Logging.logNotice("Function " + i.getFullName() + " can call nothing");
+		}
+	}
+	private boolean isCalled(FunctionDefinitionNode funcNode, ProgramState state)
+	{
+				for (FunctionDefinitionNode i : getFunctions().values())
+		{
+			if (i == funcNode) continue;
+			if (i.canCall(state, funcNode))
+				return true;
+		}
+				return false;
 	}
 	
 	private List<TranslationUnit> translationUnits;
@@ -66,6 +96,7 @@ public final class AsmBuilder implements Catalogger
 		
 		return variables;
 	}
+	
 	public LinkedHashMap<String, VariableNode> getGlobalVariables()
 	{
 		LinkedHashMap<String, VariableNode> variables = new LinkedHashMap<String, VariableNode>();
@@ -164,7 +195,8 @@ public final class AsmBuilder implements Catalogger
 	}
 	private Map<String, Integer> mapVariables(CartConfig cartConfig, MemorySize memorySize)
 	{
-		int offset = CompConfig.stackSize;
+		int offset = CompConfig.stackSize + 0x100;
+		int sOffset = cartConfig.containsChip(AddonChip.SA1) ? 256 + CompConfig.stackSize : 0; // SA1 needs its own DP
 		List<VariableNode> WRAMVars = new LinkedList<VariableNode>(), SRAMVars = new LinkedList<VariableNode>();
 		for (VariableNode var : getVariables().values())
 		{
@@ -177,7 +209,7 @@ public final class AsmBuilder implements Catalogger
 		}
 		List<Integer> WRAMPoses = null, SRAMPoses = null;
 		if (WRAMVars.size() > 0) WRAMPoses = cartConfig.getType().mapWRAM(WRAMVars, offset, memorySize);
-		if (SRAMVars.size() > 0) SRAMPoses = cartConfig.getType().mapSRAM(SRAMVars, 0, memorySize);
+		if (SRAMVars.size() > 0) SRAMPoses = cartConfig.getType().mapSRAM(SRAMVars, sOffset, memorySize);
 		
 		Map<String, Integer> map = new HashMap<String, Integer>();
 		for (int i = 0; i < WRAMVars.size(); ++i)
@@ -260,7 +292,7 @@ public final class AsmBuilder implements Catalogger
 				assembly += interrupt.longLabel + ":JML\tRESET\n";
 		return assembly;
 	}
-	private String getAssemblyPreface(CartConfig cartConfig, Map<String, Integer> varPoses) throws Exception
+	private String getAssemblyPreface(CartConfig cartConfig, Map<String, Integer> varPoses, int BSSSize) throws Exception
 	{
 		String assembly = "";
 
@@ -296,13 +328,44 @@ public final class AsmBuilder implements Catalogger
 			assembly += "LDA\t#$FFFF\n";
 			assembly += "STA\t$00420D\n";
 		}
+		if (cartConfig.containsChip(AddonChip.SA1)) // Initialize SA1
+		{
+			// Memory mapping
+			switch (cartConfig.getType())
+			{
+			case loROM:
+				assembly += "LDA\t#$8180\n";
+				assembly += "STA\t$2220\n";
+				assembly += "STA\t$2222\n";
+				break;
+			case hiROM:
+				assembly += "LDA\t#$0100\n";
+				assembly += "STA\t$2220\n";
+				assembly += "LDA\t#$0302\n";
+				assembly += "STA\t$2222\n";
+				break;
+			default:
+				throw new BuilderException(cartConfig.getType().getName() + " with SA1 is not supported on version " + CompConfig.version);
+			}
+			
+		}
 		assembly += "PHK\n"; // Set return address to RESET so that when main ends it restarts
 		assembly += "PEA\tRESET\n";
+
+		AssemblyStatePair pair = new AssemblyStatePair("", new ProgramState());
+		// Clear BSS space
+		if (BSSSize > 0)
+			pair = new ByteCopier(
+					new NumericAddressSource(
+							cartConfig.getType().getWRAMBankStart(0) + 0x100, BSSSize),
+					new ConstantSource(0, BSSSize)).apply(pair);
 		// Load initialized globals
 		for (TranslationUnit unit : translationUnits)
 			for (InitializerNode init : unit.getGlobalInitializers())
 				if (!init.isROM()) // Only RAM ones up here, to save space in 0 bank
-					assembly += init.getAssembly(new ProgramState());
+					pair = init.apply(pair);
+		assembly += pair.assembly;
+		
 		assembly += "JML\tmain\n";
 		
 		// Required special subs
@@ -342,12 +405,14 @@ public final class AsmBuilder implements Catalogger
 		{
 			if (funcNode.isImplemented() && funcNode.isInline()) continue;
 			else if (funcNode.getType().isExtern()) continue;
-			else if (!funcNode.isImplemented())
+			else if (!funcNode.isImplemented() && isCalled(funcNode, new ProgramState()))
 			{
 				if (!isModule)
 					throw new UndefinedFunctionException(funcNode);
 				else continue;
 			}
+			else if (funcNode.isOptional() && !isCalled(funcNode, new ProgramState())) // Function can be left out if unneeded
+				continue;
 			else if (isPreassembled(funcNode)) continue;
 			
 			assembly += funcNode.getAssembly(new ProgramState());
@@ -371,12 +436,16 @@ public final class AsmBuilder implements Catalogger
 				throw new BuilderException("Cannot use 16-bit addressing, more than 64 KB RAM required.");
 			if (resolveFunction("main") == null)
 				throw new BuilderException("Program must have \"" + CompConfig.mainName + "\" function.");
-			return getAssemblyPreface(cartConfig, varPoses) + assembly;
+			return getAssemblyPreface(cartConfig, varPoses, memorySize.BSSSize) + assembly;
 		}
 		else return assembly;
 	}
 	private static String postprocess(CartConfig cartConfig, String assembly, MemorySize memorySize) throws Exception
 	{
+		assembly = assembly.replace("\r\n", "\n");
+		assembly = assembly.replace("\n\r", "\n");
+		assembly = assembly.replace("\r", "\n");
+
 		ArrayList<String> lines = new ArrayList<String>(Arrays.asList(assembly.split("\n")));
 
 		if (OptimizationLevel.isAtLeast(OptimizationLevel.low))
@@ -403,6 +472,8 @@ public final class AsmBuilder implements Catalogger
 			printInfo("Postprocessed in " + (System.currentTimeMillis() - t) + " ms. Assembly length: " + assembly.length() + ".");
 		if (VerbosityLevel.isAtLeast(VerbosityLevel.medium))
 			printInfo("Linking done.");
+		if (VerbosityLevel.isAtLeast(VerbosityLevel.high))
+			printCanCalls(new ProgramState());
 		return assembly;
 	}
 	

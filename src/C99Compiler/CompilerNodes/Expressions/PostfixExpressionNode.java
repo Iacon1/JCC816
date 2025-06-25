@@ -23,12 +23,16 @@ import C99Compiler.Exceptions.ScratchOverflowException;
 import C99Compiler.Exceptions.UnsupportedFeatureException;
 import C99Compiler.Utils.CompUtils;
 import C99Compiler.Utils.ProgramState;
+import C99Compiler.Utils.ProgramState.PreserveFlag;
+import C99Compiler.Utils.ProgramState.ProcessorFlag;
 import C99Compiler.Utils.ProgramState.ScratchSource;
 import C99Compiler.Utils.PropPointer;
 import C99Compiler.Utils.AssemblyUtils.AssemblyUtils;
 import C99Compiler.Utils.AssemblyUtils.ByteCopier;
+import C99Compiler.Utils.AssemblyUtils.SignExtender;
 import C99Compiler.Utils.AssemblyUtils.StackLoader;
 import C99Compiler.Utils.AssemblyUtils.StackPusher;
+import C99Compiler.Utils.OperandSources.AddressSource;
 import C99Compiler.Utils.OperandSources.ConstantSource;
 import C99Compiler.Utils.OperandSources.OperandSource;
 import Grammar.C99.C99Parser.Assignment_expressionContext;
@@ -53,7 +57,8 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 	
 	private BaseExpressionNode<?> expr, indexExpr;
 	private List<BaseExpressionNode<?>> params;
-
+	private OperandSource dummySource;
+	
 	String memberName;
 	
 	private FunctionDefinitionNode getReferencedFunction(ProgramState state)
@@ -70,6 +75,7 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 	{
 		super(parent);
 		params = new ArrayList<BaseExpressionNode<?>>();
+		dummySource = new AddressSource(CompUtils.getSafeUUID(), 0);
 	}
 
 	@Override
@@ -89,26 +95,40 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 			if (node.argument_expression_list() != null)
 				for (Assignment_expressionContext expr : node.argument_expression_list().assignment_expression())
 					params.add(new AssignmentExpressionNode(this).interpret(expr));
-			if (params.size() != getReferencedFunction(new ProgramState()).getParameters().size())
-				throw new ConstraintException("6.5.2.2", 2, node.start);
-			if (getReferencedFunction(new ProgramState()) != null && getReferencedFunction(new ProgramState()).isSA1() && !getEnclosingFunction().isSA1())
-				throw new UnsupportedFeatureException("Calling an SA1 function outside an SA1 context", true, node.start);
-			else if (getReferencedFunction(new ProgramState()) != null && !getReferencedFunction(new ProgramState()).isSA1() && getEnclosingFunction().isSA1())
-				throw new UnsupportedFeatureException("Calling a non-SA1 function inside an SA1 context", true, node.start);
+			ProgramState state = new ProgramState();
+			if (getReferencedFunction(state) != null)
+			{
+				if (getReferencedFunction(state).canCall(state, getEnclosingFunction())) // This function will need parameters from the stack
+					getReferencedFunction(state).requireStackLoader();
+				
+				if (params.size() != getReferencedFunction(new ProgramState()).getParameters().size())
+					throw new ConstraintException("6.5.2.2", 2, node.start);
+				if (getReferencedFunction(new ProgramState()).isSA1() && !getEnclosingFunction().isSA1())
+					throw new UnsupportedFeatureException("Calling an SA1 function outside an SA1 context", true, node.start);
+				else if (!getReferencedFunction(new ProgramState()).isSA1() && getEnclosingFunction().isSA1())
+					throw new UnsupportedFeatureException("Calling a non-SA1 function inside an SA1 context", true, node.start);
+			}
 			break;
 		case ".":
 			type = PFType.structMember;
-			memberName = node.Identifier().getText();
+			memberName = node.identifier().getText();
+			if (expr.getType().getStruct().getMember(memberName) == null)
+				throw new ConstraintException("6.5.2.3", 1, node.start);
 			break;
 		case "->": // Struct member
 			type = PFType.structMemberP;
-			memberName = node.Identifier().getText();
+			memberName = node.identifier().getText();
+			if (((PointerType) expr.getType()).getType().getStruct().getMember(memberName) == null)
+				throw new ConstraintException("6.5.2", 2, node.start);
 			break;
 		case "++":
 			type = PFType.incr;
+			break;
 		case "--":
 			type = PFType.decr;
+			break;
 		}
+		dummySource.respec(getSize());
 		return this;
 	}
 
@@ -120,11 +140,14 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 		case arraySubscript:
 			return ((PointerType) expr.getType()).getType();
 		case funcCall:
-			return ((FunctionType) expr.getType()).getType();
+			if (expr.getType().isPointer())
+				return ((FunctionType) ((PointerType) expr.getType()).getType()).getType();
+			else
+				return ((FunctionType) expr.getType()).getType();
 		case structMember:
-			return getTranslationUnit().resolveStructOrUnion(expr.getType().getSUEName()).getMember(memberName).getType();
+			return expr.getType().getStruct().getMember(memberName).getType();
 		case structMemberP:
-			return getTranslationUnit().resolveStructOrUnion(((PointerType) expr.getType()).getType().getSUEName()).getMember(memberName).getType();	
+			return (((PointerType) expr.getType()).getType()).getStruct().getMember(memberName).getType();	
 		case incr: case decr:
 			return expr.getType();
 		default:
@@ -138,7 +161,7 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 		if (type == PFType.funcCall)
 		{
 			if (getReferencedFunction(state) != null)
-				return getReferencedFunction(state).getFullName().equals(function.getFullName());
+				return getReferencedFunction(state).getFullName().equals(function.getFullName()) || getReferencedFunction(state).canCall(state, function);
 			else return true;
 		}
 		else return expr.canCall(state, function);
@@ -186,14 +209,16 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 				int offset = getType().getSize() * (int) indexExpr.getPropLong(new ProgramState());
 				return new WrapperLValueNode(this, ((ArrayType) expr.getType()).getType(), expr.getLValue(state), offset);
 			}
-			addrSource = state.getPointer(expr.getLValue(state).getSource());
+			if (expr.hasLValue(state))
+				addrSource = state.getPointer(expr.getLValue(state).getSource());
+			else
+				addrSource = state.getPointer(dummySource);
 			return new IndirectLValueNode(this, new DummyLValueNode(this, getType(), addrSource), addrSource, getType());
 		case structMember:
-			return getTranslationUnit().resolveStructOrUnion(expr.getType().getSUEName()).getMember(memberName).getInstance(expr.getLValue(state));
+			return expr.getType().getStruct().getMember(memberName).getInstance(expr.getLValue(state));
 		case structMemberP:
 			addrSource = state.getPointer(expr.getLValue(state).getSource());
-			return getTranslationUnit().resolveStructOrUnion(
-					((PointerType) expr.getType()).getType().getSUEName())
+			return ((PointerType) expr.getType()).getType().getStruct()
 					.getMember(memberName).getInstance(
 							new IndirectLValueNode(this, expr.getLValue(state), addrSource, ((PointerType) expr.getType()).getType()));	
 		default:
@@ -212,7 +237,7 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 		switch (type)
 		{
 		case arraySubscript:
-			return expr.hasAssembly(state) || indexExpr.hasAssembly(state) || expr.getLValue(state) == null || !expr.getType().isArray() || !indexExpr.hasPropValue(state);
+			return expr.hasAssembly(state) || indexExpr.hasAssembly(state) || expr.getLValue(state) == null || getType().isArray() || !expr.getType().isArray() || !indexExpr.hasPropValue(state);
 		 case funcCall: return true;
 		case structMember: return expr.hasAssembly(state);
 		case structMemberP: return true;
@@ -276,18 +301,23 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 		case arraySubscript:
 			if (!getType().isArray()) // return element of an array
 			{
-				OperandSource addrSource;
-				state = state.reservePointer(expr.getLValue(state).getSource());
+				ScratchSource addrSource = null;	
+				state = state.reserveScratchBlock(CompConfig.pointerSize);
 				addrSource = state.lastScratchSource();
+				
 				state = state.setDestSource(addrSource);
 				tmpPair = new AdditiveExpressionNode(this, "+", expr, indexExpr).getAssemblyAndState(state);
 				assembly += tmpPair.assembly;
 				state = tmpPair.state;
+				if (expr.hasLValue(state))
+					state = state.markPointer(expr.getLValue(state).getSource(), addrSource);
+				else
+					state = state.markPointer(dummySource, addrSource);
 				state = state.setDestSource(destSource);
 
 				if (destSource != null)
 				{
-					tmpPair = new ByteCopier(destSource.getSize(), destSource, getLValue(state).getSource()).getAssemblyAndState(state);
+					tmpPair = new ByteCopier(destSource, getLValue(state).getSource()).getAssemblyAndState(state);
 					assembly += tmpPair.assembly;
 					state = tmpPair.state;
 				}
@@ -316,8 +346,13 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 				if (func.canCall(state, getEnclosingFunction())) // Prepare for possible recursion
 				{
 					List<VariableNode> variables = new LinkedList<VariableNode>(getEnclosingFunction().getChildVariables().values());
+					tmpPair = new AssemblyStatePair("", state);
 					for (VariableNode parameter : variables)
-					;//	assembly += AssemblyUtils.stackLoader(whitespace, leadingWhitespace, parameter.getSource()); TODO
+					{
+						tmpPair = new StackLoader(parameter.getSource().getSize(), parameter.getSource()).apply(tmpPair);
+					}
+					assembly += tmpPair.assembly;
+					state = tmpPair.state;
 				}
 				
 				List<VariableNode> funcParams = new LinkedList<VariableNode>(func.getParameters().values());
@@ -328,16 +363,17 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 					{
 						state = state.setDestSource(sourceV);
 						tmpPair = params.get(i).getAssemblyAndState(state);
-						assembly = tmpPair.assembly;
+						assembly += tmpPair.assembly;
 						state = tmpPair.state;
 						state = state.setDestSource(destSource);
 					}
 					else
 					{
 						OperandSource sourceP = null;
-						if (params.get(i).hasPropValue(state)) sourceP = new ConstantSource(params.get(i).getPropValue(state), params.get(i).getSize());
+						if (params.get(i).hasPropValue(state) && !params.get(i).getType().isArray()) sourceP = new ConstantSource(params.get(i).getPropValue(state), params.get(i).getSize()); // Arrays aren't typically function parameters
 						else if (params.get(i).hasLValue(state)) sourceP = params.get(i).getLValue(state).castTo(funcParams.get(i).getType()).getSource();
-						tmpPair = new ByteCopier(sourceV.getSize(), sourceV, sourceP).getAssemblyAndState(state);
+						
+						tmpPair = new ByteCopier(sourceV, sourceP).getAssemblyAndState(state);
 						assembly += tmpPair.assembly;
 						state = tmpPair.state;
 						
@@ -348,6 +384,28 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 				tmpPair = getRegisteredAssemblyAndState(state);
 				assembly += tmpPair.assembly;
 				state = tmpPair.state;
+				
+				if (func.needsA8() && !(state.testKnownFlag(PreserveFlag.M) && !state.testProcessorFlag(ProcessorFlag.M)))
+				{
+					assembly += state.getWhitespace() + "SEP\t#$20\n";
+					state = state.clearProcessorFlags(ProcessorFlag.M);
+				}
+				else if (func.needsA16() && !(state.testKnownFlag(PreserveFlag.M) && state.testProcessorFlag(ProcessorFlag.M)))
+				{
+					assembly += state.getWhitespace() + "REP\t#$20\n";
+					state = state.setProcessorFlags(ProcessorFlag.M);
+				}
+				
+				if (func.needsXY8() && !(state.testKnownFlag(PreserveFlag.I) && !state.testProcessorFlag(ProcessorFlag.I)))
+				{
+					assembly += state.getWhitespace() + "SEP\t#$10\n";
+					state = state.clearProcessorFlags(ProcessorFlag.I);
+				}
+				else if (func.needsXY16() && !(state.testKnownFlag(PreserveFlag.I) && state.testProcessorFlag(ProcessorFlag.I)))
+				{
+					assembly += state.getWhitespace() + "REP\t#$10\n";
+					state = state.setProcessorFlags(ProcessorFlag.I);
+				}
 				
 				if (func.isInline())
 				{
@@ -363,6 +421,7 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 				else
 				{
 					assembly += state.getWhitespace() + "JSL\t" + func.getStartLabel() + "\n";
+					state = state.releasePointers();
 					state = state.clearKnownFlags();
 				}
 				
@@ -370,12 +429,13 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 				{
 					List<VariableNode> variables = new LinkedList<VariableNode>(getEnclosingFunction().getChildVariables().values());
 					Collections.reverse(variables);
+					tmpPair = new AssemblyStatePair("", state);
 					for (VariableNode parameter : variables)
 					{
-						tmpPair = new StackLoader(parameter.getSize(), parameter.getSource()).getAssemblyAndState(state);
-						assembly += tmpPair.assembly;
-						state = tmpPair.state;
+						tmpPair = new StackLoader(parameter.getSize(), parameter.getSource()).apply(tmpPair);					
 					}
+					assembly += tmpPair.assembly;
+					state = tmpPair.state;
 				}
 			}
 			else // TODO Unpredictable function pointer or recursion, need to use the stack
@@ -441,8 +501,8 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 				
 				if (getReferencedFunction(state) == null)
 					assembly += state.getWhitespace() + "JML\t[" + CompConfig.funcPointer + "]\n" + state.getWhitespace() + ":\n";
-				else assembly += state.getWhitespace() + "JSL\t" + getReferencedFunction(state).getStartLabel() + "\n";
-
+				else assembly += state.getWhitespace() + "JSL\t" + getReferencedFunction(state).getLoaderLabel() + "\n";
+				state = state.releasePointers();
 				for (VariableNode parameter : variables)
 				{
 					tmpPair = new StackLoader(parameter.getSize(), parameter.getSource()).getAssemblyAndState(state);
@@ -464,7 +524,7 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 			{
 				tmpPair = expr.getAssemblyAndState(state);
 				if (destSource != null)
-					tmpPair = new ByteCopier(destSource.getSize(), destSource, getLValue(state).getSource()).apply(tmpPair);
+					tmpPair = new ByteCopier(destSource.getSize(), destSource, getLValue(tmpPair.state).getSource()).apply(tmpPair);
 				assembly += tmpPair.assembly;
 				state = tmpPair.state;
 			}
@@ -472,9 +532,11 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 		case structMemberP:
 			if (expr.hasAssembly(state))
 			{
+				state = state.setDestSource(null);
 				tmpPair = expr.getAssemblyAndState(state);
 				assembly += tmpPair.assembly;
 				state = tmpPair.state;
+				state = state.setDestSource(destSource);
 			}
 			ScratchSource sourceP;
 			if (!state.hasPointer(expr.getLValue(state).getSource()))
@@ -497,7 +559,15 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 			else sourceP = state.getPointer(expr.getLValue(state).getSource());
 			if (destSource != null)
 			{
-				tmpPair = new ByteCopier(destSource.getSize(), destSource, getLValue(state).getSource()).getAssemblyAndState(state);
+				tmpPair = new AssemblyStatePair("", state);
+				if (!getType().isArray())
+				{
+					if (destSource.getSize() > getLValue(state).getSource().getSize())
+						tmpPair = new SignExtender(destSource, getLValue(state).getSource(), getType().isSigned(), getLValue(state).getType().isSigned()).apply(tmpPair);
+					tmpPair = new ByteCopier(destSource, getLValue(state).getSource()).apply(tmpPair);
+				}
+				else
+					tmpPair = new ByteCopier(destSource, sourceP).apply(tmpPair);
 				assembly += tmpPair.assembly;
 				state = tmpPair.state;
 			}
@@ -533,9 +603,9 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 			}
 			BaseExpressionNode<?> dX = new DummyExpressionNode(this, expr.getType(), 1);
 			if (type == PFType.incr)
-				dX = new AdditiveExpressionNode("+", expr, dX);
+				dX = new AdditiveExpressionNode(this, "+", expr, dX);
 			else if (type == PFType.decr)
-				dX = new AdditiveExpressionNode("-", expr, dX);
+				dX = new AdditiveExpressionNode(this, "-", expr, dX);
 			dX = new AssignmentExpressionNode(this, expr, dX);
 			getEnclosingSequencePoint().registerAssemblable(dX);
 			

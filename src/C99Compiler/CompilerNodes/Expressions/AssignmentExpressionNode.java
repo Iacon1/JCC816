@@ -4,6 +4,8 @@
 package C99Compiler.CompilerNodes.Expressions;
 
 import C99Compiler.CompilerNodes.ComponentNode;
+import C99Compiler.CompilerNodes.Definitions.ArrayType;
+import C99Compiler.CompilerNodes.Definitions.PointerType;
 import C99Compiler.CompilerNodes.Definitions.Type;
 import C99Compiler.CompilerNodes.Definitions.Type.CastContext;
 import C99Compiler.CompilerNodes.Dummies.DummyExpressionNode;
@@ -47,7 +49,23 @@ public class AssignmentExpressionNode extends BinaryExpressionNode
 		BaseExpressionNode sInt = super.interpret(node);
 		if (sInt != this) return sInt;
 		
-		if (!x.hasLValue(new ProgramState())) throw new ConstraintException("6.5.16", 2, node.getStart());
+		if (!x.hasLValue(new ProgramState()) || x.getType().isConstant())
+			throw new ConstraintException("6.5.16", 2, node.getStart());
+		
+		if (y.getType().isArray()) // Decay array
+			y = new CastExpressionNode(this, ((ArrayType) y.getType()).decay(), y);
+		// Test as per 6.5.16.1.1
+		Type xType = x.getType();
+		Type yType = y.getType();
+		
+		if (!operator.startsWith("+") && !operator.startsWith("-"))
+			if (!xType.canCastTo(yType, CastContext.assignment))
+				throw new ConstraintException("6.5.16.1", 1, node.getStart());
+		else
+			if (!xType.canCastFrom(yType, CastContext.assignment))
+				throw new ConstraintException("6.5.16.2", 1, node.getStart());
+		
+		
 		BinaryExpressionNode<?,?,?,?> newY = null;
 		switch (operator)
 		{
@@ -70,16 +88,10 @@ public class AssignmentExpressionNode extends BinaryExpressionNode
 			newY.y = y;
 			break;
 		case "+=":
-			newY = new AdditiveExpressionNode(this);
-			newY.x = x;
-			newY.operator = "+";
-			newY.y = y;
+			newY = new AdditiveExpressionNode(this, "+", x, y);
 			break;
 		case "-=":
-			newY = new AdditiveExpressionNode(this);
-			newY.x = x;
-			newY.operator = "-";
-			newY.y = y;
+			newY = new AdditiveExpressionNode(this, "-", x, y);
 			break;
 		case "<<=":
 			newY = new ShiftExpressionNode(this);
@@ -166,26 +178,11 @@ public class AssignmentExpressionNode extends BinaryExpressionNode
 		
 //		if (!y.getType().canCastTo(x.getType()))
 //			throw new TypeMismatchException(y.getType(), x.getType());
-		if (y.hasAssembly(state) && !x.getType().isTwice())
+		if (y.hasAssembly(state))
 		{
 			sourceY = x.getLValue(state).getSource();
 			state = state.setDestSource(sourceY);
 			tmpPair = y.getAssemblyAndState(state);
-			assembly += tmpPair.assembly;
-			state = tmpPair.state;
-		}
-		else if (y.hasAssembly(state))
-		{
-			state = state.reserveScratchBlock(x.getSize());
-			ScratchSource scratchX = state.lastScratchSource();
-			state = state.setDestSource(x.getLValue(state).getSource());
-			tmpPair = y.getAssemblyAndState(state);
-			assembly += tmpPair.assembly;
-			state = tmpPair.state;
-			if (!y.hasLValue(state)) sourceY = scratchX;
-			else sourceY = y.getLValue(state).castTo(x.getType()).getSource();
-			ByteCopier copier = new ByteCopier(x.getLValue(state).getSize(), x.getLValue(state).getSource(), sourceY);
-			tmpPair = copier.getAssemblyAndState(state);
 			assembly += tmpPair.assembly;
 			state = tmpPair.state;
 		}
@@ -208,7 +205,12 @@ public class AssignmentExpressionNode extends BinaryExpressionNode
 		}
 		
 		if (y.hasPropValue(state) && !x.isIndirect() && !x.getType().isVolatile())
-			state = state.setPossibleValue(x.getLValue(state), y.getPropValue(state));
+		{
+			if (x.getType().isArithmetic())
+				state = state.setPossibleValue(x.getLValue(state), y.getPropLong(state, x.getType()));
+			else
+				state = state.setPossibleValue(x.getLValue(state), y.getPropValue(state));
+		}
 
 		return new AssemblyStatePair(assembly, state);
 	}

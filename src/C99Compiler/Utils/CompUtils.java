@@ -11,6 +11,7 @@ import java.util.regex.Pattern;
 import C99Compiler.CompConfig;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
@@ -33,7 +34,8 @@ public final class CompUtils
 		for (String option : options)
 			if (size <= CompConfig.sizeOf(option.split(" ")))
 			{
-				specifiers.add(option);
+				for (String subOption : option.split(" "))
+					specifiers.add(subOption);
 				break;
 			}
 		return new DummyType(specifiers);
@@ -62,17 +64,97 @@ public final class CompUtils
 	{
 		return getSmallestType(value.longValue());
 	}
+	public static boolean fitsInType(long value, Type type)
+	{
+		if (type.isSigned())
+		{
+			long min = -(long) Math.pow(2, 8 * type.getSize()) / 2;
+			long max = -min - 1;
+			return (min <= value) && (value <= max);
+		}
+		else
+		{
+			long max = (long) Math.pow(2, 8 * type.getSize()) - 1;
+			if (value < 0) value = 2 * -value;
+			return value <= max;
+		}
+	}
+	public static Type getLiteralType(String literal)
+	{
+		if (literal.contains("'")) // Character constant
+			return new DummyType("char");
+		
+		literal = literal.toLowerCase();
+		List<Type> typeList = new LinkedList<Type>();
+		long value = parseLiteral(literal).longValue();
+		int signedMode = 0; // 0 - only signed 1 - only unsigned 2 - both
+		
+		if (literal.startsWith("0x") || literal.startsWith("0") || literal.startsWith("0b")) // Hex or octal or binary
+			signedMode = 2;
+		
+		String suffix = "";
+		while (true)
+		{
+			if (literal.endsWith("u"))
+				suffix = suffix + "u";
+			else if (literal.endsWith("h"))
+				suffix = suffix + "h";
+			else if (literal.endsWith("l"))
+				suffix = suffix + "l";
+			else
+				break;
+			
+			literal = literal.substring(0, literal.length() - 1);
+		}
+		
+		if (suffix.contains("u"))
+		{
+			signedMode = 1;
+			suffix = suffix.replace("u", "");
+		}
+		switch (suffix)
+		{
+		case "hh":
+			if (signedMode != 1) typeList.add(new DummyType("char"));
+			if (signedMode != 0) typeList.add(new DummyType("unsigned", "char"));
+		case "h":
+			if (signedMode != 1) typeList.add(new DummyType("short"));
+			if (signedMode != 0) typeList.add(new DummyType("unsigned", "short"));
+		default:
+			if (signedMode != 1) typeList.add(new DummyType("int"));
+			if (signedMode != 0) typeList.add(new DummyType("unsigned", "int"));
+		case "l":
+			if (signedMode != 1) typeList.add(new DummyType("long"));
+			if (signedMode != 0) typeList.add(new DummyType("unsigned", "long"));
+		case "ll":
+			if (signedMode != 1) typeList.add(new DummyType("long", "long"));
+			if (signedMode != 0) typeList.add(new DummyType("unsigned", "long", "long"));
+		}
+		for (Type type : typeList)
+		{
+			if (fitsInType(value, type))
+				return type;
+		}
+		return new DummyType("int");
+	}
 	public static Number parseLiteral(String literal)
 	{
+		literal = literal.toLowerCase();
+		if (literal.contains("'")) // Character constant
+			return Long.valueOf((int) processEscapes(literal.substring(1, literal.length() - 1)).charAt(0));
+		literal = literal.replace("h", "");
+		literal = literal.replace("l", "");
+		literal = literal.replace("u", "");
 		if (literal.startsWith("0x")) // Hex;
 			return Long.valueOf(literal.substring(2), 16);
-		else if (literal.startsWith("0")) // Octal???
+		if (literal.startsWith("0b")) // Binary;
+			return Long.valueOf(literal.substring(2), 2);
+		else if (literal.startsWith("0")) // Octal
 			return Long.valueOf(literal, 8);
-		else if (literal.contains("'")) // Character constant
-			return Long.valueOf((int) processEscapes(literal.substring(1, literal.length() - 1)).charAt(0));
-		else // TODO, assume decimal for now
+		else // Decimal
 			return Long.valueOf(literal);	
 	}
+	
 	
 	public static final boolean isInZeroPage(String label)
 	{

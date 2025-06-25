@@ -255,7 +255,7 @@ public class ComponentNode<C extends ComponentNode<C>> implements Serializable
 		else
 		{
 			fullName += "@" + getTranslationUnit().getStaticUUID();
-			if (getTranslationUnit().resolveVariable(fullName) != null)
+			if (getTranslationUnit().resolveFunction(fullName) != null)
 				return getTranslationUnit().resolveFunction(fullName);
 		}
 		if (parent != null) return parent.resolveFunctionRelative(name);

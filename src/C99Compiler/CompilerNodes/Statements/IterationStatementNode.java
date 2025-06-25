@@ -218,11 +218,14 @@ public class IterationStatementNode extends SequencePointStatementNode<Iteration
 			{
 				state = state.setDestSource(null);
 				state = state.reserveScratchBlock(condExpNode.getSize());
-				tmpPair = getAssemblyAndStateWithRegistered(state, new EqualityExpressionNode(this, condExpNode));
+				if (condExpNode.isLogical())
+					tmpPair = getAssemblyAndStateWithRegistered(state, condExpNode);
+				else
+					tmpPair = getAssemblyAndStateWithRegistered(state, new EqualityExpressionNode(this, condExpNode, "!="));
 				assembly += tmpPair.assembly;
 				state = tmpPair.state;
-	
-				assembly += whitespace + "BEQ\t:+\n";
+				assembly += whitespace + "CMP\t#$00\n";
+				assembly += whitespace + "BNE" + "\t:+\n";
 				assembly += whitespace + "JMP\t" + getEndLabel() + "\n";
 				assembly += whitespace + ":\n";
 			}
@@ -249,10 +252,14 @@ public class IterationStatementNode extends SequencePointStatementNode<Iteration
 			assembly += whitespace + getIterLabel() + ":\n";
 
 			state = state.setDestSource(null);
-			tmpPair = getAssemblyAndStateWithRegistered(state, new EqualityExpressionNode(this, condExpNode));
+			if (condExpNode.isLogical())
+				tmpPair = getAssemblyAndStateWithRegistered(state, condExpNode);
+			else
+				tmpPair = getAssemblyAndStateWithRegistered(state, new EqualityExpressionNode(this, condExpNode, "!="));
+			
 			assembly += tmpPair.assembly;
 			state = tmpPair.state;
-			
+			assembly += whitespace + "CMP\t#$00\n";
 			assembly += whitespace + "BEQ\t" + getEndLabel() + "\n";
 			assembly += whitespace + "JMP\t" + getStartLabel() + "\n";
 			assembly += whitespace + getEndLabel() + ":\n";
@@ -288,7 +295,7 @@ public class IterationStatementNode extends SequencePointStatementNode<Iteration
 					state = state.setDestSource(null);
 					tmpPair = getAssemblyAndStateWithRegistered(state, new EqualityExpressionNode(this, condExpNode));
 					// Jump to end if equality is 1, i. e. result is 0
-					tmpPair = new ComparitiveJump(stmNode, null, getEndLabel(), null, false).apply(tmpPair);					
+					tmpPair = new ComparitiveJump(stmNode, null, getEndLabel(), null, false).apply(tmpPair);
 					assembly += tmpPair.assembly;
 					assembly = assembly.substring(0, assembly.lastIndexOf('\n', assembly.length() - 2) + 1); // Remove last line
 					state = tmpPair.state;

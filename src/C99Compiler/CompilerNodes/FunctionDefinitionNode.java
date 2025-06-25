@@ -9,8 +9,10 @@ import Grammar.C99.C99Parser.Declaration_specifiersContext;
 import Grammar.C99.C99Parser.DeclaratorContext;
 import Grammar.C99.C99Parser.Direct_declaratorContext;
 import Grammar.C99.C99Parser.Function_definitionContext;
+import Grammar.C99.C99Parser.IdentifierContext;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -28,7 +30,10 @@ import C99Compiler.CompConfig.OptimizationLevel;
 import C99Compiler.ASMGrapher.ASMGraphBuilder;
 import C99Compiler.CompilerNodes.Declarations.DeclarationSpecifiersNode;
 import C99Compiler.CompilerNodes.Declarations.DeclaratorNode;
+import C99Compiler.CompilerNodes.Declarations.DeclaratorNode.DeclaratorInfo;
 import C99Compiler.CompilerNodes.Declarations.InitializerNode;
+import C99Compiler.CompilerNodes.Declarations.ParameterDeclarationNode;
+import C99Compiler.CompilerNodes.Definitions.FunctionType;
 import C99Compiler.CompilerNodes.Definitions.Type;
 import C99Compiler.CompilerNodes.Interfaces.UnvaluedAssemblableNode;
 import C99Compiler.CompilerNodes.Interfaces.NamedNode;
@@ -70,7 +75,7 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 	public FunctionDefinitionNode interpret(Function_definitionContext node) throws Exception
 	{
 		for (Attributes_declarationContext attributes_declaration : node.attributes_declaration())
-			for (TerminalNode attribute : attributes_declaration.identifier_list().Identifier())
+			for (IdentifierContext attribute : attributes_declaration.identifier_list().identifier())
 				attributes.add(attribute.getText());
 
 		specifiers = new DeclarationSpecifiersNode(this).interpret(node.declaration_specifiers()).getSpecifiers();
@@ -79,10 +84,13 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 		type = Type.manufacture(specifiers, signature, node.declaration_specifiers().start);
 
 		if (type.isArray()) throw new ConstraintException("6.9.1", 3, node.start);
+		Type retType = ((FunctionType) type).getType();
 		if (getName().equals(CompConfig.mainName)) // If main
-			if (!getType().getSignature().equals("void()")) // Must be void with no arguments
+		{
+			if (!retType.isVoid() || signature.getChildVariables().size() != 0) // Must be void with no arguments
 				throw new UnsupportedFeatureException("Function \"main\" having a signature other than \"void()\"", true, node.start);
-
+		}
+		
 		code = new CompoundStatementNode(this, getName()).interpret(node.compound_statement());
 		
 		if (attributes.contains(Attributes.interruptCOP))
@@ -98,17 +106,21 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 			
 		return this;
 	}
-	public FunctionDefinitionNode interpret(Declaration_specifiersContext declarationSpecifiers, DeclaratorContext declarator) throws Exception // Load from declaration
+	public FunctionDefinitionNode interpret(Collection<Attributes_declarationContext> attributes, Declaration_specifiersContext declarationSpecifiers, DeclaratorContext declarator) throws Exception // Load from declaration
 	{
+		for (Attributes_declarationContext attributes_declaration : attributes)
+			for (IdentifierContext attribute : attributes_declaration.identifier_list().identifier())
+				this.attributes.add(attribute.getText());
 		specifiers = new DeclarationSpecifiersNode(this).interpret(declarationSpecifiers).getSpecifiers();
 		signature = new DeclaratorNode(this, getName(declarator.direct_declarator())).interpret(declarator);
 
 		type = Type.manufacture(specifiers, signature, declarationSpecifiers.start);
 
 		if (type.isArray()) throw new ConstraintException("6.9.1", 3, declarator.start);
-		if (getName().equals(CompConfig.mainName)) // If main
-			if (!getType().getSignature().equals("void()")) // Must be void with no arguments
-				throw new UnsupportedFeatureException("Function \"main\" having a signature other than \"void()\"", true, declarator.start);
+// Below only applies to definitions, not declarations
+//		if (getName().equals(CompConfig.mainName)) // If main
+//			if (!getType().getSignature().equals("void()")) // Must be void with no arguments
+//				throw new UnsupportedFeatureException("Function \"main\" having a signature other than \"void()\"", true, declarator.start);
 
 		return this;
 	}
@@ -122,9 +134,9 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 	}
 	private String getName(Direct_declaratorContext node)
 	{
-		while (node.Identifier() == null)
+		while (node.identifier() == null)
 			node = node.direct_declarator();
-		return node.Identifier().getText();
+		return node.identifier().getText();
 	}
 	
 	@Override
@@ -166,6 +178,10 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 	{
 		return Attributes.isInterrupt(attributes);
 	}
+	public boolean isOptional()
+	{
+		return attributes.contains(Attributes.optional);
+	}
 	private boolean isISR()
 	{
 		if (this.implementation != null) return this.implementation.isISR();
@@ -175,6 +191,26 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 	{
 		if (this.implementation != null) return this.implementation.isSA1();
 		else return attributes.contains(Attributes.SA1);
+	}
+	public boolean needsA8()
+	{
+		if (this.implementation != null) return this.implementation.needsA8();
+		else return attributes.contains(Attributes.A8);
+	}
+	public boolean needsA16()
+	{
+		if (this.implementation != null) return this.implementation.needsA16();
+		else return attributes.contains(Attributes.A16);
+	}
+	public boolean needsXY8()
+	{
+		if (this.implementation != null) return this.implementation.needsA8();
+		else return attributes.contains(Attributes.XY8);
+	}
+	public boolean needsXY16()
+	{
+		if (this.implementation != null) return this.implementation.needsA8();
+		else return attributes.contains(Attributes.XY16);
 	}
 	public boolean isInline()
 	{
@@ -263,6 +299,14 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 		pair.assembly += pair.state.getWhitespace() + getStartLabel() + ":" + "\t; " + CompConfig.functionTag + 
 				(DebugLevel.isAtLeast(DebugLevel.medium) ? " " + getType().getSignature() : "") + 
 				"\n";
+		if (isInterruptHandler() && !attributes.contains(Attributes.noISR2))
+		{
+			pair.assembly += pair.state.getWhitespace() + "REP\t#$30\n";
+			pair.state = pair.state.setProcessorFlags((byte) (ProcessorFlag.M | ProcessorFlag.I));
+			pair.assembly += pair.state.getWhitespace() + "PHY\n";
+			pair.assembly += pair.state.getWhitespace() + "PHX\n";
+			pair.assembly += pair.state.getWhitespace() + "PHA\n";
+		}
 		if (isInterruptHandler() && isISR()) // Have to push *everything* to the stack
 		{
 			// Using MVP to save space
@@ -322,7 +366,20 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 			pair.assembly += pair.state.getWhitespace() + "TXS\n";			// Move stack to new location
 		}
 		
-		pair.assembly += pair.state.getWhitespace() + getEndLabel() + ": " + (isInterruptHandler() && !attributes.contains(Attributes.noISR2) ? "RTI\n" : "RTL") + "\n";
+		pair.assembly += pair.state.getWhitespace() + getEndLabel() + ":\n";
+		if (isInterruptHandler() && !attributes.contains(Attributes.noISR2))
+		{
+			pair.assembly += pair.state.getWhitespace() + "REP\t#$30\n";
+			pair.state = pair.state.setProcessorFlags((byte) (ProcessorFlag.M | ProcessorFlag.I));
+			pair.assembly += pair.state.getWhitespace() + "PLA\n";
+			pair.assembly += pair.state.getWhitespace() + "PLX\n";
+			pair.assembly += pair.state.getWhitespace() + "PLY\n";
+			pair.assembly += pair.state.getWhitespace() + "RTI\n";
+		}
+		else
+		{
+			pair.assembly += pair.state.getWhitespace() + "RTL\n";
+		}
 		
 ;//		ScratchManager.releasePointers();
 

@@ -104,8 +104,8 @@ public class LORExpressionNode extends LogicalBinaryExpressionNode
 			assembly += tmpPair.assembly;
 			state = tmpPair.state;
 		}
-		assembly += AssemblyUtils.restore(state, (byte) (PreserveFlag.A | PreserveFlag.X));
 		state = state.setPreserveFlags(flags);
+		assembly += AssemblyUtils.restore(state, (byte) (PreserveFlag.A | PreserveFlag.X));
 		
 		return new AssemblyStatePair(assembly, state);
 	}

@@ -24,13 +24,13 @@ public class ByteCopier extends BytewiseOperator
 	}
 	public ByteCopier(OperandSource sourceTo, OperandSource sourceFrom, boolean reversed)
 	{
-		super(Math.max(sourceTo.getSize(), sourceFrom.getSize()), Math.min(sourceTo.getSize(), sourceFrom.getSize()), reversed);
+		super(sourceTo.getSize(), Math.min(sourceTo.getSize(), sourceFrom.getSize()), reversed);
 		this.sourceFrom = sourceFrom;
 		this.sourceTo = sourceTo;
 	}
 	public ByteCopier(OperandSource sourceTo, OperandSource sourceFrom)
 	{
-		super(Math.max(sourceTo.getSize(), sourceFrom.getSize()), Math.min(sourceTo.getSize(), sourceFrom.getSize()), false);
+		super(sourceTo.getSize(), Math.min(sourceTo.getSize(), sourceFrom.getSize()), false);
 		this.sourceFrom = sourceFrom;
 		this.sourceTo = sourceTo;
 	}

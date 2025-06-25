@@ -112,7 +112,11 @@ CC extends ParserRuleContext
 		byte pFlags = state.getPreserveFlags();
 		assembly += AssemblyUtils.store(state, ProgramState.PreserveFlag.A);
 		state = state.clearPreserveFlags(ProgramState.PreserveFlag.A);
-		
+
+		if (y.hasPropValue(state) && sourceY.getSize() < sourceX.getSize())
+			sourceY = sourceY.respec(sourceX.getSize());
+		if (x.hasPropValue(state) && sourceX.getSize() < sourceY.getSize())
+			sourceX = sourceX.respec(sourceY.getSize());
 		AssemblyStatePair tmpPair = new SignExtender(sourceX, sourceY, x.getType().isSigned(), y.getType().isSigned()).getAssemblyAndState(state);
 		assembly += tmpPair.assembly;
 		state = tmpPair.state;
@@ -130,9 +134,15 @@ CC extends ParserRuleContext
 		assembly += tmpPair.assembly;
 		state = tmpPair.state;
 		
-		if (size1 < destSource.getSize())
+		if (size1 < destSource.getSize() && !destSource.isStationary())
 		{
 			ZeroCopier zeroCopier = new ZeroCopier(destSource.getSize() - size1, destSource.getShifted(size1), false);
+			assembly += zeroCopier.getAssembly(state);
+			state = zeroCopier.getStateAfter(state);
+		}
+		else if (size1 < destSource.getSize())
+		{
+			ZeroCopier zeroCopier = new ZeroCopier(destSource.getSize() - size1, destSource, false);
 			assembly += zeroCopier.getAssembly(state);
 			state = zeroCopier.getStateAfter(state);
 		}

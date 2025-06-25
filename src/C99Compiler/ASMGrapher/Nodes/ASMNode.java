@@ -9,7 +9,7 @@ import java.util.List;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
-import C99Compiler.ASMGrapher.Address;
+import C99Compiler.ASMGrapher.Value;
 
 public abstract class ASMNode<C extends ParserRuleContext>
 {
@@ -35,6 +35,7 @@ public abstract class ASMNode<C extends ParserRuleContext>
 	
 	protected static int procNumber(String text)
 	{
+		text = text.replaceAll("[zaf]:", "");
 		if (text.contains("$"))
 			return Integer.valueOf(text.replace("$", ""), 16);
 		else
@@ -101,7 +102,7 @@ public abstract class ASMNode<C extends ParserRuleContext>
 	public abstract byte affectedFlags();
 	public abstract boolean affectsParameter();
 	
-	public abstract Address getAddress();
+	public abstract Value getValue();
 	public abstract int getImmediate();
 	
 	public abstract ASMType getType();

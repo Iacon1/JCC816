@@ -36,7 +36,7 @@ public class JumpStatementNode extends StatementNode<Jump_statementContext> impl
 		switch (node.getChild(0).getText())
 		{
 		case "goto":
-			gotoLabel = node.Identifier().getText();
+			gotoLabel = node.identifier().getText();
 			funcNode = getEnclosingFunction();
 			mode = Mode.gotoM;
 			break;
@@ -109,11 +109,13 @@ public class JumpStatementNode extends StatementNode<Jump_statementContext> impl
 			if (expr != null && expr.hasAssembly(state))
 			{
 				state = state.setDestSource(s);
-				assembly += expr.getAssembly(state);
+				AssemblyStatePair tmpPair = expr.getAssemblyAndState(state);
+				assembly += tmpPair.assembly;
+				state = tmpPair.state;
 			}
 			else if (expr != null && expr.hasPropValue(state))
 			{
-				ByteCopier copier = new ByteCopier(funcNode.getSize(), s, new ConstantSource(expr.getPropLong(state), funcNode.getSize()));
+				ByteCopier copier = new ByteCopier(funcNode.getSize(), s, new ConstantSource(expr.getPropValue(state), funcNode.getSize()));
 				AssemblyStatePair tmpPair = copier.getAssemblyAndState(state);
 				assembly += tmpPair.assembly;
 				state = tmpPair.state;

@@ -3,8 +3,10 @@
 //
 package C99Compiler.CompilerNodes.Interfaces;
 
+import C99Compiler.CompConfig.VerbosityLevel;
 import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.FunctionDefinitionNode;
+import C99Compiler.CompilerNodes.Definitions.Type;
 import C99Compiler.Utils.ProgramState;
 import C99Compiler.Utils.PropPointer;
 import Shared.Assemblable;
@@ -26,6 +28,22 @@ public interface AssemblableNode extends Assemblable
 	public default long getPropLong(ProgramState state)
 	{
 		try {return ((Number) getPropValue(state)).longValue();}
+		catch (Exception e) {return 0;}
+	}
+	public default long getPropLong(ProgramState state, Type type)
+	{
+		try
+		{
+			int length = type.getSize();
+			boolean signed = type.isSigned();
+			long mask1 = (long) Math.pow(2, 8*length) - 1;
+			long mask2 = (long) Math.pow(2, 8*length - 1);
+			long n = ((Number) getPropValue(state)).longValue();
+			n &= mask1;
+			if ((n & mask2) != 0 && signed)
+				n = -(mask1 & ~n) - 1;
+			return n;
+		}
 		catch (Exception e) {return 0;}
 	}
 	@Deprecated

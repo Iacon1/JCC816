@@ -162,6 +162,19 @@ public class JCC816
 				.build();
 		options.addOption(option);
 		
+		option = Option.builder("b")
+				.longOpt("bss")
+				.desc("Reserves a BSS segment of specified size.")
+				.numberOfArgs(1)
+				.build();
+		options.addOption(option);
+		
+		option = Option.builder()
+				.longOpt("show-parse-tree")
+				.desc("Displays a parse tree for every translation unit compiled.")
+				.build();
+		options.addOption(option);
+		
 		return options;
 	}
 	
@@ -369,6 +382,8 @@ public class JCC816
 			CompConfig.cacheSearches = false;
 		if (commandLine.hasOption("no-static-initialization"))
 			CompConfig.initializeStatics = false;
+		if (commandLine.hasOption("show-parse-tree"))
+			CompConfig.showParseTree = true;
 		
 		if (commandLine.hasOption("l") || commandLine.hasOption("s")) // Link to executable or to assembly
 		{	
@@ -402,7 +417,10 @@ public class JCC816
 			
 			builder.addUnits(translationUnits.values().toArray(new TranslationUnit[] {}));
 
-			MemorySize memorySize = new MemorySize(0, 0, 0, false);
+			int BSSSize = 0;
+			if (commandLine.hasOption("b"))
+				BSSSize = Integer.valueOf(commandLine.getOptionValue("b"));
+			MemorySize memorySize = new MemorySize(0, 0, 0, BSSSize, false);
 
 			if (commandLine.hasOption("l")) // Executable
 			{

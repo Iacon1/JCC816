@@ -3,6 +3,8 @@
 	<property name="src" location="src"/>
 	<property name="bin" location="bin"/>
 	<property name="test_bin" location="bin"/>
+    <property name="dir.buildfile" value="."/>
+    <property name="dir.jarfile" value="${dir.buildfile}"/>
 	<target name="build">
 		<exec executable="java">
 			<arg value = "org.antlr.v4.Tool"/>
@@ -35,5 +37,14 @@
 			<arg value = "${src}/Grammar/C99A3/"/>
 		</exec>
 		<javac srcdir="${src}" destdir="${bin}" debug="on"/>
+        <jar destfile="${dir.jarfile}/JCC816.jar" filesetmanifest="mergewithoutmain">
+            <manifest>
+                <attribute name="Main-Class" value="Executables.JCC816"/>
+                <attribute name="Class-Path" value="."/>
+            </manifest>
+            <fileset dir="${dir.jarfile}/bin"/>
+            <zipfileset excludes="META-INF/*.SF" src="${dir.jarfile}/lib/antlr-4.13.1-complete.jar"/>
+            <zipfileset excludes="META-INF/*.SF" src="${dir.jarfile}/lib/commons-cli-1.6.0/commons-cli-1.6.0.jar"/>
+        </jar>
 	</target>
 </project>

@@ -6,12 +6,14 @@ import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.Definitions.Type;
 import C99Compiler.CompilerNodes.Definitions.Type.CastContext;
 import C99Compiler.CompilerNodes.Dummies.DummyType;
+import C99Compiler.CompilerNodes.Statements.IterationStatementNode;
 import C99Compiler.CompilerNodes.Dummies.DummyExpressionNode;
 import C99Compiler.Utils.CompUtils;
 import C99Compiler.Utils.ProgramState;
 import C99Compiler.Utils.AssemblyUtils.AssemblyUtils;
 import C99Compiler.Utils.AssemblyUtils.BytewiseOperator;
 import C99Compiler.Utils.OperandSources.OperandSource;
+import C99Compiler.Utils.ProgramState.ProcessorFlag;
 import Grammar.C99.C99Parser.Equality_expressionContext;
 import Grammar.C99.C99Parser.Relational_expressionContext;
 
@@ -63,6 +65,13 @@ public class EqualityExpressionNode extends BinaryExpressionNode
 		this.operator = "==";
 	}
 
+	public EqualityExpressionNode(ComponentNode<?> parent, BaseExpressionNode<?> x, String operator)
+	{
+		super(parent);
+		this.x = x;
+		this.y = new DummyExpressionNode(this, x.getType(), 0);
+		this.operator = "!=";
+	}
 	@Override
 	protected BaseExpressionNode<Equality_expressionContext> getC1Node(Equality_expressionContext node) throws Exception
 	{return new EqualityExpressionNode(this).interpret(node.equality_expression());}
@@ -123,9 +132,23 @@ public class EqualityExpressionNode extends BinaryExpressionNode
 		if (state.destSource() != null)
 		{
 			assembly += state.getWhitespace() + CompUtils.setA8 + "\n";
-			AssemblyStatePair tmpPair = state.destSource().getSTA(state, 0);
+			state = state.clearProcessorFlags(ProcessorFlag.M);
+			AssemblyStatePair tmpPair;
+			tmpPair = state.destSource().getSTA(state, 0);
 			assembly += tmpPair.assembly;
 			state = tmpPair.state;
+			if (state.destSource().getSize() > 1)
+			{
+				assembly += state.getWhitespace() + "LDA\t#$00\n";
+				state = tmpPair.state;
+			}
+			for (int i = 1; i < state.destSource().getSize(); ++i)
+			{
+				
+				tmpPair = state.destSource().getSTA(state, i);
+				assembly += tmpPair.assembly;
+				state = tmpPair.state;
+			}
 		}
 		
 		state = state.addPreserveFlags(flags);

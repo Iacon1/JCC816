@@ -67,8 +67,8 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 				this.embName = node.Header_name().getText();
 			else if (node.String_literal() != null)
 				this.embName = node.String_literal().getText();
-			if (node.Identifier() != null)
-				this.identifier = node.Identifier().getText();
+			if (node.identifier() != null)
+				this.identifier = node.identifier().getText();
 			operator = node.getChild(0).getText();
 			
 			if ((operator.equals("++") || operator.equals("--")) && !expr.hasLValue(new ProgramState()))
@@ -77,6 +77,15 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 			{
 				if (((PostfixExpressionNode) expr).getPFType() == PFType.funcCall || !expr.hasLValue(new ProgramState()))
 					throw new ConstraintException("6.5.3.2", 1, node.start);
+			}
+		}
+		ProgramState state = new ProgramState();
+		if (operator.equals("&") && expr.hasPropValue(state))
+		{
+			if (FunctionDefinitionNode.class.isAssignableFrom(expr.getPropValue(state).getClass())) // A function pointer
+			{
+				FunctionDefinitionNode func = (FunctionDefinitionNode) expr.getPropValue(state);
+				func.requireStackLoader();
 			}
 		}
 		return this;
@@ -94,7 +103,14 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 		{
 			return new PointerType(expr.getType());
 		}
-		else return expr.getType();
+		else if (operator.equals("sizeof") || operator.equals("defined") || operator.equals("__has_embed") || operator.equals("__offset_of"))
+		{
+			return new DummyType("unsigned", "int");
+		}
+		else if (operator.equals("+") || operator.equals("-"))
+			return expr.getType().promote();
+		else
+			return expr.getType();
 	}
 	@Override public boolean isIndirect()
 	{
@@ -116,7 +132,7 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 				return ((UnaryExpressionNode) expr).expr.hasLValue(state);
 			else return false;
 		}
-		else return expr.hasLValue(state);
+		else return false;
 	}
 
 	@Override
@@ -126,12 +142,12 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 		{
 			if (UnaryExpressionNode.class.isAssignableFrom(expr.getClass()) && ((UnaryExpressionNode) expr).operator.equals("&"))
 				return ((UnaryExpressionNode) expr).expr.getLValue(state); // These two cancel each other out
-			else if (expr.hasPropValue(new ProgramState()))
+			else if (expr.hasPropValue(state))
 			{
-				if (expr.getPropPointer(new ProgramState()) != null) // Pointer
-					return new DummyVariableNode(this, getType(), new ConstantSource(expr.getPropPointer(new ProgramState()), getSize()));
-				else if (expr.getPropLong(new ProgramState()) != 0) // Numeric
-					return new DummyVariableNode(this, getType(), new NumericAddressSource((int) expr.getPropLong(new ProgramState()), getSize()));
+				if (expr.getPropPointer(state) != null) // Pointer
+					return (LValueNode<?>) expr.getPropPointer(state).getNode();
+				else if (expr.getPropLong(state) != 0) // Numeric
+					return new DummyVariableNode(this, getType(), new NumericAddressSource((int) expr.getPropLong(state), getSize()));
 				else return null;
 			}
 			else
@@ -144,7 +160,7 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 				return ((UnaryExpressionNode) expr).expr.getLValue(state); // These two cancel each other out
 			else return null;
 		}
-		else return expr.getLValue(state);
+		else return null;
 	}
 
 	@Override
@@ -159,10 +175,15 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 		else if (operator.equals("*"))
 			if (expr.hasPropValue(state)) // if expr can only point to one thing...
 			{
-				VariableNode n = ((PropPointer<VariableNode>) expr.getPropValue(state)).getNode();
-				if (state.getOnlyValue(n) != null)
-					return true;
-				else return false;
+				if (PropPointer.class.isAssignableFrom(expr.getPropValue(state).getClass())) // Is it a prop-pointer?
+				{
+					VariableNode n = ((PropPointer<VariableNode>) expr.getPropValue(state)).getNode();
+					if (state.getOnlyValue(n) != null)
+						return true;
+					else return false;
+				}
+				else
+					return false;
 			}
 			else return false;
 		else if (operator.equals("&"))
@@ -193,7 +214,7 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 		}
 		else if (operator.equals("-")) return Long.valueOf(-1 * expr.getPropLong(state));
 		else if (operator.equals("~")) return Long.valueOf(~expr.getPropLong(state));
-		else if (operator.equals("!")) return Boolean.valueOf(expr.getPropBool(state));
+		else if (operator.equals("!")) return !Boolean.valueOf(expr.getPropBool(state));
 		else if (operator.equals("*"))
 		{
 			VariableNode n = ((PropPointer<VariableNode>) state.getOnlyValue(expr.getLValue(state))).getNode();
@@ -221,14 +242,19 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 	@Override
 	public boolean hasAssembly(ProgramState state)
 	{
-		if (operator.equals("*")) return expr.hasAssembly(state) || !expr.hasPropValue(state);
+		if (operator.equals("*"))
+			return true;// || !expr.hasPropValue(state);
 		else if (operator.equals("&"))
 			return expr.hasAssembly(state) || PostfixExpressionNode.class.isAssignableFrom(expr.getClass());
 		else if (!operator.equals("++") && !operator.equals("--"))
 			return (expr == null ? false : expr.hasAssembly(state)) || !hasPropValue(state);
 		else return true;
 	}
-
+	@Override
+	public boolean isLogical()
+	{
+		return operator.equals("!");
+	}
 	@Override
 	public ProgramState getStateBefore(ProgramState state, ComponentNode<?> child) throws Exception
 	{
@@ -245,111 +271,90 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 	{
 		ProgramState oState = state;
 		AdditiveExpressionNode tmpNode;
-		AssemblyStatePair tmpPair;
+		MutableAssemblyStatePair pair = new MutableAssemblyStatePair("", state);
 		ByteCopier copier;
-		OperandSource destSource = state.destSource();
-		String whitespace = state.getWhitespace();
-		String assembly = "";
-		OperandSource sourceX;
-		ScratchSource scratchX;
-		if (expr.hasAssembly(state))
+		OperandSource destSource = pair.state.destSource();
+		OperandSource sourceX = null;
+		ScratchSource scratchX = null;
+		switch (operator) // Do we need to evaluate expression before beginning logic?
 		{
-			state = state.reserveScratchBlock(expr.getSize());
-			scratchX = state.lastScratchSource();
-			state = state.setDestSource(scratchX);
-			tmpPair = expr.getAssemblyAndState(state);
-			assembly += tmpPair.assembly;
-			state = tmpPair.state;
-			
-			if (expr.hasLValue(state))
+		case "-": case "~": case "!": break;
+		default:
+			if (expr.hasAssembly(state))
+			{
+				pair.state = pair.state.reserveScratchBlock(expr.getSize());
+				scratchX = pair.state.lastScratchSource();
+				pair.state = pair.state.setDestSource(scratchX);
+				pair = expr.apply(pair);
+	
+				if (expr.hasLValue(state))
+					sourceX = expr.getLValue(state).getSource();
+				else sourceX = scratchX;
+			}
+			else if (expr.hasPropValue(state) && !(operator.equals("++") || operator.equals("--"))) // These two need LValue
+				sourceX = new ConstantSource(expr.getPropValue(state), expr.getType().getSize());
+			else if (expr.hasLValue(state))
 				sourceX = expr.getLValue(state).getSource();
-			else sourceX = scratchX;
+			else sourceX = null;
 		}
-		else if (expr.hasPropValue(state) && !(operator.equals("++") || operator.equals("--"))) // These two need LValue
-			sourceX = new ConstantSource(expr.getPropValue(state), expr.getType().getSize());
-		else if (expr.hasLValue(state))
-			sourceX = expr.getLValue(state).getSource();
-		else sourceX = null;
-
-		
 		DummyExpressionNode dX = new DummyExpressionNode(this, expr.getType(), 1);
 		switch (operator)
 		{
 		case "++": case "--":
-			tmpNode = new AdditiveExpressionNode((operator.equals("++") ? "+" : "-"), expr, dX);
+			tmpNode = new AdditiveExpressionNode(this, (operator.equals("++") ? "+" : "-"), expr, dX);
 			if (tmpNode.hasPropValue(state))
 			{
-				tmpPair = new ByteCopier(sourceX.getSize(), sourceX, new ConstantSource(tmpNode.getPropValue(state), sourceX.getSize())).getAssemblyAndState(state);
-				state = state.setPossibleValue(expr.getLValue(state), tmpNode.getPropValue(state));
+				pair = new ByteCopier(sourceX.getSize(), sourceX, new ConstantSource(tmpNode.getPropValue(state), sourceX.getSize())).apply(pair);
+				pair.state = pair.state.setPossibleValue(expr.getLValue(state), tmpNode.getPropValue(state));
 			}
 			else
 			{
-				state = state.setDestSource(sourceX);
-				tmpPair = tmpNode.getAssemblyAndState(state);
-				state = state.setDestSource(destSource);
+				pair.state = pair.state.setDestSource(sourceX);
+				pair = tmpNode.apply(pair);
+				pair.state = pair.state.setDestSource(destSource);
 			}
-				
-			assembly += tmpPair.assembly;
-			state = tmpPair.state;
-			
+							
 			if (destSource != null && !destSource.equals(sourceX))
 			{
 				if (tmpNode.hasPropValue(state))
 					copier = new ByteCopier(sourceX.getSize(), destSource, tmpNode.getPropValue(state));
 				else
 					copier = new ByteCopier(sourceX.getSize(), destSource, sourceX);
-				tmpPair = copier.getAssemblyAndState(state);
-				assembly += tmpPair.assembly;
-				state = tmpPair.state;
+				pair = copier.apply(pair);
 			}
 			break;
 		case "-": // -x = ~(x-1)
 			if (destSource != null)
 			{
 				dX = new DummyExpressionNode(this, expr.getType(), 0);
-				tmpPair = new AdditiveExpressionNode("-", dX, expr).getAssemblyAndState(state);
-				sourceX = destSource;
-				assembly += tmpPair.assembly;
-				state = tmpPair.state;
+				pair = new AdditiveExpressionNode(this, "-", dX, expr).apply(pair);
 			}
 			break;
 		case "~":
 			if (destSource != null)
 			{
-				// TODO
-				tmpPair = new XOrExpressionNode(this).getAssemblyAndState(state);
-				assembly += tmpPair.assembly;
-				state = tmpPair.state;
+				dX = new DummyExpressionNode(this, expr.getType(), Long.valueOf("FF".repeat(expr.getSize()), 16));
+				pair = new XOrExpressionNode(this, expr, dX).apply(pair);
 			}
 			break;
 		case "!":
-			if (destSource != null)
-			{
-				// TODO
-				tmpPair = new EqualityExpressionNode(this, expr).getAssemblyAndState(state);
-				assembly += tmpPair.assembly;
-				state = tmpPair.state;
-			}
+			pair = new EqualityExpressionNode(this, expr).apply(pair);
 			break;
 		case "*":
 			ScratchSource sourceI;
 			if (!state.hasPointer(sourceX))
 			{
-				state = state.reservePointer(sourceX);
-				sourceI = state.lastScratchSource();
+				pair.state = pair.state.reservePointer(sourceX);
+				sourceI = pair.state.lastScratchSource();
 				copier = new ByteCopier(CompConfig.pointerSize, sourceI, sourceX);
-				tmpPair = copier.getAssemblyAndState(state);
-				assembly += tmpPair.assembly;
-				state = tmpPair.state;
+				pair = copier.apply(pair);
 			}
 			else sourceI = state.getPointer(sourceX);
-			indirect = new IndirectLValueNode(this, sourceX, getType());
+			indirect = new IndirectLValueNode(this, sourceI, getType());
 			if (destSource != null)
 			{
 				copier = new ByteCopier(((PointerType) expr.getType()).getType().getSize(), destSource, indirect.getSource());
-				tmpPair = copier.getAssemblyAndState(state);
-				assembly += tmpPair.assembly;
-				state = tmpPair.state;
+				pair = copier.apply(pair);
 			}
 			break;
 		case "&":
@@ -358,14 +363,12 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 				{
 					PropPointer<LValueNode<?>> p = new PropPointer<LValueNode<?>>(expr.getLValue(state), 0);
 					copier = new ByteCopier(CompConfig.pointerSize, destSource, new ConstantSource(p, CompConfig.pointerSize));
-					tmpPair = copier.getAssemblyAndState(state);
-					assembly += tmpPair.assembly;
-					state = tmpPair.state;
+					pair = copier.apply(pair);
 				}
 			break;
 		default: return new AssemblyStatePair("", oState);
 		}
-		state = state.setDestSource(destSource);
-		return new AssemblyStatePair(assembly, state);
+		pair.state = pair.state.setDestSource(destSource);
+		return pair.getImmutable();
 	}
 }

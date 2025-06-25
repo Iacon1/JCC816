@@ -38,7 +38,7 @@ public class LabeledStatementNode extends StatementNode<Labeled_statementContext
 		else
 		{
 			isCase = false;
-			label = getEnclosingFunction().getScope().getPrefix() + node.Identifier().getText();
+			label = getEnclosingFunction().getScope().getPrefix() + node.identifier().getText();
 		}
 		
 		return this;

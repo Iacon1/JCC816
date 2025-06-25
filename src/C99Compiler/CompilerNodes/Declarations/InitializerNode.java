@@ -11,14 +11,19 @@ import java.util.Map;
 
 import C99Compiler.CompConfig;
 import C99Compiler.CompilerNodes.ComponentNode;
+import C99Compiler.CompilerNodes.Dummies.DummyExpressionNode;
+import C99Compiler.CompilerNodes.Dummies.DummyType;
 import C99Compiler.CompilerNodes.FunctionDefinitionNode;
 import C99Compiler.CompilerNodes.InterpretingNode;
 import C99Compiler.CompilerNodes.Definitions.ArrayType;
+import C99Compiler.CompilerNodes.Definitions.PointerType;
 import C99Compiler.CompilerNodes.Definitions.StructUnionDefinitionNode;
 import C99Compiler.CompilerNodes.Definitions.Type;
 import C99Compiler.CompilerNodes.Expressions.AssignmentExpressionNode;
 import C99Compiler.CompilerNodes.Expressions.BaseExpressionNode;
+import C99Compiler.CompilerNodes.Expressions.CastExpressionNode;
 import C99Compiler.CompilerNodes.Expressions.ConstantExpressionNode;
+import C99Compiler.CompilerNodes.Expressions.PrimaryExpressionNode;
 import C99Compiler.CompilerNodes.Interfaces.AssemblableNode;
 import C99Compiler.CompilerNodes.Interfaces.SequencePointNode;
 import C99Compiler.CompilerNodes.Interfaces.TypedNode;
@@ -28,6 +33,7 @@ import C99Compiler.Exceptions.ConstraintException;
 import C99Compiler.Utils.ProgramState;
 import C99Compiler.Utils.AssemblyUtils.ByteCopier;
 import C99Compiler.Utils.OperandSources.ConstantSource;
+import C99Compiler.Utils.OperandSources.OperandSource;
 import Grammar.C99.C99Parser.DesignationContext;
 import Grammar.C99.C99Parser.DesignatorContext;
 import Grammar.C99.C99Parser.InitializerContext;
@@ -41,11 +47,22 @@ public class InitializerNode extends InterpretingNode<InitializerNode, Initializ
 	
 	private BaseExpressionNode<?> expr;
 	private List<Assemblable> assemblableQueue;
+
+	public InitializerNode(ComponentNode<?> parent, LValueNode<?> LValue, String literal)
+	{
+		super(parent);
+		expr = null;
+		assemblableQueue = new LinkedList<Assemblable>();
+		arrayInitializers = new LinkedHashMap<Integer, InitializerNode>();
+		expr = new DummyExpressionNode(this, LValue.getType(), literal);		
+		this.LValue = LValue;
+	}
 	
 	public InitializerNode(ComponentNode<?> parent, LValueNode<?> LValue)
 	{
 		super(parent);
 		expr = null;
+
 		assemblableQueue = new LinkedList<Assemblable>();
 		if (LValue.getType().isArray())
 		{
@@ -78,7 +95,7 @@ public class InitializerNode extends InterpretingNode<InitializerNode, Initializ
 		{
 			if (currNode.arrayInitializers != null) // Array
 			{
-				if (designator.Identifier() != null) // Must be struct to use struct references
+				if (designator.identifier() != null) // Must be struct to use struct references
 					throw new ConstraintException("6.7.8", 7, designator.start);
 				
 				int index = (int) new ConstantExpressionNode(currNode).interpret(designator.constant_expression()).getPropLong();
@@ -94,7 +111,7 @@ public class InitializerNode extends InterpretingNode<InitializerNode, Initializ
 				if (designator.constant_expression() != null) // Must be array to use array references
 					throw new ConstraintException("6.7.8", 6, designator.start);
 				
-				String memberName = designator.Identifier().getText();
+				String memberName = designator.identifier().getText();
 				
 				if (currNode.LValue.getType().getStruct().getMember(memberName) == null)
 					throw new ConstraintException("6.7.8", 7, designator.start); // This is not a member of this struct
@@ -129,7 +146,16 @@ public class InitializerNode extends InterpretingNode<InitializerNode, Initializ
 		if (node.children.size() == 1) // Can't be an initializer, which would at least have brackets
 		{
 			expr = new AssignmentExpressionNode(this).interpret(node.assignment_expression());
-			if (LValue.getType().isArray() && expr.getType().isArray() && !expr.getType().isIncomplete()) // Expression is fixed-size array
+			// String literal doesn't need a dummy initializer if we are an initializer
+			if (PrimaryExpressionNode.class.isAssignableFrom(expr.getClass()) &&
+				((PrimaryExpressionNode) expr).isStringLiteral())
+			{
+				if (getType().isArray())
+					((PrimaryExpressionNode) expr).killStringLiteralNode();
+				else
+					expr = new CastExpressionNode(this, new PointerType(new DummyType("char")), expr);
+			}
+				if (LValue.getType().isArray() && expr.getType().isArray() && !expr.getType().isIncomplete()) // Expression is fixed-size array
 			{
 				ArrayType arrayType = (ArrayType) LValue.getType();
 				arrayType.setLength(((ArrayType) expr.getType()).getLength());
@@ -140,6 +166,12 @@ public class InitializerNode extends InterpretingNode<InitializerNode, Initializ
 			int arrayIndex = 0;
 			int arraySize = -1;
 			int j = 0, k = 0;
+			if (arrayInitializers != null) // Set all array initializers to be zero
+				for (InitializerNode initializer : arrayInitializers.values())
+					initializer.expr = new DummyExpressionNode(this, initializer.getType(), 0);
+			else if (arrayInitializers != null) // Set all struct initializers to be zero
+				for (InitializerNode initializer : structInitializers.values())
+					initializer.expr = new DummyExpressionNode(this, initializer.getType(), 0);
 			for (int i = 0; i < node.initializer_list().getChildCount(); i += 2)
 			{
 				if (i == node.initializer_list().getChildCount() - 1 &&
@@ -171,8 +203,8 @@ public class InitializerNode extends InterpretingNode<InitializerNode, Initializ
 					DesignatorContext designator0 = node.initializer_list().designation(j).designator_list().designator(0);
 					if (designator0.constant_expression() != null) // Skip forward in array list
 						arrayIndex = (int) new ConstantExpressionNode(this).interpret(designator0.constant_expression()).getPropLong();
-					else if (designator0.Identifier() != null)
-						arrayIndex = LValue.getType().getStruct().getMemberNames().indexOf(designator0.Identifier().getText());
+					else if (designator0.identifier() != null)
+						arrayIndex = LValue.getType().getStruct().getMemberNames().indexOf(designator0.identifier().getText());
 					InitializerNode initializer = resolveInitializer(this, node.initializer_list().designation(j++));
 					initializer.interpret(node.initializer_list().initializer(k++));
 					arrayIndex += 1;
@@ -292,20 +324,16 @@ public class InitializerNode extends InterpretingNode<InitializerNode, Initializ
 	public AssemblyStatePair getAssemblyAndState(ProgramState state) throws Exception
 	{
 		clearAssemblables();
+
 		state = state.setDestSource(LValue.getSource());
 		if (!getScope().isRoot() || !isROM()) // Normal RAM one
 		{
 			if (expr != null)
 			{
-				AssemblyStatePair pair;
-				String assembly = "";
+				AssemblyStatePair pair = new AssemblyStatePair("", state);
 
 				if (expr.hasAssembly(state))
-				{
-					pair = expr.getAssemblyAndState(state);
-					assembly += pair.assembly;
-					state = pair.state;
-				}
+					pair = expr.apply(pair);
 				else
 				{
 					ByteCopier copier;
@@ -316,51 +344,38 @@ public class InitializerNode extends InterpretingNode<InitializerNode, Initializ
 					}
 					else if (expr.hasLValue(state))
 						copier = new ByteCopier(LValue.getSize(), LValue.getSource(), expr.getLValue(state).castTo(getType()).getSource());
-					else return new AssemblyStatePair("", state);
+					else return pair;
 					
-					pair = copier.getAssemblyAndState(state);
-					assembly += pair.assembly;
-					state = pair.state;
+					pair = copier.apply(pair);
 				}
 
-				pair = getRegisteredAssemblyAndState(state);
-				assembly += pair.assembly;
-				state = pair.state;
-				return new AssemblyStatePair(assembly, state);
+				pair = applyRegistered(pair);
+				return pair;
 			}	
 			else if (arrayInitializers != null) // Array
 			{
-				String assembly = "";
+				AssemblyStatePair pair = new AssemblyStatePair("", state);
 				for (InitializerNode initializer : arrayInitializers.values())
-				{
-					assembly += initializer.getAssembly(state);
-					state = initializer.getStateAfter(state);
-				}
-				return new AssemblyStatePair(assembly, state);
+					pair = initializer.apply(pair);
+				
+				return pair;
 			}
 			else if (structInitializers != null) // Struct
 			{
-				String assembly = "";
+				AssemblyStatePair pair = new AssemblyStatePair("", state);
 				for (InitializerNode initializer : structInitializers.values())
-				{
-					assembly += initializer.getAssembly(state);
-					state = initializer.getStateAfter(state);
-				}
-				return new AssemblyStatePair(assembly, state);
+					pair = initializer.apply(pair);
+				
+				return pair;
 			}
 			else if (LValue.getType().isStatic() && CompConfig.initializeStatics) // Statics are initialized always when compliant
 			{
-				AssemblyStatePair pair;
-				String assembly = "";
+				AssemblyStatePair pair = new AssemblyStatePair("", state);
 				ByteCopier copier = new ByteCopier(LValue.getSize(), LValue.getSource(), new ConstantSource(0, LValue.getSize()));
-				pair = copier.getAssemblyAndState(state);
-				assembly += pair.assembly;
-				state = pair.state;
+				pair = copier.apply(pair);
 				
-				pair = getRegisteredAssemblyAndState(state);
-				assembly += pair.assembly;
-				state = pair.state;
-				return new AssemblyStatePair(assembly, state);
+				pair = applyRegistered(pair);
+				return pair;
 			}
 			else return new AssemblyStatePair("", state);
 		}

@@ -10,6 +10,7 @@ import C99Compiler.Utils.CompUtils;
 import C99Compiler.Utils.ProgramState;
 import C99Compiler.Utils.ProgramState.ScratchSource;
 import C99Compiler.Utils.AssemblyUtils.BytewiseOperator;
+import C99Compiler.Utils.AssemblyUtils.SignExtender;
 import C99Compiler.Utils.AssemblyUtils.ByteCopier;
 import C99Compiler.Utils.OperandSources.ConstantByteSource;
 import C99Compiler.Utils.OperandSources.ConstantSource;
@@ -29,6 +30,7 @@ public class RelationalExpressionNode extends BinaryExpressionNode
 		private OperandSource sourceX, sourceY, tempSource;
 
 		private boolean isSigned, invert;
+		boolean firstOp;
 		public RelationalOperator(int n1, int n2, OperandSource sourceX, OperandSource sourceY, OperandSource tempSource, boolean invert)
 		{
 			super(n1, n2, true);
@@ -38,37 +40,57 @@ public class RelationalExpressionNode extends BinaryExpressionNode
 			this.isSigned = x.getType().isSigned() || y.getType().isSigned();
 			this.invert = invert;
 		}
-		
+
+		@Override
+		public AssemblyStatePair getAssemblyAndState(ProgramState state) throws Exception
+		{
+			firstOp = true;
+			return super.getAssemblyAndState(state);
+		}
 		@Override
 		protected AssemblyStatePair getAssemblyAndState(ProgramState state, int i) throws Exception
 		{
 			AssemblyStatePair tmpPair;
 			String assembly = "";
 			
-			if (isSigned && ((i == n1 - 2) || (i == 0 && n1 == 1))) // First comparison and signed, must EOR y by 0x80
+			if (isSigned && firstOp) // First comparison and signed, must EOR y by 0x80
 			{
+				firstOp = false;
+				boolean optimized = false;
 				String XOR = state.getWhitespace() + (state.testProcessorFlag(ProgramState.ProcessorFlag.M) ? "EOR\t#$8000\n" : "EOR\t#$80\n");
-				if (sourceY.isLiteral()) // Optimizable for literals
+				if (sourceY.isLiteral())
 				{
-					// Get X
-					tmpPair = sourceX.getLDA(state, i);
-					assembly += tmpPair.assembly;
-					state = tmpPair.state;
-					assembly += XOR;
-					
-					// Get Y
-					String oldY = ((ConstantByteSource) sourceY).getBase(state, i).substring(2);
-					int yVal = Integer.valueOf(oldY, 16);
-					
-					// Compare
-					assembly += state.getWhitespace() + "CMP\t#$";
-					if (state.testProcessorFlag(ProgramState.ProcessorFlag.M)) // 16-bit
-						assembly += String.format("%04x", yVal ^ 0x8000);
-					else
-						assembly += String.format("%02x", yVal ^ 0x80);
-					assembly += "\n";
+					String oldAssembly = assembly;
+					ProgramState oldState = state;
+					try // Optimizable for literals	
+					{
+						// Get X
+						tmpPair = sourceX.getLDA(state, i);
+						assembly += tmpPair.assembly;
+						state = tmpPair.state;
+						assembly += XOR;
+						
+						// Get Y
+						String oldY = ((ConstantSource) sourceY).getBase(state, i).substring(2);
+						int yVal = Integer.valueOf(oldY, 16);
+						
+						// Compare
+						assembly += state.getWhitespace() + "CMP\t#$";
+						if (state.testProcessorFlag(ProgramState.ProcessorFlag.M)) // 16-bit
+							assembly += String.format("%04x", yVal ^ 0x8000);
+						else
+							assembly += String.format("%02x", yVal ^ 0x80);
+						assembly += "\n";
+						optimized = true;
+					}
+					catch (Exception e) // Bad literal
+					{
+						optimized = false;
+						assembly = oldAssembly;
+						state = oldState;
+					}
 				}
-				else
+				if (!optimized)
 				{
 					// Get Y
 					tmpPair = sourceY.getLDA(state, i);
@@ -88,13 +110,14 @@ public class RelationalExpressionNode extends BinaryExpressionNode
 					assembly += XOR;
 					
 					// Compare
-					tmpPair = tempSource.getInstruction(state, "CMP", i);
+					tmpPair = tempSource.getInstruction(state, "CMP", 0);
 					assembly += tmpPair.assembly;
 					state = tmpPair.state;
 				}
 			}
 			else // Don't need to XOR
 			{
+				firstOp = false;
 				// Get X
 				tmpPair = sourceX.getLDA(state, i);
 				assembly += tmpPair.assembly;
@@ -209,8 +232,9 @@ public class RelationalExpressionNode extends BinaryExpressionNode
 		int max = Math.max(sourceX.getSize(), sourceY.getSize());
 		int min = Math.min(sourceX.getSize(), sourceY.getSize());
 		assembly += state.getWhitespace() + "CLC\n";
+		SignExtender e = new SignExtender(sourceX, sourceY, x.getType().isSigned(), y.getType().isSigned());
 		BytewiseOperator o = new RelationalOperator(max, min, sourceX, sourceY, tempSource, invert);
-		AssemblyStatePair tmpPair = o.getAssemblyAndState(state);
+		AssemblyStatePair tmpPair = o.apply(e.getAssemblyAndState(state));
 		assembly += tmpPair.assembly;
 		state = tmpPair.state;
 		
@@ -235,7 +259,8 @@ public class RelationalExpressionNode extends BinaryExpressionNode
 		AssemblyStatePair tmpPair = getAssemblyAndStateRec(state, sourceX, sourceY, operator, false);
 		assembly += tmpPair.assembly;
 		state = tmpPair.state;
-		
+		state = state.wipe();
+		state = state.clearKnownFlags();
 		if (hasEnd)
 		{
 			assembly += state.getWhitespace() + yesLabel + ":\n";
@@ -246,10 +271,13 @@ public class RelationalExpressionNode extends BinaryExpressionNode
 				state = tmpPair.state;
 			}
 			else
+			{
+				assembly += state.getWhitespace() + "SEP\t#$20\n";
 				assembly += state.getWhitespace() + "LDA\t#$01\n";
-			
+			}
 			assembly += whitespace + "BRA\t" + endLabel + "\n";	
 			state = state.wipe();
+			state = state.clearKnownFlags();
 			
 			assembly += whitespace + noLabel + ":\n";
 			if (state.destSource() != null)
@@ -259,8 +287,10 @@ public class RelationalExpressionNode extends BinaryExpressionNode
 				state = tmpPair.state;
 			}
 			else
+			{
+				assembly += state.getWhitespace() + "SEP\t#$20\n";
 				assembly += state.getWhitespace() + "LDA\t#$00\n";
-			
+			}
 			assembly += whitespace + endLabel + ":\n";
 		}
 		return new AssemblyStatePair(assembly, state);

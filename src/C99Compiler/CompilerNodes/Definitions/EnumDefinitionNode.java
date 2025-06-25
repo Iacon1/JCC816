@@ -33,7 +33,7 @@ public class EnumDefinitionNode extends InterpretingNode<EnumDefinitionNode, Enu
 	@Override
 	public EnumDefinitionNode interpret(Enum_specifierContext node) throws Exception
 	{
-		if (node.Identifier() != null) name = node.Identifier().getText();
+		if (node.identifier() != null) name = node.identifier().getText();
 		else
 			name = "__" + UUID.randomUUID() + "enum";
 		int value = -1;
@@ -57,7 +57,7 @@ public class EnumDefinitionNode extends InterpretingNode<EnumDefinitionNode, Enu
 		type = CompUtils.getSmallestType(largestValue);
 		type.setContext(parent);
 		for (EnumeratorContext enumerator : node.enumerator_list().enumerator())
-			new EnumeratorNode(this, enumerator.Identifier().getText(), values.get(i++));
+			new EnumeratorNode(this, enumerator.identifier().getText(), values.get(i++));
 		return this;
 	}
 	@Override

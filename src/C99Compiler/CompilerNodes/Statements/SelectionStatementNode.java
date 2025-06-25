@@ -10,6 +10,7 @@ import java.util.Set;
 import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.FunctionDefinitionNode;
 import C99Compiler.CompilerNodes.Dummies.DummyExpressionNode;
+import C99Compiler.CompilerNodes.Expressions.AdditiveExpressionNode;
 import C99Compiler.CompilerNodes.Expressions.BaseExpressionNode;
 import C99Compiler.CompilerNodes.Expressions.EqualityExpressionNode;
 import C99Compiler.CompilerNodes.Expressions.ExpressionNode;
@@ -176,13 +177,25 @@ public class SelectionStatementNode extends SequencePointStatementNode<Selection
 		else // Switch
 		{
 			long smallestCase = 0, largestCase = 0;
+			boolean first = true;
 			Set<Long> caseValues = new HashSet<Long>();
-			BaseExpressionNode<?> largestExpr = null;
+			BaseExpressionNode<?> smallestExpr = null, largestExpr = null;
 			for (BaseExpressionNode<?> node : cases.keySet()) // Determine case values
 			{
 				long l = node.getPropLong(pair.state);
-				smallestCase = Math.min(smallestCase, l);
-				largestCase = Math.max(largestCase, l);
+				if (first)
+				{
+					smallestCase = l;
+					largestCase = l;
+					first = false;
+				}
+				else
+				{
+					smallestCase = Math.min(smallestCase, l);
+					largestCase = Math.max(largestCase, l);
+				}
+				if (smallestCase == l)
+					smallestExpr = node;
 				if (largestCase == l)
 					largestExpr = node;
 				caseValues.add(l);
@@ -191,9 +204,9 @@ public class SelectionStatementNode extends SequencePointStatementNode<Selection
 				return pair.getImmutable();			
 			pair.state = pair.state.reserveScratchBlock(expression.getSize());
 			ScratchSource exprSource = pair.state.lastScratchSource();
-			
+			pair.state = pair.state.setDestSource(exprSource);
 			// If greater than largest case, skip
-			String miscLabel = CompUtils.getMiscLabel();
+			String miscLabel1 = CompUtils.getMiscLabel(), miscLabel2 = CompUtils.getMiscLabel();
 			if (expression.hasAssembly(pair.state))
 				applyWithRegistered(pair, expression);
 			else if (expression.hasPropValue(pair.state))
@@ -203,14 +216,35 @@ public class SelectionStatementNode extends SequencePointStatementNode<Selection
 			new RelationalExpressionNode(this, "<", 
 					largestExpr, 
 					new DummyExpressionNode(this, expression.getType(), exprSource),
-					hasDefault? getDefaultLabel(false) : getEndLabel(), miscLabel, false).apply(pair);
-			pair.assembly += whitespace + miscLabel + ":\n";
+					hasDefault? getDefaultLabel(false) : getEndLabel(), miscLabel1, false).apply(pair);
+			pair.assembly += whitespace + miscLabel1 + ":\n";
+			// If smaller than smallest case, skip
+			new RelationalExpressionNode(this, ">", 
+					smallestExpr, 
+					new DummyExpressionNode(this, expression.getType(), exprSource),
+					hasDefault? getDefaultLabel(false) : getEndLabel(), miscLabel2, false).apply(pair);
+			pair.assembly += whitespace + miscLabel2 + ":\n";
+			
 			
 			// Calculate jump table address
 			pair.state = pair.state.reserveScratchBlock(expression.getSize());
 			ScratchSource sourceS = pair.state.lastScratchSource();
 			pair.state = pair.state.setDestSource(sourceS);
-			new ShiftExpressionNode(this, "<<", new DummyExpressionNode(this, expression.getType(), exprSource), new DummyExpressionNode(this, 1)).apply(pair);
+			if (smallestCase != 0)
+			{
+				new AdditiveExpressionNode(this, "-", 
+						new DummyExpressionNode(this, expression.getType(), exprSource),
+						new DummyExpressionNode(this, smallestCase)).apply(pair);
+				new ShiftExpressionNode(this, "<<",
+						new DummyExpressionNode(this, expression.getType(), sourceS),
+						new DummyExpressionNode(this, 1)).apply(pair);
+			}
+			else
+			{
+				new ShiftExpressionNode(this, "<<",
+						new DummyExpressionNode(this, expression.getType(), exprSource),
+						new DummyExpressionNode(this, 1)).apply(pair);
+			}
 			pair.assembly += whitespace + "TAX\n";
 			pair.assembly += whitespace + "JMP\t(" + getTableLabel() + ",x)\n";
 			pair.state = pair.state.releaseScratchBlock(sourceS);

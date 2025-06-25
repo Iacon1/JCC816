@@ -11,10 +11,11 @@ import Shared.MapModes.ExHiROM;
 import Shared.MapModes.HiROM;
 import Shared.MapModes.LoROM;
 import Shared.MapModes.MapModeInterface;
+import Shared.MapModes.MapModeInterfaceWrapper;
 
 public class CartConfig
 {
-	public static enum MapMode implements MapModeInterface
+	public static enum MapMode implements MapModeInterfaceWrapper
 	{
 		loROM(new LoROM()),
 		hiROM(new HiROM()),
@@ -28,25 +29,10 @@ public class CartConfig
 			this.implementer = implementer;
 		}
 
-		@Override public String getName() {return implementer.getName();}
-		@Override public byte getCode() {return implementer.getCode();}
-
-		@Override public int getWRAMBankLength() {return implementer.getWRAMBankLength();} 
-		@Override public int getSRAMBankLength() {return implementer.getSRAMBankLength();}
-		@Override public int getROMBankLength(boolean isFast, int i) {return implementer.getROMBankLength(isFast, i);}
-		
-		@Override public int getMaxWRAMBanks() {return implementer.getMaxWRAMBanks();}
-		@Override public int getMaxSRAMBanks() {return implementer.getMaxSRAMBanks();}
-		@Override public int getMinROMBanks() {return implementer.getMinROMBanks();}
-		@Override public int getMaxROMBanks(boolean isFast) {return implementer.getMaxROMBanks(isFast);}
-		
-		@Override public int getWRAMBankStart(int i) {return implementer.getWRAMBankStart(i);}
-		@Override public int getSRAMBankStart(int i) {return implementer.getSRAMBankStart(i);}
-		@Override public int getROMBankStart(boolean isFast, int i) {return implementer.getROMBankStart(isFast, i);}
-		@Override public int getROMBankAlign(int i) {return implementer.getROMBankAlign(i);}
-		
-		@Override public int getHVAddress(boolean isFast) {return implementer.getHVAddress(isFast);}
-		@Override public boolean isContiguous(int i) {return implementer.isContiguous(i);}
+		public MapModeInterface getImplementer()
+		{
+			return implementer;
+		}
 	}
 	public static enum AddonChip
 	{
@@ -108,7 +94,7 @@ public class CartConfig
 	
 	public boolean containsChip(AddonChip addonChip)
 	{
-		return addonChip.equals(addonChip);
+		return this.addonChip.equals(addonChip);
 	}
 
 	public MapMode getType()
