@@ -243,7 +243,7 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 	public boolean hasAssembly(ProgramState state)
 	{
 		if (operator.equals("*"))
-			return expr.hasAssembly(state) || !expr.hasPropValue(state);
+			return true;// || !expr.hasPropValue(state);
 		else if (operator.equals("&"))
 			return expr.hasAssembly(state) || PostfixExpressionNode.class.isAssignableFrom(expr.getClass());
 		else if (!operator.equals("++") && !operator.equals("--"))
