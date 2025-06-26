@@ -600,8 +600,10 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 				tmpPair = new ByteCopier(expr.getSize(), destSource, sourceX).getAssemblyAndState(state);
 				assembly += tmpPair.assembly;
 				state = tmpPair.state;
+				state = state.releasePointer(sourceX);
 			}
 			BaseExpressionNode<?> dX = new DummyExpressionNode(this, expr.getType(), 1);
+			state = state.releasePointer(sourceX);
 			if (type == PFType.incr)
 				dX = new AdditiveExpressionNode(this, "+", expr, dX);
 			else if (type == PFType.decr)
