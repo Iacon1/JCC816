@@ -60,6 +60,8 @@ keyword
 	| Offsetof
 	
 	| SRAM
+	| SPECX
+	| SPECY
 	| RWTWICE
 	| ROTWICE
 	| WOTWICE

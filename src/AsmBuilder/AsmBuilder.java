@@ -200,6 +200,8 @@ public final class AsmBuilder implements Catalogger
 		List<VariableNode> WRAMVars = new LinkedList<VariableNode>(), SRAMVars = new LinkedList<VariableNode>();
 		for (VariableNode var : getVariables().values())
 		{
+			if (var.getType().isSpecX() || var.getType().isSpecY())
+				continue;
 			if (var.getType().isSRAM())
 				SRAMVars.add(var);
 			else if (var.getType().isWRAM())
@@ -247,7 +249,7 @@ public final class AsmBuilder implements Catalogger
 		for (VariableNode var : getVariables().values())
 		{
 			if (var.getScope().isRoot() && var.getType().isROM()) continue; // These are mapped elsewhere
-			
+			if (var.getType().isSpecX() || var.getType().isSpecY()) continue;
 			String fullName = var.getFullName();
 			assembly += AssemblyUtils.applyFiller(fullName, maxLength) + " = $" + String.format("%06x", varPoses.get(var.getFullName()));
 			if (DebugLevel.isAtLeast(DebugLevel.medium))

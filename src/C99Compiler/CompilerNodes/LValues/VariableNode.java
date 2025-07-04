@@ -27,14 +27,21 @@ public class VariableNode extends LValueNode<VariableNode> implements NamedNode
 	@Override
 	public String getName() {return name;}
 	@Override
-	public String getFullName() {return NamedNode.super.getFullName() + (type.isStatic() ? "@" + getTranslationUnit().getStaticUUID() : "");}
-	
+	public String getFullName()
+	{
+		return NamedNode.super.getFullName() + (type.isStatic() ? "@" + getTranslationUnit().getStaticUUID() : "");
+	}
+
 	@Override
 	public OperandSource getSource()
 	{
 		if (source == null)
 		{
-			if (getType().isTwice())
+			if (getType().isSpecX())
+				source = (AddressSource) CompConfig.specSubSource(true, this.getSize());
+			else if (getType().isSpecY())
+				source = (AddressSource) CompConfig.specSubSource(false, this.getSize());
+			else if (getType().isTwice())
 				source = new StationaryAddressSource(this.getFullName(), this.getSize()); // We can't find our name and size until assembly time
 			else
 				source = new AddressSource(this.getFullName(), this.getSize()); // We can't find our name and size until assembly time

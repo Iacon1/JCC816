@@ -432,7 +432,14 @@ public class Type implements Serializable
 				typeQualifiers.contains("__ROTWICE") ||
 				typeQualifiers.contains("__WOTWICE");
 	}
-	
+	public boolean isSpecX()
+	{
+		return storageClassSpecifier.equals("__SPECX"); 
+	}
+	public boolean isSpecY()
+	{
+		return storageClassSpecifier.equals("__SPECY"); 
+	}
 	public boolean isConstant()
 	{
 		return typeQualifiers.contains("const") || typeQualifiers.contains("__ROTWICE");
