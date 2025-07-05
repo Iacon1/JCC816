@@ -13,6 +13,8 @@ import C99Compiler.Utils.ProgramState;
 
 public class MultOptimizer implements PerNodeASTPass<MultiplicativeExpressionNode>
 {
+	@Override public Class<MultiplicativeExpressionNode> getNodeClass() {return MultiplicativeExpressionNode.class;}
+	
 	private static int optimizedComplexity(long l) // Simulates below const-mult optimization to see if it's worth the trouble
 	{
 		if (l <= 1)
@@ -25,13 +27,7 @@ public class MultOptimizer implements PerNodeASTPass<MultiplicativeExpressionNod
 
 		return (startOdd ? 2 : 1) +  optimizedComplexity(l);
 	}
-
-	@Override
-	public Class<MultiplicativeExpressionNode> getNodeClass()
-	{
-		return MultiplicativeExpressionNode.class;
-	}
-
+	
 	@Override
 	public ComponentNode<?> apply(MultiplicativeExpressionNode node, ProgramState state)
 	{

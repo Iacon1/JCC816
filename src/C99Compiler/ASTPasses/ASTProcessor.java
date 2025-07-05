@@ -4,13 +4,12 @@ package C99Compiler.ASTPasses;
 
 import C99Compiler.CompilerNodes.TranslationUnitNode;
 
-public class ASTOptimizer
+public class ASTProcessor
 {
-	private ASTOptimizer() {} // Singleton
+	private ASTProcessor() {} // Singleton
 	
-	public static void optimizeAST(TranslationUnitNode unit) throws Exception
+	public static void processAST(TranslationUnitNode unit) throws Exception
 	{
-		// Call passes here
 		new MultOptimizer().apply(unit);
 	}
 }

@@ -14,7 +14,7 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
 
 import C99Compiler.CompConfig.VerbosityLevel;
-import C99Compiler.ASTPasses.ASTOptimizer;
+import C99Compiler.ASTPasses.ASTProcessor;
 import C99Compiler.CompilerNodes.TranslationUnitNode;
 import C99Compiler.CompilerNodes.Statements.CompoundStatementNode;
 import C99Compiler.Utils.LineInfo;
@@ -152,7 +152,7 @@ public class C99Compiler
 		
 		t = System.currentTimeMillis();
 
-		ASTOptimizer.optimizeAST(unit);
+		ASTProcessor.processAST(unit);
 		if (VerbosityLevel.isAtLeast(VerbosityLevel.medium))
 			printInfo("Optimized in " + (System.currentTimeMillis() - t) + " ms.");
 		
