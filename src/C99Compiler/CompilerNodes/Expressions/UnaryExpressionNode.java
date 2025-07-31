@@ -92,6 +92,13 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 	}
 
 	@Override
+	protected void onSwap(ComponentNode<?> from, ComponentNode<?> to)
+	{
+		if (expr == from)
+			expr = (BaseExpressionNode<?>) to;
+	}
+	
+	@Override
 	public Type getType()
 	{
 		if (type != null) return new PointerType(new DummyType("void")); // No object can have a greater size than a pointer
@@ -302,7 +309,7 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 		{
 		case "++": case "--":
 			tmpNode = new AdditiveExpressionNode(this, (operator.equals("++") ? "+" : "-"), expr, dX);
-			if (tmpNode.hasPropValue(state))
+			if (tmpNode.hasPropValue(state) && !expr.getLValue(state).getScope().isRoot())
 			{
 				pair = new ByteCopier(sourceX.getSize(), sourceX, new ConstantSource(tmpNode.getPropValue(state), sourceX.getSize())).apply(pair);
 				pair.state = pair.state.setPossibleValue(expr.getLValue(state), tmpNode.getPropValue(state));

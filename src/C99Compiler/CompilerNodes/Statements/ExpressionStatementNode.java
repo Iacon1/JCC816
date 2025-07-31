@@ -22,6 +22,12 @@ public class ExpressionStatementNode extends SequencePointStatementNode<Expressi
 			expression = new ExpressionNode(this).interpret(node.expression());
 		return this;
 	}
+	@Override
+	protected void onSwap(ComponentNode<?> from, ComponentNode<?> to)
+	{
+		if (expression == from)
+			expression = (BaseExpressionNode<?>) to;
+	}
 	
 	@Override
 	public boolean canCall(ProgramState state, FunctionDefinitionNode function)

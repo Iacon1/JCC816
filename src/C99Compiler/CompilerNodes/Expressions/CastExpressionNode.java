@@ -40,7 +40,12 @@ public class CastExpressionNode extends BaseExpressionNode<Cast_expressionContex
 		}
 		else return delegate(new UnaryExpressionNode(this).interpret(node.unary_expression()));
 	}
-	
+	@Override
+	protected void onSwap(ComponentNode<?> from, ComponentNode<?> to)
+	{
+		if (expr == from)
+			expr = (BaseExpressionNode<?>) to;
+	}
 	private boolean specifiesConversion()
 	{
 		return getType().getSize() != expr.getType().getSize();

@@ -224,6 +224,13 @@ public class InitializerNode extends InterpretingNode<InitializerNode, Initializ
 	}
 	
 	@Override
+	protected void onSwap(ComponentNode<?> from, ComponentNode<?> to)
+	{
+		if (expr == from)
+			expr = (BaseExpressionNode<?>) to;
+	}
+	
+	@Override
 	public boolean canCall(ProgramState state, FunctionDefinitionNode function)
 	{
 		return expr != null && expr.canCall(state, function);
@@ -239,6 +246,7 @@ public class InitializerNode extends InterpretingNode<InitializerNode, Initializ
 	{
 		return LValue.getType().isROM();
 	}
+	
 	
 	@Override
 	public boolean hasAssembly(ProgramState state)
@@ -340,7 +348,8 @@ public class InitializerNode extends InterpretingNode<InitializerNode, Initializ
 					if (expr.hasPropValue(state))
 					{
 						copier = new ByteCopier(LValue.getSize(), LValue.getSource(), new ConstantSource(expr.getPropValue(state), LValue.getSize()));
-						state = state.setPossibleValue(LValue, expr.getPropValue(state));
+						if (!getScope().isRoot())
+							state = state.setPossibleValue(LValue, expr.getPropValue(state));
 					}
 					else if (expr.hasLValue(state))
 						copier = new ByteCopier(LValue.getSize(), LValue.getSource(), expr.getLValue(state).castTo(getType()).getSource());
