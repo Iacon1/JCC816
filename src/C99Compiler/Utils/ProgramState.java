@@ -665,9 +665,9 @@ public class ProgramState
 	{
 		byte knownFlags = this.knownFlags;
 		if ((flags & ProcessorFlag.M) != 0)
-			knownFlags &= ~PreserveFlag.M;
+			knownFlags |= PreserveFlag.M;
 		if ((flags & ProcessorFlag.I) != 0)
-			knownFlags &= ~PreserveFlag.I;
+			knownFlags |= PreserveFlag.I;
 		ProgramState s = new ProgramState(
 				whitespaceLevel,
 				blockList, lastScratchSource,
@@ -686,9 +686,9 @@ public class ProgramState
 	{
 		byte knownFlags = this.knownFlags;
 		if ((flags & ProcessorFlag.M) != 0)
-			knownFlags &= ~PreserveFlag.M;
+			knownFlags |= PreserveFlag.M;
 		if ((flags & ProcessorFlag.I) != 0)
-			knownFlags &= ~PreserveFlag.I;
+			knownFlags |= PreserveFlag.I;
 		ProgramState s = new ProgramState(
 				whitespaceLevel,
 				blockList, lastScratchSource,
