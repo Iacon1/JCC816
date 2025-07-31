@@ -170,6 +170,13 @@ public class JCC816
 		options.addOption(option);
 		
 		option = Option.builder()
+				.longOpt("imp-mult")
+				.desc("Sets the filepath for a custom multiplication implementation.")
+				.numberOfArgs(1)
+				.build();
+		options.addOption(option);
+		
+		option = Option.builder()
 				.longOpt("show-parse-tree")
 				.desc("Displays a parse tree for every translation unit compiled.")
 				.build();
@@ -192,7 +199,7 @@ public class JCC816
 		String sourceNameA, sourceNameC, sourceNameH;
 		DebugLevel dbgLevel = null;
 
-		if (isHeader)
+		if (isHeader && (!sourceName.contains("imp_math") || (CompConfig.multImpFile == null && CompConfig.floatImpFile == null)))
 		{
 			sourceNameA = sourceName.replace(".h", ".asm");
 			sourceNameC = sourceName.replace(".h", ".c");
@@ -200,6 +207,19 @@ public class JCC816
 		}
 		else
 		{
+			if (isHeader) // imp_math
+			{
+				if (sourceName.equals("imp_math\\imp_mult.h") && CompConfig.multImpFile != null) // Replacement provided for imp_mult.c.
+				{
+					isResource = false;
+					sourceName = CompConfig.multImpFile;
+				}
+				else if (sourceName.equals("imp_math\\imp_float.h") && CompConfig.floatImpFile != null) // Replacement provided for imp_float.c.
+				{
+					isResource = false;
+					sourceName = CompConfig.floatImpFile;
+				}
+			}
 			sourceNameA = null;
 			sourceNameC = null;
 			sourceNameH = null;
@@ -211,6 +231,7 @@ public class JCC816
 				sourceNameH = sourceName;
 		}
 		
+		// Get C file
 		if (sourceNameC != null && (isResource ? FileIO.hasResource(sourceNameC) : FileIO.hasFile(sourceNameC)))
 		{
 			if (VerbosityLevel.isAtLeast(VerbosityLevel.high))
@@ -267,7 +288,10 @@ public class JCC816
 			
 			for (String stdLib : includedStdLibs)
 			{
-				stdLib = "stdlib\\" + stdLib;
+				if (stdLib.equals("imp_mult.h") || stdLib.equals("imp_float.h"))
+					stdLib = "imp_math\\" + stdLib;
+				else
+					stdLib = "stdlib\\" + stdLib;
 				if (stdLib.endsWith(".h"))
 				{
 					if (isHeaderLoaded(translationUnits, stdLib)) continue;
@@ -327,6 +351,8 @@ public class JCC816
 		
 		if (commandLine.hasOption("r")) // Root
 			CompConfig.rootFolder = commandLine.getOptionValue("r").replace("/", "\\");
+		if (commandLine.hasOption("imp-mult"))
+			CompConfig.multImpFile = commandLine.getOptionValue("imp-mult").replace("/", "\\");
 		
 		if (commandLine.hasOption("H"))
 		{

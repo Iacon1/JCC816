@@ -88,14 +88,26 @@ public class ControlNode extends InterpretingNode<ControlNode, Control_lineConte
 			if (isStd) // Include std library
 			{
 				stdLib = filename;
-				try {file = FileIO.readResource("stdlib\\" + filename);}
+				try
+				{
+					if (filename.equals("imp_float.h") || filename.equals("imp_mult.h"))
+						file = FileIO.readResource("imp_math\\" + filename);
+					else
+						file = FileIO.readResource("stdlib\\" + filename);
+				}
 				catch (Exception e) {file = FileIO.readFile(filename);}
 			}
 			else // Include other file
 			{
 				otherLib = filename;
 				try {file = FileIO.readFile(filename);}
-				catch (Exception e) {file = FileIO.readResource("stdlib\\" + filename);}
+				catch (Exception e)
+				{
+					if (filename.equals("imp_float.h") || filename.equals("imp_mult.h"))
+						file = FileIO.readResource("imp_math\\" + filename);
+					else
+						file = FileIO.readResource("stdlib\\" + filename);
+				}
 			}
 			String oldFILE = PreProcComponentNode.file;
 			int oldLINE = PreProcComponentNode.line;

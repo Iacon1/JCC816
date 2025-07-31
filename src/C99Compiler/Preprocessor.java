@@ -111,6 +111,12 @@ public final class Preprocessor
 		Grammar.GrammarFlags.isPreproc = true;
 		PreProcComponentNode.loadPredefs(header);
 		PreProcComponentNode.resetLineNo(filename, 1, isStd);
+
+		// Add math implementation headers
+		source =
+				"#include <imp_mult.h>\n" +
+//				"#include <imp_float.h>\n" +
+				source;
 		GroupNode node = new GroupNode().interpret(parsePreprocess(source));
 		includedStdLibs.addAll(node.getIncludedStdLibs());
 		includedOtherLibs.addAll(node.getIncludedOtherLibs());

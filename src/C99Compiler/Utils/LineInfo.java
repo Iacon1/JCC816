@@ -21,6 +21,8 @@ public class LineInfo implements Serializable
 	{
 		if (!isStd)
 			return "\"" + FileIO.getFile(filename) + "\", " + line;
+		else if (filename.contains("imp_math"))
+			return "\"imp_math\\" + filename.replace("imp_math\\", "") + "\", " + line;
 		else
 			return "\"stdlib\\" + filename.replace("stdlib\\", "") + "\", " + line;
 
