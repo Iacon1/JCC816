@@ -374,11 +374,11 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 			pair.assembly += pair.state.getWhitespace() + "PLA\n";
 			pair.assembly += pair.state.getWhitespace() + "PLX\n";
 			pair.assembly += pair.state.getWhitespace() + "PLY\n";
-			pair.assembly += pair.state.getWhitespace() + "RTI\n";
+			pair.assembly += pair.state.getWhitespace() + "RTI; @endfunc\n";
 		}
 		else
 		{
-			pair.assembly += pair.state.getWhitespace() + "RTL\n";
+			pair.assembly += pair.state.getWhitespace() + "RTL\t; @endfunc\n";
 		}
 		
 ;//		ScratchManager.releasePointers();

@@ -3,20 +3,23 @@
 
 package AsmBuilder;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 import java.util.Set;
+import java.util.function.Function;
 
-import C99Compiler.CompConfig;
 import C99Compiler.CompConfig.DefinableInterrupt;
 import C99Compiler.CompilerNodes.FunctionDefinitionNode;
 import C99Compiler.CompilerNodes.Declarations.InitializerNode;
 import C99Compiler.CompilerNodes.Definitions.EnumDefinitionNode;
 import C99Compiler.CompilerNodes.Definitions.StructUnionDefinitionNode;
 import C99Compiler.CompilerNodes.Definitions.Type;
-import C99Compiler.CompilerNodes.Dummies.DummyFunctionNode;
 import C99Compiler.CompilerNodes.Dummies.EnumeratorNode;
 import C99Compiler.CompilerNodes.LValues.VariableNode;
 import Shared.TranslationUnit;
@@ -63,6 +66,46 @@ public class AssemblyUnit implements TranslationUnit {
 	
 	public String getAssembly()
 	{
+		return assembly;
+	}
+	
+	public String clearOptionals(Collection<FunctionDefinitionNode> functions, Function<FunctionDefinitionNode, Boolean> isCalled) // Clears optional functions from the assembly
+	{
+		List<String> lines = new ArrayList<String>();
+		lines.addAll(Arrays.asList(getAssembly().split("\n")));
+		Queue<Integer> removalQueue = new LinkedList<Integer>();
+		int i = 0, begin = -1;
+		for (String line : lines)
+		{
+			if (line.contains("@func")) // Is definitely function start
+			{
+				for (FunctionDefinitionNode function : functions) // For each function
+				{
+					if (line.contains(function.getFullName() + ":") && function.getFullName().equals("__mul16by8"))
+						function = function;
+					// Is it optional, not called, *and* declared here?
+					if (line.contains(function.getFullName() + ":") && function.isOptional() && !isCalled.apply(function))
+						begin = i; // Mark for omission
+				}
+			}
+			if (begin != -1) // Part of function we're omitting
+			{
+				removalQueue.add(i);
+				if (line.contains("@endfunc")) // End of function we're omitting
+					begin = -1;
+			}
+			i += 1;
+		}
+		int removedSoFar = 0;
+		while (!removalQueue.isEmpty())
+		{
+			i = removalQueue.poll();	
+			lines.remove(i - removedSoFar);
+			removedSoFar += 1;
+		}
+		String assembly = "";
+		for (String line : lines)
+			assembly += line + "\n";
 		return assembly;
 	}
 }

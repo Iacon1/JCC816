@@ -67,6 +67,7 @@ public final class AsmBuilder implements Catalogger
 				Logging.logNotice("Function " + i.getFullName() + " can call nothing");
 		}
 	}
+
 	private boolean isCalled(FunctionDefinitionNode funcNode, ProgramState state)
 	{
 				for (FunctionDefinitionNode i : getFunctions().values())
@@ -406,24 +407,24 @@ public final class AsmBuilder implements Catalogger
 		for (FunctionDefinitionNode funcNode : getFunctions().values())
 		{
 			if (funcNode.isImplemented() && funcNode.isInline()) continue;
-			else if (funcNode.getType().isExtern()) continue;
 			else if (!funcNode.isImplemented() && isCalled(funcNode, new ProgramState()))
 			{
-				if (!isModule)
+				if (funcNode.getType().isExtern()) continue;
+				else if (!isModule)
 					throw new UndefinedFunctionException(funcNode);
 				else continue;
 			}
-			else if (funcNode.isOptional() && !isCalled(funcNode, new ProgramState())) // Function can be left out if unneeded
+			else if (funcNode.isOptional() && !isModule && !isCalled(funcNode, new ProgramState())) // Function can be left out if unneeded
 				continue;
 			else if (isPreassembled(funcNode)) continue;
-			
-			assembly += funcNode.getAssembly(new ProgramState());
+			else if (funcNode.isImplemented())
+				assembly += funcNode.getAssembly(new ProgramState());
 		}
 		
 		// Get raw assembly
 		for (TranslationUnit unit : translationUnits)
 			if (AssemblyUnit.class.isAssignableFrom(unit.getClass()))
-				assembly += ((AssemblyUnit) unit).getAssembly();
+				assembly += ((AssemblyUnit) unit).clearOptionals(getFunctions().values(), (FunctionDefinitionNode func) -> {return this.isCalled(func, new ProgramState());});
 		
 		if (!isModule)
 		{	
