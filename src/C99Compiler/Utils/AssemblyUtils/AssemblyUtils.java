@@ -23,31 +23,31 @@ public final class AssemblyUtils
 	public static String store(ProgramState state, byte flags)
 	{
 		String assembly = "";
-		if ((flags & ProgramState.PreserveFlag.A) != 0 && state.testPreserveFlag(ProgramState.PreserveFlag.A))
+		if ((flags & ProgramState.PreserveFlag.A) == ProgramState.PreserveFlag.A && state.testPreserveFlag(ProgramState.PreserveFlag.A))
 			assembly = state.getWhitespace() + "PHA\n";
-		if ((flags & ProgramState.PreserveFlag.X) != 0 && state.testPreserveFlag(ProgramState.PreserveFlag.X))
+		if ((flags & ProgramState.PreserveFlag.X) == ProgramState.PreserveFlag.X && state.testPreserveFlag(ProgramState.PreserveFlag.X))
 			assembly = state.getWhitespace() + "PHX\n";
-		if ((flags & ProgramState.PreserveFlag.Y) != 0 && state.testPreserveFlag(ProgramState.PreserveFlag.Y))
+		if ((flags & ProgramState.PreserveFlag.Y) == ProgramState.PreserveFlag.Y && state.testPreserveFlag(ProgramState.PreserveFlag.Y))
 			assembly = state.getWhitespace() + "PHY\n";
-		if ((flags & ProgramState.PreserveFlag.M) != 0 && state.testPreserveFlag(ProgramState.PreserveFlag.M))
+		if ((flags & ProgramState.PreserveFlag.M) == ProgramState.PreserveFlag.M && state.testPreserveFlag(ProgramState.PreserveFlag.M))
 			assembly = state.getWhitespace() + "PHP\n";
-		else if ((flags & ProgramState.PreserveFlag.I) != 0 && state.testPreserveFlag(ProgramState.PreserveFlag.I))
+		else if ((flags & ProgramState.PreserveFlag.I) == ProgramState.PreserveFlag.I && state.testPreserveFlag(ProgramState.PreserveFlag.I))
 			assembly = state.getWhitespace() + "PHP\n";
 		return assembly;
 	}
 	public static String restore(ProgramState state, byte flags)
 	{
 		String assembly = "";
-		if ((flags & ProgramState.PreserveFlag.M) != 0 && state.testPreserveFlag(ProgramState.PreserveFlag.M))
-			assembly = state.getWhitespace() + "PLP\n";
-		else if ((flags & ProgramState.PreserveFlag.I) != 0 && state.testPreserveFlag(ProgramState.PreserveFlag.I))
-			assembly = state.getWhitespace() + "PLP\n";
-		if ((flags & ProgramState.PreserveFlag.Y) != 0 && state.testPreserveFlag(ProgramState.PreserveFlag.Y))
-			assembly = state.getWhitespace() + "PLY\n";
-		if ((flags & ProgramState.PreserveFlag.X) != 0 && state.testPreserveFlag(ProgramState.PreserveFlag.X))
-			assembly = state.getWhitespace() + "PLX\n";
-		if ((flags & ProgramState.PreserveFlag.A) != 0 && state.testPreserveFlag(ProgramState.PreserveFlag.A))
+		if ((flags & ProgramState.PreserveFlag.A) == ProgramState.PreserveFlag.A && state.testPreserveFlag(ProgramState.PreserveFlag.A))
 			assembly = state.getWhitespace() + "PLA\n";
+		if ((flags & ProgramState.PreserveFlag.X) == ProgramState.PreserveFlag.X && state.testPreserveFlag(ProgramState.PreserveFlag.X))
+			assembly = state.getWhitespace() + "PLX\n";
+		if ((flags & ProgramState.PreserveFlag.Y) == ProgramState.PreserveFlag.Y && state.testPreserveFlag(ProgramState.PreserveFlag.Y))
+			assembly = state.getWhitespace() + "PLY\n";
+		if ((flags & ProgramState.PreserveFlag.M) == ProgramState.PreserveFlag.M && state.testPreserveFlag(ProgramState.PreserveFlag.M))
+			assembly = state.getWhitespace() + "PLP\n";
+		else if ((flags & ProgramState.PreserveFlag.I) == ProgramState.PreserveFlag.I && state.testPreserveFlag(ProgramState.PreserveFlag.I))
+			assembly = state.getWhitespace() + "PLP\n";
 		return assembly;
 	}
 
