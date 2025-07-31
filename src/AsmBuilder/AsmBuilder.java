@@ -41,6 +41,7 @@ import C99Compiler.Utils.OperandSources.ConstantSource;
 import C99Compiler.Utils.OperandSources.NumericAddressSource;
 import Logging.Logging;
 import Shared.Assemblable.AssemblyStatePair;
+import Shared.CallGraph;
 import Shared.CartConfig;
 import Shared.Catalogger;
 import Shared.MemorySize;
@@ -53,32 +54,7 @@ public final class AsmBuilder implements Catalogger
 	{
 		for (int i = 0; i < info.length; ++i) Logging.logNotice(info[i].toString() + (i == info.length - 1 ? "" : ", ") + "\n");
 	}
-	private void printCanCalls(ProgramState state)
-	{
-		for (FunctionDefinitionNode i : getFunctions().values())
-		{
-			String list = "";
-			for (FunctionDefinitionNode j : getFunctions().values())
-				if (i.canCall(state, j) && i != j)
-					list = list + (list.isEmpty() ? "" : ", ") + j.getFullName();
-			if (list != "")
-				Logging.logNotice("Function " + i.getFullName() + " can call: " + list);
-			else
-				Logging.logNotice("Function " + i.getFullName() + " can call nothing");
-		}
-	}
 
-	private boolean isCalled(FunctionDefinitionNode funcNode, ProgramState state)
-	{
-				for (FunctionDefinitionNode i : getFunctions().values())
-		{
-			if (i == funcNode) continue;
-			if (i.canCall(state, funcNode))
-				return true;
-		}
-				return false;
-	}
-	
 	private List<TranslationUnit> translationUnits;
 	
 	private List<Exception> storedExceptions;
@@ -194,7 +170,7 @@ public final class AsmBuilder implements Catalogger
 			}
 		return false;
 	}
-	private Map<String, Integer> mapVariables(CartConfig cartConfig, MemorySize memorySize)
+	private Map<String, Integer> mapVariables(CartConfig cartConfig, MemorySize memorySize, CallGraph callGraph)
 	{
 		int offset = CompConfig.stackSize + 0x100;
 		int sOffset = cartConfig.containsChip(AddonChip.SA1) ? 256 + CompConfig.stackSize : 0; // SA1 needs its own DP
@@ -211,8 +187,8 @@ public final class AsmBuilder implements Catalogger
 				WRAMVars.add(var);
 		}
 		List<Integer> WRAMPoses = null, SRAMPoses = null;
-		if (WRAMVars.size() > 0) WRAMPoses = cartConfig.getType().mapWRAM(WRAMVars, offset, memorySize);
-		if (SRAMVars.size() > 0) SRAMPoses = cartConfig.getType().mapSRAM(SRAMVars, sOffset, memorySize);
+		if (WRAMVars.size() > 0) WRAMPoses = cartConfig.getType().mapWRAM(WRAMVars, offset, memorySize, callGraph);
+		if (SRAMVars.size() > 0) SRAMPoses = cartConfig.getType().mapSRAM(SRAMVars, sOffset, memorySize, callGraph);
 		
 		Map<String, Integer> map = new HashMap<String, Integer>();
 		for (int i = 0; i < WRAMVars.size(); ++i)
@@ -403,29 +379,32 @@ public final class AsmBuilder implements Catalogger
 	{
 		String assembly = "";
 		memorySize.isFast = cartConfig.isFast();
+		
+		CallGraph callGraph = new CallGraph(getFunctions().values());
+		if (VerbosityLevel.isAtLeast(VerbosityLevel.high))
+			callGraph.printCallGraph();
+		
 		// Get assembly from functions
 		for (FunctionDefinitionNode funcNode : getFunctions().values())
 		{
 			if (funcNode.isImplemented() && funcNode.isInline()) continue;
-			else if (!funcNode.isImplemented() && isCalled(funcNode, new ProgramState()))
+			else if (!funcNode.isImplemented() && callGraph.canEverBeCalled(funcNode))
 			{
 				if (funcNode.getType().isExtern()) continue;
 				else if (!isModule)
 					throw new UndefinedFunctionException(funcNode);
 				else continue;
 			}
-			else if (funcNode.isOptional() && !isModule && !isCalled(funcNode, new ProgramState())) // Function can be left out if unneeded
+			else if (funcNode.isOptional() && !isModule && !callGraph.canEverBeCalled(funcNode)) // Function can be left out if unneeded
 				continue;
 			else if (isPreassembled(funcNode)) continue;
 			else if (funcNode.isImplemented())
 				assembly += funcNode.getAssembly(new ProgramState());
 		}
-		
 		// Get raw assembly
 		for (TranslationUnit unit : translationUnits)
 			if (AssemblyUnit.class.isAssignableFrom(unit.getClass()))
-				assembly += ((AssemblyUnit) unit).clearOptionals(getFunctions().values(), (FunctionDefinitionNode func) -> {return this.isCalled(func, new ProgramState());});
-		
+				assembly += ((AssemblyUnit) unit).clearOptionals(getFunctions().values(), (FunctionDefinitionNode func) -> {return callGraph.canEverBeCalled(func);});
 		if (!isModule)
 		{	
 			// Get ROM data
@@ -433,15 +412,16 @@ public final class AsmBuilder implements Catalogger
 				for (InitializerNode init : unit.getGlobalInitializers())
 					if (!init.getType().isExtern() && init.isROM()) // Rom ones go last
 						assembly += init.getAssembly(new ProgramState());
-		
-			Map<String, Integer> varPoses = mapVariables(cartConfig, memorySize);
+
+			Map<String, Integer> varPoses = mapVariables(cartConfig, memorySize, callGraph);
 			if (CompConfig.wordAddresses && memorySize.WRAMSize > 0xFFFF)
 				throw new BuilderException("Cannot use 16-bit addressing, more than 64 KB RAM required.");
 			if (resolveFunction("main") == null)
 				throw new BuilderException("Program must have \"" + CompConfig.mainName + "\" function.");
+			
 			return getAssemblyPreface(cartConfig, varPoses, memorySize.BSSSize) + assembly;
 		}
-		else return assembly;
+		else return assembly;		
 	}
 	private static String postprocess(CartConfig cartConfig, String assembly, MemorySize memorySize) throws Exception
 	{
@@ -475,8 +455,6 @@ public final class AsmBuilder implements Catalogger
 			printInfo("Postprocessed in " + (System.currentTimeMillis() - t) + " ms. Assembly length: " + assembly.length() + ".");
 		if (VerbosityLevel.isAtLeast(VerbosityLevel.medium))
 			printInfo("Linking done.");
-		if (VerbosityLevel.isAtLeast(VerbosityLevel.high))
-			printCanCalls(new ProgramState());
 		return assembly;
 	}
 	

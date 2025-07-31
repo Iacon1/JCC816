@@ -15,6 +15,7 @@ import C99Compiler.CompilerNodes.LValues.VariableNode;
 import C99Compiler.Utils.OverlaySolver;
 import C99Compiler.Utils.ProgramState;
 import Logging.Logging;
+import Shared.CallGraph;
 import Shared.Configurer;
 import Shared.MemorySize;
 
@@ -23,11 +24,12 @@ public interface MapModeInterface extends Configurer
 	public static class VariableOverlayable implements OverlaySolver.Overlayable<VariableOverlayable>
 	{
 		private VariableNode variable;
-		// Dynamic programming
-		private static Map<SimpleEntry<FunctionDefinitionNode, FunctionDefinitionNode>, Boolean> dynamicMap = new HashMap<SimpleEntry<FunctionDefinitionNode, FunctionDefinitionNode>, Boolean>();
-		public VariableOverlayable(VariableNode variable)
+		private final CallGraph callGraph;
+
+		public VariableOverlayable(VariableNode variable, CallGraph callGraph)
 		{
 			this.variable = variable;
+			this.callGraph = callGraph;
 		}
 
 		@Override
@@ -41,18 +43,10 @@ public interface MapModeInterface extends Configurer
 			SimpleEntry<FunctionDefinitionNode, FunctionDefinitionNode> entry =
 					new SimpleEntry<FunctionDefinitionNode, FunctionDefinitionNode>(aFunc, bFunc);
 
-			if (dynamicMap.get(entry) != null)
-			{
-				// Found value in map, no need to recalculate
-				return dynamicMap.get(entry);
-			}
-			else
-			{
-				// If either func can call the other then no overlaying
-				boolean value = aFunc.canCall(new ProgramState(), bFunc) || bFunc.canCall(new ProgramState(), aFunc);
-				dynamicMap.put(entry, !value);
-				return !value;
-			}
+			if (callGraph.canEverCall(aFunc, bFunc) || callGraph.canEverCall(bFunc, aFunc))
+				return false;
+			
+			return true;
 		}
 
 		@Override
@@ -88,11 +82,11 @@ public interface MapModeInterface extends Configurer
 	 */
 	public boolean isContiguous(int i);
 	
-	public default List<Integer> mapWRAM(List<VariableNode> variables, int offset, MemorySize memorySize)
+	public default List<Integer> mapWRAM(List<VariableNode> variables, int offset, MemorySize memorySize, CallGraph callGraph)
 	{
 		List<VariableOverlayable> variableOverlayables = new ArrayList<VariableOverlayable>();
 		for (VariableNode variable : variables)
-			variableOverlayables.add(new VariableOverlayable(variable));
+			variableOverlayables.add(new VariableOverlayable(variable, callGraph));
 		SimpleEntry<List<Integer>, Integer> solution = OverlaySolver.solveOverlay(variableOverlayables, getWRAMBankLength(), getMaxWRAMBanks(), (Integer i) ->
 		{
 			if (i == 0) return getWRAMBankStart(i) + offset;
@@ -101,11 +95,11 @@ public interface MapModeInterface extends Configurer
 		memorySize.WRAMSize = solution.getValue();
 		return solution.getKey();
 	}
-	public default List<Integer> mapSRAM(List<VariableNode> variables, int offset, MemorySize memorySize)
+	public default List<Integer> mapSRAM(List<VariableNode> variables, int offset, MemorySize memorySize, CallGraph callGraph)
 	{
 		List<VariableOverlayable> variableOverlayables = new ArrayList<VariableOverlayable>();
 		for (VariableNode variable : variables)
-			variableOverlayables.add(new VariableOverlayable(variable));
+			variableOverlayables.add(new VariableOverlayable(variable, callGraph));
 		SimpleEntry<List<Integer>, Integer> solution = OverlaySolver.solveOverlay(variableOverlayables, getSRAMBankLength(), getMaxSRAMBanks(), (Integer i) ->
 		{
 			if (i == 0) return getSRAMBankStart(i) + offset;
