@@ -49,6 +49,16 @@ public class ComponentNode<C extends ComponentNode<C>> implements Serializable
 	{
 		return children;
 	}
+	public List<ComponentNode<?>> getDescendents()
+	{
+		List<ComponentNode<?>> descendents = new LinkedList<ComponentNode<?>>();
+		for (ComponentNode<?> child : children)
+		{
+			descendents.add(child);
+			descendents.addAll(child.getDescendents());
+		}
+		return descendents;
+	}
 	public void removeChild(ComponentNode<?> child)
 	{
 		children.remove(child);
@@ -82,6 +92,8 @@ public class ComponentNode<C extends ComponentNode<C>> implements Serializable
 		if (this.parent != null)
 			parent.removeChild(this);
 		parent = newParent;
+		if (!parent.children.contains(this))
+			parent.children.add(this);
 		parent.invalidateSearchCaches();
 	}
 	/**
@@ -382,5 +394,10 @@ public class ComponentNode<C extends ComponentNode<C>> implements Serializable
 		for (VariableNode v : this.getReferencedVariables().values())
 			state = state.clearPossibleValues(v);
 		return state;
+	}
+	
+	public boolean isValid()
+	{
+		return getTranslationUnit() != null;
 	}
 }

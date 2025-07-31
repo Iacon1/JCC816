@@ -65,6 +65,7 @@ public class MultOptimizer implements PerNodeASTPass<MultiplicativeExpressionNod
 				d1 = new DummyExpressionNode(node, y.getType(), l);
 				d2 = new DummyExpressionNode(node, y.getType(), i);
 				BaseExpressionNode<?> m1 = new MultiplicativeExpressionNode(node, "*", x, d1);
+				x.swapParent(m1);
 				d1.swapParent(m1);
 				m1 = (BaseExpressionNode<?>) apply((MultiplicativeExpressionNode) m1, state);
 				ShiftExpressionNode s1 = new ShiftExpressionNode(node, "<<", m1, d2);
@@ -87,6 +88,8 @@ public class MultOptimizer implements PerNodeASTPass<MultiplicativeExpressionNod
 			DummyExpressionNode d1;
 			d1 = new DummyExpressionNode(node, y.getType(), (int) (Math.log(y.getPropLong(state)) / Math.log(2)));
 			ShiftExpressionNode s1 = new ShiftExpressionNode(node, ">>", x, d1);
+			x.swapParent(s1);
+			d1.swapParent(d1);
 			optNode = s1;
 		}
 		

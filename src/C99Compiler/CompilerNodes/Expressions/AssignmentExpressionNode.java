@@ -70,22 +70,13 @@ public class AssignmentExpressionNode extends BinaryExpressionNode
 		switch (operator)
 		{
 		case "*=":
-			newY = new MultiplicativeExpressionNode(this);
-			newY.x = x;
-			newY.operator = "*";
-			newY.y = y;
+			newY = new MultiplicativeExpressionNode(this, "*", x, y);
 			break;
 		case "/=":
-			newY = new MultiplicativeExpressionNode(this);
-			newY.x = x;
-			newY.operator = "/";
-			newY.y = y;
+			newY = new MultiplicativeExpressionNode(this, "/", x, y);
 			break;
 		case "%=":
-			newY = new MultiplicativeExpressionNode(this);
-			newY.x = x;
-			newY.operator = "%";
-			newY.y = y;
+			newY = new MultiplicativeExpressionNode(this, "%", x, y);
 			break;
 		case "+=":
 			newY = new AdditiveExpressionNode(this, "+", x, y);
@@ -126,6 +117,7 @@ public class AssignmentExpressionNode extends BinaryExpressionNode
 		case "=": return this;
 		}
 		newY.interpret(null);
+		y.swapParent(newY);
 		y = newY;
 		
 		return this;
@@ -204,7 +196,7 @@ public class AssignmentExpressionNode extends BinaryExpressionNode
 			state = tmpPair.state;
 		}
 		
-		if (y.hasPropValue(state) && !x.isIndirect() && !x.getType().isVolatile())
+		if (y.hasPropValue(state) && !x.isIndirect() && !x.getType().isVolatile() && !x.getLValue(state).getScope().isRoot())
 		{
 			if (x.getType().isArithmetic())
 				state = state.setPossibleValue(x.getLValue(state), y.getPropLong(state, x.getType()));
