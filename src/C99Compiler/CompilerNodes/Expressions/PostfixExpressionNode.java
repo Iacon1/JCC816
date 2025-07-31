@@ -3,6 +3,7 @@
 package C99Compiler.CompilerNodes.Expressions;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -56,6 +57,7 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 	private PFType type;
 	
 	private BaseExpressionNode<?> expr, indexExpr;
+	private AdditiveExpressionNode pAddExpr;
 	private List<BaseExpressionNode<?>> params;
 	private OperandSource dummySource;
 	
@@ -74,7 +76,17 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 	public PostfixExpressionNode(ComponentNode<?> parent)
 	{
 		super(parent);
+		expr = null;
 		params = new ArrayList<BaseExpressionNode<?>>();
+		dummySource = new AddressSource(CompUtils.getSafeUUID(), 0);
+	}
+	// Synthetic function call
+	public PostfixExpressionNode(ComponentNode<?> parent, String functionName, BaseExpressionNode<?>... params)
+	{
+		super(parent);
+		this.type = PFType.funcCall;
+		this.expr = new PrimaryExpressionNode(this, functionName);
+		this.params = Arrays.asList(params);
 		dummySource = new AddressSource(CompUtils.getSafeUUID(), 0);
 	}
 
@@ -89,6 +101,7 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 		case "[": // Array subscript
 			type = PFType.arraySubscript;
 			indexExpr = new ExpressionNode(this).interpret(node.expression());
+			pAddExpr = new AdditiveExpressionNode(this, "+", expr, indexExpr);
 			break;
 		case "(": // Function call
 			type = PFType.funcCall;
@@ -132,6 +145,15 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 		return this;
 	}
 
+	@Override
+	protected void onSwap(ComponentNode<?> from, ComponentNode<?> to)
+	{
+		if (expr == from)
+			expr = (BaseExpressionNode<?>) to;
+		else if (indexExpr == from)
+			indexExpr = (BaseExpressionNode<?>) to;
+	}
+	
 	@Override
 	public Type getType()
 	{
@@ -306,7 +328,7 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 				addrSource = state.lastScratchSource();
 				
 				state = state.setDestSource(addrSource);
-				tmpPair = new AdditiveExpressionNode(this, "+", expr, indexExpr).getAssemblyAndState(state);
+				tmpPair = pAddExpr.getAssemblyAndState(state);
 				assembly += tmpPair.assembly;
 				state = tmpPair.state;
 				if (expr.hasLValue(state))
@@ -325,7 +347,7 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 			else // Return head of an array
 			{
 				state = state.setDestSource(destSource);
-				tmpPair = new AdditiveExpressionNode(this, "+", expr, indexExpr).getAssemblyAndState(state);
+				tmpPair = pAddExpr.getAssemblyAndState(state);
 				assembly += tmpPair.assembly;
 				state = tmpPair.state;
 			}

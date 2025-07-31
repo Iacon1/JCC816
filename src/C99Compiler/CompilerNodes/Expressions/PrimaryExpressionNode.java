@@ -38,7 +38,11 @@ public class PrimaryExpressionNode extends BaseExpressionNode<Primary_expression
 	private Token token;
 	
 	public PrimaryExpressionNode(ComponentNode<?> parent) {super(parent);}
-
+	public PrimaryExpressionNode(ComponentNode<?> parent, String identifier)
+	{
+		super(parent);
+		this.identifier = identifier;
+	}
 	@Override
 	public BaseExpressionNode<Primary_expressionContext> interpret(Primary_expressionContext node) throws Exception
 	{
