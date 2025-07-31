@@ -50,7 +50,7 @@ public abstract class EightBitBytewiseOperator implements Assemblable
 				for (int i = 0; i < n; ++i)
 					apply(pair, i);
 			else // Go from offset n - 2 down
-				for (int i = n - 1; i >= 0; ++i)
+				for (int i = n - 1; i >= 0; --i)
 					apply(pair, i);
 		}
 		
