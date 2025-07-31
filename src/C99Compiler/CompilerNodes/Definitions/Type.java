@@ -434,11 +434,11 @@ public class Type implements Serializable
 	}
 	public boolean isSpecX()
 	{
-		return storageClassSpecifier.equals("__SPECX"); 
+		return storageClassSpecifier != null && storageClassSpecifier.equals("__SPECX"); 
 	}
 	public boolean isSpecY()
 	{
-		return storageClassSpecifier.equals("__SPECY"); 
+		return storageClassSpecifier != null && storageClassSpecifier.equals("__SPECY"); 
 	}
 	public boolean isConstant()
 	{
