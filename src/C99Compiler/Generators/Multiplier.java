@@ -6,7 +6,7 @@
  * And K bytes C1, C2, C3, ...
  * We can calculate Ax * By = Z1Z2
  */
-package C99Compiler.CompilerNodes.Expressions.Snippets;
+package C99Compiler.Generators;
 
 import C99Compiler.Utils.ProgramState;
 import C99Compiler.Utils.SNESRegisters;
@@ -25,7 +25,7 @@ public class Multiplier implements Assemblable
 		
 		public MultiplierOperator(int offset, OperandSource destSource, OperandSource sourceX, OperandSource sourceY)
 		{
-			super(sourceX.getSize(), false);
+			super(sourceY.getSize(), false);
 			this.offset = offset;
 			this.destSource = destSource;
 			this.sourceX = sourceX;
@@ -48,7 +48,7 @@ public class Multiplier implements Assemblable
 				pair.assembly += whitespace + "LDA\t" + SNESRegisters.RDMPYH + "\n";
 				pair.assembly += whitespace + "TAX\n";
 			}
-			sourceY.applyLDA(pair, i);
+			sourceY.applyLDA(pair, offset);
 			pair.assembly += whitespace + "STA\t" + SNESRegisters.WRMPYB + "\n";
 			if (i == 0) // First mult of the set
 			{
@@ -93,7 +93,7 @@ public class Multiplier implements Assemblable
 		// High byte
 		pair.assembly += pair.state.getWhitespace() + "LDA\t" + SNESRegisters.RDMPYH + "\n";
 		pair.assembly += pair.state.getWhitespace() + "ADC\t#$00\n";
-		destSource.applySTA(pair, destSource.getSize() - 1);
+		destSource.applySTA(pair, sourceX.getSize() + sourceY.getSize() - 1);
 		
 		return pair.getImmutable();
 	}
