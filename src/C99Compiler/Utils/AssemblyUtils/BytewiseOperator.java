@@ -39,8 +39,14 @@ public abstract class BytewiseOperator implements Assemblable
 		MutableAssemblyStatePair pair = new MutableAssemblyStatePair("", state);
 
 		byte flags = pair.state.getPreserveFlags();
-		pair.assembly += AssemblyUtils.store(pair.state, ProgramState.PreserveFlag.A);
-		pair.state = pair.state.clearPreserveFlags(ProgramState.PreserveFlag.A);
+		byte byteMask = ProgramState.PreserveFlag.A;
+		// If we're already in the bit mode we want don't bother preserving anything
+		if (n1 == 1 && (state.testKnownFlag(ProgramState.PreserveFlag.M) && !pair.state.testProcessorFlag(ProgramState.ProcessorFlag.M)))
+			byteMask &= ~ProgramState.PreserveFlag.M;
+		else if (n1 == 2 && n2 == 2 && (state.testKnownFlag(ProgramState.PreserveFlag.M) && pair.state.testProcessorFlag(ProgramState.ProcessorFlag.M)))
+			byteMask &= ~ProgramState.PreserveFlag.M;
+		pair.assembly += AssemblyUtils.store(pair.state, byteMask);
+		pair.state = pair.state.clearPreserveFlags(byteMask);
 		
 		if (n1 == 1 || (n1 == 2 && n2 == 2)) // Only one operation needed
 		{
@@ -130,8 +136,8 @@ public abstract class BytewiseOperator implements Assemblable
 			}
 		}
 		
-		state = state.setPreserveFlags(flags);
-		pair.assembly += AssemblyUtils.restore(state, ProgramState.PreserveFlag.A);
+		pair.state = pair.state.setPreserveFlags(flags);
+		pair.assembly += AssemblyUtils.restore(state, byteMask);
 		
 		return pair.getImmutable();
 	}
