@@ -16,7 +16,9 @@ public final class Banker
 	{
 		int sizeEstimate = 0; // Estimated ROM size
 
-		boolean inBlock = false, leftBlock = false; // Whether we're in a block of code and whether we just left a block
+		boolean inBlock = false; // Whether we're in a block of code
+		boolean leftBlock = false; // whether we just left a block and
+		boolean startedBlock = false;  // whether we just entered a block
 		boolean inData = false; // Whether the block we're in is data
 		int blockStart = 0; // Which line did the block start with?
 		String blockBuffer = ""; // Current block buffer
@@ -43,6 +45,7 @@ public final class Banker
 		blockStart = lineNo;
 		blockBuffer = "";
 		inBlock = false;
+		startedBlock = true;
 		inData = true; // In data specifically
 		leftBlock = false;
 		while (lineNo <= lines.size())
@@ -64,6 +67,7 @@ public final class Banker
 			if (line.contains("; " + CompConfig.functionTag))
 			{
 				inBlock = true;
+				startedBlock = true;
 				inData = false;
 				leftBlock = true;
 			}
@@ -71,6 +75,7 @@ public final class Banker
 			{
 				if (inBlock)
 					leftBlock = true;
+				startedBlock = true;
 				inData = true;
 				inBlock = true;
 			}
@@ -83,6 +88,7 @@ public final class Banker
 			if (leftBlock) // A block has ended
 			{
 				int blockSize = new ASMGraphBuilder(blockBuffer).getSize();
+
 				if (blockSize > emptySpace.get(currBank)) // We don't have this much space in the bank
 				{
 					boolean foundSpace = false;
@@ -91,7 +97,7 @@ public final class Banker
 						{
 							lines.add(blockStart, ".SEGMENT\t\"" + CompConfig.codeBankName(i) + "\"");
 							lineNo += 1;
-							emptySpace.set(currBank, emptySpace.get(i) - blockSize);
+							emptySpace.set(i, emptySpace.get(i) - blockSize);
 							bankUsed.set(i, true);
 							sizeEstimate += blockSize;
 							foundSpace = true;
@@ -115,13 +121,14 @@ public final class Banker
 				}
 				blockBuffer = "";
 			}
-			leftBlock = false;
-			
-			if (line.contains("; " + CompConfig.functionTag))
+
+			if (startedBlock)
 			{
 				blockStart = lineNo;
 				blockBuffer = "";
+				startedBlock = false;
 			}
+			leftBlock = false;
 			
 			if (!inBlock)
 			{
@@ -130,37 +137,37 @@ public final class Banker
 				else
 					lineSize = new ASMGraphBuilder(line + "\n").getSize();
 
-					if (lineSize > emptySpace.get(currBank)) // We don't have this much space in the bank
-					{
-						boolean foundSpace = false;
-						for (int i = 0; i < emptySpace.size(); ++i)
-							if (lineSize <= emptySpace.get(i))
+				if (lineSize > emptySpace.get(currBank)) // We don't have this much space in the bank
+				{
+					boolean foundSpace = false;
+					for (int i = 0; i < emptySpace.size(); ++i)
+						if (lineSize <= emptySpace.get(i))
+						{
+							lines.add(blockStart, ".SEGMENT\t\"" + CompConfig.codeBankName(i) + "\"");
+							lineNo += 1;
+							emptySpace.set(i, emptySpace.get(i) - lineSize);
+							bankUsed.set(i, true);
+							sizeEstimate += lineSize;
+							foundSpace = true;
+			
+							if (emptySpace.get(currBank) > 0) // Empty space remains here
 							{
-								lines.add(blockStart, ".SEGMENT\t\"" + CompConfig.codeBankName(i) + "\"");
+								lines.add(blockStart, ".SEGMENT\t\"" + CompConfig.codeBankName(currBank) + "\"");
 								lineNo += 1;
-								emptySpace.set(currBank, emptySpace.get(i) - lineSize);
-								bankUsed.set(i, true);
-								sizeEstimate += lineSize;
-								foundSpace = true;
-				
-								if (emptySpace.get(currBank) > 0) // Empty space remains here
-								{
-									lines.add(blockStart, ".SEGMENT\t\"" + CompConfig.codeBankName(currBank) + "\"");
-									lineNo += 1;
-								}
-								else
-									currBank = i;
-								break;
 							}
-						if (!foundSpace)
-							throw new UnsupportedFeatureException("Couldn't find anywhere to put segment of size " + lineSize + "B in " + cartConfig.getType().getName() + " mapping mode", false, lineNo, 0);
-					}
-					else
-					{
-						emptySpace.set(currBank, emptySpace.get(currBank) - lineSize);
-						sizeEstimate += lineSize;
-					}
+							else
+								currBank = i;
+							break;
+						}
+					if (!foundSpace)
+						throw new UnsupportedFeatureException("Couldn't find anywhere to put segment of size " + lineSize + "B in " + cartConfig.getType().getName() + " mapping mode", false, lineNo, 0);
 				}
+				else
+				{
+					emptySpace.set(currBank, emptySpace.get(currBank) - lineSize);
+					sizeEstimate += lineSize;
+				}
+			}
 			else
 				blockBuffer += line + "\n";
 			

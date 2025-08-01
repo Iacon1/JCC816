@@ -81,8 +81,6 @@ public class AssemblyUnit implements TranslationUnit {
 			{
 				for (FunctionDefinitionNode function : functions) // For each function
 				{
-					if (line.contains(function.getFullName() + ":") && function.getFullName().equals("__mul16by8"))
-						function = function;
 					// Is it optional, not called, *and* declared here?
 					if (line.contains(function.getFullName() + ":") && function.isOptional() && !isCalled.apply(function))
 						begin = i; // Mark for omission
