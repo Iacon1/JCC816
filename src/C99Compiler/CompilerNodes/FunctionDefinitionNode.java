@@ -281,7 +281,8 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 	public AssemblyStatePair getAssemblyAndState(ProgramState state) throws Exception
 	{
 		MutableAssemblyStatePair pair = new MutableAssemblyStatePair("", state);
-		
+		if (code == null && implementation != null)
+			return implementation.getAssemblyAndState(state);
 //		if (DebugLevel.isAtLeast(DebugLevel.low))
 //			assembly += ".dbg func, \"" + getName() + "\", \"01\", EXTERN, \"" + getFullName() + "\"\n";
 		
