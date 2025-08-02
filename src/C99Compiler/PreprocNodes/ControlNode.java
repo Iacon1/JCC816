@@ -225,10 +225,11 @@ public class ControlNode extends InterpretingNode<ControlNode, Control_lineConte
 			return pragmaOutput;
 		else return "";
 	}
-	public List<LineInfo> getLineInfo()
+	@Override
+	public List<LineInfo> getLineInfo(int offset)
 	{
 		if (command.equals("include"))
-			return include.getLineInfo();
+			return include.getLineInfo(offset);
 		else return lineInfo;
 	}
 }

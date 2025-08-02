@@ -121,7 +121,7 @@ public final class Preprocessor
 		includedStdLibs.addAll(node.getIncludedStdLibs());
 		includedOtherLibs.addAll(node.getIncludedOtherLibs());
 		lineInfo.clear();
-		lineInfo.addAll(node.getLineInfo());
+		lineInfo.addAll(node.getLineInfo(-1)); // -1 offset to account for imp_mult
 		source = node.getText();
 		PreProcComponentNode.reset();
 		Grammar.GrammarFlags.isPreproc = false;

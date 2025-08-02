@@ -17,6 +17,13 @@ public class LineInfo implements Serializable
 		this.isStd = isStd;
 	}
 	
+	public LineInfo(LineInfo info)
+	{
+		this.filename = info.filename;
+		this.line = info.line;
+		this.isStd = info.isStd;
+	}
+
 	public String getLine()
 	{
 		if (!isStd)

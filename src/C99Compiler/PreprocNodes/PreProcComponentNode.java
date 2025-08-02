@@ -237,11 +237,11 @@ public abstract class PreProcComponentNode<T extends PreProcComponentNode<T>>
 		return wordList;
 	}
 	
-	public List<LineInfo> getLineInfo()
+	public List<LineInfo> getLineInfo(int offset)
 	{
 		List<LineInfo> lineInfo = new LinkedList<LineInfo>();
 		for (PreProcComponentNode<?> child : children)
-			lineInfo.addAll(child.getLineInfo());
+			lineInfo.addAll(child.getLineInfo(offset));
 		return lineInfo;
 	}
 }

@@ -53,5 +53,16 @@ public class TextNode extends InterpretingNode<TextNode, Text_lineContext> imple
 		return text.stripTrailing() + "\n";
 	}
 	
-	public List<LineInfo> getLineInfo() {return lineInfo;}
+	@Override
+	public List<LineInfo> getLineInfo(int offset)
+	{
+		List<LineInfo> list = new LinkedList<LineInfo>();
+		for (LineInfo info : lineInfo)
+		{
+			LineInfo newInfo = new LineInfo(info);
+			newInfo.line += offset;
+			list.add(newInfo);
+		}
+		return list;
+	}
 }
