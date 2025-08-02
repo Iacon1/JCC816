@@ -379,16 +379,14 @@ public final class AsmBuilder implements Catalogger
 	{
 		String assembly = "";
 		memorySize.isFast = cartConfig.isFast();
-		
 		CallGraph callGraph = new CallGraph(getFunctions().values());
-		if (VerbosityLevel.isAtLeast(VerbosityLevel.high))
+		if (!isModule && VerbosityLevel.isAtLeast(VerbosityLevel.high))
 			callGraph.printCallGraph();
-		
 		// Get assembly from functions
 		for (FunctionDefinitionNode funcNode : getFunctions().values())
 		{
 			if (funcNode.isImplemented() && funcNode.isInline()) continue;
-			else if (!funcNode.isImplemented() && callGraph.canEverBeCalled(funcNode))
+			else if (!funcNode.isImplemented() && !isModule && callGraph.canEverBeCalled(funcNode))
 			{
 				if (funcNode.getType().isExtern()) continue;
 				else if (!isModule)
@@ -404,7 +402,10 @@ public final class AsmBuilder implements Catalogger
 		// Get raw assembly
 		for (TranslationUnit unit : translationUnits)
 			if (AssemblyUnit.class.isAssignableFrom(unit.getClass()))
-				assembly += ((AssemblyUnit) unit).clearOptionals(getFunctions().values(), (FunctionDefinitionNode func) -> {return callGraph.canEverBeCalled(func);});
+				if (!isModule)
+					assembly += ((AssemblyUnit) unit).clearOptionals(getFunctions().values(), (FunctionDefinitionNode func) -> {return callGraph.canEverBeCalled(func);});
+				else
+					assembly += ((AssemblyUnit) unit).getAssembly();
 		if (!isModule)
 		{	
 			// Get ROM data
