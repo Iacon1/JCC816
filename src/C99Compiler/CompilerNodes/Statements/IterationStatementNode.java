@@ -16,6 +16,7 @@ import C99Compiler.Utils.ProgramState;
 import C99Compiler.Utils.AssemblyUtils.AssemblyUtils;
 import C99Compiler.Utils.AssemblyUtils.ComparitiveJump;
 import C99Compiler.Utils.OperandSources.OperandSource;
+import C99Compiler.Utils.ProgramState.ProcessorFlag;
 import C99Compiler.Utils.ProgramState.ScratchSource;
 import Grammar.C99.C99Parser.Iteration_statementContext;
 
@@ -224,6 +225,8 @@ public class IterationStatementNode extends SequencePointStatementNode<Iteration
 					tmpPair = getAssemblyAndStateWithRegistered(state, new EqualityExpressionNode(this, condExpNode, "!="));
 				assembly += tmpPair.assembly;
 				state = tmpPair.state;
+				assembly += whitespace + "SEP\t#$20\n";
+				state = state.clearProcessorFlags(ProcessorFlag.M);
 				assembly += whitespace + "CMP\t#$00\n";
 				assembly += whitespace + "BNE" + "\t:+\n";
 				assembly += whitespace + "JMP\t" + getEndLabel() + "\n";
@@ -259,6 +262,8 @@ public class IterationStatementNode extends SequencePointStatementNode<Iteration
 			
 			assembly += tmpPair.assembly;
 			state = tmpPair.state;
+			assembly += whitespace + "SEP\t#$20\n";
+			state = state.clearProcessorFlags(ProcessorFlag.M);
 			assembly += whitespace + "CMP\t#$00\n";
 			assembly += whitespace + "BEQ\t" + getEndLabel() + "\n";
 			assembly += whitespace + "JMP\t" + getStartLabel() + "\n";
