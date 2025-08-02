@@ -22,6 +22,7 @@ import C99Compiler.Utils.ProgramState.ScratchSource;
 import C99Compiler.Utils.AssemblyUtils.ByteCopier;
 import C99Compiler.Utils.AssemblyUtils.ComparitiveJump;
 import C99Compiler.Utils.OperandSources.ConstantSource;
+import C99Compiler.Utils.OperandSources.OperandSource;
 import Grammar.C99.C99Parser.Selection_statementContext;
 
 public class SelectionStatementNode extends SequencePointStatementNode<Selection_statementContext>
@@ -151,11 +152,10 @@ public class SelectionStatementNode extends SequencePointStatementNode<Selection
 				{
 					if (!expression.isLogical())
 					{
-						pair.state = pair.state.reserveScratchBlock(expression.getSize());
-						ScratchSource exprSource = pair.state.lastScratchSource();
-						pair.state = pair.state.setDestSource(exprSource);
+						OperandSource destSource = state.destSource();
+						state = state.setDestSource(null);
 						applyWithRegistered(pair, new EqualityExpressionNode(this, expression));
-						new ByteCopier(exprSource.getSize(), exprSource, exprSource).apply(pair);
+						state = state.setDestSource(destSource);
 					}
 					else
 					{
