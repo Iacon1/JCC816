@@ -54,6 +54,7 @@ import C99Compiler.Utils.AssemblyUtils.StackPusher;
 public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionNode, Function_definitionContext> implements NamedNode, TypedNode, UnvaluedAssemblableNode
 {
 	private Set<String> attributes;
+	private Set<String> attributeReqs;
 	private DeclarationSpecifiersNode.DeclSpecifiers specifiers;
 	private Type type;
 	private DeclaratorNode signature;
@@ -67,6 +68,7 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 	{
 		super(parent);
 		attributes = new HashSet<String>();
+		attributeReqs = new HashSet<String>();
 		requiresStackLoader = false;
 		implementation = null;
 	}
@@ -74,10 +76,20 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 	@Override
 	public FunctionDefinitionNode interpret(Function_definitionContext node) throws Exception
 	{
+		boolean aReq = false; // Is the next attribute a real attribute or a required function name?
 		for (Attributes_declarationContext attributes_declaration : node.attributes_declaration())
 			for (IdentifierContext attribute : attributes_declaration.identifier_list().identifier())
-				attributes.add(attribute.getText());
-
+			{
+				if (aReq)
+				{
+					attributeReqs.add(attribute.getText());
+					aReq = false;
+				}
+				else if (attribute.getText().equals(Attributes.req))
+					aReq = true;
+				else
+					attributes.add(attribute.getText());
+			}
 		specifiers = new DeclarationSpecifiersNode(this).interpret(node.declaration_specifiers()).getSpecifiers();
 		signature = new DeclaratorNode(this, getName(node.declarator().direct_declarator())).interpret(node.declarator());
 
@@ -92,7 +104,7 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 		}
 		
 		code = new CompoundStatementNode(this, getName()).interpret(node.compound_statement());
-		
+
 		if (attributes.contains(Attributes.interruptCOP))
 			getTranslationUnit().registerInterrupt(DefinableInterrupt.COP, getStartLabel());
 		if (attributes.contains(Attributes.interruptBRK))
@@ -108,9 +120,21 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 	}
 	public FunctionDefinitionNode interpret(Collection<Attributes_declarationContext> attributes, Declaration_specifiersContext declarationSpecifiers, DeclaratorContext declarator) throws Exception // Load from declaration
 	{
+		boolean aReq = false; // Is the next attribute a real attribute or a required function name?
 		for (Attributes_declarationContext attributes_declaration : attributes)
 			for (IdentifierContext attribute : attributes_declaration.identifier_list().identifier())
-				this.attributes.add(attribute.getText());
+			{
+				if (aReq)
+				{
+					attributeReqs.add(attribute.getText());
+					aReq = false;
+				}
+				else if (attribute.getText().equals(Attributes.req))
+					aReq = true;
+				else
+					this.attributes.add(attribute.getText());
+			}
+		
 		specifiers = new DeclarationSpecifiersNode(this).interpret(declarationSpecifiers).getSpecifiers();
 		signature = new DeclaratorNode(this, getName(declarator.direct_declarator())).interpret(declarator);
 
@@ -232,6 +256,11 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 	@Override
 	public boolean canCall(ProgramState state, FunctionDefinitionNode function)
 	{
+		// Specially-marked as calling that function
+		for (String req : attributeReqs)
+			if (req.equals(function.getFullName()))
+				return true;
+		
 		if (this.implementation != null)
 		{
 			return (

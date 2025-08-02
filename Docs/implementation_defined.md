@@ -20,6 +20,7 @@ Function attributes are specified per function, like so: `[[spec1, spec2, spec3]
 * `XY8`: Tells the optimization routines that the function can be assumed to start in 8-bit-XY-register mode.
 * `XY16`: Tells the optimization routines that the function  can be assumed to start in 16-bit-XY-register mode.
 * `optional`: Allows the compiler to not emit assembly for the function if it believes the function is never called.
+* `__req`: Specifies that the *next* identifier in the list isn't an attribute but rather the name of a function that the compiler should consider callable (for purposes of `optional` by this function. Useful, for example, for assembly routines that use multiplication.
 
 # Type specifiers
 * `__SRAM`: Marks the variable as needing to be allocated to SRAM instead of WRAM.

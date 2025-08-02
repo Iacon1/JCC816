@@ -18,11 +18,11 @@
 [[optional]] extern float __sint32toflt32(__SPECX long x);
 [[optional]] extern float __sint64toflt32(__SPECX long long x);
 
-[[optional]] extern float __uint8toflt32(__SPECX unsigned char x);
-[[optional]] extern float __uint16toflt32(__SPECX unsigned short x);
+[[optional, __req, __uint24toflt32]] extern float __uint8toflt32(__SPECX unsigned char x);
+[[optional, __req, __uint24toflt32]] extern float __uint16toflt32(__SPECX unsigned short x);
 [[optional]] extern float __uint24toflt32(__SPECX unsigned int x);
-[[optional]] extern float __uint32toflt32(__SPECX unsigned long x);
-[[optional]] extern float __uint64toflt32(__SPECX unsigned long long x);
+[[optional, __req, __uint24toflt32]] extern float __uint32toflt32(__SPECX unsigned long x);
+[[optional, __req, __uint24toflt32]] extern float __uint64toflt32(__SPECX unsigned long long x);
 
 [[optional]] extern char __flt32tosint8(__SPECX float x);
 [[optional]] extern short __flt32tosint16(__SPECX float x);
