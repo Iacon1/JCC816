@@ -48,7 +48,7 @@ public class Multiplier implements Assemblable
 				pair.assembly += whitespace + "LDA\t" + SNESRegisters.RDMPYH + "\n";
 				pair.assembly += whitespace + "TAX\n";
 			}
-			sourceY.applyLDA(pair, offset);
+			sourceY.applyLDA(pair, i);
 			pair.assembly += whitespace + "STA\t" + SNESRegisters.WRMPYB + "\n";
 			if (i == 0) // First mult of the set
 			{
