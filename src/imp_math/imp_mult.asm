@@ -2788,7 +2788,7 @@ __div8by16:	; @func
   SEP	#$20
   LDA	#$00
   STA	__div8by16@start + 2
-  __ITER__START__c8220a6c_968c_4268_9bae_7c5a02e53748:
+  __ITER__START__b9e7a2c9_d31c_47e9_9c49_de1b01b6d800:
   CLC
   REP	#$20
   LDA	#$0000
@@ -2796,26 +2796,26 @@ __div8by16:	; @func
   SEP	#$20
   LDA	__@signExtend
   CMP	__@specSubY + 1
-  BCC	__CMP_NO_5be212db_0aa7_46e0_8a81_038fc381a3d5
-  BNE	__CMP_YES_5be212db_0aa7_46e0_8a81_038fc381a3d5
+  BCC	__CMP_NO_f5c010e9_23ca_47e9_b6cd_7487c33529a8
+  BNE	__CMP_YES_f5c010e9_23ca_47e9_b6cd_7487c33529a8
   SEP	#$20
   LDA	__@specSubX + 0
   CMP	__@specSubY + 0
-  BCC	__CMP_NO_5be212db_0aa7_46e0_8a81_038fc381a3d5
-  BNE	__CMP_YES_5be212db_0aa7_46e0_8a81_038fc381a3d5
-  JMP	__CMP_NO_5be212db_0aa7_46e0_8a81_038fc381a3d5
-  __CMP_YES_5be212db_0aa7_46e0_8a81_038fc381a3d5:
+  BCC	__CMP_NO_f5c010e9_23ca_47e9_b6cd_7487c33529a8
+  BNE	__CMP_YES_f5c010e9_23ca_47e9_b6cd_7487c33529a8
+  JMP	__CMP_NO_f5c010e9_23ca_47e9_b6cd_7487c33529a8
+  __CMP_YES_f5c010e9_23ca_47e9_b6cd_7487c33529a8:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_5be212db_0aa7_46e0_8a81_038fc381a3d5
-  __CMP_NO_5be212db_0aa7_46e0_8a81_038fc381a3d5:
+  BRA	__CMP_END_f5c010e9_23ca_47e9_b6cd_7487c33529a8
+  __CMP_NO_f5c010e9_23ca_47e9_b6cd_7487c33529a8:
   SEP	#$20
   LDA	#$00
-  __CMP_END_5be212db_0aa7_46e0_8a81_038fc381a3d5:
+  __CMP_END_f5c010e9_23ca_47e9_b6cd_7487c33529a8:
   SEP	#$20
   CMP	#$00
   BNE	:+
-  JMP	__ITER__END__c8220a6c_968c_4268_9bae_7c5a02e53748
+  JMP	__ITER__END__b9e7a2c9_d31c_47e9_9c49_de1b01b6d800
   :
   REP	#$20
   LDA	#$0000
@@ -2823,37 +2823,26 @@ __div8by16:	; @func
   
   LDA	#$8000
   AND	__@specSubY + 0
-  STA	__@scratchBase + 3
+  STA	__@scratchBase + 0
   SEP	#$20
   LDA	#$00
   AND	__@signExtend
-  STA	__@scratchBase + 5
+  STA	__@scratchBase + 2
   SEP	#$10
   LDX	#$00
   REP	#$20
-  LDA	__@scratchBase + 3
+  LDA	__@scratchBase + 0
   CMP	#$0000
   BNE	:+
   SEP	#$20
-  LDA	__@scratchBase + 5
+  LDA	__@scratchBase + 2
   CMP	#$00
   BNE	:+
   INX
 : TXA
-  SEP	#$20
-  STA	__@scratchBase + 0
-  LDA	#$00
-  STA	__@scratchBase + 1
-  STA	__@scratchBase + 2
-  REP	#$20
-  LDA	__@scratchBase + 0
-  STA	__@scratchBase + 0
-  SEP	#$20
-  LDA	__@scratchBase + 2
-  STA	__@scratchBase + 2
-  BNE	__IFNOT_0ba5a7c2_4e9e_4201_ba7e_2a33f459365d
-  JMP	__ITER__END__c8220a6c_968c_4268_9bae_7c5a02e53748
-  __IFNOT_0ba5a7c2_4e9e_4201_ba7e_2a33f459365d:
+  BNE	__IFNOT_204f72d8_5b55_45d1_a6ea_174a368770fa
+  JMP	__ITER__END__b9e7a2c9_d31c_47e9_9c49_de1b01b6d800
+  __IFNOT_204f72d8_5b55_45d1_a6ea_174a368770fa:
   REP	#$20
   LDA	__@specSubY + 0
   ASL
@@ -2866,9 +2855,9 @@ __div8by16:	; @func
   LDA	__div8by16@start + 2
   ROL
   STA	__div8by16@start + 2
-  JMP	__ITER__START__c8220a6c_968c_4268_9bae_7c5a02e53748
-  __ITER__END__c8220a6c_968c_4268_9bae_7c5a02e53748:
-  __ITER__START__fb0e3bdb_9141_4a4d_837b_860a833e4ba6:
+  JMP	__ITER__START__b9e7a2c9_d31c_47e9_9c49_de1b01b6d800
+  __ITER__END__b9e7a2c9_d31c_47e9_9c49_de1b01b6d800:
+  __ITER__START__7e1d8691_92a5_43c7_96ae_9a82b886c989:
   SEP	#$10
   LDX	#$01
   REP	#$20
@@ -2884,7 +2873,7 @@ __div8by16:	; @func
   SEP	#$20
   CMP	#$00
   BNE	:+
-  JMP	__ITER__END__fb0e3bdb_9141_4a4d_837b_860a833e4ba6
+  JMP	__ITER__END__7e1d8691_92a5_43c7_96ae_9a82b886c989
   :
   CLC
   REP	#$20
@@ -2893,23 +2882,23 @@ __div8by16:	; @func
   SEP	#$20
   LDA	__@signExtend
   CMP	__@specSubY + 1
-  BCC	__CMP_NO_d0d0f123_6afb_4048_a5f7_0dc591d08269
-  BNE	__CMP_YES_d0d0f123_6afb_4048_a5f7_0dc591d08269
+  BCC	__CMP_NO_7b3f19d7_4638_4b86_92fa_0f22fea7d054
+  BNE	__CMP_YES_7b3f19d7_4638_4b86_92fa_0f22fea7d054
   SEP	#$20
   LDA	__@specSubX + 0
   CMP	__@specSubY + 0
-  BCC	__CMP_NO_d0d0f123_6afb_4048_a5f7_0dc591d08269
-  BNE	__CMP_YES_d0d0f123_6afb_4048_a5f7_0dc591d08269
-  JMP	__CMP_YES_d0d0f123_6afb_4048_a5f7_0dc591d08269
-  __CMP_YES_d0d0f123_6afb_4048_a5f7_0dc591d08269:
+  BCC	__CMP_NO_7b3f19d7_4638_4b86_92fa_0f22fea7d054
+  BNE	__CMP_YES_7b3f19d7_4638_4b86_92fa_0f22fea7d054
+  JMP	__CMP_YES_7b3f19d7_4638_4b86_92fa_0f22fea7d054
+  __CMP_YES_7b3f19d7_4638_4b86_92fa_0f22fea7d054:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_d0d0f123_6afb_4048_a5f7_0dc591d08269
-  __CMP_NO_d0d0f123_6afb_4048_a5f7_0dc591d08269:
+  BRA	__CMP_END_7b3f19d7_4638_4b86_92fa_0f22fea7d054
+  __CMP_NO_7b3f19d7_4638_4b86_92fa_0f22fea7d054:
   SEP	#$20
   LDA	#$00
-  __CMP_END_d0d0f123_6afb_4048_a5f7_0dc591d08269:
-  BEQ	__IFNOT_19c9786d_a5f3_423a_a49b_66c7b69fe174
+  __CMP_END_7b3f19d7_4638_4b86_92fa_0f22fea7d054:
+  BEQ	__IFNOT_8ff5d3aa_e5e3_43e1_be3a_e091f4c6c4d0
   REP	#$20
   LDA	#$0000
   STA	__@signExtend
@@ -2927,7 +2916,7 @@ __div8by16:	; @func
   LDA	__div8by16@ret + 2
   ADC	__div8by16@start + 2
   STA	__div8by16@ret + 2
-  __IFNOT_19c9786d_a5f3_423a_a49b_66c7b69fe174:
+  __IFNOT_8ff5d3aa_e5e3_43e1_be3a_e091f4c6c4d0:
   REP	#$20
   LDA	__@specSubY + 0
   LSR
@@ -2940,8 +2929,8 @@ __div8by16:	; @func
   LDA	__div8by16@start + 0
   ROR
   STA	__div8by16@start + 0
-  JMP	__ITER__START__fb0e3bdb_9141_4a4d_837b_860a833e4ba6
-  __ITER__END__fb0e3bdb_9141_4a4d_837b_860a833e4ba6:
+  JMP	__ITER__START__7e1d8691_92a5_43c7_96ae_9a82b886c989
+  __ITER__END__7e1d8691_92a5_43c7_96ae_9a82b886c989:
   REP	#$20
   LDA	__div8by16@ret + 0
   STA	__@callResult + 0
@@ -2965,26 +2954,26 @@ __div16by16:	; @func
   SEP	#$20
   LDA	#$00
   STA	__div16by16@start + 2
-  __ITER__START__1684e3e1_a9f6_4e16_a911_8f5e9ce335ce:
+  __ITER__START__763740b7_f03a_4c7f_a3ee_01351443bf4e:
   CLC
   REP	#$20
   LDA	__@specSubX + 0
   CMP	__@specSubY + 0
-  BCC	__CMP_NO_fc8b7476_b205_4c31_b5ac_ea7dbcd1c1d9
-  BNE	__CMP_YES_fc8b7476_b205_4c31_b5ac_ea7dbcd1c1d9
-  JMP	__CMP_NO_fc8b7476_b205_4c31_b5ac_ea7dbcd1c1d9
-  __CMP_YES_fc8b7476_b205_4c31_b5ac_ea7dbcd1c1d9:
+  BCC	__CMP_NO_40f72d14_1182_4b7b_98ef_b748654368ce
+  BNE	__CMP_YES_40f72d14_1182_4b7b_98ef_b748654368ce
+  JMP	__CMP_NO_40f72d14_1182_4b7b_98ef_b748654368ce
+  __CMP_YES_40f72d14_1182_4b7b_98ef_b748654368ce:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_fc8b7476_b205_4c31_b5ac_ea7dbcd1c1d9
-  __CMP_NO_fc8b7476_b205_4c31_b5ac_ea7dbcd1c1d9:
+  BRA	__CMP_END_40f72d14_1182_4b7b_98ef_b748654368ce
+  __CMP_NO_40f72d14_1182_4b7b_98ef_b748654368ce:
   SEP	#$20
   LDA	#$00
-  __CMP_END_fc8b7476_b205_4c31_b5ac_ea7dbcd1c1d9:
+  __CMP_END_40f72d14_1182_4b7b_98ef_b748654368ce:
   SEP	#$20
   CMP	#$00
   BNE	:+
-  JMP	__ITER__END__1684e3e1_a9f6_4e16_a911_8f5e9ce335ce
+  JMP	__ITER__END__763740b7_f03a_4c7f_a3ee_01351443bf4e
   :
   REP	#$20
   LDA	#$0000
@@ -2992,37 +2981,26 @@ __div16by16:	; @func
   
   LDA	#$8000
   AND	__@specSubY + 0
-  STA	__@scratchBase + 3
+  STA	__@scratchBase + 0
   SEP	#$20
   LDA	#$00
   AND	__@signExtend
-  STA	__@scratchBase + 5
+  STA	__@scratchBase + 2
   SEP	#$10
   LDX	#$00
   REP	#$20
-  LDA	__@scratchBase + 3
+  LDA	__@scratchBase + 0
   CMP	#$0000
   BNE	:+
   SEP	#$20
-  LDA	__@scratchBase + 5
+  LDA	__@scratchBase + 2
   CMP	#$00
   BNE	:+
   INX
 : TXA
-  SEP	#$20
-  STA	__@scratchBase + 0
-  LDA	#$00
-  STA	__@scratchBase + 1
-  STA	__@scratchBase + 2
-  REP	#$20
-  LDA	__@scratchBase + 0
-  STA	__@scratchBase + 0
-  SEP	#$20
-  LDA	__@scratchBase + 2
-  STA	__@scratchBase + 2
-  BNE	__IFNOT_6813bd8b_0170_4853_bd84_77ddd90a7784
-  JMP	__ITER__END__1684e3e1_a9f6_4e16_a911_8f5e9ce335ce
-  __IFNOT_6813bd8b_0170_4853_bd84_77ddd90a7784:
+  BNE	__IFNOT_c26203a2_4f73_4d29_b4a0_953f48ab65dc
+  JMP	__ITER__END__763740b7_f03a_4c7f_a3ee_01351443bf4e
+  __IFNOT_c26203a2_4f73_4d29_b4a0_953f48ab65dc:
   REP	#$20
   LDA	__@specSubY + 0
   ASL
@@ -3035,9 +3013,9 @@ __div16by16:	; @func
   LDA	__div16by16@start + 2
   ROL
   STA	__div16by16@start + 2
-  JMP	__ITER__START__1684e3e1_a9f6_4e16_a911_8f5e9ce335ce
-  __ITER__END__1684e3e1_a9f6_4e16_a911_8f5e9ce335ce:
-  __ITER__START__9db63f84_7602_40e7_98b9_c73cca494a1a:
+  JMP	__ITER__START__763740b7_f03a_4c7f_a3ee_01351443bf4e
+  __ITER__END__763740b7_f03a_4c7f_a3ee_01351443bf4e:
+  __ITER__START__6266cd13_0dd7_4264_a6f7_c91f16559541:
   SEP	#$10
   LDX	#$01
   REP	#$20
@@ -3053,24 +3031,24 @@ __div16by16:	; @func
   SEP	#$20
   CMP	#$00
   BNE	:+
-  JMP	__ITER__END__9db63f84_7602_40e7_98b9_c73cca494a1a
+  JMP	__ITER__END__6266cd13_0dd7_4264_a6f7_c91f16559541
   :
   CLC
   REP	#$20
   LDA	__@specSubX + 0
   CMP	__@specSubY + 0
-  BCC	__CMP_NO_17d38197_1efa_41e2_9c3b_4448dea657aa
-  BNE	__CMP_YES_17d38197_1efa_41e2_9c3b_4448dea657aa
-  JMP	__CMP_YES_17d38197_1efa_41e2_9c3b_4448dea657aa
-  __CMP_YES_17d38197_1efa_41e2_9c3b_4448dea657aa:
+  BCC	__CMP_NO_6f5b26be_20d5_4c55_adba_a16fe6bdd4f5
+  BNE	__CMP_YES_6f5b26be_20d5_4c55_adba_a16fe6bdd4f5
+  JMP	__CMP_YES_6f5b26be_20d5_4c55_adba_a16fe6bdd4f5
+  __CMP_YES_6f5b26be_20d5_4c55_adba_a16fe6bdd4f5:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_17d38197_1efa_41e2_9c3b_4448dea657aa
-  __CMP_NO_17d38197_1efa_41e2_9c3b_4448dea657aa:
+  BRA	__CMP_END_6f5b26be_20d5_4c55_adba_a16fe6bdd4f5
+  __CMP_NO_6f5b26be_20d5_4c55_adba_a16fe6bdd4f5:
   SEP	#$20
   LDA	#$00
-  __CMP_END_17d38197_1efa_41e2_9c3b_4448dea657aa:
-  BEQ	__IFNOT_0d75aadf_4f75_4e83_a40a_2b973ad80b02
+  __CMP_END_6f5b26be_20d5_4c55_adba_a16fe6bdd4f5:
+  BEQ	__IFNOT_fe1f62de_e6c5_4474_84e5_0d92920fe5f6
   SEC
   REP	#$20
   LDA	__@specSubX + 0
@@ -3085,7 +3063,7 @@ __div16by16:	; @func
   LDA	__div16by16@ret + 2
   ADC	__div16by16@start + 2
   STA	__div16by16@ret + 2
-  __IFNOT_0d75aadf_4f75_4e83_a40a_2b973ad80b02:
+  __IFNOT_fe1f62de_e6c5_4474_84e5_0d92920fe5f6:
   REP	#$20
   LDA	__@specSubY + 0
   LSR
@@ -3098,8 +3076,8 @@ __div16by16:	; @func
   LDA	__div16by16@start + 0
   ROR
   STA	__div16by16@start + 0
-  JMP	__ITER__START__9db63f84_7602_40e7_98b9_c73cca494a1a
-  __ITER__END__9db63f84_7602_40e7_98b9_c73cca494a1a:
+  JMP	__ITER__START__6266cd13_0dd7_4264_a6f7_c91f16559541
+  __ITER__END__6266cd13_0dd7_4264_a6f7_c91f16559541:
   REP	#$20
   LDA	__div16by16@ret + 0
   STA	__@callResult + 0
@@ -3123,7 +3101,7 @@ __div24by16:	; @func
   SEP	#$20
   LDA	#$00
   STA	__div24by16@start + 2
-  __ITER__START__9b427433_e2a7_4bb7_ae6f_05840221e68f:
+  __ITER__START__fd6e71fb_0355_4486_8e9d_fa459f19830b:
   CLC
   REP	#$20
   LDA	#$0000
@@ -3131,25 +3109,25 @@ __div24by16:	; @func
   SEP	#$20
   LDA	__@specSubX + 2
   CMP	__@signExtend
-  BCC	__CMP_NO_7cfc854b_8149_45e4_b293_3ff7c88c9594
-  BNE	__CMP_YES_7cfc854b_8149_45e4_b293_3ff7c88c9594
+  BCC	__CMP_NO_3507d5d9_8300_4d7c_b56f_1baf5e57139b
+  BNE	__CMP_YES_3507d5d9_8300_4d7c_b56f_1baf5e57139b
   LDA	__@specSubX + 0
   CMP	__@specSubY + 0
-  BCC	__CMP_NO_7cfc854b_8149_45e4_b293_3ff7c88c9594
-  BNE	__CMP_YES_7cfc854b_8149_45e4_b293_3ff7c88c9594
-  JMP	__CMP_NO_7cfc854b_8149_45e4_b293_3ff7c88c9594
-  __CMP_YES_7cfc854b_8149_45e4_b293_3ff7c88c9594:
+  BCC	__CMP_NO_3507d5d9_8300_4d7c_b56f_1baf5e57139b
+  BNE	__CMP_YES_3507d5d9_8300_4d7c_b56f_1baf5e57139b
+  JMP	__CMP_NO_3507d5d9_8300_4d7c_b56f_1baf5e57139b
+  __CMP_YES_3507d5d9_8300_4d7c_b56f_1baf5e57139b:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_7cfc854b_8149_45e4_b293_3ff7c88c9594
-  __CMP_NO_7cfc854b_8149_45e4_b293_3ff7c88c9594:
+  BRA	__CMP_END_3507d5d9_8300_4d7c_b56f_1baf5e57139b
+  __CMP_NO_3507d5d9_8300_4d7c_b56f_1baf5e57139b:
   SEP	#$20
   LDA	#$00
-  __CMP_END_7cfc854b_8149_45e4_b293_3ff7c88c9594:
+  __CMP_END_3507d5d9_8300_4d7c_b56f_1baf5e57139b:
   SEP	#$20
   CMP	#$00
   BNE	:+
-  JMP	__ITER__END__9b427433_e2a7_4bb7_ae6f_05840221e68f
+  JMP	__ITER__END__fd6e71fb_0355_4486_8e9d_fa459f19830b
   :
   REP	#$20
   LDA	#$0000
@@ -3157,37 +3135,26 @@ __div24by16:	; @func
   
   LDA	#$8000
   AND	__@specSubY + 0
-  STA	__@scratchBase + 3
+  STA	__@scratchBase + 0
   SEP	#$20
   LDA	#$00
   AND	__@signExtend
-  STA	__@scratchBase + 5
+  STA	__@scratchBase + 2
   SEP	#$10
   LDX	#$00
   REP	#$20
-  LDA	__@scratchBase + 3
+  LDA	__@scratchBase + 0
   CMP	#$0000
   BNE	:+
   SEP	#$20
-  LDA	__@scratchBase + 5
+  LDA	__@scratchBase + 2
   CMP	#$00
   BNE	:+
   INX
 : TXA
-  SEP	#$20
-  STA	__@scratchBase + 0
-  LDA	#$00
-  STA	__@scratchBase + 1
-  STA	__@scratchBase + 2
-  REP	#$20
-  LDA	__@scratchBase + 0
-  STA	__@scratchBase + 0
-  SEP	#$20
-  LDA	__@scratchBase + 2
-  STA	__@scratchBase + 2
-  BNE	__IFNOT_f541f734_5ad1_4c92_ac82_54f5263cd1de
-  JMP	__ITER__END__9b427433_e2a7_4bb7_ae6f_05840221e68f
-  __IFNOT_f541f734_5ad1_4c92_ac82_54f5263cd1de:
+  BNE	__IFNOT_b30795b7_b3b7_4c29_98cb_e73ea23d890d
+  JMP	__ITER__END__fd6e71fb_0355_4486_8e9d_fa459f19830b
+  __IFNOT_b30795b7_b3b7_4c29_98cb_e73ea23d890d:
   REP	#$20
   LDA	__@specSubY + 0
   ASL
@@ -3200,9 +3167,9 @@ __div24by16:	; @func
   LDA	__div24by16@start + 2
   ROL
   STA	__div24by16@start + 2
-  JMP	__ITER__START__9b427433_e2a7_4bb7_ae6f_05840221e68f
-  __ITER__END__9b427433_e2a7_4bb7_ae6f_05840221e68f:
-  __ITER__START__17d14e1e_8552_4eff_aca1_65e6a5b852f3:
+  JMP	__ITER__START__fd6e71fb_0355_4486_8e9d_fa459f19830b
+  __ITER__END__fd6e71fb_0355_4486_8e9d_fa459f19830b:
+  __ITER__START__4008d61e_524c_410a_a3b8_d4e6b16318c3:
   SEP	#$10
   LDX	#$01
   REP	#$20
@@ -3218,7 +3185,7 @@ __div24by16:	; @func
   SEP	#$20
   CMP	#$00
   BNE	:+
-  JMP	__ITER__END__17d14e1e_8552_4eff_aca1_65e6a5b852f3
+  JMP	__ITER__END__4008d61e_524c_410a_a3b8_d4e6b16318c3
   :
   CLC
   REP	#$20
@@ -3227,22 +3194,22 @@ __div24by16:	; @func
   SEP	#$20
   LDA	__@specSubX + 2
   CMP	__@signExtend
-  BCC	__CMP_NO_f5535aff_0572_4b98_b2e2_eaeede5aa663
-  BNE	__CMP_YES_f5535aff_0572_4b98_b2e2_eaeede5aa663
+  BCC	__CMP_NO_354aeb5b_58b0_4b97_acb1_599b6feadff7
+  BNE	__CMP_YES_354aeb5b_58b0_4b97_acb1_599b6feadff7
   LDA	__@specSubX + 0
   CMP	__@specSubY + 0
-  BCC	__CMP_NO_f5535aff_0572_4b98_b2e2_eaeede5aa663
-  BNE	__CMP_YES_f5535aff_0572_4b98_b2e2_eaeede5aa663
-  JMP	__CMP_YES_f5535aff_0572_4b98_b2e2_eaeede5aa663
-  __CMP_YES_f5535aff_0572_4b98_b2e2_eaeede5aa663:
+  BCC	__CMP_NO_354aeb5b_58b0_4b97_acb1_599b6feadff7
+  BNE	__CMP_YES_354aeb5b_58b0_4b97_acb1_599b6feadff7
+  JMP	__CMP_YES_354aeb5b_58b0_4b97_acb1_599b6feadff7
+  __CMP_YES_354aeb5b_58b0_4b97_acb1_599b6feadff7:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_f5535aff_0572_4b98_b2e2_eaeede5aa663
-  __CMP_NO_f5535aff_0572_4b98_b2e2_eaeede5aa663:
+  BRA	__CMP_END_354aeb5b_58b0_4b97_acb1_599b6feadff7
+  __CMP_NO_354aeb5b_58b0_4b97_acb1_599b6feadff7:
   SEP	#$20
   LDA	#$00
-  __CMP_END_f5535aff_0572_4b98_b2e2_eaeede5aa663:
-  BEQ	__IFNOT_796c9dbf_b23b_4e93_bb38_657a478f0fca
+  __CMP_END_354aeb5b_58b0_4b97_acb1_599b6feadff7:
+  BEQ	__IFNOT_fc10b905_6255_4996_97b3_923044688c43
   REP	#$20
   LDA	#$0000
   STA	__@signExtend
@@ -3263,7 +3230,7 @@ __div24by16:	; @func
   LDA	__div24by16@ret + 2
   ADC	__div24by16@start + 2
   STA	__div24by16@ret + 2
-  __IFNOT_796c9dbf_b23b_4e93_bb38_657a478f0fca:
+  __IFNOT_fc10b905_6255_4996_97b3_923044688c43:
   REP	#$20
   LDA	__@specSubY + 0
   LSR
@@ -3276,8 +3243,8 @@ __div24by16:	; @func
   LDA	__div24by16@start + 0
   ROR
   STA	__div24by16@start + 0
-  JMP	__ITER__START__17d14e1e_8552_4eff_aca1_65e6a5b852f3
-  __ITER__END__17d14e1e_8552_4eff_aca1_65e6a5b852f3:
+  JMP	__ITER__START__4008d61e_524c_410a_a3b8_d4e6b16318c3
+  __ITER__END__4008d61e_524c_410a_a3b8_d4e6b16318c3:
   REP	#$20
   LDA	__div24by16@ret + 0
   STA	__@callResult + 0
@@ -3301,32 +3268,32 @@ __div32by16:	; @func
   SEP	#$20
   LDA	#$00
   STA	__div32by16@start + 2
-  __ITER__START__570711fb_b010_484e_ab94_7d6b3fa4a19a:
+  __ITER__START__4c268d50_3ed7_4ae1_89c5_6d3fed2e65e4:
   CLC
   REP	#$20
   LDA	#$0000
   STA	__@signExtend
   LDA	__@specSubX + 2
   CMP	__@signExtend
-  BCC	__CMP_NO_883d2c5d_2115_4e02_8caa_cdfe75df7f02
-  BNE	__CMP_YES_883d2c5d_2115_4e02_8caa_cdfe75df7f02
+  BCC	__CMP_NO_06d49eb7_d347_4ddb_add4_9aaa31c044d4
+  BNE	__CMP_YES_06d49eb7_d347_4ddb_add4_9aaa31c044d4
   LDA	__@specSubX + 0
   CMP	__@specSubY + 0
-  BCC	__CMP_NO_883d2c5d_2115_4e02_8caa_cdfe75df7f02
-  BNE	__CMP_YES_883d2c5d_2115_4e02_8caa_cdfe75df7f02
-  JMP	__CMP_NO_883d2c5d_2115_4e02_8caa_cdfe75df7f02
-  __CMP_YES_883d2c5d_2115_4e02_8caa_cdfe75df7f02:
+  BCC	__CMP_NO_06d49eb7_d347_4ddb_add4_9aaa31c044d4
+  BNE	__CMP_YES_06d49eb7_d347_4ddb_add4_9aaa31c044d4
+  JMP	__CMP_NO_06d49eb7_d347_4ddb_add4_9aaa31c044d4
+  __CMP_YES_06d49eb7_d347_4ddb_add4_9aaa31c044d4:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_883d2c5d_2115_4e02_8caa_cdfe75df7f02
-  __CMP_NO_883d2c5d_2115_4e02_8caa_cdfe75df7f02:
+  BRA	__CMP_END_06d49eb7_d347_4ddb_add4_9aaa31c044d4
+  __CMP_NO_06d49eb7_d347_4ddb_add4_9aaa31c044d4:
   SEP	#$20
   LDA	#$00
-  __CMP_END_883d2c5d_2115_4e02_8caa_cdfe75df7f02:
+  __CMP_END_06d49eb7_d347_4ddb_add4_9aaa31c044d4:
   SEP	#$20
   CMP	#$00
   BNE	:+
-  JMP	__ITER__END__570711fb_b010_484e_ab94_7d6b3fa4a19a
+  JMP	__ITER__END__4c268d50_3ed7_4ae1_89c5_6d3fed2e65e4
   :
   REP	#$20
   LDA	#$0000
@@ -3334,37 +3301,26 @@ __div32by16:	; @func
   
   LDA	#$8000
   AND	__@specSubY + 0
-  STA	__@scratchBase + 3
+  STA	__@scratchBase + 0
   SEP	#$20
   LDA	#$00
   AND	__@signExtend
-  STA	__@scratchBase + 5
+  STA	__@scratchBase + 2
   SEP	#$10
   LDX	#$00
   REP	#$20
-  LDA	__@scratchBase + 3
+  LDA	__@scratchBase + 0
   CMP	#$0000
   BNE	:+
   SEP	#$20
-  LDA	__@scratchBase + 5
+  LDA	__@scratchBase + 2
   CMP	#$00
   BNE	:+
   INX
 : TXA
-  SEP	#$20
-  STA	__@scratchBase + 0
-  LDA	#$00
-  STA	__@scratchBase + 1
-  STA	__@scratchBase + 2
-  REP	#$20
-  LDA	__@scratchBase + 0
-  STA	__@scratchBase + 0
-  SEP	#$20
-  LDA	__@scratchBase + 2
-  STA	__@scratchBase + 2
-  BNE	__IFNOT_6d60c0e2_ea0b_45e3_85e8_27496fca05cf
-  JMP	__ITER__END__570711fb_b010_484e_ab94_7d6b3fa4a19a
-  __IFNOT_6d60c0e2_ea0b_45e3_85e8_27496fca05cf:
+  BNE	__IFNOT_b93528dc_d77d_47ea_9030_72af9a9eac97
+  JMP	__ITER__END__4c268d50_3ed7_4ae1_89c5_6d3fed2e65e4
+  __IFNOT_b93528dc_d77d_47ea_9030_72af9a9eac97:
   REP	#$20
   LDA	__@specSubY + 0
   ASL
@@ -3377,9 +3333,9 @@ __div32by16:	; @func
   LDA	__div32by16@start + 2
   ROL
   STA	__div32by16@start + 2
-  JMP	__ITER__START__570711fb_b010_484e_ab94_7d6b3fa4a19a
-  __ITER__END__570711fb_b010_484e_ab94_7d6b3fa4a19a:
-  __ITER__START__897a710e_e277_4cb7_9c99_fd7b5a569604:
+  JMP	__ITER__START__4c268d50_3ed7_4ae1_89c5_6d3fed2e65e4
+  __ITER__END__4c268d50_3ed7_4ae1_89c5_6d3fed2e65e4:
+  __ITER__START__ac414a85_e56f_43d0_9f94_03c6f8e5138c:
   SEP	#$10
   LDX	#$01
   REP	#$20
@@ -3395,7 +3351,7 @@ __div32by16:	; @func
   SEP	#$20
   CMP	#$00
   BNE	:+
-  JMP	__ITER__END__897a710e_e277_4cb7_9c99_fd7b5a569604
+  JMP	__ITER__END__ac414a85_e56f_43d0_9f94_03c6f8e5138c
   :
   CLC
   REP	#$20
@@ -3403,22 +3359,22 @@ __div32by16:	; @func
   STA	__@signExtend
   LDA	__@specSubX + 2
   CMP	__@signExtend
-  BCC	__CMP_NO_1b1da8b8_6939_40a6_af3b_d86ecc460809
-  BNE	__CMP_YES_1b1da8b8_6939_40a6_af3b_d86ecc460809
+  BCC	__CMP_NO_53c5a42a_d7a8_4a4c_a386_b47140ec4038
+  BNE	__CMP_YES_53c5a42a_d7a8_4a4c_a386_b47140ec4038
   LDA	__@specSubX + 0
   CMP	__@specSubY + 0
-  BCC	__CMP_NO_1b1da8b8_6939_40a6_af3b_d86ecc460809
-  BNE	__CMP_YES_1b1da8b8_6939_40a6_af3b_d86ecc460809
-  JMP	__CMP_YES_1b1da8b8_6939_40a6_af3b_d86ecc460809
-  __CMP_YES_1b1da8b8_6939_40a6_af3b_d86ecc460809:
+  BCC	__CMP_NO_53c5a42a_d7a8_4a4c_a386_b47140ec4038
+  BNE	__CMP_YES_53c5a42a_d7a8_4a4c_a386_b47140ec4038
+  JMP	__CMP_YES_53c5a42a_d7a8_4a4c_a386_b47140ec4038
+  __CMP_YES_53c5a42a_d7a8_4a4c_a386_b47140ec4038:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_1b1da8b8_6939_40a6_af3b_d86ecc460809
-  __CMP_NO_1b1da8b8_6939_40a6_af3b_d86ecc460809:
+  BRA	__CMP_END_53c5a42a_d7a8_4a4c_a386_b47140ec4038
+  __CMP_NO_53c5a42a_d7a8_4a4c_a386_b47140ec4038:
   SEP	#$20
   LDA	#$00
-  __CMP_END_1b1da8b8_6939_40a6_af3b_d86ecc460809:
-  BEQ	__IFNOT_1aa83bdc_378d_4d60_b8bb_e6fda531f0b4
+  __CMP_END_53c5a42a_d7a8_4a4c_a386_b47140ec4038:
+  BEQ	__IFNOT_ac06827f_892f_4f7a_bf43_f4b0bdefac95
   REP	#$20
   LDA	#$0000
   STA	__@signExtend
@@ -3439,7 +3395,7 @@ __div32by16:	; @func
   LDA	__div32by16@ret + 2
   ADC	__div32by16@start + 2
   STA	__div32by16@ret + 2
-  __IFNOT_1aa83bdc_378d_4d60_b8bb_e6fda531f0b4:
+  __IFNOT_ac06827f_892f_4f7a_bf43_f4b0bdefac95:
   REP	#$20
   LDA	__@specSubY + 0
   LSR
@@ -3452,8 +3408,8 @@ __div32by16:	; @func
   LDA	__div32by16@start + 0
   ROR
   STA	__div32by16@start + 0
-  JMP	__ITER__START__897a710e_e277_4cb7_9c99_fd7b5a569604
-  __ITER__END__897a710e_e277_4cb7_9c99_fd7b5a569604:
+  JMP	__ITER__START__ac414a85_e56f_43d0_9f94_03c6f8e5138c
+  __ITER__END__ac414a85_e56f_43d0_9f94_03c6f8e5138c:
   REP	#$20
   LDA	__div32by16@ret + 0
   STA	__@callResult + 0
@@ -3477,40 +3433,40 @@ __div64by16:	; @func
   SEP	#$20
   LDA	#$00
   STA	__div64by16@start + 2
-  __ITER__START__0fe1083f_2349_4057_a177_da8c94bccb78:
+  __ITER__START__4b7b98fb_b2fb_476a_aa3d_803ed5841dda:
   CLC
   REP	#$20
   LDA	#$0000
   STA	__@signExtend
   LDA	__@specSubX + 6
   CMP	__@signExtend
-  BCC	__CMP_NO_6e9dadf6_3db1_45f4_9c0c_0745644243f7
-  BNE	__CMP_YES_6e9dadf6_3db1_45f4_9c0c_0745644243f7
+  BCC	__CMP_NO_eb340472_1e71_4f8e_b3bc_b3244bbdcdb0
+  BNE	__CMP_YES_eb340472_1e71_4f8e_b3bc_b3244bbdcdb0
   LDA	__@specSubX + 4
   CMP	__@signExtend
-  BCC	__CMP_NO_6e9dadf6_3db1_45f4_9c0c_0745644243f7
-  BNE	__CMP_YES_6e9dadf6_3db1_45f4_9c0c_0745644243f7
+  BCC	__CMP_NO_eb340472_1e71_4f8e_b3bc_b3244bbdcdb0
+  BNE	__CMP_YES_eb340472_1e71_4f8e_b3bc_b3244bbdcdb0
   LDA	__@specSubX + 2
   CMP	__@signExtend
-  BCC	__CMP_NO_6e9dadf6_3db1_45f4_9c0c_0745644243f7
-  BNE	__CMP_YES_6e9dadf6_3db1_45f4_9c0c_0745644243f7
+  BCC	__CMP_NO_eb340472_1e71_4f8e_b3bc_b3244bbdcdb0
+  BNE	__CMP_YES_eb340472_1e71_4f8e_b3bc_b3244bbdcdb0
   LDA	__@specSubX + 0
   CMP	__@specSubY + 0
-  BCC	__CMP_NO_6e9dadf6_3db1_45f4_9c0c_0745644243f7
-  BNE	__CMP_YES_6e9dadf6_3db1_45f4_9c0c_0745644243f7
-  JMP	__CMP_NO_6e9dadf6_3db1_45f4_9c0c_0745644243f7
-  __CMP_YES_6e9dadf6_3db1_45f4_9c0c_0745644243f7:
+  BCC	__CMP_NO_eb340472_1e71_4f8e_b3bc_b3244bbdcdb0
+  BNE	__CMP_YES_eb340472_1e71_4f8e_b3bc_b3244bbdcdb0
+  JMP	__CMP_NO_eb340472_1e71_4f8e_b3bc_b3244bbdcdb0
+  __CMP_YES_eb340472_1e71_4f8e_b3bc_b3244bbdcdb0:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_6e9dadf6_3db1_45f4_9c0c_0745644243f7
-  __CMP_NO_6e9dadf6_3db1_45f4_9c0c_0745644243f7:
+  BRA	__CMP_END_eb340472_1e71_4f8e_b3bc_b3244bbdcdb0
+  __CMP_NO_eb340472_1e71_4f8e_b3bc_b3244bbdcdb0:
   SEP	#$20
   LDA	#$00
-  __CMP_END_6e9dadf6_3db1_45f4_9c0c_0745644243f7:
+  __CMP_END_eb340472_1e71_4f8e_b3bc_b3244bbdcdb0:
   SEP	#$20
   CMP	#$00
   BNE	:+
-  JMP	__ITER__END__0fe1083f_2349_4057_a177_da8c94bccb78
+  JMP	__ITER__END__4b7b98fb_b2fb_476a_aa3d_803ed5841dda
   :
   REP	#$20
   LDA	#$0000
@@ -3518,37 +3474,26 @@ __div64by16:	; @func
   
   LDA	#$8000
   AND	__@specSubY + 0
-  STA	__@scratchBase + 3
+  STA	__@scratchBase + 0
   SEP	#$20
   LDA	#$00
   AND	__@signExtend
-  STA	__@scratchBase + 5
+  STA	__@scratchBase + 2
   SEP	#$10
   LDX	#$00
   REP	#$20
-  LDA	__@scratchBase + 3
+  LDA	__@scratchBase + 0
   CMP	#$0000
   BNE	:+
   SEP	#$20
-  LDA	__@scratchBase + 5
+  LDA	__@scratchBase + 2
   CMP	#$00
   BNE	:+
   INX
 : TXA
-  SEP	#$20
-  STA	__@scratchBase + 0
-  LDA	#$00
-  STA	__@scratchBase + 1
-  STA	__@scratchBase + 2
-  REP	#$20
-  LDA	__@scratchBase + 0
-  STA	__@scratchBase + 0
-  SEP	#$20
-  LDA	__@scratchBase + 2
-  STA	__@scratchBase + 2
-  BNE	__IFNOT_34b2362f_7ec2_4283_b8fc_8018d15ac460
-  JMP	__ITER__END__0fe1083f_2349_4057_a177_da8c94bccb78
-  __IFNOT_34b2362f_7ec2_4283_b8fc_8018d15ac460:
+  BNE	__IFNOT_31d11ec0_e550_4324_a116_562747363fb8
+  JMP	__ITER__END__4b7b98fb_b2fb_476a_aa3d_803ed5841dda
+  __IFNOT_31d11ec0_e550_4324_a116_562747363fb8:
   REP	#$20
   LDA	__@specSubY + 0
   ASL
@@ -3561,9 +3506,9 @@ __div64by16:	; @func
   LDA	__div64by16@start + 2
   ROL
   STA	__div64by16@start + 2
-  JMP	__ITER__START__0fe1083f_2349_4057_a177_da8c94bccb78
-  __ITER__END__0fe1083f_2349_4057_a177_da8c94bccb78:
-  __ITER__START__35bff097_b235_4590_8caa_b92e19c2ec37:
+  JMP	__ITER__START__4b7b98fb_b2fb_476a_aa3d_803ed5841dda
+  __ITER__END__4b7b98fb_b2fb_476a_aa3d_803ed5841dda:
+  __ITER__START__8a656cc9_eee8_43fc_ba37_4b1196b250b0:
   SEP	#$10
   LDX	#$01
   REP	#$20
@@ -3579,7 +3524,7 @@ __div64by16:	; @func
   SEP	#$20
   CMP	#$00
   BNE	:+
-  JMP	__ITER__END__35bff097_b235_4590_8caa_b92e19c2ec37
+  JMP	__ITER__END__8a656cc9_eee8_43fc_ba37_4b1196b250b0
   :
   CLC
   REP	#$20
@@ -3587,30 +3532,30 @@ __div64by16:	; @func
   STA	__@signExtend
   LDA	__@specSubX + 6
   CMP	__@signExtend
-  BCC	__CMP_NO_a3a6ec86_9fb0_489c_8db1_555c7e550a34
-  BNE	__CMP_YES_a3a6ec86_9fb0_489c_8db1_555c7e550a34
+  BCC	__CMP_NO_db663599_ddc1_4b0b_bd89_5e33849abe2a
+  BNE	__CMP_YES_db663599_ddc1_4b0b_bd89_5e33849abe2a
   LDA	__@specSubX + 4
   CMP	__@signExtend
-  BCC	__CMP_NO_a3a6ec86_9fb0_489c_8db1_555c7e550a34
-  BNE	__CMP_YES_a3a6ec86_9fb0_489c_8db1_555c7e550a34
+  BCC	__CMP_NO_db663599_ddc1_4b0b_bd89_5e33849abe2a
+  BNE	__CMP_YES_db663599_ddc1_4b0b_bd89_5e33849abe2a
   LDA	__@specSubX + 2
   CMP	__@signExtend
-  BCC	__CMP_NO_a3a6ec86_9fb0_489c_8db1_555c7e550a34
-  BNE	__CMP_YES_a3a6ec86_9fb0_489c_8db1_555c7e550a34
+  BCC	__CMP_NO_db663599_ddc1_4b0b_bd89_5e33849abe2a
+  BNE	__CMP_YES_db663599_ddc1_4b0b_bd89_5e33849abe2a
   LDA	__@specSubX + 0
   CMP	__@specSubY + 0
-  BCC	__CMP_NO_a3a6ec86_9fb0_489c_8db1_555c7e550a34
-  BNE	__CMP_YES_a3a6ec86_9fb0_489c_8db1_555c7e550a34
-  JMP	__CMP_YES_a3a6ec86_9fb0_489c_8db1_555c7e550a34
-  __CMP_YES_a3a6ec86_9fb0_489c_8db1_555c7e550a34:
+  BCC	__CMP_NO_db663599_ddc1_4b0b_bd89_5e33849abe2a
+  BNE	__CMP_YES_db663599_ddc1_4b0b_bd89_5e33849abe2a
+  JMP	__CMP_YES_db663599_ddc1_4b0b_bd89_5e33849abe2a
+  __CMP_YES_db663599_ddc1_4b0b_bd89_5e33849abe2a:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_a3a6ec86_9fb0_489c_8db1_555c7e550a34
-  __CMP_NO_a3a6ec86_9fb0_489c_8db1_555c7e550a34:
+  BRA	__CMP_END_db663599_ddc1_4b0b_bd89_5e33849abe2a
+  __CMP_NO_db663599_ddc1_4b0b_bd89_5e33849abe2a:
   SEP	#$20
   LDA	#$00
-  __CMP_END_a3a6ec86_9fb0_489c_8db1_555c7e550a34:
-  BEQ	__IFNOT_3f5b28bd_deef_430c_a6ab_d4161067cb3d
+  __CMP_END_db663599_ddc1_4b0b_bd89_5e33849abe2a:
+  BEQ	__IFNOT_31326ba8_1cc4_4ccf_82ef_30ef45c19c1c
   REP	#$20
   LDA	#$0000
   STA	__@signExtend
@@ -3639,7 +3584,7 @@ __div64by16:	; @func
   LDA	__div64by16@ret + 2
   ADC	__div64by16@start + 2
   STA	__div64by16@ret + 2
-  __IFNOT_3f5b28bd_deef_430c_a6ab_d4161067cb3d:
+  __IFNOT_31326ba8_1cc4_4ccf_82ef_30ef45c19c1c:
   REP	#$20
   LDA	__@specSubY + 0
   LSR
@@ -3652,8 +3597,8 @@ __div64by16:	; @func
   LDA	__div64by16@start + 0
   ROR
   STA	__div64by16@start + 0
-  JMP	__ITER__START__35bff097_b235_4590_8caa_b92e19c2ec37
-  __ITER__END__35bff097_b235_4590_8caa_b92e19c2ec37:
+  JMP	__ITER__START__8a656cc9_eee8_43fc_ba37_4b1196b250b0
+  __ITER__END__8a656cc9_eee8_43fc_ba37_4b1196b250b0:
   REP	#$20
   LDA	__div64by16@ret + 0
   STA	__@callResult + 0
@@ -3683,69 +3628,58 @@ __div8by24:	; @func
   SEP	#$20
   LDA	#$00
   STA	__div8by24@start + 2
-  __ITER__START__75146d50_0f3c_4bff_8fd5_928fee35d28d:
+  __ITER__START__e1c05cab_5774_4936_bb0c_522dad9a1269:
   CLC
   REP	#$20
   LDA	#$0000
   STA	__@signExtend
   LDA	__@signExtend
   CMP	__@specSubY + 1
-  BCC	__CMP_NO_067ea1f5_76f4_4f1c_8970_17d2a266163f
-  BNE	__CMP_YES_067ea1f5_76f4_4f1c_8970_17d2a266163f
+  BCC	__CMP_NO_3eaace26_f391_47d6_9cb6_cbc495631a65
+  BNE	__CMP_YES_3eaace26_f391_47d6_9cb6_cbc495631a65
   SEP	#$20
   LDA	__@specSubX + 0
   CMP	__@specSubY + 0
-  BCC	__CMP_NO_067ea1f5_76f4_4f1c_8970_17d2a266163f
-  BNE	__CMP_YES_067ea1f5_76f4_4f1c_8970_17d2a266163f
-  JMP	__CMP_NO_067ea1f5_76f4_4f1c_8970_17d2a266163f
-  __CMP_YES_067ea1f5_76f4_4f1c_8970_17d2a266163f:
+  BCC	__CMP_NO_3eaace26_f391_47d6_9cb6_cbc495631a65
+  BNE	__CMP_YES_3eaace26_f391_47d6_9cb6_cbc495631a65
+  JMP	__CMP_NO_3eaace26_f391_47d6_9cb6_cbc495631a65
+  __CMP_YES_3eaace26_f391_47d6_9cb6_cbc495631a65:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_067ea1f5_76f4_4f1c_8970_17d2a266163f
-  __CMP_NO_067ea1f5_76f4_4f1c_8970_17d2a266163f:
+  BRA	__CMP_END_3eaace26_f391_47d6_9cb6_cbc495631a65
+  __CMP_NO_3eaace26_f391_47d6_9cb6_cbc495631a65:
   SEP	#$20
   LDA	#$00
-  __CMP_END_067ea1f5_76f4_4f1c_8970_17d2a266163f:
+  __CMP_END_3eaace26_f391_47d6_9cb6_cbc495631a65:
   SEP	#$20
   CMP	#$00
   BNE	:+
-  JMP	__ITER__END__75146d50_0f3c_4bff_8fd5_928fee35d28d
+  JMP	__ITER__END__e1c05cab_5774_4936_bb0c_522dad9a1269
   :
   
   REP	#$20
   LDA	#$0000
   AND	__@specSubY + 0
-  STA	__@scratchBase + 3
+  STA	__@scratchBase + 0
   SEP	#$20
   LDA	#$80
   AND	__@specSubY + 2
-  STA	__@scratchBase + 5
+  STA	__@scratchBase + 2
   SEP	#$10
   LDX	#$00
   REP	#$20
-  LDA	__@scratchBase + 3
+  LDA	__@scratchBase + 0
   CMP	#$0000
   BNE	:+
   SEP	#$20
-  LDA	__@scratchBase + 5
+  LDA	__@scratchBase + 2
   CMP	#$00
   BNE	:+
   INX
 : TXA
-  SEP	#$20
-  STA	__@scratchBase + 0
-  LDA	#$00
-  STA	__@scratchBase + 1
-  STA	__@scratchBase + 2
-  REP	#$20
-  LDA	__@scratchBase + 0
-  STA	__@scratchBase + 0
-  SEP	#$20
-  LDA	__@scratchBase + 2
-  STA	__@scratchBase + 2
-  BNE	__IFNOT_61ccf676_8fa6_4071_93d3_cc2c3cce7e6e
-  JMP	__ITER__END__75146d50_0f3c_4bff_8fd5_928fee35d28d
-  __IFNOT_61ccf676_8fa6_4071_93d3_cc2c3cce7e6e:
+  BNE	__IFNOT_5788f9f1_2c9c_4a23_94c1_6775472541b8
+  JMP	__ITER__END__e1c05cab_5774_4936_bb0c_522dad9a1269
+  __IFNOT_5788f9f1_2c9c_4a23_94c1_6775472541b8:
   REP	#$20
   LDA	__@specSubY + 0
   ASL
@@ -3762,9 +3696,9 @@ __div8by24:	; @func
   LDA	__div8by24@start + 2
   ROL
   STA	__div8by24@start + 2
-  JMP	__ITER__START__75146d50_0f3c_4bff_8fd5_928fee35d28d
-  __ITER__END__75146d50_0f3c_4bff_8fd5_928fee35d28d:
-  __ITER__START__c99384ef_e973_45cd_b4d9_17737fc6079f:
+  JMP	__ITER__START__e1c05cab_5774_4936_bb0c_522dad9a1269
+  __ITER__END__e1c05cab_5774_4936_bb0c_522dad9a1269:
+  __ITER__START__f80977d7_b98d_4174_864b_4de4e0948e41:
   SEP	#$10
   LDX	#$01
   REP	#$20
@@ -3780,7 +3714,7 @@ __div8by24:	; @func
   SEP	#$20
   CMP	#$00
   BNE	:+
-  JMP	__ITER__END__c99384ef_e973_45cd_b4d9_17737fc6079f
+  JMP	__ITER__END__f80977d7_b98d_4174_864b_4de4e0948e41
   :
   CLC
   REP	#$20
@@ -3788,23 +3722,23 @@ __div8by24:	; @func
   STA	__@signExtend
   LDA	__@signExtend
   CMP	__@specSubY + 1
-  BCC	__CMP_NO_02156bcc_2b49_43b4_bfd5_4ef9daca00f6
-  BNE	__CMP_YES_02156bcc_2b49_43b4_bfd5_4ef9daca00f6
+  BCC	__CMP_NO_4e0ac496_c1ba_40fc_9629_4790d78feade
+  BNE	__CMP_YES_4e0ac496_c1ba_40fc_9629_4790d78feade
   SEP	#$20
   LDA	__@specSubX + 0
   CMP	__@specSubY + 0
-  BCC	__CMP_NO_02156bcc_2b49_43b4_bfd5_4ef9daca00f6
-  BNE	__CMP_YES_02156bcc_2b49_43b4_bfd5_4ef9daca00f6
-  JMP	__CMP_YES_02156bcc_2b49_43b4_bfd5_4ef9daca00f6
-  __CMP_YES_02156bcc_2b49_43b4_bfd5_4ef9daca00f6:
+  BCC	__CMP_NO_4e0ac496_c1ba_40fc_9629_4790d78feade
+  BNE	__CMP_YES_4e0ac496_c1ba_40fc_9629_4790d78feade
+  JMP	__CMP_YES_4e0ac496_c1ba_40fc_9629_4790d78feade
+  __CMP_YES_4e0ac496_c1ba_40fc_9629_4790d78feade:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_02156bcc_2b49_43b4_bfd5_4ef9daca00f6
-  __CMP_NO_02156bcc_2b49_43b4_bfd5_4ef9daca00f6:
+  BRA	__CMP_END_4e0ac496_c1ba_40fc_9629_4790d78feade
+  __CMP_NO_4e0ac496_c1ba_40fc_9629_4790d78feade:
   SEP	#$20
   LDA	#$00
-  __CMP_END_02156bcc_2b49_43b4_bfd5_4ef9daca00f6:
-  BEQ	__IFNOT_b0def376_15ad_4d8b_afdc_4b58b48a9e8b
+  __CMP_END_4e0ac496_c1ba_40fc_9629_4790d78feade:
+  BEQ	__IFNOT_592be2f2_30e1_4cbe_86d7_8c1325418aed
   REP	#$20
   LDA	#$0000
   STA	__@signExtend
@@ -3822,7 +3756,7 @@ __div8by24:	; @func
   LDA	__div8by24@ret + 2
   ADC	__div8by24@start + 2
   STA	__div8by24@ret + 2
-  __IFNOT_b0def376_15ad_4d8b_afdc_4b58b48a9e8b:
+  __IFNOT_592be2f2_30e1_4cbe_86d7_8c1325418aed:
   REP	#$20
   LDA	__@specSubY + 1
   LSR
@@ -3839,8 +3773,8 @@ __div8by24:	; @func
   LDA	__div8by24@start + 0
   ROR
   STA	__div8by24@start + 0
-  JMP	__ITER__START__c99384ef_e973_45cd_b4d9_17737fc6079f
-  __ITER__END__c99384ef_e973_45cd_b4d9_17737fc6079f:
+  JMP	__ITER__START__f80977d7_b98d_4174_864b_4de4e0948e41
+  __ITER__END__f80977d7_b98d_4174_864b_4de4e0948e41:
   REP	#$20
   LDA	__div8by24@ret + 0
   STA	__@callResult + 0
@@ -3864,7 +3798,7 @@ __div16by24:	; @func
   SEP	#$20
   LDA	#$00
   STA	__div16by24@start + 2
-  __ITER__START__bda3eb28_a703_4932_be55_d550e7acdc1d:
+  __ITER__START__db591c54_430a_47b5_8796_510180245356:
   CLC
   REP	#$20
   LDA	#$0000
@@ -3872,61 +3806,50 @@ __div16by24:	; @func
   SEP	#$20
   LDA	__@signExtend
   CMP	__@specSubY + 2
-  BCC	__CMP_NO_24e85033_cd7f_454e_8e2b_f7e1b76f12f7
-  BNE	__CMP_YES_24e85033_cd7f_454e_8e2b_f7e1b76f12f7
+  BCC	__CMP_NO_0f530af6_83b6_4bc9_973e_52d7b700477f
+  BNE	__CMP_YES_0f530af6_83b6_4bc9_973e_52d7b700477f
   LDA	__@specSubX + 0
   CMP	__@specSubY + 0
-  BCC	__CMP_NO_24e85033_cd7f_454e_8e2b_f7e1b76f12f7
-  BNE	__CMP_YES_24e85033_cd7f_454e_8e2b_f7e1b76f12f7
-  JMP	__CMP_NO_24e85033_cd7f_454e_8e2b_f7e1b76f12f7
-  __CMP_YES_24e85033_cd7f_454e_8e2b_f7e1b76f12f7:
+  BCC	__CMP_NO_0f530af6_83b6_4bc9_973e_52d7b700477f
+  BNE	__CMP_YES_0f530af6_83b6_4bc9_973e_52d7b700477f
+  JMP	__CMP_NO_0f530af6_83b6_4bc9_973e_52d7b700477f
+  __CMP_YES_0f530af6_83b6_4bc9_973e_52d7b700477f:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_24e85033_cd7f_454e_8e2b_f7e1b76f12f7
-  __CMP_NO_24e85033_cd7f_454e_8e2b_f7e1b76f12f7:
+  BRA	__CMP_END_0f530af6_83b6_4bc9_973e_52d7b700477f
+  __CMP_NO_0f530af6_83b6_4bc9_973e_52d7b700477f:
   SEP	#$20
   LDA	#$00
-  __CMP_END_24e85033_cd7f_454e_8e2b_f7e1b76f12f7:
+  __CMP_END_0f530af6_83b6_4bc9_973e_52d7b700477f:
   SEP	#$20
   CMP	#$00
   BNE	:+
-  JMP	__ITER__END__bda3eb28_a703_4932_be55_d550e7acdc1d
+  JMP	__ITER__END__db591c54_430a_47b5_8796_510180245356
   :
   
   REP	#$20
   LDA	#$0000
   AND	__@specSubY + 0
-  STA	__@scratchBase + 3
+  STA	__@scratchBase + 0
   SEP	#$20
   LDA	#$80
   AND	__@specSubY + 2
-  STA	__@scratchBase + 5
+  STA	__@scratchBase + 2
   SEP	#$10
   LDX	#$00
   REP	#$20
-  LDA	__@scratchBase + 3
+  LDA	__@scratchBase + 0
   CMP	#$0000
   BNE	:+
   SEP	#$20
-  LDA	__@scratchBase + 5
+  LDA	__@scratchBase + 2
   CMP	#$00
   BNE	:+
   INX
 : TXA
-  SEP	#$20
-  STA	__@scratchBase + 0
-  LDA	#$00
-  STA	__@scratchBase + 1
-  STA	__@scratchBase + 2
-  REP	#$20
-  LDA	__@scratchBase + 0
-  STA	__@scratchBase + 0
-  SEP	#$20
-  LDA	__@scratchBase + 2
-  STA	__@scratchBase + 2
-  BNE	__IFNOT_c3ea3829_60d3_433c_a6a2_7665d79677d7
-  JMP	__ITER__END__bda3eb28_a703_4932_be55_d550e7acdc1d
-  __IFNOT_c3ea3829_60d3_433c_a6a2_7665d79677d7:
+  BNE	__IFNOT_2ca940a0_ce48_4ba0_b9de_e92e305848c0
+  JMP	__ITER__END__db591c54_430a_47b5_8796_510180245356
+  __IFNOT_2ca940a0_ce48_4ba0_b9de_e92e305848c0:
   REP	#$20
   LDA	__@specSubY + 0
   ASL
@@ -3943,9 +3866,9 @@ __div16by24:	; @func
   LDA	__div16by24@start + 2
   ROL
   STA	__div16by24@start + 2
-  JMP	__ITER__START__bda3eb28_a703_4932_be55_d550e7acdc1d
-  __ITER__END__bda3eb28_a703_4932_be55_d550e7acdc1d:
-  __ITER__START__17588adb_fda0_4df1_a1bf_931616ea054d:
+  JMP	__ITER__START__db591c54_430a_47b5_8796_510180245356
+  __ITER__END__db591c54_430a_47b5_8796_510180245356:
+  __ITER__START__e7721ce8_dd82_4c1a_a69c_087cfc28b8b7:
   SEP	#$10
   LDX	#$01
   REP	#$20
@@ -3961,7 +3884,7 @@ __div16by24:	; @func
   SEP	#$20
   CMP	#$00
   BNE	:+
-  JMP	__ITER__END__17588adb_fda0_4df1_a1bf_931616ea054d
+  JMP	__ITER__END__e7721ce8_dd82_4c1a_a69c_087cfc28b8b7
   :
   CLC
   REP	#$20
@@ -3970,22 +3893,22 @@ __div16by24:	; @func
   SEP	#$20
   LDA	__@signExtend
   CMP	__@specSubY + 2
-  BCC	__CMP_NO_a00b370b_cfe7_4bf2_a9b4_6eb568487c45
-  BNE	__CMP_YES_a00b370b_cfe7_4bf2_a9b4_6eb568487c45
+  BCC	__CMP_NO_f57402de_0fd9_471d_8a36_00393937d8bc
+  BNE	__CMP_YES_f57402de_0fd9_471d_8a36_00393937d8bc
   LDA	__@specSubX + 0
   CMP	__@specSubY + 0
-  BCC	__CMP_NO_a00b370b_cfe7_4bf2_a9b4_6eb568487c45
-  BNE	__CMP_YES_a00b370b_cfe7_4bf2_a9b4_6eb568487c45
-  JMP	__CMP_YES_a00b370b_cfe7_4bf2_a9b4_6eb568487c45
-  __CMP_YES_a00b370b_cfe7_4bf2_a9b4_6eb568487c45:
+  BCC	__CMP_NO_f57402de_0fd9_471d_8a36_00393937d8bc
+  BNE	__CMP_YES_f57402de_0fd9_471d_8a36_00393937d8bc
+  JMP	__CMP_YES_f57402de_0fd9_471d_8a36_00393937d8bc
+  __CMP_YES_f57402de_0fd9_471d_8a36_00393937d8bc:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_a00b370b_cfe7_4bf2_a9b4_6eb568487c45
-  __CMP_NO_a00b370b_cfe7_4bf2_a9b4_6eb568487c45:
+  BRA	__CMP_END_f57402de_0fd9_471d_8a36_00393937d8bc
+  __CMP_NO_f57402de_0fd9_471d_8a36_00393937d8bc:
   SEP	#$20
   LDA	#$00
-  __CMP_END_a00b370b_cfe7_4bf2_a9b4_6eb568487c45:
-  BEQ	__IFNOT_e20299db_2782_4175_8446_794b7165ce7c
+  __CMP_END_f57402de_0fd9_471d_8a36_00393937d8bc:
+  BEQ	__IFNOT_4c15530a_453d_46f4_8bac_c66047c9fd55
   REP	#$20
   LDA	#$0000
   STA	__@signExtend
@@ -4002,7 +3925,7 @@ __div16by24:	; @func
   LDA	__div16by24@ret + 2
   ADC	__div16by24@start + 2
   STA	__div16by24@ret + 2
-  __IFNOT_e20299db_2782_4175_8446_794b7165ce7c:
+  __IFNOT_4c15530a_453d_46f4_8bac_c66047c9fd55:
   REP	#$20
   LDA	__@specSubY + 1
   LSR
@@ -4019,8 +3942,8 @@ __div16by24:	; @func
   LDA	__div16by24@start + 0
   ROR
   STA	__div16by24@start + 0
-  JMP	__ITER__START__17588adb_fda0_4df1_a1bf_931616ea054d
-  __ITER__END__17588adb_fda0_4df1_a1bf_931616ea054d:
+  JMP	__ITER__START__e7721ce8_dd82_4c1a_a69c_087cfc28b8b7
+  __ITER__END__e7721ce8_dd82_4c1a_a69c_087cfc28b8b7:
   REP	#$20
   LDA	__div16by24@ret + 0
   STA	__@callResult + 0
@@ -4044,68 +3967,57 @@ __div24by24:	; @func
   SEP	#$20
   LDA	#$00
   STA	__div24by24@start + 2
-  __ITER__START__7e2e8b08_386d_43a7_8518_cd076ed3c7a3:
+  __ITER__START__2b935b0f_8b5d_44f4_9658_bc406b4017a6:
   CLC
   REP	#$20
   REP	#$20
   LDA	__@specSubX + 1
   CMP	__@specSubY + 1
-  BCC	__CMP_NO_96e4ddd5_3697_4eb3_a4ca_94044a31c1e7
-  BNE	__CMP_YES_96e4ddd5_3697_4eb3_a4ca_94044a31c1e7
+  BCC	__CMP_NO_8b27343b_0282_4095_8339_8d35f8bed1d8
+  BNE	__CMP_YES_8b27343b_0282_4095_8339_8d35f8bed1d8
   SEP	#$20
   LDA	__@specSubX + 0
   CMP	__@specSubY + 0
-  BCC	__CMP_NO_96e4ddd5_3697_4eb3_a4ca_94044a31c1e7
-  BNE	__CMP_YES_96e4ddd5_3697_4eb3_a4ca_94044a31c1e7
-  JMP	__CMP_NO_96e4ddd5_3697_4eb3_a4ca_94044a31c1e7
-  __CMP_YES_96e4ddd5_3697_4eb3_a4ca_94044a31c1e7:
+  BCC	__CMP_NO_8b27343b_0282_4095_8339_8d35f8bed1d8
+  BNE	__CMP_YES_8b27343b_0282_4095_8339_8d35f8bed1d8
+  JMP	__CMP_NO_8b27343b_0282_4095_8339_8d35f8bed1d8
+  __CMP_YES_8b27343b_0282_4095_8339_8d35f8bed1d8:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_96e4ddd5_3697_4eb3_a4ca_94044a31c1e7
-  __CMP_NO_96e4ddd5_3697_4eb3_a4ca_94044a31c1e7:
+  BRA	__CMP_END_8b27343b_0282_4095_8339_8d35f8bed1d8
+  __CMP_NO_8b27343b_0282_4095_8339_8d35f8bed1d8:
   SEP	#$20
   LDA	#$00
-  __CMP_END_96e4ddd5_3697_4eb3_a4ca_94044a31c1e7:
+  __CMP_END_8b27343b_0282_4095_8339_8d35f8bed1d8:
   SEP	#$20
   CMP	#$00
   BNE	:+
-  JMP	__ITER__END__7e2e8b08_386d_43a7_8518_cd076ed3c7a3
+  JMP	__ITER__END__2b935b0f_8b5d_44f4_9658_bc406b4017a6
   :
   
   REP	#$20
   LDA	#$0000
   AND	__@specSubY + 0
-  STA	__@scratchBase + 3
+  STA	__@scratchBase + 0
   SEP	#$20
   LDA	#$80
   AND	__@specSubY + 2
-  STA	__@scratchBase + 5
+  STA	__@scratchBase + 2
   SEP	#$10
   LDX	#$00
   REP	#$20
-  LDA	__@scratchBase + 3
+  LDA	__@scratchBase + 0
   CMP	#$0000
   BNE	:+
   SEP	#$20
-  LDA	__@scratchBase + 5
+  LDA	__@scratchBase + 2
   CMP	#$00
   BNE	:+
   INX
 : TXA
-  SEP	#$20
-  STA	__@scratchBase + 0
-  LDA	#$00
-  STA	__@scratchBase + 1
-  STA	__@scratchBase + 2
-  REP	#$20
-  LDA	__@scratchBase + 0
-  STA	__@scratchBase + 0
-  SEP	#$20
-  LDA	__@scratchBase + 2
-  STA	__@scratchBase + 2
-  BNE	__IFNOT_749b5b34_32f7_4c6e_88c7_e8802a8bf3e0
-  JMP	__ITER__END__7e2e8b08_386d_43a7_8518_cd076ed3c7a3
-  __IFNOT_749b5b34_32f7_4c6e_88c7_e8802a8bf3e0:
+  BNE	__IFNOT_f6f78a76_a0cb_4e53_8ef7_35459e7ec9b3
+  JMP	__ITER__END__2b935b0f_8b5d_44f4_9658_bc406b4017a6
+  __IFNOT_f6f78a76_a0cb_4e53_8ef7_35459e7ec9b3:
   REP	#$20
   LDA	__@specSubY + 0
   ASL
@@ -4122,9 +4034,9 @@ __div24by24:	; @func
   LDA	__div24by24@start + 2
   ROL
   STA	__div24by24@start + 2
-  JMP	__ITER__START__7e2e8b08_386d_43a7_8518_cd076ed3c7a3
-  __ITER__END__7e2e8b08_386d_43a7_8518_cd076ed3c7a3:
-  __ITER__START__f583574f_1bc6_4ba8_a294_73ae670ebda8:
+  JMP	__ITER__START__2b935b0f_8b5d_44f4_9658_bc406b4017a6
+  __ITER__END__2b935b0f_8b5d_44f4_9658_bc406b4017a6:
+  __ITER__START__3385ffbb_d8f8_4225_8bf1_68704281817c:
   SEP	#$10
   LDX	#$01
   REP	#$20
@@ -4140,30 +4052,30 @@ __div24by24:	; @func
   SEP	#$20
   CMP	#$00
   BNE	:+
-  JMP	__ITER__END__f583574f_1bc6_4ba8_a294_73ae670ebda8
+  JMP	__ITER__END__3385ffbb_d8f8_4225_8bf1_68704281817c
   :
   CLC
   REP	#$20
   REP	#$20
   LDA	__@specSubX + 1
   CMP	__@specSubY + 1
-  BCC	__CMP_NO_c3116aec_6c8a_478f_9523_07bf6e833057
-  BNE	__CMP_YES_c3116aec_6c8a_478f_9523_07bf6e833057
+  BCC	__CMP_NO_b8df6a41_c766_41d7_af87_214d97013f64
+  BNE	__CMP_YES_b8df6a41_c766_41d7_af87_214d97013f64
   SEP	#$20
   LDA	__@specSubX + 0
   CMP	__@specSubY + 0
-  BCC	__CMP_NO_c3116aec_6c8a_478f_9523_07bf6e833057
-  BNE	__CMP_YES_c3116aec_6c8a_478f_9523_07bf6e833057
-  JMP	__CMP_YES_c3116aec_6c8a_478f_9523_07bf6e833057
-  __CMP_YES_c3116aec_6c8a_478f_9523_07bf6e833057:
+  BCC	__CMP_NO_b8df6a41_c766_41d7_af87_214d97013f64
+  BNE	__CMP_YES_b8df6a41_c766_41d7_af87_214d97013f64
+  JMP	__CMP_YES_b8df6a41_c766_41d7_af87_214d97013f64
+  __CMP_YES_b8df6a41_c766_41d7_af87_214d97013f64:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_c3116aec_6c8a_478f_9523_07bf6e833057
-  __CMP_NO_c3116aec_6c8a_478f_9523_07bf6e833057:
+  BRA	__CMP_END_b8df6a41_c766_41d7_af87_214d97013f64
+  __CMP_NO_b8df6a41_c766_41d7_af87_214d97013f64:
   SEP	#$20
   LDA	#$00
-  __CMP_END_c3116aec_6c8a_478f_9523_07bf6e833057:
-  BEQ	__IFNOT_675a0ec3_d891_4fdb_9f94_b53534168294
+  __CMP_END_b8df6a41_c766_41d7_af87_214d97013f64:
+  BEQ	__IFNOT_e309728e_1373_4ab5_8a45_93746e0ed940
   SEC
   REP	#$20
   LDA	__@specSubX + 0
@@ -4182,7 +4094,7 @@ __div24by24:	; @func
   LDA	__div24by24@ret + 2
   ADC	__div24by24@start + 2
   STA	__div24by24@ret + 2
-  __IFNOT_675a0ec3_d891_4fdb_9f94_b53534168294:
+  __IFNOT_e309728e_1373_4ab5_8a45_93746e0ed940:
   REP	#$20
   LDA	__@specSubY + 1
   LSR
@@ -4199,8 +4111,8 @@ __div24by24:	; @func
   LDA	__div24by24@start + 0
   ROR
   STA	__div24by24@start + 0
-  JMP	__ITER__START__f583574f_1bc6_4ba8_a294_73ae670ebda8
-  __ITER__END__f583574f_1bc6_4ba8_a294_73ae670ebda8:
+  JMP	__ITER__START__3385ffbb_d8f8_4225_8bf1_68704281817c
+  __ITER__END__3385ffbb_d8f8_4225_8bf1_68704281817c:
   REP	#$20
   LDA	__div24by24@ret + 0
   STA	__@callResult + 0
@@ -4224,7 +4136,7 @@ __div32by24:	; @func
   SEP	#$20
   LDA	#$00
   STA	__div32by24@start + 2
-  __ITER__START__b98f94b3_5b34_44d2_acfa_495327881ff5:
+  __ITER__START__43eae53d_b1b6_4022_9bf0_2873f2a4624b:
   CLC
   REP	#$20
   LDA	#$0000
@@ -4232,66 +4144,55 @@ __div32by24:	; @func
   SEP	#$20
   LDA	__@specSubX + 3
   CMP	__@signExtend
-  BCC	__CMP_NO_7bc97959_cdff_428e_8e5e_180b50ffeb3a
-  BNE	__CMP_YES_7bc97959_cdff_428e_8e5e_180b50ffeb3a
+  BCC	__CMP_NO_85a64ff5_a6f5_48fb_bfb3_d2a56244fe17
+  BNE	__CMP_YES_85a64ff5_a6f5_48fb_bfb3_d2a56244fe17
   LDA	__@specSubX + 1
   CMP	__@specSubY + 1
-  BCC	__CMP_NO_7bc97959_cdff_428e_8e5e_180b50ffeb3a
-  BNE	__CMP_YES_7bc97959_cdff_428e_8e5e_180b50ffeb3a
+  BCC	__CMP_NO_85a64ff5_a6f5_48fb_bfb3_d2a56244fe17
+  BNE	__CMP_YES_85a64ff5_a6f5_48fb_bfb3_d2a56244fe17
   SEP	#$20
   LDA	__@specSubX + 0
   CMP	__@specSubY + 0
-  BCC	__CMP_NO_7bc97959_cdff_428e_8e5e_180b50ffeb3a
-  BNE	__CMP_YES_7bc97959_cdff_428e_8e5e_180b50ffeb3a
-  JMP	__CMP_NO_7bc97959_cdff_428e_8e5e_180b50ffeb3a
-  __CMP_YES_7bc97959_cdff_428e_8e5e_180b50ffeb3a:
+  BCC	__CMP_NO_85a64ff5_a6f5_48fb_bfb3_d2a56244fe17
+  BNE	__CMP_YES_85a64ff5_a6f5_48fb_bfb3_d2a56244fe17
+  JMP	__CMP_NO_85a64ff5_a6f5_48fb_bfb3_d2a56244fe17
+  __CMP_YES_85a64ff5_a6f5_48fb_bfb3_d2a56244fe17:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_7bc97959_cdff_428e_8e5e_180b50ffeb3a
-  __CMP_NO_7bc97959_cdff_428e_8e5e_180b50ffeb3a:
+  BRA	__CMP_END_85a64ff5_a6f5_48fb_bfb3_d2a56244fe17
+  __CMP_NO_85a64ff5_a6f5_48fb_bfb3_d2a56244fe17:
   SEP	#$20
   LDA	#$00
-  __CMP_END_7bc97959_cdff_428e_8e5e_180b50ffeb3a:
+  __CMP_END_85a64ff5_a6f5_48fb_bfb3_d2a56244fe17:
   SEP	#$20
   CMP	#$00
   BNE	:+
-  JMP	__ITER__END__b98f94b3_5b34_44d2_acfa_495327881ff5
+  JMP	__ITER__END__43eae53d_b1b6_4022_9bf0_2873f2a4624b
   :
   
   REP	#$20
   LDA	#$0000
   AND	__@specSubY + 0
-  STA	__@scratchBase + 3
+  STA	__@scratchBase + 0
   SEP	#$20
   LDA	#$80
   AND	__@specSubY + 2
-  STA	__@scratchBase + 5
+  STA	__@scratchBase + 2
   SEP	#$10
   LDX	#$00
   REP	#$20
-  LDA	__@scratchBase + 3
+  LDA	__@scratchBase + 0
   CMP	#$0000
   BNE	:+
   SEP	#$20
-  LDA	__@scratchBase + 5
+  LDA	__@scratchBase + 2
   CMP	#$00
   BNE	:+
   INX
 : TXA
-  SEP	#$20
-  STA	__@scratchBase + 0
-  LDA	#$00
-  STA	__@scratchBase + 1
-  STA	__@scratchBase + 2
-  REP	#$20
-  LDA	__@scratchBase + 0
-  STA	__@scratchBase + 0
-  SEP	#$20
-  LDA	__@scratchBase + 2
-  STA	__@scratchBase + 2
-  BNE	__IFNOT_bb2e6b48_b63c_4b49_bdd5_b8d5ff7786f0
-  JMP	__ITER__END__b98f94b3_5b34_44d2_acfa_495327881ff5
-  __IFNOT_bb2e6b48_b63c_4b49_bdd5_b8d5ff7786f0:
+  BNE	__IFNOT_92ae211a_9b32_4553_aaf2_5f74645fc830
+  JMP	__ITER__END__43eae53d_b1b6_4022_9bf0_2873f2a4624b
+  __IFNOT_92ae211a_9b32_4553_aaf2_5f74645fc830:
   REP	#$20
   LDA	__@specSubY + 0
   ASL
@@ -4308,9 +4209,9 @@ __div32by24:	; @func
   LDA	__div32by24@start + 2
   ROL
   STA	__div32by24@start + 2
-  JMP	__ITER__START__b98f94b3_5b34_44d2_acfa_495327881ff5
-  __ITER__END__b98f94b3_5b34_44d2_acfa_495327881ff5:
-  __ITER__START__1bccde5e_83ee_4207_b3e0_14b4394afbda:
+  JMP	__ITER__START__43eae53d_b1b6_4022_9bf0_2873f2a4624b
+  __ITER__END__43eae53d_b1b6_4022_9bf0_2873f2a4624b:
+  __ITER__START__4e073406_056f_4061_bbd7_b06c3a53fd90:
   SEP	#$10
   LDX	#$01
   REP	#$20
@@ -4326,7 +4227,7 @@ __div32by24:	; @func
   SEP	#$20
   CMP	#$00
   BNE	:+
-  JMP	__ITER__END__1bccde5e_83ee_4207_b3e0_14b4394afbda
+  JMP	__ITER__END__4e073406_056f_4061_bbd7_b06c3a53fd90
   :
   CLC
   REP	#$20
@@ -4335,27 +4236,27 @@ __div32by24:	; @func
   SEP	#$20
   LDA	__@specSubX + 3
   CMP	__@signExtend
-  BCC	__CMP_NO_e472f77e_7874_4e0a_a614_b5ccc06be8ee
-  BNE	__CMP_YES_e472f77e_7874_4e0a_a614_b5ccc06be8ee
+  BCC	__CMP_NO_9ecf12de_327d_4ae8_b117_2d8375126da4
+  BNE	__CMP_YES_9ecf12de_327d_4ae8_b117_2d8375126da4
   LDA	__@specSubX + 1
   CMP	__@specSubY + 1
-  BCC	__CMP_NO_e472f77e_7874_4e0a_a614_b5ccc06be8ee
-  BNE	__CMP_YES_e472f77e_7874_4e0a_a614_b5ccc06be8ee
+  BCC	__CMP_NO_9ecf12de_327d_4ae8_b117_2d8375126da4
+  BNE	__CMP_YES_9ecf12de_327d_4ae8_b117_2d8375126da4
   SEP	#$20
   LDA	__@specSubX + 0
   CMP	__@specSubY + 0
-  BCC	__CMP_NO_e472f77e_7874_4e0a_a614_b5ccc06be8ee
-  BNE	__CMP_YES_e472f77e_7874_4e0a_a614_b5ccc06be8ee
-  JMP	__CMP_YES_e472f77e_7874_4e0a_a614_b5ccc06be8ee
-  __CMP_YES_e472f77e_7874_4e0a_a614_b5ccc06be8ee:
+  BCC	__CMP_NO_9ecf12de_327d_4ae8_b117_2d8375126da4
+  BNE	__CMP_YES_9ecf12de_327d_4ae8_b117_2d8375126da4
+  JMP	__CMP_YES_9ecf12de_327d_4ae8_b117_2d8375126da4
+  __CMP_YES_9ecf12de_327d_4ae8_b117_2d8375126da4:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_e472f77e_7874_4e0a_a614_b5ccc06be8ee
-  __CMP_NO_e472f77e_7874_4e0a_a614_b5ccc06be8ee:
+  BRA	__CMP_END_9ecf12de_327d_4ae8_b117_2d8375126da4
+  __CMP_NO_9ecf12de_327d_4ae8_b117_2d8375126da4:
   SEP	#$20
   LDA	#$00
-  __CMP_END_e472f77e_7874_4e0a_a614_b5ccc06be8ee:
-  BEQ	__IFNOT_69558d23_2729_4663_b012_d1ac05c3aef4
+  __CMP_END_9ecf12de_327d_4ae8_b117_2d8375126da4:
+  BEQ	__IFNOT_b2398030_438a_44a8_8a6e_647a730cd066
   REP	#$20
   LDA	#$0000
   STA	__@signExtend
@@ -4380,7 +4281,7 @@ __div32by24:	; @func
   LDA	__div32by24@ret + 2
   ADC	__div32by24@start + 2
   STA	__div32by24@ret + 2
-  __IFNOT_69558d23_2729_4663_b012_d1ac05c3aef4:
+  __IFNOT_b2398030_438a_44a8_8a6e_647a730cd066:
   REP	#$20
   LDA	__@specSubY + 1
   LSR
@@ -4397,8 +4298,8 @@ __div32by24:	; @func
   LDA	__div32by24@start + 0
   ROR
   STA	__div32by24@start + 0
-  JMP	__ITER__START__1bccde5e_83ee_4207_b3e0_14b4394afbda
-  __ITER__END__1bccde5e_83ee_4207_b3e0_14b4394afbda:
+  JMP	__ITER__START__4e073406_056f_4061_bbd7_b06c3a53fd90
+  __ITER__END__4e073406_056f_4061_bbd7_b06c3a53fd90:
   REP	#$20
   LDA	__div32by24@ret + 0
   STA	__@callResult + 0
@@ -4422,82 +4323,71 @@ __div64by24:	; @func
   SEP	#$20
   LDA	#$00
   STA	__div64by24@start + 2
-  __ITER__START__76f406a6_2ba4_4f58_ad13_4b928d6ee028:
+  __ITER__START__4305a167_81f9_457d_b49f_9f67f663f83a:
   CLC
   REP	#$20
   LDA	#$0000
   STA	__@signExtend
   LDA	__@specSubX + 6
   CMP	__@signExtend
-  BCC	__CMP_NO_b0cbd9bb_aa10_4106_b77c_1a49f1103bba
-  BNE	__CMP_YES_b0cbd9bb_aa10_4106_b77c_1a49f1103bba
+  BCC	__CMP_NO_a6e80078_7b1d_479b_bef8_eae1d2d713d4
+  BNE	__CMP_YES_a6e80078_7b1d_479b_bef8_eae1d2d713d4
   LDA	__@specSubX + 4
   CMP	__@signExtend
-  BCC	__CMP_NO_b0cbd9bb_aa10_4106_b77c_1a49f1103bba
-  BNE	__CMP_YES_b0cbd9bb_aa10_4106_b77c_1a49f1103bba
+  BCC	__CMP_NO_a6e80078_7b1d_479b_bef8_eae1d2d713d4
+  BNE	__CMP_YES_a6e80078_7b1d_479b_bef8_eae1d2d713d4
   SEP	#$20
   LDA	__@specSubX + 3
   CMP	__@signExtend
-  BCC	__CMP_NO_b0cbd9bb_aa10_4106_b77c_1a49f1103bba
-  BNE	__CMP_YES_b0cbd9bb_aa10_4106_b77c_1a49f1103bba
+  BCC	__CMP_NO_a6e80078_7b1d_479b_bef8_eae1d2d713d4
+  BNE	__CMP_YES_a6e80078_7b1d_479b_bef8_eae1d2d713d4
   LDA	__@specSubX + 1
   CMP	__@specSubY + 1
-  BCC	__CMP_NO_b0cbd9bb_aa10_4106_b77c_1a49f1103bba
-  BNE	__CMP_YES_b0cbd9bb_aa10_4106_b77c_1a49f1103bba
+  BCC	__CMP_NO_a6e80078_7b1d_479b_bef8_eae1d2d713d4
+  BNE	__CMP_YES_a6e80078_7b1d_479b_bef8_eae1d2d713d4
   SEP	#$20
   LDA	__@specSubX + 0
   CMP	__@specSubY + 0
-  BCC	__CMP_NO_b0cbd9bb_aa10_4106_b77c_1a49f1103bba
-  BNE	__CMP_YES_b0cbd9bb_aa10_4106_b77c_1a49f1103bba
-  JMP	__CMP_NO_b0cbd9bb_aa10_4106_b77c_1a49f1103bba
-  __CMP_YES_b0cbd9bb_aa10_4106_b77c_1a49f1103bba:
+  BCC	__CMP_NO_a6e80078_7b1d_479b_bef8_eae1d2d713d4
+  BNE	__CMP_YES_a6e80078_7b1d_479b_bef8_eae1d2d713d4
+  JMP	__CMP_NO_a6e80078_7b1d_479b_bef8_eae1d2d713d4
+  __CMP_YES_a6e80078_7b1d_479b_bef8_eae1d2d713d4:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_b0cbd9bb_aa10_4106_b77c_1a49f1103bba
-  __CMP_NO_b0cbd9bb_aa10_4106_b77c_1a49f1103bba:
+  BRA	__CMP_END_a6e80078_7b1d_479b_bef8_eae1d2d713d4
+  __CMP_NO_a6e80078_7b1d_479b_bef8_eae1d2d713d4:
   SEP	#$20
   LDA	#$00
-  __CMP_END_b0cbd9bb_aa10_4106_b77c_1a49f1103bba:
+  __CMP_END_a6e80078_7b1d_479b_bef8_eae1d2d713d4:
   SEP	#$20
   CMP	#$00
   BNE	:+
-  JMP	__ITER__END__76f406a6_2ba4_4f58_ad13_4b928d6ee028
+  JMP	__ITER__END__4305a167_81f9_457d_b49f_9f67f663f83a
   :
   
   REP	#$20
   LDA	#$0000
   AND	__@specSubY + 0
-  STA	__@scratchBase + 3
+  STA	__@scratchBase + 0
   SEP	#$20
   LDA	#$80
   AND	__@specSubY + 2
-  STA	__@scratchBase + 5
+  STA	__@scratchBase + 2
   SEP	#$10
   LDX	#$00
   REP	#$20
-  LDA	__@scratchBase + 3
+  LDA	__@scratchBase + 0
   CMP	#$0000
   BNE	:+
   SEP	#$20
-  LDA	__@scratchBase + 5
+  LDA	__@scratchBase + 2
   CMP	#$00
   BNE	:+
   INX
 : TXA
-  SEP	#$20
-  STA	__@scratchBase + 0
-  LDA	#$00
-  STA	__@scratchBase + 1
-  STA	__@scratchBase + 2
-  REP	#$20
-  LDA	__@scratchBase + 0
-  STA	__@scratchBase + 0
-  SEP	#$20
-  LDA	__@scratchBase + 2
-  STA	__@scratchBase + 2
-  BNE	__IFNOT_f894317a_ff2b_4790_a9a4_953bc6d572b4
-  JMP	__ITER__END__76f406a6_2ba4_4f58_ad13_4b928d6ee028
-  __IFNOT_f894317a_ff2b_4790_a9a4_953bc6d572b4:
+  BNE	__IFNOT_32737708_1ddd_473b_bef7_8bcd3bf6dda8
+  JMP	__ITER__END__4305a167_81f9_457d_b49f_9f67f663f83a
+  __IFNOT_32737708_1ddd_473b_bef7_8bcd3bf6dda8:
   REP	#$20
   LDA	__@specSubY + 0
   ASL
@@ -4514,9 +4404,9 @@ __div64by24:	; @func
   LDA	__div64by24@start + 2
   ROL
   STA	__div64by24@start + 2
-  JMP	__ITER__START__76f406a6_2ba4_4f58_ad13_4b928d6ee028
-  __ITER__END__76f406a6_2ba4_4f58_ad13_4b928d6ee028:
-  __ITER__START__6ede0b41_df3e_40c3_af0e_82dd10448e07:
+  JMP	__ITER__START__4305a167_81f9_457d_b49f_9f67f663f83a
+  __ITER__END__4305a167_81f9_457d_b49f_9f67f663f83a:
+  __ITER__START__86e6a96e_8405_4bf2_b90e_754bd30c2f0a:
   SEP	#$10
   LDX	#$01
   REP	#$20
@@ -4532,7 +4422,7 @@ __div64by24:	; @func
   SEP	#$20
   CMP	#$00
   BNE	:+
-  JMP	__ITER__END__6ede0b41_df3e_40c3_af0e_82dd10448e07
+  JMP	__ITER__END__86e6a96e_8405_4bf2_b90e_754bd30c2f0a
   :
   CLC
   REP	#$20
@@ -4540,37 +4430,37 @@ __div64by24:	; @func
   STA	__@signExtend
   LDA	__@specSubX + 6
   CMP	__@signExtend
-  BCC	__CMP_NO_6333736e_7c4c_4d28_a4be_25a8498530b9
-  BNE	__CMP_YES_6333736e_7c4c_4d28_a4be_25a8498530b9
+  BCC	__CMP_NO_e6fdc90b_c5a9_4c4c_99fd_ec6cad75f928
+  BNE	__CMP_YES_e6fdc90b_c5a9_4c4c_99fd_ec6cad75f928
   LDA	__@specSubX + 4
   CMP	__@signExtend
-  BCC	__CMP_NO_6333736e_7c4c_4d28_a4be_25a8498530b9
-  BNE	__CMP_YES_6333736e_7c4c_4d28_a4be_25a8498530b9
+  BCC	__CMP_NO_e6fdc90b_c5a9_4c4c_99fd_ec6cad75f928
+  BNE	__CMP_YES_e6fdc90b_c5a9_4c4c_99fd_ec6cad75f928
   SEP	#$20
   LDA	__@specSubX + 3
   CMP	__@signExtend
-  BCC	__CMP_NO_6333736e_7c4c_4d28_a4be_25a8498530b9
-  BNE	__CMP_YES_6333736e_7c4c_4d28_a4be_25a8498530b9
+  BCC	__CMP_NO_e6fdc90b_c5a9_4c4c_99fd_ec6cad75f928
+  BNE	__CMP_YES_e6fdc90b_c5a9_4c4c_99fd_ec6cad75f928
   LDA	__@specSubX + 1
   CMP	__@specSubY + 1
-  BCC	__CMP_NO_6333736e_7c4c_4d28_a4be_25a8498530b9
-  BNE	__CMP_YES_6333736e_7c4c_4d28_a4be_25a8498530b9
+  BCC	__CMP_NO_e6fdc90b_c5a9_4c4c_99fd_ec6cad75f928
+  BNE	__CMP_YES_e6fdc90b_c5a9_4c4c_99fd_ec6cad75f928
   SEP	#$20
   LDA	__@specSubX + 0
   CMP	__@specSubY + 0
-  BCC	__CMP_NO_6333736e_7c4c_4d28_a4be_25a8498530b9
-  BNE	__CMP_YES_6333736e_7c4c_4d28_a4be_25a8498530b9
-  JMP	__CMP_YES_6333736e_7c4c_4d28_a4be_25a8498530b9
-  __CMP_YES_6333736e_7c4c_4d28_a4be_25a8498530b9:
+  BCC	__CMP_NO_e6fdc90b_c5a9_4c4c_99fd_ec6cad75f928
+  BNE	__CMP_YES_e6fdc90b_c5a9_4c4c_99fd_ec6cad75f928
+  JMP	__CMP_YES_e6fdc90b_c5a9_4c4c_99fd_ec6cad75f928
+  __CMP_YES_e6fdc90b_c5a9_4c4c_99fd_ec6cad75f928:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_6333736e_7c4c_4d28_a4be_25a8498530b9
-  __CMP_NO_6333736e_7c4c_4d28_a4be_25a8498530b9:
+  BRA	__CMP_END_e6fdc90b_c5a9_4c4c_99fd_ec6cad75f928
+  __CMP_NO_e6fdc90b_c5a9_4c4c_99fd_ec6cad75f928:
   SEP	#$20
   LDA	#$00
-  __CMP_END_6333736e_7c4c_4d28_a4be_25a8498530b9:
+  __CMP_END_e6fdc90b_c5a9_4c4c_99fd_ec6cad75f928:
   BNE	:+
-  JMP	__IFNOT_c31a4e69_af94_4a56_98ae_6d8b224e7e6a
+  JMP	__IFNOT_b499b252_9fad_4047_89eb_b5bc3382006d
   :
   REP	#$20
   LDA	#$0000
@@ -4604,7 +4494,7 @@ __div64by24:	; @func
   LDA	__div64by24@ret + 2
   ADC	__div64by24@start + 2
   STA	__div64by24@ret + 2
-  __IFNOT_c31a4e69_af94_4a56_98ae_6d8b224e7e6a:
+  __IFNOT_b499b252_9fad_4047_89eb_b5bc3382006d:
   REP	#$20
   LDA	__@specSubY + 1
   LSR
@@ -4621,8 +4511,8 @@ __div64by24:	; @func
   LDA	__div64by24@start + 0
   ROR
   STA	__div64by24@start + 0
-  JMP	__ITER__START__6ede0b41_df3e_40c3_af0e_82dd10448e07
-  __ITER__END__6ede0b41_df3e_40c3_af0e_82dd10448e07:
+  JMP	__ITER__START__86e6a96e_8405_4bf2_b90e_754bd30c2f0a
+  __ITER__END__86e6a96e_8405_4bf2_b90e_754bd30c2f0a:
   REP	#$20
   LDA	__div64by24@ret + 0
   STA	__@callResult + 0
@@ -4652,75 +4542,63 @@ __div8by32:	; @func
   SEP	#$20
   LDA	#$00
   STA	__div8by32@start + 2
-  __ITER__START__982b374d_6273_4370_a343_231237127100:
+  __ITER__START__5274abcc_752f_4459_af4d_d95905d649a7:
   CLC
   REP	#$20
   LDA	#$0000
   STA	__@signExtend
   LDA	__@signExtend
   CMP	__@specSubY + 2
-  BCC	__CMP_NO_d3c5fd8d_9bed_402d_b084_4f31f99fa836
-  BNE	__CMP_YES_d3c5fd8d_9bed_402d_b084_4f31f99fa836
+  BCC	__CMP_NO_563e60f1_7a96_4f8d_8fb1_204d72849542
+  BNE	__CMP_YES_563e60f1_7a96_4f8d_8fb1_204d72849542
   SEP	#$20
   LDA	__@signExtend
   CMP	__@specSubY + 1
-  BCC	__CMP_NO_d3c5fd8d_9bed_402d_b084_4f31f99fa836
-  BNE	__CMP_YES_d3c5fd8d_9bed_402d_b084_4f31f99fa836
+  BCC	__CMP_NO_563e60f1_7a96_4f8d_8fb1_204d72849542
+  BNE	__CMP_YES_563e60f1_7a96_4f8d_8fb1_204d72849542
   SEP	#$20
   LDA	__@specSubX + 0
   CMP	__@specSubY + 0
-  BCC	__CMP_NO_d3c5fd8d_9bed_402d_b084_4f31f99fa836
-  BNE	__CMP_YES_d3c5fd8d_9bed_402d_b084_4f31f99fa836
-  JMP	__CMP_NO_d3c5fd8d_9bed_402d_b084_4f31f99fa836
-  __CMP_YES_d3c5fd8d_9bed_402d_b084_4f31f99fa836:
+  BCC	__CMP_NO_563e60f1_7a96_4f8d_8fb1_204d72849542
+  BNE	__CMP_YES_563e60f1_7a96_4f8d_8fb1_204d72849542
+  JMP	__CMP_NO_563e60f1_7a96_4f8d_8fb1_204d72849542
+  __CMP_YES_563e60f1_7a96_4f8d_8fb1_204d72849542:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_d3c5fd8d_9bed_402d_b084_4f31f99fa836
-  __CMP_NO_d3c5fd8d_9bed_402d_b084_4f31f99fa836:
+  BRA	__CMP_END_563e60f1_7a96_4f8d_8fb1_204d72849542
+  __CMP_NO_563e60f1_7a96_4f8d_8fb1_204d72849542:
   SEP	#$20
   LDA	#$00
-  __CMP_END_d3c5fd8d_9bed_402d_b084_4f31f99fa836:
+  __CMP_END_563e60f1_7a96_4f8d_8fb1_204d72849542:
   SEP	#$20
   CMP	#$00
   BNE	:+
-  JMP	__ITER__END__982b374d_6273_4370_a343_231237127100
+  JMP	__ITER__END__5274abcc_752f_4459_af4d_d95905d649a7
   :
   
   REP	#$20
   LDA	#$0000
   AND	__@specSubY + 0
-  STA	__@scratchBase + 4
+  STA	__@scratchBase + 0
   REP	#$20
   LDA	#$8000
   AND	__@specSubY + 2
-  STA	__@scratchBase + 6
+  STA	__@scratchBase + 2
   SEP	#$10
   LDX	#$00
   REP	#$20
-  LDA	__@scratchBase + 4
+  LDA	__@scratchBase + 0
   CMP	#$0000
   BNE	:+
   REP	#$20
-  LDA	__@scratchBase + 6
+  LDA	__@scratchBase + 2
   CMP	#$0000
   BNE	:+
   INX
 : TXA
-  SEP	#$20
-  STA	__@scratchBase + 0
-  LDA	#$00
-  STA	__@scratchBase + 1
-  STA	__@scratchBase + 2
-  STA	__@scratchBase + 3
-  REP	#$20
-  LDA	__@scratchBase + 0
-  STA	__@scratchBase + 0
-  REP	#$20
-  LDA	__@scratchBase + 2
-  STA	__@scratchBase + 2
-  BNE	__IFNOT_4e1bdd38_713f_462c_922e_a7d93e77e226
-  JMP	__ITER__END__982b374d_6273_4370_a343_231237127100
-  __IFNOT_4e1bdd38_713f_462c_922e_a7d93e77e226:
+  BNE	__IFNOT_f9a212a1_0e75_486f_ac71_c0ead4aa382d
+  JMP	__ITER__END__5274abcc_752f_4459_af4d_d95905d649a7
+  __IFNOT_f9a212a1_0e75_486f_ac71_c0ead4aa382d:
   REP	#$20
   LDA	__@specSubY + 0
   ASL
@@ -4737,9 +4615,9 @@ __div8by32:	; @func
   LDA	__div8by32@start + 2
   ROL
   STA	__div8by32@start + 2
-  JMP	__ITER__START__982b374d_6273_4370_a343_231237127100
-  __ITER__END__982b374d_6273_4370_a343_231237127100:
-  __ITER__START__d8bc8c62_8fe0_4d47_9d55_4c7a69a607ca:
+  JMP	__ITER__START__5274abcc_752f_4459_af4d_d95905d649a7
+  __ITER__END__5274abcc_752f_4459_af4d_d95905d649a7:
+  __ITER__START__c99d971e_40c3_4ad9_bc2a_bc79879147e1:
   SEP	#$10
   LDX	#$01
   REP	#$20
@@ -4755,7 +4633,7 @@ __div8by32:	; @func
   SEP	#$20
   CMP	#$00
   BNE	:+
-  JMP	__ITER__END__d8bc8c62_8fe0_4d47_9d55_4c7a69a607ca
+  JMP	__ITER__END__c99d971e_40c3_4ad9_bc2a_bc79879147e1
   :
   CLC
   REP	#$20
@@ -4763,28 +4641,28 @@ __div8by32:	; @func
   STA	__@signExtend
   LDA	__@signExtend
   CMP	__@specSubY + 2
-  BCC	__CMP_NO_7dba237f_fe9c_4ba3_a2d3_7763e1ebecbd
-  BNE	__CMP_YES_7dba237f_fe9c_4ba3_a2d3_7763e1ebecbd
+  BCC	__CMP_NO_7c6af8ac_f81d_42dd_b1de_aad9fe2e5744
+  BNE	__CMP_YES_7c6af8ac_f81d_42dd_b1de_aad9fe2e5744
   SEP	#$20
   LDA	__@signExtend
   CMP	__@specSubY + 1
-  BCC	__CMP_NO_7dba237f_fe9c_4ba3_a2d3_7763e1ebecbd
-  BNE	__CMP_YES_7dba237f_fe9c_4ba3_a2d3_7763e1ebecbd
+  BCC	__CMP_NO_7c6af8ac_f81d_42dd_b1de_aad9fe2e5744
+  BNE	__CMP_YES_7c6af8ac_f81d_42dd_b1de_aad9fe2e5744
   SEP	#$20
   LDA	__@specSubX + 0
   CMP	__@specSubY + 0
-  BCC	__CMP_NO_7dba237f_fe9c_4ba3_a2d3_7763e1ebecbd
-  BNE	__CMP_YES_7dba237f_fe9c_4ba3_a2d3_7763e1ebecbd
-  JMP	__CMP_YES_7dba237f_fe9c_4ba3_a2d3_7763e1ebecbd
-  __CMP_YES_7dba237f_fe9c_4ba3_a2d3_7763e1ebecbd:
+  BCC	__CMP_NO_7c6af8ac_f81d_42dd_b1de_aad9fe2e5744
+  BNE	__CMP_YES_7c6af8ac_f81d_42dd_b1de_aad9fe2e5744
+  JMP	__CMP_YES_7c6af8ac_f81d_42dd_b1de_aad9fe2e5744
+  __CMP_YES_7c6af8ac_f81d_42dd_b1de_aad9fe2e5744:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_7dba237f_fe9c_4ba3_a2d3_7763e1ebecbd
-  __CMP_NO_7dba237f_fe9c_4ba3_a2d3_7763e1ebecbd:
+  BRA	__CMP_END_7c6af8ac_f81d_42dd_b1de_aad9fe2e5744
+  __CMP_NO_7c6af8ac_f81d_42dd_b1de_aad9fe2e5744:
   SEP	#$20
   LDA	#$00
-  __CMP_END_7dba237f_fe9c_4ba3_a2d3_7763e1ebecbd:
-  BEQ	__IFNOT_b4a36b16_a9bc_49bc_88dc_d5cc65779ab4
+  __CMP_END_7c6af8ac_f81d_42dd_b1de_aad9fe2e5744:
+  BEQ	__IFNOT_cfb3f379_e940_46a1_9588_aa3e70289f01
   REP	#$20
   LDA	#$0000
   STA	__@signExtend
@@ -4802,7 +4680,7 @@ __div8by32:	; @func
   LDA	__div8by32@ret + 2
   ADC	__div8by32@start + 2
   STA	__div8by32@ret + 2
-  __IFNOT_b4a36b16_a9bc_49bc_88dc_d5cc65779ab4:
+  __IFNOT_cfb3f379_e940_46a1_9588_aa3e70289f01:
   REP	#$20
   LDA	__@specSubY + 2
   LSR
@@ -4818,8 +4696,8 @@ __div8by32:	; @func
   LDA	__div8by32@start + 0
   ROR
   STA	__div8by32@start + 0
-  JMP	__ITER__START__d8bc8c62_8fe0_4d47_9d55_4c7a69a607ca
-  __ITER__END__d8bc8c62_8fe0_4d47_9d55_4c7a69a607ca:
+  JMP	__ITER__START__c99d971e_40c3_4ad9_bc2a_bc79879147e1
+  __ITER__END__c99d971e_40c3_4ad9_bc2a_bc79879147e1:
   REP	#$20
   LDA	__div8by32@ret + 0
   STA	__@callResult + 0
@@ -4843,69 +4721,57 @@ __div16by32:	; @func
   SEP	#$20
   LDA	#$00
   STA	__div16by32@start + 2
-  __ITER__START__409a444f_273d_45c4_aee8_c5edd054e944:
+  __ITER__START__914f140d_d2e5_4790_a233_d6041b487156:
   CLC
   REP	#$20
   LDA	#$0000
   STA	__@signExtend
   LDA	__@signExtend
   CMP	__@specSubY + 2
-  BCC	__CMP_NO_c5efdd98_8969_4a0e_8ec1_c6f5c6587695
-  BNE	__CMP_YES_c5efdd98_8969_4a0e_8ec1_c6f5c6587695
+  BCC	__CMP_NO_3d9b8f03_7979_4e2e_8c22_53f140c9aace
+  BNE	__CMP_YES_3d9b8f03_7979_4e2e_8c22_53f140c9aace
   LDA	__@specSubX + 0
   CMP	__@specSubY + 0
-  BCC	__CMP_NO_c5efdd98_8969_4a0e_8ec1_c6f5c6587695
-  BNE	__CMP_YES_c5efdd98_8969_4a0e_8ec1_c6f5c6587695
-  JMP	__CMP_NO_c5efdd98_8969_4a0e_8ec1_c6f5c6587695
-  __CMP_YES_c5efdd98_8969_4a0e_8ec1_c6f5c6587695:
+  BCC	__CMP_NO_3d9b8f03_7979_4e2e_8c22_53f140c9aace
+  BNE	__CMP_YES_3d9b8f03_7979_4e2e_8c22_53f140c9aace
+  JMP	__CMP_NO_3d9b8f03_7979_4e2e_8c22_53f140c9aace
+  __CMP_YES_3d9b8f03_7979_4e2e_8c22_53f140c9aace:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_c5efdd98_8969_4a0e_8ec1_c6f5c6587695
-  __CMP_NO_c5efdd98_8969_4a0e_8ec1_c6f5c6587695:
+  BRA	__CMP_END_3d9b8f03_7979_4e2e_8c22_53f140c9aace
+  __CMP_NO_3d9b8f03_7979_4e2e_8c22_53f140c9aace:
   SEP	#$20
   LDA	#$00
-  __CMP_END_c5efdd98_8969_4a0e_8ec1_c6f5c6587695:
+  __CMP_END_3d9b8f03_7979_4e2e_8c22_53f140c9aace:
   SEP	#$20
   CMP	#$00
   BNE	:+
-  JMP	__ITER__END__409a444f_273d_45c4_aee8_c5edd054e944
+  JMP	__ITER__END__914f140d_d2e5_4790_a233_d6041b487156
   :
   
   REP	#$20
   LDA	#$0000
   AND	__@specSubY + 0
-  STA	__@scratchBase + 4
+  STA	__@scratchBase + 0
   REP	#$20
   LDA	#$8000
   AND	__@specSubY + 2
-  STA	__@scratchBase + 6
+  STA	__@scratchBase + 2
   SEP	#$10
   LDX	#$00
   REP	#$20
-  LDA	__@scratchBase + 4
+  LDA	__@scratchBase + 0
   CMP	#$0000
   BNE	:+
   REP	#$20
-  LDA	__@scratchBase + 6
+  LDA	__@scratchBase + 2
   CMP	#$0000
   BNE	:+
   INX
 : TXA
-  SEP	#$20
-  STA	__@scratchBase + 0
-  LDA	#$00
-  STA	__@scratchBase + 1
-  STA	__@scratchBase + 2
-  STA	__@scratchBase + 3
-  REP	#$20
-  LDA	__@scratchBase + 0
-  STA	__@scratchBase + 0
-  REP	#$20
-  LDA	__@scratchBase + 2
-  STA	__@scratchBase + 2
-  BNE	__IFNOT_f3e7941a_076f_4041_a72f_e8889e5938df
-  JMP	__ITER__END__409a444f_273d_45c4_aee8_c5edd054e944
-  __IFNOT_f3e7941a_076f_4041_a72f_e8889e5938df:
+  BNE	__IFNOT_48c605d2_f92a_4383_a0f6_0b839bb8224f
+  JMP	__ITER__END__914f140d_d2e5_4790_a233_d6041b487156
+  __IFNOT_48c605d2_f92a_4383_a0f6_0b839bb8224f:
   REP	#$20
   LDA	__@specSubY + 0
   ASL
@@ -4922,9 +4788,9 @@ __div16by32:	; @func
   LDA	__div16by32@start + 2
   ROL
   STA	__div16by32@start + 2
-  JMP	__ITER__START__409a444f_273d_45c4_aee8_c5edd054e944
-  __ITER__END__409a444f_273d_45c4_aee8_c5edd054e944:
-  __ITER__START__11768456_e88a_4478_924a_8051d9212fc1:
+  JMP	__ITER__START__914f140d_d2e5_4790_a233_d6041b487156
+  __ITER__END__914f140d_d2e5_4790_a233_d6041b487156:
+  __ITER__START__4bd7c724_7aba_4a3c_9e89_1527f9c061c5:
   SEP	#$10
   LDX	#$01
   REP	#$20
@@ -4940,7 +4806,7 @@ __div16by32:	; @func
   SEP	#$20
   CMP	#$00
   BNE	:+
-  JMP	__ITER__END__11768456_e88a_4478_924a_8051d9212fc1
+  JMP	__ITER__END__4bd7c724_7aba_4a3c_9e89_1527f9c061c5
   :
   CLC
   REP	#$20
@@ -4948,22 +4814,22 @@ __div16by32:	; @func
   STA	__@signExtend
   LDA	__@signExtend
   CMP	__@specSubY + 2
-  BCC	__CMP_NO_0c82cc65_1690_460a_987d_372c49e4da03
-  BNE	__CMP_YES_0c82cc65_1690_460a_987d_372c49e4da03
+  BCC	__CMP_NO_77e5361b_f02f_4efb_b4c0_04bc05aa1e56
+  BNE	__CMP_YES_77e5361b_f02f_4efb_b4c0_04bc05aa1e56
   LDA	__@specSubX + 0
   CMP	__@specSubY + 0
-  BCC	__CMP_NO_0c82cc65_1690_460a_987d_372c49e4da03
-  BNE	__CMP_YES_0c82cc65_1690_460a_987d_372c49e4da03
-  JMP	__CMP_YES_0c82cc65_1690_460a_987d_372c49e4da03
-  __CMP_YES_0c82cc65_1690_460a_987d_372c49e4da03:
+  BCC	__CMP_NO_77e5361b_f02f_4efb_b4c0_04bc05aa1e56
+  BNE	__CMP_YES_77e5361b_f02f_4efb_b4c0_04bc05aa1e56
+  JMP	__CMP_YES_77e5361b_f02f_4efb_b4c0_04bc05aa1e56
+  __CMP_YES_77e5361b_f02f_4efb_b4c0_04bc05aa1e56:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_0c82cc65_1690_460a_987d_372c49e4da03
-  __CMP_NO_0c82cc65_1690_460a_987d_372c49e4da03:
+  BRA	__CMP_END_77e5361b_f02f_4efb_b4c0_04bc05aa1e56
+  __CMP_NO_77e5361b_f02f_4efb_b4c0_04bc05aa1e56:
   SEP	#$20
   LDA	#$00
-  __CMP_END_0c82cc65_1690_460a_987d_372c49e4da03:
-  BEQ	__IFNOT_5176f3ab_0152_4f3f_ae7e_e1bd752e4704
+  __CMP_END_77e5361b_f02f_4efb_b4c0_04bc05aa1e56:
+  BEQ	__IFNOT_aa328461_9f54_4d4b_a838_f4f2395ceb81
   REP	#$20
   LDA	#$0000
   STA	__@signExtend
@@ -4980,7 +4846,7 @@ __div16by32:	; @func
   LDA	__div16by32@ret + 2
   ADC	__div16by32@start + 2
   STA	__div16by32@ret + 2
-  __IFNOT_5176f3ab_0152_4f3f_ae7e_e1bd752e4704:
+  __IFNOT_aa328461_9f54_4d4b_a838_f4f2395ceb81:
   REP	#$20
   LDA	__@specSubY + 2
   LSR
@@ -4996,8 +4862,8 @@ __div16by32:	; @func
   LDA	__div16by32@start + 0
   ROR
   STA	__div16by32@start + 0
-  JMP	__ITER__START__11768456_e88a_4478_924a_8051d9212fc1
-  __ITER__END__11768456_e88a_4478_924a_8051d9212fc1:
+  JMP	__ITER__START__4bd7c724_7aba_4a3c_9e89_1527f9c061c5
+  __ITER__END__4bd7c724_7aba_4a3c_9e89_1527f9c061c5:
   REP	#$20
   LDA	__div16by32@ret + 0
   STA	__@callResult + 0
@@ -5021,7 +4887,7 @@ __div24by32:	; @func
   SEP	#$20
   LDA	#$00
   STA	__div24by32@start + 2
-  __ITER__START__851c36d2_d5db_4724_accc_0498ca1c694e:
+  __ITER__START__b74ac516_d92f_4bae_b17b_ce41501d10e2:
   CLC
   REP	#$20
   LDA	#$0000
@@ -5029,67 +4895,55 @@ __div24by32:	; @func
   SEP	#$20
   LDA	__@signExtend
   CMP	__@specSubY + 3
-  BCC	__CMP_NO_c94b2fe0_1aa2_460e_ada1_0919e8fc6bf7
-  BNE	__CMP_YES_c94b2fe0_1aa2_460e_ada1_0919e8fc6bf7
+  BCC	__CMP_NO_e618e343_c971_43d5_aa93_6401f0381884
+  BNE	__CMP_YES_e618e343_c971_43d5_aa93_6401f0381884
   LDA	__@specSubX + 1
   CMP	__@specSubY + 1
-  BCC	__CMP_NO_c94b2fe0_1aa2_460e_ada1_0919e8fc6bf7
-  BNE	__CMP_YES_c94b2fe0_1aa2_460e_ada1_0919e8fc6bf7
+  BCC	__CMP_NO_e618e343_c971_43d5_aa93_6401f0381884
+  BNE	__CMP_YES_e618e343_c971_43d5_aa93_6401f0381884
   SEP	#$20
   LDA	__@specSubX + 0
   CMP	__@specSubY + 0
-  BCC	__CMP_NO_c94b2fe0_1aa2_460e_ada1_0919e8fc6bf7
-  BNE	__CMP_YES_c94b2fe0_1aa2_460e_ada1_0919e8fc6bf7
-  JMP	__CMP_NO_c94b2fe0_1aa2_460e_ada1_0919e8fc6bf7
-  __CMP_YES_c94b2fe0_1aa2_460e_ada1_0919e8fc6bf7:
+  BCC	__CMP_NO_e618e343_c971_43d5_aa93_6401f0381884
+  BNE	__CMP_YES_e618e343_c971_43d5_aa93_6401f0381884
+  JMP	__CMP_NO_e618e343_c971_43d5_aa93_6401f0381884
+  __CMP_YES_e618e343_c971_43d5_aa93_6401f0381884:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_c94b2fe0_1aa2_460e_ada1_0919e8fc6bf7
-  __CMP_NO_c94b2fe0_1aa2_460e_ada1_0919e8fc6bf7:
+  BRA	__CMP_END_e618e343_c971_43d5_aa93_6401f0381884
+  __CMP_NO_e618e343_c971_43d5_aa93_6401f0381884:
   SEP	#$20
   LDA	#$00
-  __CMP_END_c94b2fe0_1aa2_460e_ada1_0919e8fc6bf7:
+  __CMP_END_e618e343_c971_43d5_aa93_6401f0381884:
   SEP	#$20
   CMP	#$00
   BNE	:+
-  JMP	__ITER__END__851c36d2_d5db_4724_accc_0498ca1c694e
+  JMP	__ITER__END__b74ac516_d92f_4bae_b17b_ce41501d10e2
   :
   
   REP	#$20
   LDA	#$0000
   AND	__@specSubY + 0
-  STA	__@scratchBase + 4
+  STA	__@scratchBase + 0
   REP	#$20
   LDA	#$8000
   AND	__@specSubY + 2
-  STA	__@scratchBase + 6
+  STA	__@scratchBase + 2
   SEP	#$10
   LDX	#$00
   REP	#$20
-  LDA	__@scratchBase + 4
+  LDA	__@scratchBase + 0
   CMP	#$0000
   BNE	:+
   REP	#$20
-  LDA	__@scratchBase + 6
+  LDA	__@scratchBase + 2
   CMP	#$0000
   BNE	:+
   INX
 : TXA
-  SEP	#$20
-  STA	__@scratchBase + 0
-  LDA	#$00
-  STA	__@scratchBase + 1
-  STA	__@scratchBase + 2
-  STA	__@scratchBase + 3
-  REP	#$20
-  LDA	__@scratchBase + 0
-  STA	__@scratchBase + 0
-  REP	#$20
-  LDA	__@scratchBase + 2
-  STA	__@scratchBase + 2
-  BNE	__IFNOT_a764f368_0143_4911_b82b_a8592c99600d
-  JMP	__ITER__END__851c36d2_d5db_4724_accc_0498ca1c694e
-  __IFNOT_a764f368_0143_4911_b82b_a8592c99600d:
+  BNE	__IFNOT_bde7ac35_1c3c_4e73_9667_7d332f905bfa
+  JMP	__ITER__END__b74ac516_d92f_4bae_b17b_ce41501d10e2
+  __IFNOT_bde7ac35_1c3c_4e73_9667_7d332f905bfa:
   REP	#$20
   LDA	__@specSubY + 0
   ASL
@@ -5106,9 +4960,9 @@ __div24by32:	; @func
   LDA	__div24by32@start + 2
   ROL
   STA	__div24by32@start + 2
-  JMP	__ITER__START__851c36d2_d5db_4724_accc_0498ca1c694e
-  __ITER__END__851c36d2_d5db_4724_accc_0498ca1c694e:
-  __ITER__START__6df9e0cf_f277_4ebf_9c8d_708a6e55ffa9:
+  JMP	__ITER__START__b74ac516_d92f_4bae_b17b_ce41501d10e2
+  __ITER__END__b74ac516_d92f_4bae_b17b_ce41501d10e2:
+  __ITER__START__a0dd91d8_a3b7_4faa_a794_884b318a7487:
   SEP	#$10
   LDX	#$01
   REP	#$20
@@ -5124,7 +4978,7 @@ __div24by32:	; @func
   SEP	#$20
   CMP	#$00
   BNE	:+
-  JMP	__ITER__END__6df9e0cf_f277_4ebf_9c8d_708a6e55ffa9
+  JMP	__ITER__END__a0dd91d8_a3b7_4faa_a794_884b318a7487
   :
   CLC
   REP	#$20
@@ -5133,27 +4987,27 @@ __div24by32:	; @func
   SEP	#$20
   LDA	__@signExtend
   CMP	__@specSubY + 3
-  BCC	__CMP_NO_f1c4d847_7d50_45e4_8ce2_93244939497b
-  BNE	__CMP_YES_f1c4d847_7d50_45e4_8ce2_93244939497b
+  BCC	__CMP_NO_000b16b7_4deb_471d_8d08_06a049d81c87
+  BNE	__CMP_YES_000b16b7_4deb_471d_8d08_06a049d81c87
   LDA	__@specSubX + 1
   CMP	__@specSubY + 1
-  BCC	__CMP_NO_f1c4d847_7d50_45e4_8ce2_93244939497b
-  BNE	__CMP_YES_f1c4d847_7d50_45e4_8ce2_93244939497b
+  BCC	__CMP_NO_000b16b7_4deb_471d_8d08_06a049d81c87
+  BNE	__CMP_YES_000b16b7_4deb_471d_8d08_06a049d81c87
   SEP	#$20
   LDA	__@specSubX + 0
   CMP	__@specSubY + 0
-  BCC	__CMP_NO_f1c4d847_7d50_45e4_8ce2_93244939497b
-  BNE	__CMP_YES_f1c4d847_7d50_45e4_8ce2_93244939497b
-  JMP	__CMP_YES_f1c4d847_7d50_45e4_8ce2_93244939497b
-  __CMP_YES_f1c4d847_7d50_45e4_8ce2_93244939497b:
+  BCC	__CMP_NO_000b16b7_4deb_471d_8d08_06a049d81c87
+  BNE	__CMP_YES_000b16b7_4deb_471d_8d08_06a049d81c87
+  JMP	__CMP_YES_000b16b7_4deb_471d_8d08_06a049d81c87
+  __CMP_YES_000b16b7_4deb_471d_8d08_06a049d81c87:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_f1c4d847_7d50_45e4_8ce2_93244939497b
-  __CMP_NO_f1c4d847_7d50_45e4_8ce2_93244939497b:
+  BRA	__CMP_END_000b16b7_4deb_471d_8d08_06a049d81c87
+  __CMP_NO_000b16b7_4deb_471d_8d08_06a049d81c87:
   SEP	#$20
   LDA	#$00
-  __CMP_END_f1c4d847_7d50_45e4_8ce2_93244939497b:
-  BEQ	__IFNOT_a79bd06c_9445_4d77_9738_274cb7d1cc63
+  __CMP_END_000b16b7_4deb_471d_8d08_06a049d81c87:
+  BEQ	__IFNOT_6b95d079_655c_4e7a_872d_993fbf553b67
   REP	#$20
   LDA	#$0000
   STA	__@signExtend
@@ -5174,7 +5028,7 @@ __div24by32:	; @func
   LDA	__div24by32@ret + 2
   ADC	__div24by32@start + 2
   STA	__div24by32@ret + 2
-  __IFNOT_a79bd06c_9445_4d77_9738_274cb7d1cc63:
+  __IFNOT_6b95d079_655c_4e7a_872d_993fbf553b67:
   REP	#$20
   LDA	__@specSubY + 2
   LSR
@@ -5190,8 +5044,8 @@ __div24by32:	; @func
   LDA	__div24by32@start + 0
   ROR
   STA	__div24by32@start + 0
-  JMP	__ITER__START__6df9e0cf_f277_4ebf_9c8d_708a6e55ffa9
-  __ITER__END__6df9e0cf_f277_4ebf_9c8d_708a6e55ffa9:
+  JMP	__ITER__START__a0dd91d8_a3b7_4faa_a794_884b318a7487
+  __ITER__END__a0dd91d8_a3b7_4faa_a794_884b318a7487:
   REP	#$20
   LDA	__div24by32@ret + 0
   STA	__@callResult + 0
@@ -5212,69 +5066,57 @@ __div32by32:	; @func
   STA	__div32by32@start + 0
   LDA	#$0000
   STA	__div32by32@start + 2
-  __ITER__START__d7079aed_eebc_4c0e_a011_7cfc22804ca0:
+  __ITER__START__a44aa414_d099_4b9a_8bd6_6d09cfb4f924:
   CLC
   REP	#$20
   REP	#$20
   LDA	__@specSubX + 2
   CMP	__@specSubY + 2
-  BCC	__CMP_NO_aff6b586_d719_4f9a_801c_4e400195b36b
-  BNE	__CMP_YES_aff6b586_d719_4f9a_801c_4e400195b36b
+  BCC	__CMP_NO_57b88d1c_5955_48d2_a24d_bd03e0cf97ff
+  BNE	__CMP_YES_57b88d1c_5955_48d2_a24d_bd03e0cf97ff
   REP	#$20
   LDA	__@specSubX + 0
   CMP	__@specSubY + 0
-  BCC	__CMP_NO_aff6b586_d719_4f9a_801c_4e400195b36b
-  BNE	__CMP_YES_aff6b586_d719_4f9a_801c_4e400195b36b
-  JMP	__CMP_NO_aff6b586_d719_4f9a_801c_4e400195b36b
-  __CMP_YES_aff6b586_d719_4f9a_801c_4e400195b36b:
+  BCC	__CMP_NO_57b88d1c_5955_48d2_a24d_bd03e0cf97ff
+  BNE	__CMP_YES_57b88d1c_5955_48d2_a24d_bd03e0cf97ff
+  JMP	__CMP_NO_57b88d1c_5955_48d2_a24d_bd03e0cf97ff
+  __CMP_YES_57b88d1c_5955_48d2_a24d_bd03e0cf97ff:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_aff6b586_d719_4f9a_801c_4e400195b36b
-  __CMP_NO_aff6b586_d719_4f9a_801c_4e400195b36b:
+  BRA	__CMP_END_57b88d1c_5955_48d2_a24d_bd03e0cf97ff
+  __CMP_NO_57b88d1c_5955_48d2_a24d_bd03e0cf97ff:
   SEP	#$20
   LDA	#$00
-  __CMP_END_aff6b586_d719_4f9a_801c_4e400195b36b:
+  __CMP_END_57b88d1c_5955_48d2_a24d_bd03e0cf97ff:
   SEP	#$20
   CMP	#$00
   BNE	:+
-  JMP	__ITER__END__d7079aed_eebc_4c0e_a011_7cfc22804ca0
+  JMP	__ITER__END__a44aa414_d099_4b9a_8bd6_6d09cfb4f924
   :
   
   REP	#$20
   LDA	#$0000
   AND	__@specSubY + 0
-  STA	__@scratchBase + 4
+  STA	__@scratchBase + 0
   REP	#$20
   LDA	#$8000
   AND	__@specSubY + 2
-  STA	__@scratchBase + 6
+  STA	__@scratchBase + 2
   SEP	#$10
   LDX	#$00
   REP	#$20
-  LDA	__@scratchBase + 4
+  LDA	__@scratchBase + 0
   CMP	#$0000
   BNE	:+
   REP	#$20
-  LDA	__@scratchBase + 6
+  LDA	__@scratchBase + 2
   CMP	#$0000
   BNE	:+
   INX
 : TXA
-  SEP	#$20
-  STA	__@scratchBase + 0
-  LDA	#$00
-  STA	__@scratchBase + 1
-  STA	__@scratchBase + 2
-  STA	__@scratchBase + 3
-  REP	#$20
-  LDA	__@scratchBase + 0
-  STA	__@scratchBase + 0
-  REP	#$20
-  LDA	__@scratchBase + 2
-  STA	__@scratchBase + 2
-  BNE	__IFNOT_77a1d5ba_fa10_4463_9d92_c0fb7ac252ef
-  JMP	__ITER__END__d7079aed_eebc_4c0e_a011_7cfc22804ca0
-  __IFNOT_77a1d5ba_fa10_4463_9d92_c0fb7ac252ef:
+  BNE	__IFNOT_6984e0f9_f019_44f1_8992_9ec09f8456ed
+  JMP	__ITER__END__a44aa414_d099_4b9a_8bd6_6d09cfb4f924
+  __IFNOT_6984e0f9_f019_44f1_8992_9ec09f8456ed:
   REP	#$20
   LDA	__@specSubY + 0
   ASL
@@ -5291,9 +5133,9 @@ __div32by32:	; @func
   LDA	__div32by32@start + 2
   ROL
   STA	__div32by32@start + 2
-  JMP	__ITER__START__d7079aed_eebc_4c0e_a011_7cfc22804ca0
-  __ITER__END__d7079aed_eebc_4c0e_a011_7cfc22804ca0:
-  __ITER__START__64dad75e_f05c_4cc1_a29a_0f14f5bbdfb5:
+  JMP	__ITER__START__a44aa414_d099_4b9a_8bd6_6d09cfb4f924
+  __ITER__END__a44aa414_d099_4b9a_8bd6_6d09cfb4f924:
+  __ITER__START__c75e8621_997f_4ef0_a7be_41babbee5d87:
   SEP	#$10
   LDX	#$01
   REP	#$20
@@ -5309,30 +5151,30 @@ __div32by32:	; @func
   SEP	#$20
   CMP	#$00
   BNE	:+
-  JMP	__ITER__END__64dad75e_f05c_4cc1_a29a_0f14f5bbdfb5
+  JMP	__ITER__END__c75e8621_997f_4ef0_a7be_41babbee5d87
   :
   CLC
   REP	#$20
   REP	#$20
   LDA	__@specSubX + 2
   CMP	__@specSubY + 2
-  BCC	__CMP_NO_7c3a9277_64d5_4816_af26_094c193c5d80
-  BNE	__CMP_YES_7c3a9277_64d5_4816_af26_094c193c5d80
+  BCC	__CMP_NO_271175d7_479f_4663_9c7f_aeb437d296ec
+  BNE	__CMP_YES_271175d7_479f_4663_9c7f_aeb437d296ec
   REP	#$20
   LDA	__@specSubX + 0
   CMP	__@specSubY + 0
-  BCC	__CMP_NO_7c3a9277_64d5_4816_af26_094c193c5d80
-  BNE	__CMP_YES_7c3a9277_64d5_4816_af26_094c193c5d80
-  JMP	__CMP_YES_7c3a9277_64d5_4816_af26_094c193c5d80
-  __CMP_YES_7c3a9277_64d5_4816_af26_094c193c5d80:
+  BCC	__CMP_NO_271175d7_479f_4663_9c7f_aeb437d296ec
+  BNE	__CMP_YES_271175d7_479f_4663_9c7f_aeb437d296ec
+  JMP	__CMP_YES_271175d7_479f_4663_9c7f_aeb437d296ec
+  __CMP_YES_271175d7_479f_4663_9c7f_aeb437d296ec:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_7c3a9277_64d5_4816_af26_094c193c5d80
-  __CMP_NO_7c3a9277_64d5_4816_af26_094c193c5d80:
+  BRA	__CMP_END_271175d7_479f_4663_9c7f_aeb437d296ec
+  __CMP_NO_271175d7_479f_4663_9c7f_aeb437d296ec:
   SEP	#$20
   LDA	#$00
-  __CMP_END_7c3a9277_64d5_4816_af26_094c193c5d80:
-  BEQ	__IFNOT_58fb465d_5393_49b9_a489_431d4c8df806
+  __CMP_END_271175d7_479f_4663_9c7f_aeb437d296ec:
+  BEQ	__IFNOT_6db0844b_e7c2_429a_81a0_5d31832f06cd
   SEC
   REP	#$20
   LDA	__@specSubX + 0
@@ -5351,7 +5193,7 @@ __div32by32:	; @func
   LDA	__div32by32@ret + 2
   ADC	__div32by32@start + 2
   STA	__div32by32@ret + 2
-  __IFNOT_58fb465d_5393_49b9_a489_431d4c8df806:
+  __IFNOT_6db0844b_e7c2_429a_81a0_5d31832f06cd:
   REP	#$20
   LDA	__@specSubY + 2
   LSR
@@ -5366,8 +5208,8 @@ __div32by32:	; @func
   LDA	__div32by32@start + 0
   ROR
   STA	__div32by32@start + 0
-  JMP	__ITER__START__64dad75e_f05c_4cc1_a29a_0f14f5bbdfb5
-  __ITER__END__64dad75e_f05c_4cc1_a29a_0f14f5bbdfb5:
+  JMP	__ITER__START__c75e8621_997f_4ef0_a7be_41babbee5d87
+  __ITER__END__c75e8621_997f_4ef0_a7be_41babbee5d87:
   REP	#$20
   LDA	__div32by32@ret + 0
   STA	__@callResult + 0
@@ -5388,77 +5230,65 @@ __div64by32:	; @func
   STA	__div64by32@start + 0
   LDA	#$0000
   STA	__div64by32@start + 2
-  __ITER__START__31096882_b781_46a1_a675_88b15cdaa035:
+  __ITER__START__d159e0d2_f476_4d92_ac58_4e150c933f27:
   CLC
   REP	#$20
   LDA	#$0000
   STA	__@signExtend
   LDA	__@specSubX + 6
   CMP	__@signExtend
-  BCC	__CMP_NO_46da6bcb_a7e4_4831_8a15_3934344c99fd
-  BNE	__CMP_YES_46da6bcb_a7e4_4831_8a15_3934344c99fd
+  BCC	__CMP_NO_525095e8_ecc3_460a_bb94_df0e5812c14f
+  BNE	__CMP_YES_525095e8_ecc3_460a_bb94_df0e5812c14f
   LDA	__@specSubX + 4
   CMP	__@signExtend
-  BCC	__CMP_NO_46da6bcb_a7e4_4831_8a15_3934344c99fd
-  BNE	__CMP_YES_46da6bcb_a7e4_4831_8a15_3934344c99fd
+  BCC	__CMP_NO_525095e8_ecc3_460a_bb94_df0e5812c14f
+  BNE	__CMP_YES_525095e8_ecc3_460a_bb94_df0e5812c14f
   LDA	__@specSubX + 2
   CMP	__@specSubY + 2
-  BCC	__CMP_NO_46da6bcb_a7e4_4831_8a15_3934344c99fd
-  BNE	__CMP_YES_46da6bcb_a7e4_4831_8a15_3934344c99fd
+  BCC	__CMP_NO_525095e8_ecc3_460a_bb94_df0e5812c14f
+  BNE	__CMP_YES_525095e8_ecc3_460a_bb94_df0e5812c14f
   LDA	__@specSubX + 0
   CMP	__@specSubY + 0
-  BCC	__CMP_NO_46da6bcb_a7e4_4831_8a15_3934344c99fd
-  BNE	__CMP_YES_46da6bcb_a7e4_4831_8a15_3934344c99fd
-  JMP	__CMP_NO_46da6bcb_a7e4_4831_8a15_3934344c99fd
-  __CMP_YES_46da6bcb_a7e4_4831_8a15_3934344c99fd:
+  BCC	__CMP_NO_525095e8_ecc3_460a_bb94_df0e5812c14f
+  BNE	__CMP_YES_525095e8_ecc3_460a_bb94_df0e5812c14f
+  JMP	__CMP_NO_525095e8_ecc3_460a_bb94_df0e5812c14f
+  __CMP_YES_525095e8_ecc3_460a_bb94_df0e5812c14f:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_46da6bcb_a7e4_4831_8a15_3934344c99fd
-  __CMP_NO_46da6bcb_a7e4_4831_8a15_3934344c99fd:
+  BRA	__CMP_END_525095e8_ecc3_460a_bb94_df0e5812c14f
+  __CMP_NO_525095e8_ecc3_460a_bb94_df0e5812c14f:
   SEP	#$20
   LDA	#$00
-  __CMP_END_46da6bcb_a7e4_4831_8a15_3934344c99fd:
+  __CMP_END_525095e8_ecc3_460a_bb94_df0e5812c14f:
   SEP	#$20
   CMP	#$00
   BNE	:+
-  JMP	__ITER__END__31096882_b781_46a1_a675_88b15cdaa035
+  JMP	__ITER__END__d159e0d2_f476_4d92_ac58_4e150c933f27
   :
   
   REP	#$20
   LDA	#$0000
   AND	__@specSubY + 0
-  STA	__@scratchBase + 4
+  STA	__@scratchBase + 0
   REP	#$20
   LDA	#$8000
   AND	__@specSubY + 2
-  STA	__@scratchBase + 6
+  STA	__@scratchBase + 2
   SEP	#$10
   LDX	#$00
   REP	#$20
-  LDA	__@scratchBase + 4
+  LDA	__@scratchBase + 0
   CMP	#$0000
   BNE	:+
   REP	#$20
-  LDA	__@scratchBase + 6
+  LDA	__@scratchBase + 2
   CMP	#$0000
   BNE	:+
   INX
 : TXA
-  SEP	#$20
-  STA	__@scratchBase + 0
-  LDA	#$00
-  STA	__@scratchBase + 1
-  STA	__@scratchBase + 2
-  STA	__@scratchBase + 3
-  REP	#$20
-  LDA	__@scratchBase + 0
-  STA	__@scratchBase + 0
-  REP	#$20
-  LDA	__@scratchBase + 2
-  STA	__@scratchBase + 2
-  BNE	__IFNOT_568b84dc_8bd7_4779_820f_9bd975a1b0d6
-  JMP	__ITER__END__31096882_b781_46a1_a675_88b15cdaa035
-  __IFNOT_568b84dc_8bd7_4779_820f_9bd975a1b0d6:
+  BNE	__IFNOT_b565b010_2a31_4f86_9761_190586344fba
+  JMP	__ITER__END__d159e0d2_f476_4d92_ac58_4e150c933f27
+  __IFNOT_b565b010_2a31_4f86_9761_190586344fba:
   REP	#$20
   LDA	__@specSubY + 0
   ASL
@@ -5475,9 +5305,9 @@ __div64by32:	; @func
   LDA	__div64by32@start + 2
   ROL
   STA	__div64by32@start + 2
-  JMP	__ITER__START__31096882_b781_46a1_a675_88b15cdaa035
-  __ITER__END__31096882_b781_46a1_a675_88b15cdaa035:
-  __ITER__START__29001e6f_0b52_4e6e_92aa_4b3f3ba788f7:
+  JMP	__ITER__START__d159e0d2_f476_4d92_ac58_4e150c933f27
+  __ITER__END__d159e0d2_f476_4d92_ac58_4e150c933f27:
+  __ITER__START__c2789258_274f_4aa3_83ff_000f3cbf551b:
   SEP	#$10
   LDX	#$01
   REP	#$20
@@ -5493,7 +5323,7 @@ __div64by32:	; @func
   SEP	#$20
   CMP	#$00
   BNE	:+
-  JMP	__ITER__END__29001e6f_0b52_4e6e_92aa_4b3f3ba788f7
+  JMP	__ITER__END__c2789258_274f_4aa3_83ff_000f3cbf551b
   :
   CLC
   REP	#$20
@@ -5501,30 +5331,30 @@ __div64by32:	; @func
   STA	__@signExtend
   LDA	__@specSubX + 6
   CMP	__@signExtend
-  BCC	__CMP_NO_e282a179_ab2f_49f2_910a_c81408be45e5
-  BNE	__CMP_YES_e282a179_ab2f_49f2_910a_c81408be45e5
+  BCC	__CMP_NO_e8551cee_5655_4931_8952_7545e402e6c6
+  BNE	__CMP_YES_e8551cee_5655_4931_8952_7545e402e6c6
   LDA	__@specSubX + 4
   CMP	__@signExtend
-  BCC	__CMP_NO_e282a179_ab2f_49f2_910a_c81408be45e5
-  BNE	__CMP_YES_e282a179_ab2f_49f2_910a_c81408be45e5
+  BCC	__CMP_NO_e8551cee_5655_4931_8952_7545e402e6c6
+  BNE	__CMP_YES_e8551cee_5655_4931_8952_7545e402e6c6
   LDA	__@specSubX + 2
   CMP	__@specSubY + 2
-  BCC	__CMP_NO_e282a179_ab2f_49f2_910a_c81408be45e5
-  BNE	__CMP_YES_e282a179_ab2f_49f2_910a_c81408be45e5
+  BCC	__CMP_NO_e8551cee_5655_4931_8952_7545e402e6c6
+  BNE	__CMP_YES_e8551cee_5655_4931_8952_7545e402e6c6
   LDA	__@specSubX + 0
   CMP	__@specSubY + 0
-  BCC	__CMP_NO_e282a179_ab2f_49f2_910a_c81408be45e5
-  BNE	__CMP_YES_e282a179_ab2f_49f2_910a_c81408be45e5
-  JMP	__CMP_YES_e282a179_ab2f_49f2_910a_c81408be45e5
-  __CMP_YES_e282a179_ab2f_49f2_910a_c81408be45e5:
+  BCC	__CMP_NO_e8551cee_5655_4931_8952_7545e402e6c6
+  BNE	__CMP_YES_e8551cee_5655_4931_8952_7545e402e6c6
+  JMP	__CMP_YES_e8551cee_5655_4931_8952_7545e402e6c6
+  __CMP_YES_e8551cee_5655_4931_8952_7545e402e6c6:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_e282a179_ab2f_49f2_910a_c81408be45e5
-  __CMP_NO_e282a179_ab2f_49f2_910a_c81408be45e5:
+  BRA	__CMP_END_e8551cee_5655_4931_8952_7545e402e6c6
+  __CMP_NO_e8551cee_5655_4931_8952_7545e402e6c6:
   SEP	#$20
   LDA	#$00
-  __CMP_END_e282a179_ab2f_49f2_910a_c81408be45e5:
-  BEQ	__IFNOT_7a5db5cd_a0a9_40f8_a1ad_38049b7871fe
+  __CMP_END_e8551cee_5655_4931_8952_7545e402e6c6:
+  BEQ	__IFNOT_ece4d981_6c5b_49ce_8c2f_d2e569efb389
   REP	#$20
   LDA	#$0000
   STA	__@signExtend
@@ -5553,7 +5383,7 @@ __div64by32:	; @func
   LDA	__div64by32@ret + 2
   ADC	__div64by32@start + 2
   STA	__div64by32@ret + 2
-  __IFNOT_7a5db5cd_a0a9_40f8_a1ad_38049b7871fe:
+  __IFNOT_ece4d981_6c5b_49ce_8c2f_d2e569efb389:
   REP	#$20
   LDA	__@specSubY + 2
   LSR
@@ -5568,8 +5398,8 @@ __div64by32:	; @func
   LDA	__div64by32@start + 0
   ROR
   STA	__div64by32@start + 0
-  JMP	__ITER__START__29001e6f_0b52_4e6e_92aa_4b3f3ba788f7
-  __ITER__END__29001e6f_0b52_4e6e_92aa_4b3f3ba788f7:
+  JMP	__ITER__START__c2789258_274f_4aa3_83ff_000f3cbf551b
+  __ITER__END__c2789258_274f_4aa3_83ff_000f3cbf551b:
   REP	#$20
   LDA	__div64by32@ret + 0
   STA	__@callResult + 0
@@ -5599,109 +5429,87 @@ __div8by64:	; @func
   SEP	#$20
   LDA	#$00
   STA	__div8by64@start + 2
-  __ITER__START__7ebefbee_ccb5_4549_a8f0_d9a3876a2c3d:
+  __ITER__START__12e03761_5a08_419b_b1ff_8e751bff4be5:
   CLC
   REP	#$20
   LDA	#$0000
   STA	__@signExtend
   LDA	__@signExtend
   CMP	__@specSubY + 6
-  BCC	__CMP_NO_6168d8f6_171e_48b1_acac_a999bce48039
-  BNE	__CMP_YES_6168d8f6_171e_48b1_acac_a999bce48039
+  BCC	__CMP_NO_5d886386_1574_4083_b0c5_04dc85971609
+  BNE	__CMP_YES_5d886386_1574_4083_b0c5_04dc85971609
   LDA	__@signExtend
   CMP	__@specSubY + 4
-  BCC	__CMP_NO_6168d8f6_171e_48b1_acac_a999bce48039
-  BNE	__CMP_YES_6168d8f6_171e_48b1_acac_a999bce48039
+  BCC	__CMP_NO_5d886386_1574_4083_b0c5_04dc85971609
+  BNE	__CMP_YES_5d886386_1574_4083_b0c5_04dc85971609
   LDA	__@signExtend
   CMP	__@specSubY + 2
-  BCC	__CMP_NO_6168d8f6_171e_48b1_acac_a999bce48039
-  BNE	__CMP_YES_6168d8f6_171e_48b1_acac_a999bce48039
+  BCC	__CMP_NO_5d886386_1574_4083_b0c5_04dc85971609
+  BNE	__CMP_YES_5d886386_1574_4083_b0c5_04dc85971609
   SEP	#$20
   LDA	__@signExtend
   CMP	__@specSubY + 1
-  BCC	__CMP_NO_6168d8f6_171e_48b1_acac_a999bce48039
-  BNE	__CMP_YES_6168d8f6_171e_48b1_acac_a999bce48039
+  BCC	__CMP_NO_5d886386_1574_4083_b0c5_04dc85971609
+  BNE	__CMP_YES_5d886386_1574_4083_b0c5_04dc85971609
   SEP	#$20
   LDA	__@specSubX + 0
   CMP	__@specSubY + 0
-  BCC	__CMP_NO_6168d8f6_171e_48b1_acac_a999bce48039
-  BNE	__CMP_YES_6168d8f6_171e_48b1_acac_a999bce48039
-  JMP	__CMP_NO_6168d8f6_171e_48b1_acac_a999bce48039
-  __CMP_YES_6168d8f6_171e_48b1_acac_a999bce48039:
+  BCC	__CMP_NO_5d886386_1574_4083_b0c5_04dc85971609
+  BNE	__CMP_YES_5d886386_1574_4083_b0c5_04dc85971609
+  JMP	__CMP_NO_5d886386_1574_4083_b0c5_04dc85971609
+  __CMP_YES_5d886386_1574_4083_b0c5_04dc85971609:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_6168d8f6_171e_48b1_acac_a999bce48039
-  __CMP_NO_6168d8f6_171e_48b1_acac_a999bce48039:
+  BRA	__CMP_END_5d886386_1574_4083_b0c5_04dc85971609
+  __CMP_NO_5d886386_1574_4083_b0c5_04dc85971609:
   SEP	#$20
   LDA	#$00
-  __CMP_END_6168d8f6_171e_48b1_acac_a999bce48039:
+  __CMP_END_5d886386_1574_4083_b0c5_04dc85971609:
   SEP	#$20
   CMP	#$00
   BNE	:+
-  JMP	__ITER__END__7ebefbee_ccb5_4549_a8f0_d9a3876a2c3d
+  JMP	__ITER__END__12e03761_5a08_419b_b1ff_8e751bff4be5
   :
   
   REP	#$20
   LDA	#$0000
   AND	__@specSubY + 0
-  STA	__@scratchBase + 8
+  STA	__@scratchBase + 0
   REP	#$20
   LDA	#$8000
   AND	__@specSubY + 2
-  STA	__@scratchBase + 10
+  STA	__@scratchBase + 2
   REP	#$20
   LDA	#$0000
   AND	__@specSubY + 4
-  STA	__@scratchBase + 12
+  STA	__@scratchBase + 4
   REP	#$20
   LDA	#$0000
   AND	__@specSubY + 6
-  STA	__@scratchBase + 14
+  STA	__@scratchBase + 6
   SEP	#$10
   LDX	#$00
   REP	#$20
-  LDA	__@scratchBase + 8
+  LDA	__@scratchBase + 0
   CMP	#$0000
   BNE	:+
   REP	#$20
-  LDA	__@scratchBase + 10
+  LDA	__@scratchBase + 2
   CMP	#$0000
   BNE	:+
   REP	#$20
-  LDA	__@scratchBase + 12
+  LDA	__@scratchBase + 4
   CMP	#$0000
   BNE	:+
   REP	#$20
-  LDA	__@scratchBase + 14
+  LDA	__@scratchBase + 6
   CMP	#$0000
   BNE	:+
   INX
 : TXA
-  SEP	#$20
-  STA	__@scratchBase + 0
-  LDA	#$00
-  STA	__@scratchBase + 1
-  STA	__@scratchBase + 2
-  STA	__@scratchBase + 3
-  STA	__@scratchBase + 4
-  STA	__@scratchBase + 5
-  STA	__@scratchBase + 6
-  STA	__@scratchBase + 7
-  REP	#$20
-  LDA	__@scratchBase + 0
-  STA	__@scratchBase + 0
-  REP	#$20
-  LDA	__@scratchBase + 2
-  STA	__@scratchBase + 2
-  REP	#$20
-  LDA	__@scratchBase + 4
-  STA	__@scratchBase + 4
-  REP	#$20
-  LDA	__@scratchBase + 6
-  STA	__@scratchBase + 6
-  BNE	__IFNOT_4aa62108_400f_4e87_9087_e7241cb4cb6e
-  JMP	__ITER__END__7ebefbee_ccb5_4549_a8f0_d9a3876a2c3d
-  __IFNOT_4aa62108_400f_4e87_9087_e7241cb4cb6e:
+  BNE	__IFNOT_0aa0afdf_3e1b_4a17_a051_91edc3ac80c1
+  JMP	__ITER__END__12e03761_5a08_419b_b1ff_8e751bff4be5
+  __IFNOT_0aa0afdf_3e1b_4a17_a051_91edc3ac80c1:
   REP	#$20
   LDA	__@specSubY + 0
   ASL
@@ -5726,9 +5534,9 @@ __div8by64:	; @func
   LDA	__div8by64@start + 2
   ROL
   STA	__div8by64@start + 2
-  JMP	__ITER__START__7ebefbee_ccb5_4549_a8f0_d9a3876a2c3d
-  __ITER__END__7ebefbee_ccb5_4549_a8f0_d9a3876a2c3d:
-  __ITER__START__bf2e60c8_c753_43fa_907c_92faf7cccbca:
+  JMP	__ITER__START__12e03761_5a08_419b_b1ff_8e751bff4be5
+  __ITER__END__12e03761_5a08_419b_b1ff_8e751bff4be5:
+  __ITER__START__f8f62d4d_614e_4892_9719_6ac1ecb6e54a:
   SEP	#$10
   LDX	#$01
   REP	#$20
@@ -5744,7 +5552,7 @@ __div8by64:	; @func
   SEP	#$20
   CMP	#$00
   BNE	:+
-  JMP	__ITER__END__bf2e60c8_c753_43fa_907c_92faf7cccbca
+  JMP	__ITER__END__f8f62d4d_614e_4892_9719_6ac1ecb6e54a
   :
   CLC
   REP	#$20
@@ -5752,36 +5560,36 @@ __div8by64:	; @func
   STA	__@signExtend
   LDA	__@signExtend
   CMP	__@specSubY + 6
-  BCC	__CMP_NO_043daeee_8063_4367_aa45_acd04dc60330
-  BNE	__CMP_YES_043daeee_8063_4367_aa45_acd04dc60330
+  BCC	__CMP_NO_1092e13d_d43e_4b16_89a1_8c96637d7461
+  BNE	__CMP_YES_1092e13d_d43e_4b16_89a1_8c96637d7461
   LDA	__@signExtend
   CMP	__@specSubY + 4
-  BCC	__CMP_NO_043daeee_8063_4367_aa45_acd04dc60330
-  BNE	__CMP_YES_043daeee_8063_4367_aa45_acd04dc60330
+  BCC	__CMP_NO_1092e13d_d43e_4b16_89a1_8c96637d7461
+  BNE	__CMP_YES_1092e13d_d43e_4b16_89a1_8c96637d7461
   LDA	__@signExtend
   CMP	__@specSubY + 2
-  BCC	__CMP_NO_043daeee_8063_4367_aa45_acd04dc60330
-  BNE	__CMP_YES_043daeee_8063_4367_aa45_acd04dc60330
+  BCC	__CMP_NO_1092e13d_d43e_4b16_89a1_8c96637d7461
+  BNE	__CMP_YES_1092e13d_d43e_4b16_89a1_8c96637d7461
   SEP	#$20
   LDA	__@signExtend
   CMP	__@specSubY + 1
-  BCC	__CMP_NO_043daeee_8063_4367_aa45_acd04dc60330
-  BNE	__CMP_YES_043daeee_8063_4367_aa45_acd04dc60330
+  BCC	__CMP_NO_1092e13d_d43e_4b16_89a1_8c96637d7461
+  BNE	__CMP_YES_1092e13d_d43e_4b16_89a1_8c96637d7461
   SEP	#$20
   LDA	__@specSubX + 0
   CMP	__@specSubY + 0
-  BCC	__CMP_NO_043daeee_8063_4367_aa45_acd04dc60330
-  BNE	__CMP_YES_043daeee_8063_4367_aa45_acd04dc60330
-  JMP	__CMP_YES_043daeee_8063_4367_aa45_acd04dc60330
-  __CMP_YES_043daeee_8063_4367_aa45_acd04dc60330:
+  BCC	__CMP_NO_1092e13d_d43e_4b16_89a1_8c96637d7461
+  BNE	__CMP_YES_1092e13d_d43e_4b16_89a1_8c96637d7461
+  JMP	__CMP_YES_1092e13d_d43e_4b16_89a1_8c96637d7461
+  __CMP_YES_1092e13d_d43e_4b16_89a1_8c96637d7461:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_043daeee_8063_4367_aa45_acd04dc60330
-  __CMP_NO_043daeee_8063_4367_aa45_acd04dc60330:
+  BRA	__CMP_END_1092e13d_d43e_4b16_89a1_8c96637d7461
+  __CMP_NO_1092e13d_d43e_4b16_89a1_8c96637d7461:
   SEP	#$20
   LDA	#$00
-  __CMP_END_043daeee_8063_4367_aa45_acd04dc60330:
-  BEQ	__IFNOT_a5a5ea81_d272_4519_bbbc_7e09e81f2852
+  __CMP_END_1092e13d_d43e_4b16_89a1_8c96637d7461:
+  BEQ	__IFNOT_f179b147_df21_49ac_a51e_c2a716fbc8e7
   REP	#$20
   LDA	#$0000
   STA	__@signExtend
@@ -5799,7 +5607,7 @@ __div8by64:	; @func
   LDA	__div8by64@ret + 2
   ADC	__div8by64@start + 2
   STA	__div8by64@ret + 2
-  __IFNOT_a5a5ea81_d272_4519_bbbc_7e09e81f2852:
+  __IFNOT_f179b147_df21_49ac_a51e_c2a716fbc8e7:
   REP	#$20
   LDA	__@specSubY + 6
   LSR
@@ -5821,8 +5629,8 @@ __div8by64:	; @func
   LDA	__div8by64@start + 0
   ROR
   STA	__div8by64@start + 0
-  JMP	__ITER__START__bf2e60c8_c753_43fa_907c_92faf7cccbca
-  __ITER__END__bf2e60c8_c753_43fa_907c_92faf7cccbca:
+  JMP	__ITER__START__f8f62d4d_614e_4892_9719_6ac1ecb6e54a
+  __ITER__END__f8f62d4d_614e_4892_9719_6ac1ecb6e54a:
   REP	#$20
   LDA	__div8by64@ret + 0
   STA	__@callResult + 0
@@ -5846,103 +5654,81 @@ __div16by64:	; @func
   SEP	#$20
   LDA	#$00
   STA	__div16by64@start + 2
-  __ITER__START__5f351836_e500_4f72_a533_023a1c8a8e16:
+  __ITER__START__a24dce63_c740_4da7_8b4e_2fa4e575ed29:
   CLC
   REP	#$20
   LDA	#$0000
   STA	__@signExtend
   LDA	__@signExtend
   CMP	__@specSubY + 6
-  BCC	__CMP_NO_e0e3350a_48c4_419b_9c93_7cbc43bbf9e8
-  BNE	__CMP_YES_e0e3350a_48c4_419b_9c93_7cbc43bbf9e8
+  BCC	__CMP_NO_6020f8c4_8e67_49d2_93b9_e3e29bf87854
+  BNE	__CMP_YES_6020f8c4_8e67_49d2_93b9_e3e29bf87854
   LDA	__@signExtend
   CMP	__@specSubY + 4
-  BCC	__CMP_NO_e0e3350a_48c4_419b_9c93_7cbc43bbf9e8
-  BNE	__CMP_YES_e0e3350a_48c4_419b_9c93_7cbc43bbf9e8
+  BCC	__CMP_NO_6020f8c4_8e67_49d2_93b9_e3e29bf87854
+  BNE	__CMP_YES_6020f8c4_8e67_49d2_93b9_e3e29bf87854
   LDA	__@signExtend
   CMP	__@specSubY + 2
-  BCC	__CMP_NO_e0e3350a_48c4_419b_9c93_7cbc43bbf9e8
-  BNE	__CMP_YES_e0e3350a_48c4_419b_9c93_7cbc43bbf9e8
+  BCC	__CMP_NO_6020f8c4_8e67_49d2_93b9_e3e29bf87854
+  BNE	__CMP_YES_6020f8c4_8e67_49d2_93b9_e3e29bf87854
   LDA	__@specSubX + 0
   CMP	__@specSubY + 0
-  BCC	__CMP_NO_e0e3350a_48c4_419b_9c93_7cbc43bbf9e8
-  BNE	__CMP_YES_e0e3350a_48c4_419b_9c93_7cbc43bbf9e8
-  JMP	__CMP_NO_e0e3350a_48c4_419b_9c93_7cbc43bbf9e8
-  __CMP_YES_e0e3350a_48c4_419b_9c93_7cbc43bbf9e8:
+  BCC	__CMP_NO_6020f8c4_8e67_49d2_93b9_e3e29bf87854
+  BNE	__CMP_YES_6020f8c4_8e67_49d2_93b9_e3e29bf87854
+  JMP	__CMP_NO_6020f8c4_8e67_49d2_93b9_e3e29bf87854
+  __CMP_YES_6020f8c4_8e67_49d2_93b9_e3e29bf87854:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_e0e3350a_48c4_419b_9c93_7cbc43bbf9e8
-  __CMP_NO_e0e3350a_48c4_419b_9c93_7cbc43bbf9e8:
+  BRA	__CMP_END_6020f8c4_8e67_49d2_93b9_e3e29bf87854
+  __CMP_NO_6020f8c4_8e67_49d2_93b9_e3e29bf87854:
   SEP	#$20
   LDA	#$00
-  __CMP_END_e0e3350a_48c4_419b_9c93_7cbc43bbf9e8:
+  __CMP_END_6020f8c4_8e67_49d2_93b9_e3e29bf87854:
   SEP	#$20
   CMP	#$00
   BNE	:+
-  JMP	__ITER__END__5f351836_e500_4f72_a533_023a1c8a8e16
+  JMP	__ITER__END__a24dce63_c740_4da7_8b4e_2fa4e575ed29
   :
   
   REP	#$20
   LDA	#$0000
   AND	__@specSubY + 0
-  STA	__@scratchBase + 8
+  STA	__@scratchBase + 0
   REP	#$20
   LDA	#$8000
   AND	__@specSubY + 2
-  STA	__@scratchBase + 10
+  STA	__@scratchBase + 2
   REP	#$20
   LDA	#$0000
   AND	__@specSubY + 4
-  STA	__@scratchBase + 12
+  STA	__@scratchBase + 4
   REP	#$20
   LDA	#$0000
   AND	__@specSubY + 6
-  STA	__@scratchBase + 14
+  STA	__@scratchBase + 6
   SEP	#$10
   LDX	#$00
   REP	#$20
-  LDA	__@scratchBase + 8
+  LDA	__@scratchBase + 0
   CMP	#$0000
   BNE	:+
   REP	#$20
-  LDA	__@scratchBase + 10
+  LDA	__@scratchBase + 2
   CMP	#$0000
   BNE	:+
   REP	#$20
-  LDA	__@scratchBase + 12
+  LDA	__@scratchBase + 4
   CMP	#$0000
   BNE	:+
   REP	#$20
-  LDA	__@scratchBase + 14
+  LDA	__@scratchBase + 6
   CMP	#$0000
   BNE	:+
   INX
 : TXA
-  SEP	#$20
-  STA	__@scratchBase + 0
-  LDA	#$00
-  STA	__@scratchBase + 1
-  STA	__@scratchBase + 2
-  STA	__@scratchBase + 3
-  STA	__@scratchBase + 4
-  STA	__@scratchBase + 5
-  STA	__@scratchBase + 6
-  STA	__@scratchBase + 7
-  REP	#$20
-  LDA	__@scratchBase + 0
-  STA	__@scratchBase + 0
-  REP	#$20
-  LDA	__@scratchBase + 2
-  STA	__@scratchBase + 2
-  REP	#$20
-  LDA	__@scratchBase + 4
-  STA	__@scratchBase + 4
-  REP	#$20
-  LDA	__@scratchBase + 6
-  STA	__@scratchBase + 6
-  BNE	__IFNOT_943f9e73_d26a_42cd_b53f_4c84cd6d97ea
-  JMP	__ITER__END__5f351836_e500_4f72_a533_023a1c8a8e16
-  __IFNOT_943f9e73_d26a_42cd_b53f_4c84cd6d97ea:
+  BNE	__IFNOT_a72563a5_bd23_47b8_833a_d627670430d9
+  JMP	__ITER__END__a24dce63_c740_4da7_8b4e_2fa4e575ed29
+  __IFNOT_a72563a5_bd23_47b8_833a_d627670430d9:
   REP	#$20
   LDA	__@specSubY + 0
   ASL
@@ -5967,9 +5753,9 @@ __div16by64:	; @func
   LDA	__div16by64@start + 2
   ROL
   STA	__div16by64@start + 2
-  JMP	__ITER__START__5f351836_e500_4f72_a533_023a1c8a8e16
-  __ITER__END__5f351836_e500_4f72_a533_023a1c8a8e16:
-  __ITER__START__522b072d_ae0f_4579_988a_48fe599c4fc3:
+  JMP	__ITER__START__a24dce63_c740_4da7_8b4e_2fa4e575ed29
+  __ITER__END__a24dce63_c740_4da7_8b4e_2fa4e575ed29:
+  __ITER__START__637b2c26_a7d1_424a_87db_eac3e3f51efb:
   SEP	#$10
   LDX	#$01
   REP	#$20
@@ -5985,7 +5771,7 @@ __div16by64:	; @func
   SEP	#$20
   CMP	#$00
   BNE	:+
-  JMP	__ITER__END__522b072d_ae0f_4579_988a_48fe599c4fc3
+  JMP	__ITER__END__637b2c26_a7d1_424a_87db_eac3e3f51efb
   :
   CLC
   REP	#$20
@@ -5993,30 +5779,30 @@ __div16by64:	; @func
   STA	__@signExtend
   LDA	__@signExtend
   CMP	__@specSubY + 6
-  BCC	__CMP_NO_3121bd57_6237_4588_b689_f251a09f4c48
-  BNE	__CMP_YES_3121bd57_6237_4588_b689_f251a09f4c48
+  BCC	__CMP_NO_1f777696_20d9_4a06_bc92_066cbc33f247
+  BNE	__CMP_YES_1f777696_20d9_4a06_bc92_066cbc33f247
   LDA	__@signExtend
   CMP	__@specSubY + 4
-  BCC	__CMP_NO_3121bd57_6237_4588_b689_f251a09f4c48
-  BNE	__CMP_YES_3121bd57_6237_4588_b689_f251a09f4c48
+  BCC	__CMP_NO_1f777696_20d9_4a06_bc92_066cbc33f247
+  BNE	__CMP_YES_1f777696_20d9_4a06_bc92_066cbc33f247
   LDA	__@signExtend
   CMP	__@specSubY + 2
-  BCC	__CMP_NO_3121bd57_6237_4588_b689_f251a09f4c48
-  BNE	__CMP_YES_3121bd57_6237_4588_b689_f251a09f4c48
+  BCC	__CMP_NO_1f777696_20d9_4a06_bc92_066cbc33f247
+  BNE	__CMP_YES_1f777696_20d9_4a06_bc92_066cbc33f247
   LDA	__@specSubX + 0
   CMP	__@specSubY + 0
-  BCC	__CMP_NO_3121bd57_6237_4588_b689_f251a09f4c48
-  BNE	__CMP_YES_3121bd57_6237_4588_b689_f251a09f4c48
-  JMP	__CMP_YES_3121bd57_6237_4588_b689_f251a09f4c48
-  __CMP_YES_3121bd57_6237_4588_b689_f251a09f4c48:
+  BCC	__CMP_NO_1f777696_20d9_4a06_bc92_066cbc33f247
+  BNE	__CMP_YES_1f777696_20d9_4a06_bc92_066cbc33f247
+  JMP	__CMP_YES_1f777696_20d9_4a06_bc92_066cbc33f247
+  __CMP_YES_1f777696_20d9_4a06_bc92_066cbc33f247:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_3121bd57_6237_4588_b689_f251a09f4c48
-  __CMP_NO_3121bd57_6237_4588_b689_f251a09f4c48:
+  BRA	__CMP_END_1f777696_20d9_4a06_bc92_066cbc33f247
+  __CMP_NO_1f777696_20d9_4a06_bc92_066cbc33f247:
   SEP	#$20
   LDA	#$00
-  __CMP_END_3121bd57_6237_4588_b689_f251a09f4c48:
-  BEQ	__IFNOT_cbfe933f_b228_437b_bbc5_cea40e695e17
+  __CMP_END_1f777696_20d9_4a06_bc92_066cbc33f247:
+  BEQ	__IFNOT_50441b4b_a6c1_4166_9c3f_bb1feb6fe7e0
   REP	#$20
   LDA	#$0000
   STA	__@signExtend
@@ -6033,7 +5819,7 @@ __div16by64:	; @func
   LDA	__div16by64@ret + 2
   ADC	__div16by64@start + 2
   STA	__div16by64@ret + 2
-  __IFNOT_cbfe933f_b228_437b_bbc5_cea40e695e17:
+  __IFNOT_50441b4b_a6c1_4166_9c3f_bb1feb6fe7e0:
   REP	#$20
   LDA	__@specSubY + 6
   LSR
@@ -6055,8 +5841,8 @@ __div16by64:	; @func
   LDA	__div16by64@start + 0
   ROR
   STA	__div16by64@start + 0
-  JMP	__ITER__START__522b072d_ae0f_4579_988a_48fe599c4fc3
-  __ITER__END__522b072d_ae0f_4579_988a_48fe599c4fc3:
+  JMP	__ITER__START__637b2c26_a7d1_424a_87db_eac3e3f51efb
+  __ITER__END__637b2c26_a7d1_424a_87db_eac3e3f51efb:
   REP	#$20
   LDA	__div16by64@ret + 0
   STA	__@callResult + 0
@@ -6080,109 +5866,87 @@ __div24by64:	; @func
   SEP	#$20
   LDA	#$00
   STA	__div24by64@start + 2
-  __ITER__START__139c93f2_71ce_4bb3_992e_a4021274f783:
+  __ITER__START__8516e6db_e483_4814_b4a1_184b527521b4:
   CLC
   REP	#$20
   LDA	#$0000
   STA	__@signExtend
   LDA	__@signExtend
   CMP	__@specSubY + 6
-  BCC	__CMP_NO_ba06f98b_f727_4603_ba88_8f682b61b85b
-  BNE	__CMP_YES_ba06f98b_f727_4603_ba88_8f682b61b85b
+  BCC	__CMP_NO_ace6a1a9_749b_47eb_b0c6_82c92a41b1ca
+  BNE	__CMP_YES_ace6a1a9_749b_47eb_b0c6_82c92a41b1ca
   LDA	__@signExtend
   CMP	__@specSubY + 4
-  BCC	__CMP_NO_ba06f98b_f727_4603_ba88_8f682b61b85b
-  BNE	__CMP_YES_ba06f98b_f727_4603_ba88_8f682b61b85b
+  BCC	__CMP_NO_ace6a1a9_749b_47eb_b0c6_82c92a41b1ca
+  BNE	__CMP_YES_ace6a1a9_749b_47eb_b0c6_82c92a41b1ca
   SEP	#$20
   LDA	__@signExtend
   CMP	__@specSubY + 3
-  BCC	__CMP_NO_ba06f98b_f727_4603_ba88_8f682b61b85b
-  BNE	__CMP_YES_ba06f98b_f727_4603_ba88_8f682b61b85b
+  BCC	__CMP_NO_ace6a1a9_749b_47eb_b0c6_82c92a41b1ca
+  BNE	__CMP_YES_ace6a1a9_749b_47eb_b0c6_82c92a41b1ca
   LDA	__@specSubX + 1
   CMP	__@specSubY + 1
-  BCC	__CMP_NO_ba06f98b_f727_4603_ba88_8f682b61b85b
-  BNE	__CMP_YES_ba06f98b_f727_4603_ba88_8f682b61b85b
+  BCC	__CMP_NO_ace6a1a9_749b_47eb_b0c6_82c92a41b1ca
+  BNE	__CMP_YES_ace6a1a9_749b_47eb_b0c6_82c92a41b1ca
   SEP	#$20
   LDA	__@specSubX + 0
   CMP	__@specSubY + 0
-  BCC	__CMP_NO_ba06f98b_f727_4603_ba88_8f682b61b85b
-  BNE	__CMP_YES_ba06f98b_f727_4603_ba88_8f682b61b85b
-  JMP	__CMP_NO_ba06f98b_f727_4603_ba88_8f682b61b85b
-  __CMP_YES_ba06f98b_f727_4603_ba88_8f682b61b85b:
+  BCC	__CMP_NO_ace6a1a9_749b_47eb_b0c6_82c92a41b1ca
+  BNE	__CMP_YES_ace6a1a9_749b_47eb_b0c6_82c92a41b1ca
+  JMP	__CMP_NO_ace6a1a9_749b_47eb_b0c6_82c92a41b1ca
+  __CMP_YES_ace6a1a9_749b_47eb_b0c6_82c92a41b1ca:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_ba06f98b_f727_4603_ba88_8f682b61b85b
-  __CMP_NO_ba06f98b_f727_4603_ba88_8f682b61b85b:
+  BRA	__CMP_END_ace6a1a9_749b_47eb_b0c6_82c92a41b1ca
+  __CMP_NO_ace6a1a9_749b_47eb_b0c6_82c92a41b1ca:
   SEP	#$20
   LDA	#$00
-  __CMP_END_ba06f98b_f727_4603_ba88_8f682b61b85b:
+  __CMP_END_ace6a1a9_749b_47eb_b0c6_82c92a41b1ca:
   SEP	#$20
   CMP	#$00
   BNE	:+
-  JMP	__ITER__END__139c93f2_71ce_4bb3_992e_a4021274f783
+  JMP	__ITER__END__8516e6db_e483_4814_b4a1_184b527521b4
   :
   
   REP	#$20
   LDA	#$0000
   AND	__@specSubY + 0
-  STA	__@scratchBase + 8
+  STA	__@scratchBase + 0
   REP	#$20
   LDA	#$8000
   AND	__@specSubY + 2
-  STA	__@scratchBase + 10
+  STA	__@scratchBase + 2
   REP	#$20
   LDA	#$0000
   AND	__@specSubY + 4
-  STA	__@scratchBase + 12
+  STA	__@scratchBase + 4
   REP	#$20
   LDA	#$0000
   AND	__@specSubY + 6
-  STA	__@scratchBase + 14
+  STA	__@scratchBase + 6
   SEP	#$10
   LDX	#$00
   REP	#$20
-  LDA	__@scratchBase + 8
+  LDA	__@scratchBase + 0
   CMP	#$0000
   BNE	:+
   REP	#$20
-  LDA	__@scratchBase + 10
+  LDA	__@scratchBase + 2
   CMP	#$0000
   BNE	:+
   REP	#$20
-  LDA	__@scratchBase + 12
+  LDA	__@scratchBase + 4
   CMP	#$0000
   BNE	:+
   REP	#$20
-  LDA	__@scratchBase + 14
+  LDA	__@scratchBase + 6
   CMP	#$0000
   BNE	:+
   INX
 : TXA
-  SEP	#$20
-  STA	__@scratchBase + 0
-  LDA	#$00
-  STA	__@scratchBase + 1
-  STA	__@scratchBase + 2
-  STA	__@scratchBase + 3
-  STA	__@scratchBase + 4
-  STA	__@scratchBase + 5
-  STA	__@scratchBase + 6
-  STA	__@scratchBase + 7
-  REP	#$20
-  LDA	__@scratchBase + 0
-  STA	__@scratchBase + 0
-  REP	#$20
-  LDA	__@scratchBase + 2
-  STA	__@scratchBase + 2
-  REP	#$20
-  LDA	__@scratchBase + 4
-  STA	__@scratchBase + 4
-  REP	#$20
-  LDA	__@scratchBase + 6
-  STA	__@scratchBase + 6
-  BNE	__IFNOT_e68c9554_1665_4a67_a9fe_c18a4125fcb4
-  JMP	__ITER__END__139c93f2_71ce_4bb3_992e_a4021274f783
-  __IFNOT_e68c9554_1665_4a67_a9fe_c18a4125fcb4:
+  BNE	__IFNOT_5fe2535a_d8d4_4063_b824_df8a9910739a
+  JMP	__ITER__END__8516e6db_e483_4814_b4a1_184b527521b4
+  __IFNOT_5fe2535a_d8d4_4063_b824_df8a9910739a:
   REP	#$20
   LDA	__@specSubY + 0
   ASL
@@ -6207,9 +5971,9 @@ __div24by64:	; @func
   LDA	__div24by64@start + 2
   ROL
   STA	__div24by64@start + 2
-  JMP	__ITER__START__139c93f2_71ce_4bb3_992e_a4021274f783
-  __ITER__END__139c93f2_71ce_4bb3_992e_a4021274f783:
-  __ITER__START__a95f190d_1564_4eac_89dc_73b13e1bddd6:
+  JMP	__ITER__START__8516e6db_e483_4814_b4a1_184b527521b4
+  __ITER__END__8516e6db_e483_4814_b4a1_184b527521b4:
+  __ITER__START__627a72cd_6ee9_4ebd_b05f_bc11a1414091:
   SEP	#$10
   LDX	#$01
   REP	#$20
@@ -6225,7 +5989,7 @@ __div24by64:	; @func
   SEP	#$20
   CMP	#$00
   BNE	:+
-  JMP	__ITER__END__a95f190d_1564_4eac_89dc_73b13e1bddd6
+  JMP	__ITER__END__627a72cd_6ee9_4ebd_b05f_bc11a1414091
   :
   CLC
   REP	#$20
@@ -6233,36 +5997,36 @@ __div24by64:	; @func
   STA	__@signExtend
   LDA	__@signExtend
   CMP	__@specSubY + 6
-  BCC	__CMP_NO_6c853f4d_215f_403a_906e_2db2b3646b24
-  BNE	__CMP_YES_6c853f4d_215f_403a_906e_2db2b3646b24
+  BCC	__CMP_NO_11f8e678_6b4e_492a_a0d1_32e20422b64f
+  BNE	__CMP_YES_11f8e678_6b4e_492a_a0d1_32e20422b64f
   LDA	__@signExtend
   CMP	__@specSubY + 4
-  BCC	__CMP_NO_6c853f4d_215f_403a_906e_2db2b3646b24
-  BNE	__CMP_YES_6c853f4d_215f_403a_906e_2db2b3646b24
+  BCC	__CMP_NO_11f8e678_6b4e_492a_a0d1_32e20422b64f
+  BNE	__CMP_YES_11f8e678_6b4e_492a_a0d1_32e20422b64f
   SEP	#$20
   LDA	__@signExtend
   CMP	__@specSubY + 3
-  BCC	__CMP_NO_6c853f4d_215f_403a_906e_2db2b3646b24
-  BNE	__CMP_YES_6c853f4d_215f_403a_906e_2db2b3646b24
+  BCC	__CMP_NO_11f8e678_6b4e_492a_a0d1_32e20422b64f
+  BNE	__CMP_YES_11f8e678_6b4e_492a_a0d1_32e20422b64f
   LDA	__@specSubX + 1
   CMP	__@specSubY + 1
-  BCC	__CMP_NO_6c853f4d_215f_403a_906e_2db2b3646b24
-  BNE	__CMP_YES_6c853f4d_215f_403a_906e_2db2b3646b24
+  BCC	__CMP_NO_11f8e678_6b4e_492a_a0d1_32e20422b64f
+  BNE	__CMP_YES_11f8e678_6b4e_492a_a0d1_32e20422b64f
   SEP	#$20
   LDA	__@specSubX + 0
   CMP	__@specSubY + 0
-  BCC	__CMP_NO_6c853f4d_215f_403a_906e_2db2b3646b24
-  BNE	__CMP_YES_6c853f4d_215f_403a_906e_2db2b3646b24
-  JMP	__CMP_YES_6c853f4d_215f_403a_906e_2db2b3646b24
-  __CMP_YES_6c853f4d_215f_403a_906e_2db2b3646b24:
+  BCC	__CMP_NO_11f8e678_6b4e_492a_a0d1_32e20422b64f
+  BNE	__CMP_YES_11f8e678_6b4e_492a_a0d1_32e20422b64f
+  JMP	__CMP_YES_11f8e678_6b4e_492a_a0d1_32e20422b64f
+  __CMP_YES_11f8e678_6b4e_492a_a0d1_32e20422b64f:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_6c853f4d_215f_403a_906e_2db2b3646b24
-  __CMP_NO_6c853f4d_215f_403a_906e_2db2b3646b24:
+  BRA	__CMP_END_11f8e678_6b4e_492a_a0d1_32e20422b64f
+  __CMP_NO_11f8e678_6b4e_492a_a0d1_32e20422b64f:
   SEP	#$20
   LDA	#$00
-  __CMP_END_6c853f4d_215f_403a_906e_2db2b3646b24:
-  BEQ	__IFNOT_05d84e16_0757_4094_be64_fca11d8111a2
+  __CMP_END_11f8e678_6b4e_492a_a0d1_32e20422b64f:
+  BEQ	__IFNOT_43726ca6_fc82_4353_876a_8212268ab82f
   REP	#$20
   LDA	#$0000
   STA	__@signExtend
@@ -6283,7 +6047,7 @@ __div24by64:	; @func
   LDA	__div24by64@ret + 2
   ADC	__div24by64@start + 2
   STA	__div24by64@ret + 2
-  __IFNOT_05d84e16_0757_4094_be64_fca11d8111a2:
+  __IFNOT_43726ca6_fc82_4353_876a_8212268ab82f:
   REP	#$20
   LDA	__@specSubY + 6
   LSR
@@ -6305,8 +6069,8 @@ __div24by64:	; @func
   LDA	__div24by64@start + 0
   ROR
   STA	__div24by64@start + 0
-  JMP	__ITER__START__a95f190d_1564_4eac_89dc_73b13e1bddd6
-  __ITER__END__a95f190d_1564_4eac_89dc_73b13e1bddd6:
+  JMP	__ITER__START__627a72cd_6ee9_4ebd_b05f_bc11a1414091
+  __ITER__END__627a72cd_6ee9_4ebd_b05f_bc11a1414091:
   REP	#$20
   LDA	__div24by64@ret + 0
   STA	__@callResult + 0
@@ -6327,103 +6091,81 @@ __div32by64:	; @func
   STA	__div32by64@start + 0
   LDA	#$0000
   STA	__div32by64@start + 2
-  __ITER__START__e94cd4fb_d1c8_4253_a37e_c0cfbfe64ff0:
+  __ITER__START__b99fa804_61de_4fbc_95cf_eac927d72d88:
   CLC
   REP	#$20
   LDA	#$0000
   STA	__@signExtend
   LDA	__@signExtend
   CMP	__@specSubY + 6
-  BCC	__CMP_NO_bd58db2c_36e1_47e8_92cf_3da78d3c8bcc
-  BNE	__CMP_YES_bd58db2c_36e1_47e8_92cf_3da78d3c8bcc
+  BCC	__CMP_NO_687fd437_a805_41d7_99db_b6d2433fc4d8
+  BNE	__CMP_YES_687fd437_a805_41d7_99db_b6d2433fc4d8
   LDA	__@signExtend
   CMP	__@specSubY + 4
-  BCC	__CMP_NO_bd58db2c_36e1_47e8_92cf_3da78d3c8bcc
-  BNE	__CMP_YES_bd58db2c_36e1_47e8_92cf_3da78d3c8bcc
+  BCC	__CMP_NO_687fd437_a805_41d7_99db_b6d2433fc4d8
+  BNE	__CMP_YES_687fd437_a805_41d7_99db_b6d2433fc4d8
   LDA	__@specSubX + 2
   CMP	__@specSubY + 2
-  BCC	__CMP_NO_bd58db2c_36e1_47e8_92cf_3da78d3c8bcc
-  BNE	__CMP_YES_bd58db2c_36e1_47e8_92cf_3da78d3c8bcc
+  BCC	__CMP_NO_687fd437_a805_41d7_99db_b6d2433fc4d8
+  BNE	__CMP_YES_687fd437_a805_41d7_99db_b6d2433fc4d8
   LDA	__@specSubX + 0
   CMP	__@specSubY + 0
-  BCC	__CMP_NO_bd58db2c_36e1_47e8_92cf_3da78d3c8bcc
-  BNE	__CMP_YES_bd58db2c_36e1_47e8_92cf_3da78d3c8bcc
-  JMP	__CMP_NO_bd58db2c_36e1_47e8_92cf_3da78d3c8bcc
-  __CMP_YES_bd58db2c_36e1_47e8_92cf_3da78d3c8bcc:
+  BCC	__CMP_NO_687fd437_a805_41d7_99db_b6d2433fc4d8
+  BNE	__CMP_YES_687fd437_a805_41d7_99db_b6d2433fc4d8
+  JMP	__CMP_NO_687fd437_a805_41d7_99db_b6d2433fc4d8
+  __CMP_YES_687fd437_a805_41d7_99db_b6d2433fc4d8:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_bd58db2c_36e1_47e8_92cf_3da78d3c8bcc
-  __CMP_NO_bd58db2c_36e1_47e8_92cf_3da78d3c8bcc:
+  BRA	__CMP_END_687fd437_a805_41d7_99db_b6d2433fc4d8
+  __CMP_NO_687fd437_a805_41d7_99db_b6d2433fc4d8:
   SEP	#$20
   LDA	#$00
-  __CMP_END_bd58db2c_36e1_47e8_92cf_3da78d3c8bcc:
+  __CMP_END_687fd437_a805_41d7_99db_b6d2433fc4d8:
   SEP	#$20
   CMP	#$00
   BNE	:+
-  JMP	__ITER__END__e94cd4fb_d1c8_4253_a37e_c0cfbfe64ff0
+  JMP	__ITER__END__b99fa804_61de_4fbc_95cf_eac927d72d88
   :
   
   REP	#$20
   LDA	#$0000
   AND	__@specSubY + 0
-  STA	__@scratchBase + 8
+  STA	__@scratchBase + 0
   REP	#$20
   LDA	#$8000
   AND	__@specSubY + 2
-  STA	__@scratchBase + 10
+  STA	__@scratchBase + 2
   REP	#$20
   LDA	#$0000
   AND	__@specSubY + 4
-  STA	__@scratchBase + 12
+  STA	__@scratchBase + 4
   REP	#$20
   LDA	#$0000
   AND	__@specSubY + 6
-  STA	__@scratchBase + 14
+  STA	__@scratchBase + 6
   SEP	#$10
   LDX	#$00
   REP	#$20
-  LDA	__@scratchBase + 8
+  LDA	__@scratchBase + 0
   CMP	#$0000
   BNE	:+
   REP	#$20
-  LDA	__@scratchBase + 10
+  LDA	__@scratchBase + 2
   CMP	#$0000
   BNE	:+
   REP	#$20
-  LDA	__@scratchBase + 12
+  LDA	__@scratchBase + 4
   CMP	#$0000
   BNE	:+
   REP	#$20
-  LDA	__@scratchBase + 14
+  LDA	__@scratchBase + 6
   CMP	#$0000
   BNE	:+
   INX
 : TXA
-  SEP	#$20
-  STA	__@scratchBase + 0
-  LDA	#$00
-  STA	__@scratchBase + 1
-  STA	__@scratchBase + 2
-  STA	__@scratchBase + 3
-  STA	__@scratchBase + 4
-  STA	__@scratchBase + 5
-  STA	__@scratchBase + 6
-  STA	__@scratchBase + 7
-  REP	#$20
-  LDA	__@scratchBase + 0
-  STA	__@scratchBase + 0
-  REP	#$20
-  LDA	__@scratchBase + 2
-  STA	__@scratchBase + 2
-  REP	#$20
-  LDA	__@scratchBase + 4
-  STA	__@scratchBase + 4
-  REP	#$20
-  LDA	__@scratchBase + 6
-  STA	__@scratchBase + 6
-  BNE	__IFNOT_5a1ace65_6141_49b2_942e_b5c11b9eaf8d
-  JMP	__ITER__END__e94cd4fb_d1c8_4253_a37e_c0cfbfe64ff0
-  __IFNOT_5a1ace65_6141_49b2_942e_b5c11b9eaf8d:
+  BNE	__IFNOT_373a3b78_70b6_4b7f_83c2_c13348672427
+  JMP	__ITER__END__b99fa804_61de_4fbc_95cf_eac927d72d88
+  __IFNOT_373a3b78_70b6_4b7f_83c2_c13348672427:
   REP	#$20
   LDA	__@specSubY + 0
   ASL
@@ -6448,9 +6190,9 @@ __div32by64:	; @func
   LDA	__div32by64@start + 2
   ROL
   STA	__div32by64@start + 2
-  JMP	__ITER__START__e94cd4fb_d1c8_4253_a37e_c0cfbfe64ff0
-  __ITER__END__e94cd4fb_d1c8_4253_a37e_c0cfbfe64ff0:
-  __ITER__START__e43fcc4c_756c_478d_b0d4_bc673c29403e:
+  JMP	__ITER__START__b99fa804_61de_4fbc_95cf_eac927d72d88
+  __ITER__END__b99fa804_61de_4fbc_95cf_eac927d72d88:
+  __ITER__START__4068a112_3ae9_4dd9_9e33_02ad15036240:
   SEP	#$10
   LDX	#$01
   REP	#$20
@@ -6466,7 +6208,7 @@ __div32by64:	; @func
   SEP	#$20
   CMP	#$00
   BNE	:+
-  JMP	__ITER__END__e43fcc4c_756c_478d_b0d4_bc673c29403e
+  JMP	__ITER__END__4068a112_3ae9_4dd9_9e33_02ad15036240
   :
   CLC
   REP	#$20
@@ -6474,30 +6216,30 @@ __div32by64:	; @func
   STA	__@signExtend
   LDA	__@signExtend
   CMP	__@specSubY + 6
-  BCC	__CMP_NO_e8078b16_b462_4476_b540_9ebccb106c9e
-  BNE	__CMP_YES_e8078b16_b462_4476_b540_9ebccb106c9e
+  BCC	__CMP_NO_c65bc916_e90f_4afb_ac3f_9441f3fe5030
+  BNE	__CMP_YES_c65bc916_e90f_4afb_ac3f_9441f3fe5030
   LDA	__@signExtend
   CMP	__@specSubY + 4
-  BCC	__CMP_NO_e8078b16_b462_4476_b540_9ebccb106c9e
-  BNE	__CMP_YES_e8078b16_b462_4476_b540_9ebccb106c9e
+  BCC	__CMP_NO_c65bc916_e90f_4afb_ac3f_9441f3fe5030
+  BNE	__CMP_YES_c65bc916_e90f_4afb_ac3f_9441f3fe5030
   LDA	__@specSubX + 2
   CMP	__@specSubY + 2
-  BCC	__CMP_NO_e8078b16_b462_4476_b540_9ebccb106c9e
-  BNE	__CMP_YES_e8078b16_b462_4476_b540_9ebccb106c9e
+  BCC	__CMP_NO_c65bc916_e90f_4afb_ac3f_9441f3fe5030
+  BNE	__CMP_YES_c65bc916_e90f_4afb_ac3f_9441f3fe5030
   LDA	__@specSubX + 0
   CMP	__@specSubY + 0
-  BCC	__CMP_NO_e8078b16_b462_4476_b540_9ebccb106c9e
-  BNE	__CMP_YES_e8078b16_b462_4476_b540_9ebccb106c9e
-  JMP	__CMP_YES_e8078b16_b462_4476_b540_9ebccb106c9e
-  __CMP_YES_e8078b16_b462_4476_b540_9ebccb106c9e:
+  BCC	__CMP_NO_c65bc916_e90f_4afb_ac3f_9441f3fe5030
+  BNE	__CMP_YES_c65bc916_e90f_4afb_ac3f_9441f3fe5030
+  JMP	__CMP_YES_c65bc916_e90f_4afb_ac3f_9441f3fe5030
+  __CMP_YES_c65bc916_e90f_4afb_ac3f_9441f3fe5030:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_e8078b16_b462_4476_b540_9ebccb106c9e
-  __CMP_NO_e8078b16_b462_4476_b540_9ebccb106c9e:
+  BRA	__CMP_END_c65bc916_e90f_4afb_ac3f_9441f3fe5030
+  __CMP_NO_c65bc916_e90f_4afb_ac3f_9441f3fe5030:
   SEP	#$20
   LDA	#$00
-  __CMP_END_e8078b16_b462_4476_b540_9ebccb106c9e:
-  BEQ	__IFNOT_7f1d793b_fe2e_409b_a857_8006ed9ea8fd
+  __CMP_END_c65bc916_e90f_4afb_ac3f_9441f3fe5030:
+  BEQ	__IFNOT_f74bd2b3_a2a1_4766_b0ec_a354cf7e9577
   REP	#$20
   LDA	#$0000
   STA	__@signExtend
@@ -6518,7 +6260,7 @@ __div32by64:	; @func
   LDA	__div32by64@ret + 2
   ADC	__div32by64@start + 2
   STA	__div32by64@ret + 2
-  __IFNOT_7f1d793b_fe2e_409b_a857_8006ed9ea8fd:
+  __IFNOT_f74bd2b3_a2a1_4766_b0ec_a354cf7e9577:
   REP	#$20
   LDA	__@specSubY + 6
   LSR
@@ -6539,8 +6281,8 @@ __div32by64:	; @func
   LDA	__div32by64@start + 0
   ROR
   STA	__div32by64@start + 0
-  JMP	__ITER__START__e43fcc4c_756c_478d_b0d4_bc673c29403e
-  __ITER__END__e43fcc4c_756c_478d_b0d4_bc673c29403e:
+  JMP	__ITER__START__4068a112_3ae9_4dd9_9e33_02ad15036240
+  __ITER__END__4068a112_3ae9_4dd9_9e33_02ad15036240:
   REP	#$20
   LDA	__div32by64@ret + 0
   STA	__@callResult + 0
@@ -6565,105 +6307,83 @@ __div64by64:	; @func
   STA	__div64by64@start + 2
   STA	__div64by64@start + 4
   STA	__div64by64@start + 6
-  __ITER__START__49325e74_1aae_41a6_9c26_7cd7c02dcc7e:
+  __ITER__START__74667acf_5a2c_474a_a013_f9426bfcd2f5:
   CLC
   REP	#$20
   REP	#$20
   LDA	__@specSubX + 6
   CMP	__@specSubY + 6
-  BCC	__CMP_NO_18daa495_e7a0_470b_a490_54d612cc5309
-  BNE	__CMP_YES_18daa495_e7a0_470b_a490_54d612cc5309
+  BCC	__CMP_NO_40b55880_8c82_4fbe_88e9_ab5a3d15c49a
+  BNE	__CMP_YES_40b55880_8c82_4fbe_88e9_ab5a3d15c49a
   REP	#$20
   LDA	__@specSubX + 4
   CMP	__@specSubY + 4
-  BCC	__CMP_NO_18daa495_e7a0_470b_a490_54d612cc5309
-  BNE	__CMP_YES_18daa495_e7a0_470b_a490_54d612cc5309
+  BCC	__CMP_NO_40b55880_8c82_4fbe_88e9_ab5a3d15c49a
+  BNE	__CMP_YES_40b55880_8c82_4fbe_88e9_ab5a3d15c49a
   REP	#$20
   LDA	__@specSubX + 2
   CMP	__@specSubY + 2
-  BCC	__CMP_NO_18daa495_e7a0_470b_a490_54d612cc5309
-  BNE	__CMP_YES_18daa495_e7a0_470b_a490_54d612cc5309
+  BCC	__CMP_NO_40b55880_8c82_4fbe_88e9_ab5a3d15c49a
+  BNE	__CMP_YES_40b55880_8c82_4fbe_88e9_ab5a3d15c49a
   REP	#$20
   LDA	__@specSubX + 0
   CMP	__@specSubY + 0
-  BCC	__CMP_NO_18daa495_e7a0_470b_a490_54d612cc5309
-  BNE	__CMP_YES_18daa495_e7a0_470b_a490_54d612cc5309
-  JMP	__CMP_NO_18daa495_e7a0_470b_a490_54d612cc5309
-  __CMP_YES_18daa495_e7a0_470b_a490_54d612cc5309:
+  BCC	__CMP_NO_40b55880_8c82_4fbe_88e9_ab5a3d15c49a
+  BNE	__CMP_YES_40b55880_8c82_4fbe_88e9_ab5a3d15c49a
+  JMP	__CMP_NO_40b55880_8c82_4fbe_88e9_ab5a3d15c49a
+  __CMP_YES_40b55880_8c82_4fbe_88e9_ab5a3d15c49a:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_18daa495_e7a0_470b_a490_54d612cc5309
-  __CMP_NO_18daa495_e7a0_470b_a490_54d612cc5309:
+  BRA	__CMP_END_40b55880_8c82_4fbe_88e9_ab5a3d15c49a
+  __CMP_NO_40b55880_8c82_4fbe_88e9_ab5a3d15c49a:
   SEP	#$20
   LDA	#$00
-  __CMP_END_18daa495_e7a0_470b_a490_54d612cc5309:
+  __CMP_END_40b55880_8c82_4fbe_88e9_ab5a3d15c49a:
   SEP	#$20
   CMP	#$00
   BNE	:+
-  JMP	__ITER__END__49325e74_1aae_41a6_9c26_7cd7c02dcc7e
+  JMP	__ITER__END__74667acf_5a2c_474a_a013_f9426bfcd2f5
   :
   
   REP	#$20
   LDA	#$0000
   AND	__@specSubY + 0
-  STA	__@scratchBase + 8
+  STA	__@scratchBase + 0
   REP	#$20
   LDA	#$8000
   AND	__@specSubY + 2
-  STA	__@scratchBase + 10
+  STA	__@scratchBase + 2
   REP	#$20
   LDA	#$0000
   AND	__@specSubY + 4
-  STA	__@scratchBase + 12
+  STA	__@scratchBase + 4
   REP	#$20
   LDA	#$0000
   AND	__@specSubY + 6
-  STA	__@scratchBase + 14
+  STA	__@scratchBase + 6
   SEP	#$10
   LDX	#$00
   REP	#$20
-  LDA	__@scratchBase + 8
+  LDA	__@scratchBase + 0
   CMP	#$0000
   BNE	:+
   REP	#$20
-  LDA	__@scratchBase + 10
+  LDA	__@scratchBase + 2
   CMP	#$0000
   BNE	:+
   REP	#$20
-  LDA	__@scratchBase + 12
+  LDA	__@scratchBase + 4
   CMP	#$0000
   BNE	:+
   REP	#$20
-  LDA	__@scratchBase + 14
+  LDA	__@scratchBase + 6
   CMP	#$0000
   BNE	:+
   INX
 : TXA
-  SEP	#$20
-  STA	__@scratchBase + 0
-  LDA	#$00
-  STA	__@scratchBase + 1
-  STA	__@scratchBase + 2
-  STA	__@scratchBase + 3
-  STA	__@scratchBase + 4
-  STA	__@scratchBase + 5
-  STA	__@scratchBase + 6
-  STA	__@scratchBase + 7
-  REP	#$20
-  LDA	__@scratchBase + 0
-  STA	__@scratchBase + 0
-  REP	#$20
-  LDA	__@scratchBase + 2
-  STA	__@scratchBase + 2
-  REP	#$20
-  LDA	__@scratchBase + 4
-  STA	__@scratchBase + 4
-  REP	#$20
-  LDA	__@scratchBase + 6
-  STA	__@scratchBase + 6
-  BNE	__IFNOT_55ebcaa1_bb53_47b4_8c79_9b76ce194339
-  JMP	__ITER__END__49325e74_1aae_41a6_9c26_7cd7c02dcc7e
-  __IFNOT_55ebcaa1_bb53_47b4_8c79_9b76ce194339:
+  BNE	__IFNOT_914c774e_1f82_46b9_970f_74db887c4e80
+  JMP	__ITER__END__74667acf_5a2c_474a_a013_f9426bfcd2f5
+  __IFNOT_914c774e_1f82_46b9_970f_74db887c4e80:
   REP	#$20
   LDA	__@specSubY + 0
   ASL
@@ -6696,9 +6416,9 @@ __div64by64:	; @func
   LDA	__div64by64@start + 6
   ROL
   STA	__div64by64@start + 6
-  JMP	__ITER__START__49325e74_1aae_41a6_9c26_7cd7c02dcc7e
-  __ITER__END__49325e74_1aae_41a6_9c26_7cd7c02dcc7e:
-  __ITER__START__8dc3d550_64ec_42e0_967a_aaec1f690790:
+  JMP	__ITER__START__74667acf_5a2c_474a_a013_f9426bfcd2f5
+  __ITER__END__74667acf_5a2c_474a_a013_f9426bfcd2f5:
+  __ITER__START__414af8b4_7fe5_43ec_a0f8_c5665c5ae5a8:
   SEP	#$10
   LDX	#$01
   REP	#$20
@@ -6722,41 +6442,41 @@ __div64by64:	; @func
   SEP	#$20
   CMP	#$00
   BNE	:+
-  JMP	__ITER__END__8dc3d550_64ec_42e0_967a_aaec1f690790
+  JMP	__ITER__END__414af8b4_7fe5_43ec_a0f8_c5665c5ae5a8
   :
   CLC
   REP	#$20
   REP	#$20
   LDA	__@specSubX + 6
   CMP	__@specSubY + 6
-  BCC	__CMP_NO_e9d18134_61d9_46e6_a121_92cc0f4b15b1
-  BNE	__CMP_YES_e9d18134_61d9_46e6_a121_92cc0f4b15b1
+  BCC	__CMP_NO_4039f886_6710_4ff1_9e53_7b4d80a96daf
+  BNE	__CMP_YES_4039f886_6710_4ff1_9e53_7b4d80a96daf
   REP	#$20
   LDA	__@specSubX + 4
   CMP	__@specSubY + 4
-  BCC	__CMP_NO_e9d18134_61d9_46e6_a121_92cc0f4b15b1
-  BNE	__CMP_YES_e9d18134_61d9_46e6_a121_92cc0f4b15b1
+  BCC	__CMP_NO_4039f886_6710_4ff1_9e53_7b4d80a96daf
+  BNE	__CMP_YES_4039f886_6710_4ff1_9e53_7b4d80a96daf
   REP	#$20
   LDA	__@specSubX + 2
   CMP	__@specSubY + 2
-  BCC	__CMP_NO_e9d18134_61d9_46e6_a121_92cc0f4b15b1
-  BNE	__CMP_YES_e9d18134_61d9_46e6_a121_92cc0f4b15b1
+  BCC	__CMP_NO_4039f886_6710_4ff1_9e53_7b4d80a96daf
+  BNE	__CMP_YES_4039f886_6710_4ff1_9e53_7b4d80a96daf
   REP	#$20
   LDA	__@specSubX + 0
   CMP	__@specSubY + 0
-  BCC	__CMP_NO_e9d18134_61d9_46e6_a121_92cc0f4b15b1
-  BNE	__CMP_YES_e9d18134_61d9_46e6_a121_92cc0f4b15b1
-  JMP	__CMP_YES_e9d18134_61d9_46e6_a121_92cc0f4b15b1
-  __CMP_YES_e9d18134_61d9_46e6_a121_92cc0f4b15b1:
+  BCC	__CMP_NO_4039f886_6710_4ff1_9e53_7b4d80a96daf
+  BNE	__CMP_YES_4039f886_6710_4ff1_9e53_7b4d80a96daf
+  JMP	__CMP_YES_4039f886_6710_4ff1_9e53_7b4d80a96daf
+  __CMP_YES_4039f886_6710_4ff1_9e53_7b4d80a96daf:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_e9d18134_61d9_46e6_a121_92cc0f4b15b1
-  __CMP_NO_e9d18134_61d9_46e6_a121_92cc0f4b15b1:
+  BRA	__CMP_END_4039f886_6710_4ff1_9e53_7b4d80a96daf
+  __CMP_NO_4039f886_6710_4ff1_9e53_7b4d80a96daf:
   SEP	#$20
   LDA	#$00
-  __CMP_END_e9d18134_61d9_46e6_a121_92cc0f4b15b1:
+  __CMP_END_4039f886_6710_4ff1_9e53_7b4d80a96daf:
   BNE	:+
-  JMP	__IFNOT_e34bce58_a456_458f_973e_c2c6a81e0569
+  JMP	__IFNOT_a3bdcdf2_f29b_4222_bfc6_3f84df67f1cc
   :
   SEC
   REP	#$20
@@ -6792,7 +6512,7 @@ __div64by64:	; @func
   LDA	__div64by64@ret + 6
   ADC	__div64by64@start + 6
   STA	__div64by64@ret + 6
-  __IFNOT_e34bce58_a456_458f_973e_c2c6a81e0569:
+  __IFNOT_a3bdcdf2_f29b_4222_bfc6_3f84df67f1cc:
   REP	#$20
   LDA	__@specSubY + 6
   LSR
@@ -6819,8 +6539,8 @@ __div64by64:	; @func
   LDA	__div64by64@start + 0
   ROR
   STA	__div64by64@start + 0
-  JMP	__ITER__START__8dc3d550_64ec_42e0_967a_aaec1f690790
-  __ITER__END__8dc3d550_64ec_42e0_967a_aaec1f690790:
+  JMP	__ITER__START__414af8b4_7fe5_43ec_a0f8_c5665c5ae5a8
+  __ITER__END__414af8b4_7fe5_43ec_a0f8_c5665c5ae5a8:
   REP	#$20
   LDA	__div64by64@ret + 0
   STA	__@callResult + 0
@@ -6850,7 +6570,7 @@ __mod8by16:	; @func
   SEP	#$20
   LDA	#$00
   STA	__mod8by16@start + 2
-  __ITER__START__7259167e_8a6e_4c64_9f43_ae6142b62df3:
+  __ITER__START__a1b39bd7_7aa4_46ba_a268_e467d53e975d:
   CLC
   REP	#$20
   LDA	#$0000
@@ -6858,26 +6578,26 @@ __mod8by16:	; @func
   SEP	#$20
   LDA	__@signExtend
   CMP	__@specSubY + 1
-  BCC	__CMP_NO_2b2327e0_1e80_47a4_aab5_8f59c43d0872
-  BNE	__CMP_YES_2b2327e0_1e80_47a4_aab5_8f59c43d0872
+  BCC	__CMP_NO_85d60f70_bc0e_475f_bbb3_cf6f0196bc3d
+  BNE	__CMP_YES_85d60f70_bc0e_475f_bbb3_cf6f0196bc3d
   SEP	#$20
   LDA	__@specSubX + 0
   CMP	__@specSubY + 0
-  BCC	__CMP_NO_2b2327e0_1e80_47a4_aab5_8f59c43d0872
-  BNE	__CMP_YES_2b2327e0_1e80_47a4_aab5_8f59c43d0872
-  JMP	__CMP_NO_2b2327e0_1e80_47a4_aab5_8f59c43d0872
-  __CMP_YES_2b2327e0_1e80_47a4_aab5_8f59c43d0872:
+  BCC	__CMP_NO_85d60f70_bc0e_475f_bbb3_cf6f0196bc3d
+  BNE	__CMP_YES_85d60f70_bc0e_475f_bbb3_cf6f0196bc3d
+  JMP	__CMP_NO_85d60f70_bc0e_475f_bbb3_cf6f0196bc3d
+  __CMP_YES_85d60f70_bc0e_475f_bbb3_cf6f0196bc3d:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_2b2327e0_1e80_47a4_aab5_8f59c43d0872
-  __CMP_NO_2b2327e0_1e80_47a4_aab5_8f59c43d0872:
+  BRA	__CMP_END_85d60f70_bc0e_475f_bbb3_cf6f0196bc3d
+  __CMP_NO_85d60f70_bc0e_475f_bbb3_cf6f0196bc3d:
   SEP	#$20
   LDA	#$00
-  __CMP_END_2b2327e0_1e80_47a4_aab5_8f59c43d0872:
+  __CMP_END_85d60f70_bc0e_475f_bbb3_cf6f0196bc3d:
   SEP	#$20
   CMP	#$00
   BNE	:+
-  JMP	__ITER__END__7259167e_8a6e_4c64_9f43_ae6142b62df3
+  JMP	__ITER__END__a1b39bd7_7aa4_46ba_a268_e467d53e975d
   :
   REP	#$20
   LDA	#$0000
@@ -6885,37 +6605,26 @@ __mod8by16:	; @func
   
   LDA	#$8000
   AND	__@specSubY + 0
-  STA	__@scratchBase + 3
+  STA	__@scratchBase + 0
   SEP	#$20
   LDA	#$00
   AND	__@signExtend
-  STA	__@scratchBase + 5
+  STA	__@scratchBase + 2
   SEP	#$10
   LDX	#$00
   REP	#$20
-  LDA	__@scratchBase + 3
+  LDA	__@scratchBase + 0
   CMP	#$0000
   BNE	:+
   SEP	#$20
-  LDA	__@scratchBase + 5
+  LDA	__@scratchBase + 2
   CMP	#$00
   BNE	:+
   INX
 : TXA
-  SEP	#$20
-  STA	__@scratchBase + 0
-  LDA	#$00
-  STA	__@scratchBase + 1
-  STA	__@scratchBase + 2
-  REP	#$20
-  LDA	__@scratchBase + 0
-  STA	__@scratchBase + 0
-  SEP	#$20
-  LDA	__@scratchBase + 2
-  STA	__@scratchBase + 2
-  BNE	__IFNOT_06763327_a4cf_4ac6_a8a2_efa39cd9e0d1
-  JMP	__ITER__END__7259167e_8a6e_4c64_9f43_ae6142b62df3
-  __IFNOT_06763327_a4cf_4ac6_a8a2_efa39cd9e0d1:
+  BNE	__IFNOT_e382879e_3d66_4090_a3b4_cedb7e58610e
+  JMP	__ITER__END__a1b39bd7_7aa4_46ba_a268_e467d53e975d
+  __IFNOT_e382879e_3d66_4090_a3b4_cedb7e58610e:
   REP	#$20
   LDA	__@specSubY + 0
   ASL
@@ -6928,9 +6637,9 @@ __mod8by16:	; @func
   LDA	__mod8by16@start + 2
   ROL
   STA	__mod8by16@start + 2
-  JMP	__ITER__START__7259167e_8a6e_4c64_9f43_ae6142b62df3
-  __ITER__END__7259167e_8a6e_4c64_9f43_ae6142b62df3:
-  __ITER__START__941953d6_f7df_44be_95ce_3d94e4470964:
+  JMP	__ITER__START__a1b39bd7_7aa4_46ba_a268_e467d53e975d
+  __ITER__END__a1b39bd7_7aa4_46ba_a268_e467d53e975d:
+  __ITER__START__ea6f0ce1_a090_44b0_ae22_b822ee86f8ac:
   SEP	#$10
   LDX	#$01
   REP	#$20
@@ -6946,7 +6655,7 @@ __mod8by16:	; @func
   SEP	#$20
   CMP	#$00
   BNE	:+
-  JMP	__ITER__END__941953d6_f7df_44be_95ce_3d94e4470964
+  JMP	__ITER__END__ea6f0ce1_a090_44b0_ae22_b822ee86f8ac
   :
   CLC
   REP	#$20
@@ -6955,23 +6664,23 @@ __mod8by16:	; @func
   SEP	#$20
   LDA	__@signExtend
   CMP	__@specSubY + 1
-  BCC	__CMP_NO_180193f7_43e9_4274_b981_6c5b205f191d
-  BNE	__CMP_YES_180193f7_43e9_4274_b981_6c5b205f191d
+  BCC	__CMP_NO_0158d2e9_49e4_45b5_9aae_f1b2b91d898e
+  BNE	__CMP_YES_0158d2e9_49e4_45b5_9aae_f1b2b91d898e
   SEP	#$20
   LDA	__@specSubX + 0
   CMP	__@specSubY + 0
-  BCC	__CMP_NO_180193f7_43e9_4274_b981_6c5b205f191d
-  BNE	__CMP_YES_180193f7_43e9_4274_b981_6c5b205f191d
-  JMP	__CMP_YES_180193f7_43e9_4274_b981_6c5b205f191d
-  __CMP_YES_180193f7_43e9_4274_b981_6c5b205f191d:
+  BCC	__CMP_NO_0158d2e9_49e4_45b5_9aae_f1b2b91d898e
+  BNE	__CMP_YES_0158d2e9_49e4_45b5_9aae_f1b2b91d898e
+  JMP	__CMP_YES_0158d2e9_49e4_45b5_9aae_f1b2b91d898e
+  __CMP_YES_0158d2e9_49e4_45b5_9aae_f1b2b91d898e:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_180193f7_43e9_4274_b981_6c5b205f191d
-  __CMP_NO_180193f7_43e9_4274_b981_6c5b205f191d:
+  BRA	__CMP_END_0158d2e9_49e4_45b5_9aae_f1b2b91d898e
+  __CMP_NO_0158d2e9_49e4_45b5_9aae_f1b2b91d898e:
   SEP	#$20
   LDA	#$00
-  __CMP_END_180193f7_43e9_4274_b981_6c5b205f191d:
-  BEQ	__IFNOT_e999ef45_b4f5_4002_87db_02771ef20e75
+  __CMP_END_0158d2e9_49e4_45b5_9aae_f1b2b91d898e:
+  BEQ	__IFNOT_6e2dd3d4_e4be_4620_87ca_fc3a6a5b2673
   REP	#$20
   LDA	#$0000
   STA	__@signExtend
@@ -6989,7 +6698,7 @@ __mod8by16:	; @func
   LDA	__mod8by16@ret + 2
   ADC	__mod8by16@start + 2
   STA	__mod8by16@ret + 2
-  __IFNOT_e999ef45_b4f5_4002_87db_02771ef20e75:
+  __IFNOT_6e2dd3d4_e4be_4620_87ca_fc3a6a5b2673:
   REP	#$20
   LDA	__@specSubY + 0
   LSR
@@ -7002,8 +6711,8 @@ __mod8by16:	; @func
   LDA	__mod8by16@start + 0
   ROR
   STA	__mod8by16@start + 0
-  JMP	__ITER__START__941953d6_f7df_44be_95ce_3d94e4470964
-  __ITER__END__941953d6_f7df_44be_95ce_3d94e4470964:
+  JMP	__ITER__START__ea6f0ce1_a090_44b0_ae22_b822ee86f8ac
+  __ITER__END__ea6f0ce1_a090_44b0_ae22_b822ee86f8ac:
   REP	#$20
   LDA	__@specSubX + 0
   STA	__@callResult + 0
@@ -7027,26 +6736,26 @@ __mod16by16:	; @func
   SEP	#$20
   LDA	#$00
   STA	__mod16by16@start + 2
-  __ITER__START__ada723fd_7bc4_4ea2_9b2c_8394cf3e1e60:
+  __ITER__START__1a9b39c3_a6dd_456f_b052_c0e1309d66ee:
   CLC
   REP	#$20
   LDA	__@specSubX + 0
   CMP	__@specSubY + 0
-  BCC	__CMP_NO_e72066e8_14a8_4ad6_9a8a_12899a306436
-  BNE	__CMP_YES_e72066e8_14a8_4ad6_9a8a_12899a306436
-  JMP	__CMP_NO_e72066e8_14a8_4ad6_9a8a_12899a306436
-  __CMP_YES_e72066e8_14a8_4ad6_9a8a_12899a306436:
+  BCC	__CMP_NO_5adaf6f6_fdb8_44fc_9435_bf971101d913
+  BNE	__CMP_YES_5adaf6f6_fdb8_44fc_9435_bf971101d913
+  JMP	__CMP_NO_5adaf6f6_fdb8_44fc_9435_bf971101d913
+  __CMP_YES_5adaf6f6_fdb8_44fc_9435_bf971101d913:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_e72066e8_14a8_4ad6_9a8a_12899a306436
-  __CMP_NO_e72066e8_14a8_4ad6_9a8a_12899a306436:
+  BRA	__CMP_END_5adaf6f6_fdb8_44fc_9435_bf971101d913
+  __CMP_NO_5adaf6f6_fdb8_44fc_9435_bf971101d913:
   SEP	#$20
   LDA	#$00
-  __CMP_END_e72066e8_14a8_4ad6_9a8a_12899a306436:
+  __CMP_END_5adaf6f6_fdb8_44fc_9435_bf971101d913:
   SEP	#$20
   CMP	#$00
   BNE	:+
-  JMP	__ITER__END__ada723fd_7bc4_4ea2_9b2c_8394cf3e1e60
+  JMP	__ITER__END__1a9b39c3_a6dd_456f_b052_c0e1309d66ee
   :
   REP	#$20
   LDA	#$0000
@@ -7054,37 +6763,26 @@ __mod16by16:	; @func
   
   LDA	#$8000
   AND	__@specSubY + 0
-  STA	__@scratchBase + 3
+  STA	__@scratchBase + 0
   SEP	#$20
   LDA	#$00
   AND	__@signExtend
-  STA	__@scratchBase + 5
+  STA	__@scratchBase + 2
   SEP	#$10
   LDX	#$00
   REP	#$20
-  LDA	__@scratchBase + 3
+  LDA	__@scratchBase + 0
   CMP	#$0000
   BNE	:+
   SEP	#$20
-  LDA	__@scratchBase + 5
+  LDA	__@scratchBase + 2
   CMP	#$00
   BNE	:+
   INX
 : TXA
-  SEP	#$20
-  STA	__@scratchBase + 0
-  LDA	#$00
-  STA	__@scratchBase + 1
-  STA	__@scratchBase + 2
-  REP	#$20
-  LDA	__@scratchBase + 0
-  STA	__@scratchBase + 0
-  SEP	#$20
-  LDA	__@scratchBase + 2
-  STA	__@scratchBase + 2
-  BNE	__IFNOT_f923301e_3dde_40f0_906c_19ea88141d85
-  JMP	__ITER__END__ada723fd_7bc4_4ea2_9b2c_8394cf3e1e60
-  __IFNOT_f923301e_3dde_40f0_906c_19ea88141d85:
+  BNE	__IFNOT_77968058_125c_46d3_9988_d5b10325dd4f
+  JMP	__ITER__END__1a9b39c3_a6dd_456f_b052_c0e1309d66ee
+  __IFNOT_77968058_125c_46d3_9988_d5b10325dd4f:
   REP	#$20
   LDA	__@specSubY + 0
   ASL
@@ -7097,9 +6795,9 @@ __mod16by16:	; @func
   LDA	__mod16by16@start + 2
   ROL
   STA	__mod16by16@start + 2
-  JMP	__ITER__START__ada723fd_7bc4_4ea2_9b2c_8394cf3e1e60
-  __ITER__END__ada723fd_7bc4_4ea2_9b2c_8394cf3e1e60:
-  __ITER__START__d3b3fc2e_4539_4214_8daa_85f6bdce65aa:
+  JMP	__ITER__START__1a9b39c3_a6dd_456f_b052_c0e1309d66ee
+  __ITER__END__1a9b39c3_a6dd_456f_b052_c0e1309d66ee:
+  __ITER__START__319b791d_f807_4872_be92_060576308c9c:
   SEP	#$10
   LDX	#$01
   REP	#$20
@@ -7115,24 +6813,24 @@ __mod16by16:	; @func
   SEP	#$20
   CMP	#$00
   BNE	:+
-  JMP	__ITER__END__d3b3fc2e_4539_4214_8daa_85f6bdce65aa
+  JMP	__ITER__END__319b791d_f807_4872_be92_060576308c9c
   :
   CLC
   REP	#$20
   LDA	__@specSubX + 0
   CMP	__@specSubY + 0
-  BCC	__CMP_NO_bc3b354e_7d45_42a1_a76c_28461362b8a0
-  BNE	__CMP_YES_bc3b354e_7d45_42a1_a76c_28461362b8a0
-  JMP	__CMP_YES_bc3b354e_7d45_42a1_a76c_28461362b8a0
-  __CMP_YES_bc3b354e_7d45_42a1_a76c_28461362b8a0:
+  BCC	__CMP_NO_385a1023_41e7_4ad7_a9b0_9946415882d3
+  BNE	__CMP_YES_385a1023_41e7_4ad7_a9b0_9946415882d3
+  JMP	__CMP_YES_385a1023_41e7_4ad7_a9b0_9946415882d3
+  __CMP_YES_385a1023_41e7_4ad7_a9b0_9946415882d3:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_bc3b354e_7d45_42a1_a76c_28461362b8a0
-  __CMP_NO_bc3b354e_7d45_42a1_a76c_28461362b8a0:
+  BRA	__CMP_END_385a1023_41e7_4ad7_a9b0_9946415882d3
+  __CMP_NO_385a1023_41e7_4ad7_a9b0_9946415882d3:
   SEP	#$20
   LDA	#$00
-  __CMP_END_bc3b354e_7d45_42a1_a76c_28461362b8a0:
-  BEQ	__IFNOT_370ff6db_1b08_4e22_b2e8_71d41e0a77dd
+  __CMP_END_385a1023_41e7_4ad7_a9b0_9946415882d3:
+  BEQ	__IFNOT_092dd641_70c3_4a14_b215_96fb9932df92
   SEC
   REP	#$20
   LDA	__@specSubX + 0
@@ -7147,7 +6845,7 @@ __mod16by16:	; @func
   LDA	__mod16by16@ret + 2
   ADC	__mod16by16@start + 2
   STA	__mod16by16@ret + 2
-  __IFNOT_370ff6db_1b08_4e22_b2e8_71d41e0a77dd:
+  __IFNOT_092dd641_70c3_4a14_b215_96fb9932df92:
   REP	#$20
   LDA	__@specSubY + 0
   LSR
@@ -7160,8 +6858,8 @@ __mod16by16:	; @func
   LDA	__mod16by16@start + 0
   ROR
   STA	__mod16by16@start + 0
-  JMP	__ITER__START__d3b3fc2e_4539_4214_8daa_85f6bdce65aa
-  __ITER__END__d3b3fc2e_4539_4214_8daa_85f6bdce65aa:
+  JMP	__ITER__START__319b791d_f807_4872_be92_060576308c9c
+  __ITER__END__319b791d_f807_4872_be92_060576308c9c:
   REP	#$20
   LDA	__@specSubX + 0
   STA	__@callResult + 0
@@ -7185,7 +6883,7 @@ __mod24by16:	; @func
   SEP	#$20
   LDA	#$00
   STA	__mod24by16@start + 2
-  __ITER__START__6521a9de_e4cf_44f2_b7ac_8131eb4c4bdf:
+  __ITER__START__49d9cd48_fa61_4ab3_b269_906465301403:
   CLC
   REP	#$20
   LDA	#$0000
@@ -7193,25 +6891,25 @@ __mod24by16:	; @func
   SEP	#$20
   LDA	__@specSubX + 2
   CMP	__@signExtend
-  BCC	__CMP_NO_28214227_0eb2_4fd9_9de8_a4b932fcd493
-  BNE	__CMP_YES_28214227_0eb2_4fd9_9de8_a4b932fcd493
+  BCC	__CMP_NO_372ae2bd_2bac_4304_8810_1c5021d86bc6
+  BNE	__CMP_YES_372ae2bd_2bac_4304_8810_1c5021d86bc6
   LDA	__@specSubX + 0
   CMP	__@specSubY + 0
-  BCC	__CMP_NO_28214227_0eb2_4fd9_9de8_a4b932fcd493
-  BNE	__CMP_YES_28214227_0eb2_4fd9_9de8_a4b932fcd493
-  JMP	__CMP_NO_28214227_0eb2_4fd9_9de8_a4b932fcd493
-  __CMP_YES_28214227_0eb2_4fd9_9de8_a4b932fcd493:
+  BCC	__CMP_NO_372ae2bd_2bac_4304_8810_1c5021d86bc6
+  BNE	__CMP_YES_372ae2bd_2bac_4304_8810_1c5021d86bc6
+  JMP	__CMP_NO_372ae2bd_2bac_4304_8810_1c5021d86bc6
+  __CMP_YES_372ae2bd_2bac_4304_8810_1c5021d86bc6:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_28214227_0eb2_4fd9_9de8_a4b932fcd493
-  __CMP_NO_28214227_0eb2_4fd9_9de8_a4b932fcd493:
+  BRA	__CMP_END_372ae2bd_2bac_4304_8810_1c5021d86bc6
+  __CMP_NO_372ae2bd_2bac_4304_8810_1c5021d86bc6:
   SEP	#$20
   LDA	#$00
-  __CMP_END_28214227_0eb2_4fd9_9de8_a4b932fcd493:
+  __CMP_END_372ae2bd_2bac_4304_8810_1c5021d86bc6:
   SEP	#$20
   CMP	#$00
   BNE	:+
-  JMP	__ITER__END__6521a9de_e4cf_44f2_b7ac_8131eb4c4bdf
+  JMP	__ITER__END__49d9cd48_fa61_4ab3_b269_906465301403
   :
   REP	#$20
   LDA	#$0000
@@ -7219,37 +6917,26 @@ __mod24by16:	; @func
   
   LDA	#$8000
   AND	__@specSubY + 0
-  STA	__@scratchBase + 3
+  STA	__@scratchBase + 0
   SEP	#$20
   LDA	#$00
   AND	__@signExtend
-  STA	__@scratchBase + 5
+  STA	__@scratchBase + 2
   SEP	#$10
   LDX	#$00
   REP	#$20
-  LDA	__@scratchBase + 3
+  LDA	__@scratchBase + 0
   CMP	#$0000
   BNE	:+
   SEP	#$20
-  LDA	__@scratchBase + 5
+  LDA	__@scratchBase + 2
   CMP	#$00
   BNE	:+
   INX
 : TXA
-  SEP	#$20
-  STA	__@scratchBase + 0
-  LDA	#$00
-  STA	__@scratchBase + 1
-  STA	__@scratchBase + 2
-  REP	#$20
-  LDA	__@scratchBase + 0
-  STA	__@scratchBase + 0
-  SEP	#$20
-  LDA	__@scratchBase + 2
-  STA	__@scratchBase + 2
-  BNE	__IFNOT_e5260b01_441f_45e1_b65c_b0cb206223ca
-  JMP	__ITER__END__6521a9de_e4cf_44f2_b7ac_8131eb4c4bdf
-  __IFNOT_e5260b01_441f_45e1_b65c_b0cb206223ca:
+  BNE	__IFNOT_1ba9c98c_7777_43a4_9d3e_f6512b0892e0
+  JMP	__ITER__END__49d9cd48_fa61_4ab3_b269_906465301403
+  __IFNOT_1ba9c98c_7777_43a4_9d3e_f6512b0892e0:
   REP	#$20
   LDA	__@specSubY + 0
   ASL
@@ -7262,9 +6949,9 @@ __mod24by16:	; @func
   LDA	__mod24by16@start + 2
   ROL
   STA	__mod24by16@start + 2
-  JMP	__ITER__START__6521a9de_e4cf_44f2_b7ac_8131eb4c4bdf
-  __ITER__END__6521a9de_e4cf_44f2_b7ac_8131eb4c4bdf:
-  __ITER__START__bcbb4951_82dc_424d_b497_ec4434223890:
+  JMP	__ITER__START__49d9cd48_fa61_4ab3_b269_906465301403
+  __ITER__END__49d9cd48_fa61_4ab3_b269_906465301403:
+  __ITER__START__aff33907_0a78_42ee_a271_9aedb20a7d6e:
   SEP	#$10
   LDX	#$01
   REP	#$20
@@ -7280,7 +6967,7 @@ __mod24by16:	; @func
   SEP	#$20
   CMP	#$00
   BNE	:+
-  JMP	__ITER__END__bcbb4951_82dc_424d_b497_ec4434223890
+  JMP	__ITER__END__aff33907_0a78_42ee_a271_9aedb20a7d6e
   :
   CLC
   REP	#$20
@@ -7289,22 +6976,22 @@ __mod24by16:	; @func
   SEP	#$20
   LDA	__@specSubX + 2
   CMP	__@signExtend
-  BCC	__CMP_NO_94b9ff87_f9d6_40c1_85e6_be56175ec57f
-  BNE	__CMP_YES_94b9ff87_f9d6_40c1_85e6_be56175ec57f
+  BCC	__CMP_NO_a758265d_730e_4bc1_ad25_205869a5d7ba
+  BNE	__CMP_YES_a758265d_730e_4bc1_ad25_205869a5d7ba
   LDA	__@specSubX + 0
   CMP	__@specSubY + 0
-  BCC	__CMP_NO_94b9ff87_f9d6_40c1_85e6_be56175ec57f
-  BNE	__CMP_YES_94b9ff87_f9d6_40c1_85e6_be56175ec57f
-  JMP	__CMP_YES_94b9ff87_f9d6_40c1_85e6_be56175ec57f
-  __CMP_YES_94b9ff87_f9d6_40c1_85e6_be56175ec57f:
+  BCC	__CMP_NO_a758265d_730e_4bc1_ad25_205869a5d7ba
+  BNE	__CMP_YES_a758265d_730e_4bc1_ad25_205869a5d7ba
+  JMP	__CMP_YES_a758265d_730e_4bc1_ad25_205869a5d7ba
+  __CMP_YES_a758265d_730e_4bc1_ad25_205869a5d7ba:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_94b9ff87_f9d6_40c1_85e6_be56175ec57f
-  __CMP_NO_94b9ff87_f9d6_40c1_85e6_be56175ec57f:
+  BRA	__CMP_END_a758265d_730e_4bc1_ad25_205869a5d7ba
+  __CMP_NO_a758265d_730e_4bc1_ad25_205869a5d7ba:
   SEP	#$20
   LDA	#$00
-  __CMP_END_94b9ff87_f9d6_40c1_85e6_be56175ec57f:
-  BEQ	__IFNOT_22ed1043_802d_435b_9c42_52fd81b9989d
+  __CMP_END_a758265d_730e_4bc1_ad25_205869a5d7ba:
+  BEQ	__IFNOT_8904241a_562e_4503_b8af_f46aab81195f
   REP	#$20
   LDA	#$0000
   STA	__@signExtend
@@ -7325,7 +7012,7 @@ __mod24by16:	; @func
   LDA	__mod24by16@ret + 2
   ADC	__mod24by16@start + 2
   STA	__mod24by16@ret + 2
-  __IFNOT_22ed1043_802d_435b_9c42_52fd81b9989d:
+  __IFNOT_8904241a_562e_4503_b8af_f46aab81195f:
   REP	#$20
   LDA	__@specSubY + 0
   LSR
@@ -7338,8 +7025,8 @@ __mod24by16:	; @func
   LDA	__mod24by16@start + 0
   ROR
   STA	__mod24by16@start + 0
-  JMP	__ITER__START__bcbb4951_82dc_424d_b497_ec4434223890
-  __ITER__END__bcbb4951_82dc_424d_b497_ec4434223890:
+  JMP	__ITER__START__aff33907_0a78_42ee_a271_9aedb20a7d6e
+  __ITER__END__aff33907_0a78_42ee_a271_9aedb20a7d6e:
   REP	#$20
   LDA	__@specSubX + 0
   STA	__@callResult + 0
@@ -7363,32 +7050,32 @@ __mod32by16:	; @func
   SEP	#$20
   LDA	#$00
   STA	__mod32by16@start + 2
-  __ITER__START__6c5584b0_25a0_4d6d_b407_04e0bc979b2a:
+  __ITER__START__3a5734ef_2d1c_4fcd_b732_5204722d5456:
   CLC
   REP	#$20
   LDA	#$0000
   STA	__@signExtend
   LDA	__@specSubX + 2
   CMP	__@signExtend
-  BCC	__CMP_NO_192281c7_8be0_4ef8_aebf_8f8521edc5aa
-  BNE	__CMP_YES_192281c7_8be0_4ef8_aebf_8f8521edc5aa
+  BCC	__CMP_NO_b4e4e329_c8ff_4d59_96a8_efe43deccf28
+  BNE	__CMP_YES_b4e4e329_c8ff_4d59_96a8_efe43deccf28
   LDA	__@specSubX + 0
   CMP	__@specSubY + 0
-  BCC	__CMP_NO_192281c7_8be0_4ef8_aebf_8f8521edc5aa
-  BNE	__CMP_YES_192281c7_8be0_4ef8_aebf_8f8521edc5aa
-  JMP	__CMP_NO_192281c7_8be0_4ef8_aebf_8f8521edc5aa
-  __CMP_YES_192281c7_8be0_4ef8_aebf_8f8521edc5aa:
+  BCC	__CMP_NO_b4e4e329_c8ff_4d59_96a8_efe43deccf28
+  BNE	__CMP_YES_b4e4e329_c8ff_4d59_96a8_efe43deccf28
+  JMP	__CMP_NO_b4e4e329_c8ff_4d59_96a8_efe43deccf28
+  __CMP_YES_b4e4e329_c8ff_4d59_96a8_efe43deccf28:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_192281c7_8be0_4ef8_aebf_8f8521edc5aa
-  __CMP_NO_192281c7_8be0_4ef8_aebf_8f8521edc5aa:
+  BRA	__CMP_END_b4e4e329_c8ff_4d59_96a8_efe43deccf28
+  __CMP_NO_b4e4e329_c8ff_4d59_96a8_efe43deccf28:
   SEP	#$20
   LDA	#$00
-  __CMP_END_192281c7_8be0_4ef8_aebf_8f8521edc5aa:
+  __CMP_END_b4e4e329_c8ff_4d59_96a8_efe43deccf28:
   SEP	#$20
   CMP	#$00
   BNE	:+
-  JMP	__ITER__END__6c5584b0_25a0_4d6d_b407_04e0bc979b2a
+  JMP	__ITER__END__3a5734ef_2d1c_4fcd_b732_5204722d5456
   :
   REP	#$20
   LDA	#$0000
@@ -7396,37 +7083,26 @@ __mod32by16:	; @func
   
   LDA	#$8000
   AND	__@specSubY + 0
-  STA	__@scratchBase + 3
+  STA	__@scratchBase + 0
   SEP	#$20
   LDA	#$00
   AND	__@signExtend
-  STA	__@scratchBase + 5
+  STA	__@scratchBase + 2
   SEP	#$10
   LDX	#$00
   REP	#$20
-  LDA	__@scratchBase + 3
+  LDA	__@scratchBase + 0
   CMP	#$0000
   BNE	:+
   SEP	#$20
-  LDA	__@scratchBase + 5
+  LDA	__@scratchBase + 2
   CMP	#$00
   BNE	:+
   INX
 : TXA
-  SEP	#$20
-  STA	__@scratchBase + 0
-  LDA	#$00
-  STA	__@scratchBase + 1
-  STA	__@scratchBase + 2
-  REP	#$20
-  LDA	__@scratchBase + 0
-  STA	__@scratchBase + 0
-  SEP	#$20
-  LDA	__@scratchBase + 2
-  STA	__@scratchBase + 2
-  BNE	__IFNOT_e4dbef64_ea48_4740_98da_1dcaeb906bb9
-  JMP	__ITER__END__6c5584b0_25a0_4d6d_b407_04e0bc979b2a
-  __IFNOT_e4dbef64_ea48_4740_98da_1dcaeb906bb9:
+  BNE	__IFNOT_34c7b687_49ac_4956_b340_0a16b7758aef
+  JMP	__ITER__END__3a5734ef_2d1c_4fcd_b732_5204722d5456
+  __IFNOT_34c7b687_49ac_4956_b340_0a16b7758aef:
   REP	#$20
   LDA	__@specSubY + 0
   ASL
@@ -7439,9 +7115,9 @@ __mod32by16:	; @func
   LDA	__mod32by16@start + 2
   ROL
   STA	__mod32by16@start + 2
-  JMP	__ITER__START__6c5584b0_25a0_4d6d_b407_04e0bc979b2a
-  __ITER__END__6c5584b0_25a0_4d6d_b407_04e0bc979b2a:
-  __ITER__START__46753ff3_5b2c_4a50_87b9_e17d21a60ea2:
+  JMP	__ITER__START__3a5734ef_2d1c_4fcd_b732_5204722d5456
+  __ITER__END__3a5734ef_2d1c_4fcd_b732_5204722d5456:
+  __ITER__START__25d9c994_e143_4ed3_b7e0_9a92483f2467:
   SEP	#$10
   LDX	#$01
   REP	#$20
@@ -7457,7 +7133,7 @@ __mod32by16:	; @func
   SEP	#$20
   CMP	#$00
   BNE	:+
-  JMP	__ITER__END__46753ff3_5b2c_4a50_87b9_e17d21a60ea2
+  JMP	__ITER__END__25d9c994_e143_4ed3_b7e0_9a92483f2467
   :
   CLC
   REP	#$20
@@ -7465,22 +7141,22 @@ __mod32by16:	; @func
   STA	__@signExtend
   LDA	__@specSubX + 2
   CMP	__@signExtend
-  BCC	__CMP_NO_f273056f_dcf5_4ad0_b261_6aee41ef4599
-  BNE	__CMP_YES_f273056f_dcf5_4ad0_b261_6aee41ef4599
+  BCC	__CMP_NO_6eecdfd7_e084_4c38_b60f_7be09681f21e
+  BNE	__CMP_YES_6eecdfd7_e084_4c38_b60f_7be09681f21e
   LDA	__@specSubX + 0
   CMP	__@specSubY + 0
-  BCC	__CMP_NO_f273056f_dcf5_4ad0_b261_6aee41ef4599
-  BNE	__CMP_YES_f273056f_dcf5_4ad0_b261_6aee41ef4599
-  JMP	__CMP_YES_f273056f_dcf5_4ad0_b261_6aee41ef4599
-  __CMP_YES_f273056f_dcf5_4ad0_b261_6aee41ef4599:
+  BCC	__CMP_NO_6eecdfd7_e084_4c38_b60f_7be09681f21e
+  BNE	__CMP_YES_6eecdfd7_e084_4c38_b60f_7be09681f21e
+  JMP	__CMP_YES_6eecdfd7_e084_4c38_b60f_7be09681f21e
+  __CMP_YES_6eecdfd7_e084_4c38_b60f_7be09681f21e:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_f273056f_dcf5_4ad0_b261_6aee41ef4599
-  __CMP_NO_f273056f_dcf5_4ad0_b261_6aee41ef4599:
+  BRA	__CMP_END_6eecdfd7_e084_4c38_b60f_7be09681f21e
+  __CMP_NO_6eecdfd7_e084_4c38_b60f_7be09681f21e:
   SEP	#$20
   LDA	#$00
-  __CMP_END_f273056f_dcf5_4ad0_b261_6aee41ef4599:
-  BEQ	__IFNOT_1f9bb143_e29b_4d3f_b4b7_f7d75bf1eaf3
+  __CMP_END_6eecdfd7_e084_4c38_b60f_7be09681f21e:
+  BEQ	__IFNOT_c91c02d9_b9b9_42e3_a3fa_b6a9fb69103f
   REP	#$20
   LDA	#$0000
   STA	__@signExtend
@@ -7501,7 +7177,7 @@ __mod32by16:	; @func
   LDA	__mod32by16@ret + 2
   ADC	__mod32by16@start + 2
   STA	__mod32by16@ret + 2
-  __IFNOT_1f9bb143_e29b_4d3f_b4b7_f7d75bf1eaf3:
+  __IFNOT_c91c02d9_b9b9_42e3_a3fa_b6a9fb69103f:
   REP	#$20
   LDA	__@specSubY + 0
   LSR
@@ -7514,8 +7190,8 @@ __mod32by16:	; @func
   LDA	__mod32by16@start + 0
   ROR
   STA	__mod32by16@start + 0
-  JMP	__ITER__START__46753ff3_5b2c_4a50_87b9_e17d21a60ea2
-  __ITER__END__46753ff3_5b2c_4a50_87b9_e17d21a60ea2:
+  JMP	__ITER__START__25d9c994_e143_4ed3_b7e0_9a92483f2467
+  __ITER__END__25d9c994_e143_4ed3_b7e0_9a92483f2467:
   REP	#$20
   LDA	__@specSubX + 0
   STA	__@callResult + 0
@@ -7539,40 +7215,40 @@ __mod64by16:	; @func
   SEP	#$20
   LDA	#$00
   STA	__mod64by16@start + 2
-  __ITER__START__61d61823_ce36_4ee3_8411_1a6d1dbb1a13:
+  __ITER__START__ef49b949_e5f6_4681_a87e_ea81e03bd89c:
   CLC
   REP	#$20
   LDA	#$0000
   STA	__@signExtend
   LDA	__@specSubX + 6
   CMP	__@signExtend
-  BCC	__CMP_NO_f21efc3c_eefe_4ce1_9c87_d3070b2b7b70
-  BNE	__CMP_YES_f21efc3c_eefe_4ce1_9c87_d3070b2b7b70
+  BCC	__CMP_NO_beecb487_c631_4e6a_8371_aba37b0cd096
+  BNE	__CMP_YES_beecb487_c631_4e6a_8371_aba37b0cd096
   LDA	__@specSubX + 4
   CMP	__@signExtend
-  BCC	__CMP_NO_f21efc3c_eefe_4ce1_9c87_d3070b2b7b70
-  BNE	__CMP_YES_f21efc3c_eefe_4ce1_9c87_d3070b2b7b70
+  BCC	__CMP_NO_beecb487_c631_4e6a_8371_aba37b0cd096
+  BNE	__CMP_YES_beecb487_c631_4e6a_8371_aba37b0cd096
   LDA	__@specSubX + 2
   CMP	__@signExtend
-  BCC	__CMP_NO_f21efc3c_eefe_4ce1_9c87_d3070b2b7b70
-  BNE	__CMP_YES_f21efc3c_eefe_4ce1_9c87_d3070b2b7b70
+  BCC	__CMP_NO_beecb487_c631_4e6a_8371_aba37b0cd096
+  BNE	__CMP_YES_beecb487_c631_4e6a_8371_aba37b0cd096
   LDA	__@specSubX + 0
   CMP	__@specSubY + 0
-  BCC	__CMP_NO_f21efc3c_eefe_4ce1_9c87_d3070b2b7b70
-  BNE	__CMP_YES_f21efc3c_eefe_4ce1_9c87_d3070b2b7b70
-  JMP	__CMP_NO_f21efc3c_eefe_4ce1_9c87_d3070b2b7b70
-  __CMP_YES_f21efc3c_eefe_4ce1_9c87_d3070b2b7b70:
+  BCC	__CMP_NO_beecb487_c631_4e6a_8371_aba37b0cd096
+  BNE	__CMP_YES_beecb487_c631_4e6a_8371_aba37b0cd096
+  JMP	__CMP_NO_beecb487_c631_4e6a_8371_aba37b0cd096
+  __CMP_YES_beecb487_c631_4e6a_8371_aba37b0cd096:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_f21efc3c_eefe_4ce1_9c87_d3070b2b7b70
-  __CMP_NO_f21efc3c_eefe_4ce1_9c87_d3070b2b7b70:
+  BRA	__CMP_END_beecb487_c631_4e6a_8371_aba37b0cd096
+  __CMP_NO_beecb487_c631_4e6a_8371_aba37b0cd096:
   SEP	#$20
   LDA	#$00
-  __CMP_END_f21efc3c_eefe_4ce1_9c87_d3070b2b7b70:
+  __CMP_END_beecb487_c631_4e6a_8371_aba37b0cd096:
   SEP	#$20
   CMP	#$00
   BNE	:+
-  JMP	__ITER__END__61d61823_ce36_4ee3_8411_1a6d1dbb1a13
+  JMP	__ITER__END__ef49b949_e5f6_4681_a87e_ea81e03bd89c
   :
   REP	#$20
   LDA	#$0000
@@ -7580,37 +7256,26 @@ __mod64by16:	; @func
   
   LDA	#$8000
   AND	__@specSubY + 0
-  STA	__@scratchBase + 3
+  STA	__@scratchBase + 0
   SEP	#$20
   LDA	#$00
   AND	__@signExtend
-  STA	__@scratchBase + 5
+  STA	__@scratchBase + 2
   SEP	#$10
   LDX	#$00
   REP	#$20
-  LDA	__@scratchBase + 3
+  LDA	__@scratchBase + 0
   CMP	#$0000
   BNE	:+
   SEP	#$20
-  LDA	__@scratchBase + 5
+  LDA	__@scratchBase + 2
   CMP	#$00
   BNE	:+
   INX
 : TXA
-  SEP	#$20
-  STA	__@scratchBase + 0
-  LDA	#$00
-  STA	__@scratchBase + 1
-  STA	__@scratchBase + 2
-  REP	#$20
-  LDA	__@scratchBase + 0
-  STA	__@scratchBase + 0
-  SEP	#$20
-  LDA	__@scratchBase + 2
-  STA	__@scratchBase + 2
-  BNE	__IFNOT_d567c60a_6d72_4aef_97a2_979bc14c71ab
-  JMP	__ITER__END__61d61823_ce36_4ee3_8411_1a6d1dbb1a13
-  __IFNOT_d567c60a_6d72_4aef_97a2_979bc14c71ab:
+  BNE	__IFNOT_df485932_7529_4d1e_ae2d_c1906d78fd97
+  JMP	__ITER__END__ef49b949_e5f6_4681_a87e_ea81e03bd89c
+  __IFNOT_df485932_7529_4d1e_ae2d_c1906d78fd97:
   REP	#$20
   LDA	__@specSubY + 0
   ASL
@@ -7623,9 +7288,9 @@ __mod64by16:	; @func
   LDA	__mod64by16@start + 2
   ROL
   STA	__mod64by16@start + 2
-  JMP	__ITER__START__61d61823_ce36_4ee3_8411_1a6d1dbb1a13
-  __ITER__END__61d61823_ce36_4ee3_8411_1a6d1dbb1a13:
-  __ITER__START__56ae649c_13a0_445f_9cb7_23f96104ba82:
+  JMP	__ITER__START__ef49b949_e5f6_4681_a87e_ea81e03bd89c
+  __ITER__END__ef49b949_e5f6_4681_a87e_ea81e03bd89c:
+  __ITER__START__18716238_5163_4ede_b528_33cbdb7516d6:
   SEP	#$10
   LDX	#$01
   REP	#$20
@@ -7641,7 +7306,7 @@ __mod64by16:	; @func
   SEP	#$20
   CMP	#$00
   BNE	:+
-  JMP	__ITER__END__56ae649c_13a0_445f_9cb7_23f96104ba82
+  JMP	__ITER__END__18716238_5163_4ede_b528_33cbdb7516d6
   :
   CLC
   REP	#$20
@@ -7649,30 +7314,30 @@ __mod64by16:	; @func
   STA	__@signExtend
   LDA	__@specSubX + 6
   CMP	__@signExtend
-  BCC	__CMP_NO_06514998_3ecf_4a44_a06a_94d58b7f1b30
-  BNE	__CMP_YES_06514998_3ecf_4a44_a06a_94d58b7f1b30
+  BCC	__CMP_NO_c4e37572_fb71_419c_9b42_4891ff5985af
+  BNE	__CMP_YES_c4e37572_fb71_419c_9b42_4891ff5985af
   LDA	__@specSubX + 4
   CMP	__@signExtend
-  BCC	__CMP_NO_06514998_3ecf_4a44_a06a_94d58b7f1b30
-  BNE	__CMP_YES_06514998_3ecf_4a44_a06a_94d58b7f1b30
+  BCC	__CMP_NO_c4e37572_fb71_419c_9b42_4891ff5985af
+  BNE	__CMP_YES_c4e37572_fb71_419c_9b42_4891ff5985af
   LDA	__@specSubX + 2
   CMP	__@signExtend
-  BCC	__CMP_NO_06514998_3ecf_4a44_a06a_94d58b7f1b30
-  BNE	__CMP_YES_06514998_3ecf_4a44_a06a_94d58b7f1b30
+  BCC	__CMP_NO_c4e37572_fb71_419c_9b42_4891ff5985af
+  BNE	__CMP_YES_c4e37572_fb71_419c_9b42_4891ff5985af
   LDA	__@specSubX + 0
   CMP	__@specSubY + 0
-  BCC	__CMP_NO_06514998_3ecf_4a44_a06a_94d58b7f1b30
-  BNE	__CMP_YES_06514998_3ecf_4a44_a06a_94d58b7f1b30
-  JMP	__CMP_YES_06514998_3ecf_4a44_a06a_94d58b7f1b30
-  __CMP_YES_06514998_3ecf_4a44_a06a_94d58b7f1b30:
+  BCC	__CMP_NO_c4e37572_fb71_419c_9b42_4891ff5985af
+  BNE	__CMP_YES_c4e37572_fb71_419c_9b42_4891ff5985af
+  JMP	__CMP_YES_c4e37572_fb71_419c_9b42_4891ff5985af
+  __CMP_YES_c4e37572_fb71_419c_9b42_4891ff5985af:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_06514998_3ecf_4a44_a06a_94d58b7f1b30
-  __CMP_NO_06514998_3ecf_4a44_a06a_94d58b7f1b30:
+  BRA	__CMP_END_c4e37572_fb71_419c_9b42_4891ff5985af
+  __CMP_NO_c4e37572_fb71_419c_9b42_4891ff5985af:
   SEP	#$20
   LDA	#$00
-  __CMP_END_06514998_3ecf_4a44_a06a_94d58b7f1b30:
-  BEQ	__IFNOT_c8aea7d7_fbcb_4a20_ad2b_8b21d70e52c9
+  __CMP_END_c4e37572_fb71_419c_9b42_4891ff5985af:
+  BEQ	__IFNOT_01965fe2_5bc7_4f97_aedf_73f2592b1b29
   REP	#$20
   LDA	#$0000
   STA	__@signExtend
@@ -7701,7 +7366,7 @@ __mod64by16:	; @func
   LDA	__mod64by16@ret + 2
   ADC	__mod64by16@start + 2
   STA	__mod64by16@ret + 2
-  __IFNOT_c8aea7d7_fbcb_4a20_ad2b_8b21d70e52c9:
+  __IFNOT_01965fe2_5bc7_4f97_aedf_73f2592b1b29:
   REP	#$20
   LDA	__@specSubY + 0
   LSR
@@ -7714,8 +7379,8 @@ __mod64by16:	; @func
   LDA	__mod64by16@start + 0
   ROR
   STA	__mod64by16@start + 0
-  JMP	__ITER__START__56ae649c_13a0_445f_9cb7_23f96104ba82
-  __ITER__END__56ae649c_13a0_445f_9cb7_23f96104ba82:
+  JMP	__ITER__START__18716238_5163_4ede_b528_33cbdb7516d6
+  __ITER__END__18716238_5163_4ede_b528_33cbdb7516d6:
   REP	#$20
   LDA	__@specSubX + 0
   STA	__@callResult + 0
@@ -7745,69 +7410,58 @@ __mod8by24:	; @func
   SEP	#$20
   LDA	#$00
   STA	__mod8by24@start + 2
-  __ITER__START__0e30140b_6a2b_48b0_ad7d_f75187bb14f6:
+  __ITER__START__fc73ef90_d92c_4bb6_a5d6_bacaac711932:
   CLC
   REP	#$20
   LDA	#$0000
   STA	__@signExtend
   LDA	__@signExtend
   CMP	__@specSubY + 1
-  BCC	__CMP_NO_e4d2c988_5791_4339_b544_df17e97848e9
-  BNE	__CMP_YES_e4d2c988_5791_4339_b544_df17e97848e9
+  BCC	__CMP_NO_97ea6612_4075_4b0d_b6bb_ee687332d9c7
+  BNE	__CMP_YES_97ea6612_4075_4b0d_b6bb_ee687332d9c7
   SEP	#$20
   LDA	__@specSubX + 0
   CMP	__@specSubY + 0
-  BCC	__CMP_NO_e4d2c988_5791_4339_b544_df17e97848e9
-  BNE	__CMP_YES_e4d2c988_5791_4339_b544_df17e97848e9
-  JMP	__CMP_NO_e4d2c988_5791_4339_b544_df17e97848e9
-  __CMP_YES_e4d2c988_5791_4339_b544_df17e97848e9:
+  BCC	__CMP_NO_97ea6612_4075_4b0d_b6bb_ee687332d9c7
+  BNE	__CMP_YES_97ea6612_4075_4b0d_b6bb_ee687332d9c7
+  JMP	__CMP_NO_97ea6612_4075_4b0d_b6bb_ee687332d9c7
+  __CMP_YES_97ea6612_4075_4b0d_b6bb_ee687332d9c7:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_e4d2c988_5791_4339_b544_df17e97848e9
-  __CMP_NO_e4d2c988_5791_4339_b544_df17e97848e9:
+  BRA	__CMP_END_97ea6612_4075_4b0d_b6bb_ee687332d9c7
+  __CMP_NO_97ea6612_4075_4b0d_b6bb_ee687332d9c7:
   SEP	#$20
   LDA	#$00
-  __CMP_END_e4d2c988_5791_4339_b544_df17e97848e9:
+  __CMP_END_97ea6612_4075_4b0d_b6bb_ee687332d9c7:
   SEP	#$20
   CMP	#$00
   BNE	:+
-  JMP	__ITER__END__0e30140b_6a2b_48b0_ad7d_f75187bb14f6
+  JMP	__ITER__END__fc73ef90_d92c_4bb6_a5d6_bacaac711932
   :
   
   REP	#$20
   LDA	#$0000
   AND	__@specSubY + 0
-  STA	__@scratchBase + 3
+  STA	__@scratchBase + 0
   SEP	#$20
   LDA	#$80
   AND	__@specSubY + 2
-  STA	__@scratchBase + 5
+  STA	__@scratchBase + 2
   SEP	#$10
   LDX	#$00
   REP	#$20
-  LDA	__@scratchBase + 3
+  LDA	__@scratchBase + 0
   CMP	#$0000
   BNE	:+
   SEP	#$20
-  LDA	__@scratchBase + 5
+  LDA	__@scratchBase + 2
   CMP	#$00
   BNE	:+
   INX
 : TXA
-  SEP	#$20
-  STA	__@scratchBase + 0
-  LDA	#$00
-  STA	__@scratchBase + 1
-  STA	__@scratchBase + 2
-  REP	#$20
-  LDA	__@scratchBase + 0
-  STA	__@scratchBase + 0
-  SEP	#$20
-  LDA	__@scratchBase + 2
-  STA	__@scratchBase + 2
-  BNE	__IFNOT_d5bcb565_4739_4460_9d46_735bfc6c167c
-  JMP	__ITER__END__0e30140b_6a2b_48b0_ad7d_f75187bb14f6
-  __IFNOT_d5bcb565_4739_4460_9d46_735bfc6c167c:
+  BNE	__IFNOT_88795099_c5b8_4880_937b_43db5778253a
+  JMP	__ITER__END__fc73ef90_d92c_4bb6_a5d6_bacaac711932
+  __IFNOT_88795099_c5b8_4880_937b_43db5778253a:
   REP	#$20
   LDA	__@specSubY + 0
   ASL
@@ -7824,9 +7478,9 @@ __mod8by24:	; @func
   LDA	__mod8by24@start + 2
   ROL
   STA	__mod8by24@start + 2
-  JMP	__ITER__START__0e30140b_6a2b_48b0_ad7d_f75187bb14f6
-  __ITER__END__0e30140b_6a2b_48b0_ad7d_f75187bb14f6:
-  __ITER__START__0be1335a_66d0_4db5_80e6_f15ab3318d7b:
+  JMP	__ITER__START__fc73ef90_d92c_4bb6_a5d6_bacaac711932
+  __ITER__END__fc73ef90_d92c_4bb6_a5d6_bacaac711932:
+  __ITER__START__ab40755e_e910_4299_8ad9_1cc78ba1fef7:
   SEP	#$10
   LDX	#$01
   REP	#$20
@@ -7842,7 +7496,7 @@ __mod8by24:	; @func
   SEP	#$20
   CMP	#$00
   BNE	:+
-  JMP	__ITER__END__0be1335a_66d0_4db5_80e6_f15ab3318d7b
+  JMP	__ITER__END__ab40755e_e910_4299_8ad9_1cc78ba1fef7
   :
   CLC
   REP	#$20
@@ -7850,23 +7504,23 @@ __mod8by24:	; @func
   STA	__@signExtend
   LDA	__@signExtend
   CMP	__@specSubY + 1
-  BCC	__CMP_NO_cb8f5e73_6e64_464b_9f17_06e637109fcd
-  BNE	__CMP_YES_cb8f5e73_6e64_464b_9f17_06e637109fcd
+  BCC	__CMP_NO_e296889c_4bf5_44a1_879a_541404e90453
+  BNE	__CMP_YES_e296889c_4bf5_44a1_879a_541404e90453
   SEP	#$20
   LDA	__@specSubX + 0
   CMP	__@specSubY + 0
-  BCC	__CMP_NO_cb8f5e73_6e64_464b_9f17_06e637109fcd
-  BNE	__CMP_YES_cb8f5e73_6e64_464b_9f17_06e637109fcd
-  JMP	__CMP_YES_cb8f5e73_6e64_464b_9f17_06e637109fcd
-  __CMP_YES_cb8f5e73_6e64_464b_9f17_06e637109fcd:
+  BCC	__CMP_NO_e296889c_4bf5_44a1_879a_541404e90453
+  BNE	__CMP_YES_e296889c_4bf5_44a1_879a_541404e90453
+  JMP	__CMP_YES_e296889c_4bf5_44a1_879a_541404e90453
+  __CMP_YES_e296889c_4bf5_44a1_879a_541404e90453:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_cb8f5e73_6e64_464b_9f17_06e637109fcd
-  __CMP_NO_cb8f5e73_6e64_464b_9f17_06e637109fcd:
+  BRA	__CMP_END_e296889c_4bf5_44a1_879a_541404e90453
+  __CMP_NO_e296889c_4bf5_44a1_879a_541404e90453:
   SEP	#$20
   LDA	#$00
-  __CMP_END_cb8f5e73_6e64_464b_9f17_06e637109fcd:
-  BEQ	__IFNOT_b4bada2e_c17a_4ffc_ac90_96df2787c357
+  __CMP_END_e296889c_4bf5_44a1_879a_541404e90453:
+  BEQ	__IFNOT_93c6ee05_8e8c_47a3_9a16_9c4dd4f88b63
   REP	#$20
   LDA	#$0000
   STA	__@signExtend
@@ -7884,7 +7538,7 @@ __mod8by24:	; @func
   LDA	__mod8by24@ret + 2
   ADC	__mod8by24@start + 2
   STA	__mod8by24@ret + 2
-  __IFNOT_b4bada2e_c17a_4ffc_ac90_96df2787c357:
+  __IFNOT_93c6ee05_8e8c_47a3_9a16_9c4dd4f88b63:
   REP	#$20
   LDA	__@specSubY + 1
   LSR
@@ -7901,8 +7555,8 @@ __mod8by24:	; @func
   LDA	__mod8by24@start + 0
   ROR
   STA	__mod8by24@start + 0
-  JMP	__ITER__START__0be1335a_66d0_4db5_80e6_f15ab3318d7b
-  __ITER__END__0be1335a_66d0_4db5_80e6_f15ab3318d7b:
+  JMP	__ITER__START__ab40755e_e910_4299_8ad9_1cc78ba1fef7
+  __ITER__END__ab40755e_e910_4299_8ad9_1cc78ba1fef7:
   REP	#$20
   LDA	__@specSubX + 0
   STA	__@callResult + 0
@@ -7926,7 +7580,7 @@ __mod16by24:	; @func
   SEP	#$20
   LDA	#$00
   STA	__mod16by24@start + 2
-  __ITER__START__5e548ec0_58d0_4a4e_ba04_96e5d72be677:
+  __ITER__START__e9e20e6d_3b64_4044_a2c1_e9c4c5d9398b:
   CLC
   REP	#$20
   LDA	#$0000
@@ -7934,61 +7588,50 @@ __mod16by24:	; @func
   SEP	#$20
   LDA	__@signExtend
   CMP	__@specSubY + 2
-  BCC	__CMP_NO_ab29e216_121b_449c_8ab5_1139e4a76c9d
-  BNE	__CMP_YES_ab29e216_121b_449c_8ab5_1139e4a76c9d
+  BCC	__CMP_NO_6f334412_b81b_4d52_90c0_a4fbc1e8a1c3
+  BNE	__CMP_YES_6f334412_b81b_4d52_90c0_a4fbc1e8a1c3
   LDA	__@specSubX + 0
   CMP	__@specSubY + 0
-  BCC	__CMP_NO_ab29e216_121b_449c_8ab5_1139e4a76c9d
-  BNE	__CMP_YES_ab29e216_121b_449c_8ab5_1139e4a76c9d
-  JMP	__CMP_NO_ab29e216_121b_449c_8ab5_1139e4a76c9d
-  __CMP_YES_ab29e216_121b_449c_8ab5_1139e4a76c9d:
+  BCC	__CMP_NO_6f334412_b81b_4d52_90c0_a4fbc1e8a1c3
+  BNE	__CMP_YES_6f334412_b81b_4d52_90c0_a4fbc1e8a1c3
+  JMP	__CMP_NO_6f334412_b81b_4d52_90c0_a4fbc1e8a1c3
+  __CMP_YES_6f334412_b81b_4d52_90c0_a4fbc1e8a1c3:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_ab29e216_121b_449c_8ab5_1139e4a76c9d
-  __CMP_NO_ab29e216_121b_449c_8ab5_1139e4a76c9d:
+  BRA	__CMP_END_6f334412_b81b_4d52_90c0_a4fbc1e8a1c3
+  __CMP_NO_6f334412_b81b_4d52_90c0_a4fbc1e8a1c3:
   SEP	#$20
   LDA	#$00
-  __CMP_END_ab29e216_121b_449c_8ab5_1139e4a76c9d:
+  __CMP_END_6f334412_b81b_4d52_90c0_a4fbc1e8a1c3:
   SEP	#$20
   CMP	#$00
   BNE	:+
-  JMP	__ITER__END__5e548ec0_58d0_4a4e_ba04_96e5d72be677
+  JMP	__ITER__END__e9e20e6d_3b64_4044_a2c1_e9c4c5d9398b
   :
   
   REP	#$20
   LDA	#$0000
   AND	__@specSubY + 0
-  STA	__@scratchBase + 3
+  STA	__@scratchBase + 0
   SEP	#$20
   LDA	#$80
   AND	__@specSubY + 2
-  STA	__@scratchBase + 5
+  STA	__@scratchBase + 2
   SEP	#$10
   LDX	#$00
   REP	#$20
-  LDA	__@scratchBase + 3
+  LDA	__@scratchBase + 0
   CMP	#$0000
   BNE	:+
   SEP	#$20
-  LDA	__@scratchBase + 5
+  LDA	__@scratchBase + 2
   CMP	#$00
   BNE	:+
   INX
 : TXA
-  SEP	#$20
-  STA	__@scratchBase + 0
-  LDA	#$00
-  STA	__@scratchBase + 1
-  STA	__@scratchBase + 2
-  REP	#$20
-  LDA	__@scratchBase + 0
-  STA	__@scratchBase + 0
-  SEP	#$20
-  LDA	__@scratchBase + 2
-  STA	__@scratchBase + 2
-  BNE	__IFNOT_930d3fdc_f2f1_4699_ab93_d179774d4658
-  JMP	__ITER__END__5e548ec0_58d0_4a4e_ba04_96e5d72be677
-  __IFNOT_930d3fdc_f2f1_4699_ab93_d179774d4658:
+  BNE	__IFNOT_fc3873dd_6201_40f2_a9cf_f7a3b0e627d2
+  JMP	__ITER__END__e9e20e6d_3b64_4044_a2c1_e9c4c5d9398b
+  __IFNOT_fc3873dd_6201_40f2_a9cf_f7a3b0e627d2:
   REP	#$20
   LDA	__@specSubY + 0
   ASL
@@ -8005,9 +7648,9 @@ __mod16by24:	; @func
   LDA	__mod16by24@start + 2
   ROL
   STA	__mod16by24@start + 2
-  JMP	__ITER__START__5e548ec0_58d0_4a4e_ba04_96e5d72be677
-  __ITER__END__5e548ec0_58d0_4a4e_ba04_96e5d72be677:
-  __ITER__START__deb6bec8_a2ef_469f_b645_4a84b3cc8f22:
+  JMP	__ITER__START__e9e20e6d_3b64_4044_a2c1_e9c4c5d9398b
+  __ITER__END__e9e20e6d_3b64_4044_a2c1_e9c4c5d9398b:
+  __ITER__START__13de07b4_3f0b_4eef_b195_8405007d6c93:
   SEP	#$10
   LDX	#$01
   REP	#$20
@@ -8023,7 +7666,7 @@ __mod16by24:	; @func
   SEP	#$20
   CMP	#$00
   BNE	:+
-  JMP	__ITER__END__deb6bec8_a2ef_469f_b645_4a84b3cc8f22
+  JMP	__ITER__END__13de07b4_3f0b_4eef_b195_8405007d6c93
   :
   CLC
   REP	#$20
@@ -8032,22 +7675,22 @@ __mod16by24:	; @func
   SEP	#$20
   LDA	__@signExtend
   CMP	__@specSubY + 2
-  BCC	__CMP_NO_90aaf4c1_6924_4693_8f6e_23c52ebb4a17
-  BNE	__CMP_YES_90aaf4c1_6924_4693_8f6e_23c52ebb4a17
+  BCC	__CMP_NO_f1eac784_42f8_49ba_9893_4dab5b898d63
+  BNE	__CMP_YES_f1eac784_42f8_49ba_9893_4dab5b898d63
   LDA	__@specSubX + 0
   CMP	__@specSubY + 0
-  BCC	__CMP_NO_90aaf4c1_6924_4693_8f6e_23c52ebb4a17
-  BNE	__CMP_YES_90aaf4c1_6924_4693_8f6e_23c52ebb4a17
-  JMP	__CMP_YES_90aaf4c1_6924_4693_8f6e_23c52ebb4a17
-  __CMP_YES_90aaf4c1_6924_4693_8f6e_23c52ebb4a17:
+  BCC	__CMP_NO_f1eac784_42f8_49ba_9893_4dab5b898d63
+  BNE	__CMP_YES_f1eac784_42f8_49ba_9893_4dab5b898d63
+  JMP	__CMP_YES_f1eac784_42f8_49ba_9893_4dab5b898d63
+  __CMP_YES_f1eac784_42f8_49ba_9893_4dab5b898d63:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_90aaf4c1_6924_4693_8f6e_23c52ebb4a17
-  __CMP_NO_90aaf4c1_6924_4693_8f6e_23c52ebb4a17:
+  BRA	__CMP_END_f1eac784_42f8_49ba_9893_4dab5b898d63
+  __CMP_NO_f1eac784_42f8_49ba_9893_4dab5b898d63:
   SEP	#$20
   LDA	#$00
-  __CMP_END_90aaf4c1_6924_4693_8f6e_23c52ebb4a17:
-  BEQ	__IFNOT_f4dae96f_1769_4650_9b05_fb3bd7742911
+  __CMP_END_f1eac784_42f8_49ba_9893_4dab5b898d63:
+  BEQ	__IFNOT_47bcdad9_114c_4d71_8489_fd65385fb0bb
   REP	#$20
   LDA	#$0000
   STA	__@signExtend
@@ -8064,7 +7707,7 @@ __mod16by24:	; @func
   LDA	__mod16by24@ret + 2
   ADC	__mod16by24@start + 2
   STA	__mod16by24@ret + 2
-  __IFNOT_f4dae96f_1769_4650_9b05_fb3bd7742911:
+  __IFNOT_47bcdad9_114c_4d71_8489_fd65385fb0bb:
   REP	#$20
   LDA	__@specSubY + 1
   LSR
@@ -8081,8 +7724,8 @@ __mod16by24:	; @func
   LDA	__mod16by24@start + 0
   ROR
   STA	__mod16by24@start + 0
-  JMP	__ITER__START__deb6bec8_a2ef_469f_b645_4a84b3cc8f22
-  __ITER__END__deb6bec8_a2ef_469f_b645_4a84b3cc8f22:
+  JMP	__ITER__START__13de07b4_3f0b_4eef_b195_8405007d6c93
+  __ITER__END__13de07b4_3f0b_4eef_b195_8405007d6c93:
   REP	#$20
   LDA	__@specSubX + 0
   STA	__@callResult + 0
@@ -8106,68 +7749,57 @@ __mod24by24:	; @func
   SEP	#$20
   LDA	#$00
   STA	__mod24by24@start + 2
-  __ITER__START__53a36642_0401_4cd9_bda5_c85da34c9f1f:
+  __ITER__START__6e92b0dd_259d_411f_886f_587fca63dc55:
   CLC
   REP	#$20
   REP	#$20
   LDA	__@specSubX + 1
   CMP	__@specSubY + 1
-  BCC	__CMP_NO_281032ab_76aa_402b_9b5f_adca0353d363
-  BNE	__CMP_YES_281032ab_76aa_402b_9b5f_adca0353d363
+  BCC	__CMP_NO_e8327c19_efe3_445d_a380_09c11d3d9d7c
+  BNE	__CMP_YES_e8327c19_efe3_445d_a380_09c11d3d9d7c
   SEP	#$20
   LDA	__@specSubX + 0
   CMP	__@specSubY + 0
-  BCC	__CMP_NO_281032ab_76aa_402b_9b5f_adca0353d363
-  BNE	__CMP_YES_281032ab_76aa_402b_9b5f_adca0353d363
-  JMP	__CMP_NO_281032ab_76aa_402b_9b5f_adca0353d363
-  __CMP_YES_281032ab_76aa_402b_9b5f_adca0353d363:
+  BCC	__CMP_NO_e8327c19_efe3_445d_a380_09c11d3d9d7c
+  BNE	__CMP_YES_e8327c19_efe3_445d_a380_09c11d3d9d7c
+  JMP	__CMP_NO_e8327c19_efe3_445d_a380_09c11d3d9d7c
+  __CMP_YES_e8327c19_efe3_445d_a380_09c11d3d9d7c:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_281032ab_76aa_402b_9b5f_adca0353d363
-  __CMP_NO_281032ab_76aa_402b_9b5f_adca0353d363:
+  BRA	__CMP_END_e8327c19_efe3_445d_a380_09c11d3d9d7c
+  __CMP_NO_e8327c19_efe3_445d_a380_09c11d3d9d7c:
   SEP	#$20
   LDA	#$00
-  __CMP_END_281032ab_76aa_402b_9b5f_adca0353d363:
+  __CMP_END_e8327c19_efe3_445d_a380_09c11d3d9d7c:
   SEP	#$20
   CMP	#$00
   BNE	:+
-  JMP	__ITER__END__53a36642_0401_4cd9_bda5_c85da34c9f1f
+  JMP	__ITER__END__6e92b0dd_259d_411f_886f_587fca63dc55
   :
   
   REP	#$20
   LDA	#$0000
   AND	__@specSubY + 0
-  STA	__@scratchBase + 3
+  STA	__@scratchBase + 0
   SEP	#$20
   LDA	#$80
   AND	__@specSubY + 2
-  STA	__@scratchBase + 5
+  STA	__@scratchBase + 2
   SEP	#$10
   LDX	#$00
   REP	#$20
-  LDA	__@scratchBase + 3
+  LDA	__@scratchBase + 0
   CMP	#$0000
   BNE	:+
   SEP	#$20
-  LDA	__@scratchBase + 5
+  LDA	__@scratchBase + 2
   CMP	#$00
   BNE	:+
   INX
 : TXA
-  SEP	#$20
-  STA	__@scratchBase + 0
-  LDA	#$00
-  STA	__@scratchBase + 1
-  STA	__@scratchBase + 2
-  REP	#$20
-  LDA	__@scratchBase + 0
-  STA	__@scratchBase + 0
-  SEP	#$20
-  LDA	__@scratchBase + 2
-  STA	__@scratchBase + 2
-  BNE	__IFNOT_e6d2ad62_9115_4820_9f65_088ef91ee04e
-  JMP	__ITER__END__53a36642_0401_4cd9_bda5_c85da34c9f1f
-  __IFNOT_e6d2ad62_9115_4820_9f65_088ef91ee04e:
+  BNE	__IFNOT_a5c19791_5447_45f6_b7ee_e585a63032eb
+  JMP	__ITER__END__6e92b0dd_259d_411f_886f_587fca63dc55
+  __IFNOT_a5c19791_5447_45f6_b7ee_e585a63032eb:
   REP	#$20
   LDA	__@specSubY + 0
   ASL
@@ -8184,9 +7816,9 @@ __mod24by24:	; @func
   LDA	__mod24by24@start + 2
   ROL
   STA	__mod24by24@start + 2
-  JMP	__ITER__START__53a36642_0401_4cd9_bda5_c85da34c9f1f
-  __ITER__END__53a36642_0401_4cd9_bda5_c85da34c9f1f:
-  __ITER__START__7b7c529d_b7bb_4dcb_839e_349de35d6137:
+  JMP	__ITER__START__6e92b0dd_259d_411f_886f_587fca63dc55
+  __ITER__END__6e92b0dd_259d_411f_886f_587fca63dc55:
+  __ITER__START__55d19179_2d15_445b_b4a6_7f05fdd6b385:
   SEP	#$10
   LDX	#$01
   REP	#$20
@@ -8202,30 +7834,30 @@ __mod24by24:	; @func
   SEP	#$20
   CMP	#$00
   BNE	:+
-  JMP	__ITER__END__7b7c529d_b7bb_4dcb_839e_349de35d6137
+  JMP	__ITER__END__55d19179_2d15_445b_b4a6_7f05fdd6b385
   :
   CLC
   REP	#$20
   REP	#$20
   LDA	__@specSubX + 1
   CMP	__@specSubY + 1
-  BCC	__CMP_NO_37c720a1_b589_4217_8cd9_9fda48e6414e
-  BNE	__CMP_YES_37c720a1_b589_4217_8cd9_9fda48e6414e
+  BCC	__CMP_NO_708d9b1c_21bf_401b_a71b_36c9d6bbf018
+  BNE	__CMP_YES_708d9b1c_21bf_401b_a71b_36c9d6bbf018
   SEP	#$20
   LDA	__@specSubX + 0
   CMP	__@specSubY + 0
-  BCC	__CMP_NO_37c720a1_b589_4217_8cd9_9fda48e6414e
-  BNE	__CMP_YES_37c720a1_b589_4217_8cd9_9fda48e6414e
-  JMP	__CMP_YES_37c720a1_b589_4217_8cd9_9fda48e6414e
-  __CMP_YES_37c720a1_b589_4217_8cd9_9fda48e6414e:
+  BCC	__CMP_NO_708d9b1c_21bf_401b_a71b_36c9d6bbf018
+  BNE	__CMP_YES_708d9b1c_21bf_401b_a71b_36c9d6bbf018
+  JMP	__CMP_YES_708d9b1c_21bf_401b_a71b_36c9d6bbf018
+  __CMP_YES_708d9b1c_21bf_401b_a71b_36c9d6bbf018:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_37c720a1_b589_4217_8cd9_9fda48e6414e
-  __CMP_NO_37c720a1_b589_4217_8cd9_9fda48e6414e:
+  BRA	__CMP_END_708d9b1c_21bf_401b_a71b_36c9d6bbf018
+  __CMP_NO_708d9b1c_21bf_401b_a71b_36c9d6bbf018:
   SEP	#$20
   LDA	#$00
-  __CMP_END_37c720a1_b589_4217_8cd9_9fda48e6414e:
-  BEQ	__IFNOT_91db2426_6307_4041_a1f0_dd86ea20012c
+  __CMP_END_708d9b1c_21bf_401b_a71b_36c9d6bbf018:
+  BEQ	__IFNOT_f7007d02_2d5f_4261_ac76_a681e6c6f5d7
   SEC
   REP	#$20
   LDA	__@specSubX + 0
@@ -8244,7 +7876,7 @@ __mod24by24:	; @func
   LDA	__mod24by24@ret + 2
   ADC	__mod24by24@start + 2
   STA	__mod24by24@ret + 2
-  __IFNOT_91db2426_6307_4041_a1f0_dd86ea20012c:
+  __IFNOT_f7007d02_2d5f_4261_ac76_a681e6c6f5d7:
   REP	#$20
   LDA	__@specSubY + 1
   LSR
@@ -8261,8 +7893,8 @@ __mod24by24:	; @func
   LDA	__mod24by24@start + 0
   ROR
   STA	__mod24by24@start + 0
-  JMP	__ITER__START__7b7c529d_b7bb_4dcb_839e_349de35d6137
-  __ITER__END__7b7c529d_b7bb_4dcb_839e_349de35d6137:
+  JMP	__ITER__START__55d19179_2d15_445b_b4a6_7f05fdd6b385
+  __ITER__END__55d19179_2d15_445b_b4a6_7f05fdd6b385:
   REP	#$20
   LDA	__@specSubX + 0
   STA	__@callResult + 0
@@ -8286,7 +7918,7 @@ __mod32by24:	; @func
   SEP	#$20
   LDA	#$00
   STA	__mod32by24@start + 2
-  __ITER__START__59e1d4e3_da15_403d_b71b_dd97193a7dd4:
+  __ITER__START__671e97a9_6741_4b8b_a124_e2c561f16204:
   CLC
   REP	#$20
   LDA	#$0000
@@ -8294,66 +7926,55 @@ __mod32by24:	; @func
   SEP	#$20
   LDA	__@specSubX + 3
   CMP	__@signExtend
-  BCC	__CMP_NO_1af5e01e_b273_44aa_bfb3_6fe5aa6f06fa
-  BNE	__CMP_YES_1af5e01e_b273_44aa_bfb3_6fe5aa6f06fa
+  BCC	__CMP_NO_0160be4f_24ef_4696_acaf_f4085070db7a
+  BNE	__CMP_YES_0160be4f_24ef_4696_acaf_f4085070db7a
   LDA	__@specSubX + 1
   CMP	__@specSubY + 1
-  BCC	__CMP_NO_1af5e01e_b273_44aa_bfb3_6fe5aa6f06fa
-  BNE	__CMP_YES_1af5e01e_b273_44aa_bfb3_6fe5aa6f06fa
+  BCC	__CMP_NO_0160be4f_24ef_4696_acaf_f4085070db7a
+  BNE	__CMP_YES_0160be4f_24ef_4696_acaf_f4085070db7a
   SEP	#$20
   LDA	__@specSubX + 0
   CMP	__@specSubY + 0
-  BCC	__CMP_NO_1af5e01e_b273_44aa_bfb3_6fe5aa6f06fa
-  BNE	__CMP_YES_1af5e01e_b273_44aa_bfb3_6fe5aa6f06fa
-  JMP	__CMP_NO_1af5e01e_b273_44aa_bfb3_6fe5aa6f06fa
-  __CMP_YES_1af5e01e_b273_44aa_bfb3_6fe5aa6f06fa:
+  BCC	__CMP_NO_0160be4f_24ef_4696_acaf_f4085070db7a
+  BNE	__CMP_YES_0160be4f_24ef_4696_acaf_f4085070db7a
+  JMP	__CMP_NO_0160be4f_24ef_4696_acaf_f4085070db7a
+  __CMP_YES_0160be4f_24ef_4696_acaf_f4085070db7a:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_1af5e01e_b273_44aa_bfb3_6fe5aa6f06fa
-  __CMP_NO_1af5e01e_b273_44aa_bfb3_6fe5aa6f06fa:
+  BRA	__CMP_END_0160be4f_24ef_4696_acaf_f4085070db7a
+  __CMP_NO_0160be4f_24ef_4696_acaf_f4085070db7a:
   SEP	#$20
   LDA	#$00
-  __CMP_END_1af5e01e_b273_44aa_bfb3_6fe5aa6f06fa:
+  __CMP_END_0160be4f_24ef_4696_acaf_f4085070db7a:
   SEP	#$20
   CMP	#$00
   BNE	:+
-  JMP	__ITER__END__59e1d4e3_da15_403d_b71b_dd97193a7dd4
+  JMP	__ITER__END__671e97a9_6741_4b8b_a124_e2c561f16204
   :
   
   REP	#$20
   LDA	#$0000
   AND	__@specSubY + 0
-  STA	__@scratchBase + 3
+  STA	__@scratchBase + 0
   SEP	#$20
   LDA	#$80
   AND	__@specSubY + 2
-  STA	__@scratchBase + 5
+  STA	__@scratchBase + 2
   SEP	#$10
   LDX	#$00
   REP	#$20
-  LDA	__@scratchBase + 3
+  LDA	__@scratchBase + 0
   CMP	#$0000
   BNE	:+
   SEP	#$20
-  LDA	__@scratchBase + 5
+  LDA	__@scratchBase + 2
   CMP	#$00
   BNE	:+
   INX
 : TXA
-  SEP	#$20
-  STA	__@scratchBase + 0
-  LDA	#$00
-  STA	__@scratchBase + 1
-  STA	__@scratchBase + 2
-  REP	#$20
-  LDA	__@scratchBase + 0
-  STA	__@scratchBase + 0
-  SEP	#$20
-  LDA	__@scratchBase + 2
-  STA	__@scratchBase + 2
-  BNE	__IFNOT_ee24ee18_e7a6_41b4_a335_0274746fce64
-  JMP	__ITER__END__59e1d4e3_da15_403d_b71b_dd97193a7dd4
-  __IFNOT_ee24ee18_e7a6_41b4_a335_0274746fce64:
+  BNE	__IFNOT_7bddbcba_13c7_4bed_a42a_aee72c44b6d6
+  JMP	__ITER__END__671e97a9_6741_4b8b_a124_e2c561f16204
+  __IFNOT_7bddbcba_13c7_4bed_a42a_aee72c44b6d6:
   REP	#$20
   LDA	__@specSubY + 0
   ASL
@@ -8370,9 +7991,9 @@ __mod32by24:	; @func
   LDA	__mod32by24@start + 2
   ROL
   STA	__mod32by24@start + 2
-  JMP	__ITER__START__59e1d4e3_da15_403d_b71b_dd97193a7dd4
-  __ITER__END__59e1d4e3_da15_403d_b71b_dd97193a7dd4:
-  __ITER__START__d7076d13_99c2_48c5_81a4_8d36ca1f3d63:
+  JMP	__ITER__START__671e97a9_6741_4b8b_a124_e2c561f16204
+  __ITER__END__671e97a9_6741_4b8b_a124_e2c561f16204:
+  __ITER__START__d1810a70_cd3d_4a1a_b041_129e919cbd28:
   SEP	#$10
   LDX	#$01
   REP	#$20
@@ -8388,7 +8009,7 @@ __mod32by24:	; @func
   SEP	#$20
   CMP	#$00
   BNE	:+
-  JMP	__ITER__END__d7076d13_99c2_48c5_81a4_8d36ca1f3d63
+  JMP	__ITER__END__d1810a70_cd3d_4a1a_b041_129e919cbd28
   :
   CLC
   REP	#$20
@@ -8397,27 +8018,27 @@ __mod32by24:	; @func
   SEP	#$20
   LDA	__@specSubX + 3
   CMP	__@signExtend
-  BCC	__CMP_NO_2c44a1eb_5998_41b2_babb_cad7ef89b2c8
-  BNE	__CMP_YES_2c44a1eb_5998_41b2_babb_cad7ef89b2c8
+  BCC	__CMP_NO_d12e55d2_cf89_453a_b409_a777b7cf358a
+  BNE	__CMP_YES_d12e55d2_cf89_453a_b409_a777b7cf358a
   LDA	__@specSubX + 1
   CMP	__@specSubY + 1
-  BCC	__CMP_NO_2c44a1eb_5998_41b2_babb_cad7ef89b2c8
-  BNE	__CMP_YES_2c44a1eb_5998_41b2_babb_cad7ef89b2c8
+  BCC	__CMP_NO_d12e55d2_cf89_453a_b409_a777b7cf358a
+  BNE	__CMP_YES_d12e55d2_cf89_453a_b409_a777b7cf358a
   SEP	#$20
   LDA	__@specSubX + 0
   CMP	__@specSubY + 0
-  BCC	__CMP_NO_2c44a1eb_5998_41b2_babb_cad7ef89b2c8
-  BNE	__CMP_YES_2c44a1eb_5998_41b2_babb_cad7ef89b2c8
-  JMP	__CMP_YES_2c44a1eb_5998_41b2_babb_cad7ef89b2c8
-  __CMP_YES_2c44a1eb_5998_41b2_babb_cad7ef89b2c8:
+  BCC	__CMP_NO_d12e55d2_cf89_453a_b409_a777b7cf358a
+  BNE	__CMP_YES_d12e55d2_cf89_453a_b409_a777b7cf358a
+  JMP	__CMP_YES_d12e55d2_cf89_453a_b409_a777b7cf358a
+  __CMP_YES_d12e55d2_cf89_453a_b409_a777b7cf358a:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_2c44a1eb_5998_41b2_babb_cad7ef89b2c8
-  __CMP_NO_2c44a1eb_5998_41b2_babb_cad7ef89b2c8:
+  BRA	__CMP_END_d12e55d2_cf89_453a_b409_a777b7cf358a
+  __CMP_NO_d12e55d2_cf89_453a_b409_a777b7cf358a:
   SEP	#$20
   LDA	#$00
-  __CMP_END_2c44a1eb_5998_41b2_babb_cad7ef89b2c8:
-  BEQ	__IFNOT_5efb7b8d_1393_46f1_91a4_c8065e597086
+  __CMP_END_d12e55d2_cf89_453a_b409_a777b7cf358a:
+  BEQ	__IFNOT_cefb8ccb_10d9_488f_bd90_05bc717b077e
   REP	#$20
   LDA	#$0000
   STA	__@signExtend
@@ -8442,7 +8063,7 @@ __mod32by24:	; @func
   LDA	__mod32by24@ret + 2
   ADC	__mod32by24@start + 2
   STA	__mod32by24@ret + 2
-  __IFNOT_5efb7b8d_1393_46f1_91a4_c8065e597086:
+  __IFNOT_cefb8ccb_10d9_488f_bd90_05bc717b077e:
   REP	#$20
   LDA	__@specSubY + 1
   LSR
@@ -8459,8 +8080,8 @@ __mod32by24:	; @func
   LDA	__mod32by24@start + 0
   ROR
   STA	__mod32by24@start + 0
-  JMP	__ITER__START__d7076d13_99c2_48c5_81a4_8d36ca1f3d63
-  __ITER__END__d7076d13_99c2_48c5_81a4_8d36ca1f3d63:
+  JMP	__ITER__START__d1810a70_cd3d_4a1a_b041_129e919cbd28
+  __ITER__END__d1810a70_cd3d_4a1a_b041_129e919cbd28:
   REP	#$20
   LDA	__@specSubX + 0
   STA	__@callResult + 0
@@ -8484,82 +8105,71 @@ __mod64by24:	; @func
   SEP	#$20
   LDA	#$00
   STA	__mod64by24@start + 2
-  __ITER__START__7f35e9a4_0f66_45c6_a1d5_45164952e676:
+  __ITER__START__1f7a3e95_8fc6_4314_9781_ff2dbaef829e:
   CLC
   REP	#$20
   LDA	#$0000
   STA	__@signExtend
   LDA	__@specSubX + 6
   CMP	__@signExtend
-  BCC	__CMP_NO_e7cf55fe_55d3_44de_904d_86534a05de09
-  BNE	__CMP_YES_e7cf55fe_55d3_44de_904d_86534a05de09
+  BCC	__CMP_NO_15a72354_e348_4a3e_9dcc_518d8d5cf5b2
+  BNE	__CMP_YES_15a72354_e348_4a3e_9dcc_518d8d5cf5b2
   LDA	__@specSubX + 4
   CMP	__@signExtend
-  BCC	__CMP_NO_e7cf55fe_55d3_44de_904d_86534a05de09
-  BNE	__CMP_YES_e7cf55fe_55d3_44de_904d_86534a05de09
+  BCC	__CMP_NO_15a72354_e348_4a3e_9dcc_518d8d5cf5b2
+  BNE	__CMP_YES_15a72354_e348_4a3e_9dcc_518d8d5cf5b2
   SEP	#$20
   LDA	__@specSubX + 3
   CMP	__@signExtend
-  BCC	__CMP_NO_e7cf55fe_55d3_44de_904d_86534a05de09
-  BNE	__CMP_YES_e7cf55fe_55d3_44de_904d_86534a05de09
+  BCC	__CMP_NO_15a72354_e348_4a3e_9dcc_518d8d5cf5b2
+  BNE	__CMP_YES_15a72354_e348_4a3e_9dcc_518d8d5cf5b2
   LDA	__@specSubX + 1
   CMP	__@specSubY + 1
-  BCC	__CMP_NO_e7cf55fe_55d3_44de_904d_86534a05de09
-  BNE	__CMP_YES_e7cf55fe_55d3_44de_904d_86534a05de09
+  BCC	__CMP_NO_15a72354_e348_4a3e_9dcc_518d8d5cf5b2
+  BNE	__CMP_YES_15a72354_e348_4a3e_9dcc_518d8d5cf5b2
   SEP	#$20
   LDA	__@specSubX + 0
   CMP	__@specSubY + 0
-  BCC	__CMP_NO_e7cf55fe_55d3_44de_904d_86534a05de09
-  BNE	__CMP_YES_e7cf55fe_55d3_44de_904d_86534a05de09
-  JMP	__CMP_NO_e7cf55fe_55d3_44de_904d_86534a05de09
-  __CMP_YES_e7cf55fe_55d3_44de_904d_86534a05de09:
+  BCC	__CMP_NO_15a72354_e348_4a3e_9dcc_518d8d5cf5b2
+  BNE	__CMP_YES_15a72354_e348_4a3e_9dcc_518d8d5cf5b2
+  JMP	__CMP_NO_15a72354_e348_4a3e_9dcc_518d8d5cf5b2
+  __CMP_YES_15a72354_e348_4a3e_9dcc_518d8d5cf5b2:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_e7cf55fe_55d3_44de_904d_86534a05de09
-  __CMP_NO_e7cf55fe_55d3_44de_904d_86534a05de09:
+  BRA	__CMP_END_15a72354_e348_4a3e_9dcc_518d8d5cf5b2
+  __CMP_NO_15a72354_e348_4a3e_9dcc_518d8d5cf5b2:
   SEP	#$20
   LDA	#$00
-  __CMP_END_e7cf55fe_55d3_44de_904d_86534a05de09:
+  __CMP_END_15a72354_e348_4a3e_9dcc_518d8d5cf5b2:
   SEP	#$20
   CMP	#$00
   BNE	:+
-  JMP	__ITER__END__7f35e9a4_0f66_45c6_a1d5_45164952e676
+  JMP	__ITER__END__1f7a3e95_8fc6_4314_9781_ff2dbaef829e
   :
   
   REP	#$20
   LDA	#$0000
   AND	__@specSubY + 0
-  STA	__@scratchBase + 3
+  STA	__@scratchBase + 0
   SEP	#$20
   LDA	#$80
   AND	__@specSubY + 2
-  STA	__@scratchBase + 5
+  STA	__@scratchBase + 2
   SEP	#$10
   LDX	#$00
   REP	#$20
-  LDA	__@scratchBase + 3
+  LDA	__@scratchBase + 0
   CMP	#$0000
   BNE	:+
   SEP	#$20
-  LDA	__@scratchBase + 5
+  LDA	__@scratchBase + 2
   CMP	#$00
   BNE	:+
   INX
 : TXA
-  SEP	#$20
-  STA	__@scratchBase + 0
-  LDA	#$00
-  STA	__@scratchBase + 1
-  STA	__@scratchBase + 2
-  REP	#$20
-  LDA	__@scratchBase + 0
-  STA	__@scratchBase + 0
-  SEP	#$20
-  LDA	__@scratchBase + 2
-  STA	__@scratchBase + 2
-  BNE	__IFNOT_395181be_a6c0_4a40_bf03_fdf463810543
-  JMP	__ITER__END__7f35e9a4_0f66_45c6_a1d5_45164952e676
-  __IFNOT_395181be_a6c0_4a40_bf03_fdf463810543:
+  BNE	__IFNOT_e61904f9_1348_436e_a2f4_7f2dbd4f18f8
+  JMP	__ITER__END__1f7a3e95_8fc6_4314_9781_ff2dbaef829e
+  __IFNOT_e61904f9_1348_436e_a2f4_7f2dbd4f18f8:
   REP	#$20
   LDA	__@specSubY + 0
   ASL
@@ -8576,9 +8186,9 @@ __mod64by24:	; @func
   LDA	__mod64by24@start + 2
   ROL
   STA	__mod64by24@start + 2
-  JMP	__ITER__START__7f35e9a4_0f66_45c6_a1d5_45164952e676
-  __ITER__END__7f35e9a4_0f66_45c6_a1d5_45164952e676:
-  __ITER__START__1ea87fe2_254e_4315_a255_2adff343b659:
+  JMP	__ITER__START__1f7a3e95_8fc6_4314_9781_ff2dbaef829e
+  __ITER__END__1f7a3e95_8fc6_4314_9781_ff2dbaef829e:
+  __ITER__START__2b6db3f6_4676_4468_99d2_6bd320690fb3:
   SEP	#$10
   LDX	#$01
   REP	#$20
@@ -8594,7 +8204,7 @@ __mod64by24:	; @func
   SEP	#$20
   CMP	#$00
   BNE	:+
-  JMP	__ITER__END__1ea87fe2_254e_4315_a255_2adff343b659
+  JMP	__ITER__END__2b6db3f6_4676_4468_99d2_6bd320690fb3
   :
   CLC
   REP	#$20
@@ -8602,37 +8212,37 @@ __mod64by24:	; @func
   STA	__@signExtend
   LDA	__@specSubX + 6
   CMP	__@signExtend
-  BCC	__CMP_NO_8191e524_ba47_4fe8_a2e0_9ef395893b83
-  BNE	__CMP_YES_8191e524_ba47_4fe8_a2e0_9ef395893b83
+  BCC	__CMP_NO_30a91f89_5455_4470_a5ba_0c628461d89e
+  BNE	__CMP_YES_30a91f89_5455_4470_a5ba_0c628461d89e
   LDA	__@specSubX + 4
   CMP	__@signExtend
-  BCC	__CMP_NO_8191e524_ba47_4fe8_a2e0_9ef395893b83
-  BNE	__CMP_YES_8191e524_ba47_4fe8_a2e0_9ef395893b83
+  BCC	__CMP_NO_30a91f89_5455_4470_a5ba_0c628461d89e
+  BNE	__CMP_YES_30a91f89_5455_4470_a5ba_0c628461d89e
   SEP	#$20
   LDA	__@specSubX + 3
   CMP	__@signExtend
-  BCC	__CMP_NO_8191e524_ba47_4fe8_a2e0_9ef395893b83
-  BNE	__CMP_YES_8191e524_ba47_4fe8_a2e0_9ef395893b83
+  BCC	__CMP_NO_30a91f89_5455_4470_a5ba_0c628461d89e
+  BNE	__CMP_YES_30a91f89_5455_4470_a5ba_0c628461d89e
   LDA	__@specSubX + 1
   CMP	__@specSubY + 1
-  BCC	__CMP_NO_8191e524_ba47_4fe8_a2e0_9ef395893b83
-  BNE	__CMP_YES_8191e524_ba47_4fe8_a2e0_9ef395893b83
+  BCC	__CMP_NO_30a91f89_5455_4470_a5ba_0c628461d89e
+  BNE	__CMP_YES_30a91f89_5455_4470_a5ba_0c628461d89e
   SEP	#$20
   LDA	__@specSubX + 0
   CMP	__@specSubY + 0
-  BCC	__CMP_NO_8191e524_ba47_4fe8_a2e0_9ef395893b83
-  BNE	__CMP_YES_8191e524_ba47_4fe8_a2e0_9ef395893b83
-  JMP	__CMP_YES_8191e524_ba47_4fe8_a2e0_9ef395893b83
-  __CMP_YES_8191e524_ba47_4fe8_a2e0_9ef395893b83:
+  BCC	__CMP_NO_30a91f89_5455_4470_a5ba_0c628461d89e
+  BNE	__CMP_YES_30a91f89_5455_4470_a5ba_0c628461d89e
+  JMP	__CMP_YES_30a91f89_5455_4470_a5ba_0c628461d89e
+  __CMP_YES_30a91f89_5455_4470_a5ba_0c628461d89e:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_8191e524_ba47_4fe8_a2e0_9ef395893b83
-  __CMP_NO_8191e524_ba47_4fe8_a2e0_9ef395893b83:
+  BRA	__CMP_END_30a91f89_5455_4470_a5ba_0c628461d89e
+  __CMP_NO_30a91f89_5455_4470_a5ba_0c628461d89e:
   SEP	#$20
   LDA	#$00
-  __CMP_END_8191e524_ba47_4fe8_a2e0_9ef395893b83:
+  __CMP_END_30a91f89_5455_4470_a5ba_0c628461d89e:
   BNE	:+
-  JMP	__IFNOT_4be7c2b6_a2a5_4ca6_8ff5_c6a3522e3fc8
+  JMP	__IFNOT_a3eede4d_5f75_4d2c_b03f_4bc997ef0115
   :
   REP	#$20
   LDA	#$0000
@@ -8666,7 +8276,7 @@ __mod64by24:	; @func
   LDA	__mod64by24@ret + 2
   ADC	__mod64by24@start + 2
   STA	__mod64by24@ret + 2
-  __IFNOT_4be7c2b6_a2a5_4ca6_8ff5_c6a3522e3fc8:
+  __IFNOT_a3eede4d_5f75_4d2c_b03f_4bc997ef0115:
   REP	#$20
   LDA	__@specSubY + 1
   LSR
@@ -8683,8 +8293,8 @@ __mod64by24:	; @func
   LDA	__mod64by24@start + 0
   ROR
   STA	__mod64by24@start + 0
-  JMP	__ITER__START__1ea87fe2_254e_4315_a255_2adff343b659
-  __ITER__END__1ea87fe2_254e_4315_a255_2adff343b659:
+  JMP	__ITER__START__2b6db3f6_4676_4468_99d2_6bd320690fb3
+  __ITER__END__2b6db3f6_4676_4468_99d2_6bd320690fb3:
   REP	#$20
   LDA	__@specSubX + 0
   STA	__@callResult + 0
@@ -8714,75 +8324,63 @@ __mod8by32:	; @func
   SEP	#$20
   LDA	#$00
   STA	__mod8by32@start + 2
-  __ITER__START__9c2eeec6_7561_4c6f_bf31_179bfc05a765:
+  __ITER__START__32e62b3e_ecf7_4725_beaa_1b34a68ca202:
   CLC
   REP	#$20
   LDA	#$0000
   STA	__@signExtend
   LDA	__@signExtend
   CMP	__@specSubY + 2
-  BCC	__CMP_NO_3ffb61b3_40b5_4a20_a06c_dc8e0c7d300a
-  BNE	__CMP_YES_3ffb61b3_40b5_4a20_a06c_dc8e0c7d300a
+  BCC	__CMP_NO_a4f29c82_9561_4230_966c_e62ba3e17258
+  BNE	__CMP_YES_a4f29c82_9561_4230_966c_e62ba3e17258
   SEP	#$20
   LDA	__@signExtend
   CMP	__@specSubY + 1
-  BCC	__CMP_NO_3ffb61b3_40b5_4a20_a06c_dc8e0c7d300a
-  BNE	__CMP_YES_3ffb61b3_40b5_4a20_a06c_dc8e0c7d300a
+  BCC	__CMP_NO_a4f29c82_9561_4230_966c_e62ba3e17258
+  BNE	__CMP_YES_a4f29c82_9561_4230_966c_e62ba3e17258
   SEP	#$20
   LDA	__@specSubX + 0
   CMP	__@specSubY + 0
-  BCC	__CMP_NO_3ffb61b3_40b5_4a20_a06c_dc8e0c7d300a
-  BNE	__CMP_YES_3ffb61b3_40b5_4a20_a06c_dc8e0c7d300a
-  JMP	__CMP_NO_3ffb61b3_40b5_4a20_a06c_dc8e0c7d300a
-  __CMP_YES_3ffb61b3_40b5_4a20_a06c_dc8e0c7d300a:
+  BCC	__CMP_NO_a4f29c82_9561_4230_966c_e62ba3e17258
+  BNE	__CMP_YES_a4f29c82_9561_4230_966c_e62ba3e17258
+  JMP	__CMP_NO_a4f29c82_9561_4230_966c_e62ba3e17258
+  __CMP_YES_a4f29c82_9561_4230_966c_e62ba3e17258:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_3ffb61b3_40b5_4a20_a06c_dc8e0c7d300a
-  __CMP_NO_3ffb61b3_40b5_4a20_a06c_dc8e0c7d300a:
+  BRA	__CMP_END_a4f29c82_9561_4230_966c_e62ba3e17258
+  __CMP_NO_a4f29c82_9561_4230_966c_e62ba3e17258:
   SEP	#$20
   LDA	#$00
-  __CMP_END_3ffb61b3_40b5_4a20_a06c_dc8e0c7d300a:
+  __CMP_END_a4f29c82_9561_4230_966c_e62ba3e17258:
   SEP	#$20
   CMP	#$00
   BNE	:+
-  JMP	__ITER__END__9c2eeec6_7561_4c6f_bf31_179bfc05a765
+  JMP	__ITER__END__32e62b3e_ecf7_4725_beaa_1b34a68ca202
   :
   
   REP	#$20
   LDA	#$0000
   AND	__@specSubY + 0
-  STA	__@scratchBase + 4
+  STA	__@scratchBase + 0
   REP	#$20
   LDA	#$8000
   AND	__@specSubY + 2
-  STA	__@scratchBase + 6
+  STA	__@scratchBase + 2
   SEP	#$10
   LDX	#$00
   REP	#$20
-  LDA	__@scratchBase + 4
+  LDA	__@scratchBase + 0
   CMP	#$0000
   BNE	:+
   REP	#$20
-  LDA	__@scratchBase + 6
+  LDA	__@scratchBase + 2
   CMP	#$0000
   BNE	:+
   INX
 : TXA
-  SEP	#$20
-  STA	__@scratchBase + 0
-  LDA	#$00
-  STA	__@scratchBase + 1
-  STA	__@scratchBase + 2
-  STA	__@scratchBase + 3
-  REP	#$20
-  LDA	__@scratchBase + 0
-  STA	__@scratchBase + 0
-  REP	#$20
-  LDA	__@scratchBase + 2
-  STA	__@scratchBase + 2
-  BNE	__IFNOT_b7af17c2_8fac_429c_bb26_8d447cf31b9b
-  JMP	__ITER__END__9c2eeec6_7561_4c6f_bf31_179bfc05a765
-  __IFNOT_b7af17c2_8fac_429c_bb26_8d447cf31b9b:
+  BNE	__IFNOT_4e7f94c2_35a6_4c48_a754_c6696f556603
+  JMP	__ITER__END__32e62b3e_ecf7_4725_beaa_1b34a68ca202
+  __IFNOT_4e7f94c2_35a6_4c48_a754_c6696f556603:
   REP	#$20
   LDA	__@specSubY + 0
   ASL
@@ -8799,9 +8397,9 @@ __mod8by32:	; @func
   LDA	__mod8by32@start + 2
   ROL
   STA	__mod8by32@start + 2
-  JMP	__ITER__START__9c2eeec6_7561_4c6f_bf31_179bfc05a765
-  __ITER__END__9c2eeec6_7561_4c6f_bf31_179bfc05a765:
-  __ITER__START__eaa81d56_cf89_4abc_95ef_1ef2161d3d18:
+  JMP	__ITER__START__32e62b3e_ecf7_4725_beaa_1b34a68ca202
+  __ITER__END__32e62b3e_ecf7_4725_beaa_1b34a68ca202:
+  __ITER__START__a10196c6_5e08_48c5_aa82_383b773976b4:
   SEP	#$10
   LDX	#$01
   REP	#$20
@@ -8817,7 +8415,7 @@ __mod8by32:	; @func
   SEP	#$20
   CMP	#$00
   BNE	:+
-  JMP	__ITER__END__eaa81d56_cf89_4abc_95ef_1ef2161d3d18
+  JMP	__ITER__END__a10196c6_5e08_48c5_aa82_383b773976b4
   :
   CLC
   REP	#$20
@@ -8825,28 +8423,28 @@ __mod8by32:	; @func
   STA	__@signExtend
   LDA	__@signExtend
   CMP	__@specSubY + 2
-  BCC	__CMP_NO_9d96c3ae_1c23_4fcb_b390_545dc3b54ab3
-  BNE	__CMP_YES_9d96c3ae_1c23_4fcb_b390_545dc3b54ab3
+  BCC	__CMP_NO_508b2151_9dda_4ae9_a220_cbcd3bf8c472
+  BNE	__CMP_YES_508b2151_9dda_4ae9_a220_cbcd3bf8c472
   SEP	#$20
   LDA	__@signExtend
   CMP	__@specSubY + 1
-  BCC	__CMP_NO_9d96c3ae_1c23_4fcb_b390_545dc3b54ab3
-  BNE	__CMP_YES_9d96c3ae_1c23_4fcb_b390_545dc3b54ab3
+  BCC	__CMP_NO_508b2151_9dda_4ae9_a220_cbcd3bf8c472
+  BNE	__CMP_YES_508b2151_9dda_4ae9_a220_cbcd3bf8c472
   SEP	#$20
   LDA	__@specSubX + 0
   CMP	__@specSubY + 0
-  BCC	__CMP_NO_9d96c3ae_1c23_4fcb_b390_545dc3b54ab3
-  BNE	__CMP_YES_9d96c3ae_1c23_4fcb_b390_545dc3b54ab3
-  JMP	__CMP_YES_9d96c3ae_1c23_4fcb_b390_545dc3b54ab3
-  __CMP_YES_9d96c3ae_1c23_4fcb_b390_545dc3b54ab3:
+  BCC	__CMP_NO_508b2151_9dda_4ae9_a220_cbcd3bf8c472
+  BNE	__CMP_YES_508b2151_9dda_4ae9_a220_cbcd3bf8c472
+  JMP	__CMP_YES_508b2151_9dda_4ae9_a220_cbcd3bf8c472
+  __CMP_YES_508b2151_9dda_4ae9_a220_cbcd3bf8c472:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_9d96c3ae_1c23_4fcb_b390_545dc3b54ab3
-  __CMP_NO_9d96c3ae_1c23_4fcb_b390_545dc3b54ab3:
+  BRA	__CMP_END_508b2151_9dda_4ae9_a220_cbcd3bf8c472
+  __CMP_NO_508b2151_9dda_4ae9_a220_cbcd3bf8c472:
   SEP	#$20
   LDA	#$00
-  __CMP_END_9d96c3ae_1c23_4fcb_b390_545dc3b54ab3:
-  BEQ	__IFNOT_61229049_7c18_4d00_8c70_4720232933ba
+  __CMP_END_508b2151_9dda_4ae9_a220_cbcd3bf8c472:
+  BEQ	__IFNOT_b2553263_ac80_43a6_ac0c_cd0e3ec93e95
   REP	#$20
   LDA	#$0000
   STA	__@signExtend
@@ -8864,7 +8462,7 @@ __mod8by32:	; @func
   LDA	__mod8by32@ret + 2
   ADC	__mod8by32@start + 2
   STA	__mod8by32@ret + 2
-  __IFNOT_61229049_7c18_4d00_8c70_4720232933ba:
+  __IFNOT_b2553263_ac80_43a6_ac0c_cd0e3ec93e95:
   REP	#$20
   LDA	__@specSubY + 2
   LSR
@@ -8880,8 +8478,8 @@ __mod8by32:	; @func
   LDA	__mod8by32@start + 0
   ROR
   STA	__mod8by32@start + 0
-  JMP	__ITER__START__eaa81d56_cf89_4abc_95ef_1ef2161d3d18
-  __ITER__END__eaa81d56_cf89_4abc_95ef_1ef2161d3d18:
+  JMP	__ITER__START__a10196c6_5e08_48c5_aa82_383b773976b4
+  __ITER__END__a10196c6_5e08_48c5_aa82_383b773976b4:
   REP	#$20
   LDA	__@specSubX + 0
   STA	__@callResult + 0
@@ -8905,69 +8503,57 @@ __mod16by32:	; @func
   SEP	#$20
   LDA	#$00
   STA	__mod16by32@start + 2
-  __ITER__START__25168a83_1235_4fc0_9634_f6554949dafc:
+  __ITER__START__226c9a7f_8032_48e2_af65_6fe39930b187:
   CLC
   REP	#$20
   LDA	#$0000
   STA	__@signExtend
   LDA	__@signExtend
   CMP	__@specSubY + 2
-  BCC	__CMP_NO_5fe626bc_0064_4da8_a14e_765a921d848b
-  BNE	__CMP_YES_5fe626bc_0064_4da8_a14e_765a921d848b
+  BCC	__CMP_NO_a26f91f2_3da5_4930_927a_25461db7d52e
+  BNE	__CMP_YES_a26f91f2_3da5_4930_927a_25461db7d52e
   LDA	__@specSubX + 0
   CMP	__@specSubY + 0
-  BCC	__CMP_NO_5fe626bc_0064_4da8_a14e_765a921d848b
-  BNE	__CMP_YES_5fe626bc_0064_4da8_a14e_765a921d848b
-  JMP	__CMP_NO_5fe626bc_0064_4da8_a14e_765a921d848b
-  __CMP_YES_5fe626bc_0064_4da8_a14e_765a921d848b:
+  BCC	__CMP_NO_a26f91f2_3da5_4930_927a_25461db7d52e
+  BNE	__CMP_YES_a26f91f2_3da5_4930_927a_25461db7d52e
+  JMP	__CMP_NO_a26f91f2_3da5_4930_927a_25461db7d52e
+  __CMP_YES_a26f91f2_3da5_4930_927a_25461db7d52e:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_5fe626bc_0064_4da8_a14e_765a921d848b
-  __CMP_NO_5fe626bc_0064_4da8_a14e_765a921d848b:
+  BRA	__CMP_END_a26f91f2_3da5_4930_927a_25461db7d52e
+  __CMP_NO_a26f91f2_3da5_4930_927a_25461db7d52e:
   SEP	#$20
   LDA	#$00
-  __CMP_END_5fe626bc_0064_4da8_a14e_765a921d848b:
+  __CMP_END_a26f91f2_3da5_4930_927a_25461db7d52e:
   SEP	#$20
   CMP	#$00
   BNE	:+
-  JMP	__ITER__END__25168a83_1235_4fc0_9634_f6554949dafc
+  JMP	__ITER__END__226c9a7f_8032_48e2_af65_6fe39930b187
   :
   
   REP	#$20
   LDA	#$0000
   AND	__@specSubY + 0
-  STA	__@scratchBase + 4
+  STA	__@scratchBase + 0
   REP	#$20
   LDA	#$8000
   AND	__@specSubY + 2
-  STA	__@scratchBase + 6
+  STA	__@scratchBase + 2
   SEP	#$10
   LDX	#$00
   REP	#$20
-  LDA	__@scratchBase + 4
+  LDA	__@scratchBase + 0
   CMP	#$0000
   BNE	:+
   REP	#$20
-  LDA	__@scratchBase + 6
+  LDA	__@scratchBase + 2
   CMP	#$0000
   BNE	:+
   INX
 : TXA
-  SEP	#$20
-  STA	__@scratchBase + 0
-  LDA	#$00
-  STA	__@scratchBase + 1
-  STA	__@scratchBase + 2
-  STA	__@scratchBase + 3
-  REP	#$20
-  LDA	__@scratchBase + 0
-  STA	__@scratchBase + 0
-  REP	#$20
-  LDA	__@scratchBase + 2
-  STA	__@scratchBase + 2
-  BNE	__IFNOT_4712fd82_a151_4664_85e9_2046e8faf2f2
-  JMP	__ITER__END__25168a83_1235_4fc0_9634_f6554949dafc
-  __IFNOT_4712fd82_a151_4664_85e9_2046e8faf2f2:
+  BNE	__IFNOT_eeb0044f_7e6d_4cb6_a7cb_00e81a3c2a29
+  JMP	__ITER__END__226c9a7f_8032_48e2_af65_6fe39930b187
+  __IFNOT_eeb0044f_7e6d_4cb6_a7cb_00e81a3c2a29:
   REP	#$20
   LDA	__@specSubY + 0
   ASL
@@ -8984,9 +8570,9 @@ __mod16by32:	; @func
   LDA	__mod16by32@start + 2
   ROL
   STA	__mod16by32@start + 2
-  JMP	__ITER__START__25168a83_1235_4fc0_9634_f6554949dafc
-  __ITER__END__25168a83_1235_4fc0_9634_f6554949dafc:
-  __ITER__START__fcdfdd2b_e250_4ae4_bbb4_5113ff5b8b7e:
+  JMP	__ITER__START__226c9a7f_8032_48e2_af65_6fe39930b187
+  __ITER__END__226c9a7f_8032_48e2_af65_6fe39930b187:
+  __ITER__START__7f2d2f1d_2b26_4f51_a0f0_9ab1cfac4529:
   SEP	#$10
   LDX	#$01
   REP	#$20
@@ -9002,7 +8588,7 @@ __mod16by32:	; @func
   SEP	#$20
   CMP	#$00
   BNE	:+
-  JMP	__ITER__END__fcdfdd2b_e250_4ae4_bbb4_5113ff5b8b7e
+  JMP	__ITER__END__7f2d2f1d_2b26_4f51_a0f0_9ab1cfac4529
   :
   CLC
   REP	#$20
@@ -9010,22 +8596,22 @@ __mod16by32:	; @func
   STA	__@signExtend
   LDA	__@signExtend
   CMP	__@specSubY + 2
-  BCC	__CMP_NO_2f627a78_bd43_4ae8_aba4_61d4de0dfd8a
-  BNE	__CMP_YES_2f627a78_bd43_4ae8_aba4_61d4de0dfd8a
+  BCC	__CMP_NO_5ea0ce22_625a_47d5_8193_ec771547b6c7
+  BNE	__CMP_YES_5ea0ce22_625a_47d5_8193_ec771547b6c7
   LDA	__@specSubX + 0
   CMP	__@specSubY + 0
-  BCC	__CMP_NO_2f627a78_bd43_4ae8_aba4_61d4de0dfd8a
-  BNE	__CMP_YES_2f627a78_bd43_4ae8_aba4_61d4de0dfd8a
-  JMP	__CMP_YES_2f627a78_bd43_4ae8_aba4_61d4de0dfd8a
-  __CMP_YES_2f627a78_bd43_4ae8_aba4_61d4de0dfd8a:
+  BCC	__CMP_NO_5ea0ce22_625a_47d5_8193_ec771547b6c7
+  BNE	__CMP_YES_5ea0ce22_625a_47d5_8193_ec771547b6c7
+  JMP	__CMP_YES_5ea0ce22_625a_47d5_8193_ec771547b6c7
+  __CMP_YES_5ea0ce22_625a_47d5_8193_ec771547b6c7:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_2f627a78_bd43_4ae8_aba4_61d4de0dfd8a
-  __CMP_NO_2f627a78_bd43_4ae8_aba4_61d4de0dfd8a:
+  BRA	__CMP_END_5ea0ce22_625a_47d5_8193_ec771547b6c7
+  __CMP_NO_5ea0ce22_625a_47d5_8193_ec771547b6c7:
   SEP	#$20
   LDA	#$00
-  __CMP_END_2f627a78_bd43_4ae8_aba4_61d4de0dfd8a:
-  BEQ	__IFNOT_2263dded_6dcc_4b1a_84bd_59c5938d4e24
+  __CMP_END_5ea0ce22_625a_47d5_8193_ec771547b6c7:
+  BEQ	__IFNOT_d8e06d03_d4f3_42b3_96cc_dc7f482a43a1
   REP	#$20
   LDA	#$0000
   STA	__@signExtend
@@ -9042,7 +8628,7 @@ __mod16by32:	; @func
   LDA	__mod16by32@ret + 2
   ADC	__mod16by32@start + 2
   STA	__mod16by32@ret + 2
-  __IFNOT_2263dded_6dcc_4b1a_84bd_59c5938d4e24:
+  __IFNOT_d8e06d03_d4f3_42b3_96cc_dc7f482a43a1:
   REP	#$20
   LDA	__@specSubY + 2
   LSR
@@ -9058,8 +8644,8 @@ __mod16by32:	; @func
   LDA	__mod16by32@start + 0
   ROR
   STA	__mod16by32@start + 0
-  JMP	__ITER__START__fcdfdd2b_e250_4ae4_bbb4_5113ff5b8b7e
-  __ITER__END__fcdfdd2b_e250_4ae4_bbb4_5113ff5b8b7e:
+  JMP	__ITER__START__7f2d2f1d_2b26_4f51_a0f0_9ab1cfac4529
+  __ITER__END__7f2d2f1d_2b26_4f51_a0f0_9ab1cfac4529:
   REP	#$20
   LDA	__@specSubX + 0
   STA	__@callResult + 0
@@ -9083,7 +8669,7 @@ __mod24by32:	; @func
   SEP	#$20
   LDA	#$00
   STA	__mod24by32@start + 2
-  __ITER__START__9072fa37_77a5_4f75_8058_b63e2a101b0b:
+  __ITER__START__3667439b_7e24_4fd4_a439_def757a55b2a:
   CLC
   REP	#$20
   LDA	#$0000
@@ -9091,67 +8677,55 @@ __mod24by32:	; @func
   SEP	#$20
   LDA	__@signExtend
   CMP	__@specSubY + 3
-  BCC	__CMP_NO_0579f322_5787_4521_82ac_d32e5f5d97c6
-  BNE	__CMP_YES_0579f322_5787_4521_82ac_d32e5f5d97c6
+  BCC	__CMP_NO_0f83c17d_7a12_404d_a050_16eec38dc11a
+  BNE	__CMP_YES_0f83c17d_7a12_404d_a050_16eec38dc11a
   LDA	__@specSubX + 1
   CMP	__@specSubY + 1
-  BCC	__CMP_NO_0579f322_5787_4521_82ac_d32e5f5d97c6
-  BNE	__CMP_YES_0579f322_5787_4521_82ac_d32e5f5d97c6
+  BCC	__CMP_NO_0f83c17d_7a12_404d_a050_16eec38dc11a
+  BNE	__CMP_YES_0f83c17d_7a12_404d_a050_16eec38dc11a
   SEP	#$20
   LDA	__@specSubX + 0
   CMP	__@specSubY + 0
-  BCC	__CMP_NO_0579f322_5787_4521_82ac_d32e5f5d97c6
-  BNE	__CMP_YES_0579f322_5787_4521_82ac_d32e5f5d97c6
-  JMP	__CMP_NO_0579f322_5787_4521_82ac_d32e5f5d97c6
-  __CMP_YES_0579f322_5787_4521_82ac_d32e5f5d97c6:
+  BCC	__CMP_NO_0f83c17d_7a12_404d_a050_16eec38dc11a
+  BNE	__CMP_YES_0f83c17d_7a12_404d_a050_16eec38dc11a
+  JMP	__CMP_NO_0f83c17d_7a12_404d_a050_16eec38dc11a
+  __CMP_YES_0f83c17d_7a12_404d_a050_16eec38dc11a:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_0579f322_5787_4521_82ac_d32e5f5d97c6
-  __CMP_NO_0579f322_5787_4521_82ac_d32e5f5d97c6:
+  BRA	__CMP_END_0f83c17d_7a12_404d_a050_16eec38dc11a
+  __CMP_NO_0f83c17d_7a12_404d_a050_16eec38dc11a:
   SEP	#$20
   LDA	#$00
-  __CMP_END_0579f322_5787_4521_82ac_d32e5f5d97c6:
+  __CMP_END_0f83c17d_7a12_404d_a050_16eec38dc11a:
   SEP	#$20
   CMP	#$00
   BNE	:+
-  JMP	__ITER__END__9072fa37_77a5_4f75_8058_b63e2a101b0b
+  JMP	__ITER__END__3667439b_7e24_4fd4_a439_def757a55b2a
   :
   
   REP	#$20
   LDA	#$0000
   AND	__@specSubY + 0
-  STA	__@scratchBase + 4
+  STA	__@scratchBase + 0
   REP	#$20
   LDA	#$8000
   AND	__@specSubY + 2
-  STA	__@scratchBase + 6
+  STA	__@scratchBase + 2
   SEP	#$10
   LDX	#$00
   REP	#$20
-  LDA	__@scratchBase + 4
+  LDA	__@scratchBase + 0
   CMP	#$0000
   BNE	:+
   REP	#$20
-  LDA	__@scratchBase + 6
+  LDA	__@scratchBase + 2
   CMP	#$0000
   BNE	:+
   INX
 : TXA
-  SEP	#$20
-  STA	__@scratchBase + 0
-  LDA	#$00
-  STA	__@scratchBase + 1
-  STA	__@scratchBase + 2
-  STA	__@scratchBase + 3
-  REP	#$20
-  LDA	__@scratchBase + 0
-  STA	__@scratchBase + 0
-  REP	#$20
-  LDA	__@scratchBase + 2
-  STA	__@scratchBase + 2
-  BNE	__IFNOT_c8f211ad_4e17_402b_b66a_7ce532d7a96f
-  JMP	__ITER__END__9072fa37_77a5_4f75_8058_b63e2a101b0b
-  __IFNOT_c8f211ad_4e17_402b_b66a_7ce532d7a96f:
+  BNE	__IFNOT_38fa5f98_cf01_477f_a87c_c86685c24403
+  JMP	__ITER__END__3667439b_7e24_4fd4_a439_def757a55b2a
+  __IFNOT_38fa5f98_cf01_477f_a87c_c86685c24403:
   REP	#$20
   LDA	__@specSubY + 0
   ASL
@@ -9168,9 +8742,9 @@ __mod24by32:	; @func
   LDA	__mod24by32@start + 2
   ROL
   STA	__mod24by32@start + 2
-  JMP	__ITER__START__9072fa37_77a5_4f75_8058_b63e2a101b0b
-  __ITER__END__9072fa37_77a5_4f75_8058_b63e2a101b0b:
-  __ITER__START__713c7f01_ca34_47b8_827e_497d5c7d8a41:
+  JMP	__ITER__START__3667439b_7e24_4fd4_a439_def757a55b2a
+  __ITER__END__3667439b_7e24_4fd4_a439_def757a55b2a:
+  __ITER__START__01ec0af3_b079_495e_8add_437bd8f5bf5b:
   SEP	#$10
   LDX	#$01
   REP	#$20
@@ -9186,7 +8760,7 @@ __mod24by32:	; @func
   SEP	#$20
   CMP	#$00
   BNE	:+
-  JMP	__ITER__END__713c7f01_ca34_47b8_827e_497d5c7d8a41
+  JMP	__ITER__END__01ec0af3_b079_495e_8add_437bd8f5bf5b
   :
   CLC
   REP	#$20
@@ -9195,27 +8769,27 @@ __mod24by32:	; @func
   SEP	#$20
   LDA	__@signExtend
   CMP	__@specSubY + 3
-  BCC	__CMP_NO_07bbbe70_6e0f_4ef4_82f0_501e861e1d95
-  BNE	__CMP_YES_07bbbe70_6e0f_4ef4_82f0_501e861e1d95
+  BCC	__CMP_NO_bc220358_47b7_491f_8330_9d5cb5d4950b
+  BNE	__CMP_YES_bc220358_47b7_491f_8330_9d5cb5d4950b
   LDA	__@specSubX + 1
   CMP	__@specSubY + 1
-  BCC	__CMP_NO_07bbbe70_6e0f_4ef4_82f0_501e861e1d95
-  BNE	__CMP_YES_07bbbe70_6e0f_4ef4_82f0_501e861e1d95
+  BCC	__CMP_NO_bc220358_47b7_491f_8330_9d5cb5d4950b
+  BNE	__CMP_YES_bc220358_47b7_491f_8330_9d5cb5d4950b
   SEP	#$20
   LDA	__@specSubX + 0
   CMP	__@specSubY + 0
-  BCC	__CMP_NO_07bbbe70_6e0f_4ef4_82f0_501e861e1d95
-  BNE	__CMP_YES_07bbbe70_6e0f_4ef4_82f0_501e861e1d95
-  JMP	__CMP_YES_07bbbe70_6e0f_4ef4_82f0_501e861e1d95
-  __CMP_YES_07bbbe70_6e0f_4ef4_82f0_501e861e1d95:
+  BCC	__CMP_NO_bc220358_47b7_491f_8330_9d5cb5d4950b
+  BNE	__CMP_YES_bc220358_47b7_491f_8330_9d5cb5d4950b
+  JMP	__CMP_YES_bc220358_47b7_491f_8330_9d5cb5d4950b
+  __CMP_YES_bc220358_47b7_491f_8330_9d5cb5d4950b:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_07bbbe70_6e0f_4ef4_82f0_501e861e1d95
-  __CMP_NO_07bbbe70_6e0f_4ef4_82f0_501e861e1d95:
+  BRA	__CMP_END_bc220358_47b7_491f_8330_9d5cb5d4950b
+  __CMP_NO_bc220358_47b7_491f_8330_9d5cb5d4950b:
   SEP	#$20
   LDA	#$00
-  __CMP_END_07bbbe70_6e0f_4ef4_82f0_501e861e1d95:
-  BEQ	__IFNOT_735aa4ed_ebbb_49c8_96fa_43a0723a16ba
+  __CMP_END_bc220358_47b7_491f_8330_9d5cb5d4950b:
+  BEQ	__IFNOT_581f70e0_4100_4156_85e9_0cd748f2d6c4
   REP	#$20
   LDA	#$0000
   STA	__@signExtend
@@ -9236,7 +8810,7 @@ __mod24by32:	; @func
   LDA	__mod24by32@ret + 2
   ADC	__mod24by32@start + 2
   STA	__mod24by32@ret + 2
-  __IFNOT_735aa4ed_ebbb_49c8_96fa_43a0723a16ba:
+  __IFNOT_581f70e0_4100_4156_85e9_0cd748f2d6c4:
   REP	#$20
   LDA	__@specSubY + 2
   LSR
@@ -9252,8 +8826,8 @@ __mod24by32:	; @func
   LDA	__mod24by32@start + 0
   ROR
   STA	__mod24by32@start + 0
-  JMP	__ITER__START__713c7f01_ca34_47b8_827e_497d5c7d8a41
-  __ITER__END__713c7f01_ca34_47b8_827e_497d5c7d8a41:
+  JMP	__ITER__START__01ec0af3_b079_495e_8add_437bd8f5bf5b
+  __ITER__END__01ec0af3_b079_495e_8add_437bd8f5bf5b:
   REP	#$20
   LDA	__@specSubX + 0
   STA	__@callResult + 0
@@ -9274,69 +8848,57 @@ __mod32by32:	; @func
   STA	__mod32by32@start + 0
   LDA	#$0000
   STA	__mod32by32@start + 2
-  __ITER__START__fc1b8156_1a73_4041_9c9f_abb76ed7f2c9:
+  __ITER__START__7244feaf_0cf3_4bda_aabe_de9ab299a263:
   CLC
   REP	#$20
   REP	#$20
   LDA	__@specSubX + 2
   CMP	__@specSubY + 2
-  BCC	__CMP_NO_8e829e4f_c856_443d_bb60_7b05b0a2a7da
-  BNE	__CMP_YES_8e829e4f_c856_443d_bb60_7b05b0a2a7da
+  BCC	__CMP_NO_c82a98cd_ee33_4b80_a8f6_62898c9155b2
+  BNE	__CMP_YES_c82a98cd_ee33_4b80_a8f6_62898c9155b2
   REP	#$20
   LDA	__@specSubX + 0
   CMP	__@specSubY + 0
-  BCC	__CMP_NO_8e829e4f_c856_443d_bb60_7b05b0a2a7da
-  BNE	__CMP_YES_8e829e4f_c856_443d_bb60_7b05b0a2a7da
-  JMP	__CMP_NO_8e829e4f_c856_443d_bb60_7b05b0a2a7da
-  __CMP_YES_8e829e4f_c856_443d_bb60_7b05b0a2a7da:
+  BCC	__CMP_NO_c82a98cd_ee33_4b80_a8f6_62898c9155b2
+  BNE	__CMP_YES_c82a98cd_ee33_4b80_a8f6_62898c9155b2
+  JMP	__CMP_NO_c82a98cd_ee33_4b80_a8f6_62898c9155b2
+  __CMP_YES_c82a98cd_ee33_4b80_a8f6_62898c9155b2:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_8e829e4f_c856_443d_bb60_7b05b0a2a7da
-  __CMP_NO_8e829e4f_c856_443d_bb60_7b05b0a2a7da:
+  BRA	__CMP_END_c82a98cd_ee33_4b80_a8f6_62898c9155b2
+  __CMP_NO_c82a98cd_ee33_4b80_a8f6_62898c9155b2:
   SEP	#$20
   LDA	#$00
-  __CMP_END_8e829e4f_c856_443d_bb60_7b05b0a2a7da:
+  __CMP_END_c82a98cd_ee33_4b80_a8f6_62898c9155b2:
   SEP	#$20
   CMP	#$00
   BNE	:+
-  JMP	__ITER__END__fc1b8156_1a73_4041_9c9f_abb76ed7f2c9
+  JMP	__ITER__END__7244feaf_0cf3_4bda_aabe_de9ab299a263
   :
   
   REP	#$20
   LDA	#$0000
   AND	__@specSubY + 0
-  STA	__@scratchBase + 4
+  STA	__@scratchBase + 0
   REP	#$20
   LDA	#$8000
   AND	__@specSubY + 2
-  STA	__@scratchBase + 6
+  STA	__@scratchBase + 2
   SEP	#$10
   LDX	#$00
   REP	#$20
-  LDA	__@scratchBase + 4
+  LDA	__@scratchBase + 0
   CMP	#$0000
   BNE	:+
   REP	#$20
-  LDA	__@scratchBase + 6
+  LDA	__@scratchBase + 2
   CMP	#$0000
   BNE	:+
   INX
 : TXA
-  SEP	#$20
-  STA	__@scratchBase + 0
-  LDA	#$00
-  STA	__@scratchBase + 1
-  STA	__@scratchBase + 2
-  STA	__@scratchBase + 3
-  REP	#$20
-  LDA	__@scratchBase + 0
-  STA	__@scratchBase + 0
-  REP	#$20
-  LDA	__@scratchBase + 2
-  STA	__@scratchBase + 2
-  BNE	__IFNOT_3629bd76_a3d6_40ba_8f88_477f2ff62646
-  JMP	__ITER__END__fc1b8156_1a73_4041_9c9f_abb76ed7f2c9
-  __IFNOT_3629bd76_a3d6_40ba_8f88_477f2ff62646:
+  BNE	__IFNOT_91599e8e_87b4_41e9_aab1_742554651ec8
+  JMP	__ITER__END__7244feaf_0cf3_4bda_aabe_de9ab299a263
+  __IFNOT_91599e8e_87b4_41e9_aab1_742554651ec8:
   REP	#$20
   LDA	__@specSubY + 0
   ASL
@@ -9353,9 +8915,9 @@ __mod32by32:	; @func
   LDA	__mod32by32@start + 2
   ROL
   STA	__mod32by32@start + 2
-  JMP	__ITER__START__fc1b8156_1a73_4041_9c9f_abb76ed7f2c9
-  __ITER__END__fc1b8156_1a73_4041_9c9f_abb76ed7f2c9:
-  __ITER__START__918d0e75_0ebb_4057_848b_35c6e3227824:
+  JMP	__ITER__START__7244feaf_0cf3_4bda_aabe_de9ab299a263
+  __ITER__END__7244feaf_0cf3_4bda_aabe_de9ab299a263:
+  __ITER__START__ec553278_1fb1_452a_9df6_cab258efb406:
   SEP	#$10
   LDX	#$01
   REP	#$20
@@ -9371,30 +8933,30 @@ __mod32by32:	; @func
   SEP	#$20
   CMP	#$00
   BNE	:+
-  JMP	__ITER__END__918d0e75_0ebb_4057_848b_35c6e3227824
+  JMP	__ITER__END__ec553278_1fb1_452a_9df6_cab258efb406
   :
   CLC
   REP	#$20
   REP	#$20
   LDA	__@specSubX + 2
   CMP	__@specSubY + 2
-  BCC	__CMP_NO_7aa54000_db54_4c5f_b7ef_ab41330bf4d2
-  BNE	__CMP_YES_7aa54000_db54_4c5f_b7ef_ab41330bf4d2
+  BCC	__CMP_NO_b2fb110e_aff8_485b_a8fb_06b2c0e4d2ac
+  BNE	__CMP_YES_b2fb110e_aff8_485b_a8fb_06b2c0e4d2ac
   REP	#$20
   LDA	__@specSubX + 0
   CMP	__@specSubY + 0
-  BCC	__CMP_NO_7aa54000_db54_4c5f_b7ef_ab41330bf4d2
-  BNE	__CMP_YES_7aa54000_db54_4c5f_b7ef_ab41330bf4d2
-  JMP	__CMP_YES_7aa54000_db54_4c5f_b7ef_ab41330bf4d2
-  __CMP_YES_7aa54000_db54_4c5f_b7ef_ab41330bf4d2:
+  BCC	__CMP_NO_b2fb110e_aff8_485b_a8fb_06b2c0e4d2ac
+  BNE	__CMP_YES_b2fb110e_aff8_485b_a8fb_06b2c0e4d2ac
+  JMP	__CMP_YES_b2fb110e_aff8_485b_a8fb_06b2c0e4d2ac
+  __CMP_YES_b2fb110e_aff8_485b_a8fb_06b2c0e4d2ac:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_7aa54000_db54_4c5f_b7ef_ab41330bf4d2
-  __CMP_NO_7aa54000_db54_4c5f_b7ef_ab41330bf4d2:
+  BRA	__CMP_END_b2fb110e_aff8_485b_a8fb_06b2c0e4d2ac
+  __CMP_NO_b2fb110e_aff8_485b_a8fb_06b2c0e4d2ac:
   SEP	#$20
   LDA	#$00
-  __CMP_END_7aa54000_db54_4c5f_b7ef_ab41330bf4d2:
-  BEQ	__IFNOT_bb761842_e00c_4c06_bcab_6ee8f03c4c69
+  __CMP_END_b2fb110e_aff8_485b_a8fb_06b2c0e4d2ac:
+  BEQ	__IFNOT_bb43cd47_ab79_4474_9269_3a23fc94d0ae
   SEC
   REP	#$20
   LDA	__@specSubX + 0
@@ -9413,7 +8975,7 @@ __mod32by32:	; @func
   LDA	__mod32by32@ret + 2
   ADC	__mod32by32@start + 2
   STA	__mod32by32@ret + 2
-  __IFNOT_bb761842_e00c_4c06_bcab_6ee8f03c4c69:
+  __IFNOT_bb43cd47_ab79_4474_9269_3a23fc94d0ae:
   REP	#$20
   LDA	__@specSubY + 2
   LSR
@@ -9428,8 +8990,8 @@ __mod32by32:	; @func
   LDA	__mod32by32@start + 0
   ROR
   STA	__mod32by32@start + 0
-  JMP	__ITER__START__918d0e75_0ebb_4057_848b_35c6e3227824
-  __ITER__END__918d0e75_0ebb_4057_848b_35c6e3227824:
+  JMP	__ITER__START__ec553278_1fb1_452a_9df6_cab258efb406
+  __ITER__END__ec553278_1fb1_452a_9df6_cab258efb406:
   REP	#$20
   LDA	__@specSubX + 0
   STA	__@callResult + 0
@@ -9450,77 +9012,65 @@ __mod64by32:	; @func
   STA	__mod64by32@start + 0
   LDA	#$0000
   STA	__mod64by32@start + 2
-  __ITER__START__7bb028c1_6e36_4099_89ab_b3dc14fa46c5:
+  __ITER__START__9d6682b5_d392_4bcf_9033_f374aae8d553:
   CLC
   REP	#$20
   LDA	#$0000
   STA	__@signExtend
   LDA	__@specSubX + 6
   CMP	__@signExtend
-  BCC	__CMP_NO_d4839cfa_b4ea_4154_b11b_ca9e28f991f5
-  BNE	__CMP_YES_d4839cfa_b4ea_4154_b11b_ca9e28f991f5
+  BCC	__CMP_NO_9b4874a0_10bc_4c0f_8a37_63329e6beb46
+  BNE	__CMP_YES_9b4874a0_10bc_4c0f_8a37_63329e6beb46
   LDA	__@specSubX + 4
   CMP	__@signExtend
-  BCC	__CMP_NO_d4839cfa_b4ea_4154_b11b_ca9e28f991f5
-  BNE	__CMP_YES_d4839cfa_b4ea_4154_b11b_ca9e28f991f5
+  BCC	__CMP_NO_9b4874a0_10bc_4c0f_8a37_63329e6beb46
+  BNE	__CMP_YES_9b4874a0_10bc_4c0f_8a37_63329e6beb46
   LDA	__@specSubX + 2
   CMP	__@specSubY + 2
-  BCC	__CMP_NO_d4839cfa_b4ea_4154_b11b_ca9e28f991f5
-  BNE	__CMP_YES_d4839cfa_b4ea_4154_b11b_ca9e28f991f5
+  BCC	__CMP_NO_9b4874a0_10bc_4c0f_8a37_63329e6beb46
+  BNE	__CMP_YES_9b4874a0_10bc_4c0f_8a37_63329e6beb46
   LDA	__@specSubX + 0
   CMP	__@specSubY + 0
-  BCC	__CMP_NO_d4839cfa_b4ea_4154_b11b_ca9e28f991f5
-  BNE	__CMP_YES_d4839cfa_b4ea_4154_b11b_ca9e28f991f5
-  JMP	__CMP_NO_d4839cfa_b4ea_4154_b11b_ca9e28f991f5
-  __CMP_YES_d4839cfa_b4ea_4154_b11b_ca9e28f991f5:
+  BCC	__CMP_NO_9b4874a0_10bc_4c0f_8a37_63329e6beb46
+  BNE	__CMP_YES_9b4874a0_10bc_4c0f_8a37_63329e6beb46
+  JMP	__CMP_NO_9b4874a0_10bc_4c0f_8a37_63329e6beb46
+  __CMP_YES_9b4874a0_10bc_4c0f_8a37_63329e6beb46:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_d4839cfa_b4ea_4154_b11b_ca9e28f991f5
-  __CMP_NO_d4839cfa_b4ea_4154_b11b_ca9e28f991f5:
+  BRA	__CMP_END_9b4874a0_10bc_4c0f_8a37_63329e6beb46
+  __CMP_NO_9b4874a0_10bc_4c0f_8a37_63329e6beb46:
   SEP	#$20
   LDA	#$00
-  __CMP_END_d4839cfa_b4ea_4154_b11b_ca9e28f991f5:
+  __CMP_END_9b4874a0_10bc_4c0f_8a37_63329e6beb46:
   SEP	#$20
   CMP	#$00
   BNE	:+
-  JMP	__ITER__END__7bb028c1_6e36_4099_89ab_b3dc14fa46c5
+  JMP	__ITER__END__9d6682b5_d392_4bcf_9033_f374aae8d553
   :
   
   REP	#$20
   LDA	#$0000
   AND	__@specSubY + 0
-  STA	__@scratchBase + 4
+  STA	__@scratchBase + 0
   REP	#$20
   LDA	#$8000
   AND	__@specSubY + 2
-  STA	__@scratchBase + 6
+  STA	__@scratchBase + 2
   SEP	#$10
   LDX	#$00
   REP	#$20
-  LDA	__@scratchBase + 4
+  LDA	__@scratchBase + 0
   CMP	#$0000
   BNE	:+
   REP	#$20
-  LDA	__@scratchBase + 6
+  LDA	__@scratchBase + 2
   CMP	#$0000
   BNE	:+
   INX
 : TXA
-  SEP	#$20
-  STA	__@scratchBase + 0
-  LDA	#$00
-  STA	__@scratchBase + 1
-  STA	__@scratchBase + 2
-  STA	__@scratchBase + 3
-  REP	#$20
-  LDA	__@scratchBase + 0
-  STA	__@scratchBase + 0
-  REP	#$20
-  LDA	__@scratchBase + 2
-  STA	__@scratchBase + 2
-  BNE	__IFNOT_abc20cf9_a27b_4aa7_b2fc_2960a9cfd858
-  JMP	__ITER__END__7bb028c1_6e36_4099_89ab_b3dc14fa46c5
-  __IFNOT_abc20cf9_a27b_4aa7_b2fc_2960a9cfd858:
+  BNE	__IFNOT_8fde5215_f55e_4a3f_9b82_9cb3c68089d3
+  JMP	__ITER__END__9d6682b5_d392_4bcf_9033_f374aae8d553
+  __IFNOT_8fde5215_f55e_4a3f_9b82_9cb3c68089d3:
   REP	#$20
   LDA	__@specSubY + 0
   ASL
@@ -9537,9 +9087,9 @@ __mod64by32:	; @func
   LDA	__mod64by32@start + 2
   ROL
   STA	__mod64by32@start + 2
-  JMP	__ITER__START__7bb028c1_6e36_4099_89ab_b3dc14fa46c5
-  __ITER__END__7bb028c1_6e36_4099_89ab_b3dc14fa46c5:
-  __ITER__START__0afde7a8_0cd5_4bf0_8a05_9be516eac063:
+  JMP	__ITER__START__9d6682b5_d392_4bcf_9033_f374aae8d553
+  __ITER__END__9d6682b5_d392_4bcf_9033_f374aae8d553:
+  __ITER__START__ddb48983_c446_4dbc_a837_f139f0097999:
   SEP	#$10
   LDX	#$01
   REP	#$20
@@ -9555,7 +9105,7 @@ __mod64by32:	; @func
   SEP	#$20
   CMP	#$00
   BNE	:+
-  JMP	__ITER__END__0afde7a8_0cd5_4bf0_8a05_9be516eac063
+  JMP	__ITER__END__ddb48983_c446_4dbc_a837_f139f0097999
   :
   CLC
   REP	#$20
@@ -9563,30 +9113,30 @@ __mod64by32:	; @func
   STA	__@signExtend
   LDA	__@specSubX + 6
   CMP	__@signExtend
-  BCC	__CMP_NO_4decee92_1051_4d3f_bc38_e9e3214510f4
-  BNE	__CMP_YES_4decee92_1051_4d3f_bc38_e9e3214510f4
+  BCC	__CMP_NO_d9cd9dba_5146_4cb6_bac0_9754cdf12e4a
+  BNE	__CMP_YES_d9cd9dba_5146_4cb6_bac0_9754cdf12e4a
   LDA	__@specSubX + 4
   CMP	__@signExtend
-  BCC	__CMP_NO_4decee92_1051_4d3f_bc38_e9e3214510f4
-  BNE	__CMP_YES_4decee92_1051_4d3f_bc38_e9e3214510f4
+  BCC	__CMP_NO_d9cd9dba_5146_4cb6_bac0_9754cdf12e4a
+  BNE	__CMP_YES_d9cd9dba_5146_4cb6_bac0_9754cdf12e4a
   LDA	__@specSubX + 2
   CMP	__@specSubY + 2
-  BCC	__CMP_NO_4decee92_1051_4d3f_bc38_e9e3214510f4
-  BNE	__CMP_YES_4decee92_1051_4d3f_bc38_e9e3214510f4
+  BCC	__CMP_NO_d9cd9dba_5146_4cb6_bac0_9754cdf12e4a
+  BNE	__CMP_YES_d9cd9dba_5146_4cb6_bac0_9754cdf12e4a
   LDA	__@specSubX + 0
   CMP	__@specSubY + 0
-  BCC	__CMP_NO_4decee92_1051_4d3f_bc38_e9e3214510f4
-  BNE	__CMP_YES_4decee92_1051_4d3f_bc38_e9e3214510f4
-  JMP	__CMP_YES_4decee92_1051_4d3f_bc38_e9e3214510f4
-  __CMP_YES_4decee92_1051_4d3f_bc38_e9e3214510f4:
+  BCC	__CMP_NO_d9cd9dba_5146_4cb6_bac0_9754cdf12e4a
+  BNE	__CMP_YES_d9cd9dba_5146_4cb6_bac0_9754cdf12e4a
+  JMP	__CMP_YES_d9cd9dba_5146_4cb6_bac0_9754cdf12e4a
+  __CMP_YES_d9cd9dba_5146_4cb6_bac0_9754cdf12e4a:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_4decee92_1051_4d3f_bc38_e9e3214510f4
-  __CMP_NO_4decee92_1051_4d3f_bc38_e9e3214510f4:
+  BRA	__CMP_END_d9cd9dba_5146_4cb6_bac0_9754cdf12e4a
+  __CMP_NO_d9cd9dba_5146_4cb6_bac0_9754cdf12e4a:
   SEP	#$20
   LDA	#$00
-  __CMP_END_4decee92_1051_4d3f_bc38_e9e3214510f4:
-  BEQ	__IFNOT_67e3185e_b877_4047_9453_724aac518d32
+  __CMP_END_d9cd9dba_5146_4cb6_bac0_9754cdf12e4a:
+  BEQ	__IFNOT_e25a5fa8_d07e_43f6_ab8a_c5152a6b6ef4
   REP	#$20
   LDA	#$0000
   STA	__@signExtend
@@ -9615,7 +9165,7 @@ __mod64by32:	; @func
   LDA	__mod64by32@ret + 2
   ADC	__mod64by32@start + 2
   STA	__mod64by32@ret + 2
-  __IFNOT_67e3185e_b877_4047_9453_724aac518d32:
+  __IFNOT_e25a5fa8_d07e_43f6_ab8a_c5152a6b6ef4:
   REP	#$20
   LDA	__@specSubY + 2
   LSR
@@ -9630,8 +9180,8 @@ __mod64by32:	; @func
   LDA	__mod64by32@start + 0
   ROR
   STA	__mod64by32@start + 0
-  JMP	__ITER__START__0afde7a8_0cd5_4bf0_8a05_9be516eac063
-  __ITER__END__0afde7a8_0cd5_4bf0_8a05_9be516eac063:
+  JMP	__ITER__START__ddb48983_c446_4dbc_a837_f139f0097999
+  __ITER__END__ddb48983_c446_4dbc_a837_f139f0097999:
   REP	#$20
   LDA	__@specSubX + 0
   STA	__@callResult + 0
@@ -9661,109 +9211,87 @@ __mod8by64:	; @func
   SEP	#$20
   LDA	#$00
   STA	__mod8by64@start + 2
-  __ITER__START__578c2573_a5fd_40fe_a237_50edf52cf3db:
+  __ITER__START__bbdf0f18_a090_43a9_85c2_ad45cc88380a:
   CLC
   REP	#$20
   LDA	#$0000
   STA	__@signExtend
   LDA	__@signExtend
   CMP	__@specSubY + 6
-  BCC	__CMP_NO_b9b9cc9e_c838_4ce2_aaf8_122af788e956
-  BNE	__CMP_YES_b9b9cc9e_c838_4ce2_aaf8_122af788e956
+  BCC	__CMP_NO_340f2b78_f6a3_40e5_b258_58ae4a8b9133
+  BNE	__CMP_YES_340f2b78_f6a3_40e5_b258_58ae4a8b9133
   LDA	__@signExtend
   CMP	__@specSubY + 4
-  BCC	__CMP_NO_b9b9cc9e_c838_4ce2_aaf8_122af788e956
-  BNE	__CMP_YES_b9b9cc9e_c838_4ce2_aaf8_122af788e956
+  BCC	__CMP_NO_340f2b78_f6a3_40e5_b258_58ae4a8b9133
+  BNE	__CMP_YES_340f2b78_f6a3_40e5_b258_58ae4a8b9133
   LDA	__@signExtend
   CMP	__@specSubY + 2
-  BCC	__CMP_NO_b9b9cc9e_c838_4ce2_aaf8_122af788e956
-  BNE	__CMP_YES_b9b9cc9e_c838_4ce2_aaf8_122af788e956
+  BCC	__CMP_NO_340f2b78_f6a3_40e5_b258_58ae4a8b9133
+  BNE	__CMP_YES_340f2b78_f6a3_40e5_b258_58ae4a8b9133
   SEP	#$20
   LDA	__@signExtend
   CMP	__@specSubY + 1
-  BCC	__CMP_NO_b9b9cc9e_c838_4ce2_aaf8_122af788e956
-  BNE	__CMP_YES_b9b9cc9e_c838_4ce2_aaf8_122af788e956
+  BCC	__CMP_NO_340f2b78_f6a3_40e5_b258_58ae4a8b9133
+  BNE	__CMP_YES_340f2b78_f6a3_40e5_b258_58ae4a8b9133
   SEP	#$20
   LDA	__@specSubX + 0
   CMP	__@specSubY + 0
-  BCC	__CMP_NO_b9b9cc9e_c838_4ce2_aaf8_122af788e956
-  BNE	__CMP_YES_b9b9cc9e_c838_4ce2_aaf8_122af788e956
-  JMP	__CMP_NO_b9b9cc9e_c838_4ce2_aaf8_122af788e956
-  __CMP_YES_b9b9cc9e_c838_4ce2_aaf8_122af788e956:
+  BCC	__CMP_NO_340f2b78_f6a3_40e5_b258_58ae4a8b9133
+  BNE	__CMP_YES_340f2b78_f6a3_40e5_b258_58ae4a8b9133
+  JMP	__CMP_NO_340f2b78_f6a3_40e5_b258_58ae4a8b9133
+  __CMP_YES_340f2b78_f6a3_40e5_b258_58ae4a8b9133:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_b9b9cc9e_c838_4ce2_aaf8_122af788e956
-  __CMP_NO_b9b9cc9e_c838_4ce2_aaf8_122af788e956:
+  BRA	__CMP_END_340f2b78_f6a3_40e5_b258_58ae4a8b9133
+  __CMP_NO_340f2b78_f6a3_40e5_b258_58ae4a8b9133:
   SEP	#$20
   LDA	#$00
-  __CMP_END_b9b9cc9e_c838_4ce2_aaf8_122af788e956:
+  __CMP_END_340f2b78_f6a3_40e5_b258_58ae4a8b9133:
   SEP	#$20
   CMP	#$00
   BNE	:+
-  JMP	__ITER__END__578c2573_a5fd_40fe_a237_50edf52cf3db
+  JMP	__ITER__END__bbdf0f18_a090_43a9_85c2_ad45cc88380a
   :
   
   REP	#$20
   LDA	#$0000
   AND	__@specSubY + 0
-  STA	__@scratchBase + 8
+  STA	__@scratchBase + 0
   REP	#$20
   LDA	#$8000
   AND	__@specSubY + 2
-  STA	__@scratchBase + 10
+  STA	__@scratchBase + 2
   REP	#$20
   LDA	#$0000
   AND	__@specSubY + 4
-  STA	__@scratchBase + 12
+  STA	__@scratchBase + 4
   REP	#$20
   LDA	#$0000
   AND	__@specSubY + 6
-  STA	__@scratchBase + 14
+  STA	__@scratchBase + 6
   SEP	#$10
   LDX	#$00
   REP	#$20
-  LDA	__@scratchBase + 8
+  LDA	__@scratchBase + 0
   CMP	#$0000
   BNE	:+
   REP	#$20
-  LDA	__@scratchBase + 10
+  LDA	__@scratchBase + 2
   CMP	#$0000
   BNE	:+
   REP	#$20
-  LDA	__@scratchBase + 12
+  LDA	__@scratchBase + 4
   CMP	#$0000
   BNE	:+
   REP	#$20
-  LDA	__@scratchBase + 14
+  LDA	__@scratchBase + 6
   CMP	#$0000
   BNE	:+
   INX
 : TXA
-  SEP	#$20
-  STA	__@scratchBase + 0
-  LDA	#$00
-  STA	__@scratchBase + 1
-  STA	__@scratchBase + 2
-  STA	__@scratchBase + 3
-  STA	__@scratchBase + 4
-  STA	__@scratchBase + 5
-  STA	__@scratchBase + 6
-  STA	__@scratchBase + 7
-  REP	#$20
-  LDA	__@scratchBase + 0
-  STA	__@scratchBase + 0
-  REP	#$20
-  LDA	__@scratchBase + 2
-  STA	__@scratchBase + 2
-  REP	#$20
-  LDA	__@scratchBase + 4
-  STA	__@scratchBase + 4
-  REP	#$20
-  LDA	__@scratchBase + 6
-  STA	__@scratchBase + 6
-  BNE	__IFNOT_076ed1c3_325f_40cd_8893_b4c0f9d24eda
-  JMP	__ITER__END__578c2573_a5fd_40fe_a237_50edf52cf3db
-  __IFNOT_076ed1c3_325f_40cd_8893_b4c0f9d24eda:
+  BNE	__IFNOT_dc547250_f88c_4092_b667_c728a4c169b1
+  JMP	__ITER__END__bbdf0f18_a090_43a9_85c2_ad45cc88380a
+  __IFNOT_dc547250_f88c_4092_b667_c728a4c169b1:
   REP	#$20
   LDA	__@specSubY + 0
   ASL
@@ -9788,9 +9316,9 @@ __mod8by64:	; @func
   LDA	__mod8by64@start + 2
   ROL
   STA	__mod8by64@start + 2
-  JMP	__ITER__START__578c2573_a5fd_40fe_a237_50edf52cf3db
-  __ITER__END__578c2573_a5fd_40fe_a237_50edf52cf3db:
-  __ITER__START__3f15e35a_71f4_4876_8456_74e541930997:
+  JMP	__ITER__START__bbdf0f18_a090_43a9_85c2_ad45cc88380a
+  __ITER__END__bbdf0f18_a090_43a9_85c2_ad45cc88380a:
+  __ITER__START__60bf0e6a_f5a7_4b57_85c4_39625fb16a74:
   SEP	#$10
   LDX	#$01
   REP	#$20
@@ -9806,7 +9334,7 @@ __mod8by64:	; @func
   SEP	#$20
   CMP	#$00
   BNE	:+
-  JMP	__ITER__END__3f15e35a_71f4_4876_8456_74e541930997
+  JMP	__ITER__END__60bf0e6a_f5a7_4b57_85c4_39625fb16a74
   :
   CLC
   REP	#$20
@@ -9814,36 +9342,36 @@ __mod8by64:	; @func
   STA	__@signExtend
   LDA	__@signExtend
   CMP	__@specSubY + 6
-  BCC	__CMP_NO_c2f733c4_1991_4c64_8334_8b261f732977
-  BNE	__CMP_YES_c2f733c4_1991_4c64_8334_8b261f732977
+  BCC	__CMP_NO_d3652f90_2c11_449c_bb25_93f9270fc3d3
+  BNE	__CMP_YES_d3652f90_2c11_449c_bb25_93f9270fc3d3
   LDA	__@signExtend
   CMP	__@specSubY + 4
-  BCC	__CMP_NO_c2f733c4_1991_4c64_8334_8b261f732977
-  BNE	__CMP_YES_c2f733c4_1991_4c64_8334_8b261f732977
+  BCC	__CMP_NO_d3652f90_2c11_449c_bb25_93f9270fc3d3
+  BNE	__CMP_YES_d3652f90_2c11_449c_bb25_93f9270fc3d3
   LDA	__@signExtend
   CMP	__@specSubY + 2
-  BCC	__CMP_NO_c2f733c4_1991_4c64_8334_8b261f732977
-  BNE	__CMP_YES_c2f733c4_1991_4c64_8334_8b261f732977
+  BCC	__CMP_NO_d3652f90_2c11_449c_bb25_93f9270fc3d3
+  BNE	__CMP_YES_d3652f90_2c11_449c_bb25_93f9270fc3d3
   SEP	#$20
   LDA	__@signExtend
   CMP	__@specSubY + 1
-  BCC	__CMP_NO_c2f733c4_1991_4c64_8334_8b261f732977
-  BNE	__CMP_YES_c2f733c4_1991_4c64_8334_8b261f732977
+  BCC	__CMP_NO_d3652f90_2c11_449c_bb25_93f9270fc3d3
+  BNE	__CMP_YES_d3652f90_2c11_449c_bb25_93f9270fc3d3
   SEP	#$20
   LDA	__@specSubX + 0
   CMP	__@specSubY + 0
-  BCC	__CMP_NO_c2f733c4_1991_4c64_8334_8b261f732977
-  BNE	__CMP_YES_c2f733c4_1991_4c64_8334_8b261f732977
-  JMP	__CMP_YES_c2f733c4_1991_4c64_8334_8b261f732977
-  __CMP_YES_c2f733c4_1991_4c64_8334_8b261f732977:
+  BCC	__CMP_NO_d3652f90_2c11_449c_bb25_93f9270fc3d3
+  BNE	__CMP_YES_d3652f90_2c11_449c_bb25_93f9270fc3d3
+  JMP	__CMP_YES_d3652f90_2c11_449c_bb25_93f9270fc3d3
+  __CMP_YES_d3652f90_2c11_449c_bb25_93f9270fc3d3:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_c2f733c4_1991_4c64_8334_8b261f732977
-  __CMP_NO_c2f733c4_1991_4c64_8334_8b261f732977:
+  BRA	__CMP_END_d3652f90_2c11_449c_bb25_93f9270fc3d3
+  __CMP_NO_d3652f90_2c11_449c_bb25_93f9270fc3d3:
   SEP	#$20
   LDA	#$00
-  __CMP_END_c2f733c4_1991_4c64_8334_8b261f732977:
-  BEQ	__IFNOT_9fd2f062_8ddd_4bf8_9312_37d359831e3c
+  __CMP_END_d3652f90_2c11_449c_bb25_93f9270fc3d3:
+  BEQ	__IFNOT_e2e9a09a_fd4c_466c_b6d0_6ae2a38a03a2
   REP	#$20
   LDA	#$0000
   STA	__@signExtend
@@ -9861,7 +9389,7 @@ __mod8by64:	; @func
   LDA	__mod8by64@ret + 2
   ADC	__mod8by64@start + 2
   STA	__mod8by64@ret + 2
-  __IFNOT_9fd2f062_8ddd_4bf8_9312_37d359831e3c:
+  __IFNOT_e2e9a09a_fd4c_466c_b6d0_6ae2a38a03a2:
   REP	#$20
   LDA	__@specSubY + 6
   LSR
@@ -9883,8 +9411,8 @@ __mod8by64:	; @func
   LDA	__mod8by64@start + 0
   ROR
   STA	__mod8by64@start + 0
-  JMP	__ITER__START__3f15e35a_71f4_4876_8456_74e541930997
-  __ITER__END__3f15e35a_71f4_4876_8456_74e541930997:
+  JMP	__ITER__START__60bf0e6a_f5a7_4b57_85c4_39625fb16a74
+  __ITER__END__60bf0e6a_f5a7_4b57_85c4_39625fb16a74:
   REP	#$20
   LDA	__@specSubX + 0
   STA	__@callResult + 0
@@ -9908,103 +9436,81 @@ __mod16by64:	; @func
   SEP	#$20
   LDA	#$00
   STA	__mod16by64@start + 2
-  __ITER__START__47cc7cfb_634f_4b32_847d_8952fe1b0951:
+  __ITER__START__1c3f85ec_4b40_4511_8b29_beee34bcafb2:
   CLC
   REP	#$20
   LDA	#$0000
   STA	__@signExtend
   LDA	__@signExtend
   CMP	__@specSubY + 6
-  BCC	__CMP_NO_5653796d_c7f1_4988_b1e7_77059ffca5e6
-  BNE	__CMP_YES_5653796d_c7f1_4988_b1e7_77059ffca5e6
+  BCC	__CMP_NO_525eba3e_162f_4fca_b273_1c4d37d3ce7c
+  BNE	__CMP_YES_525eba3e_162f_4fca_b273_1c4d37d3ce7c
   LDA	__@signExtend
   CMP	__@specSubY + 4
-  BCC	__CMP_NO_5653796d_c7f1_4988_b1e7_77059ffca5e6
-  BNE	__CMP_YES_5653796d_c7f1_4988_b1e7_77059ffca5e6
+  BCC	__CMP_NO_525eba3e_162f_4fca_b273_1c4d37d3ce7c
+  BNE	__CMP_YES_525eba3e_162f_4fca_b273_1c4d37d3ce7c
   LDA	__@signExtend
   CMP	__@specSubY + 2
-  BCC	__CMP_NO_5653796d_c7f1_4988_b1e7_77059ffca5e6
-  BNE	__CMP_YES_5653796d_c7f1_4988_b1e7_77059ffca5e6
+  BCC	__CMP_NO_525eba3e_162f_4fca_b273_1c4d37d3ce7c
+  BNE	__CMP_YES_525eba3e_162f_4fca_b273_1c4d37d3ce7c
   LDA	__@specSubX + 0
   CMP	__@specSubY + 0
-  BCC	__CMP_NO_5653796d_c7f1_4988_b1e7_77059ffca5e6
-  BNE	__CMP_YES_5653796d_c7f1_4988_b1e7_77059ffca5e6
-  JMP	__CMP_NO_5653796d_c7f1_4988_b1e7_77059ffca5e6
-  __CMP_YES_5653796d_c7f1_4988_b1e7_77059ffca5e6:
+  BCC	__CMP_NO_525eba3e_162f_4fca_b273_1c4d37d3ce7c
+  BNE	__CMP_YES_525eba3e_162f_4fca_b273_1c4d37d3ce7c
+  JMP	__CMP_NO_525eba3e_162f_4fca_b273_1c4d37d3ce7c
+  __CMP_YES_525eba3e_162f_4fca_b273_1c4d37d3ce7c:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_5653796d_c7f1_4988_b1e7_77059ffca5e6
-  __CMP_NO_5653796d_c7f1_4988_b1e7_77059ffca5e6:
+  BRA	__CMP_END_525eba3e_162f_4fca_b273_1c4d37d3ce7c
+  __CMP_NO_525eba3e_162f_4fca_b273_1c4d37d3ce7c:
   SEP	#$20
   LDA	#$00
-  __CMP_END_5653796d_c7f1_4988_b1e7_77059ffca5e6:
+  __CMP_END_525eba3e_162f_4fca_b273_1c4d37d3ce7c:
   SEP	#$20
   CMP	#$00
   BNE	:+
-  JMP	__ITER__END__47cc7cfb_634f_4b32_847d_8952fe1b0951
+  JMP	__ITER__END__1c3f85ec_4b40_4511_8b29_beee34bcafb2
   :
   
   REP	#$20
   LDA	#$0000
   AND	__@specSubY + 0
-  STA	__@scratchBase + 8
+  STA	__@scratchBase + 0
   REP	#$20
   LDA	#$8000
   AND	__@specSubY + 2
-  STA	__@scratchBase + 10
+  STA	__@scratchBase + 2
   REP	#$20
   LDA	#$0000
   AND	__@specSubY + 4
-  STA	__@scratchBase + 12
+  STA	__@scratchBase + 4
   REP	#$20
   LDA	#$0000
   AND	__@specSubY + 6
-  STA	__@scratchBase + 14
+  STA	__@scratchBase + 6
   SEP	#$10
   LDX	#$00
   REP	#$20
-  LDA	__@scratchBase + 8
+  LDA	__@scratchBase + 0
   CMP	#$0000
   BNE	:+
   REP	#$20
-  LDA	__@scratchBase + 10
+  LDA	__@scratchBase + 2
   CMP	#$0000
   BNE	:+
   REP	#$20
-  LDA	__@scratchBase + 12
+  LDA	__@scratchBase + 4
   CMP	#$0000
   BNE	:+
   REP	#$20
-  LDA	__@scratchBase + 14
+  LDA	__@scratchBase + 6
   CMP	#$0000
   BNE	:+
   INX
 : TXA
-  SEP	#$20
-  STA	__@scratchBase + 0
-  LDA	#$00
-  STA	__@scratchBase + 1
-  STA	__@scratchBase + 2
-  STA	__@scratchBase + 3
-  STA	__@scratchBase + 4
-  STA	__@scratchBase + 5
-  STA	__@scratchBase + 6
-  STA	__@scratchBase + 7
-  REP	#$20
-  LDA	__@scratchBase + 0
-  STA	__@scratchBase + 0
-  REP	#$20
-  LDA	__@scratchBase + 2
-  STA	__@scratchBase + 2
-  REP	#$20
-  LDA	__@scratchBase + 4
-  STA	__@scratchBase + 4
-  REP	#$20
-  LDA	__@scratchBase + 6
-  STA	__@scratchBase + 6
-  BNE	__IFNOT_3b721337_0af2_485e_9ad6_099d758afaf9
-  JMP	__ITER__END__47cc7cfb_634f_4b32_847d_8952fe1b0951
-  __IFNOT_3b721337_0af2_485e_9ad6_099d758afaf9:
+  BNE	__IFNOT_1d692fd3_b81b_47b7_acd9_d3c4e8faa261
+  JMP	__ITER__END__1c3f85ec_4b40_4511_8b29_beee34bcafb2
+  __IFNOT_1d692fd3_b81b_47b7_acd9_d3c4e8faa261:
   REP	#$20
   LDA	__@specSubY + 0
   ASL
@@ -10029,9 +9535,9 @@ __mod16by64:	; @func
   LDA	__mod16by64@start + 2
   ROL
   STA	__mod16by64@start + 2
-  JMP	__ITER__START__47cc7cfb_634f_4b32_847d_8952fe1b0951
-  __ITER__END__47cc7cfb_634f_4b32_847d_8952fe1b0951:
-  __ITER__START__a5693c6a_406a_4da2_b5a8_57a002ca554f:
+  JMP	__ITER__START__1c3f85ec_4b40_4511_8b29_beee34bcafb2
+  __ITER__END__1c3f85ec_4b40_4511_8b29_beee34bcafb2:
+  __ITER__START__cc42a956_056a_46d2_8eab_0ca1756dcf19:
   SEP	#$10
   LDX	#$01
   REP	#$20
@@ -10047,7 +9553,7 @@ __mod16by64:	; @func
   SEP	#$20
   CMP	#$00
   BNE	:+
-  JMP	__ITER__END__a5693c6a_406a_4da2_b5a8_57a002ca554f
+  JMP	__ITER__END__cc42a956_056a_46d2_8eab_0ca1756dcf19
   :
   CLC
   REP	#$20
@@ -10055,30 +9561,30 @@ __mod16by64:	; @func
   STA	__@signExtend
   LDA	__@signExtend
   CMP	__@specSubY + 6
-  BCC	__CMP_NO_b5870425_5fa7_4c7e_bb08_6bd4e9dbdf3b
-  BNE	__CMP_YES_b5870425_5fa7_4c7e_bb08_6bd4e9dbdf3b
+  BCC	__CMP_NO_ed933516_3eb9_4d2e_a532_d2127cde7b83
+  BNE	__CMP_YES_ed933516_3eb9_4d2e_a532_d2127cde7b83
   LDA	__@signExtend
   CMP	__@specSubY + 4
-  BCC	__CMP_NO_b5870425_5fa7_4c7e_bb08_6bd4e9dbdf3b
-  BNE	__CMP_YES_b5870425_5fa7_4c7e_bb08_6bd4e9dbdf3b
+  BCC	__CMP_NO_ed933516_3eb9_4d2e_a532_d2127cde7b83
+  BNE	__CMP_YES_ed933516_3eb9_4d2e_a532_d2127cde7b83
   LDA	__@signExtend
   CMP	__@specSubY + 2
-  BCC	__CMP_NO_b5870425_5fa7_4c7e_bb08_6bd4e9dbdf3b
-  BNE	__CMP_YES_b5870425_5fa7_4c7e_bb08_6bd4e9dbdf3b
+  BCC	__CMP_NO_ed933516_3eb9_4d2e_a532_d2127cde7b83
+  BNE	__CMP_YES_ed933516_3eb9_4d2e_a532_d2127cde7b83
   LDA	__@specSubX + 0
   CMP	__@specSubY + 0
-  BCC	__CMP_NO_b5870425_5fa7_4c7e_bb08_6bd4e9dbdf3b
-  BNE	__CMP_YES_b5870425_5fa7_4c7e_bb08_6bd4e9dbdf3b
-  JMP	__CMP_YES_b5870425_5fa7_4c7e_bb08_6bd4e9dbdf3b
-  __CMP_YES_b5870425_5fa7_4c7e_bb08_6bd4e9dbdf3b:
+  BCC	__CMP_NO_ed933516_3eb9_4d2e_a532_d2127cde7b83
+  BNE	__CMP_YES_ed933516_3eb9_4d2e_a532_d2127cde7b83
+  JMP	__CMP_YES_ed933516_3eb9_4d2e_a532_d2127cde7b83
+  __CMP_YES_ed933516_3eb9_4d2e_a532_d2127cde7b83:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_b5870425_5fa7_4c7e_bb08_6bd4e9dbdf3b
-  __CMP_NO_b5870425_5fa7_4c7e_bb08_6bd4e9dbdf3b:
+  BRA	__CMP_END_ed933516_3eb9_4d2e_a532_d2127cde7b83
+  __CMP_NO_ed933516_3eb9_4d2e_a532_d2127cde7b83:
   SEP	#$20
   LDA	#$00
-  __CMP_END_b5870425_5fa7_4c7e_bb08_6bd4e9dbdf3b:
-  BEQ	__IFNOT_ab8b0c05_84af_4cd4_98d0_5892c2aab3b1
+  __CMP_END_ed933516_3eb9_4d2e_a532_d2127cde7b83:
+  BEQ	__IFNOT_364ab330_0614_4c46_9195_b1bb7fde3679
   REP	#$20
   LDA	#$0000
   STA	__@signExtend
@@ -10095,7 +9601,7 @@ __mod16by64:	; @func
   LDA	__mod16by64@ret + 2
   ADC	__mod16by64@start + 2
   STA	__mod16by64@ret + 2
-  __IFNOT_ab8b0c05_84af_4cd4_98d0_5892c2aab3b1:
+  __IFNOT_364ab330_0614_4c46_9195_b1bb7fde3679:
   REP	#$20
   LDA	__@specSubY + 6
   LSR
@@ -10117,8 +9623,8 @@ __mod16by64:	; @func
   LDA	__mod16by64@start + 0
   ROR
   STA	__mod16by64@start + 0
-  JMP	__ITER__START__a5693c6a_406a_4da2_b5a8_57a002ca554f
-  __ITER__END__a5693c6a_406a_4da2_b5a8_57a002ca554f:
+  JMP	__ITER__START__cc42a956_056a_46d2_8eab_0ca1756dcf19
+  __ITER__END__cc42a956_056a_46d2_8eab_0ca1756dcf19:
   REP	#$20
   LDA	__@specSubX + 0
   STA	__@callResult + 0
@@ -10142,109 +9648,87 @@ __mod24by64:	; @func
   SEP	#$20
   LDA	#$00
   STA	__mod24by64@start + 2
-  __ITER__START__60d66e8d_bcf9_4078_a9c2_fe56bb30f204:
+  __ITER__START__badca7e2_43ba_4268_9aca_8cbc719d1f3b:
   CLC
   REP	#$20
   LDA	#$0000
   STA	__@signExtend
   LDA	__@signExtend
   CMP	__@specSubY + 6
-  BCC	__CMP_NO_9ecee57a_4207_4a8c_90bc_ebf9c2206f9c
-  BNE	__CMP_YES_9ecee57a_4207_4a8c_90bc_ebf9c2206f9c
+  BCC	__CMP_NO_11cf2224_ad92_4872_a420_1c909f5e740d
+  BNE	__CMP_YES_11cf2224_ad92_4872_a420_1c909f5e740d
   LDA	__@signExtend
   CMP	__@specSubY + 4
-  BCC	__CMP_NO_9ecee57a_4207_4a8c_90bc_ebf9c2206f9c
-  BNE	__CMP_YES_9ecee57a_4207_4a8c_90bc_ebf9c2206f9c
+  BCC	__CMP_NO_11cf2224_ad92_4872_a420_1c909f5e740d
+  BNE	__CMP_YES_11cf2224_ad92_4872_a420_1c909f5e740d
   SEP	#$20
   LDA	__@signExtend
   CMP	__@specSubY + 3
-  BCC	__CMP_NO_9ecee57a_4207_4a8c_90bc_ebf9c2206f9c
-  BNE	__CMP_YES_9ecee57a_4207_4a8c_90bc_ebf9c2206f9c
+  BCC	__CMP_NO_11cf2224_ad92_4872_a420_1c909f5e740d
+  BNE	__CMP_YES_11cf2224_ad92_4872_a420_1c909f5e740d
   LDA	__@specSubX + 1
   CMP	__@specSubY + 1
-  BCC	__CMP_NO_9ecee57a_4207_4a8c_90bc_ebf9c2206f9c
-  BNE	__CMP_YES_9ecee57a_4207_4a8c_90bc_ebf9c2206f9c
+  BCC	__CMP_NO_11cf2224_ad92_4872_a420_1c909f5e740d
+  BNE	__CMP_YES_11cf2224_ad92_4872_a420_1c909f5e740d
   SEP	#$20
   LDA	__@specSubX + 0
   CMP	__@specSubY + 0
-  BCC	__CMP_NO_9ecee57a_4207_4a8c_90bc_ebf9c2206f9c
-  BNE	__CMP_YES_9ecee57a_4207_4a8c_90bc_ebf9c2206f9c
-  JMP	__CMP_NO_9ecee57a_4207_4a8c_90bc_ebf9c2206f9c
-  __CMP_YES_9ecee57a_4207_4a8c_90bc_ebf9c2206f9c:
+  BCC	__CMP_NO_11cf2224_ad92_4872_a420_1c909f5e740d
+  BNE	__CMP_YES_11cf2224_ad92_4872_a420_1c909f5e740d
+  JMP	__CMP_NO_11cf2224_ad92_4872_a420_1c909f5e740d
+  __CMP_YES_11cf2224_ad92_4872_a420_1c909f5e740d:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_9ecee57a_4207_4a8c_90bc_ebf9c2206f9c
-  __CMP_NO_9ecee57a_4207_4a8c_90bc_ebf9c2206f9c:
+  BRA	__CMP_END_11cf2224_ad92_4872_a420_1c909f5e740d
+  __CMP_NO_11cf2224_ad92_4872_a420_1c909f5e740d:
   SEP	#$20
   LDA	#$00
-  __CMP_END_9ecee57a_4207_4a8c_90bc_ebf9c2206f9c:
+  __CMP_END_11cf2224_ad92_4872_a420_1c909f5e740d:
   SEP	#$20
   CMP	#$00
   BNE	:+
-  JMP	__ITER__END__60d66e8d_bcf9_4078_a9c2_fe56bb30f204
+  JMP	__ITER__END__badca7e2_43ba_4268_9aca_8cbc719d1f3b
   :
   
   REP	#$20
   LDA	#$0000
   AND	__@specSubY + 0
-  STA	__@scratchBase + 8
+  STA	__@scratchBase + 0
   REP	#$20
   LDA	#$8000
   AND	__@specSubY + 2
-  STA	__@scratchBase + 10
+  STA	__@scratchBase + 2
   REP	#$20
   LDA	#$0000
   AND	__@specSubY + 4
-  STA	__@scratchBase + 12
+  STA	__@scratchBase + 4
   REP	#$20
   LDA	#$0000
   AND	__@specSubY + 6
-  STA	__@scratchBase + 14
+  STA	__@scratchBase + 6
   SEP	#$10
   LDX	#$00
   REP	#$20
-  LDA	__@scratchBase + 8
+  LDA	__@scratchBase + 0
   CMP	#$0000
   BNE	:+
   REP	#$20
-  LDA	__@scratchBase + 10
+  LDA	__@scratchBase + 2
   CMP	#$0000
   BNE	:+
   REP	#$20
-  LDA	__@scratchBase + 12
+  LDA	__@scratchBase + 4
   CMP	#$0000
   BNE	:+
   REP	#$20
-  LDA	__@scratchBase + 14
+  LDA	__@scratchBase + 6
   CMP	#$0000
   BNE	:+
   INX
 : TXA
-  SEP	#$20
-  STA	__@scratchBase + 0
-  LDA	#$00
-  STA	__@scratchBase + 1
-  STA	__@scratchBase + 2
-  STA	__@scratchBase + 3
-  STA	__@scratchBase + 4
-  STA	__@scratchBase + 5
-  STA	__@scratchBase + 6
-  STA	__@scratchBase + 7
-  REP	#$20
-  LDA	__@scratchBase + 0
-  STA	__@scratchBase + 0
-  REP	#$20
-  LDA	__@scratchBase + 2
-  STA	__@scratchBase + 2
-  REP	#$20
-  LDA	__@scratchBase + 4
-  STA	__@scratchBase + 4
-  REP	#$20
-  LDA	__@scratchBase + 6
-  STA	__@scratchBase + 6
-  BNE	__IFNOT_59dedc8a_65ae_4fd7_b514_60f57907ffba
-  JMP	__ITER__END__60d66e8d_bcf9_4078_a9c2_fe56bb30f204
-  __IFNOT_59dedc8a_65ae_4fd7_b514_60f57907ffba:
+  BNE	__IFNOT_c2d14495_0b58_4d31_8d3b_16caa835f191
+  JMP	__ITER__END__badca7e2_43ba_4268_9aca_8cbc719d1f3b
+  __IFNOT_c2d14495_0b58_4d31_8d3b_16caa835f191:
   REP	#$20
   LDA	__@specSubY + 0
   ASL
@@ -10269,9 +9753,9 @@ __mod24by64:	; @func
   LDA	__mod24by64@start + 2
   ROL
   STA	__mod24by64@start + 2
-  JMP	__ITER__START__60d66e8d_bcf9_4078_a9c2_fe56bb30f204
-  __ITER__END__60d66e8d_bcf9_4078_a9c2_fe56bb30f204:
-  __ITER__START__c9ad0e3a_f43a_4549_b53c_7c497303f545:
+  JMP	__ITER__START__badca7e2_43ba_4268_9aca_8cbc719d1f3b
+  __ITER__END__badca7e2_43ba_4268_9aca_8cbc719d1f3b:
+  __ITER__START__3dd02db3_8e77_4bde_b2ef_6ade4c9a8e17:
   SEP	#$10
   LDX	#$01
   REP	#$20
@@ -10287,7 +9771,7 @@ __mod24by64:	; @func
   SEP	#$20
   CMP	#$00
   BNE	:+
-  JMP	__ITER__END__c9ad0e3a_f43a_4549_b53c_7c497303f545
+  JMP	__ITER__END__3dd02db3_8e77_4bde_b2ef_6ade4c9a8e17
   :
   CLC
   REP	#$20
@@ -10295,36 +9779,36 @@ __mod24by64:	; @func
   STA	__@signExtend
   LDA	__@signExtend
   CMP	__@specSubY + 6
-  BCC	__CMP_NO_e04dfa5f_815c_4319_9dd4_1276c8783beb
-  BNE	__CMP_YES_e04dfa5f_815c_4319_9dd4_1276c8783beb
+  BCC	__CMP_NO_da415554_e295_4085_b342_fdc9c5793d71
+  BNE	__CMP_YES_da415554_e295_4085_b342_fdc9c5793d71
   LDA	__@signExtend
   CMP	__@specSubY + 4
-  BCC	__CMP_NO_e04dfa5f_815c_4319_9dd4_1276c8783beb
-  BNE	__CMP_YES_e04dfa5f_815c_4319_9dd4_1276c8783beb
+  BCC	__CMP_NO_da415554_e295_4085_b342_fdc9c5793d71
+  BNE	__CMP_YES_da415554_e295_4085_b342_fdc9c5793d71
   SEP	#$20
   LDA	__@signExtend
   CMP	__@specSubY + 3
-  BCC	__CMP_NO_e04dfa5f_815c_4319_9dd4_1276c8783beb
-  BNE	__CMP_YES_e04dfa5f_815c_4319_9dd4_1276c8783beb
+  BCC	__CMP_NO_da415554_e295_4085_b342_fdc9c5793d71
+  BNE	__CMP_YES_da415554_e295_4085_b342_fdc9c5793d71
   LDA	__@specSubX + 1
   CMP	__@specSubY + 1
-  BCC	__CMP_NO_e04dfa5f_815c_4319_9dd4_1276c8783beb
-  BNE	__CMP_YES_e04dfa5f_815c_4319_9dd4_1276c8783beb
+  BCC	__CMP_NO_da415554_e295_4085_b342_fdc9c5793d71
+  BNE	__CMP_YES_da415554_e295_4085_b342_fdc9c5793d71
   SEP	#$20
   LDA	__@specSubX + 0
   CMP	__@specSubY + 0
-  BCC	__CMP_NO_e04dfa5f_815c_4319_9dd4_1276c8783beb
-  BNE	__CMP_YES_e04dfa5f_815c_4319_9dd4_1276c8783beb
-  JMP	__CMP_YES_e04dfa5f_815c_4319_9dd4_1276c8783beb
-  __CMP_YES_e04dfa5f_815c_4319_9dd4_1276c8783beb:
+  BCC	__CMP_NO_da415554_e295_4085_b342_fdc9c5793d71
+  BNE	__CMP_YES_da415554_e295_4085_b342_fdc9c5793d71
+  JMP	__CMP_YES_da415554_e295_4085_b342_fdc9c5793d71
+  __CMP_YES_da415554_e295_4085_b342_fdc9c5793d71:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_e04dfa5f_815c_4319_9dd4_1276c8783beb
-  __CMP_NO_e04dfa5f_815c_4319_9dd4_1276c8783beb:
+  BRA	__CMP_END_da415554_e295_4085_b342_fdc9c5793d71
+  __CMP_NO_da415554_e295_4085_b342_fdc9c5793d71:
   SEP	#$20
   LDA	#$00
-  __CMP_END_e04dfa5f_815c_4319_9dd4_1276c8783beb:
-  BEQ	__IFNOT_fb4547c7_037d_47c8_adcc_9379c7e5c41b
+  __CMP_END_da415554_e295_4085_b342_fdc9c5793d71:
+  BEQ	__IFNOT_f2b450eb_a524_4273_a58d_b57a71b86624
   REP	#$20
   LDA	#$0000
   STA	__@signExtend
@@ -10345,7 +9829,7 @@ __mod24by64:	; @func
   LDA	__mod24by64@ret + 2
   ADC	__mod24by64@start + 2
   STA	__mod24by64@ret + 2
-  __IFNOT_fb4547c7_037d_47c8_adcc_9379c7e5c41b:
+  __IFNOT_f2b450eb_a524_4273_a58d_b57a71b86624:
   REP	#$20
   LDA	__@specSubY + 6
   LSR
@@ -10367,8 +9851,8 @@ __mod24by64:	; @func
   LDA	__mod24by64@start + 0
   ROR
   STA	__mod24by64@start + 0
-  JMP	__ITER__START__c9ad0e3a_f43a_4549_b53c_7c497303f545
-  __ITER__END__c9ad0e3a_f43a_4549_b53c_7c497303f545:
+  JMP	__ITER__START__3dd02db3_8e77_4bde_b2ef_6ade4c9a8e17
+  __ITER__END__3dd02db3_8e77_4bde_b2ef_6ade4c9a8e17:
   REP	#$20
   LDA	__@specSubX + 0
   STA	__@callResult + 0
@@ -10389,103 +9873,81 @@ __mod32by64:	; @func
   STA	__mod32by64@start + 0
   LDA	#$0000
   STA	__mod32by64@start + 2
-  __ITER__START__f8bdef2e_38d2_4920_8be9_401d84180a38:
+  __ITER__START__81a4c1d9_ae6d_4bfa_8aad_5ed2c4fd76d8:
   CLC
   REP	#$20
   LDA	#$0000
   STA	__@signExtend
   LDA	__@signExtend
   CMP	__@specSubY + 6
-  BCC	__CMP_NO_5c80181f_6764_400d_bf54_6e41e28b34cc
-  BNE	__CMP_YES_5c80181f_6764_400d_bf54_6e41e28b34cc
+  BCC	__CMP_NO_3caeed0f_4c92_49e5_b17c_4e3f18722886
+  BNE	__CMP_YES_3caeed0f_4c92_49e5_b17c_4e3f18722886
   LDA	__@signExtend
   CMP	__@specSubY + 4
-  BCC	__CMP_NO_5c80181f_6764_400d_bf54_6e41e28b34cc
-  BNE	__CMP_YES_5c80181f_6764_400d_bf54_6e41e28b34cc
+  BCC	__CMP_NO_3caeed0f_4c92_49e5_b17c_4e3f18722886
+  BNE	__CMP_YES_3caeed0f_4c92_49e5_b17c_4e3f18722886
   LDA	__@specSubX + 2
   CMP	__@specSubY + 2
-  BCC	__CMP_NO_5c80181f_6764_400d_bf54_6e41e28b34cc
-  BNE	__CMP_YES_5c80181f_6764_400d_bf54_6e41e28b34cc
+  BCC	__CMP_NO_3caeed0f_4c92_49e5_b17c_4e3f18722886
+  BNE	__CMP_YES_3caeed0f_4c92_49e5_b17c_4e3f18722886
   LDA	__@specSubX + 0
   CMP	__@specSubY + 0
-  BCC	__CMP_NO_5c80181f_6764_400d_bf54_6e41e28b34cc
-  BNE	__CMP_YES_5c80181f_6764_400d_bf54_6e41e28b34cc
-  JMP	__CMP_NO_5c80181f_6764_400d_bf54_6e41e28b34cc
-  __CMP_YES_5c80181f_6764_400d_bf54_6e41e28b34cc:
+  BCC	__CMP_NO_3caeed0f_4c92_49e5_b17c_4e3f18722886
+  BNE	__CMP_YES_3caeed0f_4c92_49e5_b17c_4e3f18722886
+  JMP	__CMP_NO_3caeed0f_4c92_49e5_b17c_4e3f18722886
+  __CMP_YES_3caeed0f_4c92_49e5_b17c_4e3f18722886:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_5c80181f_6764_400d_bf54_6e41e28b34cc
-  __CMP_NO_5c80181f_6764_400d_bf54_6e41e28b34cc:
+  BRA	__CMP_END_3caeed0f_4c92_49e5_b17c_4e3f18722886
+  __CMP_NO_3caeed0f_4c92_49e5_b17c_4e3f18722886:
   SEP	#$20
   LDA	#$00
-  __CMP_END_5c80181f_6764_400d_bf54_6e41e28b34cc:
+  __CMP_END_3caeed0f_4c92_49e5_b17c_4e3f18722886:
   SEP	#$20
   CMP	#$00
   BNE	:+
-  JMP	__ITER__END__f8bdef2e_38d2_4920_8be9_401d84180a38
+  JMP	__ITER__END__81a4c1d9_ae6d_4bfa_8aad_5ed2c4fd76d8
   :
   
   REP	#$20
   LDA	#$0000
   AND	__@specSubY + 0
-  STA	__@scratchBase + 8
+  STA	__@scratchBase + 0
   REP	#$20
   LDA	#$8000
   AND	__@specSubY + 2
-  STA	__@scratchBase + 10
+  STA	__@scratchBase + 2
   REP	#$20
   LDA	#$0000
   AND	__@specSubY + 4
-  STA	__@scratchBase + 12
+  STA	__@scratchBase + 4
   REP	#$20
   LDA	#$0000
   AND	__@specSubY + 6
-  STA	__@scratchBase + 14
+  STA	__@scratchBase + 6
   SEP	#$10
   LDX	#$00
   REP	#$20
-  LDA	__@scratchBase + 8
+  LDA	__@scratchBase + 0
   CMP	#$0000
   BNE	:+
   REP	#$20
-  LDA	__@scratchBase + 10
+  LDA	__@scratchBase + 2
   CMP	#$0000
   BNE	:+
   REP	#$20
-  LDA	__@scratchBase + 12
+  LDA	__@scratchBase + 4
   CMP	#$0000
   BNE	:+
   REP	#$20
-  LDA	__@scratchBase + 14
+  LDA	__@scratchBase + 6
   CMP	#$0000
   BNE	:+
   INX
 : TXA
-  SEP	#$20
-  STA	__@scratchBase + 0
-  LDA	#$00
-  STA	__@scratchBase + 1
-  STA	__@scratchBase + 2
-  STA	__@scratchBase + 3
-  STA	__@scratchBase + 4
-  STA	__@scratchBase + 5
-  STA	__@scratchBase + 6
-  STA	__@scratchBase + 7
-  REP	#$20
-  LDA	__@scratchBase + 0
-  STA	__@scratchBase + 0
-  REP	#$20
-  LDA	__@scratchBase + 2
-  STA	__@scratchBase + 2
-  REP	#$20
-  LDA	__@scratchBase + 4
-  STA	__@scratchBase + 4
-  REP	#$20
-  LDA	__@scratchBase + 6
-  STA	__@scratchBase + 6
-  BNE	__IFNOT_8f5d3059_bd97_47b4_b983_1db2d7324f1c
-  JMP	__ITER__END__f8bdef2e_38d2_4920_8be9_401d84180a38
-  __IFNOT_8f5d3059_bd97_47b4_b983_1db2d7324f1c:
+  BNE	__IFNOT_551eec4b_449a_47e9_93fd_531ad643420e
+  JMP	__ITER__END__81a4c1d9_ae6d_4bfa_8aad_5ed2c4fd76d8
+  __IFNOT_551eec4b_449a_47e9_93fd_531ad643420e:
   REP	#$20
   LDA	__@specSubY + 0
   ASL
@@ -10510,9 +9972,9 @@ __mod32by64:	; @func
   LDA	__mod32by64@start + 2
   ROL
   STA	__mod32by64@start + 2
-  JMP	__ITER__START__f8bdef2e_38d2_4920_8be9_401d84180a38
-  __ITER__END__f8bdef2e_38d2_4920_8be9_401d84180a38:
-  __ITER__START__781a61c3_f881_4ef4_b8ed_77394fb6e936:
+  JMP	__ITER__START__81a4c1d9_ae6d_4bfa_8aad_5ed2c4fd76d8
+  __ITER__END__81a4c1d9_ae6d_4bfa_8aad_5ed2c4fd76d8:
+  __ITER__START__4e97fa6e_97a5_4dcc_9537_4776f8617fc1:
   SEP	#$10
   LDX	#$01
   REP	#$20
@@ -10528,7 +9990,7 @@ __mod32by64:	; @func
   SEP	#$20
   CMP	#$00
   BNE	:+
-  JMP	__ITER__END__781a61c3_f881_4ef4_b8ed_77394fb6e936
+  JMP	__ITER__END__4e97fa6e_97a5_4dcc_9537_4776f8617fc1
   :
   CLC
   REP	#$20
@@ -10536,30 +9998,30 @@ __mod32by64:	; @func
   STA	__@signExtend
   LDA	__@signExtend
   CMP	__@specSubY + 6
-  BCC	__CMP_NO_8b9c89e9_aeef_4c4a_acf1_2f505956fd2f
-  BNE	__CMP_YES_8b9c89e9_aeef_4c4a_acf1_2f505956fd2f
+  BCC	__CMP_NO_3dbbbf3f_6674_4964_802c_1deebe12e372
+  BNE	__CMP_YES_3dbbbf3f_6674_4964_802c_1deebe12e372
   LDA	__@signExtend
   CMP	__@specSubY + 4
-  BCC	__CMP_NO_8b9c89e9_aeef_4c4a_acf1_2f505956fd2f
-  BNE	__CMP_YES_8b9c89e9_aeef_4c4a_acf1_2f505956fd2f
+  BCC	__CMP_NO_3dbbbf3f_6674_4964_802c_1deebe12e372
+  BNE	__CMP_YES_3dbbbf3f_6674_4964_802c_1deebe12e372
   LDA	__@specSubX + 2
   CMP	__@specSubY + 2
-  BCC	__CMP_NO_8b9c89e9_aeef_4c4a_acf1_2f505956fd2f
-  BNE	__CMP_YES_8b9c89e9_aeef_4c4a_acf1_2f505956fd2f
+  BCC	__CMP_NO_3dbbbf3f_6674_4964_802c_1deebe12e372
+  BNE	__CMP_YES_3dbbbf3f_6674_4964_802c_1deebe12e372
   LDA	__@specSubX + 0
   CMP	__@specSubY + 0
-  BCC	__CMP_NO_8b9c89e9_aeef_4c4a_acf1_2f505956fd2f
-  BNE	__CMP_YES_8b9c89e9_aeef_4c4a_acf1_2f505956fd2f
-  JMP	__CMP_YES_8b9c89e9_aeef_4c4a_acf1_2f505956fd2f
-  __CMP_YES_8b9c89e9_aeef_4c4a_acf1_2f505956fd2f:
+  BCC	__CMP_NO_3dbbbf3f_6674_4964_802c_1deebe12e372
+  BNE	__CMP_YES_3dbbbf3f_6674_4964_802c_1deebe12e372
+  JMP	__CMP_YES_3dbbbf3f_6674_4964_802c_1deebe12e372
+  __CMP_YES_3dbbbf3f_6674_4964_802c_1deebe12e372:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_8b9c89e9_aeef_4c4a_acf1_2f505956fd2f
-  __CMP_NO_8b9c89e9_aeef_4c4a_acf1_2f505956fd2f:
+  BRA	__CMP_END_3dbbbf3f_6674_4964_802c_1deebe12e372
+  __CMP_NO_3dbbbf3f_6674_4964_802c_1deebe12e372:
   SEP	#$20
   LDA	#$00
-  __CMP_END_8b9c89e9_aeef_4c4a_acf1_2f505956fd2f:
-  BEQ	__IFNOT_a440b6a7_7417_44bd_9421_3e7312fc41f3
+  __CMP_END_3dbbbf3f_6674_4964_802c_1deebe12e372:
+  BEQ	__IFNOT_5a6af463_2cab_4ef7_b0bf_6358eb051ba9
   REP	#$20
   LDA	#$0000
   STA	__@signExtend
@@ -10580,7 +10042,7 @@ __mod32by64:	; @func
   LDA	__mod32by64@ret + 2
   ADC	__mod32by64@start + 2
   STA	__mod32by64@ret + 2
-  __IFNOT_a440b6a7_7417_44bd_9421_3e7312fc41f3:
+  __IFNOT_5a6af463_2cab_4ef7_b0bf_6358eb051ba9:
   REP	#$20
   LDA	__@specSubY + 6
   LSR
@@ -10601,8 +10063,8 @@ __mod32by64:	; @func
   LDA	__mod32by64@start + 0
   ROR
   STA	__mod32by64@start + 0
-  JMP	__ITER__START__781a61c3_f881_4ef4_b8ed_77394fb6e936
-  __ITER__END__781a61c3_f881_4ef4_b8ed_77394fb6e936:
+  JMP	__ITER__START__4e97fa6e_97a5_4dcc_9537_4776f8617fc1
+  __ITER__END__4e97fa6e_97a5_4dcc_9537_4776f8617fc1:
   REP	#$20
   LDA	__@specSubX + 0
   STA	__@callResult + 0
@@ -10627,105 +10089,83 @@ __mod64by64:	; @func
   STA	__mod64by64@start + 2
   STA	__mod64by64@start + 4
   STA	__mod64by64@start + 6
-  __ITER__START__d524339a_662f_4cb4_a85f_daa1fedb5526:
+  __ITER__START__af5faa11_c9d7_44d6_990a_d096a2c04f00:
   CLC
   REP	#$20
   REP	#$20
   LDA	__@specSubX + 6
   CMP	__@specSubY + 6
-  BCC	__CMP_NO_32952ad0_bb1b_415e_8fae_22126f5096d5
-  BNE	__CMP_YES_32952ad0_bb1b_415e_8fae_22126f5096d5
+  BCC	__CMP_NO_6887c596_57ec_4c82_84d6_4dd83533f189
+  BNE	__CMP_YES_6887c596_57ec_4c82_84d6_4dd83533f189
   REP	#$20
   LDA	__@specSubX + 4
   CMP	__@specSubY + 4
-  BCC	__CMP_NO_32952ad0_bb1b_415e_8fae_22126f5096d5
-  BNE	__CMP_YES_32952ad0_bb1b_415e_8fae_22126f5096d5
+  BCC	__CMP_NO_6887c596_57ec_4c82_84d6_4dd83533f189
+  BNE	__CMP_YES_6887c596_57ec_4c82_84d6_4dd83533f189
   REP	#$20
   LDA	__@specSubX + 2
   CMP	__@specSubY + 2
-  BCC	__CMP_NO_32952ad0_bb1b_415e_8fae_22126f5096d5
-  BNE	__CMP_YES_32952ad0_bb1b_415e_8fae_22126f5096d5
+  BCC	__CMP_NO_6887c596_57ec_4c82_84d6_4dd83533f189
+  BNE	__CMP_YES_6887c596_57ec_4c82_84d6_4dd83533f189
   REP	#$20
   LDA	__@specSubX + 0
   CMP	__@specSubY + 0
-  BCC	__CMP_NO_32952ad0_bb1b_415e_8fae_22126f5096d5
-  BNE	__CMP_YES_32952ad0_bb1b_415e_8fae_22126f5096d5
-  JMP	__CMP_NO_32952ad0_bb1b_415e_8fae_22126f5096d5
-  __CMP_YES_32952ad0_bb1b_415e_8fae_22126f5096d5:
+  BCC	__CMP_NO_6887c596_57ec_4c82_84d6_4dd83533f189
+  BNE	__CMP_YES_6887c596_57ec_4c82_84d6_4dd83533f189
+  JMP	__CMP_NO_6887c596_57ec_4c82_84d6_4dd83533f189
+  __CMP_YES_6887c596_57ec_4c82_84d6_4dd83533f189:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_32952ad0_bb1b_415e_8fae_22126f5096d5
-  __CMP_NO_32952ad0_bb1b_415e_8fae_22126f5096d5:
+  BRA	__CMP_END_6887c596_57ec_4c82_84d6_4dd83533f189
+  __CMP_NO_6887c596_57ec_4c82_84d6_4dd83533f189:
   SEP	#$20
   LDA	#$00
-  __CMP_END_32952ad0_bb1b_415e_8fae_22126f5096d5:
+  __CMP_END_6887c596_57ec_4c82_84d6_4dd83533f189:
   SEP	#$20
   CMP	#$00
   BNE	:+
-  JMP	__ITER__END__d524339a_662f_4cb4_a85f_daa1fedb5526
+  JMP	__ITER__END__af5faa11_c9d7_44d6_990a_d096a2c04f00
   :
   
   REP	#$20
   LDA	#$0000
   AND	__@specSubY + 0
-  STA	__@scratchBase + 8
+  STA	__@scratchBase + 0
   REP	#$20
   LDA	#$8000
   AND	__@specSubY + 2
-  STA	__@scratchBase + 10
+  STA	__@scratchBase + 2
   REP	#$20
   LDA	#$0000
   AND	__@specSubY + 4
-  STA	__@scratchBase + 12
+  STA	__@scratchBase + 4
   REP	#$20
   LDA	#$0000
   AND	__@specSubY + 6
-  STA	__@scratchBase + 14
+  STA	__@scratchBase + 6
   SEP	#$10
   LDX	#$00
   REP	#$20
-  LDA	__@scratchBase + 8
+  LDA	__@scratchBase + 0
   CMP	#$0000
   BNE	:+
   REP	#$20
-  LDA	__@scratchBase + 10
+  LDA	__@scratchBase + 2
   CMP	#$0000
   BNE	:+
   REP	#$20
-  LDA	__@scratchBase + 12
+  LDA	__@scratchBase + 4
   CMP	#$0000
   BNE	:+
   REP	#$20
-  LDA	__@scratchBase + 14
+  LDA	__@scratchBase + 6
   CMP	#$0000
   BNE	:+
   INX
 : TXA
-  SEP	#$20
-  STA	__@scratchBase + 0
-  LDA	#$00
-  STA	__@scratchBase + 1
-  STA	__@scratchBase + 2
-  STA	__@scratchBase + 3
-  STA	__@scratchBase + 4
-  STA	__@scratchBase + 5
-  STA	__@scratchBase + 6
-  STA	__@scratchBase + 7
-  REP	#$20
-  LDA	__@scratchBase + 0
-  STA	__@scratchBase + 0
-  REP	#$20
-  LDA	__@scratchBase + 2
-  STA	__@scratchBase + 2
-  REP	#$20
-  LDA	__@scratchBase + 4
-  STA	__@scratchBase + 4
-  REP	#$20
-  LDA	__@scratchBase + 6
-  STA	__@scratchBase + 6
-  BNE	__IFNOT_21266d22_96e4_4d99_9fb4_7bcf0c201798
-  JMP	__ITER__END__d524339a_662f_4cb4_a85f_daa1fedb5526
-  __IFNOT_21266d22_96e4_4d99_9fb4_7bcf0c201798:
+  BNE	__IFNOT_1bb0bbe0_3393_4af3_b6cb_e7613581fc93
+  JMP	__ITER__END__af5faa11_c9d7_44d6_990a_d096a2c04f00
+  __IFNOT_1bb0bbe0_3393_4af3_b6cb_e7613581fc93:
   REP	#$20
   LDA	__@specSubY + 0
   ASL
@@ -10758,9 +10198,9 @@ __mod64by64:	; @func
   LDA	__mod64by64@start + 6
   ROL
   STA	__mod64by64@start + 6
-  JMP	__ITER__START__d524339a_662f_4cb4_a85f_daa1fedb5526
-  __ITER__END__d524339a_662f_4cb4_a85f_daa1fedb5526:
-  __ITER__START__d371e627_a610_40e8_b692_6094b282a29a:
+  JMP	__ITER__START__af5faa11_c9d7_44d6_990a_d096a2c04f00
+  __ITER__END__af5faa11_c9d7_44d6_990a_d096a2c04f00:
+  __ITER__START__c93265a6_90c2_41a8_b209_7cb1cc023772:
   SEP	#$10
   LDX	#$01
   REP	#$20
@@ -10784,41 +10224,41 @@ __mod64by64:	; @func
   SEP	#$20
   CMP	#$00
   BNE	:+
-  JMP	__ITER__END__d371e627_a610_40e8_b692_6094b282a29a
+  JMP	__ITER__END__c93265a6_90c2_41a8_b209_7cb1cc023772
   :
   CLC
   REP	#$20
   REP	#$20
   LDA	__@specSubX + 6
   CMP	__@specSubY + 6
-  BCC	__CMP_NO_dd4d5699_629d_40d2_8f71_fbc6fc562142
-  BNE	__CMP_YES_dd4d5699_629d_40d2_8f71_fbc6fc562142
+  BCC	__CMP_NO_09b07cc2_a936_40bc_a01b_46473943ac82
+  BNE	__CMP_YES_09b07cc2_a936_40bc_a01b_46473943ac82
   REP	#$20
   LDA	__@specSubX + 4
   CMP	__@specSubY + 4
-  BCC	__CMP_NO_dd4d5699_629d_40d2_8f71_fbc6fc562142
-  BNE	__CMP_YES_dd4d5699_629d_40d2_8f71_fbc6fc562142
+  BCC	__CMP_NO_09b07cc2_a936_40bc_a01b_46473943ac82
+  BNE	__CMP_YES_09b07cc2_a936_40bc_a01b_46473943ac82
   REP	#$20
   LDA	__@specSubX + 2
   CMP	__@specSubY + 2
-  BCC	__CMP_NO_dd4d5699_629d_40d2_8f71_fbc6fc562142
-  BNE	__CMP_YES_dd4d5699_629d_40d2_8f71_fbc6fc562142
+  BCC	__CMP_NO_09b07cc2_a936_40bc_a01b_46473943ac82
+  BNE	__CMP_YES_09b07cc2_a936_40bc_a01b_46473943ac82
   REP	#$20
   LDA	__@specSubX + 0
   CMP	__@specSubY + 0
-  BCC	__CMP_NO_dd4d5699_629d_40d2_8f71_fbc6fc562142
-  BNE	__CMP_YES_dd4d5699_629d_40d2_8f71_fbc6fc562142
-  JMP	__CMP_YES_dd4d5699_629d_40d2_8f71_fbc6fc562142
-  __CMP_YES_dd4d5699_629d_40d2_8f71_fbc6fc562142:
+  BCC	__CMP_NO_09b07cc2_a936_40bc_a01b_46473943ac82
+  BNE	__CMP_YES_09b07cc2_a936_40bc_a01b_46473943ac82
+  JMP	__CMP_YES_09b07cc2_a936_40bc_a01b_46473943ac82
+  __CMP_YES_09b07cc2_a936_40bc_a01b_46473943ac82:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_dd4d5699_629d_40d2_8f71_fbc6fc562142
-  __CMP_NO_dd4d5699_629d_40d2_8f71_fbc6fc562142:
+  BRA	__CMP_END_09b07cc2_a936_40bc_a01b_46473943ac82
+  __CMP_NO_09b07cc2_a936_40bc_a01b_46473943ac82:
   SEP	#$20
   LDA	#$00
-  __CMP_END_dd4d5699_629d_40d2_8f71_fbc6fc562142:
+  __CMP_END_09b07cc2_a936_40bc_a01b_46473943ac82:
   BNE	:+
-  JMP	__IFNOT_fbc3d8ca_99f7_4bf0_a2b7_cf8f8ab3764f
+  JMP	__IFNOT_4ccf8ef2_f2cf_414b_858f_1dd724c8470f
   :
   SEC
   REP	#$20
@@ -10854,7 +10294,7 @@ __mod64by64:	; @func
   LDA	__mod64by64@ret + 6
   ADC	__mod64by64@start + 6
   STA	__mod64by64@ret + 6
-  __IFNOT_fbc3d8ca_99f7_4bf0_a2b7_cf8f8ab3764f:
+  __IFNOT_4ccf8ef2_f2cf_414b_858f_1dd724c8470f:
   REP	#$20
   LDA	__@specSubY + 6
   LSR
@@ -10881,8 +10321,8 @@ __mod64by64:	; @func
   LDA	__mod64by64@start + 0
   ROR
   STA	__mod64by64@start + 0
-  JMP	__ITER__START__d371e627_a610_40e8_b692_6094b282a29a
-  __ITER__END__d371e627_a610_40e8_b692_6094b282a29a:
+  JMP	__ITER__START__c93265a6_90c2_41a8_b209_7cb1cc023772
+  __ITER__END__c93265a6_90c2_41a8_b209_7cb1cc023772:
   REP	#$20
   LDA	__@specSubX + 0
   STA	__@callResult + 0

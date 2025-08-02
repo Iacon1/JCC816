@@ -125,6 +125,7 @@ public class EqualityExpressionNode extends BinaryExpressionNode
 		state = op.getStateAfter(state);
 		if (operator.equals("==")) assembly += state.getWhitespace() + "INX\n";
 		else if (operator.equals("!=")) assembly += state.getWhitespace() + "DEX\n";
+		state = state.clearKnownFlags();
 		if (state.getWhitespace().length() >= 2)
 			assembly += ":" + state.getWhitespace().substring(1) + "TXA\n";
 		else
