@@ -86,7 +86,11 @@ public final class CompConfig
 	
 	public static int sizeOf(List<String> typeSpecifiers)
 	{
-		if (typeSpecifiers.contains("char") || typeSpecifiers.contains("_Bool")) return charSize;
+		if (typeSpecifiers.contains("double"))
+			return 8;
+		else if (typeSpecifiers.contains("float"))
+			return 4;
+		else if (typeSpecifiers.contains("char") || typeSpecifiers.contains("_Bool")) return charSize;
 		else
 		{
 			int shortCount = 0, longCount = 0;
@@ -188,6 +192,7 @@ public final class CompConfig
 		public static final String XY8 = "XY8"; // Function starts in 8-bit A mode
 		public static final String XY16 = "XY16"; // Function starts in 16-bit A mode
 		public static final String optional = "optional";
+		public static final String req = "__req";
 		public static final boolean isInterrupt(Set<String> attributes)
 		{
 			return
