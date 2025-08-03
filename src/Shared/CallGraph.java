@@ -5,6 +5,8 @@ package Shared;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -25,12 +27,20 @@ public class CallGraph
 		isFlattened.put(funcName, true);
 		
 		Set<String> set = map.get(funcName);
-		
-		for (String callee : set)
+		List<String> setList = new LinkedList<String>(set);
+		String callee;
+	
+		while (!setList.isEmpty())
 		{
+			callee = setList.removeFirst();
 			// Flatten callee, then anything it can call must be something we can call
 			flatten(callee);
-			set.addAll(map.get(callee));
+			
+			Set<String> disjunction = new HashSet<String>(map.get(callee));
+			disjunction.removeAll(set);
+			
+			set.addAll(disjunction);
+			setList.addAll(disjunction);
 		}
 	}
 	
