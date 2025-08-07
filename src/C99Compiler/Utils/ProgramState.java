@@ -948,8 +948,8 @@ public class ProgramState
 	{
 		ProgramState s = new ProgramState(
 				whitespaceLevel,
-				newBlockList(), null,
-				newPointerMap(),
+				blockList, lastScratchSource,
+				pointerMap,
 				newPossibleValues(),
 				destSource,
 				exitFuncLabel,
@@ -958,6 +958,8 @@ public class ProgramState
 				(byte) 0,
 				a, x, y,
 				isSA1);
+		try {s = s.releasePointers();}
+		catch (ScratchOverflowException e) {}
 		return s;
 	}
 	public ProgramState combine(ProgramState other)
