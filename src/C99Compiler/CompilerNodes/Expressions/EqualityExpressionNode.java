@@ -97,7 +97,7 @@ public class EqualityExpressionNode extends BinaryExpressionNode
 		case "==":
 			return x.getPropValue(state).equals(y.getPropValue(state));
 		case "!=":
-			return x.getPropValue(state).equals(y.getPropValue(state));
+			return !x.getPropValue(state).equals(y.getPropValue(state));
 		default: return null;
 		}
 	}
