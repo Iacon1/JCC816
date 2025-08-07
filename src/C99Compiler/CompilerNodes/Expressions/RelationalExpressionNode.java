@@ -249,6 +249,7 @@ public class RelationalExpressionNode extends BinaryExpressionNode
 			break;
 		}
 		
+		state = state.releaseScratchBlock(tempSource);
 		return new AssemblyStatePair(assembly, state);
 	}
 	@Override
