@@ -13,6 +13,8 @@ import C99Compiler.Utils.AssemblyUtils.BytewiseOperator;
 import C99Compiler.Utils.OperandSources.OperandSource;
 import Grammar.C99.C99Parser.Land_expressionContext;
 import Grammar.C99.C99Parser.Lor_expressionContext;
+import Shared.Assemblable.AssemblyStatePair;
+import Shared.Assemblable.MutableAssemblyStatePair;
 
 public class LORExpressionNode extends LogicalBinaryExpressionNode
 <Lor_expressionContext, Land_expressionContext, Land_expressionContext, Lor_expressionContext>
@@ -48,7 +50,7 @@ public class LORExpressionNode extends LogicalBinaryExpressionNode
 		}
 	}
 	
-	public LORExpressionNode(ComponentNode<?> parent) {super(parent);}
+	public LORExpressionNode(ComponentNode<?> parent) {super(parent, true);}
 
 	@Override
 	protected BaseExpressionNode<Lor_expressionContext> getC1Node(Lor_expressionContext node) throws Exception
@@ -75,38 +77,17 @@ public class LORExpressionNode extends LogicalBinaryExpressionNode
 	@Override
 	protected AssemblyStatePair getAssemblyAndState(ProgramState state, OperandSource sourceX, OperandSource sourceY) throws Exception
 	{
-		AssemblyStatePair tmpPair;
-		String assembly = "";
-		String whitespace = state.getWhitespace();
+		MutableAssemblyStatePair pair = new MutableAssemblyStatePair("", state);
 		
-		byte flags = state.getPreserveFlags();
-		assembly += AssemblyUtils.store(state, (byte) (PreserveFlag.A | PreserveFlag.X));
-		state = state.clearPreserveFlags((byte) (PreserveFlag.A | PreserveFlag.X));
-
-		assembly += whitespace + CompUtils.setXY8 + "\n";
-		if (operator.equals("==")) assembly += whitespace + "LDX\t#$00\n";
-		else if (operator.equals("!=")) assembly += whitespace + "LDX\t#$01\n";
-		state = state.addPreserveFlags(PreserveFlag.X);
-
-		assembly += whitespace + "LDX\t#$01\n";
-		
-		AssemblyStatePair pair = new LOROperator(sourceX.getSize(), sourceX, sourceY).getAssemblyAndState(state);
-		assembly += pair.assembly;
-		state = pair.state;
-		
-		assembly += whitespace + "DEX\n";
-		assembly += ":" + whitespace.substring(1) + "TXA\n";
-		assembly += whitespace + CompUtils.setA8 + "\n";
-		state = state.setProcessorFlags(ProcessorFlag.M);
-		if(state.destSource() != null)
+		if (!pair.state.testKnownFlag(PreserveFlag.M) || pair.state.testProcessorFlag(ProcessorFlag.M))
 		{
-			tmpPair = state.destSource().getSTA(state, 0);
-			assembly += tmpPair.assembly;
-			state = tmpPair.state;
+			pair.assembly += pair.state.getWhitespace() + "SEP\t#$20\n";
+			pair.state = pair.state.clearProcessorFlags(ProcessorFlag.M);
 		}
-		state = state.setPreserveFlags(flags);
-		assembly += AssemblyUtils.restore(state, (byte) (PreserveFlag.A | PreserveFlag.X));
 		
-		return new AssemblyStatePair(assembly, state);
+		sourceX.applyLDA(pair, 0);
+		sourceY.applyInstruction(pair, "ORA", 0);
+		
+		return pair.getImmutable();
 	}
 }
