@@ -16,6 +16,7 @@ import C99Compiler.CompilerNodes.Expressions.ConstantExpressionNode;
 import C99Compiler.CompilerNodes.Interfaces.NamedNode;
 import C99Compiler.Exceptions.ConstraintException;
 import C99Compiler.Utils.CompUtils;
+import C99Compiler.Utils.ProgramState;
 import Grammar.C99.C99Parser.Enum_specifierContext;
 import Grammar.C99.C99Parser.EnumeratorContext;
 
@@ -39,6 +40,7 @@ public class EnumDefinitionNode extends InterpretingNode<EnumDefinitionNode, Enu
 		int value = -1;
 		int largestValue = 0;
 		List<Integer> values = new LinkedList<Integer>();
+		boolean isSigned = false;
 		for (EnumeratorContext enumerator : node.enumerator_list().enumerator())
 		{
 			if (enumerator.constant_expression() != null) // Has constant expression
@@ -46,7 +48,9 @@ public class EnumDefinitionNode extends InterpretingNode<EnumDefinitionNode, Enu
 				BaseExpressionNode<?> constant = new ConstantExpressionNode(this).interpret(enumerator.constant_expression());
 				if (!constant.getType().isArithmetic())
 					throw new ConstraintException("6.7.2.2", 2, enumerator.start);
-				value = (int) constant.getPropLong();
+				value = (int) constant.getPropLong(new ProgramState());
+				if (value < 0)
+					isSigned = true;
 			}
 			else value++; // If value not specified, use value of previous + 1
 			if (Math.abs(largestValue) < Math.abs(value))
@@ -54,7 +58,10 @@ public class EnumDefinitionNode extends InterpretingNode<EnumDefinitionNode, Enu
 			values.add(value);
 		}
 		int i = 0;
-		type = CompUtils.getSmallestType(largestValue);
+		if (isSigned)
+			type = CompUtils.getSmallestSignedType(largestValue);
+		else
+			type = CompUtils.getSmallestType(largestValue);
 		type.setContext(parent);
 		for (EnumeratorContext enumerator : node.enumerator_list().enumerator())
 			new EnumeratorNode(this, enumerator.identifier().getText(), values.get(i++));

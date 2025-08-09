@@ -151,15 +151,11 @@ public class Type implements Serializable
 		{
 			throw new UndefinedTypeException("", start);
 		}
-		
-		if (typeSpecifiers.contains("double") || typeSpecifiers.contains("float")) // Floats not supported
+
+		if (typeSpecifiers.contains("_Complex")) // Complex numbers not supported
 		{
-			Exception e = new UnsupportedFeatureException("Floating-point numbers", false, start);
-			if (typeSpecifiers.contains("_Complex")) // Complex numbers not supported
-			{
-				e.addSuppressed(new UnsupportedFeatureException("Complex numbers", false, start));
-				e.addSuppressed(new ConstraintException("6.7.2", 3, start));
-			}
+			Exception e = new UnsupportedFeatureException("Complex numbers", false, start);
+			e.addSuppressed(new ConstraintException("6.7.2", 3, start));
 			throw e;
 		}
 		
@@ -228,10 +224,9 @@ public class Type implements Serializable
 			if (context.resolveStructOrUnionRelative(getSUEName()) == null)
 				baseSize = 0;
 			baseSize = context.resolveStructOrUnionRelative(getSUEName()).getSize();
-		}
-			
+		}			
 		else if (isEnum())
-			baseSize = context.resolveEnumRelative(getSUEName()).getType().getSize();
+			baseSize = getEnum().getType().getSize();
 		else baseSize = CompConfig.sizeOf(typeSpecifiers);
 		return baseSize;
 	}
@@ -466,6 +461,8 @@ public class Type implements Serializable
 	
 	public boolean isSigned()
 	{
+		if (isEnum())
+			return getEnum().getType().isSigned();
 		return !containsSpecifier("unsigned");
 	}
 	public boolean isCharacter()
@@ -482,14 +479,20 @@ public class Type implements Serializable
 				containsSpecifier("unsigned") ||
 				containsSpecifier("signed");
 	}
+	public boolean isFloat()
+	{
+		return containsSpecifier("float") ||
+				containsSpecifier("double");
+	}
 	public boolean isArithmetic()
 	{
-		return isInteger();
+		return isInteger() || isFloat();
 	}
 	public boolean isReal()
 	{
-		return isInteger();
+		return !containsSpecifier("_Complex") && isArithmetic();
 	}
+	
 	public boolean isPointer() {return false;} // To be overriden
 	public boolean isScalar()
 	{
