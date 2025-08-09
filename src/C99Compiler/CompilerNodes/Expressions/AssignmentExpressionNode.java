@@ -59,12 +59,15 @@ public class AssignmentExpressionNode extends BinaryExpressionNode
 		Type yType = y.getType();
 		
 		if (!operator.startsWith("+") && !operator.startsWith("-"))
+		{
 			if (!xType.canCastTo(yType, CastContext.assignment))
 				throw new ConstraintException("6.5.16.1", 1, node.getStart());
+		}
 		else
-			if (!xType.canCastFrom(yType, CastContext.assignment))
+		{
+			if (!xType.canCastFrom(yType, CastContext.add_assignment))
 				throw new ConstraintException("6.5.16.2", 1, node.getStart());
-		
+		}
 		
 		BinaryExpressionNode<?,?,?,?> newY = null;
 		switch (operator)
