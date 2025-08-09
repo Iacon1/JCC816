@@ -7,6 +7,8 @@ import C99Compiler.CompilerNodes.Definitions.Type;
 import C99Compiler.CompilerNodes.Definitions.Type.CastContext;
 import C99Compiler.Utils.CompUtils;
 import C99Compiler.Utils.ProgramState;
+import C99Compiler.Utils.ProgramState.PreserveFlag;
+import C99Compiler.Utils.ProgramState.ProcessorFlag;
 import C99Compiler.Utils.ProgramState.ScratchSource;
 import C99Compiler.Utils.AssemblyUtils.AssemblyUtils;
 import C99Compiler.Utils.AssemblyUtils.ByteCopier;
@@ -24,15 +26,19 @@ public class ShiftExpressionNode extends BinaryExpressionNode
 	private static class ShiftOperator extends BytewiseOperator
 	{
 		private OperandSource sourceTo, sourceFrom;
-		private boolean left, one, signed;
-		public ShiftOperator(boolean left, boolean one, boolean signed, OperandSource sourceTo, OperandSource sourceFrom)
+		private boolean left, unrolled, signed;
+		private int nShift;
+		public ShiftOperator(boolean left, boolean unrolled, int nShift, boolean signed, OperandSource sourceTo, OperandSource sourceFrom)
 		{
-			super(sourceTo.getSize(), sourceTo.getSize(), !left);
+			super(sourceTo.getSize(), (unrolled ? sourceFrom : sourceTo).getSize(), !left);
 			this.sourceTo = sourceTo;
+			if (!unrolled)
+				sourceFrom = sourceTo;
 			this.sourceFrom = sourceFrom;
-			
+		
 			this.left = left;
-			this.one = one;
+			this.unrolled = unrolled;
+			this.nShift = nShift;
 			this.signed = signed;
 		}
 
@@ -40,21 +46,16 @@ public class ShiftExpressionNode extends BinaryExpressionNode
 		protected AssemblyStatePair getAssemblyAndState(ProgramState state, int i) throws Exception
 		{
 			MutableAssemblyStatePair pair = new MutableAssemblyStatePair("", state);
+			sourceFrom.applyLDA(pair, i);
 			if (left)
 			{
-				((one && sourceTo.getSize() <= sourceFrom.getSize()) ? sourceFrom : sourceTo).applyLDA(pair, i);
-				pair.assembly += pair.state.getWhitespace() + ((i == 0) ? "ASL\n" : "ROL\n");
-			}
-			else if (signed)
-			{
-				(one ? sourceFrom : sourceTo).applyLDA(pair, i);
-				pair.assembly += pair.state.getWhitespace() + (state.testProcessorFlag(ProgramState.ProcessorFlag.M) ? "CMP\t#$8000\n" : "CMP\t#$80\n");
-				pair.assembly += pair.state.getWhitespace() + "ROR\n";
+				for (int j = 0; j < nShift; ++j)
+					pair.assembly += pair.state.getWhitespace() + ((i == 0) ? "ASL\n" : "ROL\n");
 			}
 			else
 			{
-				(one ? sourceFrom : sourceTo).applyLDA(pair, i);
-				pair.assembly += pair.state.getWhitespace() + (i >= sourceFrom.getSize() - 2 ? "LSR\n" : "ROR\n");
+				for (int j = 0; j < nShift; ++j)
+					pair.assembly += pair.state.getWhitespace() + ((i >= sourceTo.getSize() - 2) ? "LSR\n" : "ROR\n");
 			}
 			pair.state = pair.state.clearKnownFlags(ProgramState.PreserveFlag.A);
 			sourceTo.applySTA(pair, i);
@@ -100,145 +101,136 @@ public class ShiftExpressionNode extends BinaryExpressionNode
 	@Override
 	protected AssemblyStatePair getAssemblyAndState(ProgramState state, OperandSource sourceX, OperandSource sourceY) throws Exception
 	{
-		AssemblyStatePair tmpPair;
-		String assembly = "";
-		String whitespace = state.getWhitespace();
-		OperandSource destSource = state.destSource();
+		MutableAssemblyStatePair pair = new MutableAssemblyStatePair("", state);
+		OperandSource destSource = pair.state.destSource();
 		
-		assembly += AssemblyUtils.store(state, (byte) (ProgramState.PreserveFlag.A | ProgramState.PreserveFlag.X));
-		byte flags = state.getPreserveFlags();
-		state = state.clearPreserveFlags((byte) (ProgramState.PreserveFlag.A | ProgramState.PreserveFlag.X));
+		boolean isLeft = operator.equals("<<");
+		boolean isSigned = x.getType().isSigned();
+		boolean canUnroll;
 		
-		boolean isOne = y.hasPropValue(state) && (y.getPropLong(state) == 1); // No need for loop w/ only one iteration
-		if (sourceX.getSize() < destSource.getSize())
+		pair.assembly += AssemblyUtils.store(pair.state, (byte) (ProgramState.PreserveFlag.A | ProgramState.PreserveFlag.X));
+		byte flags = pair.state.getPreserveFlags();
+		pair.state = pair.state.clearPreserveFlags((byte) (ProgramState.PreserveFlag.A | ProgramState.PreserveFlag.X));
+		
+		canUnroll = false;
+		if (y.hasPropValue(pair.state))
 		{
-			SignExtender extender = new SignExtender(sourceX, sourceY, x.getType().isSigned(), y.getType().isSigned());
-			tmpPair = extender.getAssemblyAndState(state);
-			assembly += tmpPair.assembly;
-			state = tmpPair.state;
-		}
-		
-		if (y.hasPropValue(state) && y.getPropLong(state) != 0 && ((y.getPropLong(state) % 8) == 0)) // Even better optimization LOL
-		{
-			int bytesShifted = (int) y.getPropLong(state) / 8;
-			int bytesFilled = 0;
-			ByteCopier copier1, copier2;
-			switch (operator)
+			int m, n = (int) y.getPropLong(pair.state);
+			if (n % 8 <= 1 || n == 1 || destSource.getSize() <= 2)
+				canUnroll = true; // Can unroll in these circumstances
+			
+			m = n / 8;
+
+			if (m > 0)
 			{
-			case "<<": // Fill bottom bytes of destSource w/ 0, then put x in
-				bytesFilled = Math.max(0, destSource.getSize() - bytesShifted);
-				copier1 = new ByteCopier(bytesShifted, destSource, new ConstantSource(0, bytesShifted));
-				copier2 = new ByteCopier(bytesFilled, destSource.getShifted(bytesShifted), sourceX);
-				tmpPair = copier1.getAssemblyAndState(state);
-				assembly += tmpPair.assembly;
-				state = tmpPair.state;
-				tmpPair = copier2.getAssemblyAndState(state);
-				assembly += tmpPair.assembly;
-				state = tmpPair.state;
-				state = state.addPreserveFlags(flags);
-				assembly += AssemblyUtils.restore(state, (byte) (ProgramState.PreserveFlag.A | ProgramState.PreserveFlag.X));
-				return new AssemblyStatePair(assembly, state);
-			case ">>": // Fill bottom bytes of destSource with shifted x, then fill w/ zero
-				bytesFilled = Math.min(destSource.getSize(), Math.max(0, sourceX.getSize() - bytesShifted));
-				copier1 = new ByteCopier(bytesFilled, destSource, sourceX.getShifted(bytesShifted));
-				tmpPair = copier1.getAssemblyAndState(state);
-				assembly += tmpPair.assembly;
-				state = tmpPair.state;
-				if (bytesFilled < destSource.getSize())
+				n %= 8;
+				if (isLeft) // Permute left
 				{
-					copier2 = new ByteCopier(bytesShifted, destSource.getShifted(bytesFilled), new ConstantSource(0, bytesShifted));
-					tmpPair = copier2.getAssemblyAndState(state);
-					assembly += tmpPair.assembly;
-					state = tmpPair.state;
+					// Fill first m bytes with zero
+					new ZeroCopier(m, destSource).apply(pair);
+					// Fill rest with x
+					if (destSource.getSize() > m)
+						new ByteCopier(destSource.getShifted(m).respec(destSource.getSize() - m), sourceX).apply(pair);
 				}
-				state = state.addPreserveFlags(flags);
-				assembly += AssemblyUtils.restore(state, (byte) (ProgramState.PreserveFlag.A | ProgramState.PreserveFlag.X));
-				return new AssemblyStatePair(assembly, state);
+				else // Permute right
+				{
+					// Fill first (size-of-x - m) bytes with x
+					new ByteCopier(destSource.respec(sourceX.getSize() - m), sourceX.getShifted(m)).apply(pair);
+					// Fill rest with zero
+					if (destSource.getSize() > (sourceX.getSize() - m))
+						new ZeroCopier(
+								destSource.getSize() - (sourceX.getSize() - m),
+								destSource.getShifted(sourceX.getSize() - m)).apply(pair);
+				}
+				sourceX = destSource;
+				sourceY = new ConstantSource(n, sourceY.getSize());
 			}
 			
-		}
-		if (sourceY.getSize() >= 2)
-		{
-			assembly += whitespace + CompUtils.setA16 + "\n";
-			state = state.setProcessorFlags((byte) (ProgramState.ProcessorFlag.M | ProgramState.ProcessorFlag.I));
-		}
-		else if (sourceY.getSize() == 1)
-		{
-			assembly += whitespace + CompUtils.setA8 + "\n";
-			state = state.clearProcessorFlags((byte) (ProgramState.ProcessorFlag.M | ProgramState.ProcessorFlag.I));
+			if (canUnroll && n != 0)
+			{
+				new SignExtender(destSource, sourceX, getType().isSigned(), x.getType().isSigned()).apply(pair);
+				new ShiftOperator(isLeft, true, n, isSigned, destSource, sourceX).apply(pair);
+			}
 		}
 		
-		// Use destination as buffer if able to
-		OperandSource tempSource;
-		if (destSource == null || destSource.getSize() < sourceX.getSize())
+		if (!canUnroll)
 		{
-			state = state.reserveScratchBlock(sourceX.getSize());
-			tempSource = state.lastScratchSource();
-		}
-		else
-			tempSource = destSource;
-
-		if (!isOne || tempSource.getSize() > sourceX.getSize())
-		{
-			ByteCopier copier;
-			if (tempSource.getSize() > sourceX.getSize()) // TODO account for sign
+			// Can't unroll
+			// Copy X to dest
+			if (!sourceX.equals(destSource))
 			{
-				copier = new ZeroCopier(tempSource.getSize() - sourceX.getSize(), tempSource.getShifted(sourceX.getSize()));
-				tmpPair = copier.getAssemblyAndState(state);
-				assembly += tmpPair.assembly;
-				state = tmpPair.state;
+				new ByteCopier(destSource.respec(sourceX.getSize()), sourceX).apply(pair);
+				// Fill rest with zero
+				if (destSource.getSize() > sourceX.getSize())
+					new ZeroCopier(destSource.getSize() - sourceX.getSize(), destSource.getShifted(sourceX.getSize())).apply(pair);
 			}
-			copier = new ByteCopier(sourceX.getSize(), tempSource, sourceX);
-			tmpPair = copier.getAssemblyAndState(state);
-			assembly += tmpPair.assembly;
-			state = tmpPair.state;
-		}
-		if (!isOne)
-		{
-			tmpPair = sourceY.getLDA(state, 0);
-			assembly += tmpPair.assembly + "\n";
-			state = tmpPair.state;
-			assembly += whitespace + "BEQ\t:++\n";
-			assembly += whitespace + "TAX\t\n";
-			assembly += whitespace + ":\n"; // A loop
-			state = state.clearKnownFlags();
-		}
-		switch (operator)
-		{
-		case "<<":
-			tmpPair = new ShiftOperator(true, isOne, getType().isSigned(), tempSource, sourceX).getAssemblyAndState(isOne ? state : state.indent());
-			assembly += tmpPair.assembly;
-			state = tmpPair.state;
-			break;
-		case ">>":
-			tmpPair = new ShiftOperator(false, isOne, getType().isSigned(), tempSource, sourceX).getAssemblyAndState(isOne ? state : state.indent());
-			assembly += tmpPair.assembly;
-			state = tmpPair.state;
-			break;
-		}
-		
-		if (!isOne)
-		{
-			assembly += whitespace + "DEX\n";
-			assembly += whitespace + "BNE\t:-\n";
-			whitespace = state.undent().getWhitespace();
-			assembly += whitespace + ":\n"; // A loop
-		}
-
-		if (destSource != tempSource)
-		{
-			if (destSource != null)
+			// Set I flag properly
+			if (sourceY.getSize() >= 2)
 			{
-				ByteCopier copier = new ByteCopier(destSource.getSize(), destSource, tempSource);
-				tmpPair = copier.getAssemblyAndState(state);
-				assembly += tmpPair.assembly;
-				state = tmpPair.state;
+				if (!pair.state.testKnownFlag((byte) (PreserveFlag.M | PreserveFlag.I)) || !pair.state.testProcessorFlag((byte) (ProcessorFlag.M | ProcessorFlag.I)))
+				{
+					pair.assembly += pair.state.getWhitespace() + "REP\t#$30\n";
+					pair.state = pair.state.setProcessorFlags((byte) (ProcessorFlag.M | ProcessorFlag.I));
+				}
+				if (isSigned && !isLeft)
+					sourceX.applyLDA(pair, sourceX.getSize() - 2);
 			}
-			state = state.releaseScratchBlock((ScratchSource) tempSource);
-		}
+			else
+			{
+				if (!pair.state.testKnownFlag((byte) (PreserveFlag.M | PreserveFlag.I)) || pair.state.testProcessorFlag((byte) (ProcessorFlag.M | ProcessorFlag.I)))
+				{
+					pair.assembly += pair.state.getWhitespace() + "SEP\t#$30\n";
+					pair.state = pair.state.clearProcessorFlags((byte) (ProcessorFlag.M | ProcessorFlag.I));
+				}
+				if (isSigned && !isLeft)
+					sourceX.applyLDA(pair, sourceX.getSize() - 1);
+			}
+			// If signed rightshift we need to keep track of the original sign bit.
+			if (isSigned && !isLeft)
+			{
+				// Need to get the sign bit into carry
+				pair.assembly += pair.state.getWhitespace() + "ASL\n";
+				// Store it in the stack for a cheap trick to retrieve it
+				pair.assembly += pair.state.getWhitespace() + "PHP\n";
+			}
+			
+			sourceY.applyLDA(pair, 0);
+			pair.assembly += pair.state.getWhitespace() + "TAX\n";
+			pair.assembly += pair.state.getWhitespace() + ":\n";
+			pair.state = pair.state.indent();
+			if (isSigned && !isLeft)
+			{
+				pair.assembly += pair.state.getWhitespace() + "PLP\n";
+				pair.assembly += pair.state.getWhitespace() + "PHP\n";
+			}
+			else
+			{
+				pair.assembly += pair.state.getWhitespace() + "CLC\n";
+				pair.state = pair.state.clearKnownFlags();
+			}
+			new ShiftOperator(isLeft, false, 1, isSigned, destSource, sourceX).apply(pair);
 
-		state = state.addPreserveFlags(flags);
-		assembly += AssemblyUtils.restore(state, (byte) (ProgramState.PreserveFlag.A | ProgramState.PreserveFlag.X));
-		return new AssemblyStatePair(assembly, state);
+			pair.assembly += pair.state.getWhitespace() + "DEX\n";			
+			pair.state = pair.state.undent();
+			pair.assembly += pair.state.getWhitespace() + "BNE\t:-\n";
+		}
+		if (isSigned && !isLeft) // Set sign bit to proper value
+		{
+			destSource.applyLDA(pair, destSource.getSize() - 1);
+			pair.assembly += pair.state.getWhitespace() + "ASL\n"; // Move top bit out of the way
+			
+			pair.assembly += pair.state.getWhitespace() + "PLP\n"; // Cheap trick to recover previously-stored sign bit
+
+			if (!pair.state.testKnownFlag(PreserveFlag.M) || pair.state.testProcessorFlag(ProcessorFlag.M))
+			{
+				pair.assembly += pair.state.getWhitespace() + "SEP\t#$20\n";
+				pair.state = pair.state.clearProcessorFlags(ProcessorFlag.M);
+			}
+			pair.assembly += pair.state.getWhitespace() + "ROR\n"; // Insert into dest
+			destSource.applySTA(pair, destSource.getSize() - 1);
+		}
+		pair.state = pair.state.setPreserveFlags(flags);
+		pair.assembly += AssemblyUtils.restore(pair.state, (byte) (ProgramState.PreserveFlag.A | ProgramState.PreserveFlag.X));
+		return pair.getImmutable();
 	}
 }
