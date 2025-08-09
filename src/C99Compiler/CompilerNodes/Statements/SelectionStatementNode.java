@@ -18,6 +18,8 @@ import C99Compiler.CompilerNodes.Expressions.RelationalExpressionNode;
 import C99Compiler.CompilerNodes.Expressions.ShiftExpressionNode;
 import C99Compiler.Utils.CompUtils;
 import C99Compiler.Utils.ProgramState;
+import C99Compiler.Utils.ProgramState.PreserveFlag;
+import C99Compiler.Utils.ProgramState.ProcessorFlag;
 import C99Compiler.Utils.ProgramState.ScratchSource;
 import C99Compiler.Utils.AssemblyUtils.ByteCopier;
 import C99Compiler.Utils.AssemblyUtils.ComparitiveJump;
@@ -244,6 +246,22 @@ public class SelectionStatementNode extends SequencePointStatementNode<Selection
 				new ShiftExpressionNode(this, "<<",
 						new DummyExpressionNode(this, expression.getType(), exprSource),
 						new DummyExpressionNode(this, 1)).apply(pair);
+			}
+			if (sourceS.getSize() == 1)
+			{
+				if (!pair.state.testKnownFlag(PreserveFlag.I) || pair.state.testProcessorFlag(ProcessorFlag.I))
+				{
+					pair.assembly += whitespace + "SEP\t#$10\n";
+					pair.state = pair.state.clearProcessorFlags(ProcessorFlag.I);
+				}
+			}
+			else if (sourceS.getSize() == 2)
+			{
+				if (!pair.state.testKnownFlag(PreserveFlag.I) || !pair.state.testProcessorFlag(ProcessorFlag.I))
+				{
+					pair.assembly += whitespace + "REP\t#$10\n";
+					pair.state = pair.state.setProcessorFlags(ProcessorFlag.I);
+				}
 			}
 			pair.assembly += whitespace + "TAX\n";
 			pair.assembly += whitespace + "JMP\t(" + getTableLabel() + ",x)\n";
