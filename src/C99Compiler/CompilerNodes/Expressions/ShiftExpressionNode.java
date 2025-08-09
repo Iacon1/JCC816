@@ -2,6 +2,7 @@
 //
 package C99Compiler.CompilerNodes.Expressions;
 
+import C99Compiler.CompConfig;
 import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.Definitions.Type;
 import C99Compiler.CompilerNodes.Definitions.Type.CastContext;
@@ -17,6 +18,7 @@ import C99Compiler.Utils.AssemblyUtils.SignExtender;
 import C99Compiler.Utils.AssemblyUtils.ZeroCopier;
 import C99Compiler.Utils.OperandSources.ConstantSource;
 import C99Compiler.Utils.OperandSources.OperandSource;
+import C99Compiler.Utils.OperandSources.StationaryAddressSource;
 import Grammar.C99.C99Parser.Additive_expressionContext;
 import Grammar.C99.C99Parser.Shift_expressionContext;
 
@@ -116,9 +118,8 @@ public class ShiftExpressionNode extends BinaryExpressionNode
 		if (y.hasPropValue(pair.state))
 		{
 			int m, n = (int) y.getPropLong(pair.state);
-			if (n % 8 <= 1 || n == 1 || destSource.getSize() <= 2)
+			if (n % 8 == 0 || (!isSigned && (n % 8 == 1 || destSource.getSize() <= 2)))
 				canUnroll = true; // Can unroll in these circumstances
-			
 			m = n / 8;
 
 			if (m > 0)
@@ -138,9 +139,20 @@ public class ShiftExpressionNode extends BinaryExpressionNode
 					new ByteCopier(destSource.respec(sourceX.getSize() - m), sourceX.getShifted(m)).apply(pair);
 					// Fill rest with zero
 					if (destSource.getSize() > (sourceX.getSize() - m))
-						new ZeroCopier(
+					{
+						if (isSigned)
+						{
+							new SignExtender(sourceX.respec(sourceX.getSize() + 1), sourceX, true, true).apply(pair); // Force check
+							OperandSource signSource = new StationaryAddressSource(CompConfig.signExtend, destSource.getSize() - (sourceX.getSize() - m));
+							new ByteCopier(signSource.getSize(), destSource.getShifted(sourceX.getSize() - m), signSource).apply(pair);
+						}
+						else
+						{
+							new ZeroCopier(
 								destSource.getSize() - (sourceX.getSize() - m),
 								destSource.getShifted(sourceX.getSize() - m)).apply(pair);
+						}
+					}
 				}
 				sourceX = destSource;
 				sourceY = new ConstantSource(n, sourceY.getSize());
@@ -148,7 +160,7 @@ public class ShiftExpressionNode extends BinaryExpressionNode
 			
 			if (canUnroll && n != 0)
 			{
-				new SignExtender(destSource, sourceX, getType().isSigned(), x.getType().isSigned()).apply(pair);
+				new SignExtender(destSource, sourceX, false, false).apply(pair);
 				new ShiftOperator(isLeft, true, n, isSigned, destSource, sourceX).apply(pair);
 			}
 		}
@@ -213,21 +225,22 @@ public class ShiftExpressionNode extends BinaryExpressionNode
 			pair.assembly += pair.state.getWhitespace() + "DEX\n";			
 			pair.state = pair.state.undent();
 			pair.assembly += pair.state.getWhitespace() + "BNE\t:-\n";
-		}
-		if (isSigned && !isLeft) // Set sign bit to proper value
-		{
-			destSource.applyLDA(pair, destSource.getSize() - 1);
-			pair.assembly += pair.state.getWhitespace() + "ASL\n"; // Move top bit out of the way
 			
-			pair.assembly += pair.state.getWhitespace() + "PLP\n"; // Cheap trick to recover previously-stored sign bit
-
-			if (!pair.state.testKnownFlag(PreserveFlag.M) || pair.state.testProcessorFlag(ProcessorFlag.M))
+			if (isSigned && !isLeft) // Set sign bit to proper value
 			{
-				pair.assembly += pair.state.getWhitespace() + "SEP\t#$20\n";
-				pair.state = pair.state.clearProcessorFlags(ProcessorFlag.M);
+				destSource.applyLDA(pair, destSource.getSize() - 1);
+				pair.assembly += pair.state.getWhitespace() + "ASL\n"; // Move top bit out of the way
+				
+				pair.assembly += pair.state.getWhitespace() + "PLP\n"; // Cheap trick to recover previously-stored sign bit
+
+				if (!pair.state.testKnownFlag(PreserveFlag.M) || pair.state.testProcessorFlag(ProcessorFlag.M))
+				{
+					pair.assembly += pair.state.getWhitespace() + "SEP\t#$20\n";
+					pair.state = pair.state.clearProcessorFlags(ProcessorFlag.M);
+				}
+				pair.assembly += pair.state.getWhitespace() + "ROR\n"; // Insert into dest
+				destSource.applySTA(pair, destSource.getSize() - 1);
 			}
-			pair.assembly += pair.state.getWhitespace() + "ROR\n"; // Insert into dest
-			destSource.applySTA(pair, destSource.getSize() - 1);
 		}
 		pair.state = pair.state.setPreserveFlags(flags);
 		pair.assembly += AssemblyUtils.restore(pair.state, (byte) (ProgramState.PreserveFlag.A | ProgramState.PreserveFlag.X));
