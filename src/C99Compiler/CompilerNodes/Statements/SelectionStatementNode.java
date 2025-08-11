@@ -21,6 +21,7 @@ import C99Compiler.Utils.ProgramState;
 import C99Compiler.Utils.ProgramState.PreserveFlag;
 import C99Compiler.Utils.ProgramState.ProcessorFlag;
 import C99Compiler.Utils.ProgramState.ScratchSource;
+import C99Compiler.Utils.AssemblyUtils.AssemblyUtils;
 import C99Compiler.Utils.AssemblyUtils.ByteCopier;
 import C99Compiler.Utils.AssemblyUtils.ComparitiveJump;
 import C99Compiler.Utils.OperandSources.ConstantSource;
@@ -207,65 +208,36 @@ public class SelectionStatementNode extends SequencePointStatementNode<Selection
 			pair.state = pair.state.reserveScratchBlock(expression.getSize());
 			ScratchSource exprSource = pair.state.lastScratchSource();
 			pair.state = pair.state.setDestSource(exprSource);
-			// If greater than largest case, skip
-			String miscLabel1 = CompUtils.getMiscLabel(), miscLabel2 = CompUtils.getMiscLabel();
 			if (expression.hasAssembly(pair.state))
 				applyWithRegistered(pair, expression);
 			else if (expression.hasPropValue(pair.state))
 				new ByteCopier(exprSource.getSize(), exprSource, new ConstantSource(expression.getPropValue(state), exprSource.getSize())).apply(pair);
 			else if (expression.hasLValue(state))
 				new ByteCopier(exprSource.getSize(), exprSource, expression.getLValue(state).getSource()).apply(pair);
-			new RelationalExpressionNode(this, "<", 
-					largestExpr, 
-					new DummyExpressionNode(this, expression.getType(), exprSource),
-					hasDefault? getDefaultLabel(false) : getEndLabel(), miscLabel1, false).apply(pair);
-			pair.assembly += whitespace + miscLabel1 + ":\n";
-			// If smaller than smallest case, skip
-			new RelationalExpressionNode(this, ">", 
-					smallestExpr, 
-					new DummyExpressionNode(this, expression.getType(), exprSource),
-					hasDefault? getDefaultLabel(false) : getEndLabel(), miscLabel2, false).apply(pair);
-			pair.assembly += whitespace + miscLabel2 + ":\n";
-			
 			
 			// Calculate jump table address
-			pair.state = pair.state.reserveScratchBlock(expression.getSize());
-			ScratchSource sourceS = pair.state.lastScratchSource();
-			pair.state = pair.state.setDestSource(sourceS);
+			pair.state = pair.state.setDestSource(exprSource);
+
 			if (smallestCase != 0)
 			{
 				new AdditiveExpressionNode(this, "-", 
 						new DummyExpressionNode(this, expression.getType(), exprSource),
 						new DummyExpressionNode(this, smallestCase)).apply(pair);
-				new ShiftExpressionNode(this, "<<",
-						new DummyExpressionNode(this, expression.getType(), sourceS),
-						new DummyExpressionNode(this, 1)).apply(pair);
 			}
-			else
-			{
-				new ShiftExpressionNode(this, "<<",
-						new DummyExpressionNode(this, expression.getType(), exprSource),
-						new DummyExpressionNode(this, 1)).apply(pair);
-			}
-			if (sourceS.getSize() == 1)
-			{
-				if (!pair.state.testKnownFlag(PreserveFlag.I) || pair.state.testProcessorFlag(ProcessorFlag.I))
-				{
-					pair.assembly += whitespace + "SEP\t#$10\n";
-					pair.state = pair.state.clearProcessorFlags(ProcessorFlag.I);
-				}
-			}
-			else if (sourceS.getSize() == 2)
-			{
-				if (!pair.state.testKnownFlag(PreserveFlag.I) || !pair.state.testProcessorFlag(ProcessorFlag.I))
-				{
-					pair.assembly += whitespace + "REP\t#$10\n";
-					pair.state = pair.state.setProcessorFlags(ProcessorFlag.I);
-				}
-			}
+
+			AssemblyUtils.forceFlags(pair, (byte) (PreserveFlag.M | PreserveFlag.I), exprSource.getSize() != 1);
+			// Check if index is going to be valid. If not, jump to default.
+			new ConstantSource(largestCase - smallestCase + 1, exprSource.getSize()).applyInstruction(pair, "CMP", 0);
+			pair.assembly += whitespace + "BCS\t:+\n";
+
+			new ShiftExpressionNode(this, "<<",
+					new DummyExpressionNode(this, expression.getType(), exprSource),
+					new DummyExpressionNode(this, 1)).apply(pair);	
+
 			pair.assembly += whitespace + "TAX\n";
 			pair.assembly += whitespace + "JMP\t(" + getTableLabel() + ",x)\n";
-			pair.state = pair.state.releaseScratchBlock(sourceS);
+			pair.assembly += whitespace + ":\n";
+			pair.assembly += whitespace + "JMP\t" + getDefaultLabel(false) + "\n";
 			pair.assembly += whitespace + getTableLabel() + ":\n";
 			for (long i = smallestCase; i <= largestCase; ++i)
 			{
@@ -275,9 +247,11 @@ public class SelectionStatementNode extends SequencePointStatementNode<Selection
 			}
 			switchStm.apply(pair);
 			pair.state = pair.state.wipe();
+			pair.state = pair.state.releaseScratchBlock(exprSource);
 			if (!hasDefault) pair.assembly += whitespace + getDefaultLabel(false) + ":\n";
 			pair.assembly += whitespace + getEndLabel() + ":\n";
 		}
+		
 		
 		pair.state = pair.state.wipe();
 		return pair.getImmutable();
