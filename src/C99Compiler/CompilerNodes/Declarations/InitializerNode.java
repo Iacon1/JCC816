@@ -98,7 +98,7 @@ public class InitializerNode extends InterpretingNode<InitializerNode, Initializ
 				if (designator.identifier() != null) // Must be struct to use struct references
 					throw new ConstraintException("6.7.8", 7, designator.start);
 				
-				int index = (int) new ConstantExpressionNode(currNode).interpret(designator.constant_expression()).getPropLong();
+				int index = (int) new ConstantExpressionNode(currNode).interpret(designator.constant_expression()).getPropLong(new ProgramState());
 				
 				if (index > currNode.arrayInitializers.size() && !currNode.LValue.getType().isIncomplete())
 					throw new ConstraintException("6.7.8", 6, designator.start); // Array's length is known and this exceeds it
@@ -163,13 +163,35 @@ public class InitializerNode extends InterpretingNode<InitializerNode, Initializ
 		}
 		else
 		{
+			expr = null;
+			ArrayType arrayType;
 			int arrayIndex = 0;
 			int arraySize = -1;
 			int j = 0, k = 0;
 			if (arrayInitializers != null) // Set all array initializers to be zero
+			{
+				arrayType = (ArrayType) LValue.getType();
+				// Set space for incomplete arrays
+				if (arrayType.isIncomplete())
+				{
+					arrayInitializers = new LinkedHashMap<Integer, InitializerNode>();
+					arraySize = node.initializer_list().initializer().size();
+					for (DesignationContext designation : node.initializer_list().designation())
+					{
+						DesignatorContext designator0 = designation.designator_list().designator(0);
+						if (designator0.constant_expression() != null) // Skip forward in array list
+							arrayIndex = (int) new ConstantExpressionNode(this).interpret(designator0.constant_expression()).getPropLong(new ProgramState());
+						arraySize = Math.max(arraySize, arrayIndex + 1);
+					}
+
+					for (arrayIndex = 0; arrayIndex < arraySize; ++arrayIndex)
+						arrayInitializers.put(arrayIndex, new InitializerNode(this, arrayType.getAtIndex(LValue, arrayIndex)));
+					arrayIndex = 0;
+				}
 				for (InitializerNode initializer : arrayInitializers.values())
 					initializer.expr = new DummyExpressionNode(this, initializer.getType(), 0);
-			else if (arrayInitializers != null) // Set all struct initializers to be zero
+			}
+			else if (structInitializers != null) // Set all struct initializers to be zero
 				for (InitializerNode initializer : structInitializers.values())
 					initializer.expr = new DummyExpressionNode(this, initializer.getType(), 0);
 			for (int i = 0; i < node.initializer_list().getChildCount(); i += 2)
@@ -181,7 +203,7 @@ public class InitializerNode extends InterpretingNode<InitializerNode, Initializ
 				{
 					if (arrayInitializers != null)
 					{
-						ArrayType arrayType = (ArrayType) LValue.getType();
+						arrayType = (ArrayType) LValue.getType();
 						
 						if (!arrayType.isIncomplete() && arrayIndex >= arrayInitializers.size()) // Too many array indices
 							throw new ConstraintException("6.7.8", 6, node.initializer_list().initializer(k).start);
@@ -195,14 +217,14 @@ public class InitializerNode extends InterpretingNode<InitializerNode, Initializ
 					{
 						if (arrayIndex >= structInitializers.size()) // No more struct members to populate
 							throw new ConstraintException("6.7.8", 7, node.initializer_list().initializer(k).start);
-						structInitializers.get(LValue.getType().getStruct().getMemberNames().get(arrayIndex++)).interpret(node.initializer_list().initializer(k++));
+						structInitializers.get(LValue.getType().getStruct().getMemberNames().get(arrayIndex++)).interpret(node.initializer_list().initializer(k++));						
 					}
 				}
 				else if (node.initializer_list().getChild(i) == node.initializer_list().designation(j)) // Designator present
 				{
 					DesignatorContext designator0 = node.initializer_list().designation(j).designator_list().designator(0);
 					if (designator0.constant_expression() != null) // Skip forward in array list
-						arrayIndex = (int) new ConstantExpressionNode(this).interpret(designator0.constant_expression()).getPropLong();
+						arrayIndex = (int) new ConstantExpressionNode(this).interpret(designator0.constant_expression()).getPropLong(new ProgramState());
 					else if (designator0.identifier() != null)
 						arrayIndex = LValue.getType().getStruct().getMemberNames().indexOf(designator0.identifier().getText());
 					InitializerNode initializer = resolveInitializer(this, node.initializer_list().designation(j++));
@@ -214,7 +236,7 @@ public class InitializerNode extends InterpretingNode<InitializerNode, Initializ
 			
 			if (arraySize != -1 && LValue.getType().isIncomplete()) // Array size was set, meaning it's an array
 			{
-				ArrayType arrayType = (ArrayType) LValue.getType();
+				arrayType = (ArrayType) LValue.getType();
 				arrayType.setLength(arraySize);
 			}
 				
