@@ -3,7 +3,9 @@
 // Initializes a variable
 package C99Compiler.CompilerNodes.Declarations;
 
+import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -299,22 +301,27 @@ public class InitializerNode extends InterpretingNode<InitializerNode, Initializ
 	@Override
 	public Object getPropValue(ProgramState state)
 	{
+		Collection<InitializerNode> initCollection = null;
 		if (expr != null) return expr.getPropValue(state);
 		else if (arrayInitializers != null) // Array
-		{
-			List<Object> propVals = new ArrayList<Object>();
-			for (InitializerNode initializer : arrayInitializers.values())
-				propVals.add(initializer.getPropValue(state));
-			return propVals.toArray();
-		}
+			initCollection = arrayInitializers.values();
 		else if (structInitializers != null) // Struct
-		{
-			List<Object> propVals = new ArrayList<Object>();
-			for (InitializerNode initializer : structInitializers.values())
-				propVals.add(initializer.getPropValue(state));
-			return propVals.toArray();
-		}
+			initCollection = structInitializers.values();
 		else return Long.valueOf(0);
+
+		ConstantSource.ConstList propVals = new ConstantSource.ConstList();
+		for (InitializerNode init : initCollection)
+		{
+			Object obj = init.getPropValue(state);
+			if (ConstantSource.ConstList.class.isAssignableFrom(obj.getClass())) // Other array
+				propVals.addAll((ConstantSource.ConstList) obj);
+			else
+			{
+				SimpleEntry<Integer, Object> e = new SimpleEntry<Integer, Object>(init.getSize(), obj);
+				propVals.add(e);
+			}
+		}
+		return propVals;
 	}
 
 	@Override

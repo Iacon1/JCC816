@@ -2,6 +2,9 @@
 //
 package C99Compiler.Utils.OperandSources;
 
+import java.util.AbstractMap.SimpleEntry;
+import java.util.LinkedList;
+
 import C99Compiler.Utils.CompUtils;
 import C99Compiler.Utils.ProgramState;
 import C99Compiler.Utils.PropPointer;
@@ -13,6 +16,7 @@ public class ConstantSource extends ConstantByteSource
 	private PropPointer<?> pointer;
 	private Object constant;
 	
+	public static class ConstList extends LinkedList<SimpleEntry<Integer, Object>> {};
 	private static int[] asBytes(Object obj, int size)
 	{
 		int[] bytes = new int[size];
@@ -52,6 +56,17 @@ public class ConstantSource extends ConstantByteSource
 		}
 		else if (Boolean.class.isAssignableFrom(obj.getClass()))
 			bytes[0] = (Boolean) obj ? 0xFF : 0x00;
+		else if (ConstList.class.isAssignableFrom(obj.getClass())) // Const list
+		{
+			ConstList list = (ConstList) obj;
+			int i = 0;
+			for (SimpleEntry<Integer, Object> entry : list)
+			{
+				int[] subBytes = asBytes(entry.getValue(), entry.getKey());
+				for (int j = 0; j < entry.getKey(); ++j)
+					bytes[i++] = subBytes[j];
+			}
+		}
 		else if (Object[].class.isAssignableFrom(obj.getClass())) // Array
 		{
 			Object[] array = (Object[]) obj;
