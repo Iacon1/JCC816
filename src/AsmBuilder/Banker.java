@@ -87,8 +87,10 @@ public final class Banker
 
 			if (leftBlock) // A block has ended
 			{
-				int blockSize = new ASMGraphBuilder(blockBuffer).getSize();
-
+				int blockSize = 0;
+				if (blockBuffer.length() != 0)
+					blockSize = new ASMGraphBuilder(blockBuffer).getSize();
+				
 				if (blockSize > emptySpace.get(currBank)) // We don't have this much space in the bank
 				{
 					boolean foundSpace = false;
