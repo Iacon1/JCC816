@@ -86,7 +86,7 @@ public class CastExpressionNode extends BaseExpressionNode<Cast_expressionContex
 	@Override
 	public boolean hasAssembly(ProgramState state)
 	{
-		return expr.hasAssembly(state) || (!hasPropValue(state) && specifiesConversion());
+		return expr.hasAssembly(state) || (state.destSource() != null && !hasPropValue(state) && specifiesConversion());
 	}
 	@Override
 	public ProgramState getStateBefore(ProgramState state, ComponentNode<?> child) throws Exception
