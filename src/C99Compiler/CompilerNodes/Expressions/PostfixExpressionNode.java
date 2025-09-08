@@ -152,6 +152,18 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 			expr = (BaseExpressionNode<?>) to;
 		else if (indexExpr == from)
 			indexExpr = (BaseExpressionNode<?>) to;
+		else if (type == PFType.funcCall && params.contains(from))
+		{
+			// One of the parameters
+			int i = 0;
+			assert BaseExpressionNode.class.isAssignableFrom(to.getClass());
+			for (BaseExpressionNode<?> param : params)
+			{
+				if (param.equals(from))
+					params.set(i, (BaseExpressionNode<?>) to);
+				i++;
+			}
+		}
 	}
 	
 	@Override
