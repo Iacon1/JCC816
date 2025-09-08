@@ -162,6 +162,7 @@ public class AssignmentExpressionNode extends BinaryExpressionNode
 	{
 		AssemblyStatePair tmpPair;
 		final OperandSource sourceY;
+		OperandSource destSource;
 		String assembly = "";
 		
 		if (x.hasAssembly(state))
@@ -171,12 +172,13 @@ public class AssignmentExpressionNode extends BinaryExpressionNode
 			state = tmpPair.state;
 		}
 		
+		destSource = x.getLValue(state).getSource();
+		state = state.setDestSource(destSource);
 //		if (!y.getType().canCastTo(x.getType()))
 //			throw new TypeMismatchException(y.getType(), x.getType());
 		if (y.hasAssembly(state))
 		{
-			sourceY = x.getLValue(state).getSource();
-			state = state.setDestSource(sourceY);
+			sourceY = destSource;
 			tmpPair = y.getAssemblyAndState(state);
 			assembly += tmpPair.assembly;
 			state = tmpPair.state;
@@ -189,6 +191,7 @@ public class AssignmentExpressionNode extends BinaryExpressionNode
 				sourceY = y.getLValue(state).castTo(x.getType()).getSource();
 			else sourceY = null;
 			
+			Logging.Logging.logNotice(y.getClass().getCanonicalName());
 			tmpPair = new SignExtender(x.getLValue(state).getSource(), sourceY, x.getType().isSigned(), y.getType().isSigned()).getAssemblyAndState(state);
 			assembly += tmpPair.assembly;
 			state = tmpPair.state;

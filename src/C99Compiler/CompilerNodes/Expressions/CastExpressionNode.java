@@ -118,4 +118,9 @@ public class CastExpressionNode extends BaseExpressionNode<Cast_expressionContex
 			
 		return pair;
 	}
+	
+	public BaseExpressionNode<?> getCastee()
+	{
+		return expr;
+	}
 }
