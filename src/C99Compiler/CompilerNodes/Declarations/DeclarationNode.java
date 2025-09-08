@@ -72,7 +72,7 @@ public class DeclarationNode extends InterpretingNode<DeclarationNode, Declarati
 			}
 		else
 		{
-			Type type = new Type(specifiers.getSpecifiers(), this, node.start);
+			Type type = Type.manufactureCtxt(specifiers.getSpecifiers(), this, node.start);
 			if (type.getSUEName() == null) // No tag
 				throw new ConstraintException("6.7", 2, node.start);
 		}

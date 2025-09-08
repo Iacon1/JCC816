@@ -27,7 +27,7 @@ public class TypeNameNode extends InterpretingNode<TypeNameNode, Type_nameContex
 		if (declarator != null)
 			type = Type.manufacture(specifiers.getSpecifiers(), declarator, node.start);
 		else
-			type = new Type(specifiers.getSpecifiers(), this, node.start);
+			type = Type.manufactureCtxt(specifiers.getSpecifiers(), this, node.start);
 		return this;
 	}
 

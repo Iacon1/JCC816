@@ -23,7 +23,23 @@ public class PointerType extends StorageWrapperType
 		super(type);
 		this.pointerQualifiers = new HashSet<String>();
 	}
+	public PointerType(Type base, Type type, Set<String> qualifiers)
+	{
+		super(base, type);
+		this.pointerQualifiers = new HashSet<String>(qualifiers);
+	}
+	public PointerType(Type base, Type type)
+	{
+		super(base, type);
+		this.pointerQualifiers = new HashSet<String>();
+	}
 	
+	public Set<String> getPointerQualifiers()
+	{
+		return pointerQualifiers;
+	}
+
+
 	@Override
 	public int getSize()
 	{

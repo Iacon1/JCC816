@@ -9,6 +9,12 @@ public abstract class StorageWrapperType extends Type
 	protected Type type;
 	public StorageWrapperType(Type type)
 	{
+		super();
+		this.type = type;
+	}
+	public StorageWrapperType(Type base, Type type)
+	{
+		super(base);
 		this.type = type;
 	}
 	

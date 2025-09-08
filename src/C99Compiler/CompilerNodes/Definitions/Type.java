@@ -106,61 +106,6 @@ public class Type implements Serializable
 		typeSpecifiers = new LinkedList<String>();
 		typeQualifiers = new HashSet<String>();
 	}
-	public Type(DeclarationSpecifiersNode.DeclSpecifiers specifiers, ComponentNode<?> context, Token start) throws Exception
-	{
-//		this.scope = declarator.getScope();
-		typeSpecifiers = new LinkedList<String>();
-		typeQualifiers = new HashSet<String>();
-//		functionSpecifiers = new HashSet<String>();
-
-		if (specifiers.storageClassSpecifiers.length > 0)
-			storageClassSpecifier = specifiers.storageClassSpecifiers[0];
-		for (String specifier : specifiers.typeSpecifiers)
-		{
-			if (context.resolveTypedefRelative(specifier) != null)
-			{
-				Type t = context.resolveTypedefRelative(specifier);
-				typeSpecifiers.addAll(t.typeSpecifiers);
-				typeQualifiers.addAll(t.typeQualifiers);
-			}
-			else typeSpecifiers.add(specifier);
-		}
-		for (String qualifier : specifiers.typeQualifiers)
-			typeQualifiers.add(qualifier);
-//		for (String qualifier : specifiers.functionSpecifiers)
-//			functionSpecifiers.add(qualifier);
-		
-		// Check constraints
-		
-		if (specifiers.storageClassSpecifiers.length > 1)
-			throw new ConstraintException("6.7.1", 1, start);
-		
-		if (!isAllowed(typeSpecifiers))
-		{
-			for (String spec : typeSpecifiers)
-				if (!recognizedStrings.contains(spec))
-				{
-					Exception e = new UndefinedTypeException(spec, start);
-					e.addSuppressed(new ConstraintException("6.7.2", 2, start));
-					throw e;
-				}
-			// Otherwise it's the right parts, just in the wrong order
-			throw new ConstraintException("6.7.2", 2, start);
-		}
-		if ((isStructOrUnion() || isEnum()) && getSUEName() == null)
-		{
-			throw new UndefinedTypeException("", start);
-		}
-
-		if (typeSpecifiers.contains("_Complex")) // Complex numbers not supported
-		{
-			Exception e = new UnsupportedFeatureException("Complex numbers", false, start);
-			e.addSuppressed(new ConstraintException("6.7.2", 3, start));
-			throw e;
-		}
-		
-		this.context = context;
-	}
 	public Type(Type other)
 	{
 //		this.scope = declarator.getScope();
@@ -173,10 +118,71 @@ public class Type implements Serializable
 		typeSpecifiers.addAll(other.typeSpecifiers);
 		typeQualifiers.addAll(other.typeQualifiers);
 	}
+	public static Type manufactureCtxt(DeclarationSpecifiersNode.DeclSpecifiers specifiers, ComponentNode<?> context, Token start) throws Exception
+	{
+		Type t = new Type();
+		
+		if (specifiers.storageClassSpecifiers.length > 0)
+			t.storageClassSpecifier = specifiers.storageClassSpecifiers[0];
+		for (String specifier : specifiers.typeSpecifiers)
+		{
+			if (context.resolveTypedefRelative(specifier) != null)
+			{
+				Type td = context.resolveTypedefRelative(specifier);
+				t.typeSpecifiers.addAll(td.typeSpecifiers);
+				t.typeQualifiers.addAll(td.typeQualifiers);
+				if (td.isPointer() && !td.isArray())
+				{
+					PointerType pt = new PointerType(t, ((PointerType) td).getType(), ((PointerType) td).getPointerQualifiers());
+					t = pt;
+				}
+			}
+			else t.typeSpecifiers.add(specifier);
+		}
+		for (String qualifier : specifiers.typeQualifiers)
+			t.typeQualifiers.add(qualifier);
+//		for (String qualifier : specifiers.functionSpecifiers)
+//			functionSpecifiers.add(qualifier);
+		
+		// Check constraints
+		
+		if (specifiers.storageClassSpecifiers.length > 1)
+			throw new ConstraintException("6.7.1", 1, start);
+		
+		if (t.isPointer())
+			return t;
+		if (!isAllowed(t.typeSpecifiers))
+		{
+			for (String spec : t.typeSpecifiers)
+				if (!recognizedStrings.contains(spec))
+				{
+					Exception e = new UndefinedTypeException(spec, start);
+					e.addSuppressed(new ConstraintException("6.7.2", 2, start));
+					throw e;
+				}
+			// Otherwise it's the right parts, just in the wrong order
+			throw new ConstraintException("6.7.2", 2, start);
+		}
+		if ((t.isStructOrUnion() || t.isEnum()) && t.getSUEName() == null)
+		{
+			throw new UndefinedTypeException("", start);
+		}
+
+		if (t.typeSpecifiers.contains("_Complex")) // Complex numbers not supported
+		{
+			Exception e = new UnsupportedFeatureException("Complex numbers", false, start);
+			e.addSuppressed(new ConstraintException("6.7.2", 3, start));
+			throw e;
+		}
+		
+		t.context = context;
+		
+		return t;
+	}
 
 	public static Type manufacture(DeclarationSpecifiersNode.DeclSpecifiers specifiers, DeclaratorNode declaratorNode, Token start) throws Exception
 	{
-		Type type = new Type(specifiers, declaratorNode, start);
+		Type type = manufactureCtxt(specifiers, declaratorNode, start);
 		if (declaratorNode == null) return type;
 		
 		for (DeclaratorNode.DeclaratorInfo info : declaratorNode.getInfo()) // Array
