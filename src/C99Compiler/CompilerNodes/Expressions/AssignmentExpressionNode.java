@@ -5,15 +5,11 @@ package C99Compiler.CompilerNodes.Expressions;
 
 import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.Definitions.ArrayType;
-import C99Compiler.CompilerNodes.Definitions.PointerType;
 import C99Compiler.CompilerNodes.Definitions.Type;
 import C99Compiler.CompilerNodes.Definitions.Type.CastContext;
-import C99Compiler.CompilerNodes.Dummies.DummyExpressionNode;
 import C99Compiler.CompilerNodes.LValues.LValueNode;
 import C99Compiler.Exceptions.ConstraintException;
-import C99Compiler.Exceptions.ScratchOverflowException;
 import C99Compiler.Utils.ProgramState;
-import C99Compiler.Utils.ProgramState.ScratchSource;
 import C99Compiler.Utils.AssemblyUtils.ByteCopier;
 import C99Compiler.Utils.AssemblyUtils.SignExtender;
 import C99Compiler.Utils.OperandSources.ConstantSource;
@@ -190,8 +186,7 @@ public class AssignmentExpressionNode extends BinaryExpressionNode
 			else if (y.hasLValue(state))
 				sourceY = y.getLValue(state).castTo(x.getType()).getSource();
 			else sourceY = null;
-			
-			Logging.Logging.logNotice(y.getClass().getCanonicalName());
+
 			tmpPair = new SignExtender(x.getLValue(state).getSource(), sourceY, x.getType().isSigned(), y.getType().isSigned()).getAssemblyAndState(state);
 			assembly += tmpPair.assembly;
 			state = tmpPair.state;
