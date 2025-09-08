@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import C99Compiler.CompConfig;
 import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.FunctionDefinitionNode;
 import C99Compiler.CompilerNodes.Dummies.DummyExpressionNode;
@@ -24,6 +25,7 @@ import C99Compiler.Utils.ProgramState.ScratchSource;
 import C99Compiler.Utils.AssemblyUtils.AssemblyUtils;
 import C99Compiler.Utils.AssemblyUtils.ByteCopier;
 import C99Compiler.Utils.AssemblyUtils.ComparitiveJump;
+import C99Compiler.Utils.AssemblyUtils.SignExtender;
 import C99Compiler.Utils.OperandSources.ConstantSource;
 import C99Compiler.Utils.OperandSources.OperandSource;
 import Grammar.C99.C99Parser.Selection_statementContext;
@@ -179,7 +181,7 @@ public class SelectionStatementNode extends SequencePointStatementNode<Selection
 		}
 		else // Switch
 		{
-			long smallestCase = 0, largestCase = 0;
+			long smallestCase = 0, largestCase = 0, nCases;
 			boolean first = true;
 			Set<Long> caseValues = new HashSet<Long>();
 			BaseExpressionNode<?> smallestExpr = null, largestExpr = null;
@@ -204,16 +206,25 @@ public class SelectionStatementNode extends SequencePointStatementNode<Selection
 				caseValues.add(l);
 			}
 			if (largestExpr == null)
-				return pair.getImmutable();			
-			pair.state = pair.state.reserveScratchBlock(expression.getSize());
-			ScratchSource exprSource = pair.state.lastScratchSource();
+				return pair.getImmutable();
+			nCases = largestCase - smallestCase;
+			
+			if (2 * nCases >= 256 || expression.getSize() >= 2)
+			{
+				pair.state = pair.state.reserveScratchBlock(2);
+			}
+			else
+				pair.state = pair.state.reserveScratchBlock(1);
+			
+			ScratchSource exprSourceO = pair.state.lastScratchSource();
+			OperandSource exprSource = exprSourceO.respec(Math.min(2, expression.getSize()));
 			pair.state = pair.state.setDestSource(exprSource);
 			if (expression.hasAssembly(pair.state))
 				applyWithRegistered(pair, expression);
 			else if (expression.hasPropValue(pair.state))
-				new ByteCopier(exprSource.getSize(), exprSource, new ConstantSource(expression.getPropValue(state), exprSource.getSize())).apply(pair);
+				new ByteCopier(exprSource, new ConstantSource(expression.getPropValue(state), expression.getSize())).apply(pair);
 			else if (expression.hasLValue(state))
-				new ByteCopier(exprSource.getSize(), exprSource, expression.getLValue(state).getSource()).apply(pair);
+				new ByteCopier(exprSource, expression.getLValue(state).getSource()).apply(pair);
 			
 			// Calculate jump table address
 			pair.state = pair.state.setDestSource(exprSource);
@@ -224,15 +235,23 @@ public class SelectionStatementNode extends SequencePointStatementNode<Selection
 						new DummyExpressionNode(this, expression.getType(), exprSource),
 						new DummyExpressionNode(this, smallestCase)).apply(pair);
 			}
+			if (exprSourceO.getSize() == 2 && exprSource.getSize() == 1) // Need filler
+			{
+				AssemblyUtils.forceFlags(pair, PreserveFlag.M, false);
+				exprSource = exprSourceO;
+				exprSource.applyInstruction(pair, "STZ", 1);
+				pair.state = pair.state.setDestSource(exprSource);
+			}
 
 			AssemblyUtils.forceFlags(pair, (byte) (PreserveFlag.M | PreserveFlag.I), exprSource.getSize() != 1);
+			
 			// Check if index is going to be valid. If not, jump to default.
-			new ConstantSource(largestCase - smallestCase + 1, exprSource.getSize()).applyInstruction(pair, "CMP", 0);
+			new ConstantSource(nCases + 1, exprSource.getSize()).applyInstruction(pair, "CMP", 0);
 			pair.assembly += whitespace + "BCS\t:+\n";
 
 			new ShiftExpressionNode(this, "<<",
-					new DummyExpressionNode(this, expression.getType(), exprSource),
-					new DummyExpressionNode(this, 1)).apply(pair);	
+					new DummyExpressionNode(this, CompUtils.getTypeForSize(2, expression.getType().isSigned()), exprSource),
+					new DummyExpressionNode(this, 1)).apply(pair);			
 
 			pair.assembly += whitespace + "TAX\n";
 			pair.assembly += whitespace + "JMP\t(" + getTableLabel() + ",x)\n";
@@ -247,7 +266,7 @@ public class SelectionStatementNode extends SequencePointStatementNode<Selection
 			}
 			switchStm.apply(pair);
 			pair.state = pair.state.wipe();
-			pair.state = pair.state.releaseScratchBlock(exprSource);
+			pair.state = pair.state.releaseScratchBlock(exprSourceO);
 			if (!hasDefault) pair.assembly += whitespace + getDefaultLabel(false) + ":\n";
 			pair.assembly += whitespace + getEndLabel() + ":\n";
 		}
