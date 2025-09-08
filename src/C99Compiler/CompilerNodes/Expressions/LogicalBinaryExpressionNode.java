@@ -114,8 +114,8 @@ CC extends ParserRuleContext
 			yPair = y.getAssemblyAndState(pair.state);
 			if (new ASMGraphBuilder(yPair.assembly).getSize() >= 128) // Need a long skip
 			{
-				pair.assembly += pair.state.getWhitespace() + (skipOnTrue ? "BEQ\t" : "BNE\t") + ":\n";
-				pair.assembly += pair.state.getWhitespace() + "JMP\t" + skipLabel;
+				pair.assembly += pair.state.getWhitespace() + (skipOnTrue ? "BEQ\t" : "BNE\t") + ":+\n";
+				pair.assembly += pair.state.getWhitespace() + "JMP\t" + skipLabel + "\n";
 				pair.assembly += pair.state.getWhitespace() + ":\n";
 			}
 			else // Short skip
