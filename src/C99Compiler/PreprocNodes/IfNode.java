@@ -148,14 +148,22 @@ public class IfNode extends InterpretingNode<IfNode, If_sectionContext> implemen
 			
 			BaseExpressionNode<?> expr = new ConstantExpressionNode().interpret // Process macros before trying to parse
 			(
-				convert(resolveDefines(String.join("", wordList)))
+				convert(clearIdentifiers(resolveDefines(String.join("", wordList))))
 			);
 			
 			IfEntry e = new IfEntry();
 			e.startLine = startLine + 1;
 			e.context = node.if_group().group();
-			e.nLines = 1 + e.context.getText().lines().count();
-			e.used = expr.getPropLong(new ProgramState()) != 0 || expr.getPropBool(new ProgramState());
+			if (e.context != null)
+			{
+				e.nLines = 1 + e.context.getText().lines().count();
+				e.used = expr.getPropLong(new ProgramState()) != 0 || expr.getPropBool(new ProgramState());
+			}
+			else
+			{
+				e.nLines = 0;
+				e.used = false;
+			}
 			entries.add(e);
 			startLine += e.nLines;
 		}
@@ -169,7 +177,7 @@ public class IfNode extends InterpretingNode<IfNode, If_sectionContext> implemen
 			
 			BaseExpressionNode<?> expr = new ConstantExpressionNode().interpret // Process macros before trying to parse
 			(
-				convert(resolveDefines(tokens.toArray(new String[] {})))
+				convert(clearIdentifiers(resolveDefines(tokens.toArray(new String[] {}))))
 			);
 
 			IfEntry e = new IfEntry();

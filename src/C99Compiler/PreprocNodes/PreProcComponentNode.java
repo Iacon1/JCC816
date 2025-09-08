@@ -191,6 +191,14 @@ public abstract class PreProcComponentNode<T extends PreProcComponentNode<T>>
 		}
 		return wordList.toArray(new String[] {});
 	}
+	private static boolean isIdentifier(String string)
+	{
+		final String UCNPattern = "\\[uU][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F]([0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F])?";
+		final String pattern = "([a-zA-Z_]|" + UCNPattern + ")([0-9a-zA-Z_]|" + UCNPattern + ")*";
+
+		return string.matches(pattern);
+	}
+	
 	public static List<String> resolveDefines(String... words) throws Exception
 	{
 		if (words.length == 0) return new ArrayList<String>();
@@ -229,6 +237,25 @@ public abstract class PreProcComponentNode<T extends PreProcComponentNode<T>>
 					wordList.addAll(i, Arrays.asList(defines.get(word).getText().split(" ")));
 				
 				--i; // Moves back, in case the first word of the replacement is itself a macro
+			}
+			
+			++i;
+		}
+			
+		return wordList;
+	}
+	
+	public static List<String> clearIdentifiers(List<String> wordList) throws Exception
+	{
+		// Replace all identifiers
+		int i = 0;
+		while (i != wordList.size())
+		{
+			String word = wordList.get(i);
+			if (isIdentifier(word) && !word.equals("defined"))
+			{
+				wordList.remove(i);
+				wordList.add(i, "0");
 			}
 			
 			++i;
