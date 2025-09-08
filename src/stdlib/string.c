@@ -6,17 +6,17 @@ void* memcpy(void* restrict s1, const void* restrict s2, size_t n)
 {
 	for (size_t i = 0; i < n; ++i)
 	{
-		*(s1 + i) = *(s2 + i);
+		*(((char*) s1) + i) = *(((char*) s2) + i);
 	}
 	return s1;
 }
 char* strcpy(char* restrict s1, const char* restrict s2)
 {
-	size_t i = 0;
+	size_t i = -1;
 	do
 	{
-		*(s1 + i) = *(s2 + i);
 		i += 1;
+		*(s1 + i) = *(s2 + i);
 	}
 	while (*(s2 + i) != 0);
 	return s1;
@@ -63,8 +63,8 @@ int memcmp(const void *s1, const void* s2, size_t n)
 {
 	for (size_t i = 0; i < n; ++i)
 	{
-		if (*(s1 + i) < *(s2 + i)) return -1;
-		else if (*(s1 + i) > *(s2 + i)) return 1;
+		if (*(((char*) s1) + i) < *(((char*) s2) + i)) return -1;
+		else if (*(((char*) s1) + i) > *(((char*) s2) + i)) return 1;
 	}
 	return 0;
 }
@@ -113,7 +113,7 @@ void* memset(void* s, int c, size_t n)
 {
 	for (size_t i = 0; i < n; ++i)
 	{
-		*(s++) = n;
+		*((char*) s++) = n;
 	}
 	return 0;
 }
@@ -122,5 +122,5 @@ size_t strlen(const char *s)
 	char* start = s;
 	do s++;
 	while (*s != 0);
-	return (size_t) (s - start);
-}
+	return (size_t) ((unsigned int) s - (unsigned int) start);
+}*/
