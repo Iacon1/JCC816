@@ -105,30 +105,44 @@ public class JumpStatementNode extends StatementNode<Jump_statementContext> impl
 				assembly += whitespace + "JMP\t" + iterNode.getEndLabel() + "\n";
 			break;
 		case returnM:
-			OperandSource s = CompConfig.callResultSource(this.getEnclosingFunction().getSize());
-			if (expr != null && expr.hasAssembly(state))
+			if (!this.getEnclosingFunction().getType().isVoid())
 			{
+				OperandSource s = CompConfig.callResultSource(this.getEnclosingFunction().getSize());
+				
 				state = state.setDestSource(s);
-				AssemblyStatePair tmpPair = expr.getAssemblyAndState(state);
-				assembly += tmpPair.assembly;
-				state = tmpPair.state;
+				if (expr != null && expr.hasAssembly(state))
+				{
+					AssemblyStatePair tmpPair = expr.getAssemblyAndState(state);
+					assembly += tmpPair.assembly;
+					state = tmpPair.state;
+				}
+				else if (expr != null && expr.hasPropValue(state))
+				{
+					ByteCopier copier = new ByteCopier(funcNode.getSize(), s, new ConstantSource(expr.getPropValue(state), funcNode.getSize()));
+					AssemblyStatePair tmpPair = copier.getAssemblyAndState(state);
+					assembly += tmpPair.assembly;
+					state = tmpPair.state;
+				}
+				else if (expr != null && expr.hasLValue(state))
+				{
+					ByteCopier copier = new ByteCopier(funcNode.getType().getSize(), CompConfig.callResultSource(expr.getLValue(state).getSize()), expr.getLValue(state).getSource());
+					AssemblyStatePair tmpPair = copier.getAssemblyAndState(state);
+					assembly += tmpPair.assembly;
+					state = tmpPair.state;
+				}
+				assembly += whitespace + "JMP\t" + state.exitFuncLabel() + "\n";
+				break;
 			}
-			else if (expr != null && expr.hasPropValue(state))
+			else
 			{
-				ByteCopier copier = new ByteCopier(funcNode.getSize(), s, new ConstantSource(expr.getPropValue(state), funcNode.getSize()));
-				AssemblyStatePair tmpPair = copier.getAssemblyAndState(state);
-				assembly += tmpPair.assembly;
-				state = tmpPair.state;
+				state = state.setDestSource(null);
+				if (expr != null && expr.hasAssembly(state))
+				{
+					AssemblyStatePair tmpPair = expr.getAssemblyAndState(state);
+					assembly += tmpPair.assembly;
+					state = tmpPair.state;
+				}
 			}
-			else if (expr != null && expr.hasLValue(state))
-			{
-				ByteCopier copier = new ByteCopier(funcNode.getType().getSize(), CompConfig.callResultSource(expr.getLValue(state).getSize()), expr.getLValue(state).getSource());
-				AssemblyStatePair tmpPair = copier.getAssemblyAndState(state);
-				assembly += tmpPair.assembly;
-				state = tmpPair.state;
-			}
-			assembly += whitespace + "JMP\t" + state.exitFuncLabel() + "\n";
-			break;
 		}
 			
 		state = state.wipe();

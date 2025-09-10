@@ -99,8 +99,8 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 		Type retType = ((FunctionType) type).getType();
 		if (getName().equals(CompConfig.mainName)) // If main
 		{
-			if (!retType.isVoid() || signature.getChildVariables().size() != 0) // Must be void with no arguments
-				throw new UnsupportedFeatureException("Function \"main\" having a signature other than \"void()\"", true, node.start);
+			if (!(retType.isVoid() || retType.getSignature().equals("int")) || signature.getChildVariables().size() != 0) // Must be void with no arguments
+				throw new UnsupportedFeatureException("Function \"main\" having a signature other than \"void()\" or \"int()\"", true, node.start);
 		}
 		
 		code = new CompoundStatementNode(this, getName()).interpret(node.compound_statement());
