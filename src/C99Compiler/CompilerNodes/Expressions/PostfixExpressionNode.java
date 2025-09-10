@@ -194,6 +194,9 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 	{
 		if (type == PFType.funcCall)
 		{
+			for (BaseExpressionNode<?> param : params)
+				if (param.canCall(state, function))
+					return true;
 			if (getReferencedFunction(state) != null)
 				return getReferencedFunction(state).getFullName().equals(function.getFullName()) || getReferencedFunction(state).canCall(state, function);
 			else return true;
