@@ -76,7 +76,13 @@ CC extends ParserRuleContext
 	}
 	@Override public Type getType()
 	{
-		if (hasPropValue(new ProgramState()) && !hasAssembly(new ProgramState()))
+		if (x.getType().isFloat() && y.getType().isFloat())
+			return x.getSize() >= y.getSize() ? x.getType() : y.getType();
+		else if (x.getType().isFloat())
+			return x.getType();
+		else if (y.getType().isFloat())
+			return y.getType();
+		else if (hasPropValue(new ProgramState()) && !hasAssembly(new ProgramState()))
 			return CompUtils.getSmallestType(getPropLong(new ProgramState()));
 		else
 			return Type.convertArithmetic(x.getType(), y.getType());

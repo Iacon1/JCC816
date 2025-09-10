@@ -21,7 +21,39 @@ public class ConstantSource extends ConstantByteSource
 	{
 		int[] bytes = new int[size];
 		
-		if (Number.class.isAssignableFrom(obj.getClass()))
+		if (Float.class.isAssignableFrom(obj.getClass()) || Double.class.isAssignableFrom(obj.getClass()))
+		{
+			double d;
+			if (Float.class.isAssignableFrom(obj.getClass()))
+				d = ((Float) obj).doubleValue();
+			else
+				d = ((Double) obj).doubleValue();
+			int exponent = Math.getExponent(d);
+			long mantissa = (long) (Math.abs(d) * Math.pow(2, (size == 8 ? 52 : 23) - exponent));
+
+			bytes = asBytes(mantissa, size);
+			switch (size)
+			{
+			default:
+			case 4:
+				exponent += 127; // Bias
+
+				bytes[2] &= 0x7F;
+				bytes[2] |= (exponent & 0x01) << 7;
+				bytes[3] = exponent >> 1;
+				break;
+			case 8:
+				exponent += 1023; // Bias
+
+				bytes[6] &= 0x0F;
+				bytes[6] |= (exponent & 0x0F) << 4;
+				bytes[7] = exponent >> 4;
+				break;
+			}
+			if (d < 0)
+				bytes[size - 1] |= 0x80;
+		}
+		else if (Integer.class.isAssignableFrom(obj.getClass()) || Long.class.isAssignableFrom(obj.getClass()))
 		{
 			String s = new StringBuilder().append(String.format("%0" + 2*size + "x", obj)).reverse().toString(); // Reverse for proper byte order
 			String s2 = "";

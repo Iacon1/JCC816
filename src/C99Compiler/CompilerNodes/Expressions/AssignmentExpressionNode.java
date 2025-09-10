@@ -50,6 +50,12 @@ public class AssignmentExpressionNode extends BinaryExpressionNode
 		
 		if (y.getType().isArray()) // Decay array
 			y = new CastExpressionNode(this, ((ArrayType) y.getType()).decay(), y);
+		else if (x.getType().isFloat() ^ y.getType().isFloat() || (x.getType().isFloat() && y.getType().isFloat() && x.getSize() != y.getSize()))
+		{
+			BaseExpressionNode<?> tmpExpr = new CastExpressionNode(this, getType(), y);
+			y.swapParent(tmpExpr);
+			y = tmpExpr;
+		}
 		// Test as per 6.5.16.1.1
 		Type xType = x.getType();
 		Type yType = y.getType();

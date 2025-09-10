@@ -378,4 +378,11 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 		pair.state = pair.state.setDestSource(destSource);
 		return pair.getImmutable();
 	}
+
+	public BaseExpressionNode<?> getExpression() {return expr;}
+
+	public String getOperator()
+	{
+		return operator;
+	}
 }

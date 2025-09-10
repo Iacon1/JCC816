@@ -290,6 +290,7 @@ public class JCC816
 			{
 				if (stdLib.equals("imp_mult.h") || stdLib.equals("imp_float.h"))
 					stdLib = "imp_math\\" + stdLib;
+				else if (stdLib.startsWith("imp_math\\"));
 				else
 					stdLib = "stdlib\\" + stdLib;
 				if (stdLib.endsWith(".h"))

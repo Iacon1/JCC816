@@ -1,0 +1,10 @@
+__flt64touint8:		;	@func
+RTL					;	@endfunc
+__flt64touint16:	;	@func
+RTL					;	@endfunc
+__flt64touint24:	;	@func
+RTL					;	@endfunc
+__flt64touint32:	;	@func
+RTL					;	@endfunc
+__flt64touint64:	;	@func
+RTL					;	@endfunc

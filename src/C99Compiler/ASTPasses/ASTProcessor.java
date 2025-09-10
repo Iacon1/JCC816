@@ -10,6 +10,11 @@ public class ASTProcessor
 	
 	public static void processAST(TranslationUnitNode unit) throws Exception
 	{
+		new FloatAddPass().apply(unit);
+		new FloatMultPass().apply(unit);
+		new FloatCompPass().apply(unit);
+		new FloatNegPass().apply(unit);
+		new FloatCastPass().apply(unit);
 		new MultOptimizer().apply(unit);
 	}
 }

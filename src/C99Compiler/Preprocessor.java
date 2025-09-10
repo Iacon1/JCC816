@@ -115,13 +115,13 @@ public final class Preprocessor
 		// Add math implementation headers
 		source =
 				"#include <imp_mult.h>\n" +
-//				"#include <imp_float.h>\n" +
+				"#include <imp_float.h>\n" +
 				source;
 		GroupNode node = new GroupNode().interpret(parsePreprocess(source));
 		includedStdLibs.addAll(node.getIncludedStdLibs());
 		includedOtherLibs.addAll(node.getIncludedOtherLibs());
 		lineInfo.clear();
-		lineInfo.addAll(node.getLineInfo(-1)); // -1 offset to account for imp_mult
+		lineInfo.addAll(node.getLineInfo(-2)); // -2 offset to account for imp_mult and imp_float
 		source = node.getText();
 		PreProcComponentNode.reset();
 		Grammar.GrammarFlags.isPreproc = false;

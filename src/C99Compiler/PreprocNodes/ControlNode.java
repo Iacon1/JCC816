@@ -92,6 +92,8 @@ public class ControlNode extends InterpretingNode<ControlNode, Control_lineConte
 				{
 					if (filename.equals("imp_float.h") || filename.equals("imp_mult.h"))
 						file = FileIO.readResource("imp_math\\" + filename);
+					else if (filename.startsWith("imp_math\\"))
+						file = FileIO.readResource(filename);
 					else
 						file = FileIO.readResource("stdlib\\" + filename);
 				}

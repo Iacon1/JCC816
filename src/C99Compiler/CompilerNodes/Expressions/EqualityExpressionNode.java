@@ -70,7 +70,14 @@ public class EqualityExpressionNode extends BinaryExpressionNode
 		super(parent);
 		this.x = x;
 		this.y = new DummyExpressionNode(this, x.getType(), 0);
-		this.operator = "!=";
+		this.operator = operator;
+	}
+	public EqualityExpressionNode(ComponentNode<?> parent, BaseExpressionNode<?> x, BaseExpressionNode<?> y, String operator)
+	{
+		super(parent);
+		this.x = x;
+		this.y = y;
+		this.operator = operator;
 	}
 	@Override
 	protected BaseExpressionNode<Equality_expressionContext> getC1Node(Equality_expressionContext node) throws Exception

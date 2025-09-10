@@ -147,6 +147,9 @@ public final class CompUtils
 		literal = literal.replace("u", "");
 		if (literal.startsWith("0x")) // Hex;
 			return Long.valueOf(literal.substring(2), 16);
+		
+		if (literal.contains("f") || literal.contains(".") || literal.contains("d")) // Decimal
+			return Double.valueOf(literal.replaceAll("[fd]", ""));
 		if (literal.startsWith("0b")) // Binary;
 			return Long.valueOf(literal.substring(2), 2);
 		else if (literal.startsWith("0")) // Octal

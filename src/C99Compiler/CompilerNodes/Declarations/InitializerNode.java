@@ -157,7 +157,13 @@ public class InitializerNode extends InterpretingNode<InitializerNode, Initializ
 				else
 					expr = new CastExpressionNode(this, new PointerType(new DummyType("char")), expr);
 			}
-				if (LValue.getType().isArray() && expr.getType().isArray() && !expr.getType().isIncomplete()) // Expression is fixed-size array
+			if (getType().isFloat() ^ expr.getType().isFloat() || (getType().isFloat() && expr.getType().isFloat() && expr.getSize() != expr.getSize()))
+			{
+				BaseExpressionNode<?> tmpExpr = new CastExpressionNode(this, getType(), expr);
+				expr.swapParent(tmpExpr);
+				expr = tmpExpr;
+			}
+			if (LValue.getType().isArray() && expr.getType().isArray() && !expr.getType().isIncomplete()) // Expression is fixed-size array
 			{
 				ArrayType arrayType = (ArrayType) LValue.getType();
 				arrayType.setLength(((ArrayType) expr.getType()).getLength());
