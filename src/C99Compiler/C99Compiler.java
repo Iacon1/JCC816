@@ -64,16 +64,20 @@ public class C99Compiler
 					for (Init_declaratorContext i : c.init_declarator_list().init_declarator())
 					{
 						Direct_declaratorContext j = i.declarator().direct_declarator();
+						boolean registered = false;
 						do
 						{
 							if (j.identifier() != null)
+							{
 								registerTypedef(j.identifier().getText());
+								registered = true;
+							}
 							else if (j.direct_declarator() != null)
 								j = j.direct_declarator();
 							else
 								j = null;
 						}
-						while (j != null && j.identifier() == null);
+						while (j != null && !registered);
 					}
 				}
 			}

@@ -136,6 +136,11 @@ public class Type implements Serializable
 					PointerType pt = new PointerType(t, ((PointerType) td).getType(), ((PointerType) td).getPointerQualifiers());
 					t = pt;
 				}
+				else if (td.isArray())
+				{
+					ArrayType at = new ArrayType(t, ((ArrayType) td).getType(), ((ArrayType) td).getPointerQualifiers(), ((ArrayType) td).getLength());
+					t = at;
+				}
 			}
 			else t.typeSpecifiers.add(specifier);
 		}

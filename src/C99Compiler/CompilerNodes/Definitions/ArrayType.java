@@ -2,6 +2,9 @@
 // Array
 package C99Compiler.CompilerNodes.Definitions;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import C99Compiler.CompConfig;
 import C99Compiler.CompilerNodes.LValues.LValueNode;
 import C99Compiler.CompilerNodes.LValues.WrapperLValueNode;
@@ -20,7 +23,12 @@ public class ArrayType extends PointerType
 		super(type);
 		this.length = -1;
 	}
-
+	public ArrayType(Type base, Type type, Set<String> qualifiers, int length)
+	{
+		super(base, type, qualifiers);
+		this.length = length;
+	}
+	
 	public PointerType decay()
 	{
 		return new PointerType(type);
