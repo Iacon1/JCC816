@@ -250,7 +250,7 @@ public class SelectionStatementNode extends SequencePointStatementNode<Selection
 			pair.assembly += whitespace + "BCS\t:+\n";
 
 			new ShiftExpressionNode(this, "<<",
-					new DummyExpressionNode(this, CompUtils.getTypeForSize(2, expression.getType().isSigned()), exprSource),
+					new DummyExpressionNode(this, CompUtils.getTypeForSize(2, false), exprSource),
 					new DummyExpressionNode(this, 1)).apply(pair);			
 
 			pair.assembly += whitespace + "TAX\n";
