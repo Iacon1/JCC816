@@ -3,19 +3,23 @@
 package C99Compiler.Utils.OperandSources;
 
 import java.util.AbstractMap.SimpleEntry;
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
 
+import C99Compiler.CompConfig;
 import C99Compiler.Utils.CompUtils;
 import C99Compiler.Utils.ProgramState;
 import C99Compiler.Utils.PropPointer;
 import C99Compiler.Utils.ProgramState.PreserveFlag;
+import C99Compiler.Utils.ProgramState.ProcessorFlag;
 import Shared.Assemblable.AssemblyStatePair;
 
 public class ConstantSource extends ConstantByteSource
 {
-	private PropPointer<?> pointer;
 	private Object constant;
-	
+	private Map<Integer, SimpleEntry<PropPointer<?>, Integer>> pointerOverrideMap;	// When some of the bytes are replaced by a proppointer
+	private PropPointer<?> pointerOverride;											// When all of the bytes are replaced by a proppointer
 	public static class ConstList extends LinkedList<SimpleEntry<Integer, Object>> {};
 	private static int[] asBytes(Object obj, int size)
 	{
@@ -115,16 +119,76 @@ public class ConstantSource extends ConstantByteSource
 	public ConstantSource(Object constant, int offset, int size)
 	{
 		super(asBytes(constant, size), offset, size);
+		
+		boolean useOverride = false; // Do we have any prop pointers?
+		pointerOverrideMap = new HashMap<Integer, SimpleEntry<PropPointer<?>, Integer>>(size);
+		for (int i = 0; i < size; ++i)
+			pointerOverrideMap.put(i, null);
+
 		if (PropPointer.class.isAssignableFrom(constant.getClass()))
-			pointer = (PropPointer<?>) constant;
+		{
+			PropPointer<?> p = (PropPointer<?>) constant;
+			for (int i = 0; i < CompConfig.pointerSize; ++i)
+				pointerOverrideMap.put(i, new SimpleEntry<PropPointer<?>, Integer>(p, i));
+			useOverride = true;
+		}
+		else if (ConstList.class.isAssignableFrom(constant.getClass()))
+		{
+			int i = 0;
+			for (SimpleEntry<Integer, Object> entry : (ConstList) constant)
+			{
+				Object o = entry.getValue();
+				if (PropPointer.class.isAssignableFrom(o.getClass()))
+				{
+					PropPointer<?> p = (PropPointer<?>) o;
+					for (int j = i; j < i + CompConfig.pointerSize; ++j)
+						pointerOverrideMap.put(j, new SimpleEntry<PropPointer<?>, Integer>(p, j - i));
+					useOverride = true;
+				}
+				i += entry.getKey();
+			}
+		}
+	
+		if (!useOverride)
+			pointerOverrideMap = null;
+		
 		this.constant = constant;
 	}
 	
 	public ConstantSource(Object constant, int size)
 	{
 		super(asBytes(constant, size), size);
+
+		boolean useOverride = false; // Do we have any prop pointers?
+		pointerOverrideMap = new HashMap<Integer, SimpleEntry<PropPointer<?>, Integer>>(size);
+		for (int i = 0; i < size; ++i)
+			pointerOverrideMap.put(i, null);
+
 		if (PropPointer.class.isAssignableFrom(constant.getClass()))
-			pointer = (PropPointer<?>) constant;
+		{
+			pointerOverride = (PropPointer<?>) constant;
+			useOverride = true;
+		}
+		else if (ConstList.class.isAssignableFrom(constant.getClass()))
+		{
+			int i = 0;
+			for (SimpleEntry<Integer, Object> entry : (ConstList) constant)
+			{
+				Object o = entry.getValue();
+				if (PropPointer.class.isAssignableFrom(o.getClass()))
+				{
+					PropPointer<?> p = (PropPointer<?>) o;
+					for (int j = i; j < i + CompConfig.pointerSize; ++j)
+						pointerOverrideMap.put(j, new SimpleEntry<PropPointer<?>, Integer>(p, j - i));
+					useOverride = true;
+				}
+				i += entry.getKey();
+			}
+		}
+	
+		if (!useOverride || pointerOverride != null)
+			pointerOverrideMap = null;
+		
 		this.constant = constant;
 	}
 	@Override
@@ -140,8 +204,13 @@ public class ConstantSource extends ConstantByteSource
 	
 	public String getBase(ProgramState state, int i)
 	{
-		if (pointer != null)
-			return pointer.apply(state, i);
+		if (pointerOverrideMap != null && pointerOverrideMap.containsKey(i))
+		{
+			SimpleEntry<PropPointer<?>, Integer> entry = pointerOverrideMap.get(i);
+			return entry.getKey().apply(state, entry.getValue());
+		}
+		else if (pointerOverride != null)
+			return pointerOverride.apply(state, i);
 		else return super.getBase(state, i);
 	}
 	
@@ -149,7 +218,15 @@ public class ConstantSource extends ConstantByteSource
 	public AssemblyStatePair getInstruction(ProgramState state, String operation, Integer i)
 	{
 		AssemblyStatePair pair;
-		if (pointer != null && operation == "LDA")
+		if (operation == "LDA" && 
+			(
+				(pointerOverrideMap != null && 
+					(pointerOverrideMap.containsKey(i) ||
+						(state.testKnownFlag(PreserveFlag.M) && state.testProcessorFlag(ProcessorFlag.I) && pointerOverrideMap.containsKey(i - 1))
+					)
+				)
+				|| pointerOverride != null
+			))
 		{
 			pair = new AssemblyStatePair("", state.clearKnownFlags(PreserveFlag.A));
 			pair = super.getInstruction(pair.state, operation, i);
@@ -163,8 +240,8 @@ public class ConstantSource extends ConstantByteSource
 	@Override
 	public String getSpec()
 	{
-		if (pointer != null)
-			return pointer.getSpec();
+		if (pointerOverride != null)
+			return pointerOverride.getSpec();
 		else return super.getSpec();
 	}
 }
