@@ -57,7 +57,7 @@ public class PreprocNode extends ASMNode<PreprocInstructionContext>
 		{
 		case ".res": return procNumber(words[1]);
 		case ".word": return 2;
-		case ".byte": return text.length() - text.replace("$", "").length();
+		case ".byte": return text.length() - text.replace(",", "").length() + (text.endsWith(",") ? 0 : 1);
 		default: return 0;
 		}
 	}

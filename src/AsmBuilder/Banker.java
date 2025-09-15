@@ -12,7 +12,29 @@ import Shared.CartConfig;
 
 public final class Banker
 {
-	public static final int splitBanks(CartConfig cartConfig, ArrayList<String> lines) throws Exception // Returns # of banks
+	// Revise size estimate to be at least within one bank of accuracy
+	// Specifically, if any bank is used that the estimate wouldn't reach then return the sum of banks up to that one. Otherwise return original estimate
+	private static final int reviseEstimate(CartConfig cartConfig, List<Boolean> bankUsed, int sizeEstimate)
+	{
+		int maxSize = 0;
+		for (int i = 0; i < bankUsed.size(); ++i)
+			maxSize += cartConfig.getType().getROMBankLength(cartConfig.isFast(), i);
+		
+		for (int i = bankUsed.size() - 1; i >= 0; --i)
+		{
+			int bankSize = cartConfig.getType().getROMBankLength(cartConfig.isFast(), i);
+			if (bankUsed.get(i))
+			{
+				if (maxSize - bankSize < sizeEstimate) // This estimate is good enough for the config generator already
+					return sizeEstimate;
+				else return maxSize; // This estimate needs to be replaced
+			}
+			maxSize -= bankSize; // This bank wasn't important
+		}
+		
+		return sizeEstimate;
+	}
+	public static final int splitBanks(CartConfig cartConfig, ArrayList<String> lines) throws Exception // Returns ROM size estimate
 	{
 		int sizeEstimate = 0; // Estimated ROM size
 
@@ -32,7 +54,7 @@ public final class Banker
 		List<Boolean> bankUsed = new ArrayList<Boolean>(emptySpace.size());
 		for (int i = 0; i < cartConfig.getType().getMaxROMBanks(cartConfig.isFast()); ++i)
 		{
-			emptySpace.add(cartConfig.getType().getROMBankLength(cartConfig.isFast(), lineNo));
+			emptySpace.add(cartConfig.getType().getROMBankLength(cartConfig.isFast(), i));
 			bankUsed.add(false);
 		}
 		int currBank = 0;
@@ -176,6 +198,6 @@ public final class Banker
 			lineNo += 1;
 		}
 
-		return sizeEstimate;
+		return reviseEstimate(cartConfig, bankUsed, sizeEstimate);
 	}
 }
