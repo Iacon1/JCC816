@@ -66,14 +66,21 @@ public class CallGraph
 			flatten(i);
 	}
 	
-	public boolean canEverCall(FunctionDefinitionNode a, FunctionDefinitionNode b)
+	public boolean canEverBeCalledBy(FunctionDefinitionNode caller, FunctionDefinitionNode callee)
 	{
-		return map.get(a.getFullName()).contains(b.getFullName());
+		return map.get(caller.getFullName()).contains(callee.getFullName());
 	}
 
-	public boolean canEverBeCalled(FunctionDefinitionNode a)
+	public boolean canEverBeCalledByMain(FunctionDefinitionNode callee)
 	{
-		return map.get("main").contains(a.getFullName());
+		return map.get("main").contains(callee.getFullName());
+	}
+	
+	public boolean canEverBeCalledBy(List<FunctionDefinitionNode> callers, FunctionDefinitionNode callee)
+	{
+		for (FunctionDefinitionNode caller : callers)
+			if (canEverBeCalledBy(caller, callee)) return true;
+		return false;
 	}
 	
 	public void printCallGraph()

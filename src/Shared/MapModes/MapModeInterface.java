@@ -43,7 +43,7 @@ public interface MapModeInterface extends Configurer
 			SimpleEntry<FunctionDefinitionNode, FunctionDefinitionNode> entry =
 					new SimpleEntry<FunctionDefinitionNode, FunctionDefinitionNode>(aFunc, bFunc);
 
-			if (callGraph.canEverCall(aFunc, bFunc) || callGraph.canEverCall(bFunc, aFunc))
+			if (callGraph.canEverBeCalledBy(aFunc, bFunc) || callGraph.canEverBeCalledBy(bFunc, aFunc))
 				return false;
 			
 			return true;

@@ -382,18 +382,24 @@ public final class AsmBuilder implements Catalogger
 		CallGraph callGraph = new CallGraph(getFunctions().values());
 		if (!isModule && VerbosityLevel.isAtLeast(VerbosityLevel.high))
 			callGraph.printCallGraph();
+		// Get list of functions that need to exist
+		List<FunctionDefinitionNode> nonOptionals = new LinkedList<FunctionDefinitionNode>();
+		for (FunctionDefinitionNode funcNode : getFunctions().values())
+			if (funcNode.isMain() || !funcNode.isOptional())
+				nonOptionals.add(funcNode);
 		// Get assembly from functions
 		for (FunctionDefinitionNode funcNode : getFunctions().values())
 		{
+			boolean canEverBeCalled = callGraph.canEverBeCalledBy(nonOptionals, funcNode);
 			if (funcNode.isImplemented() && funcNode.isInline()) continue;
-			else if (!funcNode.isImplemented() && !isModule && callGraph.canEverBeCalled(funcNode))
+			else if (!funcNode.isImplemented() && !isModule && canEverBeCalled)
 			{
 				if (funcNode.getType().isExtern()) continue;
 				else if (!isModule)
 					throw new UndefinedFunctionException(funcNode);
 				else continue;
 			}
-			else if (funcNode.isOptional() && !isModule && !callGraph.canEverBeCalled(funcNode)) // Function can be left out if unneeded
+			else if (funcNode.isOptional() && !isModule && !canEverBeCalled) // Function can be left out if unneeded
 				continue;
 			else if (isPreassembled(funcNode)) continue;
 			else if (funcNode.isImplemented())
@@ -403,7 +409,7 @@ public final class AsmBuilder implements Catalogger
 		for (TranslationUnit unit : translationUnits)
 			if (AssemblyUnit.class.isAssignableFrom(unit.getClass()))
 				if (!isModule)
-					assembly += ((AssemblyUnit) unit).clearOptionals(getFunctions().values(), (FunctionDefinitionNode func) -> {return callGraph.canEverBeCalled(func);});
+					assembly += ((AssemblyUnit) unit).clearOptionals(getFunctions().values(), (FunctionDefinitionNode func) -> {return callGraph.canEverBeCalledBy(nonOptionals, func);});
 				else
 					assembly += ((AssemblyUnit) unit).getAssembly();
 		if (!isModule)
