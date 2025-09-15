@@ -73,6 +73,7 @@ public class PrimaryExpressionNode extends BaseExpressionNode<Primary_expression
 			{
 				stringLiteralNodeV = new VariableNode(getTranslationUnit(), "__StringLiteral_" + CompUtils.getSafeUUID(), t);
 				stringLiteralNodeI = new InitializerNode(getTranslationUnit(), stringLiteralNodeV, stringLiteral);
+				getTranslationUnit().addGlobalInitializer(stringLiteralNodeI); // TODO bad workaround
 			}
 		}
 		
@@ -193,7 +194,6 @@ public class PrimaryExpressionNode extends BaseExpressionNode<Primary_expression
 		if (stringLiteralNodeV != null)
 		{
 			OperandSource destSource = state.destSource();
-			getTranslationUnit().addGlobalInitializer(stringLiteralNodeI); // TODO bad workaround
 			MutableAssemblyStatePair pair = new MutableAssemblyStatePair("", state);
 			ByteCopier copier = new ByteCopier(destSource.getSize(), destSource, stringLiteralNodeV.getSource());
 			copier.apply(pair);

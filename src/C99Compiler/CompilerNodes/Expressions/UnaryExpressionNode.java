@@ -287,21 +287,21 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 		{
 		case "-": case "~": case "!": break;
 		default:
-			if (expr.hasAssembly(state))
+			if (expr.hasAssembly(pair.state))
 			{
 				pair.state = pair.state.reserveScratchBlock(expr.getSize());
 				scratchX = pair.state.lastScratchSource();
 				pair.state = pair.state.setDestSource(scratchX);
 				pair = expr.apply(pair);
 	
-				if (expr.hasLValue(state))
-					sourceX = expr.getLValue(state).getSource();
+				if (expr.hasLValue(pair.state))
+					sourceX = expr.getLValue(pair.state).getSource();
 				else sourceX = scratchX;
 			}
-			else if (expr.hasPropValue(state) && !(operator.equals("++") || operator.equals("--"))) // These two need LValue
-				sourceX = new ConstantSource(expr.getPropValue(state), expr.getType().getSize());
-			else if (expr.hasLValue(state))
-				sourceX = expr.getLValue(state).getSource();
+			else if (expr.hasPropValue(pair.state) && !(operator.equals("++") || operator.equals("--"))) // These two need LValue
+				sourceX = new ConstantSource(expr.getPropValue(pair.state), expr.getType().getSize());
+			else if (expr.hasLValue(pair.state))
+				sourceX = expr.getLValue(pair.state).getSource();
 			else sourceX = null;
 		}
 		DummyExpressionNode dX = new DummyExpressionNode(this, expr.getType(), 1);
@@ -309,10 +309,10 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 		{
 		case "++": case "--":
 			tmpNode = new AdditiveExpressionNode(this, (operator.equals("++") ? "+" : "-"), expr, dX);
-			if (tmpNode.hasPropValue(state) && !expr.getLValue(state).getScope().isRoot())
+			if (tmpNode.hasPropValue(state) && !expr.getLValue(pair.state).getScope().isRoot())
 			{
-				pair = new ByteCopier(sourceX.getSize(), sourceX, new ConstantSource(tmpNode.getPropValue(state), sourceX.getSize())).apply(pair);
-				pair.state = pair.state.setPossibleValue(expr.getLValue(state), tmpNode.getPropValue(state));
+				pair = new ByteCopier(sourceX.getSize(), sourceX, new ConstantSource(tmpNode.getPropValue(pair.state), sourceX.getSize())).apply(pair);
+				pair.state = pair.state.setPossibleValue(expr.getLValue(pair.state), tmpNode.getPropValue(pair.state));
 			}
 			else
 			{
@@ -366,9 +366,9 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 			break;
 		case "&":
 			if (destSource != null)
-				if (expr.hasLValue(state))
+				if (expr.hasLValue(pair.state))
 				{
-					PropPointer<LValueNode<?>> p = new PropPointer<LValueNode<?>>(expr.getLValue(state), 0);
+					PropPointer<LValueNode<?>> p = new PropPointer<LValueNode<?>>(expr.getLValue(pair.state), 0);
 					copier = new ByteCopier(CompConfig.pointerSize, destSource, new ConstantSource(p, CompConfig.pointerSize));
 					pair = copier.apply(pair);
 				}
