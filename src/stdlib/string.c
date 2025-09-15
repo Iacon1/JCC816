@@ -123,4 +123,4 @@ size_t strlen(const char *s)
 	do s++;
 	while (*s != 0);
 	return (size_t) ((unsigned int) s - (unsigned int) start);
-}*/
+}
