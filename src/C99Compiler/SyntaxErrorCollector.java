@@ -11,6 +11,7 @@ import org.antlr.v4.runtime.ANTLRErrorListener;
 import org.antlr.v4.runtime.Parser;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
+import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.atn.ATNConfigSet;
 import org.antlr.v4.runtime.dfa.DFA;
 
@@ -47,7 +48,10 @@ public class SyntaxErrorCollector implements ANTLRErrorListener
 	public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg,
 			RecognitionException e)
 	{
-		exceptions.add(new SyntaxErrorException(msg, line, charPositionInLine));
+		if (Token.class.isAssignableFrom(offendingSymbol.getClass()))
+			exceptions.add(new SyntaxErrorException(msg, (Token) offendingSymbol));
+		else
+			exceptions.add(new SyntaxErrorException(msg, line, charPositionInLine));
 	}
 
 	public Exception getException()
