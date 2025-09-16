@@ -396,9 +396,9 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 				for (int i = 0; i < params.size(); ++i)
 				{
 					OperandSource sourceV = funcParams.get(i).getSource();
+					state = state.setDestSource(sourceV);
 					if (params.get(i).hasAssembly(state))
 					{
-						state = state.setDestSource(sourceV);
 						tmpPair = params.get(i).getAssemblyAndState(state);
 						assembly += tmpPair.assembly;
 						state = tmpPair.state;
@@ -406,6 +406,7 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 					}
 					else
 					{
+						state = state.setDestSource(destSource);
 						OperandSource sourceP = null;
 						if (params.get(i).hasPropValue(state) && !params.get(i).getType().isArray()) sourceP = new ConstantSource(params.get(i).getPropValue(state), params.get(i).getSize()); // Arrays aren't typically function parameters
 						else if (params.get(i).hasLValue(state)) sourceP = params.get(i).getLValue(state).castTo(funcParams.get(i).getType()).getSource();
