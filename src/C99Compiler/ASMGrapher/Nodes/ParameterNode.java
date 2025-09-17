@@ -34,7 +34,7 @@ public class ParameterNode extends ASMNode<ParameterContext>
 			referencesY = true;
 		if (upper.contains(",S"))
 			referencesS = true;
-		if (upper.contains(",#"))
+		if (upper.startsWith("#"))
 			isImmediate = true;
 
 		if (node.value().size() > 0)

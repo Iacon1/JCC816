@@ -38,7 +38,8 @@ public class InstructionNode extends ASMNode<InstructionContext>
 	{
 		operation = Operation.valueOf(node.Operation().getText());
 		lineNo = node.start.getLine();
-		if (node.parameter() != null) parameter = new ParameterNode().interpret(node.parameter());
+		if (node.parameter() != null)
+			parameter = new ParameterNode().interpret(node.parameter());
 		else parameter = null;
 		return this;
 	}

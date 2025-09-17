@@ -77,19 +77,19 @@ public class ValueNode extends ASMNode<ValueContext>
 				break;
 			}
 		}	
-		else if (node.getChild(0).getText() == ":")
+		else if (node.getChild(0).getText().equals(":"))
 		{
 			value = new Value(node.getText());
 			size = 1;
 		}
-		else if (node.getChild(0).getText() == "#")
+		else if (node.getChild(0).getText().equals("#"))
 		{
 			ValueNode v = (ValueNode) new ValueNode(lineNo()).interpret(node.value(0));
 			value = v.getValue();
 			size = v.getSize();
 			// TODO
 		}
-		else if (node.getChild(0).getText() == "(")
+		else if (node.getChild(0).getText().equals("("))
 			return new ValueNode(lineNo()).interpret(node.value(0));
 		else if (node.value().size() == 2)
 		{
