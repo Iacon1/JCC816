@@ -73,6 +73,32 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 		implementation = null;
 	}
 
+	// Only defines what's needed for checking the name
+	public FunctionDefinitionNode interpretShort(Function_definitionContext node) throws Exception
+	{
+		boolean aReq = false; // Is the next attribute a real attribute or a required function name?
+		for (Attributes_declarationContext attributes_declaration : node.attributes_declaration())
+			for (IdentifierContext attribute : attributes_declaration.identifier_list().identifier())
+			{
+				if (aReq)
+				{
+					attributeReqs.add(attribute.getText());
+					aReq = false;
+				}
+				else if (attribute.getText().equals(Attributes.req))
+					aReq = true;
+				else
+					attributes.add(attribute.getText());
+			}
+		specifiers = new DeclarationSpecifiersNode(this).interpret(node.declaration_specifiers()).getSpecifiers();
+		signature = new DeclaratorNode(this, getName(node.declarator().direct_declarator())).interpret(node.declarator());
+
+		type = Type.manufacture(specifiers, signature, node.declaration_specifiers().start);
+
+		if (type.isArray()) throw new ConstraintException("6.9.1", 3, node.start);
+
+		return this;
+	}
 	@Override
 	public FunctionDefinitionNode interpret(Function_definitionContext node) throws Exception
 	{

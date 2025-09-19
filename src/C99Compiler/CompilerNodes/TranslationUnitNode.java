@@ -111,14 +111,14 @@ public class TranslationUnitNode extends InterpretingNode<TranslationUnitNode, T
 			else
 			{
 				FunctionDefinitionNode oldFunction = checkRepeatFunctions((ComponentNode<?> c) -> {
-							try {return new FunctionDefinitionNode(c).interpret(extDec.function_definition());}
+							try {return new FunctionDefinitionNode(c).interpretShort(extDec.function_definition());}
 							catch (Exception e) {innerException.addSuppressed(e); return null;}});
 				if (innerException.getSuppressed().length > 0) throw (Exception) innerException.getSuppressed()[0]; // Weird hack I know
 
 				if (oldFunction != null && oldFunction.isImplemented()) // Two implemented functions cannot have same erasure and name
 					throw new CompilerMultipleDefinitionException(oldFunction.getName(), extDec.start); 
 				else if (oldFunction != null) // Function definition found but not signature
-					oldFunction.implement(extDec.function_definition().compound_statement());
+					resolveFunctionRelative(oldFunction.getName()).implement(extDec.function_definition().compound_statement());
 				else // No preceeding function found
 					new FunctionDefinitionNode(this).interpret(extDec.function_definition());
 			}
