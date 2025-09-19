@@ -25,6 +25,7 @@ import C99Compiler.Utils.ProgramState;
 import C99Compiler.Utils.PropPointer;
 import C99Compiler.Utils.AssemblyUtils.ByteCopier;
 import C99Compiler.Utils.OperandSources.OperandSource;
+import C99Compiler.Utils.OperandSources.ConstantSource;
 import Grammar.C99.C99Parser.Primary_expressionContext;
 
 public class PrimaryExpressionNode extends BaseExpressionNode<Primary_expressionContext>
@@ -195,7 +196,7 @@ public class PrimaryExpressionNode extends BaseExpressionNode<Primary_expression
 		{
 			OperandSource destSource = state.destSource();
 			MutableAssemblyStatePair pair = new MutableAssemblyStatePair("", state);
-			ByteCopier copier = new ByteCopier(destSource.getSize(), destSource, stringLiteralNodeV.getSource());
+			ByteCopier copier = new ByteCopier(destSource.getSize(), destSource, new ConstantSource(new PropPointer<VariableNode>(stringLiteralNodeV, 0), CompConfig.pointerSize));
 			copier.apply(pair);
 			return pair.getImmutable();
 		}
