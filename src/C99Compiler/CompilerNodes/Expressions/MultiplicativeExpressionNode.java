@@ -176,7 +176,8 @@ public class MultiplicativeExpressionNode extends BinaryExpressionNode
 		negation.apply(pair);
 		removeChild(negation);
 		pair.assembly += pair.state.getWhitespace() + ":\n";
-		pair.state = pair.state.clearKnownFlags(ProgramState.PreserveFlag.Y);
+		pair.state = pair.state.clearKnownFlags((byte) (ProgramState.PreserveFlag.Y | ProgramState.PreserveFlag.M | ProgramState.PreserveFlag.I));
+		AssemblyUtils.forceFlags(pair, (byte) (PreserveFlag.M | PreserveFlag.I), false);
 		// If one operand is negative: Y = 1 or -1. If neither or both: Y = 0.
 		// Check Y
 		sourceY.applyLDA(pair, sourceY.getSize() - 1);
@@ -188,7 +189,9 @@ public class MultiplicativeExpressionNode extends BinaryExpressionNode
 		negation.apply(pair);
 		removeChild(negation);
 		pair.assembly += pair.state.getWhitespace() + ":\n";
-
+		pair.state = pair.state.clearKnownFlags((byte) (ProgramState.PreserveFlag.Y | ProgramState.PreserveFlag.M | ProgramState.PreserveFlag.I));
+		AssemblyUtils.forceFlags(pair, (byte) (PreserveFlag.M | PreserveFlag.I), false);
+		
 		// Do math
 		pair.state = pair.state.setDestSource(destSource);
 		dummyCall.apply(pair);
@@ -206,6 +209,7 @@ public class MultiplicativeExpressionNode extends BinaryExpressionNode
 		removeChild(dummyTemp);
 		removeChild(negation);
 		pair.assembly += pair.state.getWhitespace() + ":\n";
+		pair.state = pair.state.clearKnownFlags((byte) (ProgramState.PreserveFlag.Y | ProgramState.PreserveFlag.M | ProgramState.PreserveFlag.I));
 		
 		// Cleanup
 		pair.state = pair.state.setPreserveFlags(oldState.getPreserveFlags());
