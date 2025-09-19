@@ -73,6 +73,19 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 		implementation = null;
 	}
 
+	private void registerInterrupts()
+	{
+		if (attributes.contains(Attributes.interruptCOP))
+			getTranslationUnit().registerInterrupt(DefinableInterrupt.COP, getStartLabel());
+		if (attributes.contains(Attributes.interruptBRK))
+			getTranslationUnit().registerInterrupt(DefinableInterrupt.BRK, getStartLabel());
+		if (attributes.contains(Attributes.interruptABORT))
+			getTranslationUnit().registerInterrupt(DefinableInterrupt.ABORT, getStartLabel());
+		if (attributes.contains(Attributes.interruptIRQ))
+			getTranslationUnit().registerInterrupt(DefinableInterrupt.IRQ, getStartLabel());
+		if (attributes.contains(Attributes.interruptNMI))
+			getTranslationUnit().registerInterrupt(DefinableInterrupt.NMI, getStartLabel());
+	}
 	// Only defines what's needed for checking the name
 	public FunctionDefinitionNode interpretShort(Function_definitionContext node) throws Exception
 	{
@@ -128,20 +141,9 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 			if (!(retType.isVoid() || retType.getSignature().equals("int")) || signature.getChildVariables().size() != 0) // Must be void with no arguments
 				throw new UnsupportedFeatureException("Function \"main\" having a signature other than \"void()\" or \"int()\"", true, node.start);
 		}
-		
+		registerInterrupts();
 		code = new CompoundStatementNode(this, getName()).interpret(node.compound_statement());
-
-		if (attributes.contains(Attributes.interruptCOP))
-			getTranslationUnit().registerInterrupt(DefinableInterrupt.COP, getStartLabel());
-		if (attributes.contains(Attributes.interruptBRK))
-			getTranslationUnit().registerInterrupt(DefinableInterrupt.BRK, getStartLabel());
-		if (attributes.contains(Attributes.interruptABORT))
-			getTranslationUnit().registerInterrupt(DefinableInterrupt.ABORT, getStartLabel());
-		if (attributes.contains(Attributes.interruptIRQ))
-			getTranslationUnit().registerInterrupt(DefinableInterrupt.IRQ, getStartLabel());
-		if (attributes.contains(Attributes.interruptNMI))
-			getTranslationUnit().registerInterrupt(DefinableInterrupt.NMI, getStartLabel());
-			
+		
 		return this;
 	}
 	public FunctionDefinitionNode interpret(Collection<Attributes_declarationContext> attributes, Declaration_specifiersContext declarationSpecifiers, DeclaratorContext declarator) throws Exception // Load from declaration
@@ -171,7 +173,7 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 //		if (getName().equals(CompConfig.mainName)) // If main
 //			if (!getType().getSignature().equals("void()")) // Must be void with no arguments
 //				throw new UnsupportedFeatureException("Function \"main\" having a signature other than \"void()\"", true, declarator.start);
-
+		registerInterrupts();
 		return this;
 	}
 	public void implement(Compound_statementContext implementation) throws Exception
