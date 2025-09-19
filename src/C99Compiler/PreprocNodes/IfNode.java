@@ -200,11 +200,12 @@ public class IfNode extends InterpretingNode<IfNode, If_sectionContext> implemen
 			entries.add(e);
 			startLine += e.nLines;
 		}
-		
+		resetLineNo(startLine);
 		boolean foundGroup = false;
 		for (IfEntry e : entries)
 		{
-			if (foundGroup) addLines((int) e.nLines);
+			if (foundGroup)
+				addLines((int) e.nLines);
 			else if (e.used)
 			{
 				resetLineNo(e.startLine);
