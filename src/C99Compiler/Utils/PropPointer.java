@@ -38,7 +38,7 @@ public class PropPointer<T extends AddressableNode & TypedNode> implements BiFun
 		if (i == 0)
 			return "#" + (state.testProcessorFlag(ProgramState.ProcessorFlag.M) ? ".loWord(" : ".loByte(") + address + ")";
 		else if (i == 1)
-			return "#" + (state.testProcessorFlag(ProgramState.ProcessorFlag.M) ? ".hiWord((" : ".hiByte((") + address + ") << 8)";
+			return "#" + (state.testProcessorFlag(ProgramState.ProcessorFlag.M) ? (".hiWord((" + address + ") << 8)") : (".loByte((" + address + ") >> 8)"));
 		else if (i == 2)
 			return "#.bankByte(" + address + ")";
 		else return "#$00";
