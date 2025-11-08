@@ -189,7 +189,6 @@ public class ASMGraphBuilder
 		for (int i = 0; i < context.getChildCount(); ++i)
 		{
 			ASMNode<?> node = null;
-
 			if (context.label().size() > 0 && context.label(labels) == context.getChild(i))
 				node = new LabelNode(i).interpret(context.label(labels++));
 			else if (context.instruction().size() > 0 && context.instruction(instrs) == context.getChild(i))

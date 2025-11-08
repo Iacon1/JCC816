@@ -95,6 +95,31 @@ public class Value
 		else
 			return new Value(address | a.address);
 	}
+	public Value and(Value a)
+	{
+		return mask(a);
+	}
+	public Value or(Value a)
+	{
+		return unmask(a);
+	}
+	public Value xor(Value a)
+	{
+		if (name != null && usesOffset && a.name != null && a.usesOffset)
+			return new Value("(" + name + " + " + offset + ") ^ (" + a.name + " + " + a.offset + ")");
+		else if (name != null && usesOffset && a.name != null)
+			return new Value("(" + name + " + " + offset + ") ^ " + a.name);
+		else if (name != null && a.usesOffset && a.name != null)
+			return new Value(name + " ^ (" + a.name + " + " + a.offset + ")");
+		else if (name != null && a.name != null)
+			return new Value(name + " ^ " + a.name);
+		else if (name != null)
+			return new Value(name + " ^ " + a.address);
+		else if (a.name != null)
+			return new Value(a.name + " ^ " + address);
+		else
+			return new Value(address ^ a.address);
+	}
 	public Value lshift(Value a)
 	{
 		if (name != null && usesOffset && a.name != null && a.usesOffset)

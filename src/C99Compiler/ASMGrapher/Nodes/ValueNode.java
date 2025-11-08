@@ -108,7 +108,13 @@ public class ValueNode extends ASMNode<ValueContext>
 				value = value1.sub(value2);
 				break;
 			case "&":
-				value = value1.sub(value2);
+				value = value1.and(value2);
+				break;
+			case "|":
+				value = value1.or(value2);
+				break;
+			case "^":
+				value = value1.xor(value2);
 				break;
 			case "<<":
 				value = value1.lshift(value2);
