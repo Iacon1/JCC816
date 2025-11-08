@@ -7,7 +7,11 @@ import java.util.List;
 
 import C99Compiler.CompConfig;
 import C99Compiler.ASMGrapher.ASMGraphBuilder;
+import C99Compiler.CompilerNodes.FunctionDefinitionNode;
+import C99Compiler.Exceptions.CompilerException;
 import C99Compiler.Exceptions.UnsupportedFeatureException;
+import C99Compiler.Utils.FileIO;
+import Logging.Logging;
 import Shared.CartConfig;
 
 public final class Banker
@@ -42,6 +46,7 @@ public final class Banker
 		boolean leftBlock = false; // whether we just left a block and
 		boolean startedBlock = false;  // whether we just entered a block
 		boolean inData = false; // Whether the block we're in is data
+		boolean inAsm = false; // In embedded ASM file, make no assumptions about freedom of organization
 		int blockStart = 0; // Which line did the block start with?
 		String blockBuffer = ""; // Current block buffer
 		
@@ -75,38 +80,61 @@ public final class Banker
 			line = (lineNo == lines.size() ? "" : lines.get(lineNo));
 			prevLine = (lineNo == 0 ? "" : lines.get(lineNo - 1));
 
-			if (line.trim().startsWith(";")) // Comment
+			if (inAsm && line.contains("; " + CompConfig.eAsmTag))
+			{
+				inBlock = false;
+				leftBlock = true;
+				inAsm = false;
+			}
+			else if (line.contains("; " + CompConfig.asmTag))
+			{
+				inBlock = true;
+				startedBlock = true;
+				leftBlock = true;
+				inAsm = true;
+			}
+			else if (line.trim().startsWith(";")) // Comment
 			{
 				lineNo += 1;
 				continue;
 			}
 			
-			if (prevLine.contains("RTL"))
-			{
-				inBlock = false;
-				leftBlock = true;
-			}
-			if (line.contains("; " + CompConfig.functionTag))
-			{
-				inBlock = true;
-				startedBlock = true;
-				inData = false;
-				leftBlock = true;
-			}
-			if (line.contains(":") && (!inBlock || inData))
-			{
-				if (inBlock)
-					leftBlock = true;
-				startedBlock = true;
-				inData = true;
-				inBlock = true;
-			}
-			else if (!line.contains(".byte"))
-				inData = false;
 			
-			if (lineNo == lines.size())
-				leftBlock = true;
-
+			if (!inAsm)
+			{
+				if (prevLine.contains("; " + CompConfig.eFunctionTag) || line.contains("; " + CompConfig.functionTag))
+				{
+					if (prevLine.contains("; " + CompConfig.eFunctionTag))
+					{
+						inBlock = false;
+						leftBlock = true;
+					}
+					if (line.contains("; " + CompConfig.functionTag))
+					{
+						inBlock = true;
+						startedBlock = true;
+						inData = false;
+						leftBlock = true;
+					}
+				}
+				else if (isLabel(line))
+				{
+					if ((!inBlock || inData))
+					{
+						if (inBlock)
+							leftBlock = true;
+						startedBlock = true;
+						inData = true;
+						inBlock = true;
+					}
+				}
+				else if (!line.toLowerCase().contains(".byte"))
+					inData = false;
+				
+				if (lineNo == lines.size())
+					leftBlock = true;
+			}
+			
 			if (leftBlock) // A block has ended
 			{
 				int blockSize = 0;
@@ -136,7 +164,10 @@ public final class Banker
 							break;
 						}
 					if (!foundSpace)
-						throw new UnsupportedFeatureException("Couldn't find anywhere to put segment of size " + blockSize + "B in " + cartConfig.getType().getName() + " mapping mode", false, lineNo, 0);
+					{
+						FileIO.writeFile("badBlock.txt", blockBuffer.getBytes());
+						throw new CompilerException("Couldn't find anywhere to put segment of size " + blockSize + "B in " + cartConfig.getType().getName() + " mapping mode");
+					}
 				}
 				else
 				{
@@ -184,7 +215,10 @@ public final class Banker
 							break;
 						}
 					if (!foundSpace)
+					{
+						FileIO.writeFile("badBlock.txt", blockBuffer.getBytes());
 						throw new UnsupportedFeatureException("Couldn't find anywhere to put segment of size " + lineSize + "B in " + cartConfig.getType().getName() + " mapping mode", false, lineNo, 0);
+					}
 				}
 				else
 				{
@@ -199,5 +233,11 @@ public final class Banker
 		}
 
 		return reviseEstimate(cartConfig, bankUsed, sizeEstimate);
+	}
+	
+	private static boolean isLabel(String line)
+	{
+		line = line.replaceAll("::", "").trim();
+		return line.startsWith(".proc") || line.replaceFirst("[^\s:]*", "").startsWith(":");
 	}
 }

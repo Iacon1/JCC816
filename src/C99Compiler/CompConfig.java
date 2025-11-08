@@ -40,7 +40,10 @@ public final class CompConfig
 	public static final String callResult = "__@callResult";
 	// 16 + 16 + 128 + 3*11 + 3 + 2 + 64 = 256 = Just large enough to be a ZP!
 	public static final String bankRootName = "ROM";
-	public static final String functionTag = "@func";
+	public static final String functionTag = "@func"; // Start of a C function
+	public static final String eFunctionTag = "@endfunc"; // End of a C function
+	public static final String asmTag =  "@asm"; // Start of included asm file
+	public static final String eAsmTag = "@endasm"; // End of included asm file
 	public static final String registerTag = "__REG";
 
 	public static final int bytesPerDataLine = 32; // Bytes per data line for ROM data
@@ -129,10 +132,10 @@ public final class CompConfig
 	
 	public static enum OptimizationLevel
 	{
-		min, 	// + Basic (intra-expression) constant propagation
-		low, 	// + REP/SEP optimization
-		medium, // + Aggressive (inter-line) constant propagation and shrinkwrapping
-		all, 	// + Dependency graph optimization
+		min, 	// + Minimal optimizations; Would be harder not to implement.
+		low, 	// + 
+		medium, // + Default; Variable value tracking, operand size limiting.
+		all, 	// + Not worth it; Dependency graph optimization
 		;
 		public static boolean isAtLeast(OptimizationLevel level)
 		{
@@ -164,8 +167,8 @@ public final class CompConfig
 	
 	public static enum VerbosityLevel
 	{
-		none, 	// None
-		low,	// + None
+		none, 	// Errors only
+		low,	// + Warnings
 		medium, // + Timing data
 		high,	// + Debug info
 		;

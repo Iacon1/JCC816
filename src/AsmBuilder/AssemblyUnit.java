@@ -14,7 +14,9 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.function.Function;
 
+import C99Compiler.CompConfig;
 import C99Compiler.CompConfig.DefinableInterrupt;
+import C99Compiler.CompConfig.VerbosityLevel;
 import C99Compiler.CompilerNodes.FunctionDefinitionNode;
 import C99Compiler.CompilerNodes.Declarations.InitializerNode;
 import C99Compiler.CompilerNodes.Definitions.EnumDefinitionNode;
@@ -66,7 +68,9 @@ public class AssemblyUnit implements TranslationUnit {
 	
 	public String getAssembly()
 	{
-		return assembly;
+		return "; " + CompConfig.asmTag + (VerbosityLevel.isAtLeast(VerbosityLevel.high) ? (" " + filename) : "") + "\n" +
+				assembly + (assembly.endsWith("\n") ? "" : "\n") +
+				"; " + CompConfig.eAsmTag + "\n";
 	}
 	
 	public String clearOptionals(Collection<FunctionDefinitionNode> functions, Function<FunctionDefinitionNode, Boolean> isCalled) // Clears optional functions from the assembly
