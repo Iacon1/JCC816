@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.FileNotFoundException;
 import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -65,10 +66,17 @@ public final class FileIO
 		filename = fixFilepath(filename, false);
 		return getFile(filename).exists();
 	}
-	public static final String readResource(String filename) throws IOException
+	public static final String readResource(String filename) throws IOException, FileNotFoundException
 	{
-		filename = fixFilepath(filename, true);
-		return new String(ClassLoader.getSystemResourceAsStream(filename).readAllBytes());
+		try
+		{
+			filename = fixFilepath(filename, true);
+			return new String(ClassLoader.getSystemResourceAsStream(filename).readAllBytes());
+		}
+		catch (NullPointerException e)
+		{
+			throw new FileNotFoundException(filename);
+		}
 	}
 	public static byte[] readResourceBytes(String filename) throws IOException
 	{
@@ -97,15 +105,29 @@ public final class FileIO
 		return bytes;
 	}
 	
-	public static final String readFile(String filename) throws IOException
+	public static final String readFile(String filename) throws IOException, FileNotFoundException
 	{
-		filename = fixFilepath(filename, false);
-		return readFile(getFile(filename));
+		try
+		{
+			filename = fixFilepath(filename, false);
+			return readFile(getFile(filename));
+		}
+		catch (NullPointerException e)
+		{
+			throw new FileNotFoundException(filename);
+		}
 	}
-	public static final byte[] readFileBytes(String filename) throws IOException
+	public static final byte[] readFileBytes(String filename) throws IOException, FileNotFoundException
 	{
-		filename = fixFilepath(filename, false);
-		return readFileBytes(getFile(filename));
+		try
+		{
+			filename = fixFilepath(filename, false);
+			return readFileBytes(getFile(filename));
+		}
+		catch (NullPointerException e)
+		{
+			throw new FileNotFoundException(filename);
+		}
 	}
 	
 	public static final void writeFile(String filename, byte[] bytes) throws IOException
