@@ -9,8 +9,7 @@ public class Test
 {
 	public static void main(String[] args) throws Exception
 	{
-		FileIO.outputFolder = "Test/";
-//		JCC816.main(new String[] {"-r=Example/", "-l=example=exampleHeader.xml", "-O=1", "-D=2", "-V=2", "example.c"});
-		JCC816.main(new String[] {"-r=Test/", "-l=test=testHeader.xml", "-O=2", "--optimize-addresses", "--fast-byte-count", "-D=2", "-V=2", "test.c"});
+		FileIO.outputFolder = "./Example/";
+		JCC816.main(new String[] {"-r=Example/", "-l=example=exampleHeader.xml", "-O=2", "-D=2", "-V=3", "example.c"});
 	}
 }
