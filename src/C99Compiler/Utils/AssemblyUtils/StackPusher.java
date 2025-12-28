@@ -5,13 +5,13 @@ package C99Compiler.Utils.AssemblyUtils;
 import C99Compiler.Utils.ProgramState;
 import C99Compiler.Utils.OperandSources.OperandSource;
 
-public class StackPusher extends BytewiseOperator
+public class StackPusher extends EightBitBytewiseOperator
 {
 	OperandSource source;
 	
 	public StackPusher(int n, OperandSource source)
 	{
-		super(n, n, false);
+		super(n, false);
 		this.source = source;
 	}
 

@@ -5,13 +5,13 @@ package C99Compiler.Utils.AssemblyUtils;
 import C99Compiler.Utils.ProgramState;
 import C99Compiler.Utils.OperandSources.OperandSource;
 
-public class StackLoader extends BytewiseOperator
+public class StackLoader extends EightBitBytewiseOperator
 {
 	OperandSource source;
 	
 	public StackLoader(int n, OperandSource source)
 	{
-		super(n, n, true);
+		super(n, true);
 		this.source = source;
 	}
 
