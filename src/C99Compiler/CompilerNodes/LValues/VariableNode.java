@@ -43,8 +43,10 @@ public class VariableNode extends LValueNode<VariableNode> implements NamedNode
 				source = (AddressSource) CompConfig.specSubSource(false, this.getSize());
 			else if (getType().isTwice())
 				source = new StationaryAddressSource(this.getFullName(), this.getSize()); // We can't find our name and size until assembly time
+			else if (getType().isROM())
+				source = new AddressSource("f:" + this.getFullName(), this.getSize()); // Workaround since these addresses aren't defined explicitly
 			else
-				source = new AddressSource(this.getFullName(), this.getSize()); // We can't find our name and size until assembly time
+				source = new AddressSource(this.getFullName(), this.getSize());
 			
 		}
 		return source;
