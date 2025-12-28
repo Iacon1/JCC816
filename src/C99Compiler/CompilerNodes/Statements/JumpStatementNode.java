@@ -45,12 +45,11 @@ public class JumpStatementNode extends StatementNode<Jump_statementContext> impl
 			mode = Mode.continueM;
 			break;
 		case "break":
-			selNode = getEnclosingSelection();
-			if (selNode == null || !selNode.isSwitch() && selNode.getEnclosingIteration() == getEnclosingIteration() && selNode.getEnclosingIteration() != null)
-			{
-				iterNode = getEnclosingIteration();
+			selNode = getEnclosingSwitchSelection();
+			iterNode = getEnclosingIteration();
+			if (iterNode != null && selNode != null && iterNode.getScope().getDepth() < selNode.getScope().getDepth())
 				selNode = null;
-			}
+			
 			mode = Mode.breakM;
 			break;	
 		case "return":

@@ -39,4 +39,8 @@ public class Scope
 	{
 		return levels.size() == 0;
 	}
+	public int getDepth()
+	{
+		return levels.size();
+	}
 }

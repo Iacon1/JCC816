@@ -86,15 +86,24 @@ public class ComponentNode<C extends ComponentNode<C>> implements Serializable
 			replacement.parent.invalidateSearchCaches();
 			replacement.parent = null;
 		}
+		List<ComponentNode<?>> children = new LinkedList<ComponentNode<?>>(this.children);
+		for (ComponentNode<?> child : children)
+			child.swapParent(replacement);
 	}
 	public void swapParent(ComponentNode<?> newParent)
 	{
 		if (this.parent != null)
 			parent.removeChild(this);
 		parent = newParent;
+		if (parent == null)
+			return;
 		if (!parent.children.contains(this))
 			parent.children.add(this);
 		parent.invalidateSearchCaches();
+	}
+	public void kill()
+	{
+		swapParent(null);
 	}
 	/**
 	 * @return The current node's scope.
@@ -365,6 +374,16 @@ public class ComponentNode<C extends ComponentNode<C>> implements Serializable
 		if (SelectionStatementNode.class.isAssignableFrom(getClass()))
 			return (SelectionStatementNode) this;
 		else if (parent != null) return parent.getEnclosingSelection();
+		else return null;
+	}
+	/** Gets the enclosing switch selection, if any.
+	 * @return The selection node in question, if present.
+	 */
+	public SelectionStatementNode getEnclosingSwitchSelection()
+	{
+		if (SelectionStatementNode.class.isAssignableFrom(getClass()) && ((SelectionStatementNode) this).isSwitch())
+			return (SelectionStatementNode) this;
+		else if (parent != null) return parent.getEnclosingSwitchSelection();
 		else return null;
 	}
 	/** Gets the enclosing loop, if any.

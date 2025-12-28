@@ -29,7 +29,13 @@ public class AdditiveExpressionNode extends ArithmeticBinaryExpressionNode
 		{
 			int size = ((PointerType) x.getType()).getType().getSize();
 			if (x.getType().isArray())
-				this.x = new CastExpressionNode(this, new PointerType(((ArrayType) x.getType()).getType()), x);
+			{
+				ArrayType aT = (ArrayType) x.getType();
+				if (!aT.getType().isArray())
+					this.x = new CastExpressionNode(this, new PointerType(aT.getType()), x);
+				else
+					this.x = new CastExpressionNode(this, aT.getType(), x);
+			}
 			if (size != 1)
 			{
 				Type t = CompUtils.getSmallestType(size);
@@ -63,10 +69,18 @@ public class AdditiveExpressionNode extends ArithmeticBinaryExpressionNode
 		if (x.getType().isPointer()) // RHS must be multiplied by size of pointer base type
 		{
 			if (x.getType().isArray())
+			{
+				BaseExpressionNode<?> oldX = x;
 				x = new CastExpressionNode(this, new PointerType(((ArrayType) x.getType()).getType()), x);
+				oldX.swapParent(x);
+			}
 			int size = ((PointerType) x.getType()).getType().getSize();
 			if (size != 1)
+			{
+				BaseExpressionNode<?> oldY = y;
 				y = new MultiplicativeExpressionNode(this, "*", y, new DummyExpressionNode(this, CompUtils.getSmallestType(size), size));
+				oldY.swapParent(y);
+			}
 		}
 		
 		return this;
