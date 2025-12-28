@@ -23,8 +23,8 @@ public class MultImpGen
 		
 		CompConfig.optimizationLevel = CompConfig.OptimizationLevel.medium;
 		
-		assembly += "; Thanks Sir Walrus\n";
-		cCode += "// Thanks Sir Walrus\n";
+		assembly += "; Thanks to Sir Walrus for long div/mod code\n";
+		cCode += "// Thanks to Sir Walrus for long div/mod code\n";
 		// Routine generators already know their output sizes
 		ProgramState state = new ProgramState().indent();
 		int sizes[] = {1, 2, 3, 4, 8};

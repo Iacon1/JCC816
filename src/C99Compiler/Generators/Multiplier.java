@@ -8,10 +8,12 @@
  */
 package C99Compiler.Generators;
 
+import C99Compiler.CompConfig;
 import C99Compiler.Utils.ProgramState;
 import C99Compiler.Utils.SNESRegisters;
 import C99Compiler.Utils.AssemblyUtils.BytewiseOperator;
 import C99Compiler.Utils.AssemblyUtils.EightBitBytewiseOperator;
+import C99Compiler.Utils.AssemblyUtils.ZeroCopier;
 import C99Compiler.Utils.OperandSources.OperandSource;
 import Shared.Assemblable;
 
@@ -84,16 +86,25 @@ public class Multiplier implements Assemblable
 	@Override
 	public AssemblyStatePair getAssemblyAndState(ProgramState state) throws Exception {
 		MutableAssemblyStatePair pair = new MutableAssemblyStatePair("", state);
-
+		
 		OperandSource destSource = pair.state.destSource();
 		pair.assembly += pair.state.getWhitespace() + "CLC\n";
 		for (int i = 0; i < sourceX.getSize(); ++i)
 			new MultiplierOperator(i, destSource, sourceX, sourceY).apply(pair);
 		
-		// High byte
-		pair.assembly += pair.state.getWhitespace() + "LDA\t" + SNESRegisters.RDMPYH + "\n";
-		pair.assembly += pair.state.getWhitespace() + "ADC\t#$00\n";
-		destSource.applySTA(pair, sourceX.getSize() + sourceY.getSize() - 1);
+		// High byte if needed
+		if (sourceX.getSize() + sourceY.getSize() - 1 < destSource.getSize())
+		{
+			pair.assembly += pair.state.getWhitespace() + "LDA\t" + SNESRegisters.RDMPYH + "\n";
+			pair.assembly += pair.state.getWhitespace() + "ADC\t#$00\n";
+			destSource.applySTA(pair, sourceX.getSize() + sourceY.getSize() - 1);
+		}
+		// Filler past that
+		if (sourceX.getSize() + sourceY.getSize() < destSource.getSize())
+		{
+			int offset = sourceX.getSize() + sourceY.getSize();
+			new ZeroCopier(destSource.getSize() - offset, destSource.getShifted(offset)).apply(pair);
+		}
 		
 		return pair.getImmutable();
 	}

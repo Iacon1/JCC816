@@ -1,4 +1,4 @@
-// Thanks Sir Walrus
+// Thanks to Sir Walrus for long div/mod code
 
 // Division
 [[optional]] unsigned int __div8by16(__SPECX unsigned char x, __SPECY unsigned short y)
