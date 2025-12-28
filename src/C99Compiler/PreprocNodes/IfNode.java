@@ -148,7 +148,7 @@ public class IfNode extends InterpretingNode<IfNode, If_sectionContext> implemen
 			
 			BaseExpressionNode<?> expr = new ConstantExpressionNode().interpret // Process macros before trying to parse
 			(
-				convert(clearIdentifiers(resolveDefines(String.join("", wordList))))
+				convert(clearIdentifiers(resolveDefines(wordList.toArray(new String[] {}))))
 			);
 			
 			IfEntry e = new IfEntry();
