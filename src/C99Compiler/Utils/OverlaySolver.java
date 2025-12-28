@@ -11,13 +11,27 @@ import java.util.function.Function;
 
 public final class OverlaySolver
 {
+	public static class OverlayUnsolveableException extends Exception
+	{
+		private int size;
+		public OverlayUnsolveableException(int size)
+		{
+			super();
+			this.size = size;
+		}
+		
+		public int getSize()
+		{
+			return size;
+		}
+	}
 	public static interface Overlayable<T extends Overlayable<T>>
 	{
 		boolean isOverlayableWith(T b);
 		int getLength();
 	}
 	
-	public static <T extends Overlayable<T>> SimpleEntry<List<Integer>, Integer> solveOverlay(List<T> overlayables, int bankLength, int numBanks, Function<Integer, Integer> bankStarts)
+	public static <T extends Overlayable<T>> SimpleEntry<List<Integer>, Integer> solveOverlay(List<T> overlayables, int bankLength, int numBanks, Function<Integer, Integer> bankStarts) throws OverlayUnsolveableException
 	{
 		int[][] solution = new int[numBanks][overlayables.size()];
 		if (overlayables.size() < 1) return null;
@@ -40,9 +54,13 @@ public final class OverlaySolver
 					if (!x.isOverlayableWith(y)) // Can't have x and y overlay
 					{
 						solution[b][j] = Math.max(solution[b][j], solution[b][i] + x.getLength());
+						if (y.getLength() > bankLength) // Too big to fit in any bank
+							throw new OverlayUnsolveableException(y.getLength());
 						if (solution[b][j] + y.getLength() > bankStarts.apply(b) + bankLength) // Too high for this bank
 						{
 							solution[b][j] = -1; // Leave this bank
+							if (b + 1 == numBanks)
+								throw new OverlayUnsolveableException(y.getLength());
 							solution[b + 1][j] = bankStarts.apply(b + 1);
 						}
 					}

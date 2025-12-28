@@ -12,7 +12,10 @@ import C99Compiler.CompConfig;
 import C99Compiler.CompConfig.VerbosityLevel;
 import C99Compiler.CompilerNodes.FunctionDefinitionNode;
 import C99Compiler.CompilerNodes.LValues.VariableNode;
+import C99Compiler.Exceptions.BuilderException;
+import C99Compiler.Exceptions.UnsupportedFeatureException;
 import C99Compiler.Utils.OverlaySolver;
+import C99Compiler.Utils.OverlaySolver.OverlayUnsolveableException;
 import C99Compiler.Utils.ProgramState;
 import Logging.Logging;
 import Shared.CallGraph;
@@ -82,29 +85,47 @@ public interface MapModeInterface extends Configurer
 	 */
 	public boolean isContiguous(int i);
 	
-	public default List<Integer> mapWRAM(List<VariableNode> variables, int offset, MemorySize memorySize, CallGraph callGraph)
+	public default List<Integer> mapWRAM(List<VariableNode> variables, int offset, MemorySize memorySize, CallGraph callGraph) throws BuilderException
 	{
 		List<VariableOverlayable> variableOverlayables = new ArrayList<VariableOverlayable>();
 		for (VariableNode variable : variables)
 			variableOverlayables.add(new VariableOverlayable(variable, callGraph));
-		SimpleEntry<List<Integer>, Integer> solution = OverlaySolver.solveOverlay(variableOverlayables, getWRAMBankLength(), getMaxWRAMBanks(), (Integer i) ->
+		SimpleEntry<List<Integer>, Integer> solution;
+		try
 		{
-			if (i == 0) return getWRAMBankStart(i) + offset;
-			else return getWRAMBankStart(i);
-		});
+			solution = OverlaySolver.solveOverlay(variableOverlayables, getWRAMBankLength(), getMaxWRAMBanks(), (Integer i) ->
+			{
+				if (i == 0) return getWRAMBankStart(i) + offset;
+				else return getWRAMBankStart(i);
+			});
+		}
+		catch (OverlayUnsolveableException e)
+		{
+			throw new BuilderException("Couldn't find anywhere in WRAM to put variable of size " + e.getSize() + "B in " + getName() + " mapping mode");
+		}
 		memorySize.WRAMSize = solution.getValue();
 		return solution.getKey();
 	}
-	public default List<Integer> mapSRAM(List<VariableNode> variables, int offset, MemorySize memorySize, CallGraph callGraph)
+	public default List<Integer> mapSRAM(List<VariableNode> variables, int offset, MemorySize memorySize, CallGraph callGraph) throws BuilderException
 	{
 		List<VariableOverlayable> variableOverlayables = new ArrayList<VariableOverlayable>();
 		for (VariableNode variable : variables)
 			variableOverlayables.add(new VariableOverlayable(variable, callGraph));
-		SimpleEntry<List<Integer>, Integer> solution = OverlaySolver.solveOverlay(variableOverlayables, getSRAMBankLength(), getMaxSRAMBanks(), (Integer i) ->
+	
+		SimpleEntry<List<Integer>, Integer> solution;
+		try
 		{
-			if (i == 0) return getSRAMBankStart(i) + offset;
-			else return getSRAMBankStart(i);
-		});
+			solution = OverlaySolver.solveOverlay(variableOverlayables, getSRAMBankLength(), getMaxSRAMBanks(), (Integer i) ->
+			{
+				if (i == 0) return getSRAMBankStart(i) + offset;
+				else return getSRAMBankStart(i);
+			});
+		}
+		catch (OverlayUnsolveableException e)
+		{
+			throw new BuilderException("Couldn't find anywhere in SRAM to put variable of size " + e.getSize() + "B in " + getName() + " mapping mode");
+		}
+		
 		memorySize.SRAMSize = solution.getValue();
 		return solution.getKey();
 	}
@@ -148,13 +169,10 @@ public interface MapModeInterface extends Configurer
 		
 		if (VerbosityLevel.isAtLeast(VerbosityLevel.medium))
 		{
-			float ROMSizeKB = (float) memorySize.ROMSize / 1024f;
-			float WRAMSizeKB = (float) memorySize.WRAMSize / 1024f;
-			float SRAMSizeKB = (float) memorySize.SRAMSize / 1024f;
 			Logging.logNotice("\n" +
-					"ROM size:  " + memorySize.ROMSize + " B (" + String.format("%.02f", ROMSizeKB) + " KB)\n" +
-					"WRAM size: " + memorySize.WRAMSize + " B (" + String.format("%.02f", WRAMSizeKB) + " KB)\n" +
-					"SRAM size: " + memorySize.SRAMSize + " B (" + String.format("%.02f", SRAMSizeKB) + " KB)\n");
+					"ROM size:  " + Logging.formatBytes(memorySize.ROMSize) + "\n" +
+					"WRAM size: " + Logging.formatBytes(memorySize.WRAMSize) + "\n" +
+					"SRAM size: " + Logging.formatBytes(memorySize.SRAMSize) + "\n");
 		}
 			
 		return regions;

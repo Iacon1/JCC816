@@ -219,11 +219,10 @@ public class Header extends CartConfig
 		for (int i = getOffset() - 24 - 1; i >= 0; --i)
 			if (bytes[i] != 0x00) break;
 			else sizeB -= 1;
-		
-		double sizeKB = (double) sizeB / 1024d;
+
 		if (VerbosityLevel.isAtLeast(VerbosityLevel.medium))
-			Logging.logNotice("\nFinal ROM size: " + sizeB + " B (" + String.format("%.02f", sizeKB) + " KB)");
-		ROMSize = (int) Math.ceil(Math.log(sizeKB) / Math.log(2));
+			Logging.logNotice("\nFinal ROM size: " + Logging.formatBytes(sizeB));
+		ROMSize = (int) Math.ceil(Math.log(((double) sizeB)/1024d) / Math.log(2));
 	}
 	public void calcChecksum(byte[] bytes)
 	{

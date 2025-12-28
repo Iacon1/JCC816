@@ -103,4 +103,21 @@ public final class Logging
 		frame.pack();
 		frame.setVisible(true);
 	}
+	
+	public static String formatBytes(int bytes)
+	{
+		char prefixes[] = {'_', 'K', 'M', 'G', 'T'};
+		String formatted = "" + bytes + " B";
+		double bytesD = bytes;
+		double r = 1.;
+		int i = 0;
+		while (((double) bytes) / (1024. * r) >= 1 && i < prefixes.length)
+		{
+			r *= 1024.;
+			i += 1;
+		}
+		if (r != 1.)
+			formatted += " (" + String.format("%.02f", ((double) bytes) / r) + prefixes[i] + "B)";
+		return formatted;
+	}
 }

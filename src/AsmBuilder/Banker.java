@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import C99Compiler.CompConfig;
+import C99Compiler.CompConfig.VerbosityLevel;
 import C99Compiler.ASMGrapher.ASMGraphBuilder;
 import C99Compiler.CompilerNodes.FunctionDefinitionNode;
 import C99Compiler.Exceptions.CompilerException;
@@ -38,10 +39,21 @@ public final class Banker
 		
 		return sizeEstimate;
 	}
+	private static final String segmentLabel(String segmentName)
+	{
+		return ".SEGMENT\t\"" + segmentName + "\"";
+	}
 	public static final int splitBanks(CartConfig cartConfig, ArrayList<String> lines) throws Exception // Returns ROM size estimate
 	{
 		int sizeEstimate = 0; // Estimated ROM size
-
+		
+		// For diagnostic purposes only
+		int asmSizeEstimate = 0;
+		int codeSizeEstimate = 0;
+		int dataSizeEstimate = 0;
+		boolean wasInAsm = false;
+		boolean wasInData = false;
+		
 		boolean inBlock = false; // Whether we're in a block of code
 		boolean leftBlock = false; // whether we just left a block and
 		boolean startedBlock = false;  // whether we just entered a block
@@ -80,6 +92,8 @@ public final class Banker
 			line = (lineNo == lines.size() ? "" : lines.get(lineNo));
 			prevLine = (lineNo == 0 ? "" : lines.get(lineNo - 1));
 
+			wasInData = inData;
+			wasInAsm = inAsm;
 			if (inAsm && line.contains("; " + CompConfig.eAsmTag))
 			{
 				inBlock = false;
@@ -113,8 +127,8 @@ public final class Banker
 					{
 						inBlock = true;
 						startedBlock = true;
-						inData = false;
 						leftBlock = true;
+						inData = false;
 					}
 				}
 				else if (isLabel(line))
@@ -134,12 +148,17 @@ public final class Banker
 				if (lineNo == lines.size())
 					leftBlock = true;
 			}
-			
 			if (leftBlock) // A block has ended
 			{
 				int blockSize = 0;
 				if (blockBuffer.length() != 0)
 					blockSize = new ASMGraphBuilder(blockBuffer).getSize();
+				if (wasInAsm)
+					asmSizeEstimate += blockSize;
+				else if (wasInData)
+					dataSizeEstimate += blockSize;
+				else
+					codeSizeEstimate += blockSize;
 				
 				if (blockSize > emptySpace.get(currBank)) // We don't have this much space in the bank
 				{
@@ -147,7 +166,7 @@ public final class Banker
 					for (int i = 0; i < emptySpace.size(); ++i)
 						if (blockSize <= emptySpace.get(i))
 						{
-							lines.add(blockStart, ".SEGMENT\t\"" + CompConfig.codeBankName(i) + "\"");
+							lines.add(blockStart, segmentLabel(CompConfig.codeBankName(i)));
 							lineNo += 1;
 							emptySpace.set(i, emptySpace.get(i) - blockSize);
 							bankUsed.set(i, true);
@@ -156,7 +175,7 @@ public final class Banker
 			
 							if (emptySpace.get(currBank) > 0) // Empty space remains here
 							{
-								lines.add(lineNo, ".SEGMENT\t\"" + CompConfig.codeBankName(currBank) + "\"");
+								lines.add(lineNo, segmentLabel(CompConfig.codeBankName(currBank)));
 								lineNo += 1;
 							}
 							else
@@ -191,14 +210,21 @@ public final class Banker
 					lineSize = 0;
 				else
 					lineSize = new ASMGraphBuilder(line + "\n").getSize();
-
+				
+				if (inAsm)
+					asmSizeEstimate += lineSize;
+				else if (inData)
+					dataSizeEstimate += lineSize;
+				else
+					codeSizeEstimate += lineSize;
+				
 				if (lineSize > emptySpace.get(currBank)) // We don't have this much space in the bank
 				{
 					boolean foundSpace = false;
 					for (int i = 0; i < emptySpace.size(); ++i)
 						if (lineSize <= emptySpace.get(i))
 						{
-							lines.add(blockStart, ".SEGMENT\t\"" + CompConfig.codeBankName(i) + "\"");
+							lines.add(blockStart, segmentLabel(CompConfig.codeBankName(i)));
 							lineNo += 1;
 							emptySpace.set(i, emptySpace.get(i) - lineSize);
 							bankUsed.set(i, true);
@@ -207,7 +233,7 @@ public final class Banker
 			
 							if (emptySpace.get(currBank) > 0) // Empty space remains here
 							{
-								lines.add(blockStart, ".SEGMENT\t\"" + CompConfig.codeBankName(currBank) + "\"");
+								lines.add(blockStart, segmentLabel(CompConfig.codeBankName(currBank)));
 								lineNo += 1;
 							}
 							else
@@ -230,8 +256,15 @@ public final class Banker
 				blockBuffer += line + "\n";
 			
 			lineNo += 1;
-		}
+			}
 
+		if (VerbosityLevel.isAtLeast(VerbosityLevel.high))
+		{
+			Logging.logNotice(
+					"C code size: " + Logging.formatBytes(codeSizeEstimate) + "\n" +
+					"Incl. ASM code size: " + Logging.formatBytes(asmSizeEstimate) + "\n" +
+					"Data size: " + Logging.formatBytes(dataSizeEstimate) + "\n");
+		}
 		return reviseEstimate(cartConfig, bankUsed, sizeEstimate);
 	}
 	

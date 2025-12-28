@@ -170,7 +170,7 @@ public final class AsmBuilder implements Catalogger
 			}
 		return false;
 	}
-	private Map<String, Integer> mapVariables(CartConfig cartConfig, MemorySize memorySize, CallGraph callGraph)
+	private Map<String, Integer> mapVariables(CartConfig cartConfig, MemorySize memorySize, CallGraph callGraph) throws BuilderException
 	{
 		int offset = CompConfig.stackSize + 0x100;
 		int sOffset = cartConfig.containsChip(AddonChip.SA1) ? 256 + CompConfig.stackSize : 0; // SA1 needs its own DP
