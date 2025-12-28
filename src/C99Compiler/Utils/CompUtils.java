@@ -177,6 +177,7 @@ public final class CompUtils
 	}
 	public static final String processEscapes(String s)
 	{
+		// Resolve embedded character codes
 		Pattern pattern = Pattern.compile("(\\\\x[0-9A-Fa-f]{0,2}+)|(\\\\[0-7]{0,3}+)");
 		Matcher matcher = pattern.matcher(s);
 		List<MatchResult> results = new ArrayList<MatchResult>();
@@ -196,6 +197,17 @@ public final class CompUtils
 				char b = (char) Integer.valueOf(result.group().substring(1), 8).intValue(); // Get byte
 				s = s.substring(0, result.start()) + Character.valueOf(b) + s.substring(result.end());
 			}
+		}
+		// Resolve other escaped characters
+		pattern = Pattern.compile("\\\\(.)");
+		matcher = pattern.matcher(s);
+		results = new ArrayList<MatchResult>();
+		while (matcher.find())
+			results.add(matcher.toMatchResult());
+		for (int i = results.size() - 1; i >= 0; --i)	 // In reverse order to avoid string indexing problems
+		{
+			MatchResult result = results.get(i);
+			s = s.substring(0, result.start()) + result.group().substring(1) + s.substring(result.end());
 		}
 		return s;
 	}

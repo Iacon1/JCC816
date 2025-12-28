@@ -4,6 +4,7 @@ package C99Compiler.CompilerNodes.Statements;
 
 import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.FunctionDefinitionNode;
+import C99Compiler.Utils.CompUtils;
 import C99Compiler.Utils.ProgramState;
 import C99Compiler.Utils.AssemblyUtils.AssemblyUtils;
 import Grammar.C99.C99Parser.Asm_statementContext;
@@ -17,7 +18,7 @@ public class AssemblyStatementNode extends StatementNode<Asm_statementContext>
 	@Override
 	public StatementNode<Asm_statementContext> interpret(Asm_statementContext node) throws Exception
 	{
-		this.assemblyLines = node.String_literal().getText().substring(1, node.String_literal().getText().length() - 1).split("\n");
+		this.assemblyLines = CompUtils.processEscapes(node.String_literal().getText().substring(1, node.String_literal().getText().length() - 1)).split("\n");
 		return this;
 	}
 	
