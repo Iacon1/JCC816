@@ -46,8 +46,10 @@ public class MultOptimizer implements PerNodeASTPass<MultiplicativeExpressionNod
 		else if (x.hasPropValue(state)) // There's no way to fix this in division
 			return node;
 		
-		if (x.hasPropValue(state)) return node; // Gonna get fully optimized anyway
-		if (!y.hasPropValue(state)) return node; // Can't optimize this
+		if (x.hasPropValue(state))
+			return node; // Gonna get fully optimized anyway
+		if (!y.hasPropValue(state))
+			return node; // Can't optimize this
 		if (operator.equals("*"))
 		{
 			if (y.hasPropValue(state) && 1 < y.getPropLong(state) && optimizedComplexity(y.getPropLong(state)) <= CompConfig.maxOptimizedMultComplexity)
@@ -89,7 +91,7 @@ public class MultOptimizer implements PerNodeASTPass<MultiplicativeExpressionNod
 			d1 = new DummyExpressionNode(node, y.getType(), (int) (Math.log(y.getPropLong(state)) / Math.log(2)));
 			ShiftExpressionNode s1 = new ShiftExpressionNode(node, ">>", x, d1);
 			x.swapParent(s1);
-			d1.swapParent(d1);
+			d1.swapParent(s1);
 			optNode = s1;
 		}
 		
