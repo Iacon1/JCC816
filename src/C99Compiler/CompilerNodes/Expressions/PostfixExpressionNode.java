@@ -35,6 +35,7 @@ import C99Compiler.Utils.AssemblyUtils.StackLoader;
 import C99Compiler.Utils.AssemblyUtils.StackPusher;
 import C99Compiler.Utils.OperandSources.AddressSource;
 import C99Compiler.Utils.OperandSources.ConstantSource;
+import C99Compiler.Utils.OperandSources.IndirectOperandSource;
 import C99Compiler.Utils.OperandSources.OperandSource;
 import Grammar.C99.C99Parser.Assignment_expressionContext;
 import Grammar.C99.C99Parser.Postfix_expressionContext;
@@ -151,7 +152,10 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 		if (expr == from)
 			expr = (BaseExpressionNode<?>) to;
 		else if (indexExpr == from)
+		{
 			indexExpr = (BaseExpressionNode<?>) to;
+			pAddExpr.y = (BaseExpressionNode<?>) to;
+		}
 		else if (type == PFType.funcCall && params.contains(from))
 		{
 			// One of the parameters
@@ -201,7 +205,12 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 				return getReferencedFunction(state).getFullName().equals(function.getFullName()) || getReferencedFunction(state).canCall(state, function);
 			else return true;
 		}
-		else return expr.canCall(state, function);
+		else
+		{
+			if (pAddExpr != null && pAddExpr.canCall(state, function)) return true;
+			else if (indexExpr != null && indexExpr.canCall(state, function)) return true;
+			else return expr.canCall(state, function);
+		}
 	}
 	@Override public boolean isIndirect() {return type == PFType.arraySubscript;}
 	@Override
@@ -331,6 +340,7 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 	{
 		clearAssemblables();
 		OperandSource destSource = state.destSource();
+
 		AssemblyStatePair tmpPair;
 		String assembly = "";
 		switch (type)
@@ -368,6 +378,12 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 			}
 			break;
 		case funcCall:
+			if (destSource != null && IndirectOperandSource.class.isAssignableFrom(destSource.getClass()))
+			{
+				tmpPair = new StackPusher(CompConfig.pointerSize, ((IndirectOperandSource) destSource).getSource()).getAssemblyAndState(state);
+				assembly += tmpPair.assembly;
+				state = tmpPair.state;
+			}
 			state = state.releasePointers(); // TODO only need to wipe pointers here
 			if (getReferencedFunction(state) != null && !getReferencedFunction(state).canCall(state, getEnclosingFunction())) // We can know the variables to copy parameters to
 			{
@@ -550,6 +566,13 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 
 			}
 			
+			if (destSource != null && IndirectOperandSource.class.isAssignableFrom(destSource.getClass()))
+			{
+				tmpPair = new StackLoader(CompConfig.pointerSize, ((IndirectOperandSource) destSource).getSource()).getAssemblyAndState(state);
+				assembly += tmpPair.assembly;
+				state = tmpPair.state;
+			}
+			
 			if (destSource != null)
 			{
 				tmpPair = new ByteCopier(destSource.getSize(), destSource, CompConfig.callResultSource(destSource.getSize())).getAssemblyAndState(state);
@@ -560,6 +583,7 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 		case structMember:
 			if (expr.hasAssembly(state))
 			{
+				state = state.setDestSource(null);
 				tmpPair = expr.getAssemblyAndState(state);
 				if (destSource != null)
 					tmpPair = new ByteCopier(destSource.getSize(), destSource, getLValue(tmpPair.state).getSource()).apply(tmpPair);
@@ -660,4 +684,6 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 	}
 
 	public PFType getPFType() {return type;}
+	public BaseExpressionNode<?> getExpr() {return expr;}
+	public BaseExpressionNode<?> getIndexExpr() {return indexExpr;}
 }
