@@ -118,7 +118,7 @@ public class ShiftExpressionNode extends BinaryExpressionNode
 		if (y.hasPropValue(pair.state))
 		{
 			int m, n = (int) y.getPropLong(pair.state);
-			if (n % 8 == 0 || (!isSigned && (n % 8 == 1 || destSource.getSize() <= 2)))
+			if (n % 8 == 0 || ((!isSigned || n == 1) && (n % 8 == 1 || destSource.getSize() <= 2)))
 				canUnroll = true; // Can unroll in these circumstances
 			m = n / 8;
 
@@ -160,7 +160,7 @@ public class ShiftExpressionNode extends BinaryExpressionNode
 			
 			if (canUnroll && n != 0)
 			{
-				new SignExtender(destSource, sourceX, false, false).apply(pair);
+				new SignExtender(destSource, sourceX, isSigned, isSigned).apply(pair);
 				new ShiftOperator(isLeft, true, n, isSigned, destSource, sourceX).apply(pair);
 			}
 		}
