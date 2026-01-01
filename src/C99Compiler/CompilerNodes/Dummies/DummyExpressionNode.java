@@ -16,27 +16,35 @@ public class DummyExpressionNode extends BaseExpressionNode<ExpressionContext>
 {
 	private Type type;
 	private Object value;
-	private OperandSource source;
+	private LValueNode<?> LValueNode;
 	
 	public DummyExpressionNode(ComponentNode<?> parent, Type type, Object value)
 	{
 		super(parent);
 		this.type = type;
 		this.value = value;
-		source = null;
+		this.LValueNode = null;
 	}
 	public DummyExpressionNode(ComponentNode<?> parent, Type type, OperandSource source)
 	{
 		super(parent);
 		this.type = type;
-		value = null;
-		this.source = source;
+		this.value = null;
+		this.LValueNode = new DummyLValueNode(this, type, source);
 	}
 	public DummyExpressionNode(ComponentNode<?> parent, long value)
 	{
 		super(parent);
 		this.type = CompUtils.getSmallestType(value);
 		this.value = Long.valueOf(value);
+		this.LValueNode = null;
+	}
+	public DummyExpressionNode(ComponentNode<?> parent, LValueNode<?> lValue)
+	{
+		super(parent);
+		this.type = lValue.getType();
+		this.value = null;
+		this.LValueNode = lValue;
 	}
 	@Override public boolean hasAssembly(ProgramState state) {return false;}
 
@@ -47,16 +55,28 @@ public class DummyExpressionNode extends BaseExpressionNode<ExpressionContext>
 	public Type getType() {return type;}
 
 	@Override
-	public boolean hasPropValue(ProgramState state) {return value != null;}
+	public boolean hasPropValue(ProgramState state)
+	{
+		if (LValueNode != null)
+			return state.getOnlyValue(LValueNode) != null;
+		else
+			return value != null;
+	}
 
 	@Override
-	public Object getPropValue(ProgramState state) {return value;}
+	public Object getPropValue(ProgramState state)
+	{
+		if (LValueNode != null)
+			return state.getOnlyValue(LValueNode);
+		else
+			return value;
+	}
 
 	@Override
-	public boolean hasLValue(ProgramState state) {return source != null;}
+	public boolean hasLValue(ProgramState state) {return LValueNode != null;}
 	
 	@Override
-	public LValueNode<?> getLValue(ProgramState state) {return new DummyLValueNode(this, type, source);}
+	public LValueNode<?> getLValue(ProgramState state) {return LValueNode;}
 	
 	@Override 
 	public boolean canCall(ProgramState state, FunctionDefinitionNode function) {return false;}
@@ -68,4 +88,4 @@ public class DummyExpressionNode extends BaseExpressionNode<ExpressionContext>
 	{
 		return new AssemblyStatePair("", state);
 	}
-	}
+}
