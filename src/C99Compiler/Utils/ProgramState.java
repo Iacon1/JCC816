@@ -664,10 +664,18 @@ public class ProgramState
 	public ProgramState clearProcessorFlags(byte flags)
 	{
 		byte knownFlags = this.knownFlags;
+		int a = this.a, x = this.x, y = this.y;
 		if ((flags & ProcessorFlag.M) != 0)
+		{
 			knownFlags |= PreserveFlag.M;
+			a &= 0xFF; // A's gotten smaller
+		}
 		if ((flags & ProcessorFlag.I) != 0)
+		{
 			knownFlags |= PreserveFlag.I;
+			x &= 0xFF; // X's gotten smaller
+			y &= 0xFF; // Y's gotten smaller
+		}
 		ProgramState s = new ProgramState(
 				whitespaceLevel,
 				blockList, lastScratchSource,
@@ -686,9 +694,16 @@ public class ProgramState
 	{
 		byte knownFlags = this.knownFlags;
 		if ((flags & ProcessorFlag.M) != 0)
+		{
 			knownFlags |= PreserveFlag.M;
+			knownFlags &= ~PreserveFlag.A; // A's gotten bigger
+		}
 		if ((flags & ProcessorFlag.I) != 0)
+		{
 			knownFlags |= PreserveFlag.I;
+			knownFlags &= ~PreserveFlag.X; // X's gotten bigger
+			knownFlags &= ~PreserveFlag.Y; // Y's gotten bigger
+		}
 		ProgramState s = new ProgramState(
 				whitespaceLevel,
 				blockList, lastScratchSource,
