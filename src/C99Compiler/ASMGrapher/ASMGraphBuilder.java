@@ -173,12 +173,14 @@ public class ASMGraphBuilder
 		assembly = capitalize(assembly);
 		assembly = assembly.replaceAll("\n+", "\n");
 		for (String line : assembly.split("\n"))
-			textLines.add(line);
+			if (line.length() > 0) textLines.add(line);
 
 		e.reset();
 		C816Lexer lexer = new C816Lexer(CharStreams.fromString(assembly));
+		lexer.removeErrorListeners();
 		lexer.addErrorListener(e);
 		C816Parser parser = new C816Parser(new CommonTokenStream(lexer));
+		parser.removeErrorListeners();
 		parser.addErrorListener(e);
 		ProgramContext context = parser.program();
 		if (e.hasFailed())
