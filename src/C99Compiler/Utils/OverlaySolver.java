@@ -9,6 +9,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 
+import C99Compiler.CompilerNodes.LValues.VariableNode;
+import Logging.Logging;
+
 public final class OverlaySolver
 {
 	public static class OverlayUnsolveableException extends Exception
@@ -31,7 +34,7 @@ public final class OverlaySolver
 		int getLength();
 	}
 	
-	public static <T extends Overlayable<T>> SimpleEntry<List<Integer>, Integer> solveOverlay(List<T> overlayables, int bankLength, int numBanks, Function<Integer, Integer> bankStarts) throws OverlayUnsolveableException
+	public static <T extends Overlayable<T>> SimpleEntry<List<Integer>, Integer> solveOverlay(List<T> overlayables, int numBanks, Function<Integer, Integer> bankLengths, Function<Integer, Integer> bankStarts) throws OverlayUnsolveableException
 	{
 		int[][] solution = new int[numBanks][overlayables.size()];
 		if (overlayables.size() < 1) return null;
@@ -53,12 +56,14 @@ public final class OverlaySolver
 					T y = overlayables.get(j);
 					if (!x.isOverlayableWith(y)) // Can't have x and y overlay
 					{
+						// Move b so that it isn't in the way
 						solution[b][j] = Math.max(solution[b][j], solution[b][i] + x.getLength());
-						if (y.getLength() > bankLength) // Too big to fit in any bank
+						if (y.getLength() > bankLengths.apply(b)) // Too big to fit in any bank
 							throw new OverlayUnsolveableException(y.getLength());
-						if (solution[b][j] + y.getLength() > bankStarts.apply(b) + bankLength) // Too high for this bank
+						if (solution[b][j] + y.getLength() > bankStarts.apply(b) + bankLengths.apply(b)) // Too high for this bank
 						{
 							solution[b][j] = -1; // Leave this bank
+							
 							if (b + 1 == numBanks)
 								throw new OverlayUnsolveableException(y.getLength());
 							solution[b + 1][j] = bankStarts.apply(b + 1);
@@ -69,23 +74,27 @@ public final class OverlaySolver
 		}
 		
 		List<Integer> solutionList = new ArrayList<Integer>();
-		int[] bankLengths = new int[numBanks];
+		int[] usedBankLengths = new int[numBanks];
+		// Calculate how much of each bank is used
 		for (int i = 0; i < overlayables.size(); ++i) // For each overlayable
 		{
 			for (int b = 0; b < numBanks; ++b) // Find the first bank it's in
 				if (solution[b][i] != -1)
 				{
-					bankLengths[b] = Math.max(bankLengths[b], solution[b][i] - bankStarts.apply(b) + overlayables.get(i).getLength());
+					usedBankLengths[b] = Math.max(usedBankLengths[b], solution[b][i] - bankStarts.apply(b) + overlayables.get(i).getLength());
 					solutionList.add(solution[b][i]);
 					break;
 				}
 		}
-		for (int b = numBanks - 1; b >= 0; --b) // Find the first bank it's in
-			if (bankLengths[b] != 0)
+		for (int b = numBanks - 1; b >= 0; --b) // Find the first bank used
+			if (usedBankLengths[b] != 0)
 			{
-				bankLengths[b] += b * bankLength;
-				return new SimpleEntry<List<Integer>, Integer>(solutionList, bankLengths[b]);
+				// Assume all prior banks are used
+				for (int i = 0; i < b; ++i)
+					usedBankLengths[b] += bankLengths.apply(i);
+				return new SimpleEntry<List<Integer>, Integer>(solutionList, usedBankLengths[b]);
 			}
+		// If no bank was used
 		return new SimpleEntry<List<Integer>, Integer>(solutionList, 0);
 	}
 }

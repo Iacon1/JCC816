@@ -93,7 +93,13 @@ public interface MapModeInterface extends Configurer
 		SimpleEntry<List<Integer>, Integer> solution;
 		try
 		{
-			solution = OverlaySolver.solveOverlay(variableOverlayables, getWRAMBankLength(), getMaxWRAMBanks(), (Integer i) ->
+			solution = OverlaySolver.solveOverlay(variableOverlayables, getMaxWRAMBanks(), 
+			(Integer i) ->
+			{
+				if (i == 0) return this.getWRAMBankLength() - offset;
+				else return this.getWRAMBankLength();
+			},
+			(Integer i) ->
 			{
 				if (i == 0) return getWRAMBankStart(i) + offset;
 				else return getWRAMBankStart(i);
@@ -115,7 +121,9 @@ public interface MapModeInterface extends Configurer
 		SimpleEntry<List<Integer>, Integer> solution;
 		try
 		{
-			solution = OverlaySolver.solveOverlay(variableOverlayables, getSRAMBankLength(), getMaxSRAMBanks(), (Integer i) ->
+			solution = OverlaySolver.solveOverlay(variableOverlayables, getMaxSRAMBanks(),
+			(Integer i) -> {return getSRAMBankLength();},
+			(Integer i) ->
 			{
 				if (i == 0) return getSRAMBankStart(i) + offset;
 				else return getSRAMBankStart(i);

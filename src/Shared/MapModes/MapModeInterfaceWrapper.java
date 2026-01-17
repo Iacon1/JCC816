@@ -1,5 +1,5 @@
 // Created by Iacon1 on 02/25/2025.
-//
+// By default behaves exactly the same as getImplementer()
 package Shared.MapModes;
 
 public interface MapModeInterfaceWrapper extends MapModeInterface
