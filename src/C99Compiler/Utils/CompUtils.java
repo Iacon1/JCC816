@@ -207,7 +207,27 @@ public final class CompUtils
 		for (int i = results.size() - 1; i >= 0; --i)	 // In reverse order to avoid string indexing problems
 		{
 			MatchResult result = results.get(i);
-			s = s.substring(0, result.start()) + result.group().substring(1) + s.substring(result.end());
+			char replacement = '\0';
+			switch (result.group(1))
+			{
+			case "\\":
+				replacement = '\\'; break;
+			case "a":
+				replacement = 0x07; break; // Java doesn't have this one I guess
+			case "b":
+				replacement = '\b'; break;
+			case "f":
+				replacement = '\f'; break;
+			case "n":
+				replacement = '\n'; break;
+			case "r":
+				replacement = '\r'; break;
+			case "t":
+				replacement = '\t'; break;
+			case "v":
+				replacement = 0x0B; break; // Or this one
+			}
+			s = s.substring(0, result.start()) + replacement + s.substring(result.end());
 		}
 		return s;
 	}
