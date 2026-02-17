@@ -68,7 +68,7 @@ public class JCC816
 				.build();
 		options.addOption(option);
 		*/
-		option = Option.builder("s")
+		/*option = Option.builder("s")
 				.longOpt("assembler")
 				.hasArg()
 				.argName("output> <header")
@@ -76,7 +76,7 @@ public class JCC816
 				.valueSeparator()
 				.desc("Compiles the provided source file into an assembly file, optionally according to a provided header configuration.")
 				.build();
-		options.addOption(option);
+		options.addOption(option);*/
 		
 		option = Option.builder("h")
 				.longOpt("help")
