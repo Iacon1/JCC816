@@ -128,7 +128,7 @@ void main()
 			lowOAMBuffer[2].y = 224 - 8;
 		}
 		uiToTiles(scoreP2Tiles, 4, scoreP2, 0x001E);
-		if (0 == lowOAMBuffer[2].x) // Hit P1's side of screen
+		if (0hh == lowOAMBuffer[2].x) // Hit P1's side of screen
 		{
 			lowOAMBuffer[2].x = (32*8/2); // Reset position
 			lowOAMBuffer[2].y = (32*8/2);

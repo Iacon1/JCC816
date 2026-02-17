@@ -142,7 +142,7 @@ public final class CompConfig
 			return CompConfig.optimizationLevel.compareTo(level) >= 0;
 		}
 	}
-	public static OptimizationLevel optimizationLevel = OptimizationLevel.all;
+	public static OptimizationLevel optimizationLevel = OptimizationLevel.medium;
 	public static boolean wordAddresses = false;	// Use 16-bit addressing when possible?
 	public static boolean fastByteCount = false;	// Uses fast generous estimate for assigning banks
 	public static boolean cacheSearches = true;		// Uses caches for each node to make compilation faster

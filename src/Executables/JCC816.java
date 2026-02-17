@@ -104,7 +104,7 @@ public class JCC816
 			.longOpt("optimization-level")
 			.hasArg()
 			.argName("level")
-			.desc("Sets the level of optimization, from 0 to 3. Note that only levels 0 and 2 are meaningful for object files.")
+			.desc("Sets the level of optimization, from 0 to 2.")
 			.build();
 		options.addOption(option);
 		
