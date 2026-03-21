@@ -162,7 +162,13 @@ public class PrimaryExpressionNode extends BaseExpressionNode<Primary_expression
 				return null;
 		}
 		else if (stringLiteral == null) return constant;
-		else return stringLiteral;
+		else // String literal, may or may not be tied to dummy literal variable
+		{
+			if (stringLiteralNodeV != null)
+				return new PropPointer<VariableNode>(stringLiteralNodeV, 0);
+			else
+				return stringLiteral;
+		}
 	}
 	
 	@Override
