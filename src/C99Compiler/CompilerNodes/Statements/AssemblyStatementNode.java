@@ -4,8 +4,8 @@ package C99Compiler.CompilerNodes.Statements;
 
 import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.FunctionDefinitionNode;
+import C99Compiler.ProgramState.ProgramState;
 import C99Compiler.Utils.CompUtils;
-import C99Compiler.Utils.ProgramState;
 import C99Compiler.Utils.AssemblyUtils.AssemblyUtils;
 import Grammar.C99.C99Parser.Asm_statementContext;
 

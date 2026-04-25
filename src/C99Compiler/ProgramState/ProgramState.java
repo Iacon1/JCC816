@@ -2,7 +2,7 @@
 // The state of the program as it enters a node
 // This object should be immutable, i. e. no function in it should modify its own state.
 
-package C99Compiler.Utils;
+package C99Compiler.ProgramState;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;

@@ -7,7 +7,7 @@ import C99Compiler.CompConfig.VerbosityLevel;
 import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.FunctionDefinitionNode;
 import C99Compiler.CompilerNodes.Definitions.Type;
-import C99Compiler.Utils.ProgramState;
+import C99Compiler.ProgramState.ProgramState;
 import C99Compiler.Utils.PropPointer;
 import Shared.Assemblable;
 

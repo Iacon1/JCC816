@@ -6,7 +6,7 @@ import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.Definitions.Type;
 import C99Compiler.CompilerNodes.Expressions.CastExpressionNode;
 import C99Compiler.CompilerNodes.Expressions.PostfixExpressionNode;
-import C99Compiler.Utils.ProgramState;
+import C99Compiler.ProgramState.ProgramState;
 
 public class FloatCastPass implements PerNodeASTPass<CastExpressionNode>
 {

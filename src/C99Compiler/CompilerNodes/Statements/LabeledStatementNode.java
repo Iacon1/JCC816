@@ -7,7 +7,7 @@ import C99Compiler.CompilerNodes.FunctionDefinitionNode;
 import C99Compiler.CompilerNodes.Expressions.BaseExpressionNode;
 import C99Compiler.CompilerNodes.Expressions.ConstantExpressionNode;
 import C99Compiler.Exceptions.ConstraintException;
-import C99Compiler.Utils.ProgramState;
+import C99Compiler.ProgramState.ProgramState;
 import Grammar.C99.C99Parser.Labeled_statementContext;
 
 public class LabeledStatementNode extends StatementNode<Labeled_statementContext>

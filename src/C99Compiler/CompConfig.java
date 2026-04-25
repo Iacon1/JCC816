@@ -32,8 +32,6 @@ public final class CompConfig
 	public static final String specSubY = "__@specSubY";
 	public static final int scratchSize = 128;
 	public static final String scratchBase = "__@scratchBase";
-	public static final String pointerBase = "__@pointerBase";
-	public static final int generalPointers = 11; // Number of general pointers
 	public static final String funcPointer = "__@funcPointer";
 	public static final String signExtend = "__@signExtend"; // 1 byte; Set to be 0x00 if the last byte of an operand was positive, 0xFF otherwise
 	public static final int callResultSize = 64;
@@ -75,7 +73,6 @@ public final class CompConfig
 		list.add(new SimpleEntry<String, Integer>(specSubX, specSubSize));
 		list.add(new SimpleEntry<String, Integer>(funcPointer, pointerSize));
 		list.add(new SimpleEntry<String, Integer>(signExtend, 2));
-		list.add(new SimpleEntry<String, Integer>(pointerBase, generalPointers * pointerSize));
 		list.add(new SimpleEntry<String, Integer>(scratchBase, scratchSize));
 		return list;
 	};

@@ -3,13 +3,16 @@
 // Assign one variable to another, more or less.
 package C99Compiler.CompilerNodes.Expressions;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.Definitions.ArrayType;
 import C99Compiler.CompilerNodes.Definitions.Type;
 import C99Compiler.CompilerNodes.Definitions.Type.CastContext;
 import C99Compiler.CompilerNodes.LValues.LValueNode;
 import C99Compiler.Exceptions.ConstraintException;
-import C99Compiler.Utils.ProgramState;
+import C99Compiler.ProgramState.ProgramState;
 import C99Compiler.Utils.AssemblyUtils.ByteCopier;
 import C99Compiler.Utils.AssemblyUtils.SignExtender;
 import C99Compiler.Utils.OperandSources.ConstantSource;
@@ -202,7 +205,7 @@ public class AssignmentExpressionNode extends BinaryExpressionNode
 			assembly += tmpPair.assembly;
 			state = tmpPair.state;
 		}
-		
+		state = state.disqualifyPointers(getPointerDisqualifiers().toArray(new String[] {}));
 		if (y.hasPropValue(state) && !x.isIndirect() && !x.getType().isVolatile() && !x.getLValue(state).getScope().isRoot())
 		{
 			if (x.getType().isArithmetic())
@@ -212,5 +215,16 @@ public class AssignmentExpressionNode extends BinaryExpressionNode
 		}
 
 		return new AssemblyStatePair(assembly, state);
+	}
+	
+	@Override
+	public Set<String> getPointerDisqualifiers() // Any idle pointer disqualifiers become active here
+	{
+		Set<String> set = new HashSet<String>();
+		set.addAll(x.getPointerDisqualifiers());
+		set.addAll(y.getPointerDisqualifiers());
+		set.addAll(y.getIdlePointerDisqualifiers());
+
+		return set;
 	}
 }

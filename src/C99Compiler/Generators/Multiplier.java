@@ -9,7 +9,7 @@
 package C99Compiler.Generators;
 
 import C99Compiler.CompConfig;
-import C99Compiler.Utils.ProgramState;
+import C99Compiler.ProgramState.ProgramState;
 import C99Compiler.Utils.SNESRegisters;
 import C99Compiler.Utils.AssemblyUtils.BytewiseOperator;
 import C99Compiler.Utils.AssemblyUtils.EightBitBytewiseOperator;

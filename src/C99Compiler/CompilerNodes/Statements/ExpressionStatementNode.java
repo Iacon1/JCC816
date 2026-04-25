@@ -7,7 +7,7 @@ import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.FunctionDefinitionNode;
 import C99Compiler.CompilerNodes.Expressions.BaseExpressionNode;
 import C99Compiler.CompilerNodes.Expressions.ExpressionNode;
-import C99Compiler.Utils.ProgramState;
+import C99Compiler.ProgramState.ProgramState;
 import Grammar.C99.C99Parser.Expression_statementContext;
 
 public class ExpressionStatementNode extends SequencePointStatementNode<Expression_statementContext>

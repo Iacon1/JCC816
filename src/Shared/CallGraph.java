@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.Set;
 
 import C99Compiler.CompilerNodes.FunctionDefinitionNode;
-import C99Compiler.Utils.ProgramState;
+import C99Compiler.ProgramState.ProgramState;
 import Logging.Logging;
 
 public class CallGraph

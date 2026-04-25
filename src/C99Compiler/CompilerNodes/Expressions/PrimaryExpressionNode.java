@@ -2,8 +2,10 @@
 //
 package C99Compiler.CompilerNodes.Expressions;
 
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Set;
 
 import org.antlr.v4.runtime.Token;
 
@@ -20,8 +22,8 @@ import C99Compiler.CompilerNodes.Dummies.DummyVariableNode;
 import C99Compiler.CompilerNodes.LValues.LValueNode;
 import C99Compiler.CompilerNodes.LValues.VariableNode;
 import C99Compiler.Exceptions.UndefinedVariableException;
+import C99Compiler.ProgramState.ProgramState;
 import C99Compiler.Utils.CompUtils;
-import C99Compiler.Utils.ProgramState;
 import C99Compiler.Utils.PropPointer;
 import C99Compiler.Utils.AssemblyUtils.ByteCopier;
 import C99Compiler.Utils.OperandSources.OperandSource;

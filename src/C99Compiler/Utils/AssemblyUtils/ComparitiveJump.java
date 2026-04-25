@@ -2,8 +2,8 @@
 // Comparitive Jump
 package C99Compiler.Utils.AssemblyUtils;
 
+import C99Compiler.ProgramState.ProgramState;
 import C99Compiler.Utils.CompUtils;
-import C99Compiler.Utils.ProgramState;
 import Shared.Assemblable;
 
 public class ComparitiveJump implements Assemblable

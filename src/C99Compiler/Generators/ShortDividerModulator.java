@@ -3,9 +3,9 @@
 package C99Compiler.Generators;
 
 import C99Compiler.CompilerNodes.Dummies.DummyExpressionNode;
+import C99Compiler.ProgramState.ProgramState;
+import C99Compiler.ProgramState.ProgramState.ProcessorFlag;
 import C99Compiler.Utils.CompUtils;
-import C99Compiler.Utils.ProgramState;
-import C99Compiler.Utils.ProgramState.ProcessorFlag;
 import Shared.Assemblable;
 import C99Compiler.Utils.SNESRegisters;
 import C99Compiler.Utils.AssemblyUtils.BytewiseOperator;

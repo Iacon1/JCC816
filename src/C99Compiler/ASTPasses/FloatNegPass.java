@@ -9,7 +9,7 @@ import C99Compiler.CompilerNodes.Expressions.BaseExpressionNode;
 import C99Compiler.CompilerNodes.Expressions.CastExpressionNode;
 import C99Compiler.CompilerNodes.Expressions.PostfixExpressionNode;
 import C99Compiler.CompilerNodes.Expressions.UnaryExpressionNode;
-import C99Compiler.Utils.ProgramState;
+import C99Compiler.ProgramState.ProgramState;
 
 public class FloatNegPass implements PerNodeASTPass<UnaryExpressionNode>
 {

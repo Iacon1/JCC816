@@ -4,7 +4,7 @@
 package C99Compiler.CompilerNodes.Dummies;
 
 import C99Compiler.CompilerNodes.FunctionDefinitionNode;
-import C99Compiler.Utils.ProgramState;
+import C99Compiler.ProgramState.ProgramState;
 
 public class DummyFunctionNode extends FunctionDefinitionNode
 {

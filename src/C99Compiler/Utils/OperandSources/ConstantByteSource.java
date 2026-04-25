@@ -2,7 +2,7 @@
 //
 package C99Compiler.Utils.OperandSources;
 
-import C99Compiler.Utils.ProgramState;
+import C99Compiler.ProgramState.ProgramState;
 import Shared.Assemblable.AssemblyStatePair;
 
 public class ConstantByteSource extends OperandSource

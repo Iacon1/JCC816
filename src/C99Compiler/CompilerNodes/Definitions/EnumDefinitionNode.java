@@ -15,8 +15,8 @@ import C99Compiler.CompilerNodes.Expressions.BaseExpressionNode;
 import C99Compiler.CompilerNodes.Expressions.ConstantExpressionNode;
 import C99Compiler.CompilerNodes.Interfaces.NamedNode;
 import C99Compiler.Exceptions.ConstraintException;
+import C99Compiler.ProgramState.ProgramState;
 import C99Compiler.Utils.CompUtils;
-import C99Compiler.Utils.ProgramState;
 import Grammar.C99.C99Parser.Enum_specifierContext;
 import Grammar.C99.C99Parser.EnumeratorContext;
 

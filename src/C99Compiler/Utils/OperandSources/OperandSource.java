@@ -4,7 +4,7 @@ package C99Compiler.Utils.OperandSources;
 
 import java.io.Serializable;
 
-import C99Compiler.Utils.ProgramState;
+import C99Compiler.ProgramState.ProgramState;
 import Shared.Assemblable.AssemblyStatePair;
 import Shared.Assemblable.MutableAssemblyStatePair;
 

@@ -2,13 +2,16 @@
 //
 package C99Compiler.CompilerNodes.Dummies;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.FunctionDefinitionNode;
 import C99Compiler.CompilerNodes.Definitions.Type;
 import C99Compiler.CompilerNodes.Expressions.BaseExpressionNode;
 import C99Compiler.CompilerNodes.LValues.LValueNode;
+import C99Compiler.ProgramState.ProgramState;
 import C99Compiler.Utils.CompUtils;
-import C99Compiler.Utils.ProgramState;
 import C99Compiler.Utils.OperandSources.OperandSource;
 import Grammar.C99.C99Parser.ExpressionContext;
 
@@ -88,4 +91,12 @@ public class DummyExpressionNode extends BaseExpressionNode<ExpressionContext>
 	{
 		return new AssemblyStatePair("", state);
 	}
+	
+	@Override
+	public String getPointerName() {return "";}
+	
+	@Override
+	public Set<String> getIdlePointerDisqualifiers() {return new HashSet<String>();}
+	@Override
+	public Set<String> getPointerDisqualifiers() {return new HashSet<String>();}
 }

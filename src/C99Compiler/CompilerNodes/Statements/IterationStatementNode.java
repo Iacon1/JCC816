@@ -10,14 +10,14 @@ import C99Compiler.CompilerNodes.Expressions.BaseExpressionNode;
 import C99Compiler.CompilerNodes.Expressions.BranchingExpressionNode;
 import C99Compiler.CompilerNodes.Expressions.EqualityExpressionNode;
 import C99Compiler.CompilerNodes.Expressions.ExpressionNode;
+import C99Compiler.ProgramState.ProgramState;
+import C99Compiler.ProgramState.ProgramState.ProcessorFlag;
+import C99Compiler.ProgramState.ProgramState.ScratchSource;
 import C99Compiler.CompilerNodes.Dummies.DummyExpressionNode;
 import C99Compiler.Utils.CompUtils;
-import C99Compiler.Utils.ProgramState;
 import C99Compiler.Utils.AssemblyUtils.AssemblyUtils;
 import C99Compiler.Utils.AssemblyUtils.ComparitiveJump;
 import C99Compiler.Utils.OperandSources.OperandSource;
-import C99Compiler.Utils.ProgramState.ProcessorFlag;
-import C99Compiler.Utils.ProgramState.ScratchSource;
 import Grammar.C99.C99Parser.Iteration_statementContext;
 
 public class IterationStatementNode extends SequencePointStatementNode<Iteration_statementContext>

@@ -22,11 +22,11 @@ import C99Compiler.CompilerNodes.LValues.VariableNode;
 import C99Compiler.Exceptions.ConstraintException;
 import C99Compiler.Exceptions.ScratchOverflowException;
 import C99Compiler.Exceptions.UnsupportedFeatureException;
+import C99Compiler.ProgramState.ProgramState;
+import C99Compiler.ProgramState.ProgramState.PreserveFlag;
+import C99Compiler.ProgramState.ProgramState.ProcessorFlag;
+import C99Compiler.ProgramState.ProgramState.ScratchSource;
 import C99Compiler.Utils.CompUtils;
-import C99Compiler.Utils.ProgramState;
-import C99Compiler.Utils.ProgramState.PreserveFlag;
-import C99Compiler.Utils.ProgramState.ProcessorFlag;
-import C99Compiler.Utils.ProgramState.ScratchSource;
 import C99Compiler.Utils.PropPointer;
 import C99Compiler.Utils.AssemblyUtils.AssemblyUtils;
 import C99Compiler.Utils.AssemblyUtils.ByteCopier;
@@ -263,7 +263,7 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 		case structMember:
 			return expr.getType().getStruct().getMember(memberName).getInstance(expr.getLValue(state));
 		case structMemberP:
-			addrSource = state.getPointer(expr.getLValue(state).getSource());
+			addrSource = state.getPointer(expr.getPointerName());
 			return ((PointerType) expr.getType()).getType().getStruct()
 					.getMember(memberName).getInstance(
 							new IndirectLValueNode(this, expr.getLValue(state), addrSource, ((PointerType) expr.getType()).getType()));	
@@ -357,9 +357,9 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 				assembly += tmpPair.assembly;
 				state = tmpPair.state;
 				if (expr.hasLValue(state))
-					state = state.markPointer(expr.getLValue(state).getSource(), addrSource);
+					state = state.markPointer(addrSource, expr.getPointerName(), expr.getIdlePointerDisqualifiers().toArray(new String[] {}));
 				else
-					state = state.markPointer(dummySource, addrSource);
+					state = state.markPointer(addrSource, dummySource.getBase());
 				state = state.setDestSource(destSource);
 
 				if (destSource != null)
@@ -618,7 +618,7 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 				assembly += tmpPair.assembly;
 				state = tmpPair.state;
 			}
-			else sourceP = state.getPointer(expr.getLValue(state).getSource());
+			else sourceP = state.getPointer(expr.getPointerName());
 			if (destSource != null)
 			{
 				tmpPair = new AssemblyStatePair("", state);

@@ -4,13 +4,13 @@ package C99Compiler.CompilerNodes.Expressions;
 
 import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.Definitions.Type.CastContext;
+import C99Compiler.ProgramState.ProgramState;
+import C99Compiler.ProgramState.ProgramState.PreserveFlag;
+import C99Compiler.ProgramState.ProgramState.ProcessorFlag;
 import C99Compiler.Utils.CompUtils;
-import C99Compiler.Utils.ProgramState;
 import C99Compiler.Utils.AssemblyUtils.AssemblyUtils;
 import C99Compiler.Utils.AssemblyUtils.BytewiseOperator;
 import C99Compiler.Utils.OperandSources.OperandSource;
-import C99Compiler.Utils.ProgramState.PreserveFlag;
-import C99Compiler.Utils.ProgramState.ProcessorFlag;
 import Grammar.C99.C99Parser.Land_expressionContext;
 import Grammar.C99.C99Parser.Or_expressionContext;
 

@@ -5,7 +5,7 @@ package C99Compiler.Utils.OperandSources;
 import C99Compiler.CompConfig;
 import C99Compiler.ASMGrapher.Nodes.InstructionNode;
 import C99Compiler.ASMGrapher.Nodes.Operation;
-import C99Compiler.Utils.ProgramState;
+import C99Compiler.ProgramState.ProgramState;
 import Shared.Assemblable.AssemblyStatePair;
 
 public class AddressSource extends OperandSource

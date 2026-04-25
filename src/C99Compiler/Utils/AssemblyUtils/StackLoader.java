@@ -2,7 +2,7 @@
 //
 package C99Compiler.Utils.AssemblyUtils;
 
-import C99Compiler.Utils.ProgramState;
+import C99Compiler.ProgramState.ProgramState;
 import C99Compiler.Utils.OperandSources.OperandSource;
 
 public class StackLoader extends EightBitBytewiseOperator

@@ -13,7 +13,7 @@ import C99Compiler.CompilerNodes.Interfaces.UnvaluedAssemblableNode;
 import C99Compiler.CompilerNodes.LValues.VariableNode;
 import C99Compiler.Exceptions.CompilerMultipleDefinitionException;
 import C99Compiler.Exceptions.ConstraintException;
-import C99Compiler.Utils.ProgramState;
+import C99Compiler.ProgramState.ProgramState;
 import Grammar.C99.C99Parser.DeclarationContext;
 import Grammar.C99.C99Parser.Init_declaratorContext;
 

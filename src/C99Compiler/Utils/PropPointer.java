@@ -8,6 +8,7 @@ import java.util.function.BiFunction;
 
 import C99Compiler.CompilerNodes.Interfaces.AddressableNode;
 import C99Compiler.CompilerNodes.Interfaces.TypedNode;
+import C99Compiler.ProgramState.ProgramState;
 
 public class PropPointer<T extends AddressableNode & TypedNode> implements BiFunction<ProgramState, Integer, String>, Serializable
 {

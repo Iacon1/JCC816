@@ -7,7 +7,7 @@ import java.util.List;
 
 import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.TranslationUnitNode;
-import C99Compiler.Utils.ProgramState;
+import C99Compiler.ProgramState.ProgramState;
 
 public interface PerNodeASTPass<C extends ComponentNode<?>> extends ASTPass
 {

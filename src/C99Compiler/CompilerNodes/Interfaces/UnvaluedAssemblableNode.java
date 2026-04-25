@@ -3,7 +3,7 @@
 // Typed Node
 package C99Compiler.CompilerNodes.Interfaces;
 
-import C99Compiler.Utils.ProgramState;
+import C99Compiler.ProgramState.ProgramState;
 
 public interface UnvaluedAssemblableNode extends AssemblableNode
 {

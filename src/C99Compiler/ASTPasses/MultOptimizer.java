@@ -9,7 +9,7 @@ import C99Compiler.CompilerNodes.Expressions.AdditiveExpressionNode;
 import C99Compiler.CompilerNodes.Expressions.BaseExpressionNode;
 import C99Compiler.CompilerNodes.Expressions.MultiplicativeExpressionNode;
 import C99Compiler.CompilerNodes.Expressions.ShiftExpressionNode;
-import C99Compiler.Utils.ProgramState;
+import C99Compiler.ProgramState.ProgramState;
 
 public class MultOptimizer implements PerNodeASTPass<MultiplicativeExpressionNode>
 {

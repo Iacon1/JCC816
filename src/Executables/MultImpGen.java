@@ -5,12 +5,12 @@ package Executables;
 
 import C99Compiler.CompConfig;
 import C99Compiler.Utils.FileIO;
-import C99Compiler.Utils.ProgramState;
 import Shared.CartConfig;
 import Shared.MemorySize;
 import C99Compiler.Generators.LongDividerModulator;
 import C99Compiler.Generators.Multiplier;
 import C99Compiler.Generators.ShortDividerModulator;
+import C99Compiler.ProgramState.ProgramState;
 import C99Compiler.C99Compiler;
 import AsmBuilder.AsmBuilder;
 

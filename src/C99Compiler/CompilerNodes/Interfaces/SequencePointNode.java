@@ -2,7 +2,7 @@
 // A node that has a Sequence Point in it
 package C99Compiler.CompilerNodes.Interfaces;
 
-import C99Compiler.Utils.ProgramState;
+import C99Compiler.ProgramState.ProgramState;
 import Shared.Assemblable;
 import Shared.Assemblable.AssemblyStatePair;
 import Shared.Assemblable.MutableAssemblyStatePair;

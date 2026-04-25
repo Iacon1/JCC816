@@ -20,7 +20,7 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import C99Compiler.SyntaxErrorCollector;
 import C99Compiler.CompilerNodes.Expressions.BaseExpressionNode;
 import C99Compiler.CompilerNodes.Expressions.ConstantExpressionNode;
-import C99Compiler.Utils.ProgramState;
+import C99Compiler.ProgramState.ProgramState;
 
 public class IfNode extends InterpretingNode<IfNode, If_sectionContext> implements GeneratingNode
 {

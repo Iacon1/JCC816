@@ -3,7 +3,7 @@
 //
 package Shared;
 
-import C99Compiler.Utils.ProgramState;
+import C99Compiler.ProgramState.ProgramState;
 
 public interface Assemblable
 {

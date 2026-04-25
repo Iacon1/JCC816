@@ -3,10 +3,10 @@
 package C99Compiler.Utils.AssemblyUtils;
 
 import C99Compiler.CompConfig;
+import C99Compiler.ProgramState.ProgramState;
+import C99Compiler.ProgramState.ProgramState.PreserveFlag;
+import C99Compiler.ProgramState.ProgramState.ProcessorFlag;
 import C99Compiler.Utils.CompUtils;
-import C99Compiler.Utils.ProgramState;
-import C99Compiler.Utils.ProgramState.PreserveFlag;
-import C99Compiler.Utils.ProgramState.ProcessorFlag;
 import Shared.Assemblable;
 import C99Compiler.Utils.OperandSources.OperandSource;
 

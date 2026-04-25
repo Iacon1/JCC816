@@ -8,11 +8,11 @@ import java.util.LinkedList;
 import java.util.Map;
 
 import C99Compiler.CompConfig;
+import C99Compiler.ProgramState.ProgramState;
+import C99Compiler.ProgramState.ProgramState.PreserveFlag;
+import C99Compiler.ProgramState.ProgramState.ProcessorFlag;
 import C99Compiler.Utils.CompUtils;
-import C99Compiler.Utils.ProgramState;
 import C99Compiler.Utils.PropPointer;
-import C99Compiler.Utils.ProgramState.PreserveFlag;
-import C99Compiler.Utils.ProgramState.ProcessorFlag;
 import Shared.Assemblable.AssemblyStatePair;
 
 public class ConstantSource extends ConstantByteSource

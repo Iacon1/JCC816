@@ -8,9 +8,9 @@ import C99Compiler.CompilerNodes.FunctionDefinitionNode;
 import C99Compiler.CompilerNodes.Expressions.BaseExpressionNode;
 import C99Compiler.CompilerNodes.Expressions.ExpressionNode;
 import C99Compiler.CompilerNodes.Interfaces.AssemblableNode;
+import C99Compiler.ProgramState.ProgramState;
 import C99Compiler.Utils.OperandSources.ConstantSource;
 import C99Compiler.Utils.OperandSources.OperandSource;
-import C99Compiler.Utils.ProgramState;
 import C99Compiler.Utils.AssemblyUtils.ByteCopier;
 import Grammar.C99.C99Parser.Jump_statementContext;
 

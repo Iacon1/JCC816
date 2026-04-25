@@ -11,7 +11,7 @@ import C99Compiler.CompilerNodes.Declarations.DeclarationNode;
 import C99Compiler.CompilerNodes.Definitions.Scope;
 import C99Compiler.CompilerNodes.Interfaces.AssemblableNode;
 import C99Compiler.CompilerNodes.Interfaces.UnvaluedAssemblableNode;
-import C99Compiler.Utils.ProgramState;
+import C99Compiler.ProgramState.ProgramState;
 import Grammar.C99.C99Parser.Block_itemContext;
 import Grammar.C99.C99Parser.Compound_statementContext;
 

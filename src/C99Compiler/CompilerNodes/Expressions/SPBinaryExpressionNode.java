@@ -9,7 +9,7 @@ import org.antlr.v4.runtime.ParserRuleContext;
 
 import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.Interfaces.SequencePointNode;
-import C99Compiler.Utils.ProgramState;
+import C99Compiler.ProgramState.ProgramState;
 import Shared.Assemblable;
 
 public abstract class SPBinaryExpressionNode<
