@@ -35,13 +35,11 @@ char* strcat(char* restrict s1, const char* restrict s2)
 	char* s1_head = s1;
 	while (*s1 != 0x00) s1 += 1;
 
-	size_t i = 0;
-	do
+	for (size_t i = 0; 1; ++i)
 	{
 		*(s1 + i) = *(s2 + i);
-		i += 1;
+		if (*(s2 + i) == 0x00) break;
 	}
-	while (*(s2 + i) != 0);
 
 	return s1_head;
 }
@@ -51,11 +49,10 @@ char* strncat(char* restrict s1, const char* restrict s2, size_t n)
 	while (*s1 != 0x00) s1 += 1;
 
 	for (size_t i = 0; i < n; ++i)
-		{
-			*(s1 + i) = *(s2 + i);
-			if (*(s2 + i) == 0x00) break;
-		}
-	while (*(s2 + i) != 0);
+	{
+		*(s1 + i) = *(s2 + i);
+		if (*(s2 + i) == 0x00) break;
+	}
 
 	return s1_head;
 }
