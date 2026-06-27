@@ -8,10 +8,8 @@
  */
 package C99Compiler.Generators;
 
-import C99Compiler.CompConfig;
 import C99Compiler.ProgramState.ProgramState;
 import C99Compiler.Utils.SNESRegisters;
-import C99Compiler.Utils.AssemblyUtils.BytewiseOperator;
 import C99Compiler.Utils.AssemblyUtils.EightBitBytewiseOperator;
 import C99Compiler.Utils.AssemblyUtils.ZeroCopier;
 import C99Compiler.Utils.OperandSources.OperandSource;
@@ -39,6 +37,8 @@ public class Multiplier implements Assemblable
 		{
 			MutableAssemblyStatePair pair = new MutableAssemblyStatePair("", state);
 			String whitespace = pair.state.getWhitespace();
+			if (offset + i >= destSource.getSize())
+				return pair.getImmutable(); // This would just be wasted processing time
 			
 			if (i == 0) // First mult of the set
 			{
@@ -64,13 +64,17 @@ public class Multiplier implements Assemblable
 				pair.assembly += whitespace + "TXA\n";
 				pair.assembly += whitespace + "ADC\tf:" + SNESRegisters.RDMPYL + "\n";
 			}
-			if (offset != 0 && i < n - 1) // Not first set and not furthest byte of output
+			if (offset != 0) // Not first set
 			{
 				pair.assembly += whitespace + "CLC\n";
 				destSource.applyInstruction(pair, "ADC", offset + i);
 			}
 			destSource.applySTA(pair, offset + i);
-			
+			if (i == n - 1 && offset + i + 1 < destSource.getSize())
+			{
+				pair.assembly += whitespace + "LDA\t" + SNESRegisters.RDMPYH + "\n";
+				destSource.applySTA(pair, offset + i + 1);
+			}
 			return pair.getImmutable();
 		}
 	}

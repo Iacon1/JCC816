@@ -26,7 +26,8 @@ public class MultImpGen
 		assembly += "; Thanks to Sir Walrus for long div/mod code\n";
 		cCode += "// Thanks to Sir Walrus for long div/mod code\n";
 		// Routine generators already know their output sizes
-		ProgramState state = new ProgramState().indent();
+		ProgramState baseState, currState;
+		baseState = new ProgramState().indent();
 		int sizes[] = {1, 2, 3, 4, 8};
 		
 		assembly += "\n; Multiplication\n";
@@ -35,12 +36,12 @@ public class MultImpGen
 			{
 				if (ySize > xSize) continue;
 				if (Math.max(xSize, ySize) > 3)
-					state = state.setDestSource(CompConfig.callResultSource(Math.max(xSize, ySize)));
+					currState = baseState.setDestSource(CompConfig.callResultSource(Math.max(xSize, ySize)));
 				else
-					state = state.setDestSource(CompConfig.callResultSource(3));
+					currState = baseState.setDestSource(CompConfig.callResultSource(3));
 
 				assembly += "__mul" + (8 * xSize) + "by" + (8 * ySize) + ":\t\t; @func\n";
-				assembly += new Multiplier(CompConfig.specSubSource(true, xSize), CompConfig.specSubSource(false, ySize)).getAssembly(state);
+				assembly += new Multiplier(CompConfig.specSubSource(true, xSize), CompConfig.specSubSource(false, ySize)).getAssembly(currState);
 				assembly += "RTL\t\t; @endfunc\n";
 				assembly += "\n";
 			}
@@ -53,12 +54,12 @@ public class MultImpGen
 				if (ySize == 1)
 				{
 					if (Math.max(xSize, ySize) > 3)
-						state = state.setDestSource(CompConfig.callResultSource(Math.max(xSize, ySize)));
+						currState = baseState.setDestSource(CompConfig.callResultSource(Math.max(xSize, ySize)));
 					else
-						state = state.setDestSource(CompConfig.callResultSource(3));
+						currState = baseState.setDestSource(CompConfig.callResultSource(3));
 					
 					assembly += "__div" + (8 * xSize) + "by" + (8 * ySize) + ":\t\t; @func\n";
-						assembly += new ShortDividerModulator(CompConfig.specSubSource(true, xSize), CompConfig.specSubSource(false, ySize), false).getAssembly(state);
+					assembly += new ShortDividerModulator(CompConfig.specSubSource(true, xSize), CompConfig.specSubSource(false, ySize), false).getAssembly(currState);
 	
 					assembly += "RTL\t\t; @endfunc\n";
 					assembly += "\n";
@@ -77,12 +78,12 @@ public class MultImpGen
 				if (ySize == 1)
 				{
 					if (Math.max(xSize, ySize) > 3)
-						state = state.setDestSource(CompConfig.callResultSource(Math.max(xSize, ySize)));
+						currState = baseState.setDestSource(CompConfig.callResultSource(Math.max(xSize, ySize)));
 					else
-						state = state.setDestSource(CompConfig.callResultSource(3));
+						currState = baseState.setDestSource(CompConfig.callResultSource(3));
 					
 					assembly += "__mod" + (8 * xSize) + "by" + (8 * ySize) + ":\t\t; @func\n";
-						assembly += new ShortDividerModulator(CompConfig.specSubSource(true, xSize), CompConfig.specSubSource(false, ySize), true).getAssembly(state);
+					assembly += new ShortDividerModulator(CompConfig.specSubSource(true, xSize), CompConfig.specSubSource(false, ySize), true).getAssembly(currState);
 	
 					assembly += "RTL\t\t; @endfunc\n";
 					assembly += "\n";
