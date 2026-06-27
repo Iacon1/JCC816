@@ -74,6 +74,20 @@ class DisqualifyingMap<T>
 		
 		return new DisqualifyingMap<T>(itemMap, disqualsMap);
 	}
+	public T getFirst()
+	{
+		if (this.itemMap.size() > 0)
+			return this.itemMap.get(this.itemMap.keySet().toArray(new String[] {})[0]);
+		else
+			return null;
+	}
+	public DisqualifyingMap<T> dropFirst()
+	{
+		if (this.itemMap.size() > 0)
+			return remove(this.itemMap.get(this.itemMap.keySet().toArray(new String[] {})[0]));
+		else
+			return this;			
+	}
 	public DisqualifyingMap<T> disqualify(String... disqualifiers)
 	{
 		HashMap<String, T> itemMap = new HashMap<String, T>(this.itemMap);

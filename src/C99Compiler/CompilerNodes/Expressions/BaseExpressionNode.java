@@ -4,6 +4,8 @@
 
 package C99Compiler.CompilerNodes.Expressions;
 
+import java.util.Set;
+
 import org.antlr.v4.runtime.ParserRuleContext;
 
 import C99Compiler.CompilerNodes.ComponentNode;
@@ -39,4 +41,7 @@ public abstract class BaseExpressionNode<C extends ParserRuleContext> extends In
 	 */
 	public boolean isLogical() {return false;}
 	
+	public abstract String getPointerName(); // If this expression is of pointer type this is the name the pointer would be reserved under in ProgramState
+	public abstract Set<String> getIdlePointerDisqualifiers(); // If this expression is of pointer type and an expression containing it disqualifies pointers this is the list of disqualifiers this would add to the list being disqualified
+	public abstract Set<String> getPointerDisqualifiers(); // If this expression is of pointer type this is the list of disqualifiers that'd apply to the pointer
 }

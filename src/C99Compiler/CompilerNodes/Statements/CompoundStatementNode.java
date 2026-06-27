@@ -102,6 +102,7 @@ public class CompoundStatementNode extends StatementNode<Compound_statementConte
 			AssemblyStatePair pair = assemblable.getAssemblyAndState(state);
 			assembly += pair.assembly;
 			state = pair.state;
+			state = state.checkScratch();
 		}
 		return new AssemblyStatePair(assembly, state);
 	}

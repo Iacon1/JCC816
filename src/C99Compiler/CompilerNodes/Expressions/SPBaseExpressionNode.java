@@ -2,8 +2,7 @@
 
 package C99Compiler.CompilerNodes.Expressions;
 
-import java.util.LinkedList;
-import java.util.List;
+import java.util.LinkedHashMap;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 
@@ -14,22 +13,25 @@ import Shared.Assemblable;
 
 public abstract class SPBaseExpressionNode<C extends ParserRuleContext> extends BaseExpressionNode<C> implements SequencePointNode
 {
-	private List<Assemblable> assemblableQueue;
+	private LinkedHashMap<ComponentNode<?>, Assemblable> assemblableQueue;
 	protected boolean isSP;
 	
 	public SPBaseExpressionNode(ComponentNode<?> parent)
 	{
 		super(parent);
-		assemblableQueue = new LinkedList<Assemblable>();
+		assemblableQueue = new LinkedHashMap<ComponentNode<?>, Assemblable>();
 		isSP = false;
 	}
 	@Override public boolean isSequencePoint() {return isSP;}
-	@Override public void registerAssemblable(Assemblable assemblable) {assemblableQueue.add(assemblable);}
+	@Override public void registerAssemblable(ComponentNode<?> owner, Assemblable assemblable)
+	{
+		assemblableQueue.put(owner, assemblable);
+	}
 	@Override public void clearAssemblables() {assemblableQueue.clear();}
 	@Override public AssemblyStatePair getRegisteredAssemblyAndState(ProgramState state) throws Exception
 	{
 		String assembly = "";
-		for (Assemblable queued : assemblableQueue)
+		for (Assemblable queued : assemblableQueue.values())
 		{
 			AssemblyStatePair pair = queued.getAssemblyAndState(state);
 			assembly += pair.assembly;

@@ -2,8 +2,7 @@
 // LOR and LAND
 package C99Compiler.CompilerNodes.Expressions;
 
-import java.util.LinkedList;
-import java.util.List;
+import java.util.LinkedHashMap;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 
@@ -19,22 +18,25 @@ PC extends ParserRuleContext,
 CC extends ParserRuleContext
 > extends BinaryExpressionNode<C1, C2, PC, CC> implements SequencePointNode
 {
-	private List<Assemblable> assemblableQueue;
+	private LinkedHashMap<ComponentNode<?>, Assemblable> assemblableQueue;
 	protected boolean isSP;
 	
 	public SPBinaryExpressionNode(ComponentNode<?> parent)
 	{
 		super(parent);
-		assemblableQueue = new LinkedList<Assemblable>();
+		assemblableQueue = new LinkedHashMap<ComponentNode<?>, Assemblable>();
 		isSP = false;
 	}
 	@Override public boolean isSequencePoint() {return isSP;}
-	@Override public void registerAssemblable(Assemblable assemblable) {assemblableQueue.add(assemblable);}
+	@Override public void registerAssemblable(ComponentNode<?> owner, Assemblable assemblable)
+	{
+		assemblableQueue.put(owner, assemblable);
+	}
 	@Override public void clearAssemblables() {assemblableQueue.clear();}
 	@Override public AssemblyStatePair getRegisteredAssemblyAndState(ProgramState state) throws Exception
 	{
 		String assembly = "";
-		for (Assemblable queued : assemblableQueue)
+		for (Assemblable queued : assemblableQueue.values())
 		{
 			AssemblyStatePair pair = queued.getAssemblyAndState(state);
 			assembly += pair.assembly;

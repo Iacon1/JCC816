@@ -90,6 +90,10 @@ public class ComponentNode<C extends ComponentNode<C>> implements Serializable
 		for (ComponentNode<?> child : children)
 			child.swapParent(replacement);
 	}
+	/** Replaces this node's parent with another node
+	 * 
+	 * @param newParent
+	 */
 	public void swapParent(ComponentNode<?> newParent)
 	{
 		if (this.parent != null)
@@ -100,6 +104,16 @@ public class ComponentNode<C extends ComponentNode<C>> implements Serializable
 		if (!parent.children.contains(this))
 			parent.children.add(this);
 		parent.invalidateSearchCaches();
+	}
+	/** Replaces another node's parent with this one's and replaces this one's parent with null
+	 * 
+	 * @param other
+	 */
+	public void giveParentTo(ComponentNode<?> other)
+	{
+		this.parent.onSwap(this, other);
+		other.swapParent(this.parent);
+		swapParent(null);
 	}
 	public void kill()
 	{

@@ -305,6 +305,13 @@ public class IterationStatementNode extends SequencePointStatementNode<Iteration
 					assembly = assembly.substring(0, assembly.lastIndexOf('\n', assembly.length() - 2) + 1); // Remove last line
 					state = tmpPair.state;
 				}
+				else if (condExpNode.hasPropValue(state) && condExpNode.getPropLong(state) != 0)
+					if (stmNode.hasAssembly(state)) // Go forever
+					{
+						tmpPair = stmNode.getAssemblyAndState(state);
+						assembly += tmpPair.assembly;
+						state = tmpPair.state;
+					}
 			}
 			else if (stmNode.hasAssembly(state)) // Go forever
 			{

@@ -45,4 +45,11 @@ public class ConstantExpressionNode extends BaseExpressionNode<Constant_expressi
 	public boolean hasAssembly(ProgramState state) {throw new UnsupportedOperationException();}
 	@Override
 	public AssemblyStatePair getAssemblyAndState(ProgramState state) throws Exception {throw new UnsupportedOperationException();}
+	
+	@Override
+	public String getPointerName() {throw new UnsupportedOperationException();}
+	@Override
+	public Set<String> getIdlePointerDisqualifiers() {throw new UnsupportedOperationException();}
+	@Override
+	public Set<String> getPointerDisqualifiers() {throw new UnsupportedOperationException();}
 }

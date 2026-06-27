@@ -2,6 +2,8 @@
 //
 package C99Compiler.CompilerNodes.Expressions;
 
+import java.util.Set;
+
 import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.FunctionDefinitionNode;
 import C99Compiler.CompilerNodes.Declarations.TypeNameNode;
@@ -9,6 +11,7 @@ import C99Compiler.CompilerNodes.Definitions.Type;
 import C99Compiler.CompilerNodes.LValues.LValueNode;
 import C99Compiler.ProgramState.ProgramState;
 import C99Compiler.Utils.CompUtils;
+import C99Compiler.Utils.PropPointer;
 import C99Compiler.Utils.AssemblyUtils.AssemblyUtils;
 import C99Compiler.Utils.AssemblyUtils.ByteCopier;
 import C99Compiler.Utils.AssemblyUtils.SignExtender;
@@ -117,6 +120,22 @@ public class CastExpressionNode extends BaseExpressionNode<Cast_expressionContex
 		}
 			
 		return pair;
+	}
+	
+	@Override
+	public String getPointerName()
+	{
+		return expr.getPointerName();
+	}
+	@Override
+	public Set<String> getIdlePointerDisqualifiers()
+	{
+		return expr.getIdlePointerDisqualifiers();
+	}
+	@Override
+	public Set<String> getPointerDisqualifiers()
+	{
+		return expr.getPointerDisqualifiers();
 	}
 	
 	public BaseExpressionNode<?> getCastee()

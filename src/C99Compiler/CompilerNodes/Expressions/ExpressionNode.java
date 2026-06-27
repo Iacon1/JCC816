@@ -6,6 +6,7 @@ package C99Compiler.CompilerNodes.Expressions;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.FunctionDefinitionNode;
@@ -90,5 +91,30 @@ public class ExpressionNode extends SPBaseExpressionNode<ExpressionContext>
 		}
 		
 		return pair;
+	}
+	
+	@Override
+	public String getPointerName()
+	{
+		if (expressions.size() == 1)
+			return expressions.get(0).getPointerName();
+		else
+			throw new UnsupportedOperationException();
+	}
+	@Override
+	public Set<String> getIdlePointerDisqualifiers()
+	{
+		if (expressions.size() == 1)
+			return expressions.get(0).getIdlePointerDisqualifiers();
+		else
+			throw new UnsupportedOperationException();
+	}
+	@Override
+	public Set<String> getPointerDisqualifiers()
+	{
+		if (expressions.size() == 1)
+			return expressions.get(0).getPointerDisqualifiers();
+		else
+			throw new UnsupportedOperationException();
 	}
 }

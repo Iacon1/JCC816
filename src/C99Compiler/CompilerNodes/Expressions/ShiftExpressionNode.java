@@ -105,6 +105,7 @@ public class ShiftExpressionNode extends BinaryExpressionNode
 	{
 		MutableAssemblyStatePair pair = new MutableAssemblyStatePair("", state);
 		OperandSource destSource = pair.state.destSource();
+		ScratchSource scratchX = null;
 		
 		boolean isLeft = operator.equals("<<");
 		boolean isSigned = x.getType().isSigned();
@@ -120,6 +121,14 @@ public class ShiftExpressionNode extends BinaryExpressionNode
 			int m, n = (int) y.getPropLong(pair.state);
 			if (n % 8 == 0 || ((!isSigned || n == 1) && (n % 8 == 1 || destSource.getSize() <= 2)))
 				canUnroll = true; // Can unroll in these circumstances
+			if (canUnroll && x.getSize() == 1 && destSource.getSize() == 2) // For this kind of unrolling, x must be same 2 bytes large
+			{
+				pair.state = pair.state.reserveScratchBlock(2);
+				scratchX = pair.state.lastScratchSource();
+				new SignExtender(sourceX, destSource, x.getType().isSigned(), y.getType().isSigned()).apply(pair);
+				new ByteCopier(scratchX, sourceX).apply(pair);
+				sourceX = scratchX;
+			}
 			m = n / 8;
 
 			if (m > 0)
@@ -244,6 +253,9 @@ public class ShiftExpressionNode extends BinaryExpressionNode
 		}
 		pair.state = pair.state.setPreserveFlags(flags);
 		pair.assembly += AssemblyUtils.restore(pair.state, (byte) (ProgramState.PreserveFlag.A | ProgramState.PreserveFlag.X));
+		
+		if (scratchX != null)
+			pair.state = pair.state.releaseScratchBlock(scratchX);
 		return pair.getImmutable();
 	}
 }

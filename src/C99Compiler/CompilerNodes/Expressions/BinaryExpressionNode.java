@@ -3,6 +3,9 @@
 // A general expression node.
 package C99Compiler.CompilerNodes.Expressions;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
@@ -187,4 +190,31 @@ public abstract class BinaryExpressionNode<
 	public BaseExpressionNode<?> getX() {return x;}
 	public BaseExpressionNode<?> getY() {return y;}
 	public String getOperator() {return operator;}
+
+	@Override
+	public String getPointerName()
+	{
+		if (x.getPointerName() != null && y.getPointerName() != null)
+			return "(" + x.getPointerName() + ") " + operator + " (" + y.getPointerName() + ")";
+		else
+			throw new UnsupportedOperationException();
+	}
+	@Override
+	public Set<String> getIdlePointerDisqualifiers()
+	{
+		Set<String> set = new HashSet<String>();
+		set.addAll(x.getIdlePointerDisqualifiers());
+		set.addAll(y.getIdlePointerDisqualifiers());
+		
+		return set;
+	}
+	@Override
+	public Set<String> getPointerDisqualifiers()
+	{
+		Set<String> set = new HashSet<String>();
+		set.addAll(x.getPointerDisqualifiers());
+		set.addAll(y.getPointerDisqualifiers());
+		
+		return set;
+	}
 }

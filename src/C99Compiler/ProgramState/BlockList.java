@@ -12,10 +12,12 @@ import java.util.ArrayList;
 class BlockList
 {
 	private final List<SimpleEntry<Boolean, Integer>> blockList; // Underlying data
-
-	private BlockList(List<SimpleEntry<Boolean, Integer>> blockList)
+	private final int capacity;
+	
+	private BlockList(List<SimpleEntry<Boolean, Integer>> blockList, int capacity)
 	{
 		this.blockList = new ArrayList<SimpleEntry<Boolean, Integer>>();
+		this.capacity = capacity;
 		for (SimpleEntry<Boolean, Integer> i : blockList)
 			this.blockList.add(new SimpleEntry<Boolean, Integer>(i));
 	}
@@ -23,110 +25,88 @@ class BlockList
 	public BlockList(int capacity)
 	{
 		this.blockList = new ArrayList<SimpleEntry<Boolean, Integer>>();
+		this.capacity = capacity;
 		blockList.add(new SimpleEntry<Boolean, Integer>(false, capacity));
 	}
 	
-	public int getReservedOffset(int size, int offset) throws Exception
+	private int getTargetBlock(int size, boolean reverse) throws Exception
+	{
+		if (!reverse)
+		{
+			for (int i = 0; i < blockList.size(); ++i) // Get each block
+			{
+				if (blockList.get(i).getKey()) // Block used
+					continue;
+				else if (blockList.get(i).getValue() < size) // Block too small
+					continue;
+				else
+					return i;
+			}
+		}
+		else
+		{
+			for (int i = blockList.size() - 1; i >= 0; --i) // Get each block
+			{
+				if (blockList.get(i).getKey()) // Block used
+					continue;
+				else if (blockList.get(i).getValue() < size) // Block too small
+					continue;
+				else
+					return i;
+			}
+		}
+		throw new Exception(); // No usable blocks
+	}
+	private int getTargetBlock(int offset) throws Exception
 	{
 		int currOffset = 0;
-		for (int i = 0; i < blockList.size(); ++i) // Get each block
+		for (int i = 0; i < blockList.size(); ++i)
 		{
-			if (currOffset + blockList.get(i).getValue() <= offset) {currOffset += blockList.get(i).getValue(); continue;} // This block's not got the right location
-			else if (blockList.get(i).getKey()) throw new Exception(); // This block's used! TODO new exception
-			else if (currOffset == offset && blockList.get(i).getValue() == size) // Found a block that's just the right size in just the right spot
-				return offset;
-			else if (currOffset == offset) // Found a block that's too big but in the right spot
-				return offset;
-			else // Found a block that's too big
-				return offset;
+			if (currOffset == offset)
+				return i;
+			currOffset += blockList.get(i).getValue();
 		}
-		
+
 		throw new Exception(); // No usable blocks
 	}
 	
-	public int getReservedOffset(int size) throws Exception
+	private int getOffsetOf(int blockID)
 	{
-		int offset = 0;
-		for (int i = 0; i < blockList.size(); ++i) // Get each block
-		{
-			if (blockList.get(i).getKey()) {offset += blockList.get(i).getValue(); continue;} // This block's in use
-			else if (blockList.get(i).getValue() < size) {offset += blockList.get(i).getValue(); continue;} // This block's too small
-			else if (blockList.get(i).getValue() == size) // Found a block that's just the right size
-				return offset;
-			else // Found a block that's too big, must be split
-				return offset;
-		}
+		int currOffset = 0;
+		for (int i = 0; i < blockID; ++i)
+			currOffset += blockList.get(i).getValue();
 		
-		throw new Exception(); // No usable blocks
+		return currOffset;
 	}
 	
-	public BlockList reserve(int size, int offset) throws Exception
+	public int getReservedOffset(int size, boolean reverse) throws Exception
+	{
+		int i = getTargetBlock(size, reverse);
+		int offset = getOffsetOf(i);
+		if (reverse)
+			offset += (blockList.get(i).getValue() - size);
+		
+		return offset;
+	}
+	
+	public BlockList reserve(int size, boolean reverse) throws Exception
 	{
 		List<SimpleEntry<Boolean, Integer>> blockList = new ArrayList<SimpleEntry<Boolean, Integer>>();
 		for (SimpleEntry<Boolean, Integer> i : this.blockList)
 			blockList.add(new SimpleEntry<Boolean, Integer>(i));
-		
-		int currOffset = 0;
-		for (int i = 0; i < blockList.size(); ++i) // Get each block
+
+		int i = getTargetBlock(size, reverse);
+		if (reverse)
 		{
-			if (currOffset + blockList.get(i).getValue() <= offset) {currOffset += blockList.get(i).getValue(); continue;} // This block's not got the right location
-			else if (blockList.get(i).getKey()) throw new Exception(); // This block's used! TODO new exception
-			else if (currOffset == offset && blockList.get(i).getValue() == size) // Found a block that's just the right size in just the right spot
-			{
-				blockList.set(i, new SimpleEntry<Boolean, Integer>(true, size));
-				
-				return new BlockList(blockList);
-			}
-			else if (currOffset == offset) // Found a block that's too big but in the right spot
-			{
-				int oldSize = blockList.get(i).getValue();
-				blockList.set(i, new SimpleEntry<Boolean, Integer>(true, size));
-				blockList.add(i + 1, new SimpleEntry<Boolean, Integer>(false, oldSize));
-
-				return new BlockList(blockList);
-			}
-			else // Found a block that's too big
-			{
-				int oldSize = blockList.get(i).getValue();
-				int j = i;
-				if (offset - currOffset > 0) blockList.set(j++, new SimpleEntry<Boolean, Integer>(false, offset - currOffset));
-				blockList.add(j++, new SimpleEntry<Boolean, Integer>(true, size));
-				if (currOffset + oldSize > offset + size) blockList.add(j++, new SimpleEntry<Boolean, Integer>(false, (currOffset + oldSize) - (offset + size)));
-				return new BlockList(blockList);
-			}
+			blockList.set(i, new SimpleEntry<Boolean, Integer>(false, blockList.get(i).getValue() - size));
+			blockList.add(i + 1, new SimpleEntry<Boolean, Integer>(true, size));
 		}
-		
-		throw new Exception();
-	}
-		
-	public BlockList reserve(int size) throws Exception
-	{
-		List<SimpleEntry<Boolean, Integer>> blockList = new ArrayList<SimpleEntry<Boolean, Integer>>();
-		for (SimpleEntry<Boolean, Integer> i : this.blockList)
-			blockList.add(new SimpleEntry<Boolean, Integer>(i));
-		
-		int offset = 0;
-		for (int i = 0; i < blockList.size(); ++i) // Get each block
+		else
 		{
-			if (blockList.get(i).getKey()) {offset += blockList.get(i).getValue(); continue;} // This block's in use
-			else if (blockList.get(i).getValue() < size) {offset += blockList.get(i).getValue(); continue;} // This block's too small
-			else if (blockList.get(i).getValue() == size) // Found a block that's just the right size
-			{
-				blockList.set(i, new SimpleEntry<Boolean, Integer>(true, size));
-
-				return new BlockList(blockList);
-			}
-			else // Found a block that's too big, must be split
-			{
-				int oldSize = blockList.get(i).getValue();
-				blockList.set(i, new SimpleEntry<Boolean, Integer>(true, size));
-				blockList.add(i + 1, new SimpleEntry<Boolean, Integer>(false, oldSize - 1));
-
-				return new BlockList(blockList);
-			}
+			blockList.add(i + 1, new SimpleEntry<Boolean, Integer>(false, blockList.get(i).getValue() - size));
+			blockList.set(i, new SimpleEntry<Boolean, Integer>(true, size));
 		}
-
-		throw new Exception(); // No usable blocks
+		return new BlockList(blockList, capacity);
 	}
 	
 	public BlockList release(int offset)
@@ -135,19 +115,16 @@ class BlockList
 		for (SimpleEntry<Boolean, Integer> i : this.blockList)
 			blockList.add(new SimpleEntry<Boolean, Integer>(i));
 		
-		int i = -1;
+		int i;
 		// Find the block
-		int currOffset = 0;
-		for (int j = 0; j < blockList.size(); ++j)
+		try
 		{
-			if (offset == currOffset)
-			{
-				i = j;
-				break;
-			}
-			currOffset += blockList.get(j).getValue();
+			i = getTargetBlock(offset);
 		}
-		if (i == -1) return this;
+		catch (Exception e)
+		{
+			return this;
+		}
 		
 		int size = blockList.get(i).getValue();
 		if (i < blockList.size() - 1 && !blockList.get(i + 1).getKey()) // Can merge with next block
@@ -164,7 +141,19 @@ class BlockList
 
 		blockList.set(i, new SimpleEntry<Boolean, Integer>(false, size));
 		
-		return new BlockList(blockList);
+		return new BlockList(blockList, capacity);
+	}
+	
+	public int getUsedSize()
+	{
+		int size = 0;
+		for (int i = 0; i < blockList.size(); ++i) // Get each block
+		{
+			if (blockList.get(i).getKey()) // Block used
+				size += blockList.get(i).getValue();
+		}
+		
+		return size;
 	}
 	
 	

@@ -2,6 +2,7 @@
 // Sequence point statement node
 package C99Compiler.CompilerNodes.Statements;
 
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -15,23 +16,26 @@ import Shared.Assemblable;
 
 public abstract class SequencePointStatementNode<C extends ParserRuleContext> extends StatementNode<C> implements SequencePointNode
 {
-	private List<Assemblable> assemblableQueue;
+	private LinkedHashMap<ComponentNode<?>, Assemblable> assemblableQueue;
 	private boolean isSP;
 	
 	public SequencePointStatementNode(ComponentNode<?> parent)
 	{
 		super(parent);
-		assemblableQueue = new LinkedList<Assemblable>();
+		assemblableQueue = new LinkedHashMap<ComponentNode<?>, Assemblable>();
 		isSP = false;
 	}
 
 	@Override public boolean isSequencePoint() {return isSP;}
-	@Override public void registerAssemblable(Assemblable assemblable) {assemblableQueue.add(assemblable);}
+	@Override public void registerAssemblable(ComponentNode<?> owner, Assemblable assemblable)
+	{
+		assemblableQueue.put(owner, assemblable);
+	}
 	@Override public void clearAssemblables() {assemblableQueue.clear();}
 	@Override public AssemblyStatePair getRegisteredAssemblyAndState(ProgramState state) throws Exception
 	{
 		String assembly = "";
-		for (Assemblable queued : assemblableQueue)
+		for (Assemblable queued : assemblableQueue.values())
 		{
 			AssemblyStatePair pair = queued.getAssemblyAndState(state);
 			assembly += pair.assembly;

@@ -48,13 +48,13 @@ public class InitializerNode extends InterpretingNode<InitializerNode, Initializ
 	private Map<String, InitializerNode> structInitializers;
 	
 	private BaseExpressionNode<?> expr;
-	private List<Assemblable> assemblableQueue;
+	private LinkedHashMap<ComponentNode<?>, Assemblable> assemblableQueue;
 
 	public InitializerNode(ComponentNode<?> parent, LValueNode<?> LValue, String literal)
 	{
 		super(parent);
 		expr = null;
-		assemblableQueue = new LinkedList<Assemblable>();
+		assemblableQueue = new LinkedHashMap<ComponentNode<?>, Assemblable>();
 		arrayInitializers = new LinkedHashMap<Integer, InitializerNode>();
 		expr = new DummyExpressionNode(this, LValue.getType(), literal);		
 		this.LValue = LValue;
@@ -65,7 +65,7 @@ public class InitializerNode extends InterpretingNode<InitializerNode, Initializ
 		super(parent);
 		expr = null;
 
-		assemblableQueue = new LinkedList<Assemblable>();
+		assemblableQueue = new LinkedHashMap<ComponentNode<?>, Assemblable>();
 		if (LValue.getType().isArray())
 		{
 			arrayInitializers = new LinkedHashMap<Integer, InitializerNode>();
@@ -126,12 +126,15 @@ public class InitializerNode extends InterpretingNode<InitializerNode, Initializ
 	}
 	
 	@Override public boolean isSequencePoint() {return true;}
-	@Override public void registerAssemblable(Assemblable assemblable) {assemblableQueue.add(assemblable);}
+	@Override public void registerAssemblable(ComponentNode<?> owner, Assemblable assemblable)
+	{
+		assemblableQueue.put(owner, assemblable);
+	}
 	@Override public void clearAssemblables() {assemblableQueue.clear();}
 	@Override public AssemblyStatePair getRegisteredAssemblyAndState(ProgramState state) throws Exception
 	{
 		String assembly = "";
-		for (Assemblable queued : assemblableQueue)
+		for (Assemblable queued : assemblableQueue.values())
 		{
 			AssemblyStatePair pair = queued.getAssemblyAndState(state);
 			assembly += pair.assembly;

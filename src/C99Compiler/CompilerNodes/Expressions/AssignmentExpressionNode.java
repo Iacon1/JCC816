@@ -206,6 +206,7 @@ public class AssignmentExpressionNode extends BinaryExpressionNode
 			state = tmpPair.state;
 		}
 		state = state.disqualifyPointers(getPointerDisqualifiers().toArray(new String[] {}));
+		
 		if (y.hasPropValue(state) && !x.isIndirect() && !x.getType().isVolatile() && !x.getLValue(state).getScope().isRoot())
 		{
 			if (x.getType().isArithmetic())

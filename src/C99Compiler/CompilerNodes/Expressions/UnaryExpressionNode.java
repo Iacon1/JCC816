@@ -2,6 +2,9 @@
 //
 package C99Compiler.CompilerNodes.Expressions;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import C99Compiler.CompConfig;
 import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.FunctionDefinitionNode;
@@ -349,15 +352,29 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 			break;
 		case "*":
 			ScratchSource sourceI;
-			if (!state.hasPointer(sourceX))
+			if (!state.hasPointer(expr.getPointerName()))
 			{
-				pair.state = pair.state.reservePointer(sourceX);
-				sourceI = pair.state.lastScratchSource();
-				copier = new ByteCopier(CompConfig.pointerSize, sourceI, sourceX);
-				pair = copier.apply(pair);
+				if (!ScratchSource.class.isAssignableFrom(sourceX.getClass()))
+				{
+					pair.state = pair.state.reservePointer(expr.getPointerName(), expr.getPointerDisqualifiers().toArray(new String[] {}));
+					sourceI = pair.state.lastScratchSource();
+					copier = new ByteCopier(CompConfig.pointerSize, sourceI, sourceX);
+					pair = copier.apply(pair);
+					indirect = new IndirectLValueNode(this, sourceI, getType());
+				}
+				else
+				{
+					sourceI = (ScratchSource) sourceX;
+					pair.state = pair.state.markPointer((ScratchSource) sourceX, expr.getPointerName(), expr.getIdlePointerDisqualifiers().toArray(new String[] {}));
+					indirect = new IndirectLValueNode(this, sourceX, getType());
+				}
 			}
-			else sourceI = state.getPointer(sourceX);
-			indirect = new IndirectLValueNode(this, sourceI, getType());
+			else
+			{
+				sourceI = state.getPointer(expr.getPointerName());
+				indirect = new IndirectLValueNode(this, sourceI, getType());
+			}
+			
 			if (destSource != null)
 			{
 				copier = new ByteCopier(((PointerType) expr.getType()).getType().getSize(), destSource, indirect.getSource());
@@ -379,6 +396,40 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 		return pair.getImmutable();
 	}
 
+	@Override
+	public String getPointerName()
+	{
+		if (expr.getPointerName() != null)
+			return operator + "(" + expr.getPointerName() + ")";
+		else
+			throw new UnsupportedOperationException();
+	}
+	
+	@Override
+	public Set<String> getIdlePointerDisqualifiers()
+	{
+		Set<String> set = new HashSet<String>();
+		set.addAll(expr.getIdlePointerDisqualifiers());
+
+		return set;
+	}
+	
+	@Override
+	public Set<String> getPointerDisqualifiers()
+	{
+		Set<String> set = new HashSet<String>();
+		set.addAll(expr.getPointerDisqualifiers());
+		switch (operator)
+		{
+		case "++": case "--":
+			set.addAll(getIdlePointerDisqualifiers());
+			break;
+		default:
+		}
+		
+		return set;
+	}
+	
 	public BaseExpressionNode<?> getExpression() {return expr;}
 
 	public String getOperator()

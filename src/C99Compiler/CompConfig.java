@@ -31,6 +31,7 @@ public final class CompConfig
 	public static final String specSubX = "__@specSubX";
 	public static final String specSubY = "__@specSubY";
 	public static final int scratchSize = 128;
+	public static final int healthyScratchSize = scratchSize - 16; 
 	public static final String scratchBase = "__@scratchBase";
 	public static final String funcPointer = "__@funcPointer";
 	public static final String signExtend = "__@signExtend"; // 1 byte; Set to be 0x00 if the last byte of an operand was positive, 0xFF otherwise
@@ -175,7 +176,7 @@ public final class CompConfig
 		}
 	}
 	public static VerbosityLevel verbosityLevel = VerbosityLevel.none;
-	public static boolean showParseTree = false; 
+	public static boolean showParseTree = false;
 	
 	public static final class Attributes
 	{

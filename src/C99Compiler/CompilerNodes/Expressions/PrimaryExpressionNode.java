@@ -223,4 +223,28 @@ public class PrimaryExpressionNode extends BaseExpressionNode<Primary_expression
 		stringLiteralNodeV = null;
 		stringLiteralNodeI = null;
 	}
+	
+	@Override
+	public String getPointerName()
+	{
+		if (token != null)
+			return token.getText();
+		else return identifier;
+	}
+	
+	@Override
+	public Set<String> getIdlePointerDisqualifiers()
+	{
+		Set<String> set = new HashSet<String>();
+		set.add(getPointerName());
+		
+		return set;
+	}
+	@Override
+	public Set<String> getPointerDisqualifiers()
+	{
+		Set<String> set = new HashSet<String>();
+		
+		return set;
+	}
 }

@@ -2,8 +2,10 @@
 // LOR and LAND
 package C99Compiler.CompilerNodes.Expressions;
 
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 
@@ -146,7 +148,7 @@ CC extends ParserRuleContext
 		if (ScratchSource.class.isAssignableFrom(sourceY.getClass()))
 			pair.state = pair.state.releaseScratchBlock((ScratchSource) sourceY);
 		
-		pair.state = pair.state.releasePointer(destSource); // A copy of the destination, if it's a pointer, has gone stale
+		pair.state = pair.state.disqualifyPointers(getPointerName()); // A copy of the destination, if it's a pointer, has gone stale
 
 		pair.state = pair.state.setPreserveFlags(flags);
 		pair.assembly += AssemblyUtils.restore(pair.state, PreserveFlag.A);

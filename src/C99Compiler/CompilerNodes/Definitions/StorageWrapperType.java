@@ -11,6 +11,7 @@ public abstract class StorageWrapperType extends Type
 	{
 		super();
 		this.type = type;
+		this.context = type.context;
 	}
 	public StorageWrapperType(Type base, Type type)
 	{

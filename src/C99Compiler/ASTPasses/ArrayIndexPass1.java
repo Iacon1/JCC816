@@ -44,7 +44,7 @@ public class ArrayIndexPass1 implements PerNodeASTPass<PostfixExpressionNode>
 		ComponentNode<?> c = applyRecursive(node, state);
 		if (c == node) return node;
 		UnaryExpressionNode u = new UnaryExpressionNode(c, "*", (BaseExpressionNode<?>) c);
-		c.swap(u);
+		c.giveParentTo(u);
 		c.swapParent(u);
 		return u;
 	}

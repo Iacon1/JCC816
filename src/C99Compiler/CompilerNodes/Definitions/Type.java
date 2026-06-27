@@ -26,7 +26,7 @@ import C99Compiler.Exceptions.UnsupportedFeatureException;
 
 public class Type implements Serializable
 {
-	private ComponentNode<?> context; // The node this was defined under
+	protected ComponentNode<?> context; // The node this was defined under
 	
 	private String storageClassSpecifier;
 	protected List<String> typeSpecifiers;

@@ -2,6 +2,8 @@
 // A node that has a Sequence Point in it
 package C99Compiler.CompilerNodes.Interfaces;
 
+import C99Compiler.CompilerNodes.ComponentNode;
+import C99Compiler.CompilerNodes.Expressions.BaseExpressionNode;
 import C99Compiler.ProgramState.ProgramState;
 import Shared.Assemblable;
 import Shared.Assemblable.AssemblyStatePair;
@@ -9,7 +11,7 @@ import Shared.Assemblable.MutableAssemblyStatePair;
 
 public interface SequencePointNode
 {
-	void registerAssemblable(Assemblable assemblable);
+	void registerAssemblable(ComponentNode<?> owner, Assemblable assemblable);
 	void clearAssemblables();
 	AssemblyStatePair getRegisteredAssemblyAndState(ProgramState state) throws Exception;
 	default AssemblyStatePair applyRegistered(AssemblyStatePair pair) throws Exception

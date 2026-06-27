@@ -5,9 +5,11 @@ package C99Compiler.CompilerNodes.Expressions;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import C99Compiler.CompConfig;
 import C99Compiler.CompilerNodes.ComponentNode;
@@ -183,7 +185,9 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 			else
 				return ((FunctionType) expr.getType()).getType();
 		case structMember:
-			return expr.getType().getStruct().getMember(memberName).getType();
+			if (expr.getType().getStruct() == null)
+				expr = expr;
+			return expr.getType().getStruct().getMember(memberName) .getType();
 		case structMemberP:
 			return (((PointerType) expr.getType()).getType()).getStruct().getMember(memberName).getType();	
 		case incr: case decr:
@@ -256,9 +260,9 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 				return new WrapperLValueNode(this, ((ArrayType) expr.getType()).getType(), expr.getLValue(state), offset);
 			}
 			if (expr.hasLValue(state))
-				addrSource = state.getPointer(expr.getLValue(state).getSource());
+				addrSource = state.getPointer(expr.getPointerName());
 			else
-				addrSource = state.getPointer(dummySource);
+				addrSource = state.getPointer(dummySource.getBase());
 			return new IndirectLValueNode(this, new DummyLValueNode(this, getType(), addrSource), addrSource, getType());
 		case structMember:
 			return expr.getType().getStruct().getMember(memberName).getInstance(expr.getLValue(state));
@@ -601,18 +605,18 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 				state = state.setDestSource(destSource);
 			}
 			ScratchSource sourceP;
-			if (!state.hasPointer(expr.getLValue(state).getSource()))
+			if (!state.hasPointer(expr.getPointerName()))
 			{
 				try
 				{
-					state = state.reservePointer(expr.getLValue(state).getSource());
-					sourceP = state.getPointer(expr.getLValue(state).getSource());
+					state = state.reservePointer(expr.getPointerName(), expr.getIdlePointerDisqualifiers().toArray(new String[] {}));
+					sourceP = state.getPointer(expr.getPointerName());
 				}
 				catch (ScratchOverflowException e)
 				{
 					state.releasePointers();
-					state = state.reservePointer(expr.getLValue(state).getSource());
-					sourceP = state.getPointer(expr.getLValue(state).getSource());
+					state = state.reservePointer(expr.getPointerName());
+					sourceP = state.getPointer(expr.getPointerName());
 				}
 				tmpPair = new ByteCopier(CompConfig.pointerSize, sourceP, expr.getLValue(state).getSource()).getAssemblyAndState(state);
 				assembly += tmpPair.assembly;
@@ -662,16 +666,16 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 				tmpPair = new ByteCopier(expr.getSize(), destSource, sourceX).getAssemblyAndState(state);
 				assembly += tmpPair.assembly;
 				state = tmpPair.state;
-				state = state.releasePointer(sourceX);
+				state = state.disqualifyPointers(expr.getPointerName());
 			}
 			BaseExpressionNode<?> dX = new DummyExpressionNode(this, expr.getType(), 1);
-			state = state.releasePointer(sourceX);
+			state = state.disqualifyPointers(expr.getPointerName());
 			if (type == PFType.incr)
 				dX = new AdditiveExpressionNode(this, "+", expr, dX);
 			else if (type == PFType.decr)
 				dX = new AdditiveExpressionNode(this, "-", expr, dX);
 			dX = new AssignmentExpressionNode(this, expr, dX);
-			getEnclosingSequencePoint().registerAssemblable(dX);
+			getEnclosingSequencePoint().registerAssemblable(this, dX);
 			
 			if (scratchX != null) state = state.releaseScratchBlock(scratchX);
 			break;
@@ -679,11 +683,54 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 			break;
 		}
 		
-		state = state.releasePointer(destSource); // A copy of the destination, if it's a pointer, has gone stale
+		state = state.disqualifyPointers(getPointerName()); // A copy of the destination, if it's a pointer, has gone stale
 		return new AssemblyStatePair(assembly, state);
 	}
 
 	public PFType getPFType() {return type;}
 	public BaseExpressionNode<?> getExpr() {return expr;}
 	public BaseExpressionNode<?> getIndexExpr() {return indexExpr;}
+	
+	@Override
+	public String getPointerName()
+	{
+		switch (type)
+		{
+		case arraySubscript:
+			return expr.getPointerName() + "[" + indexExpr.getPointerName() + "]";
+		case structMember:
+			return expr.getPointerName() + " + " + expr.getType().getStruct().getOffset(memberName);
+		case structMemberP:
+			return expr.getPointerName() + " + " + ((PointerType) expr.getType()).getType().getStruct().getOffset(memberName);
+		default:
+			return expr.getPointerName();
+		}
+	}
+	
+	@Override
+	public Set<String> getIdlePointerDisqualifiers()
+	{
+		Set<String> set = new HashSet<String>();
+		set.addAll(expr.getIdlePointerDisqualifiers());
+		if (indexExpr != null) set.addAll(indexExpr.getIdlePointerDisqualifiers());
+		
+		return set;
+	}
+	
+	@Override
+	public Set<String> getPointerDisqualifiers()
+	{
+		Set<String> set = new HashSet<String>();
+		set.addAll(expr.getPointerDisqualifiers());
+		if (indexExpr != null) set.addAll(indexExpr.getPointerDisqualifiers());
+		switch (type)
+		{
+		case incr: case decr:
+			set.addAll(getIdlePointerDisqualifiers());
+			break;
+		default:
+		}
+		
+		return set;
+	}
 }

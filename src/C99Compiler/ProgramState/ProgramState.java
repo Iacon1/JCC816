@@ -26,10 +26,6 @@ public class ProgramState
 		{
 			super(CompConfig.scratchBase, offset, size);
 		}
-		public ScratchSource(int index)
-		{
-			super(CompConfig.pointerBase, index * CompConfig.pointerSize, CompConfig.pointerSize);
-		}
 	}
 	
 	// Whitespace
@@ -37,171 +33,22 @@ public class ProgramState
 	public String getWhitespace() { return " ".repeat(CompConfig.indentSize * whitespaceLevel);}
 	
 	// Scratch memory
-	private final List<SimpleEntry<Boolean, Integer>> blockList;
+	private final BlockList blockList;
 	private final ScratchSource lastScratchSource; // Last scratch source reserved
-	private static List<SimpleEntry<Boolean, Integer>> newBlockList()
-	{
-		List<SimpleEntry<Boolean, Integer>> blockList = new ArrayList<SimpleEntry<Boolean, Integer>>();
-		blockList.add(new SimpleEntry<Boolean, Integer>(false, CompConfig.scratchSize));
-		
-		return blockList;
-	}
-	private static List<SimpleEntry<Boolean, Integer>> cloneBlockList(List<SimpleEntry<Boolean, Integer>> other)
-	{
-		List<SimpleEntry<Boolean, Integer>> blockList = new ArrayList<SimpleEntry<Boolean, Integer>>();
-		for (SimpleEntry<Boolean, Integer> i : other)
-			blockList.add(new SimpleEntry<Boolean, Integer>(i));
-		
-		return blockList;
-	}
- 	private static ScratchSource reserveScratchBlock(List<SimpleEntry<Boolean, Integer>> blockList, int size, int offset) throws ScratchOverflowException
-	{
-		int currOffset = 0;
-		for (int i = 0; i < blockList.size(); ++i) // Get each block
-		{
-			if (currOffset + blockList.get(i).getValue() <= offset) {currOffset += blockList.get(i).getValue(); continue;} // This block's not got the right location
-			else if (blockList.get(i).getKey()) throw new ScratchOverflowException(); // This block's used! TODO new exception
-			else if (currOffset == offset && blockList.get(i).getValue() == size) // Found a block that's just the right size in just the right spot
-			{
-				blockList.set(i, new SimpleEntry<Boolean, Integer>(true, size));
 
-				return new ScratchSource(offset, size);
-			}
-			else if (currOffset == offset) // Found a block that's too big but in the right spot
-			{
-				int oldSize = blockList.get(i).getValue();
-				blockList.set(i, new SimpleEntry<Boolean, Integer>(true, size));
-				blockList.add(i + 1, new SimpleEntry<Boolean, Integer>(false, oldSize));
-
-				return new ScratchSource(offset, size);
-			}
-			else // Found a block that's too big
-			{
-				int oldSize = blockList.get(i).getValue();
-				int j = i;
-				if (offset - currOffset > 0) blockList.set(j++, new SimpleEntry<Boolean, Integer>(false, offset - currOffset));
-				blockList.add(j++, new SimpleEntry<Boolean, Integer>(true, size));
-				if (currOffset + oldSize > offset + size) blockList.add(j++, new SimpleEntry<Boolean, Integer>(false, (currOffset + oldSize) - (offset + size)));
-				return new ScratchSource(offset, size);
-			}
-		}
-		
-		// Found no block
-		throw new ScratchOverflowException();
-	}
-	private static ScratchSource reserveScratchBlock(List<SimpleEntry<Boolean, Integer>> blockList, int size) throws ScratchOverflowException
-	{
-		int offset = 0;
-		for (int i = 0; i < blockList.size(); ++i) // Get each block
-		{
-			if (blockList.get(i).getKey()) {offset += blockList.get(i).getValue(); continue;} // This block's in use
-			else if (blockList.get(i).getValue() < size) {offset += blockList.get(i).getValue(); continue;} // This block's too small
-			else if (blockList.get(i).getValue() == size) // Found a block that's just the right size
-			{
-				blockList.set(i, new SimpleEntry<Boolean, Integer>(true, size));
-
-				return new ScratchSource(offset, size);
-			}
-			else // Found a block that's too big, must be split
-			{
-				int oldSize = blockList.get(i).getValue();
-				blockList.set(i, new SimpleEntry<Boolean, Integer>(true, size));
-				blockList.add(i + 1, new SimpleEntry<Boolean, Integer>(false, oldSize - 1));
-
-				return new ScratchSource(offset, size);
-			}
-		}
-		
-		// Found no block
-		throw new ScratchOverflowException();
-	}
-	private static void releaseScratchBlock(List<SimpleEntry<Boolean, Integer>> blockList, LinkedHashMap<OperandSource, ScratchSource> pointerMap, ScratchSource s)
-	{
-		int i = -1;
-		// Find the block
-		int offset = 0;
-		for (int j = 0; j < blockList.size(); ++j)
-		{
-			if (s.getOffset() == offset)
-			{
-				i = j;
-				break;
-			}
-			offset += blockList.get(j).getValue();
-		}
-		if (i == -1) return;
-		
-		int size = blockList.get(i).getValue();
-		if (i < blockList.size() - 1 && !blockList.get(i + 1).getKey()) // Can merge with next block
-		{
-			size += blockList.get(i + 1).getValue();
-			blockList.remove(i);
-		}
-		if (i > 0 && !blockList.get(i - 1).getKey()) // Can merge with prior block
-		{
-			size += blockList.get(i - 1).getValue();
-			blockList.remove(i - 1);
-			i -= 1;
-		}
-		List<OperandSource> toRemove = new LinkedList<OperandSource>();
-		for (OperandSource o : pointerMap.keySet())
-			if (pointerMap.get(o).equals(s))
-				toRemove.add(o);
-		for (OperandSource o : toRemove)
-			pointerMap.remove(o);
-		
-		blockList.set(i, new SimpleEntry<Boolean, Integer>(false, size));
-	}
 	// Pointers
-	private final LinkedHashMap<OperandSource, ScratchSource> pointerMap;
-	private static LinkedHashMap<OperandSource, ScratchSource> newPointerMap()
-	{
-		return new LinkedHashMap<OperandSource, ScratchSource>();
-	}
-	private static LinkedHashMap<OperandSource, ScratchSource> clonePointerMap(LinkedHashMap<OperandSource, ScratchSource> other)
-	{
-		LinkedHashMap<OperandSource, ScratchSource> pointerMap = new LinkedHashMap<OperandSource, ScratchSource>();
-		for (Map.Entry<OperandSource, ScratchSource> i : other.entrySet())
-		{
-			pointerMap.put(i.getKey(), i.getValue());
-		}
-		
-		return pointerMap;
-	}
-	private static ScratchSource reservePointer(List<SimpleEntry<Boolean, Integer>> blockList, LinkedHashMap<OperandSource, ScratchSource> pointerMap, OperandSource s) throws ScratchOverflowException
-	{
-		if (pointerMap.containsKey(s))
-			return pointerMap.get(s);
-		
-		ScratchSource scratchSource = reserveScratchBlock(blockList, CompConfig.pointerSize);
-		pointerMap.put(s, scratchSource);
-		return scratchSource;
-	}
-	private static ScratchSource markPointer(List<SimpleEntry<Boolean, Integer>> blockList, LinkedHashMap<OperandSource, ScratchSource> pointerMap, OperandSource s, ScratchSource scratchSource) throws ScratchOverflowException
-	{
-		// Release any pre-existing pointer to this
-		releasePointer(blockList, pointerMap, pointerMap.get(s));
-		
-		pointerMap.put(s, scratchSource);
-		return scratchSource;
-	}
-	private static void releasePointer(List<SimpleEntry<Boolean, Integer>> blockList, LinkedHashMap<OperandSource, ScratchSource> pointerMap, OperandSource s) throws ScratchOverflowException
-	{
-		if (!pointerMap.containsKey(s))
-			return;
-		
-		releaseScratchBlock(blockList, pointerMap, pointerMap.get(s));
-		pointerMap.remove(s);
-	}
-	public boolean hasPointer(OperandSource s)
-	{
-		return pointerMap.containsKey(s);
-	}
-	public ScratchSource getPointer(OperandSource s)
-	{
-		return pointerMap.get(s);
-	}
+	private final DisqualifyingMap<ScratchSource> pointerMap;
+	
 	public ScratchSource lastScratchSource() {return lastScratchSource;}
+	
+	public boolean hasPointer(String name)
+	{
+		return pointerMap.get(name) != null;
+	}
+	public ScratchSource getPointer(String name)
+	{
+		return pointerMap.get(name);
+	}
 	
 	// Destination source
 	private final OperandSource destSource;
@@ -341,8 +188,8 @@ public class ProgramState
 	// Constructors
 	private ProgramState(
 			int whitespaceLevel,
-			List<SimpleEntry<Boolean, Integer>> blockList, ScratchSource lastScratchSource,
-			LinkedHashMap<OperandSource, ScratchSource> pointerMap,
+			BlockList blockList, ScratchSource lastScratchSource,
+			DisqualifyingMap<ScratchSource> pointerMap,
 			Map<LValueNode<?>, List<Object>> possibleValues,
 			OperandSource destSource,
 			String exitFuncLabel,
@@ -371,9 +218,9 @@ public class ProgramState
 	public ProgramState()
 	{
 		this.whitespaceLevel = 0;
-		this.blockList = newBlockList();
+		this.blockList = new BlockList(CompConfig.scratchSize);
 		this.lastScratchSource = null;
-		this.pointerMap = newPointerMap();
+		this.pointerMap = new DisqualifyingMap<ScratchSource>();
 		this.possibleValues = newPossibleValues();
 		this.destSource = null;
 		this.exitFuncLabel = null;
@@ -426,16 +273,23 @@ public class ProgramState
 	/** Reserves a block of scratch memory.
 	 * 
 	 * @param size The size of the block to reserve.
-	 * @param offset The offset to begin looking at.
 	 * @return A copy of the state with the block reserved.
 	 * @throws ScratchOverflowException if the block could not be reserved.
 	 */
-	public ProgramState reserveScratchBlock(int size, int offset) throws ScratchOverflowException
+	public ProgramState reserveScratchBlock(int size) throws ScratchOverflowException
 	{
-		List<SimpleEntry<Boolean, Integer>> blockList = new ArrayList<SimpleEntry<Boolean, Integer>>();
-		for (SimpleEntry<Boolean, Integer> i : this.blockList)
-			blockList.add(new SimpleEntry<Boolean, Integer>(i));
-		ScratchSource source = reserveScratchBlock(blockList, size, offset);
+		BlockList blockList;
+		int effOffset;
+		try
+		{
+			effOffset = this.blockList.getReservedOffset(size, false);
+			blockList = this.blockList.reserve(size, false);
+		}
+		catch (Exception e)
+		{
+			throw new ScratchOverflowException();
+		}
+		ScratchSource source = new ScratchSource(effOffset, size);
 		
 		ProgramState s = new ProgramState(
 				whitespaceLevel,
@@ -451,16 +305,26 @@ public class ProgramState
 				isSA1);
 		return s;
 	}
-	/** Reserves a block of scratch memory.
+	/** Reserves a block of scratch memory, starting at the end of scratch and looking backwards.
 	 * 
 	 * @param size The size of the block to reserve.
 	 * @return A copy of the state with the block reserved.
 	 * @throws ScratchOverflowException if the block could not be reserved.
 	 */
-	public ProgramState reserveScratchBlock(int size) throws ScratchOverflowException
+	public ProgramState reverseReserveScratchBlock(int size) throws ScratchOverflowException
 	{
-		List<SimpleEntry<Boolean, Integer>> blockList = cloneBlockList(this.blockList);
-		ScratchSource source = reserveScratchBlock(blockList, size);
+		BlockList blockList;
+		int effOffset;
+		try
+		{
+			effOffset = this.blockList.getReservedOffset(size, true);
+			blockList = this.blockList.reserve(size, true);
+		}
+		catch (Exception e)
+		{
+			throw new ScratchOverflowException();
+		}
+		ScratchSource source = new ScratchSource(effOffset, size);
 		
 		ProgramState s = new ProgramState(
 				whitespaceLevel,
@@ -483,10 +347,11 @@ public class ProgramState
 	 */
 	public ProgramState releaseScratchBlock(ScratchSource source)
 	{
-		List<SimpleEntry<Boolean, Integer>> blockList = cloneBlockList(this.blockList);
-		LinkedHashMap<OperandSource, ScratchSource> pointerMap = clonePointerMap(this.pointerMap);
-		releaseScratchBlock(blockList, pointerMap, source);
-		
+		BlockList blockList;
+		DisqualifyingMap<ScratchSource> pointerMap;
+		blockList = this.blockList.release(source.getOffset());
+		pointerMap = this.pointerMap.remove(source);
+
 		ProgramState s = new ProgramState(
 				whitespaceLevel,
 				blockList, lastScratchSource,
@@ -501,36 +366,37 @@ public class ProgramState
 				isSA1);
 		return s;
 	}
-	/** Reserves a pointer-usable copy of a source.
+	/** Reserves a section of scratch memory as a pointer.
 	 * 
-	 * @param source Source to reserve a pointer for.
+	 * @param name The name to reserve the pointer under.
+	 * @param disqualifiers The disqualifers that can disqualify the pointer if invoked.
 	 * @return A copy of the state with the pointer reserved.
 	 */
-	public ProgramState reservePointer(OperandSource source) throws ScratchOverflowException
+	public ProgramState reservePointer(String name, String... disqualifiers) throws ScratchOverflowException
 	{
-		if (pointerMap.containsKey(source))
+		BlockList blockList = this.blockList;
+		ScratchSource lastScratchSource = this.lastScratchSource;
+		DisqualifyingMap<ScratchSource> pointerMap = this.pointerMap;
+		
+		if (this.pointerMap.get(name) != null) // Already reserved
+			pointerMap = pointerMap.register(pointerMap.get(name), name, disqualifiers); // Refresh disqualifiers
+		else // Not yet reserved, reserve
 		{
-			ProgramState s = new ProgramState(
-					whitespaceLevel,
-					blockList, getPointer(source),
-					pointerMap,
-					possibleValues,
-					destSource,
-					exitFuncLabel,
-					processorFlags,
-					preserveFlags,
-					knownFlags,
-					a, x, y,
-					isSA1);
-			return s;
+			try
+			{
+				lastScratchSource = new ScratchSource(blockList.getReservedOffset(CompConfig.pointerSize, false), CompConfig.pointerSize);
+				blockList = blockList.reserve(CompConfig.pointerSize, false);
+			}
+			catch (Exception e)
+			{
+				throw new ScratchOverflowException();
+			}
+			pointerMap = pointerMap.register(lastScratchSource, name, disqualifiers);
 		}
-		List<SimpleEntry<Boolean, Integer>> blockList = cloneBlockList(this.blockList);
-		LinkedHashMap<OperandSource, ScratchSource> pointerMap = clonePointerMap(this.pointerMap);
-		ScratchSource scratchSource = reservePointer(blockList, pointerMap, source);
 		
 		ProgramState s = new ProgramState(
 				whitespaceLevel,
-				blockList, scratchSource,
+				blockList, lastScratchSource,
 				pointerMap,
 				possibleValues,
 				destSource,
@@ -547,31 +413,14 @@ public class ProgramState
 	 * @param source Source to reserve a pointer for.
 	 * @return A copy of the state with the pointer reserved.
 	 */
-	public ProgramState markPointer(OperandSource source, ScratchSource scratchSource) throws ScratchOverflowException
+	public ProgramState markPointer(ScratchSource scratchSource, String name, String... disqualifiers) throws ScratchOverflowException
 	{
-		if (pointerMap.containsKey(source))
-		{
-			ProgramState s = new ProgramState(
-					whitespaceLevel,
-					blockList, getPointer(source),
-					pointerMap,
-					possibleValues,
-					destSource,
-					exitFuncLabel,
-					processorFlags,
-					preserveFlags,
-					knownFlags,
-					a, x, y,
-					isSA1);
-			return s;
-		}
-		List<SimpleEntry<Boolean, Integer>> blockList = cloneBlockList(this.blockList);
-		LinkedHashMap<OperandSource, ScratchSource> pointerMap = clonePointerMap(this.pointerMap);
-		scratchSource = markPointer(blockList, pointerMap, source, scratchSource);
-		
+		DisqualifyingMap<ScratchSource> pointerMap = this.pointerMap;
+
+		pointerMap = this.pointerMap.register(scratchSource, name, disqualifiers); // Refresh disqualifiers
 		ProgramState s = new ProgramState(
 				whitespaceLevel,
-				blockList, scratchSource,
+				blockList, pointerMap.get(name),
 				pointerMap,
 				possibleValues,
 				destSource,
@@ -583,23 +432,30 @@ public class ProgramState
 				isSA1);
 		return s;
 	}
+	
 	/** Releases a pointer-usable copy of a source, if it exists.
 	 * 
 	 * @param source Source to release any pointer to.
 	 * @return A copy of the state with the pointer released.
 	 */
-	public ProgramState releasePointer(OperandSource source) throws ScratchOverflowException
+	public ProgramState disqualifyPointers(String... disqualifiers) throws ScratchOverflowException
 	{
-		if (!pointerMap.containsKey(source)) return this;
-		
-		ScratchSource pointer = getPointer(source);
- 		List<SimpleEntry<Boolean, Integer>> blockList = cloneBlockList(this.blockList);
-		LinkedHashMap<OperandSource, ScratchSource> pointerMap = clonePointerMap(this.pointerMap);
-		releasePointer(blockList, pointerMap, source);
-		
+		boolean foundLSS = false;
+		List<String> disqualifiedNames = this.pointerMap.getDisqualifiedItemNames(disqualifiers);
+		BlockList blockList = this.blockList;
+		DisqualifyingMap<ScratchSource> pointerMap = this.pointerMap;
+		for (String name : disqualifiedNames)
+		{
+			if (pointerMap.get(name).equals(lastScratchSource))
+				foundLSS = true;
+			
+			blockList = blockList.release(pointerMap.get(name).getOffset());
+		}
+		pointerMap = this.pointerMap.disqualify(disqualifiers);
+
 		ProgramState s = new ProgramState(
 				whitespaceLevel,
-				blockList, lastScratchSource == pointer ? null : lastScratchSource ,
+				blockList, foundLSS ? null : lastScratchSource ,
 				pointerMap,
 				possibleValues,
 				destSource,
@@ -617,19 +473,21 @@ public class ProgramState
 	 */
 	public ProgramState releasePointers() throws ScratchOverflowException
 	{
-		boolean wasLastPointer = pointerMap.containsValue(lastScratchSource);
- 		List<SimpleEntry<Boolean, Integer>> blockList = cloneBlockList(this.blockList);
-		LinkedHashMap<OperandSource, ScratchSource> pointerMap = clonePointerMap(this.pointerMap);
-		List<OperandSource> toRemove = new LinkedList<OperandSource>();
-		for (OperandSource p : pointerMap.keySet())
-			toRemove.add(p);
-		for (OperandSource p : toRemove)
-			releasePointer(blockList, pointerMap, p);
+		boolean foundLSS = false;
+		BlockList blockList = this.blockList;
+		DisqualifyingMap<ScratchSource> pointerMap = this.pointerMap;
+		for (ScratchSource source : pointerMap.getAll())
+		{
+			if (source.equals(lastScratchSource))
+				foundLSS = true;
+			
+			blockList = blockList.release(source.getOffset());
+		}
 		
 		ProgramState s = new ProgramState(
 				whitespaceLevel,
-				blockList, wasLastPointer ? null : lastScratchSource ,
-				pointerMap,
+				blockList, foundLSS ? null : lastScratchSource ,
+				new DisqualifyingMap<ScratchSource>(),
 				possibleValues,
 				destSource,
 				exitFuncLabel,
@@ -977,6 +835,38 @@ public class ProgramState
 		catch (ScratchOverflowException e) {}
 		return s;
 	}
+	/** Wipes the scratch state if too much memory (per CompConfig.healthyScratchSize) is used.
+	 * 
+	 * @return A copy of the state with the processor and memory states wiped.
+	 */
+	public ProgramState checkScratch()
+	{
+		BlockList blockList = this.blockList;
+		ScratchSource lastScratchSource = this.lastScratchSource;
+		DisqualifyingMap<ScratchSource> pointerMap = this.pointerMap;
+		if (blockList.getUsedSize() >= CompConfig.healthyScratchSize)
+		{
+			blockList = new BlockList(CompConfig.scratchSize);
+			lastScratchSource = null;
+			pointerMap = new DisqualifyingMap<ScratchSource>();
+			
+			ProgramState s = new ProgramState(
+					whitespaceLevel,
+					blockList, lastScratchSource,
+					pointerMap,
+					possibleValues,
+					destSource,
+					exitFuncLabel,
+					processorFlags,
+					preserveFlags,
+					knownFlags,
+					a, x, y,
+					isSA1);
+			return s;
+		}
+		else
+			return this;
+	}
 	public ProgramState combine(ProgramState other)
 	{
 		byte processorFlags = (byte) (this.processorFlags & other.processorFlags); // TODO
@@ -992,8 +882,8 @@ public class ProgramState
 		
 		ProgramState s = new ProgramState(
 				whitespaceLevel,
-				newBlockList(), null,
-				newPointerMap(),
+				new BlockList(CompConfig.scratchSize), null,
+				new DisqualifyingMap<ScratchSource>(),
 				newPossibleValues(),
 				destSource,
 				exitFuncLabel,
