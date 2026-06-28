@@ -87,13 +87,16 @@ public final class FileIO
 	public static final String readFile(File file) throws IOException
 	{
 		FileInputStream inStream = new FileInputStream(file);
-		char[] chars = new char[(int) file.length()];
+		char[] chars1 = new char[(int) file.length()]; // Maximum number of chars needed is size in bytes
 		BufferedReader reader = new BufferedReader(new InputStreamReader(inStream, "UTF-8"));
-		reader.read(chars);
+		int n = reader.read(chars1); // Figure out how many actually needed
+		char[] chars2 = new char[n];
+		for (int i = 0; i < n; ++i)
+			chars2[i] = chars1[i];
 		reader.close();
 		inStream.close();
 		
-		return new String(chars);
+		return new String(chars2);
 	}
 	public static final byte[] readFileBytes(File file) throws IOException
 	{
