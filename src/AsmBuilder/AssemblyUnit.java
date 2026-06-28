@@ -65,7 +65,7 @@ public class AssemblyUnit implements TranslationUnit {
 	@Override public String getFilename() {return filename;}
 	@Override public Set<String> getIncludedStdLibs() {return new HashSet<String>();}
 	@Override public Set<String> getIncludedOtherLibs() {return new HashSet<String>();}
-	
+	@Override public byte[] getEmbedFile(String filename) {return new byte[] {};}
 	public String getAssembly()
 	{
 		return "; " + CompConfig.asmTag + (VerbosityLevel.isAtLeast(VerbosityLevel.high) ? (" " + filename) : "") + "\n" +

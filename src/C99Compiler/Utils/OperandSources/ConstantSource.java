@@ -57,7 +57,7 @@ public class ConstantSource extends ConstantByteSource
 			if (d < 0)
 				bytes[size - 1] |= 0x80;
 		}
-		else if (Integer.class.isAssignableFrom(obj.getClass()) || Long.class.isAssignableFrom(obj.getClass()))
+		else if (Integer.class.isAssignableFrom(obj.getClass()) || Long.class.isAssignableFrom(obj.getClass()) || Byte.class.isAssignableFrom(obj.getClass()))
 		{
 			String s = new StringBuilder().append(String.format("%0" + 2*size + "x", obj)).reverse().toString(); // Reverse for proper byte order
 			String s2 = "";

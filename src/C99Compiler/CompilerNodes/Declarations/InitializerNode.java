@@ -26,10 +26,12 @@ import C99Compiler.CompilerNodes.Expressions.BaseExpressionNode;
 import C99Compiler.CompilerNodes.Expressions.CastExpressionNode;
 import C99Compiler.CompilerNodes.Expressions.ConstantExpressionNode;
 import C99Compiler.CompilerNodes.Expressions.PrimaryExpressionNode;
+import C99Compiler.CompilerNodes.Expressions.UnaryExpressionNode;
 import C99Compiler.CompilerNodes.Interfaces.AssemblableNode;
 import C99Compiler.CompilerNodes.Interfaces.SequencePointNode;
 import C99Compiler.CompilerNodes.Interfaces.TypedNode;
 import C99Compiler.CompilerNodes.LValues.LValueNode;
+import C99Compiler.CompilerNodes.LValues.WrapperLValueNode;
 import C99Compiler.CompilerNodes.LValues.VariableNode;
 import C99Compiler.Exceptions.ConstraintException;
 import C99Compiler.ProgramState.ProgramState;
@@ -123,6 +125,31 @@ public class InitializerNode extends InterpretingNode<InitializerNode, Initializ
 		}
 		
 		return currNode;
+	}
+	
+	private int checkForEmbeds(int arrayIndex)
+	{
+		if (arrayInitializers.get(arrayIndex).expr != null
+				&& UnaryExpressionNode.class.isAssignableFrom(arrayInitializers.get(arrayIndex).expr.getClass())
+				&& ((UnaryExpressionNode) arrayInitializers.get(arrayIndex).expr).isEMBED())
+		{
+			UnaryExpressionNode e = (UnaryExpressionNode) arrayInitializers.get(arrayIndex).expr;
+			byte[] bytes = (byte[]) e.getPropValue(new ProgramState());
+			Type type = ((ArrayType) e.getType()).getType();
+			if (bytes.length > 0)
+				arrayInitializers.get(arrayIndex).expr = new DummyExpressionNode(e, type, bytes[0]);
+			arrayIndex += 1;
+			for (int ii = 1; ii < bytes.length; ++ii)
+			{
+				arrayInitializers.put(arrayIndex, new InitializerNode(this, new WrapperLValueNode(this, type, LValue, type.getSize() * arrayIndex)));
+				arrayInitializers.get(arrayIndex).expr = new DummyExpressionNode(e, type, bytes[ii]);
+				arrayIndex += 1;
+			}
+		}
+		else
+			arrayIndex += 1;
+		
+		return arrayIndex;
 	}
 	
 	@Override public boolean isSequencePoint() {return true;}
@@ -220,7 +247,8 @@ public class InitializerNode extends InterpretingNode<InitializerNode, Initializ
 							throw new ConstraintException("6.7.8", 6, node.initializer_list().initializer(k).start);
 						else if (arrayIndex >= arrayInitializers.size()) // Just make a new one if we're incomplete
 							arrayInitializers.put(arrayIndex, new InitializerNode(this, arrayType.getAtIndex(LValue, i)));
-						arrayInitializers.get(arrayIndex++).interpret(node.initializer_list().initializer(k++));
+						arrayInitializers.get(arrayIndex).interpret(node.initializer_list().initializer(k++));
+						arrayIndex = checkForEmbeds(arrayIndex);
 						arraySize = Math.max(arrayIndex, arraySize); // Only set if an incomplete array
 						
 					}
@@ -240,8 +268,7 @@ public class InitializerNode extends InterpretingNode<InitializerNode, Initializ
 						arrayIndex = LValue.getType().getStruct().getMemberNames().indexOf(designator0.identifier().getText());
 					InitializerNode initializer = resolveInitializer(this, node.initializer_list().designation(j++));
 					initializer.interpret(node.initializer_list().initializer(k++));
-					arrayIndex += 1;
-					i += 1;
+					arrayIndex = checkForEmbeds(arrayIndex);
 				}
 			}
 			

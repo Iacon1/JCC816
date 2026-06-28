@@ -31,7 +31,7 @@ public abstract class PreProcComponentNode<T extends PreProcComponentNode<T>>
 	
 	public static final Map<String, DefineNode> defines = new HashMap<String, DefineNode>();
 	public static final Map<String, Map<Character, Character>> charMappings = new HashMap<String, Map<Character, Character>>();
-	public static final Set<String> embeds = new HashSet<String>();
+	public static final Map<String, byte[]> embeds = new HashMap<String, byte[]>();
 	
 	public static void resetLineNo(String file, int line, boolean isStd)
 	{
@@ -270,5 +270,10 @@ public abstract class PreProcComponentNode<T extends PreProcComponentNode<T>>
 		for (PreProcComponentNode<?> child : children)
 			lineInfo.addAll(child.getLineInfo(offset));
 		return lineInfo;
+	}
+	
+	public Map<String, byte[]> getEmbedFiles()
+	{
+		return embeds;
 	}
 }

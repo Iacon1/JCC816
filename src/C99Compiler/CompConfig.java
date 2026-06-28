@@ -44,7 +44,8 @@ public final class CompConfig
 	public static final String asmTag =  "@asm"; // Start of included asm file
 	public static final String eAsmTag = "@endasm"; // End of included asm file
 	public static final String registerTag = "__REG";
-
+	public static final String embedTag = "__EMBED";
+	
 	public static final int bytesPerDataLine = 32; // Bytes per data line for ROM data
 	
 	public static final OperandSource callResultSource(int size)

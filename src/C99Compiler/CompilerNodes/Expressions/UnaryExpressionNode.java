@@ -15,6 +15,7 @@ import C99Compiler.CompilerNodes.Dummies.DummyType;
 import C99Compiler.CompilerNodes.LValues.IndirectLValueNode;
 import C99Compiler.CompilerNodes.LValues.LValueNode;
 import C99Compiler.CompilerNodes.LValues.VariableNode;
+import C99Compiler.CompilerNodes.Definitions.ArrayType;
 import C99Compiler.CompilerNodes.Definitions.PointerType;
 import C99Compiler.Exceptions.ConstraintException;
 import C99Compiler.Exceptions.ScratchOverflowException;
@@ -40,7 +41,8 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 	private BaseExpressionNode<?> expr;
 	private Type type;
 	private String operator;
-	private String identifier, embName; // Only useful in preproc mode
+	private String identifier; // Only useful in preproc mode
+	private String embName;
 	IndirectLValueNode indirect;
 	
 	public UnaryExpressionNode(ComponentNode<?> parent) {super(parent); indirect = null;}
@@ -69,7 +71,10 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 			else if (node.Header_name() != null)
 				this.embName = node.Header_name().getText();
 			else if (node.String_literal() != null)
+			{
 				this.embName = node.String_literal().getText();
+				this.embName = this.embName.substring(1, this.embName.length() - 1);
+			}
 			if (node.identifier() != null)
 				this.identifier = node.identifier().getText();
 			operator = node.getChild(0).getText();
@@ -101,6 +106,10 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 			expr = (BaseExpressionNode<?>) to;
 	}
 	
+	public boolean isEMBED()
+	{
+		return operator.equals(CompConfig.embedTag);
+	}
 	@Override
 	public Type getType()
 	{
@@ -116,6 +125,10 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 		else if (operator.equals("sizeof") || operator.equals("defined") || operator.equals("__has_embed") || operator.equals("__offset_of"))
 		{
 			return new DummyType("unsigned", "int");
+		}
+		else if (operator.equals(CompConfig.embedTag))
+		{
+			return new ArrayType(new DummyType("unsigned", "char"), getTranslationUnit().getEmbedFile(embName).length);
 		}
 		else if (operator.equals("+") || operator.equals("-"))
 			return expr.getType().promote();
@@ -181,7 +194,7 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 	@Override
 	public boolean hasPropValue(ProgramState state)
 	{
-		if (operator.equals("sizeof") || operator.equals("defined") || operator.equals("__has_embed") || operator.equals("__offset_of")) return true;
+		if (operator.equals("sizeof") || operator.equals("defined") || operator.equals("__has_embed") || operator.equals("__offset_of") || operator.equals(CompConfig.embedTag)) return true;
 		else if (operator.equals("*"))
 			if (expr.hasPropValue(state)) // if expr can only point to one thing...
 			{
@@ -216,7 +229,11 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 		}
 		else if (operator.equals("__has_embed")) // Only useful in preproc mode
 		{
-			return PreProcComponentNode.embeds.contains(embName) ? Long.valueOf(1) : Long.valueOf(0);
+			return PreProcComponentNode.embeds.containsKey(embName) ? Long.valueOf(1) : Long.valueOf(0);
+		}
+		else if (operator.equals(CompConfig.embedTag))
+		{
+			return getTranslationUnit().getEmbedFile(embName);
 		}
 		else if (operator.equals("__offset_of")) // Only useful in preproc mode
 		{
@@ -307,7 +324,8 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 				sourceX = expr.getLValue(pair.state).getSource();
 			else sourceX = null;
 		}
-		DummyExpressionNode dX = new DummyExpressionNode(this, expr.getType(), 1);
+		DummyExpressionNode dX = null;
+		if (expr != null) dX = new DummyExpressionNode(this, expr.getType(), 1);
 		switch (operator)
 		{
 		case "++": case "--":

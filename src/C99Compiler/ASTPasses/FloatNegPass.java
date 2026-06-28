@@ -20,6 +20,9 @@ public class FloatNegPass implements PerNodeASTPass<UnaryExpressionNode>
 	{
 		String funcName = null;
 		PostfixExpressionNode funcNode = null;
+		if (node.getExpression() == null)
+			return node;
+		
 		Type type = node.getExpression().getType();
 		
 		if (type.isFloat() && node.getOperator().equals("-"))

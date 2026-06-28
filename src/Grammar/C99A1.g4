@@ -49,7 +49,11 @@ fragment Escape_sequence
 	| '\\x' [0-9a-fA-F]+ ;
 
 // A.1.6 String literals
-String_literal : 'L'? '"' (~('"'|'\\'|'\n')|Escape_sequence)+ '"' ;
+fragment S_char
+	: ~('"'|'\\'|'\n')
+	| Escape_sequence ;
+fragment S_char_seq : S_char+ ;
+String_literal : 'L'? '"' S_char_seq? '"' ;
 	
 // A.1.8 Header names
 Header_name

@@ -6,6 +6,7 @@ package C99Compiler.CompilerNodes;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import C99Compiler.CompConfig.DefinableInterrupt;
@@ -32,22 +33,12 @@ public class TranslationUnitNode extends InterpretingNode<TranslationUnitNode, T
 	private List<LineInfo> lineInfo;
 	private Set<String> includedStdLibs;
 	private Set<String> includedOtherLibs;
+	private Map<String, byte[]> embedFiles;
 	private List<InitializerNode> globalInitializers;
 	private String filename;
 	private String staticUUID;
 	
-	public TranslationUnitNode(ComponentNode<?> parent, String filename, List<LineInfo> lineInfo)
-	{
-		super(parent);
-		interrupts = new LinkedHashMap<DefinableInterrupt, String>();
-		typedefs = new LinkedHashMap<String, Type>();
-		requiredSubs = new LinkedHashMap<String, String>();
-		globalInitializers = new LinkedList<InitializerNode>();
-		this.filename = filename;
-		this.lineInfo = lineInfo;
-		staticUUID = CompUtils.getSafeUUID();
-	}
-	public TranslationUnitNode(String filename, List<LineInfo> lineInfo)
+	public TranslationUnitNode(String filename, Map<String, byte[]> embedFiles, List<LineInfo> lineInfo)
 	{
 		super();
 		interrupts = new LinkedHashMap<DefinableInterrupt, String>();
@@ -55,6 +46,7 @@ public class TranslationUnitNode extends InterpretingNode<TranslationUnitNode, T
 		requiredSubs = new LinkedHashMap<String, String>();
 		globalInitializers = new LinkedList<InitializerNode>();
 		this.filename = filename;
+		this.embedFiles = embedFiles;
 		this.lineInfo = lineInfo;
 		staticUUID = CompUtils.getSafeUUID();
 	}
@@ -134,6 +126,10 @@ public class TranslationUnitNode extends InterpretingNode<TranslationUnitNode, T
 	{
 		this.includedOtherLibs = includedOtherLibs;
 	}
+	public void setEmbedFiles(Map<String, byte[]> embedFiles)
+	{
+		this.embedFiles = embedFiles;
+	}
 	@Override
 	public Set<String> getIncludedStdLibs()
 	{
@@ -143,6 +139,11 @@ public class TranslationUnitNode extends InterpretingNode<TranslationUnitNode, T
 	public Set<String> getIncludedOtherLibs()
 	{
 		return includedOtherLibs;
+	}
+	@Override
+	public byte[] getEmbedFile(String filename)
+	{
+		return this.embedFiles.get(filename);
 	}
 	@Override
 	public String getFilename() {return filename;}

@@ -2,6 +2,7 @@
 // C Preprocessor
 package C99Compiler;
 
+import java.io.ByteArrayInputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,7 +11,6 @@ import java.util.Set;
 
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.DiagnosticErrorListener;
 import org.antlr.v4.runtime.Token;
 
 import C99Compiler.PreprocNodes.GroupNode;
@@ -89,7 +89,7 @@ public final class Preprocessor
 
 		SyntaxErrorCollector collector = new SyntaxErrorCollector();
 		
-		C99A3Lexer lexer = new C99A3Lexer(CharStreams.fromString(source));
+		C99A3Lexer lexer = new C99A3Lexer(CharStreams.fromStream(new ByteArrayInputStream(source.getBytes("UTF-8"))));
 //		lexer.removeErrorListeners();
 		lexer.addErrorListener(collector);
 
@@ -106,7 +106,7 @@ public final class Preprocessor
 		return group;
 	}
 	
-	public static final String preprocess(Set<String> includedStdLibs, Set<String> includedOtherLibs, List<LineInfo> lineInfo, String filename, String source, Header header, boolean isStd) throws Exception
+	public static final String preprocess(Set<String> includedStdLibs, Set<String> includedOtherLibs, Map<String, byte[]> embedFiles, List<LineInfo> lineInfo, String filename, String source, Header header, boolean isStd) throws Exception
 	{
 		Grammar.GrammarFlags.isPreproc = true;
 		PreProcComponentNode.loadPredefs(header);
@@ -120,6 +120,7 @@ public final class Preprocessor
 		GroupNode node = new GroupNode().interpret(parsePreprocess(source));
 		includedStdLibs.addAll(node.getIncludedStdLibs());
 		includedOtherLibs.addAll(node.getIncludedOtherLibs());
+		embedFiles.putAll(node.getEmbedFiles());
 		lineInfo.clear();
 		lineInfo.addAll(node.getLineInfo(-2)); // -2 offset to account for imp_mult and imp_float
 		source = node.getText();
@@ -129,8 +130,8 @@ public final class Preprocessor
 		return source;
 	}
 	
-	public static final String preprocess(Set<String> includedStdLibs, Set<String> includedOtherLibs, List<LineInfo> lineInfo, String filename, String source, boolean isStd) throws Exception
+	public static final String preprocess(Set<String> includedStdLibs, Set<String> includedOtherLibs, Map<String, byte[]> embedFiles, List<LineInfo> lineInfo, String filename, String source, boolean isStd) throws Exception
 	{
-		return preprocess(includedStdLibs, includedOtherLibs, lineInfo, filename, source, null, isStd);
+		return preprocess(includedStdLibs, includedOtherLibs, embedFiles, lineInfo, filename, source, null, isStd);
 	}
 }

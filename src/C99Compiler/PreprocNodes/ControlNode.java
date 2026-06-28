@@ -7,8 +7,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import org.antlr.v4.runtime.tree.TerminalNode;
-
 import C99Compiler.CompConfig;
 import C99Compiler.PragmaProcessor;
 import C99Compiler.Preprocessor;
@@ -25,7 +23,7 @@ public class ControlNode extends InterpretingNode<ControlNode, Control_lineConte
 	private GroupNode include;
 	private String stdLib; // Only fill out if standard lib was included
 	private String otherLib; // Only fill out if other lib was included
-	private byte[] embedBytes;
+	private String embedFile;
 	private String pragmaOutput; // Output of Pragma
 	private List<LineInfo> lineInfo;
 	
@@ -34,7 +32,6 @@ public class ControlNode extends InterpretingNode<ControlNode, Control_lineConte
 		super(parent);
 		command = null;
 		include = null;
-		embedBytes = null;
 		pragmaOutput = null;
 		lineInfo = new LinkedList<LineInfo>();
 	}
@@ -43,7 +40,6 @@ public class ControlNode extends InterpretingNode<ControlNode, Control_lineConte
 		super();
 		command = null;
 		include = null;
-		embedBytes = null;
 		pragmaOutput = null;
 		lineInfo = new LinkedList<LineInfo>();
 	}
@@ -67,6 +63,7 @@ public class ControlNode extends InterpretingNode<ControlNode, Control_lineConte
 	@Override
 	public ControlNode interpret(Control_lineContext node) throws Exception
 	{
+		byte[] embedBytes;
 		command = node.getChild(1).getText();
 		
 		String filename; // For include and embed
@@ -177,7 +174,8 @@ public class ControlNode extends InterpretingNode<ControlNode, Control_lineConte
 			else // Include other file
 				embedBytes = FileIO.readFileBytes(filename);
 
-			embeds.add(filename);
+			embedFile = filename.replace("\\", "\\\\");
+			embeds.put(embedFile, embedBytes);
 			
 			int j = 0;
 			for (int i = 0; i < embedBytes.length; i += CompConfig.bytesPerDataLine)
@@ -215,13 +213,7 @@ public class ControlNode extends InterpretingNode<ControlNode, Control_lineConte
 			return include.getText();
 		else if (command.equals("embed"))
 		{
-			String text = "";
-			for (int i = 0; i < embedBytes.length; ++i)
-			{
-				if (i != 0 && i % CompConfig.bytesPerDataLine == 0) text += "\n";
-				text += String.format("0x%02x", embedBytes[i]) + ", ";
-			}
-			return text.substring(0, text.length() - 2) + "\n";
+			return CompConfig.embedTag + "(\"" + embedFile + "\")\n";
 		}
 		else if (pragmaOutput != null)
 			return pragmaOutput;

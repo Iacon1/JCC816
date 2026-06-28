@@ -471,7 +471,7 @@ public class JCC816
 		{
 			String parameter = commandLine.getArgList().get(0);
 			String fileText = FileIO.readFile(parameter);
-			fileText = Preprocessor.preprocess(new HashSet<String>(), new HashSet<String>(), new LinkedList<LineInfo>(), parameter, fileText, false);
+			fileText = Preprocessor.preprocess(new HashSet<String>(), new HashSet<String>(), new HashMap<String, byte[]>(), new LinkedList<LineInfo>(), parameter, fileText, false);
 			byte[] fileBytes = fileText.getBytes();
 			FileIO.writeFile(commandLine.getOptionValue("p"), fileBytes);
 		}

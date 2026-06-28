@@ -28,9 +28,10 @@ unary_expression
 	| (Amper|Star|Plus|Minus|Tilde|Excla) cast_expression
 	| Sizeof unary_expression
 	| Sizeof LeRoBr type_name RiRoBr
+	| EmbedT LeRoBr String_literal RiRoBr
 	| HasEmbed LeRoBr (Header_name|String_literal) RiRoBr
 	| Defined identifier
-	| Defined LeRoBr identifier RiRoBr
+	| Defined LeRoBr identifier RiRoBr	
 	| Offsetof LeRoBr type_name Comma identifier RiRoBr
 	;
 cast_expression

@@ -56,6 +56,7 @@ Line : 'line' {Grammar.GrammarFlags.isPreproc}? ;
 Error : 'error' {Grammar.GrammarFlags.isPreproc}? ;
 Pragma : 'pragma' {Grammar.GrammarFlags.isPreproc}? ;
 
+EmbedT : '__EMBED';
 HasEmbed : '__has_embed' {Grammar.GrammarFlags.isPreproc}? ; // Backported from C23
 Embed : 'embed'  {Grammar.GrammarFlags.isPreproc}? ;
 Offsetof: '__offset_of' ;
