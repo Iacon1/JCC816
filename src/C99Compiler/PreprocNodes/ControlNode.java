@@ -176,10 +176,8 @@ public class ControlNode extends InterpretingNode<ControlNode, Control_lineConte
 
 			embedFile = filename.replace("\\", "\\\\");
 			embeds.put(embedFile, embedBytes);
-			
-			int j = 0;
-			for (int i = 0; i < embedBytes.length; i += CompConfig.bytesPerDataLine)
-				lineInfo.add(getCurrLineInfo());
+		
+			lineInfo.add(getCurrLineInfo());
 			break;
 		}
 		incrLineNo();

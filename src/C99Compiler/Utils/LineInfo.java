@@ -26,6 +26,9 @@ public class LineInfo implements Serializable
 
 	public String getLine()
 	{
+		char c;
+		if (filename.endsWith(".h"))
+			c = 3;
 		if (!isStd)
 			return "\"" + FileIO.getFile(filename) + "\", " + line;
 		else if (filename.contains("imp_math"))

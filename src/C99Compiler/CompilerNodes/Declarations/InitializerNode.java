@@ -269,6 +269,7 @@ public class InitializerNode extends InterpretingNode<InitializerNode, Initializ
 					InitializerNode initializer = resolveInitializer(this, node.initializer_list().designation(j++));
 					initializer.interpret(node.initializer_list().initializer(k++));
 					arrayIndex = checkForEmbeds(arrayIndex);
+					i += 1;
 				}
 			}
 			
