@@ -37,6 +37,7 @@ import C99Compiler.Utils.AssemblyUtils.StackLoader;
 import C99Compiler.Utils.AssemblyUtils.StackPusher;
 import C99Compiler.Utils.OperandSources.AddressSource;
 import C99Compiler.Utils.OperandSources.ConstantSource;
+import C99Compiler.Utils.OperandSources.IndexOperandSource;
 import C99Compiler.Utils.OperandSources.IndirectOperandSource;
 import C99Compiler.Utils.OperandSources.OperandSource;
 import Grammar.C99.C99Parser.Assignment_expressionContext;
@@ -185,9 +186,7 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 			else
 				return ((FunctionType) expr.getType()).getType();
 		case structMember:
-			if (expr.getType().getStruct() == null)
-				expr = expr;
-			return expr.getType().getStruct().getMember(memberName) .getType();
+			return expr.getType().getStruct().getMember(memberName).getType();
 		case structMemberP:
 			return (((PointerType) expr.getType()).getType()).getStruct().getMember(memberName).getType();	
 		case incr: case decr:
@@ -388,7 +387,13 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 				assembly += tmpPair.assembly;
 				state = tmpPair.state;
 			}
-			state = state.releasePointers(); // TODO only need to wipe pointers here
+			else if (destSource != null && IndexOperandSource.class.isAssignableFrom(destSource.getClass()))
+			{
+				OperandSource indexSource = ((IndexOperandSource) destSource).getIndexSource();
+				tmpPair = new StackPusher(indexSource.getSize(), indexSource).getAssemblyAndState(state);
+				assembly += tmpPair.assembly;
+				state = tmpPair.state;
+			}
 			if (getReferencedFunction(state) != null && !getReferencedFunction(state).canCall(state, getEnclosingFunction())) // We can know the variables to copy parameters to
 			{
 				if (expr.hasAssembly(state))
@@ -406,7 +411,7 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 					tmpPair = new AssemblyStatePair("", state);
 					for (VariableNode parameter : variables)
 					{
-						tmpPair = new StackLoader(parameter.getSource().getSize(), parameter.getSource()).apply(tmpPair);
+						tmpPair = new StackPusher(parameter.getSource().getSize(), parameter.getSource()).apply(tmpPair);
 					}
 					assembly += tmpPair.assembly;
 					state = tmpPair.state;
@@ -573,6 +578,13 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 			if (destSource != null && IndirectOperandSource.class.isAssignableFrom(destSource.getClass()))
 			{
 				tmpPair = new StackLoader(CompConfig.pointerSize, ((IndirectOperandSource) destSource).getSource()).getAssemblyAndState(state);
+				assembly += tmpPair.assembly;
+				state = tmpPair.state;
+			}
+			else if (destSource != null && IndexOperandSource.class.isAssignableFrom(destSource.getClass()))
+			{
+				OperandSource indexSource = ((IndexOperandSource) destSource).getIndexSource();
+				tmpPair = new StackLoader(indexSource.getSize(), indexSource).getAssemblyAndState(state);
 				assembly += tmpPair.assembly;
 				state = tmpPair.state;
 			}
