@@ -2,7 +2,7 @@
 
 int puts(const char* s)
 {
-	extern char destination;
+	extern volatile char destination;
 	int len = 0;
 	asm("puts@destination = $006000");
 	while (*s != '\0')

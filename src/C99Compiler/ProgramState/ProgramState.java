@@ -478,7 +478,7 @@ public class ProgramState
 		DisqualifyingMap<ScratchSource> pointerMap = this.pointerMap;
 		for (ScratchSource source : pointerMap.getAll())
 		{
-			if (source.equals(lastScratchSource))
+			if (lastScratchSource != null && source.equals(lastScratchSource))
 				foundLSS = true;
 			
 			blockList = blockList.release(source.getOffset());
