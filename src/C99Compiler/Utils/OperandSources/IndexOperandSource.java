@@ -20,7 +20,7 @@ public class IndexOperandSource extends OperandSource
 	@Override
 	public OperandSource getShifted(int offset, int size)
 	{
-		return new IndexOperandSource(this.size + size, source.getShifted(offset, source.size), indexSource);
+		return new IndexOperandSource(this.size + size, source.getShifted(offset, size), indexSource);
 	}
 	public OperandSource getShifted(int offset) {return getShifted(offset, 0);}
 	
@@ -66,5 +66,6 @@ public class IndexOperandSource extends OperandSource
 	{
 		return source.getSpec() + ",X";
 	}
+	public OperandSource getIndexSource() {return indexSource;}
 	
 }

@@ -62,7 +62,7 @@ public class ArrayIndexExpressionNode extends BaseExpressionNode<Postfix_express
 	@Override
 	public LValueNode<?> getLValue(ProgramState state)
 	{
-		return new IndexLValueNode(this, getType(), n.getSource(), indexSource);
+		return new IndexLValueNode(this, getType(), n.getSource().respec(getType().getSize()), indexSource);
 	}
 	
 	@Override
