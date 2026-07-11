@@ -204,7 +204,7 @@ public class ConstantSource extends ConstantByteSource
 	
 	public String getBase(ProgramState state, int i)
 	{
-		if (pointerOverrideMap != null && pointerOverrideMap.containsKey(i))
+		if (pointerOverrideMap != null && pointerOverrideMap.containsKey(i) && pointerOverrideMap.get(i) != null)
 		{
 			SimpleEntry<PropPointer<?>, Integer> entry = pointerOverrideMap.get(i);
 			return entry.getKey().apply(state, entry.getValue());
