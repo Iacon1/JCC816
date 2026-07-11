@@ -181,6 +181,25 @@ public abstract class PreProcComponentNode<T extends PreProcComponentNode<T>>
 		
 		return new ArrayList<String>(wordList.subList(leftmost, rightmost + 1));
 	}
+	private static List<String> removeParameters(List<String> wordList, int leftmost)
+	{
+		int rightmost = leftmost - 1;
+		int parenDepth = 1; // When 0, good to leave
+		while (parenDepth != 0)
+		{
+			rightmost += 1;
+			
+			if (rightmost >= wordList.size()) return null;
+			if (wordList.get(rightmost + 1).equals("(")) parenDepth += 1;
+			else if (wordList.get(rightmost + 1).equals(")")) parenDepth -= 1;
+		}
+		
+		List<String> list = new ArrayList<String>();
+		list.addAll(wordList.subList(0, leftmost));
+		list.addAll(wordList.subList(rightmost + 1, wordList.size()));
+		
+		return list;
+	}
 	private static String[] removeCommas(List<String> wordList)
 	{
 		int i = wordList.size() - 1;
@@ -228,7 +247,7 @@ public abstract class PreProcComponentNode<T extends PreProcComponentNode<T>>
 				if (defines.get(word).hasParameters())
 				{
 					List<String> parameters = collectParameters(wordList, i + 1);
-					wordList.removeAll(parameters);
+					wordList = removeParameters(wordList, i + 1);
 					wordList.remove(i + 1); // Remove parentheses
 					wordList.remove(i); // Remove parentheses
 					wordList.addAll(i, Arrays.asList(defines.get(word).getText(removeCommas(parameters)).split(" ")));
