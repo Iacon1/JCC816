@@ -10,6 +10,7 @@ import java.io.InputStream;
 import java.util.LinkedList;
 import java.util.List;
 
+import C99Compiler.CompConfig;
 import C99Compiler.CompConfig.DebugLevel;
 import C99Compiler.CompConfig.VerbosityLevel;
 import C99Compiler.Exceptions.AssemblerException;
@@ -22,6 +23,17 @@ import Shared.Header.DestinationCode;
 
 public class Assembler
 {
+	private static String getCL65Name()
+	{
+		if (CompConfig.pathCL65.equals(""))
+			return "cl65";
+		else
+		{
+			if (!CompConfig.pathCL65.endsWith("/"))
+				CompConfig.pathCL65 += "/";
+			return CompConfig.pathCL65 + "cl65";
+		}
+	}
 	public static byte[] assemble(String name, Header header, String assembly, boolean cleanup, MemorySize memorySize) throws Exception
 	{
 		if (name.endsWith(".sfc"))
@@ -43,7 +55,7 @@ public class Assembler
 		
 		Process proc;
 		List<String> parameters = new LinkedList<String>();
-		parameters.add("cl65");
+		parameters.add(getCL65Name());
 		parameters.add("--verbose");
 		if (DebugLevel.isAtLeast(DebugLevel.medium))
 			parameters.add("-g");
@@ -96,7 +108,7 @@ public class Assembler
 	{
 		try
 		{
-			Process proc = Runtime.getRuntime().exec(new String[] {"cl65", "--version"});
+			Process proc = Runtime.getRuntime().exec(new String[] {getCL65Name(), "--version"});
 			InputStream stream = proc.getErrorStream();
 			String s = new String(stream.readAllBytes());
 			stream.close();

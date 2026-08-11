@@ -17,6 +17,7 @@ public final class CompConfig
 	public static final String version = "0.X";
 
 	public static String rootFolder = "."; // Name of base folder to look for non-stdlib libraries in
+	public static String pathCL65 = ""; // Put at start of CL65 path
 	public static String multImpFile = null; // Filename of mult. expression implementation source.
 	public static String floatImpFile = null; // Filename of float expression implementation source.
 	
