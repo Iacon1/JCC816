@@ -80,24 +80,24 @@ public abstract class PreProcComponentNode<T extends PreProcComponentNode<T>>
 			defines.put("__SNES_REGION__", destCode);
 			switch (header.getDestinationCode())
 			{
-			case japan: defines.put("__SNES_REGION_JPN__", destCode); break;
-			case USA: defines.put("__SNES_REGION_USA__", destCode); break;
-			case australia: defines.put("__SNES_REGION_AUS__", destCode); break;
-			case brazil: defines.put("__SNES_REGION_BRA__", destCode); break;
-			case canada: defines.put("__SNES_REGION_CAN__", destCode); break;
-			case china: defines.put("__SNES_REGION_CHN__", destCode); break;
-			case denmark: defines.put("__SNES_REGION_DEN__", destCode); break;
-			case europe: defines.put("__SNES_REGION_EUR__", destCode); break;
-			case finland: defines.put("__SNES_REGION_FIN__", destCode); break;
-			case france: defines.put("__SNES_REGION_FRA__", destCode); break;
-			case germany: defines.put("__SNES_REGION_GER__", destCode); break;
-			case indonesia: defines.put("__SNES_REGION_IND__", destCode); break;
-			case international: defines.put("__SNES_REGION_INT__", destCode); break;
-			case italy: defines.put("__SNES_REGION_ITA__", destCode); break;
-			case netherlands: defines.put("__SNES_REGION_NET__", destCode); break;
-			case southKorea: defines.put("__SNES_REGION_KOR__", destCode); break;
-			case spain: defines.put("__SNES_REGION_SPN__", destCode); break;
-			case sweden: defines.put("__SNES_REGION_SWE__", destCode); break;
+			case japan: 		defines.put("__SNES_REGION_JPN__", destCode); defines.put("__SNES_TIMING_NTSC__", destCode); break;
+			case USA: 			defines.put("__SNES_REGION_USA__", destCode); defines.put("__SNES_TIMING_NTSC__", destCode); break;
+			case australia:		defines.put("__SNES_REGION_AUS__", destCode); defines.put("__SNES_TIMING_PAL__", destCode); break;
+			case brazil: 		defines.put("__SNES_REGION_BRA__", destCode); defines.put("__SNES_TIMING_NTSC__", destCode); break;
+			case canada: 		defines.put("__SNES_REGION_CAN__", destCode); defines.put("__SNES_TIMING_NTSC__", destCode); break;
+			case china: 		defines.put("__SNES_REGION_CHN__", destCode); defines.put("__SNES_TIMING_PAL__", destCode); break;
+			case denmark: 		defines.put("__SNES_REGION_DEN__", destCode); defines.put("__SNES_TIMING_PAL__", destCode); break;
+			case europe: 		defines.put("__SNES_REGION_EUR__", destCode); defines.put("__SNES_TIMING_PAL__", destCode); break;
+			case finland: 		defines.put("__SNES_REGION_FIN__", destCode); defines.put("__SNES_TIMING_PAL__", destCode); break;
+			case france: 		defines.put("__SNES_REGION_FRA__", destCode); defines.put("__SNES_TIMING_PAL__", destCode); break;
+			case germany: 		defines.put("__SNES_REGION_GER__", destCode); defines.put("__SNES_TIMING_PAL__", destCode); break;
+			case indonesia: 	defines.put("__SNES_REGION_IND__", destCode); defines.put("__SNES_TIMING_PAL__", destCode); break;
+			case international: defines.put("__SNES_REGION_INT__", destCode); defines.put("__SNES_TIMING_PAL__", destCode); break;
+			case italy: 		defines.put("__SNES_REGION_ITA__", destCode); defines.put("__SNES_TIMING_PAL__", destCode); break;
+			case netherlands: 	defines.put("__SNES_REGION_NET__", destCode); defines.put("__SNES_TIMING_PAL__", destCode); break;
+			case southKorea: 	defines.put("__SNES_REGION_KOR__", destCode); defines.put("__SNES_TIMING_NTSC__", destCode); break;
+			case spain: 		defines.put("__SNES_REGION_SPN__", destCode); defines.put("__SNES_TIMING_PAL__", destCode); break;
+			case sweden: 		defines.put("__SNES_REGION_SWE__", destCode); defines.put("__SNES_TIMING_PAL__", destCode); break;
 			}
 				
 			DefineNode revision = new DefineNode("0x" + String.format("%02x", header.getRevision()));
