@@ -1,1 +1,3 @@
-java -jar "$(dirname "$0")\JCC816.jar" $@
+#!/bin/sh
+
+java -jar "$(dirname "$0")/JCC816.jar" $@
