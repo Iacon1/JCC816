@@ -182,6 +182,13 @@ public class JCC816
 				.build();
 		options.addOption(option);
 		
+		option = Option.builder()
+				.longOpt("path-CL65")
+				.desc("Sets the (absolute) path to search for CL65 and other CC65 suite applications. Otherwise defaults to root.")
+				.numberOfArgs(1)
+				.build();
+		options.addOption(option);
+		
 		return options;
 	}
 	
@@ -346,7 +353,7 @@ public class JCC816
 		}
 		if (commandLine.hasOption("l") && !Assembler.hasCL65()) // No Cl65 installed
 		{
-			Logging.logError("CL65 not detected. Cannot link to executable without Cl65 installed.");
+			Logging.logError("CL65 not detected. Cannot link to executable without CL65 installed.");
 			return;
 		}
 		
@@ -361,6 +368,8 @@ public class JCC816
 			FileIO.writeFile(filename, FileIO.readResourceBytes("XML\\Header.XML"));
 			return;
 		}
+		if (commandLine.hasOption("path-CL65"))
+			CompConfig.pathCL65 = commandLine.getOptionValue("path-CL65");
 		
 		// Load header
 		if (commandLine.hasOption("l")) // Executable
