@@ -88,12 +88,13 @@ public class ArrayIndexPass2 implements PerNodeASTPass<UnaryExpressionNode>
 		else
 			y = addees.pop();
 		
+		Type type = ((PointerType) x.getType()).getType();
+		
 		LValueNode<?> n = (LValueNode<?>) x.getPropPointer(state).getNode();
-		if (x.getType() != n.getType()) // Sometimes happens when a cast from pointer to pointer occurs
-			n = new WrapperLValueNode(n, x.getType(), n, 0);
+		if (type != n.getType())
+			n = new WrapperLValueNode(n, type, n, 0);
 		if (y.hasPropValue(state))
 		{
-			Type type = ((PointerType) n.getType()).getType();
 			DummyExpressionNode d = new DummyExpressionNode(node, new WrapperLValueNode(node, type, n, (int) y.getPropLong(state)));
 			node.swap(d);
 			return d;

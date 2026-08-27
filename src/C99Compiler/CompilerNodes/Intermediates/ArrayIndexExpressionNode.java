@@ -2,7 +2,6 @@
 // An optimized node just for array indicing and dereferencing pointers to known values
 package C99Compiler.CompilerNodes.Intermediates;
 
-import java.util.HashSet;
 import java.util.Set;
 
 import javax.naming.OperationNotSupportedException;
@@ -94,7 +93,6 @@ public class ArrayIndexExpressionNode extends BaseExpressionNode<Postfix_express
 	public AssemblyStatePair getAssemblyAndState(ProgramState state) throws Exception
 	{
 		MutableAssemblyStatePair pair = new MutableAssemblyStatePair("", state);
-		boolean usedScratch = false;
 		OperandSource destSource = pair.state.destSource();
 		int size = Math.min(indexExpr.getSize(), 2);
 
@@ -105,7 +103,6 @@ public class ArrayIndexExpressionNode extends BaseExpressionNode<Postfix_express
 		if (indexExpr.hasAssembly(pair.state))
 		{
 			indexExpr.apply(pair);
-			usedScratch = true;
 		}
 		else if (indexExpr.hasPropValue(state))
 		{
@@ -115,7 +112,6 @@ public class ArrayIndexExpressionNode extends BaseExpressionNode<Postfix_express
 		else if (indexExpr.hasLValue(state))
 		{
 			new ByteCopier(indexSource, indexExpr.getLValue(state).getSource()).apply(pair);
-			usedScratch = true;
 		}
 		pair.state = pair.state.setDestSource(destSource);
 		if (destSource != null)
@@ -127,7 +123,7 @@ public class ArrayIndexExpressionNode extends BaseExpressionNode<Postfix_express
 	@Override
 	public Type getType()
 	{
-		return ((PointerType) n.getType()).getType();
+		return n.getType();
 	}
 	
 	@Override
