@@ -2,6 +2,7 @@
 //
 package C99Compiler.Utils.OperandSources;
 
+import C99Compiler.CompConfig;
 import C99Compiler.ProgramState.ProgramState;
 import C99Compiler.ProgramState.ProgramState.PreserveFlag;
 import C99Compiler.ProgramState.ProgramState.ProcessorFlag;
@@ -41,6 +42,12 @@ public class IndexOperandSource extends OperandSource
 	public AssemblyStatePair getInstruction(ProgramState state, String operation, Integer i)
 	{
 		String assembly = "";
+		AssemblyStatePair p;
+		
+		p = source.getInstruction(state, operation, i);
+		if (p.assembly.contains(CompConfig.signExtend)) // Sign extend detected
+			return p;
+		
 		if (indexSource.getSize() >= 2 && (!state.testKnownFlag(PreserveFlag.I) || !state.testProcessorFlag(ProcessorFlag.I)))
 		{
 			assembly += state.getWhitespace() + "REP\t#$10\n";
@@ -51,7 +58,7 @@ public class IndexOperandSource extends OperandSource
 			assembly += state.getWhitespace() + "SEP\t#$10\n";
 			state = state.setProcessorFlags(ProcessorFlag.I);
 		}
-		AssemblyStatePair p = indexSource.getInstruction(state, "LDX", 0);
+		p = indexSource.getInstruction(state, "LDX", 0);
 		assembly += p.assembly;
 		state = p.state;
 		
