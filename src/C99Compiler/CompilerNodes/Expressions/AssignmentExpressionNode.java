@@ -177,13 +177,13 @@ public class AssignmentExpressionNode extends BinaryExpressionNode
 			state = tmpPair.state;
 		}
 		
-		destSource = x.getLValue(state).getSource();
-		state = state.setDestSource(destSource);
+		destSource = state.destSource();
+		state = state.setDestSource(x.getLValue(state).getSource());
 //		if (!y.getType().canCastTo(x.getType()))
 //			throw new TypeMismatchException(y.getType(), x.getType());
 		if (y.hasAssembly(state))
 		{
-			sourceY = destSource;
+			sourceY = x.getLValue(state).getSource();
 			tmpPair = y.getAssemblyAndState(state);
 			assembly += tmpPair.assembly;
 			state = tmpPair.state;
@@ -201,6 +201,14 @@ public class AssignmentExpressionNode extends BinaryExpressionNode
 			state = tmpPair.state;
 			
 			ByteCopier copier = new ByteCopier(x.getLValue(state).getSource(), sourceY);
+			tmpPair = copier.getAssemblyAndState(state);
+			assembly += tmpPair.assembly;
+			state = tmpPair.state;
+		}
+		if (destSource != null)
+		{
+			state = state.setDestSource(destSource);
+			ByteCopier copier = new ByteCopier(destSource, sourceY);
 			tmpPair = copier.getAssemblyAndState(state);
 			assembly += tmpPair.assembly;
 			state = tmpPair.state;
