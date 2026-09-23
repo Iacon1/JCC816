@@ -119,7 +119,7 @@ public abstract class BytewiseOperator implements Assemblable
 					}
 					else
 					{
-						if (!(state.testKnownFlag(ProgramState.PreserveFlag.M) && state.testProcessorFlag(ProgramState.ProcessorFlag.M))) // Not already in 16-bit mode
+						if (!(pair.state.testKnownFlag(ProgramState.PreserveFlag.M) && pair.state.testProcessorFlag(ProgramState.ProcessorFlag.M))) // Not already in 16-bit mode
 						{
 							pair.assembly += pair.state.getWhitespace() + CompUtils.setA16 + "\n";
 							pair.state = pair.state.setProcessorFlags(ProgramState.ProcessorFlag.M);
