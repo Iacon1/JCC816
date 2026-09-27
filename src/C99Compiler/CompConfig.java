@@ -179,6 +179,7 @@ public final class CompConfig
 	}
 	public static VerbosityLevel verbosityLevel = VerbosityLevel.none;
 	public static boolean showParseTree = false;
+	public static boolean throwExceptions = false;
 	
 	public static final class Attributes
 	{

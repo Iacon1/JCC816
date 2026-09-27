@@ -4,8 +4,8 @@ package C99Compiler.Exceptions;
 
 import org.antlr.v4.runtime.Token;
 
-import C99Compiler.C99Compiler;
 import C99Compiler.CompilerNodes.ComponentNode;
+
 import C99Compiler.Utils.LineInfo;
 
 public class TokenException extends CompilerException
@@ -15,7 +15,7 @@ public class TokenException extends CompilerException
 		String filename;
 		if (info == null)
 		{
-			filename = C99Compiler.getCurrFilename();
+			filename = C99Compiler.C99Compiler.getCurrFilename();
 		}
 		else
 		{

@@ -103,7 +103,7 @@ public class C99Compiler
 	private static TranslationUnitNode parse(String filename, Map<String, byte[]> embedFiles, List<LineInfo> lineInfo, CommonTokenStream tokens) throws Exception
 	{
 		currTypedefs.clear();
-		SyntaxErrorCollector collector = new SyntaxErrorCollector();
+		SyntaxErrorCollector collector = new SyntaxErrorCollector(lineInfo);
 		C99Parser parser = new C99Parser(tokens);
 		parser.removeErrorListeners(); // Removes default error listener
 		parser.addErrorListener(collector);

@@ -9,8 +9,6 @@ import C99Compiler.CompConfig.DebugLevel;
 import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.InterpretingNode;
 import C99Compiler.CompilerNodes.Interfaces.UnvaluedAssemblableNode;
-import C99Compiler.CompilerNodes.LValues.VariableNode;
-import C99Compiler.Exceptions.ScratchOverflowException;
 import C99Compiler.ProgramState.ProgramState;
 import C99Compiler.Utils.LineInfo;
 import Grammar.C99.C99Parser.StatementContext;
