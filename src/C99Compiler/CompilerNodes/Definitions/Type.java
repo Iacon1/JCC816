@@ -16,13 +16,12 @@ import C99Compiler.CompConfig;
 import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.Declarations.DeclarationSpecifiersNode;
 import C99Compiler.CompilerNodes.Declarations.DeclaratorNode;
-import C99Compiler.CompilerNodes.Declarations.DirectDeclaratorNode;
 import C99Compiler.CompilerNodes.Dummies.DummyType;
-import C99Compiler.CompilerNodes.Interfaces.TypedNode;
 import C99Compiler.CompilerNodes.LValues.VariableNode;
 import C99Compiler.Exceptions.ConstraintException;
 import C99Compiler.Exceptions.UndefinedTypeException;
 import C99Compiler.Exceptions.UnsupportedFeatureException;
+import C99Compiler.ProgramState.ProgramState;
 
 public class Type implements Serializable
 {
@@ -121,7 +120,7 @@ public class Type implements Serializable
 	public static Type manufactureCtxt(DeclarationSpecifiersNode.DeclSpecifiers specifiers, ComponentNode<?> context, Token start) throws Exception
 	{
 		Type t = new Type();
-		
+
 		if (specifiers.storageClassSpecifiers.length > 0)
 			t.storageClassSpecifier = specifiers.storageClassSpecifiers[0];
 		for (String specifier : specifiers.typeSpecifiers)
@@ -150,9 +149,8 @@ public class Type implements Serializable
 //			functionSpecifiers.add(qualifier);
 		
 		// Check constraints
-		
 		if (specifiers.storageClassSpecifiers.length > 1)
-			throw new ConstraintException("6.7.1", 1, start);
+			throw new ConstraintException("6.7.1", 1, start, context);
 		
 		if (t.isPointer())
 			return t;
@@ -161,22 +159,22 @@ public class Type implements Serializable
 			for (String spec : t.typeSpecifiers)
 				if (!recognizedStrings.contains(spec))
 				{
-					Exception e = new UndefinedTypeException(spec, start);
-					e.addSuppressed(new ConstraintException("6.7.2", 2, start));
+					Exception e = new UndefinedTypeException(spec, start, context);
+					e.addSuppressed(new ConstraintException("6.7.2", 2, start, context));
 					throw e;
 				}
 			// Otherwise it's the right parts, just in the wrong order
-			throw new ConstraintException("6.7.2", 2, start);
+			throw new ConstraintException("6.7.2", 2, start, context);
 		}
 		if ((t.isStructOrUnion() || t.isEnum()) && t.getSUEName() == null)
 		{
-			throw new UndefinedTypeException("", start);
+			throw new UndefinedTypeException("", start, context);
 		}
 
 		if (t.typeSpecifiers.contains("_Complex")) // Complex numbers not supported
 		{
-			Exception e = new UnsupportedFeatureException("Complex numbers", false, start);
-			e.addSuppressed(new ConstraintException("6.7.2", 3, start));
+			Exception e = new UnsupportedFeatureException("Complex numbers", false, start, context);
+			e.addSuppressed(new ConstraintException("6.7.2", 3, start, context));
 			throw e;
 		}
 		
@@ -199,15 +197,15 @@ public class Type implements Serializable
 			}
 			if (info.type == DeclaratorNode.DeclaratorType.array)
 			{
-				if (info.assignExpr != null && Number.class.isAssignableFrom(info.assignExpr.getPropValue().getClass()))
-					type = new ArrayType(type, (int) info.assignExpr.getPropLong());
+				if (info.assignExpr != null && Number.class.isAssignableFrom(info.assignExpr.getPropValue(new ProgramState()).getClass()))
+					type = new ArrayType(type, (int) info.assignExpr.getPropLong(new ProgramState()));
 				else
 					type = new ArrayType(type); // Incomplete array
 			}
 			else if (info.type == DeclaratorNode.DeclaratorType.funcParam) // Function
 			{
 				if (type.isFunction() || type.isArray())
-					throw new ConstraintException("6.7.5.3", 1, start);
+					throw new ConstraintException("6.7.5.3", 1, start, declaratorNode);
 				List<Type> paramTypes = new ArrayList<Type>();
 				for (int i = 0; i < info.paramDecls.length; ++i)
 				{
@@ -215,7 +213,7 @@ public class Type implements Serializable
 					{
 						Type paramType = variable.getType();
 						if (paramType.isExtern() | paramType.isAuto() | paramType.isStatic())
-							throw new ConstraintException("6.7.5.3", 2, start);
+							throw new ConstraintException("6.7.5.3", 2, start, declaratorNode);
 						paramTypes.add(paramType);
 					}
 				}

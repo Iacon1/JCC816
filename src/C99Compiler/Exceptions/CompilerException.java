@@ -2,7 +2,7 @@
 // An exception from the compiler
 package C99Compiler.Exceptions;
 
-public class CompilerException extends Exception
+public class CompilerException extends SoftException
 {
 	public CompilerException(String message)
 	{

@@ -2,7 +2,6 @@
 // Array
 package C99Compiler.CompilerNodes.Definitions;
 
-import java.util.HashSet;
 import java.util.Set;
 
 import C99Compiler.CompConfig;

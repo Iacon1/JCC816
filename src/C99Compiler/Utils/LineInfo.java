@@ -23,12 +23,15 @@ public class LineInfo implements Serializable
 		this.line = info.line;
 		this.isStd = info.isStd;
 	}
+	public LineInfo()
+	{
+		this.filename = null;
+		this.line = 0;
+		this.isStd = false;
+	}
 
 	public String getLine()
 	{
-		char c;
-		if (filename.endsWith(".h"))
-			c = 3;
 		if (!isStd)
 			return "\"" + FileIO.getFile(filename) + "\", " + line;
 		else if (filename.contains("imp_math"))

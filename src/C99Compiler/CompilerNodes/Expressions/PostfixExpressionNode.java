@@ -119,24 +119,24 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 					getReferencedFunction(state).requireStackLoader();
 				
 				if (params.size() != getReferencedFunction(new ProgramState()).getParameters().size())
-					throw new ConstraintException("6.5.2.2", 2, node.start);
+					throw new ConstraintException("6.5.2.2", 2, node.start, this);
 				if (getReferencedFunction(new ProgramState()).isSA1() && !getEnclosingFunction().isSA1())
-					throw new UnsupportedFeatureException("Calling an SA1 function outside an SA1 context", true, node.start);
+					throw new UnsupportedFeatureException("Calling an SA1 function outside an SA1 context", true, node.start, this);
 				else if (!getReferencedFunction(new ProgramState()).isSA1() && getEnclosingFunction().isSA1())
-					throw new UnsupportedFeatureException("Calling a non-SA1 function inside an SA1 context", true, node.start);
+					throw new UnsupportedFeatureException("Calling a non-SA1 function inside an SA1 context", true, node.start, this);
 			}
 			break;
 		case ".":
 			type = PFType.structMember;
 			memberName = node.identifier().getText();
 			if (expr.getType().getStruct().getMember(memberName) == null)
-				throw new ConstraintException("6.5.2.3", 1, node.start);
+				throw new ConstraintException("6.5.2.3", 1, node.start, this);
 			break;
 		case "->": // Struct member
 			type = PFType.structMemberP;
 			memberName = node.identifier().getText();
 			if (((PointerType) expr.getType()).getType().getStruct().getMember(memberName) == null)
-				throw new ConstraintException("6.5.2", 2, node.start);
+				throw new ConstraintException("6.5.2", 2, node.start, this);
 			break;
 		case "++":
 			type = PFType.incr;

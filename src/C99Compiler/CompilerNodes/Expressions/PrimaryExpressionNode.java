@@ -4,7 +4,6 @@ package C99Compiler.CompilerNodes.Expressions;
 
 import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Set;
 
 import org.antlr.v4.runtime.Token;
@@ -15,10 +14,8 @@ import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.FunctionDefinitionNode;
 import C99Compiler.CompilerNodes.Declarations.InitializerNode;
 import C99Compiler.CompilerNodes.Definitions.ArrayType;
-import C99Compiler.CompilerNodes.Definitions.PointerType;
 import C99Compiler.CompilerNodes.Definitions.Type;
 import C99Compiler.CompilerNodes.Dummies.DummyType;
-import C99Compiler.CompilerNodes.Dummies.DummyVariableNode;
 import C99Compiler.CompilerNodes.LValues.LValueNode;
 import C99Compiler.CompilerNodes.LValues.VariableNode;
 import C99Compiler.Exceptions.UndefinedVariableException;
@@ -59,7 +56,7 @@ public class PrimaryExpressionNode extends BaseExpressionNode<Primary_expression
 			if (resolveEnumeratorRelative(identifier) != null); // Enumerator
 			else if (hasLValue(new ProgramState())); // Variable
 			else if (resolveFunctionRelative(identifier) != null); // Function
-			else throw new UndefinedVariableException(identifier, node.start);
+			else throw new UndefinedVariableException(identifier, node.start, this);
 		}
 		else if (node.Constant() != null)
 		{

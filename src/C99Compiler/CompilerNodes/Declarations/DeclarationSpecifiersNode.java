@@ -116,7 +116,7 @@ public class DeclarationSpecifiersNode extends InterpretingNode<DeclarationSpeci
 		}
 		// Constraints
 		if (storageClassSpecifiers.size() > 1)
-			throw new ConstraintException("6.7.1", 2, node.start);
+			throw new ConstraintException("6.7.1", 2, node.start, this);
 		
 		return this;
 	}
@@ -137,7 +137,7 @@ public class DeclarationSpecifiersNode extends InterpretingNode<DeclarationSpeci
 		
 		// Constraints
 		if (storageClassSpecifiers.size() > 1)
-			throw new ConstraintException("6.7.1", 2, node.start);
+			throw new ConstraintException("6.7.1", 2, node.start, this);
 		
 		return this;
 	}

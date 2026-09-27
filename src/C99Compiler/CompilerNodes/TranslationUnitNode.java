@@ -108,7 +108,7 @@ public class TranslationUnitNode extends InterpretingNode<TranslationUnitNode, T
 				if (innerException.getSuppressed().length > 0) throw (Exception) innerException.getSuppressed()[0]; // Weird hack I know
 
 				if (oldFunction != null && oldFunction.isImplemented()) // Two implemented functions cannot have same erasure and name
-					throw new CompilerMultipleDefinitionException(oldFunction.getName(), extDec.start); 
+					throw new CompilerMultipleDefinitionException(oldFunction.getName(), extDec.start, this); 
 				else if (oldFunction != null) // Function definition found but not signature
 					resolveFunctionRelative(oldFunction.getName()).implement(extDec.function_definition().compound_statement());
 				else // No preceeding function found

@@ -2,20 +2,12 @@
 // LOR and LAND
 package C99Compiler.CompilerNodes.Expressions;
 
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-
 import org.antlr.v4.runtime.ParserRuleContext;
 
-import C99Compiler.CompConfig;
 import C99Compiler.ASMGrapher.ASMGraphBuilder;
 import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.Definitions.Type;
 import C99Compiler.CompilerNodes.Dummies.DummyType;
-import C99Compiler.CompilerNodes.Dummies.DummyExpressionNode;
-import C99Compiler.CompilerNodes.Interfaces.SequencePointNode;
 import C99Compiler.ProgramState.ProgramState;
 import C99Compiler.ProgramState.ProgramState.PreserveFlag;
 import C99Compiler.ProgramState.ProgramState.ProcessorFlag;

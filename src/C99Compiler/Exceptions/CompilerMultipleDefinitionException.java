@@ -4,12 +4,13 @@ package C99Compiler.Exceptions;
 
 import org.antlr.v4.runtime.Token;
 
+import C99Compiler.CompilerNodes.ComponentNode;
+
 public class CompilerMultipleDefinitionException extends TokenException
 {
-
-	public CompilerMultipleDefinitionException(String name, Token start)
+	public CompilerMultipleDefinitionException(String name, Token start, ComponentNode<?> context)
 	{
-		super("Item defined at least twice in scope: " + name, start);
+		super("Item defined at least twice in scope: " + name, start, context);
 	}
 	
 }

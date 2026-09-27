@@ -2,7 +2,7 @@
 // An exception from the compiler
 package C99Compiler.Exceptions;
 
-public class AssemblerException extends Exception
+public class AssemblerException extends SoftException
 {
 	public AssemblerException(String message)
 	{

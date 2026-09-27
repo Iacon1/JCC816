@@ -13,6 +13,7 @@ import C99Compiler.CompilerNodes.Expressions.AssignmentExpressionNode;
 import C99Compiler.CompilerNodes.Expressions.BaseExpressionNode;
 import C99Compiler.CompilerNodes.LValues.VariableNode;
 import C99Compiler.Exceptions.UnsupportedFeatureException;
+import C99Compiler.ProgramState.ProgramState;
 import Grammar.C99.C99Parser.Direct_abstract_declaratorContext;
 import Grammar.C99.C99Parser.Direct_declaratorContext;
 import Grammar.C99.C99Parser.Parameter_declarationContext;
@@ -94,9 +95,9 @@ public class DirectDeclaratorNode extends InterpretingNode<DirectDeclaratorNode,
 				info.assignExpr = (BaseExpressionNode<?>) new AssignmentExpressionNode(this).interpret(node.assignment_expression());
 			subDirDec = new DirectDeclaratorNode(this, scopeOverride).interpret(node.direct_declarator());
 			if (type == DeclaratorType.varLenArray) // VLA not supported
-				throw new UnsupportedFeatureException("Variable length arrays", false, node.start);
-			if (info.assignExpr != null && !info.assignExpr.hasPropValue()) // Static allocation can't handle arrays whose size is unknown at compile time
-				throw new UnsupportedFeatureException("Arrays of non-constant length", false, node.start);
+				throw new UnsupportedFeatureException("Variable length arrays", false, node.start, this);
+			if (info.assignExpr != null && !info.assignExpr.hasPropValue(new ProgramState())) // Static allocation can't handle arrays whose size is unknown at compile time
+				throw new UnsupportedFeatureException("Arrays of non-constant length", false, node.start, this);
 		}
 		return this;
 	}
@@ -139,9 +140,9 @@ public class DirectDeclaratorNode extends InterpretingNode<DirectDeclaratorNode,
 					info.assignExpr = new AssignmentExpressionNode(this).interpret(node.assignment_expression());
 				subDirDec = new DirectDeclaratorNode(this, scopeOverride).interpret(node.direct_abstract_declarator());
 				if (type == DeclaratorType.varLenArray) // VLA not supported
-					throw new UnsupportedFeatureException("Variable length arrays", false, node.start);
-				if (info.assignExpr != null && !info.assignExpr.hasPropValue()) // Static allocation can't handle arrays whose size is unknown at compile time
-					throw new UnsupportedFeatureException("Arrays of non-constant length", false, node.start);
+					throw new UnsupportedFeatureException("Variable length arrays", false, node.start, this);
+				if (info.assignExpr != null && !info.assignExpr.hasPropValue(new ProgramState())) // Static allocation can't handle arrays whose size is unknown at compile time
+					throw new UnsupportedFeatureException("Arrays of non-constant length", false, node.start, this);
 			}
 			if (node.direct_abstract_declarator() != null)
 				subDirDec = new DirectDeclaratorNode(this, scopeOverride).interpret(node.direct_abstract_declarator());

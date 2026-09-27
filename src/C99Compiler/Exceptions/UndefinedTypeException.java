@@ -5,13 +5,14 @@ package C99Compiler.Exceptions;
 
 import org.antlr.v4.runtime.Token;
 
-@SuppressWarnings("serial")
+import C99Compiler.CompilerNodes.ComponentNode;
+
 public class UndefinedTypeException extends TokenException
 {
 
-	public UndefinedTypeException(String type, Token location)
+	public UndefinedTypeException(String type, Token location, ComponentNode<?> context)
 	{
-		super("The type " + type + " is not defined.", location);
+		super("The type " + type + " is not defined.", location, context);
 	}
 
 }

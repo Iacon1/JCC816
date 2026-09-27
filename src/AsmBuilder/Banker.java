@@ -243,7 +243,7 @@ public final class Banker
 					if (!foundSpace)
 					{
 						FileIO.writeFile("badBlock.txt", blockBuffer.getBytes());
-						throw new UnsupportedFeatureException("Couldn't find anywhere to put segment of size " + lineSize + "B in " + cartConfig.getType().getName() + " mapping mode", false, lineNo, 0);
+						throw new UnsupportedFeatureException("Couldn't find anywhere to put segment of size " + lineSize + "B in " + cartConfig.getType().getName() + " mapping mode", false, lineNo, 0, null);
 					}
 				}
 				else

@@ -6,7 +6,6 @@ package C99Compiler.CompilerNodes.Definitions;
 import java.util.ArrayList;
 import java.util.List;
 
-import C99Compiler.CompConfig;
 import C99Compiler.CompilerNodes.Interfaces.TypedNode;
 
 public class FunctionType extends StorageWrapperType

@@ -4,7 +4,9 @@ package C99Compiler.Exceptions;
 
 import org.antlr.v4.runtime.Token;
 
-@SuppressWarnings("serial")
+import C99Compiler.CompilerNodes.ComponentNode;
+import C99Compiler.Utils.LineInfo;
+
 public class ConstraintException extends TokenException
 {
 	private static String getDesc(String section, int number)
@@ -49,8 +51,8 @@ public class ConstraintException extends TokenException
 		}
 	}
 	
-	public ConstraintException(String section, int constraintNumber, Token location)
+	public ConstraintException(String section, int constraintNumber, Token location, ComponentNode<?> context)
 	{
-		super(section + "." + constraintNumber + "\n" + getDesc(section, constraintNumber), location);
+		super(section + "." + constraintNumber + "\n" + getDesc(section, constraintNumber), location, context);
 	}
 }

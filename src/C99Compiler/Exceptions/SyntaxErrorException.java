@@ -5,16 +5,16 @@ package C99Compiler.Exceptions;
 
 import org.antlr.v4.runtime.Token;
 
+import C99Compiler.Utils.LineInfo;
+
 public class SyntaxErrorException extends TokenException
 {
-
-	public SyntaxErrorException(String message, int line, int charPositionInLine)
+	public SyntaxErrorException(Token location, LineInfo info)
 	{
-		super(message, line, charPositionInLine);
+		super("Syntax error", location, info);	
 	}
-	public SyntaxErrorException(String message, Token token)
+	public SyntaxErrorException(int line, int pos, String text, LineInfo info)
 	{
-		super(message, token);
+		super("Syntax error", line, pos, text, info);
 	}
-
 }

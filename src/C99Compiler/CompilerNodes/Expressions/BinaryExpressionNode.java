@@ -13,7 +13,6 @@ import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.FunctionDefinitionNode;
 import C99Compiler.CompilerNodes.Definitions.Type.CastContext;
 import C99Compiler.CompilerNodes.LValues.LValueNode;
-import C99Compiler.Exceptions.ScratchOverflowException;
 import C99Compiler.ProgramState.ProgramState;
 import C99Compiler.ProgramState.ProgramState.ScratchSource;
 import C99Compiler.Utils.OperandSources.ConstantSource;

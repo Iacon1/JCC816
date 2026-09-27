@@ -80,7 +80,7 @@ public class MultiplicativeExpressionNode extends BinaryExpressionNode
 		BaseExpressionNode<Multiplicative_expressionContext> result = super.interpret(node);
 		if (result != this) return result;
 		if (operator.equals("/") && y.hasPropValue(new ProgramState()) && y.getPropLong(new ProgramState()) == 0) // Divide by zero
-			throw new UnsupportedFeatureException("Division by zero", true, node.start);
+			throw new UnsupportedFeatureException("Division by zero", true, node.start, this);
 		
 		callExpr = new PostfixExpressionNode(this, getCallName(), x, y);
 		

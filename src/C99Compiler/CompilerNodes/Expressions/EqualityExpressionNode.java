@@ -6,7 +6,6 @@ import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.Definitions.Type;
 import C99Compiler.CompilerNodes.Definitions.Type.CastContext;
 import C99Compiler.CompilerNodes.Dummies.DummyType;
-import C99Compiler.CompilerNodes.Statements.IterationStatementNode;
 import C99Compiler.ProgramState.ProgramState;
 import C99Compiler.ProgramState.ProgramState.ProcessorFlag;
 import C99Compiler.CompilerNodes.Dummies.DummyExpressionNode;

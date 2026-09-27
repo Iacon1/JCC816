@@ -5,13 +5,14 @@ package C99Compiler.Exceptions;
 
 import org.antlr.v4.runtime.Token;
 
-@SuppressWarnings("serial")
+import C99Compiler.CompilerNodes.ComponentNode;
+
 public class UndefinedVariableException extends TokenException
 {
 
-	public UndefinedVariableException(String type, Token location)
+	public UndefinedVariableException(String type, Token location, ComponentNode<?> context)
 	{
-		super("The variable " + type + " is not defined.", location);
+		super("The variable " + type + " is not defined.", location, context);
 	}
 
 }

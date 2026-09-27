@@ -2,7 +2,7 @@
 // An exception from the compiler
 package C99Compiler.Exceptions;
 
-public class BuilderException extends Exception
+public class BuilderException extends SoftException
 {
 	public BuilderException(String message)
 	{

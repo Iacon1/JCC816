@@ -16,14 +16,22 @@ import org.antlr.v4.runtime.atn.ATNConfigSet;
 import org.antlr.v4.runtime.dfa.DFA;
 
 import C99Compiler.Exceptions.SyntaxErrorException;
+import C99Compiler.Utils.LineInfo;
 
 public class SyntaxErrorCollector implements ANTLRErrorListener
 {
 	private List<Exception> exceptions;
+	private List<LineInfo> info;
 	
 	public SyntaxErrorCollector()
 	{
 		exceptions = new ArrayList<Exception>();
+		info = null;
+	}
+	public SyntaxErrorCollector(List<LineInfo> info)
+	{
+		exceptions = new ArrayList<Exception>();
+		this.info = info;
 	}
 	@Override
 	public void reportAmbiguity(Parser recognizer, DFA dfa, int startIndex, int stopIndex, boolean exact, BitSet ambigAlts, ATNConfigSet configs)
@@ -48,10 +56,16 @@ public class SyntaxErrorCollector implements ANTLRErrorListener
 	public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg,
 			RecognitionException e)
 	{
-		if (Token.class.isAssignableFrom(offendingSymbol.getClass()))
-			exceptions.add(new SyntaxErrorException(msg, (Token) offendingSymbol));
+		LineInfo lineInfo;
+		if (info == null)
+			lineInfo = null;
 		else
-			exceptions.add(new SyntaxErrorException(msg, line, charPositionInLine));
+			lineInfo = info.get(line);
+		
+		if (Token.class.isAssignableFrom(offendingSymbol.getClass()))
+			exceptions.add(new SyntaxErrorException((Token) offendingSymbol, lineInfo));
+		else
+			exceptions.add(new SyntaxErrorException(line, charPositionInLine, "", lineInfo));
 	}
 
 	public Exception getException()

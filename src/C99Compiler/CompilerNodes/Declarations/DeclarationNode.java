@@ -61,7 +61,7 @@ public class DeclarationNode extends InterpretingNode<DeclarationNode, Declarati
 				else
 				{
 					if (checkRepeatVariables((ComponentNode<?> c) -> new VariableNode(c, declaratorNode.getIdentifier(), type)) != null)
-						throw new CompilerMultipleDefinitionException(declaratorNode.getIdentifier(), initDeclarator.start); // Two variables cannot have same full name
+						throw new CompilerMultipleDefinitionException(declaratorNode.getIdentifier(), initDeclarator.start, this); // Two variables cannot have same full name
 					VariableNode variable = new VariableNode(this, declaratorNode.getIdentifier(), type);
 					variables.add(variable);
 					if (initDeclarator.initializer() != null)
@@ -74,7 +74,7 @@ public class DeclarationNode extends InterpretingNode<DeclarationNode, Declarati
 		{
 			Type type = Type.manufactureCtxt(specifiers.getSpecifiers(), this, node.start);
 			if (type.getSUEName() == null) // No tag
-				throw new ConstraintException("6.7", 2, node.start);
+				throw new ConstraintException("6.7", 2, node.start, this);
 		}
 		return this;
 	}

@@ -5,10 +5,8 @@ package C99Compiler.CompilerNodes.Declarations;
 import java.util.LinkedList;
 import java.util.List;
 
-import C99Compiler.CompilerNodes.Expressions.ConstantExpressionNode;
 import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.InterpretingNode;
-import C99Compiler.CompilerNodes.Definitions.BitFieldType;
 import C99Compiler.CompilerNodes.Definitions.Type;
 import C99Compiler.CompilerNodes.LValues.MemberNode;
 import C99Compiler.CompilerNodes.Definitions.StructUnionDefinitionNode;
@@ -38,7 +36,7 @@ public class StructDeclarationNode extends InterpretingNode<StructDeclarationNod
 				Type type = Type.manufacture(specifiers.getSpecifiers(), declaratorNode, structDeclarator.start);
 				if (structDeclarator.constant_expression() != null) // Bitfield
 				{
-					throw new UnsupportedFeatureException("Bitfields", false, structDeclarator.start); // TODO later
+					throw new UnsupportedFeatureException("Bitfields", false, structDeclarator.start, this); // TODO later
 /*					long fieldBits = new ConstantExpressionNode(this).interpret(structDeclarator.constant_expression()).getPropLong();
 					if (type.isInteger() || type.containsSpecifier("_Bool"))
 						type = new BitFieldType(type, fieldBits);
@@ -47,7 +45,7 @@ public class StructDeclarationNode extends InterpretingNode<StructDeclarationNod
 				MemberNode member = new MemberNode(this, (StructUnionDefinitionNode) parent, declaratorNode.getIdentifier(), type);
 				members.add(member);
 			}
-		else throw new ConstraintException("6.7", 2, node.start);
+		else throw new ConstraintException("6.7", 2, node.start, this);
 		return this;
 	}
 	

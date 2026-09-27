@@ -4,11 +4,8 @@
 package C99Compiler.CompilerNodes.Declarations;
 
 import java.util.AbstractMap.SimpleEntry;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 
 import C99Compiler.CompConfig;
@@ -37,7 +34,6 @@ import C99Compiler.Exceptions.ConstraintException;
 import C99Compiler.ProgramState.ProgramState;
 import C99Compiler.Utils.AssemblyUtils.ByteCopier;
 import C99Compiler.Utils.OperandSources.ConstantSource;
-import C99Compiler.Utils.OperandSources.OperandSource;
 import Grammar.C99.C99Parser.DesignationContext;
 import Grammar.C99.C99Parser.DesignatorContext;
 import Grammar.C99.C99Parser.InitializerContext;
@@ -95,17 +91,18 @@ public class InitializerNode extends InterpretingNode<InitializerNode, Initializ
 	private static InitializerNode resolveInitializer(InitializerNode startNode, DesignationContext designation) throws Exception
 	{
 		InitializerNode currNode = startNode;
+		
 		for (DesignatorContext designator : designation.designator_list().designator())
 		{
 			if (currNode.arrayInitializers != null) // Array
 			{
 				if (designator.identifier() != null) // Must be struct to use struct references
-					throw new ConstraintException("6.7.8", 7, designator.start);
+					throw new ConstraintException("6.7.8", 7, designator.start, startNode);
 				
 				int index = (int) new ConstantExpressionNode(currNode).interpret(designator.constant_expression()).getPropLong(new ProgramState());
 				
 				if (index > currNode.arrayInitializers.size() && !currNode.LValue.getType().isIncomplete())
-					throw new ConstraintException("6.7.8", 6, designator.start); // Array's length is known and this exceeds it
+					throw new ConstraintException("6.7.8", 6, designator.start, startNode); // Array's length is known and this exceeds it
 				
 				currNode = currNode.arrayInitializers.get(index);
 			}
@@ -113,12 +110,12 @@ public class InitializerNode extends InterpretingNode<InitializerNode, Initializ
 			if (currNode.structInitializers != null) // Struct
 			{
 				if (designator.constant_expression() != null) // Must be array to use array references
-					throw new ConstraintException("6.7.8", 6, designator.start);
+					throw new ConstraintException("6.7.8", 6, designator.start, startNode);
 				
 				String memberName = designator.identifier().getText();
 				
 				if (currNode.LValue.getType().getStruct().getMember(memberName) == null)
-					throw new ConstraintException("6.7.8", 7, designator.start); // This is not a member of this struct
+					throw new ConstraintException("6.7.8", 7, designator.start, startNode); // This is not a member of this struct
 				
 				currNode = currNode.structInitializers.get(memberName);
 			}
@@ -244,7 +241,7 @@ public class InitializerNode extends InterpretingNode<InitializerNode, Initializ
 						arrayType = (ArrayType) LValue.getType();
 						
 						if (!arrayType.isIncomplete() && arrayIndex >= arrayInitializers.size()) // Too many array indices
-							throw new ConstraintException("6.7.8", 6, node.initializer_list().initializer(k).start);
+							throw new ConstraintException("6.7.8", 6, node.initializer_list().initializer(k).start, this);
 						else if (arrayIndex >= arrayInitializers.size()) // Just make a new one if we're incomplete
 							arrayInitializers.put(arrayIndex, new InitializerNode(this, arrayType.getAtIndex(LValue, i)));
 						arrayInitializers.get(arrayIndex).interpret(node.initializer_list().initializer(k++));
@@ -255,7 +252,7 @@ public class InitializerNode extends InterpretingNode<InitializerNode, Initializ
 					else if (structInitializers != null)
 					{
 						if (arrayIndex >= structInitializers.size()) // No more struct members to populate
-							throw new ConstraintException("6.7.8", 7, node.initializer_list().initializer(k).start);
+							throw new ConstraintException("6.7.8", 7, node.initializer_list().initializer(k).start, this);
 						structInitializers.get(LValue.getType().getStruct().getMemberNames().get(arrayIndex++)).interpret(node.initializer_list().initializer(k++));						
 					}
 				}

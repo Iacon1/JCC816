@@ -49,7 +49,7 @@ public class AssignmentExpressionNode extends BinaryExpressionNode
 		if (sInt != this) return sInt;
 		
 		if (!x.hasLValue(new ProgramState()) || x.getType().isConstant())
-			throw new ConstraintException("6.5.16", 2, node.getStart());
+			throw new ConstraintException("6.5.16", 2, node.getStart(), this);
 		
 		if (y.getType().isArray()) // Decay array
 			y = new CastExpressionNode(this, ((ArrayType) y.getType()).decay(), y);
@@ -66,12 +66,12 @@ public class AssignmentExpressionNode extends BinaryExpressionNode
 		if (!operator.startsWith("+") && !operator.startsWith("-"))
 		{
 			if (!xType.canCastTo(yType, CastContext.assignment))
-				throw new ConstraintException("6.5.16.1", 1, node.getStart());
+				throw new ConstraintException("6.5.16.1", 1, node.getStart(), this);
 		}
 		else
 		{
 			if (!xType.canCastFrom(yType, CastContext.add_assignment))
-				throw new ConstraintException("6.5.16.2", 1, node.getStart());
+				throw new ConstraintException("6.5.16.2", 1, node.getStart(), this);
 		}
 		
 		BinaryExpressionNode<?,?,?,?> newY = null;

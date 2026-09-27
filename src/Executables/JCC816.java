@@ -29,6 +29,7 @@ import C99Compiler.CompConfig.DebugLevel;
 import C99Compiler.CompConfig.OptimizationLevel;
 import C99Compiler.CompConfig.VerbosityLevel;
 import C99Compiler.CompilerNodes.Dummies.DummyTranslationUnit;
+import C99Compiler.Exceptions.SoftException;
 import C99Compiler.Utils.FileIO;
 import C99Compiler.Utils.LineInfo;
 import Logging.DebugLogger;
@@ -331,158 +332,166 @@ public class JCC816
 	
 	public static void main(String[] args) throws Exception
 	{
-		AsmBuilder builder = new AsmBuilder();
-		Header header;
-		
-		Logging.setLogger(new DebugLogger());
-		
-		CommandLine commandLine;
 		try
 		{
-			commandLine = new DefaultParser().parse(getOptions(), args);
-		}
-		catch (ParseException e)
-		{
-			new HelpFormatter().printHelp(helpName, helpHeader, getOptions(), helpFooter, true);
-			return;
-		}
-		if (commandLine.hasOption("help") || commandLine.getOptions().length == 0)
-		{
-			new HelpFormatter().printHelp(helpName, helpHeader, getOptions(), helpFooter, true);
-			return;
-		}
-		if (commandLine.hasOption("l") && !Assembler.hasCL65()) // No Cl65 installed
-		{
-			Logging.logError("CL65 not detected. Cannot link to executable without CL65 installed.");
-			return;
-		}
-		
-		if (commandLine.hasOption("r")) // Root
-			CompConfig.rootFolder = commandLine.getOptionValue("r").replace("/", "\\");
-		if (commandLine.hasOption("imp-mult"))
-			CompConfig.multImpFile = commandLine.getOptionValue("imp-mult").replace("/", "\\");
-		
-		if (commandLine.hasOption("H"))
-		{
-			String filename = commandLine.getOptionValue("H");
-			FileIO.writeFile(filename, FileIO.readResourceBytes("XML\\Header.XML"));
-			return;
-		}
-		if (commandLine.hasOption("path-CL65"))
-			CompConfig.pathCL65 = commandLine.getOptionValue("path-CL65");
-		
-		// Load header
-		if (commandLine.hasOption("l")) // Executable
-		{
-			String headerName = commandLine.getOptionValues("l")[1];
-			header = new Header(FileIO.readFileXML(headerName));
-		}
-		else if (commandLine.hasOption("s")) // Assembly
-		{
-			String headerName = commandLine.getOptionValues("s")[1];
-			header = new Header(FileIO.readFileXML(headerName));
-		}
-		else
-			header = null;
-		
-		// Set levels
-		if (commandLine.hasOption("O"))
-			switch (commandLine.getOptionValue("O"))
+			AsmBuilder builder = new AsmBuilder();
+			Header header;
+			
+			Logging.setLogger(new DebugLogger());
+			
+			CommandLine commandLine;
+			try
 			{
-			case "0" : CompConfig.optimizationLevel = OptimizationLevel.min; break;
-			case "1" : CompConfig.optimizationLevel = OptimizationLevel.low; break;
-			case "2" : CompConfig.optimizationLevel = OptimizationLevel.medium; break;
-			case "3" : CompConfig.optimizationLevel = OptimizationLevel.all; break;
+				commandLine = new DefaultParser().parse(getOptions(), args);
 			}
-		if (commandLine.hasOption("D"))
-			switch (commandLine.getOptionValue("D"))
+			catch (ParseException e)
 			{
-			case "0" : CompConfig.debugLevel = DebugLevel.none; break;
-			case "1" : CompConfig.debugLevel = DebugLevel.low; break;
-			case "2" : CompConfig.debugLevel = DebugLevel.medium; break;
+				new HelpFormatter().printHelp(helpName, helpHeader, getOptions(), helpFooter, true);
+				return;
 			}
-		if (commandLine.hasOption("V"))
-			switch (commandLine.getOptionValue("V"))
+			if (commandLine.hasOption("help") || commandLine.getOptions().length == 0)
 			{
-			case "0" : CompConfig.verbosityLevel = VerbosityLevel.none; break;
-			case "1" : CompConfig.verbosityLevel = VerbosityLevel.low; break;
-			case "2" : CompConfig.verbosityLevel = VerbosityLevel.medium; break;
-			case "3" : CompConfig.verbosityLevel = VerbosityLevel.high; break;
+				new HelpFormatter().printHelp(helpName, helpHeader, getOptions(), helpFooter, true);
+				return;
 			}
-		
-		if (commandLine.hasOption("optimize-addresses"))
-			CompConfig.wordAddresses = true;
-		if (commandLine.hasOption("fast-byte-count"))
-			CompConfig.fastByteCount = true;
-		if (commandLine.hasOption("no-node-caching"))
-			CompConfig.cacheSearches = false;
-		if (commandLine.hasOption("no-static-initialization"))
-			CompConfig.initializeStatics = false;
-		if (commandLine.hasOption("show-parse-tree"))
-			CompConfig.showParseTree = true;
-		
-		if (commandLine.hasOption("l") || commandLine.hasOption("s")) // Link to executable or to assembly
-		{	
-			Map<String, TranslationUnit> translationUnits  = new HashMap<String, TranslationUnit>();
-			List<String> filenames = new LinkedList<String>();
-			for (String parameter : commandLine.getArgList())
+			if (commandLine.hasOption("l") && !Assembler.hasCL65()) // No Cl65 installed
 			{
-				List<String> matchingFiles = FileIO.matchingFiles(parameter);
-				if (matchingFiles.isEmpty())
-					Logging.logError("File not found: " + parameter);
-				else
-					filenames.addAll(matchingFiles);
+				Logging.logError("CL65 not detected. Cannot link to executable without CL65 installed.");
+				return;
 			}
 			
-			for (String filename : filenames) // Read all input files
-			{
-				TranslationUnit unit = loadUnit(filename, false, false, header);
-				if (unit != null)
-					translationUnits.put(unit.getFilename(), unit);
-				else
-					Logging.logError("File not found: " + filename);
-			}
+			if (commandLine.hasOption("r")) // Root
+				CompConfig.rootFolder = commandLine.getOptionValue("r").replace("/", "\\");
+			if (commandLine.hasOption("imp-mult"))
+				CompConfig.multImpFile = commandLine.getOptionValue("imp-mult").replace("/", "\\");
 			
-			if (commandLine.hasOption("s"))
+			if (commandLine.hasOption("H"))
 			{
-				if (translationUnits.size() > 1)
-					Logging.logError("Multiple sources provided. Only saving file " + filenames.get(0) + ".");
+				String filename = commandLine.getOptionValue("H");
+				FileIO.writeFile(filename, FileIO.readResourceBytes("XML\\Header.XML"));
+				return;
 			}
-			else
-				resolveIncludes(translationUnits, header);
+			if (commandLine.hasOption("path-CL65"))
+				CompConfig.pathCL65 = commandLine.getOptionValue("path-CL65");
 			
-			builder.addUnits(translationUnits.values().toArray(new TranslationUnit[] {}));
-
-			int BSSSize = 0;
-			if (commandLine.hasOption("b"))
-				BSSSize = Integer.valueOf(commandLine.getOptionValue("b"));
-			MemorySize memorySize = new MemorySize(0, 0, 0, BSSSize, false);
-
+			// Load header
 			if (commandLine.hasOption("l")) // Executable
 			{
-				String outName = commandLine.getOptionValues("l")[0];
-				if (header == null) header = new Header();
-				String assembly = builder.build(header, memorySize);
-				Assembler.assemble(outName, header, assembly, commandLine.hasOption("c"), memorySize);
+				String headerName = commandLine.getOptionValues("l")[1];
+				header = new Header(FileIO.readFileXML(headerName));
 			}
 			else if (commandLine.hasOption("s")) // Assembly
 			{
-				String outName = commandLine.getOptionValues("s")[0];
-				if (header == null) header = new Header();
+				String headerName = commandLine.getOptionValues("s")[1];
+				header = new Header(FileIO.readFileXML(headerName));
+			}
+			else
+				header = null;
+			
+			// Set levels
+			if (commandLine.hasOption("O"))
+				switch (commandLine.getOptionValue("O"))
+				{
+				case "0" : CompConfig.optimizationLevel = OptimizationLevel.min; break;
+				case "1" : CompConfig.optimizationLevel = OptimizationLevel.low; break;
+				case "2" : CompConfig.optimizationLevel = OptimizationLevel.medium; break;
+				case "3" : CompConfig.optimizationLevel = OptimizationLevel.all; break;
+				}
+			if (commandLine.hasOption("D"))
+				switch (commandLine.getOptionValue("D"))
+				{
+				case "0" : CompConfig.debugLevel = DebugLevel.none; break;
+				case "1" : CompConfig.debugLevel = DebugLevel.low; break;
+				case "2" : CompConfig.debugLevel = DebugLevel.medium; break;
+				}
+			if (commandLine.hasOption("V"))
+				switch (commandLine.getOptionValue("V"))
+				{
+				case "0" : CompConfig.verbosityLevel = VerbosityLevel.none; break;
+				case "1" : CompConfig.verbosityLevel = VerbosityLevel.low; break;
+				case "2" : CompConfig.verbosityLevel = VerbosityLevel.medium; break;
+				case "3" : CompConfig.verbosityLevel = VerbosityLevel.high; break;
+				}
+			
+			if (commandLine.hasOption("optimize-addresses"))
+				CompConfig.wordAddresses = true;
+			if (commandLine.hasOption("fast-byte-count"))
+				CompConfig.fastByteCount = true;
+			if (commandLine.hasOption("no-node-caching"))
+				CompConfig.cacheSearches = false;
+			if (commandLine.hasOption("no-static-initialization"))
+				CompConfig.initializeStatics = false;
+			if (commandLine.hasOption("show-parse-tree"))
+				CompConfig.showParseTree = true;
+			
+			if (commandLine.hasOption("l") || commandLine.hasOption("s")) // Link to executable or to assembly
+			{	
+				Map<String, TranslationUnit> translationUnits  = new HashMap<String, TranslationUnit>();
+				List<String> filenames = new LinkedList<String>();
+				for (String parameter : commandLine.getArgList())
+				{
+					List<String> matchingFiles = FileIO.matchingFiles(parameter);
+					if (matchingFiles.isEmpty())
+						Logging.logError("File not found: " + parameter);
+					else
+						filenames.addAll(matchingFiles);
+				}
 				
-				ModuleAssemblyUnit unit = builder.buildModule(header, memorySize);
-				if (!outName.endsWith(".asm"))
-					outName = outName + ".asm";
-				FileIO.writeFile(outName, unit.save());
+				for (String filename : filenames) // Read all input files
+				{
+					TranslationUnit unit = loadUnit(filename, false, false, header);
+					if (unit != null)
+						translationUnits.put(unit.getFilename(), unit);
+					else
+						Logging.logError("File not found: " + filename);
+				}
+				
+				if (commandLine.hasOption("s"))
+				{
+					if (translationUnits.size() > 1)
+						Logging.logError("Multiple sources provided. Only saving file " + filenames.get(0) + ".");
+				}
+				else
+					resolveIncludes(translationUnits, header);
+				
+				builder.addUnits(translationUnits.values().toArray(new TranslationUnit[] {}));
+	
+				int BSSSize = 0;
+				if (commandLine.hasOption("b"))
+					BSSSize = Integer.valueOf(commandLine.getOptionValue("b"));
+				MemorySize memorySize = new MemorySize(0, 0, 0, BSSSize, false);
+	
+				if (commandLine.hasOption("l")) // Executable
+				{
+					String outName = commandLine.getOptionValues("l")[0];
+					if (header == null) header = new Header();
+					String assembly = builder.build(header, memorySize);
+					Assembler.assemble(outName, header, assembly, commandLine.hasOption("c"), memorySize);
+				}
+				else if (commandLine.hasOption("s")) // Assembly
+				{
+					String outName = commandLine.getOptionValues("s")[0];
+					if (header == null) header = new Header();
+					
+					ModuleAssemblyUnit unit = builder.buildModule(header, memorySize);
+					if (!outName.endsWith(".asm"))
+						outName = outName + ".asm";
+					FileIO.writeFile(outName, unit.save());
+				}
+			}
+			else if (commandLine.hasOption("p")) // Preprocess
+			{
+				String parameter = commandLine.getArgList().get(0);
+				String fileText = FileIO.readFile(parameter);
+				fileText = Preprocessor.preprocess(new HashSet<String>(), new HashSet<String>(), new HashMap<String, byte[]>(), new LinkedList<LineInfo>(), parameter, fileText, false);
+				byte[] fileBytes = fileText.getBytes();
+				FileIO.writeFile(commandLine.getOptionValue("p"), fileBytes);
 			}
 		}
-		else if (commandLine.hasOption("p")) // Preprocess
+		catch (SoftException e)
 		{
-			String parameter = commandLine.getArgList().get(0);
-			String fileText = FileIO.readFile(parameter);
-			fileText = Preprocessor.preprocess(new HashSet<String>(), new HashSet<String>(), new HashMap<String, byte[]>(), new LinkedList<LineInfo>(), parameter, fileText, false);
-			byte[] fileBytes = fileText.getBytes();
-			FileIO.writeFile(commandLine.getOptionValue("p"), fileBytes);
+			Logging.logError(e.getMessage());
+			return;
 		}
 	}
 

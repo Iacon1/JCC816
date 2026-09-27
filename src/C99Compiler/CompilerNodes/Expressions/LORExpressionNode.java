@@ -7,14 +7,10 @@ import C99Compiler.CompilerNodes.Definitions.Type.CastContext;
 import C99Compiler.ProgramState.ProgramState;
 import C99Compiler.ProgramState.ProgramState.PreserveFlag;
 import C99Compiler.ProgramState.ProgramState.ProcessorFlag;
-import C99Compiler.Utils.CompUtils;
-import C99Compiler.Utils.AssemblyUtils.AssemblyUtils;
 import C99Compiler.Utils.AssemblyUtils.BytewiseOperator;
 import C99Compiler.Utils.OperandSources.OperandSource;
 import Grammar.C99.C99Parser.Land_expressionContext;
 import Grammar.C99.C99Parser.Lor_expressionContext;
-import Shared.Assemblable.AssemblyStatePair;
-import Shared.Assemblable.MutableAssemblyStatePair;
 
 public class LORExpressionNode extends LogicalBinaryExpressionNode
 <Lor_expressionContext, Land_expressionContext, Land_expressionContext, Lor_expressionContext>

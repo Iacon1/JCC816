@@ -27,7 +27,6 @@ import Grammar.C99.C99Parser.Compound_statementContext;
 import Grammar.C99.C99Parser.DeclarationContext;
 import Grammar.C99.C99Parser.Direct_declaratorContext;
 import Grammar.C99.C99Parser.Init_declaratorContext;
-import Grammar.C99.C99Parser.Init_declarator_listContext;
 import Grammar.C99.C99Parser.Storage_class_specifierContext;
 import Grammar.C99.C99Parser.Translation_unitContext;
 import Logging.Logging;

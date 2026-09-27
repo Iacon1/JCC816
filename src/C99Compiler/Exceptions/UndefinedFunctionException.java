@@ -5,7 +5,6 @@ package C99Compiler.Exceptions;
 
 import C99Compiler.CompilerNodes.FunctionDefinitionNode;
 
-@SuppressWarnings("serial")
 public class UndefinedFunctionException extends BuilderException
 {
 

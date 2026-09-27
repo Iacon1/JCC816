@@ -80,11 +80,11 @@ public class UnaryExpressionNode extends BaseExpressionNode<Unary_expressionCont
 			operator = node.getChild(0).getText();
 			
 			if ((operator.equals("++") || operator.equals("--")) && !expr.hasLValue(new ProgramState()))
-				throw new ConstraintException("6.5.3.1", 1, node.start);
+				throw new ConstraintException("6.5.3.1", 1, node.start, this);
 			if (operator.equals("&") && PostfixExpressionNode.class.isAssignableFrom(expr.getClass()))
 			{
 				if (((PostfixExpressionNode) expr).getPFType() == PFType.funcCall || !expr.hasLValue(new ProgramState()))
-					throw new ConstraintException("6.5.3.2", 1, node.start);
+					throw new ConstraintException("6.5.3.2", 1, node.start, this);
 			}
 		}
 		ProgramState state = new ProgramState();

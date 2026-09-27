@@ -10,7 +10,6 @@ import C99Compiler.CompilerNodes.Definitions.Type;
 import C99Compiler.CompilerNodes.LValues.LValueNode;
 import C99Compiler.Exceptions.ConstraintException;
 import C99Compiler.ProgramState.ProgramState;
-import C99Compiler.Utils.OperandSources.OperandSource;
 import Grammar.C99.C99Parser.Constant_expressionContext;
 
 public class ConstantExpressionNode extends BaseExpressionNode<Constant_expressionContext>
@@ -23,7 +22,7 @@ public class ConstantExpressionNode extends BaseExpressionNode<Constant_expressi
 	{
 		BaseExpressionNode<?> expr = new ConditionalExpressionNode(this).interpret(node.conditional_expression());
 		if (!expr.hasPropValue(new ProgramState()))
-			throw new ConstraintException("6.6", 4, node.start);
+			throw new ConstraintException("6.6", 4, node.start, this);
 		return delegate(expr);
 	}
 

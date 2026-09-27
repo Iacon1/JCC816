@@ -7,7 +7,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
-import C99Compiler.CompConfig;
 import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.InterpretingNode;
 import C99Compiler.CompilerNodes.Dummies.EnumeratorNode;
@@ -47,7 +46,7 @@ public class EnumDefinitionNode extends InterpretingNode<EnumDefinitionNode, Enu
 			{
 				BaseExpressionNode<?> constant = new ConstantExpressionNode(this).interpret(enumerator.constant_expression());
 				if (!constant.getType().isArithmetic())
-					throw new ConstraintException("6.7.2.2", 2, enumerator.start);
+					throw new ConstraintException("6.7.2.2", 2, enumerator.start, this);
 				value = (int) constant.getPropLong(new ProgramState());
 				if (value < 0)
 					isSigned = true;

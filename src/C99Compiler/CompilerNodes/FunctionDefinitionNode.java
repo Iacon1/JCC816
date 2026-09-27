@@ -108,7 +108,7 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 
 		type = Type.manufacture(specifiers, signature, node.declaration_specifiers().start);
 
-		if (type.isArray()) throw new ConstraintException("6.9.1", 3, node.start);
+		if (type.isArray()) throw new ConstraintException("6.9.1", 3, node.start, this);
 
 		return this;
 	}
@@ -134,12 +134,12 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 
 		type = Type.manufacture(specifiers, signature, node.declaration_specifiers().start);
 
-		if (type.isArray()) throw new ConstraintException("6.9.1", 3, node.start);
+		if (type.isArray()) throw new ConstraintException("6.9.1", 3, node.start, this);
 		Type retType = ((FunctionType) type).getType();
 		if (getName().equals(CompConfig.mainName)) // If main
 		{
 			if (!(retType.isVoid() || retType.getSignature().equals("int")) || signature.getChildVariables().size() != 0) // Must be void with no arguments
-				throw new UnsupportedFeatureException("Function \"main\" having a signature other than \"void()\" or \"int()\"", true, node.start);
+				throw new UnsupportedFeatureException("Function \"main\" having a signature other than \"void()\" or \"int()\"", true, node.start, this);
 		}
 		registerInterrupts();
 		code = new CompoundStatementNode(this, getName()).interpret(node.compound_statement());
@@ -168,7 +168,7 @@ public class FunctionDefinitionNode extends InterpretingNode<FunctionDefinitionN
 
 		type = Type.manufacture(specifiers, signature, declarationSpecifiers.start);
 
-		if (type.isArray()) throw new ConstraintException("6.9.1", 3, declarator.start);
+		if (type.isArray()) throw new ConstraintException("6.9.1", 3, declarator.start, this);
 // Below only applies to definitions, not declarations
 //		if (getName().equals(CompConfig.mainName)) // If main
 //			if (!getType().getSignature().equals("void()")) // Must be void with no arguments

@@ -43,7 +43,7 @@ public class ParameterDeclarationNode extends InterpretingNode<ParameterDeclarat
 			DeclaratorNode declaratorNode = new DeclaratorNode(this).interpret(declarator);
 			Type type = Type.manufacture(specifiers.getSpecifiers(), declaratorNode, declarator.start);
 			if (checkRepeatVariables((ComponentNode<?> c) -> new VariableNode(c, declaratorNode.getIdentifier(), type)) != null)
-				throw new CompilerMultipleDefinitionException(declaratorNode.getIdentifier(), declarator.start); // Two variables cannot have same full name
+				throw new CompilerMultipleDefinitionException(declaratorNode.getIdentifier(), declarator.start, this); // Two variables cannot have same full name
 			VariableNode variable = new VariableNode(this, declaratorNode.getIdentifier(), type);
 			variables.add(variable);
 		}
@@ -52,7 +52,7 @@ public class ParameterDeclarationNode extends InterpretingNode<ParameterDeclarat
 			DeclaratorNode declaratorNode = new DeclaratorNode(this).interpret(absDeclarator);
 			Type type = Type.manufacture(specifiers.getSpecifiers(), declaratorNode, absDeclarator.start);
 			if (checkRepeatVariables((ComponentNode<?> c) -> new VariableNode(c, declaratorNode.getIdentifier(), type)) != null)
-				throw new CompilerMultipleDefinitionException(declaratorNode.getIdentifier(), absDeclarator.start); // Two variables cannot have same full name
+				throw new CompilerMultipleDefinitionException(declaratorNode.getIdentifier(), absDeclarator.start, this); // Two variables cannot have same full name
 			VariableNode variable = new VariableNode(this, declaratorNode.getIdentifier(), type);
 			variables.add(variable);
 		}

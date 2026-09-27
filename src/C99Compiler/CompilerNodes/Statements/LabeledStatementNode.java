@@ -27,7 +27,7 @@ public class LabeledStatementNode extends StatementNode<Labeled_statementContext
 		{
 			isCase = true;
 			if (getEnclosingSelection() == null || !getEnclosingSelection().isSwitch())
-				throw new ConstraintException("6.8.1", 2, node.start);
+				throw new ConstraintException("6.8.1", 2, node.start, this);
 			if (node.constant_expression() != null)
 			{
 				BaseExpressionNode<?> constExpr = new ConstantExpressionNode(this).interpret(node.constant_expression());
