@@ -210,6 +210,38 @@ public abstract class PreProcComponentNode<T extends PreProcComponentNode<T>>
 		}
 		return wordList.toArray(new String[] {});
 	}
+	// Groups strings in the list by commas. I. E. ["A", "+", "B" ",", "C"] would become ["A + B", "C"]
+	private static String[] groupByCommas(List<String> wordList)
+	{
+		int i = wordList.size() - 1;
+		String tmp = "";
+		int parenDepth = 0; // So we don't trash interior macros
+		
+		while (i >= 0)
+		{
+			
+			if (parenDepth != 0 || !wordList.get(i).equals(","))
+			{
+				if (wordList.get(i).equals(")"))
+					parenDepth += 1;
+				else if (wordList.get(i).equals("(") && parenDepth != 0)
+					parenDepth -= 1;
+				tmp = wordList.get(i) + (tmp.isEmpty() ? "" : " " + tmp);
+				wordList.remove(i);
+				i--;
+			}
+			else // Replace comma with what's collected so far
+			{
+				wordList.set(i, tmp);
+				tmp = "";
+				i--;
+			}
+		}
+		wordList.add(0, tmp);
+
+		return wordList.toArray(new String[] {});
+	}
+	
 	private static boolean isIdentifier(String string)
 	{
 		final String UCNPattern = "\\[uU][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F]([0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F])?";
@@ -250,7 +282,7 @@ public abstract class PreProcComponentNode<T extends PreProcComponentNode<T>>
 					wordList = removeParameters(wordList, i + 1);
 					wordList.remove(i + 1); // Remove parentheses
 					wordList.remove(i); // Remove parentheses
-					wordList.addAll(i, Arrays.asList(defines.get(word).getText(removeCommas(parameters)).split(" ")));
+					wordList.addAll(i, Arrays.asList(defines.get(word).getText(groupByCommas(parameters)).split(" ")));
 				}
 				else
 					wordList.addAll(i, Arrays.asList(defines.get(word).getText().split(" ")));

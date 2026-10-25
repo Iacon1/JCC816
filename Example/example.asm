@@ -470,21 +470,21 @@ setBackgroundMode:	; @func void(unsigned char, _Bool, _Bool)
   BNE	:+
   INX
 : TXA
-  BNE	__condSkip69f07f50_59ba_4b87_8ac7_3fa56a05776a
+  BNE	__condSkip75d31de7_8333_4bcd_8f48_b93fcf150e64
   REP	#$20
   LDA	#$00f0
   STA	__@scratchBase + 0
   SEP	#$20
   LDA	#$00
   STA	__@scratchBase + 2
-  JMP	__condEnd69f07f50_59ba_4b87_8ac7_3fa56a05776a
-  __condSkip69f07f50_59ba_4b87_8ac7_3fa56a05776a:
+  JMP	__condEnd75d31de7_8333_4bcd_8f48_b93fcf150e64
+  __condSkip75d31de7_8333_4bcd_8f48_b93fcf150e64:
   REP	#$20
   LDA	#$0000
   STA	__@scratchBase + 0
   SEP	#$20
   STA	__@scratchBase + 2
-  __condEnd69f07f50_59ba_4b87_8ac7_3fa56a05776a:
+  __condEnd75d31de7_8333_4bcd_8f48_b93fcf150e64:
   REP	#$20
   LDA	#$0000
   STA	__@signExtend
@@ -500,7 +500,7 @@ setBackgroundMode:	; @func void(unsigned char, _Bool, _Bool)
   BNE	:+
   INX
 : TXA
-  BNE	__IFNOT_25635ef0_6431_4c54_a370_eb912de8ba49
+  BNE	__IFNOT_0d63d36b_1bdc_42c1_98d1_30ba1a1aae76
   .dbg	line, "Example\SNES\Graphics\backgrounds.c", 12
   REP	#$20
   LDA	#$0000
@@ -509,7 +509,7 @@ setBackgroundMode:	; @func void(unsigned char, _Bool, _Bool)
   LDA	setBackgroundMode@mode + 0
   ORA	#$08
   STA	setBackgroundMode@mode + 0
-  __IFNOT_25635ef0_6431_4c54_a370_eb912de8ba49:
+  __IFNOT_0d63d36b_1bdc_42c1_98d1_30ba1a1aae76:
   .dbg	line, "Example\SNES\Graphics\backgrounds.c", 13
   SEP	#$20
   LDA	setBackgroundMode@mode + 0
@@ -543,16 +543,16 @@ setBackgroundTileset:	; @func void(unsigned char, unsigned short)
   ASL
   STA	__@scratchBase + 0
   TAX
-  JMP	(__SWITCH_TABLE_9b261bf1_d13a_453a_bfa7_5e2a5bd56d6d,x)
+  JMP	(__SWITCH_TABLE_e72103b7_d545_49d8_9281_d448087e31c7,x)
   :
-  JMP	__CASE_9b261bf1_d13a_453a_bfa7_5e2a5bd56d6d_DEF
-  __SWITCH_TABLE_9b261bf1_d13a_453a_bfa7_5e2a5bd56d6d:
-    .word	.LoWord(__CASE_9b261bf1_d13a_453a_bfa7_5e2a5bd56d6d_0)
-    .word	.LoWord(__CASE_9b261bf1_d13a_453a_bfa7_5e2a5bd56d6d_1)
-    .word	.LoWord(__CASE_9b261bf1_d13a_453a_bfa7_5e2a5bd56d6d_2)
-    .word	.LoWord(__CASE_9b261bf1_d13a_453a_bfa7_5e2a5bd56d6d_3)
+  JMP	__CASE_e72103b7_d545_49d8_9281_d448087e31c7_DEF
+  __SWITCH_TABLE_e72103b7_d545_49d8_9281_d448087e31c7:
+    .word	.LoWord(__CASE_e72103b7_d545_49d8_9281_d448087e31c7_0)
+    .word	.LoWord(__CASE_e72103b7_d545_49d8_9281_d448087e31c7_1)
+    .word	.LoWord(__CASE_e72103b7_d545_49d8_9281_d448087e31c7_2)
+    .word	.LoWord(__CASE_e72103b7_d545_49d8_9281_d448087e31c7_3)
   .dbg	line, "Example\SNES\Graphics\backgrounds.c", 26
-__CASE_9b261bf1_d13a_453a_bfa7_5e2a5bd56d6d_0:
+__CASE_e72103b7_d545_49d8_9281_d448087e31c7_0:
   REP	#$20
   LDA	#$0000
   STA	__@signExtend
@@ -579,9 +579,9 @@ __CASE_9b261bf1_d13a_453a_bfa7_5e2a5bd56d6d_0:
   ORA	__@scratchBase + 1
   STA	bufferBG12NBA + 0
   .dbg	line, "Example\SNES\Graphics\backgrounds.c", 29
-  JMP	__CASE_SKIP_9b261bf1_d13a_453a_bfa7_5e2a5bd56d6d
+  JMP	__CASE_SKIP_e72103b7_d545_49d8_9281_d448087e31c7
   .dbg	line, "Example\SNES\Graphics\backgrounds.c", 30
-__CASE_9b261bf1_d13a_453a_bfa7_5e2a5bd56d6d_1:
+__CASE_e72103b7_d545_49d8_9281_d448087e31c7_1:
   REP	#$20
   LDA	#$0000
   STA	__@signExtend
@@ -610,9 +610,9 @@ __CASE_9b261bf1_d13a_453a_bfa7_5e2a5bd56d6d_1:
   ORA	__@scratchBase + 1
   STA	bufferBG12NBA + 0
   .dbg	line, "Example\SNES\Graphics\backgrounds.c", 33
-  JMP	__CASE_SKIP_9b261bf1_d13a_453a_bfa7_5e2a5bd56d6d
+  JMP	__CASE_SKIP_e72103b7_d545_49d8_9281_d448087e31c7
   .dbg	line, "Example\SNES\Graphics\backgrounds.c", 34
-__CASE_9b261bf1_d13a_453a_bfa7_5e2a5bd56d6d_2:
+__CASE_e72103b7_d545_49d8_9281_d448087e31c7_2:
   REP	#$20
   LDA	#$0000
   STA	__@signExtend
@@ -639,9 +639,9 @@ __CASE_9b261bf1_d13a_453a_bfa7_5e2a5bd56d6d_2:
   ORA	__@scratchBase + 1
   STA	bufferBG34NBA + 0
   .dbg	line, "Example\SNES\Graphics\backgrounds.c", 37
-  JMP	__CASE_SKIP_9b261bf1_d13a_453a_bfa7_5e2a5bd56d6d
+  JMP	__CASE_SKIP_e72103b7_d545_49d8_9281_d448087e31c7
   .dbg	line, "Example\SNES\Graphics\backgrounds.c", 38
-__CASE_9b261bf1_d13a_453a_bfa7_5e2a5bd56d6d_3:
+__CASE_e72103b7_d545_49d8_9281_d448087e31c7_3:
   REP	#$20
   LDA	#$0000
   STA	__@signExtend
@@ -670,9 +670,9 @@ __CASE_9b261bf1_d13a_453a_bfa7_5e2a5bd56d6d_3:
   ORA	__@scratchBase + 1
   STA	bufferBG34NBA + 0
   .dbg	line, "Example\SNES\Graphics\backgrounds.c", 41
-  JMP	__CASE_SKIP_9b261bf1_d13a_453a_bfa7_5e2a5bd56d6d
-  __CASE_9b261bf1_d13a_453a_bfa7_5e2a5bd56d6d_DEF:
-  __CASE_SKIP_9b261bf1_d13a_453a_bfa7_5e2a5bd56d6d:
+  JMP	__CASE_SKIP_e72103b7_d545_49d8_9281_d448087e31c7
+  __CASE_e72103b7_d545_49d8_9281_d448087e31c7_DEF:
+  __CASE_SKIP_e72103b7_d545_49d8_9281_d448087e31c7:
   .dbg	line, "Example\SNES\Graphics\backgrounds.c", 44
   SEP	#$20
   LDA	bufferBG12NBA + 0
@@ -765,16 +765,16 @@ setHighOAMProperties:	; @func void(unsigned char, _Bool, _Bool)
   ASL
   STA	__@scratchBase + 0
   TAX
-  JMP	(__SWITCH_TABLE_c03eed28_29da_41b4_b798_963313e81fae,x)
+  JMP	(__SWITCH_TABLE_3be2caf7_516a_4823_ae79_246bc4185784,x)
   :
-  JMP	__CASE_c03eed28_29da_41b4_b798_963313e81fae_DEF
-  __SWITCH_TABLE_c03eed28_29da_41b4_b798_963313e81fae:
-    .word	.LoWord(__CASE_c03eed28_29da_41b4_b798_963313e81fae_0)
-    .word	.LoWord(__CASE_c03eed28_29da_41b4_b798_963313e81fae_1)
-    .word	.LoWord(__CASE_c03eed28_29da_41b4_b798_963313e81fae_2)
-    .word	.LoWord(__CASE_c03eed28_29da_41b4_b798_963313e81fae_3)
+  JMP	__CASE_3be2caf7_516a_4823_ae79_246bc4185784_DEF
+  __SWITCH_TABLE_3be2caf7_516a_4823_ae79_246bc4185784:
+    .word	.LoWord(__CASE_3be2caf7_516a_4823_ae79_246bc4185784_0)
+    .word	.LoWord(__CASE_3be2caf7_516a_4823_ae79_246bc4185784_1)
+    .word	.LoWord(__CASE_3be2caf7_516a_4823_ae79_246bc4185784_2)
+    .word	.LoWord(__CASE_3be2caf7_516a_4823_ae79_246bc4185784_3)
   .dbg	line, "Example\SNES\Graphics\oam.c", 32
-__CASE_c03eed28_29da_41b4_b798_963313e81fae_0:
+__CASE_3be2caf7_516a_4823_ae79_246bc4185784_0:
   REP	#$20
   LDA	#$0000
   STA	__@signExtend
@@ -825,9 +825,9 @@ __CASE_c03eed28_29da_41b4_b798_963313e81fae_0:
   ORA	__@scratchBase + 1
   STA	setHighOAMProperties@b + 0
   .dbg	line, "Example\SNES\Graphics\oam.c", 35
-  JMP	__CASE_SKIP_c03eed28_29da_41b4_b798_963313e81fae
+  JMP	__CASE_SKIP_3be2caf7_516a_4823_ae79_246bc4185784
   .dbg	line, "Example\SNES\Graphics\oam.c", 36
-__CASE_c03eed28_29da_41b4_b798_963313e81fae_1:
+__CASE_3be2caf7_516a_4823_ae79_246bc4185784_1:
   REP	#$20
   LDA	#$0000
   STA	__@signExtend
@@ -891,9 +891,9 @@ __CASE_c03eed28_29da_41b4_b798_963313e81fae_1:
   ORA	__@scratchBase + 1
   STA	setHighOAMProperties@b + 0
   .dbg	line, "Example\SNES\Graphics\oam.c", 39
-  JMP	__CASE_SKIP_c03eed28_29da_41b4_b798_963313e81fae
+  JMP	__CASE_SKIP_3be2caf7_516a_4823_ae79_246bc4185784
   .dbg	line, "Example\SNES\Graphics\oam.c", 40
-__CASE_c03eed28_29da_41b4_b798_963313e81fae_2:
+__CASE_3be2caf7_516a_4823_ae79_246bc4185784_2:
   REP	#$20
   LDA	#$0000
   STA	__@signExtend
@@ -957,9 +957,9 @@ __CASE_c03eed28_29da_41b4_b798_963313e81fae_2:
   ORA	__@scratchBase + 1
   STA	setHighOAMProperties@b + 0
   .dbg	line, "Example\SNES\Graphics\oam.c", 43
-  JMP	__CASE_SKIP_c03eed28_29da_41b4_b798_963313e81fae
+  JMP	__CASE_SKIP_3be2caf7_516a_4823_ae79_246bc4185784
   .dbg	line, "Example\SNES\Graphics\oam.c", 44
-__CASE_c03eed28_29da_41b4_b798_963313e81fae_3:
+__CASE_3be2caf7_516a_4823_ae79_246bc4185784_3:
   REP	#$20
   LDA	#$0000
   STA	__@signExtend
@@ -1023,9 +1023,9 @@ __CASE_c03eed28_29da_41b4_b798_963313e81fae_3:
   ORA	__@scratchBase + 1
   STA	setHighOAMProperties@b + 0
   .dbg	line, "Example\SNES\Graphics\oam.c", 47
-  JMP	__CASE_SKIP_c03eed28_29da_41b4_b798_963313e81fae
-  __CASE_c03eed28_29da_41b4_b798_963313e81fae_DEF:
-  __CASE_SKIP_c03eed28_29da_41b4_b798_963313e81fae:
+  JMP	__CASE_SKIP_3be2caf7_516a_4823_ae79_246bc4185784
+  __CASE_3be2caf7_516a_4823_ae79_246bc4185784_DEF:
+  __CASE_SKIP_3be2caf7_516a_4823_ae79_246bc4185784:
   .dbg	line, "Example\SNES\Graphics\oam.c", 49
   SEP	#$20
   LDA	setHighOAMProperties@i + 0
@@ -1042,36 +1042,36 @@ clearOAMBuffers:	; @func void()
   SEP	#$20
   LDA	#$00
   STA	clearOAMBuffers@i + 0
-  __ITER__START__70cfcb64_f5ac_4c99_a844_0d0db54e9e43:
+  __ITER__START__51065ac7_53de_40dd_afd0_3d115d53523b:
   REP	#$21
   LDA	#$0000
   STA	__@signExtend
   LDA	__@signExtend
   EOR	#$8000
   CMP	#$8000
-  BCC	__CMP_YES_ee5504f1_99e0_490b_b37d_8529b09bc88f
-  BNE	__CMP_NO_ee5504f1_99e0_490b_b37d_8529b09bc88f
+  BCC	__CMP_YES_550fc90f_ba41_4973_9806_fde95f9bda55
+  BNE	__CMP_NO_550fc90f_ba41_4973_9806_fde95f9bda55
   SEP	#$20
   LDA	clearOAMBuffers@i + 0
   CMP	#$80
-  BCC	__CMP_YES_ee5504f1_99e0_490b_b37d_8529b09bc88f
-  BNE	__CMP_NO_ee5504f1_99e0_490b_b37d_8529b09bc88f
-  JMP	__CMP_NO_ee5504f1_99e0_490b_b37d_8529b09bc88f
-  __CMP_YES_ee5504f1_99e0_490b_b37d_8529b09bc88f:
+  BCC	__CMP_YES_550fc90f_ba41_4973_9806_fde95f9bda55
+  BNE	__CMP_NO_550fc90f_ba41_4973_9806_fde95f9bda55
+  JMP	__CMP_NO_550fc90f_ba41_4973_9806_fde95f9bda55
+  __CMP_YES_550fc90f_ba41_4973_9806_fde95f9bda55:
   REP	#$20
   LDA	#$0001
   STA	__@scratchBase + 0
   SEP	#$20
   LDA	#$00
   STA	__@scratchBase + 2
-  BRA	__CMP_END_ee5504f1_99e0_490b_b37d_8529b09bc88f
-  __CMP_NO_ee5504f1_99e0_490b_b37d_8529b09bc88f:
+  BRA	__CMP_END_550fc90f_ba41_4973_9806_fde95f9bda55
+  __CMP_NO_550fc90f_ba41_4973_9806_fde95f9bda55:
   REP	#$20
   LDA	#$0000
   STA	__@scratchBase + 0
   SEP	#$20
   STA	__@scratchBase + 2
-  __CMP_END_ee5504f1_99e0_490b_b37d_8529b09bc88f:
+  __CMP_END_550fc90f_ba41_4973_9806_fde95f9bda55:
   SEP	#$10
   LDX	#$00
   REP	#$20
@@ -1085,7 +1085,7 @@ clearOAMBuffers:	; @func void()
   INX
 : TXA
   BEQ	:+
-  JMP	__ITER__END__70cfcb64_f5ac_4c99_a844_0d0db54e9e43
+  JMP	__ITER__END__51065ac7_53de_40dd_afd0_3d115d53523b
   :
   .dbg	line, "Example\SNES\Graphics\oam.c", 14
   REP	#$20
@@ -1160,47 +1160,47 @@ clearOAMBuffers:	; @func void()
   LDA	#$00
   LDX	__@scratchBase + 120
   STA	lowOAMBuffer + 3,X
-  __ITER__ITER__70cfcb64_f5ac_4c99_a844_0d0db54e9e43:
+  __ITER__ITER__51065ac7_53de_40dd_afd0_3d115d53523b:
   CLC
   LDA	clearOAMBuffers@i + 0
   ADC	#$01
   STA	clearOAMBuffers@i + 0
-  JMP	__ITER__START__70cfcb64_f5ac_4c99_a844_0d0db54e9e43
-  __ITER__END__70cfcb64_f5ac_4c99_a844_0d0db54e9e43:
+  JMP	__ITER__START__51065ac7_53de_40dd_afd0_3d115d53523b
+  __ITER__END__51065ac7_53de_40dd_afd0_3d115d53523b:
   .dbg	line, "Example\SNES\Graphics\oam.c", 19
   SEP	#$20
   LDA	#$00
   STA	clearOAMBuffers@i + 0
-  __ITER__START__442a1157_e0b1_4d9a_986b_e5f7434d8577:
+  __ITER__START__610b3063_a8b7_4916_9edd_f15184b5d042:
   REP	#$21
   LDA	#$0000
   STA	__@signExtend
   LDA	__@signExtend
   EOR	#$8000
   CMP	#$8000
-  BCC	__CMP_YES_ba16441e_6a1b_43ab_98c6_c546c4086128
-  BNE	__CMP_NO_ba16441e_6a1b_43ab_98c6_c546c4086128
+  BCC	__CMP_YES_d58cd1e0_c43f_491c_b4a7_65abb8da84ab
+  BNE	__CMP_NO_d58cd1e0_c43f_491c_b4a7_65abb8da84ab
   SEP	#$20
   LDA	clearOAMBuffers@i + 0
   CMP	#$20
-  BCC	__CMP_YES_ba16441e_6a1b_43ab_98c6_c546c4086128
-  BNE	__CMP_NO_ba16441e_6a1b_43ab_98c6_c546c4086128
-  JMP	__CMP_NO_ba16441e_6a1b_43ab_98c6_c546c4086128
-  __CMP_YES_ba16441e_6a1b_43ab_98c6_c546c4086128:
+  BCC	__CMP_YES_d58cd1e0_c43f_491c_b4a7_65abb8da84ab
+  BNE	__CMP_NO_d58cd1e0_c43f_491c_b4a7_65abb8da84ab
+  JMP	__CMP_NO_d58cd1e0_c43f_491c_b4a7_65abb8da84ab
+  __CMP_YES_d58cd1e0_c43f_491c_b4a7_65abb8da84ab:
   REP	#$20
   LDA	#$0001
   STA	__@scratchBase + 0
   SEP	#$20
   LDA	#$00
   STA	__@scratchBase + 2
-  BRA	__CMP_END_ba16441e_6a1b_43ab_98c6_c546c4086128
-  __CMP_NO_ba16441e_6a1b_43ab_98c6_c546c4086128:
+  BRA	__CMP_END_d58cd1e0_c43f_491c_b4a7_65abb8da84ab
+  __CMP_NO_d58cd1e0_c43f_491c_b4a7_65abb8da84ab:
   REP	#$20
   LDA	#$0000
   STA	__@scratchBase + 0
   SEP	#$20
   STA	__@scratchBase + 2
-  __CMP_END_ba16441e_6a1b_43ab_98c6_c546c4086128:
+  __CMP_END_d58cd1e0_c43f_491c_b4a7_65abb8da84ab:
   SEP	#$10
   LDX	#$00
   REP	#$20
@@ -1213,7 +1213,7 @@ clearOAMBuffers:	; @func void()
   BNE	:+
   INX
 : TXA
-  BNE	__ITER__END__442a1157_e0b1_4d9a_986b_e5f7434d8577
+  BNE	__ITER__END__610b3063_a8b7_4916_9edd_f15184b5d042
   .dbg	line, "Example\SNES\Graphics\oam.c", 21
   SEP	#$20
   LDA	clearOAMBuffers@i + 0
@@ -1222,13 +1222,13 @@ clearOAMBuffers:	; @func void()
   SEP	#$10
   LDX	__@scratchBase + 119
   STA	highOAMBuffer + 0,X
-  __ITER__ITER__442a1157_e0b1_4d9a_986b_e5f7434d8577:
+  __ITER__ITER__610b3063_a8b7_4916_9edd_f15184b5d042:
   CLC
   LDA	clearOAMBuffers@i + 0
   ADC	#$01
   STA	clearOAMBuffers@i + 0
-  JMP	__ITER__START__442a1157_e0b1_4d9a_986b_e5f7434d8577
-  __ITER__END__442a1157_e0b1_4d9a_986b_e5f7434d8577:
+  JMP	__ITER__START__610b3063_a8b7_4916_9edd_f15184b5d042
+  __ITER__END__610b3063_a8b7_4916_9edd_f15184b5d042:
 __clearOAMBuffers_END:
 RTL	; @endfunc
 updateOAM:	; @func void()
@@ -1304,24 +1304,24 @@ isColliding:	; @func _Bool(unsigned char, unsigned char, unsigned char, unsigned
   CLC
   LDA	isColliding@x1 + 0
   CMP	__@scratchBase + 0
-  BCC	__CMP_NO_749bb77a_ff34_42e5_a01c_167475017e95
-  BNE	__CMP_YES_749bb77a_ff34_42e5_a01c_167475017e95
-  JMP	__CMP_YES_749bb77a_ff34_42e5_a01c_167475017e95
-  __CMP_YES_749bb77a_ff34_42e5_a01c_167475017e95:
+  BCC	__CMP_NO_0db6fb14_19c6_4360_ac80_3f1d1696a89c
+  BNE	__CMP_YES_0db6fb14_19c6_4360_ac80_3f1d1696a89c
+  JMP	__CMP_YES_0db6fb14_19c6_4360_ac80_3f1d1696a89c
+  __CMP_YES_0db6fb14_19c6_4360_ac80_3f1d1696a89c:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_749bb77a_ff34_42e5_a01c_167475017e95
-  __CMP_NO_749bb77a_ff34_42e5_a01c_167475017e95:
+  BRA	__CMP_END_0db6fb14_19c6_4360_ac80_3f1d1696a89c
+  __CMP_NO_0db6fb14_19c6_4360_ac80_3f1d1696a89c:
   SEP	#$20
   LDA	#$00
-  __CMP_END_749bb77a_ff34_42e5_a01c_167475017e95:
-  BEQ	__IFNOT_c9818312_2be4_4990_aa73_292efc149c77
+  __CMP_END_0db6fb14_19c6_4360_ac80_3f1d1696a89c:
+  BEQ	__IFNOT_cc9005f9_7cd1_471d_8fec_90d0e15fdfd0
   .dbg	line, "Example\example.c", 22
   SEP	#$20
   LDA	#$00
   STA	__@callResult + 0
   JMP	__isColliding_END
-  __IFNOT_c9818312_2be4_4990_aa73_292efc149c77:
+  __IFNOT_cc9005f9_7cd1_471d_8fec_90d0e15fdfd0:
   .dbg	line, "Example\example.c", 23
   CLC
   SEP	#$20
@@ -1331,24 +1331,24 @@ isColliding:	; @func _Bool(unsigned char, unsigned char, unsigned char, unsigned
   CLC
   LDA	__@scratchBase + 0
   CMP	isColliding@x2 + 0
-  BCC	__CMP_YES_82e7c7dc_9b6b_4a1e_9c11_453349b9590f
-  BNE	__CMP_NO_82e7c7dc_9b6b_4a1e_9c11_453349b9590f
-  JMP	__CMP_YES_82e7c7dc_9b6b_4a1e_9c11_453349b9590f
-  __CMP_YES_82e7c7dc_9b6b_4a1e_9c11_453349b9590f:
+  BCC	__CMP_YES_397cc2bd_ccdb_4f37_b1d5_95f6b89357a9
+  BNE	__CMP_NO_397cc2bd_ccdb_4f37_b1d5_95f6b89357a9
+  JMP	__CMP_YES_397cc2bd_ccdb_4f37_b1d5_95f6b89357a9
+  __CMP_YES_397cc2bd_ccdb_4f37_b1d5_95f6b89357a9:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_82e7c7dc_9b6b_4a1e_9c11_453349b9590f
-  __CMP_NO_82e7c7dc_9b6b_4a1e_9c11_453349b9590f:
+  BRA	__CMP_END_397cc2bd_ccdb_4f37_b1d5_95f6b89357a9
+  __CMP_NO_397cc2bd_ccdb_4f37_b1d5_95f6b89357a9:
   SEP	#$20
   LDA	#$00
-  __CMP_END_82e7c7dc_9b6b_4a1e_9c11_453349b9590f:
-  BEQ	__IFNOT_cb887e00_7783_413d_bf37_adad542a7ad0
+  __CMP_END_397cc2bd_ccdb_4f37_b1d5_95f6b89357a9:
+  BEQ	__IFNOT_58a6ca87_7241_4b97_868e_a68a2dd21f40
   .dbg	line, "Example\example.c", 23
   SEP	#$20
   LDA	#$00
   STA	__@callResult + 0
   JMP	__isColliding_END
-  __IFNOT_cb887e00_7783_413d_bf37_adad542a7ad0:
+  __IFNOT_58a6ca87_7241_4b97_868e_a68a2dd21f40:
   .dbg	line, "Example\example.c", 24
   CLC
   SEP	#$20
@@ -1358,24 +1358,24 @@ isColliding:	; @func _Bool(unsigned char, unsigned char, unsigned char, unsigned
   CLC
   LDA	isColliding@y1 + 0
   CMP	__@scratchBase + 0
-  BCC	__CMP_NO_bcfe7f5d_cf7a_4f5e_a55e_e25b1a17d90a
-  BNE	__CMP_YES_bcfe7f5d_cf7a_4f5e_a55e_e25b1a17d90a
-  JMP	__CMP_YES_bcfe7f5d_cf7a_4f5e_a55e_e25b1a17d90a
-  __CMP_YES_bcfe7f5d_cf7a_4f5e_a55e_e25b1a17d90a:
+  BCC	__CMP_NO_d7c2d2ca_9114_4832_88ad_328596280d96
+  BNE	__CMP_YES_d7c2d2ca_9114_4832_88ad_328596280d96
+  JMP	__CMP_YES_d7c2d2ca_9114_4832_88ad_328596280d96
+  __CMP_YES_d7c2d2ca_9114_4832_88ad_328596280d96:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_bcfe7f5d_cf7a_4f5e_a55e_e25b1a17d90a
-  __CMP_NO_bcfe7f5d_cf7a_4f5e_a55e_e25b1a17d90a:
+  BRA	__CMP_END_d7c2d2ca_9114_4832_88ad_328596280d96
+  __CMP_NO_d7c2d2ca_9114_4832_88ad_328596280d96:
   SEP	#$20
   LDA	#$00
-  __CMP_END_bcfe7f5d_cf7a_4f5e_a55e_e25b1a17d90a:
-  BEQ	__IFNOT_05956f9c_89f7_4bbe_81ee_87fe7d13a918
+  __CMP_END_d7c2d2ca_9114_4832_88ad_328596280d96:
+  BEQ	__IFNOT_b84072b1_89a3_4704_a5ed_39885233c4c0
   .dbg	line, "Example\example.c", 24
   SEP	#$20
   LDA	#$00
   STA	__@callResult + 0
   JMP	__isColliding_END
-  __IFNOT_05956f9c_89f7_4bbe_81ee_87fe7d13a918:
+  __IFNOT_b84072b1_89a3_4704_a5ed_39885233c4c0:
   .dbg	line, "Example\example.c", 25
   CLC
   SEP	#$20
@@ -1385,24 +1385,24 @@ isColliding:	; @func _Bool(unsigned char, unsigned char, unsigned char, unsigned
   CLC
   LDA	__@scratchBase + 0
   CMP	isColliding@y2 + 0
-  BCC	__CMP_YES_483b0598_4055_4320_8ce0_f94f65cfd28e
-  BNE	__CMP_NO_483b0598_4055_4320_8ce0_f94f65cfd28e
-  JMP	__CMP_YES_483b0598_4055_4320_8ce0_f94f65cfd28e
-  __CMP_YES_483b0598_4055_4320_8ce0_f94f65cfd28e:
+  BCC	__CMP_YES_8bcea93e_bc31_446b_8ccc_ce731b674def
+  BNE	__CMP_NO_8bcea93e_bc31_446b_8ccc_ce731b674def
+  JMP	__CMP_YES_8bcea93e_bc31_446b_8ccc_ce731b674def
+  __CMP_YES_8bcea93e_bc31_446b_8ccc_ce731b674def:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_483b0598_4055_4320_8ce0_f94f65cfd28e
-  __CMP_NO_483b0598_4055_4320_8ce0_f94f65cfd28e:
+  BRA	__CMP_END_8bcea93e_bc31_446b_8ccc_ce731b674def
+  __CMP_NO_8bcea93e_bc31_446b_8ccc_ce731b674def:
   SEP	#$20
   LDA	#$00
-  __CMP_END_483b0598_4055_4320_8ce0_f94f65cfd28e:
-  BEQ	__IFNOT_f8fdbce3_311c_40f8_beb7_c91a139c5745
+  __CMP_END_8bcea93e_bc31_446b_8ccc_ce731b674def:
+  BEQ	__IFNOT_5a2ac2ca_794b_43a7_8bc6_bc8eb6dd9433
   .dbg	line, "Example\example.c", 25
   SEP	#$20
   LDA	#$00
   STA	__@callResult + 0
   JMP	__isColliding_END
-  __IFNOT_f8fdbce3_311c_40f8_beb7_c91a139c5745:
+  __IFNOT_5a2ac2ca_794b_43a7_8bc6_bc8eb6dd9433:
   .dbg	line, "Example\example.c", 26
   SEP	#$20
   LDA	#$01
@@ -1423,7 +1423,7 @@ uiToTiles:	; @func void((unsigned short)*, unsigned char, unsigned int, unsigned
   LDA	__@signExtend
   SBC	#$00
   STA	uiToTiles@i + 1
-  __ITER__START__5a2f3590_8333_4612_a066_9432f02eed2b:
+  __ITER__START__c9058465_a004_4f07_bc84_06b50e93d7be:
   CLC
   SEP	#$20
   LDA	uiToTiles@i + 1
@@ -1439,29 +1439,29 @@ uiToTiles:	; @func void((unsigned short)*, unsigned char, unsigned int, unsigned
   LDA	__@signExtend
   EOR	#$80
   CMP	#$80
-  BCC	__CMP_NO_efb47f58_59f8_40d1_8b53_6ab597b21699
-  BNE	__CMP_YES_efb47f58_59f8_40d1_8b53_6ab597b21699
+  BCC	__CMP_NO_05526c20_3ff6_42e9_9ae6_7abea9584af1
+  BNE	__CMP_YES_05526c20_3ff6_42e9_9ae6_7abea9584af1
   REP	#$20
   LDA	uiToTiles@i + 0
   CMP	#$0000
-  BCC	__CMP_NO_efb47f58_59f8_40d1_8b53_6ab597b21699
-  BNE	__CMP_YES_efb47f58_59f8_40d1_8b53_6ab597b21699
-  JMP	__CMP_YES_efb47f58_59f8_40d1_8b53_6ab597b21699
-  __CMP_YES_efb47f58_59f8_40d1_8b53_6ab597b21699:
+  BCC	__CMP_NO_05526c20_3ff6_42e9_9ae6_7abea9584af1
+  BNE	__CMP_YES_05526c20_3ff6_42e9_9ae6_7abea9584af1
+  JMP	__CMP_YES_05526c20_3ff6_42e9_9ae6_7abea9584af1
+  __CMP_YES_05526c20_3ff6_42e9_9ae6_7abea9584af1:
   REP	#$20
   LDA	#$0001
   STA	__@scratchBase + 0
   SEP	#$20
   LDA	#$00
   STA	__@scratchBase + 2
-  BRA	__CMP_END_efb47f58_59f8_40d1_8b53_6ab597b21699
-  __CMP_NO_efb47f58_59f8_40d1_8b53_6ab597b21699:
+  BRA	__CMP_END_05526c20_3ff6_42e9_9ae6_7abea9584af1
+  __CMP_NO_05526c20_3ff6_42e9_9ae6_7abea9584af1:
   REP	#$20
   LDA	#$0000
   STA	__@scratchBase + 0
   SEP	#$20
   STA	__@scratchBase + 2
-  __CMP_END_efb47f58_59f8_40d1_8b53_6ab597b21699:
+  __CMP_END_05526c20_3ff6_42e9_9ae6_7abea9584af1:
   SEP	#$10
   LDX	#$00
   REP	#$20
@@ -1475,7 +1475,7 @@ uiToTiles:	; @func void((unsigned short)*, unsigned char, unsigned int, unsigned
   INX
 : TXA
   BEQ	:+
-  JMP	__ITER__END__5a2f3590_8333_4612_a066_9432f02eed2b
+  JMP	__ITER__END__c9058465_a004_4f07_bc84_06b50e93d7be
   :
   .dbg	line, "Example\example.c", 35
   SEP	#$10
@@ -1631,14 +1631,14 @@ uiToTiles:	; @func void((unsigned short)*, unsigned char, unsigned int, unsigned
   SEP	#$10
   LDY	#$0000
   STA	[__@scratchBase],y
-  __ITER__ITER__5a2f3590_8333_4612_a066_9432f02eed2b:
+  __ITER__ITER__c9058465_a004_4f07_bc84_06b50e93d7be:
   SEC
   REP	#$20
   LDA	uiToTiles@i + 0
   SBC	#$0001
   STA	uiToTiles@i + 0
-  JMP	__ITER__START__5a2f3590_8333_4612_a066_9432f02eed2b
-  __ITER__END__5a2f3590_8333_4612_a066_9432f02eed2b:
+  JMP	__ITER__START__c9058465_a004_4f07_bc84_06b50e93d7be
+  __ITER__END__c9058465_a004_4f07_bc84_06b50e93d7be:
 __uiToTiles_END:
 RTL	; @endfunc
 main:	; @func void()
@@ -1889,7 +1889,7 @@ main:	; @func void()
   LDA	#$00
   STA	main@refreshScores + 0
   .dbg	line, "Example\example.c", 95
-  __ITER__START__b4e4674c_75b8_4cd6_acba_6a0bfd796bc0:
+  __ITER__START__338f965a_6207_41c6_9813_0e8de44f9f9c:
   .dbg	line, "Example\example.c", 97
   SEP	#$10
   LDX	#$00
@@ -1900,7 +1900,7 @@ main:	; @func void()
   INX
 : TXA
   BEQ	:+
-  JMP	__IFNOT_e5e3f31f_4842_4a2b_b3ad_424b943d8b36
+  JMP	__IFNOT_27819b44_b82f_479f_8360_87c6aa6c7e97
   :
   .dbg	line, "Example\example.c", 98
   .dbg	line, "Example\example.c", 99
@@ -1935,7 +1935,7 @@ main:	; @func void()
   SEP	#$20
   LDA	#$00
   STA	main@refreshScores + 0
-  __IFNOT_e5e3f31f_4842_4a2b_b3ad_424b943d8b36:
+  __IFNOT_27819b44_b82f_479f_8360_87c6aa6c7e97:
   .dbg	line, "Example\example.c", 104
   JSL	updateOAM
   .dbg	line, "Example\example.c", 105
@@ -1956,35 +1956,35 @@ main:	; @func void()
 : TXA
   SEP	#$20
   STA	__@scratchBase + 0
-  BEQ	__SKIPf5bc6f97_858e_49a8_b104_07a0971f8631
+  BEQ	__SKIP8abbbc9c_9790_46f2_8b73_728730d8aac3
   REP	#$21
   LDA	#$0000
   STA	__@signExtend
   LDA	__@signExtend
   EOR	#$8000
   CMP	#$8000
-  BCC	__CMP_NO_4045bca2_47fd_478b_8099_276bce2f8f74
-  BNE	__CMP_YES_4045bca2_47fd_478b_8099_276bce2f8f74
+  BCC	__CMP_NO_38c04e54_a335_479f_adc1_7db2ae8ee5b9
+  BNE	__CMP_YES_38c04e54_a335_479f_adc1_7db2ae8ee5b9
   SEP	#$20
   LDA	lowOAMBuffer + 1
   CMP	#$00
-  BCC	__CMP_NO_4045bca2_47fd_478b_8099_276bce2f8f74
-  BNE	__CMP_YES_4045bca2_47fd_478b_8099_276bce2f8f74
-  JMP	__CMP_NO_4045bca2_47fd_478b_8099_276bce2f8f74
-  __CMP_YES_4045bca2_47fd_478b_8099_276bce2f8f74:
+  BCC	__CMP_NO_38c04e54_a335_479f_adc1_7db2ae8ee5b9
+  BNE	__CMP_YES_38c04e54_a335_479f_adc1_7db2ae8ee5b9
+  JMP	__CMP_NO_38c04e54_a335_479f_adc1_7db2ae8ee5b9
+  __CMP_YES_38c04e54_a335_479f_adc1_7db2ae8ee5b9:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_4045bca2_47fd_478b_8099_276bce2f8f74
-  __CMP_NO_4045bca2_47fd_478b_8099_276bce2f8f74:
+  BRA	__CMP_END_38c04e54_a335_479f_adc1_7db2ae8ee5b9
+  __CMP_NO_38c04e54_a335_479f_adc1_7db2ae8ee5b9:
   SEP	#$20
   LDA	#$00
-  __CMP_END_4045bca2_47fd_478b_8099_276bce2f8f74:
+  __CMP_END_38c04e54_a335_479f_adc1_7db2ae8ee5b9:
   SEP	#$20
   STA	__@scratchBase + 1
-  __SKIPf5bc6f97_858e_49a8_b104_07a0971f8631:
+  __SKIP8abbbc9c_9790_46f2_8b73_728730d8aac3:
   LDA	__@scratchBase + 0
   AND	__@scratchBase + 1
-  BEQ	__IFNOT_a89e4d5f_8d8e_49a7_8737_33ab330a4479
+  BEQ	__IFNOT_fb2acca5_86f9_4844_8df7_75b141e936b8
   .dbg	line, "Example\example.c", 108
   REP	#$20
   LDA	#$0000
@@ -1993,8 +1993,8 @@ main:	; @func void()
   LDA	lowOAMBuffer + 1
   SBC	#$01
   STA	lowOAMBuffer + 1
-  JMP	__IFNOTELSE_a89e4d5f_8d8e_49a7_8737_33ab330a4479
-  __IFNOT_a89e4d5f_8d8e_49a7_8737_33ab330a4479:
+  JMP	__IFNOTELSE_fb2acca5_86f9_4844_8df7_75b141e936b8
+  __IFNOT_fb2acca5_86f9_4844_8df7_75b141e936b8:
   REP	#$20
   LDA	#$0400
   AND	JOYPAD + 0
@@ -2008,27 +2008,27 @@ main:	; @func void()
 : TXA
   SEP	#$20
   STA	__@scratchBase + 0
-  BEQ	__SKIPe5d50ed5_2c4b_4a1f_b4de_31214cd588ad
+  BEQ	__SKIP05dc0557_7906_4867_b210_20fb4b5a201f
   CLC
   LDA	lowOAMBuffer + 1
   CMP	#$d0
-  BCC	__CMP_YES_5c9d6e24_2c8b_4fc8_bea2_e58f33add147
-  BNE	__CMP_NO_5c9d6e24_2c8b_4fc8_bea2_e58f33add147
-  JMP	__CMP_NO_5c9d6e24_2c8b_4fc8_bea2_e58f33add147
-  __CMP_YES_5c9d6e24_2c8b_4fc8_bea2_e58f33add147:
+  BCC	__CMP_YES_ea33ee32_caf3_4b8c_abd0_a39c5929af2e
+  BNE	__CMP_NO_ea33ee32_caf3_4b8c_abd0_a39c5929af2e
+  JMP	__CMP_NO_ea33ee32_caf3_4b8c_abd0_a39c5929af2e
+  __CMP_YES_ea33ee32_caf3_4b8c_abd0_a39c5929af2e:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_5c9d6e24_2c8b_4fc8_bea2_e58f33add147
-  __CMP_NO_5c9d6e24_2c8b_4fc8_bea2_e58f33add147:
+  BRA	__CMP_END_ea33ee32_caf3_4b8c_abd0_a39c5929af2e
+  __CMP_NO_ea33ee32_caf3_4b8c_abd0_a39c5929af2e:
   SEP	#$20
   LDA	#$00
-  __CMP_END_5c9d6e24_2c8b_4fc8_bea2_e58f33add147:
+  __CMP_END_ea33ee32_caf3_4b8c_abd0_a39c5929af2e:
   SEP	#$20
   STA	__@scratchBase + 1
-  __SKIPe5d50ed5_2c4b_4a1f_b4de_31214cd588ad:
+  __SKIP05dc0557_7906_4867_b210_20fb4b5a201f:
   LDA	__@scratchBase + 0
   AND	__@scratchBase + 1
-  BEQ	__IFNOT_24cb149b_a73b_40bd_bc29_05ec835bc171
+  BEQ	__IFNOT_05907e57_eb43_4ccd_90ce_54f9b08a5506
   .dbg	line, "Example\example.c", 110
   REP	#$20
   LDA	#$0000
@@ -2038,8 +2038,8 @@ main:	; @func void()
   LDA	lowOAMBuffer + 1
   ADC	#$01
   STA	lowOAMBuffer + 1
-  __IFNOT_24cb149b_a73b_40bd_bc29_05ec835bc171:
-  __IFNOTELSE_a89e4d5f_8d8e_49a7_8737_33ab330a4479:
+  __IFNOT_05907e57_eb43_4ccd_90ce_54f9b08a5506:
+  __IFNOTELSE_fb2acca5_86f9_4844_8df7_75b141e936b8:
   .dbg	line, "Example\example.c", 112
   REP	#$20
   LDA	#$0800
@@ -2054,35 +2054,35 @@ main:	; @func void()
 : TXA
   SEP	#$20
   STA	__@scratchBase + 0
-  BEQ	__SKIP78b8ade6_79c0_48a7_b255_8ec4a386ce7a
+  BEQ	__SKIP78b6d58c_0f20_44a7_b7e3_7285464c2474
   REP	#$21
   LDA	#$0000
   STA	__@signExtend
   LDA	__@signExtend
   EOR	#$8000
   CMP	#$8000
-  BCC	__CMP_NO_da42f219_1734_4cd5_bed4_9bab21a45b8f
-  BNE	__CMP_YES_da42f219_1734_4cd5_bed4_9bab21a45b8f
+  BCC	__CMP_NO_dfd6b653_6bc8_4eaa_b5d8_607bfb7af8b2
+  BNE	__CMP_YES_dfd6b653_6bc8_4eaa_b5d8_607bfb7af8b2
   SEP	#$20
   LDA	lowOAMBuffer + 5
   CMP	#$00
-  BCC	__CMP_NO_da42f219_1734_4cd5_bed4_9bab21a45b8f
-  BNE	__CMP_YES_da42f219_1734_4cd5_bed4_9bab21a45b8f
-  JMP	__CMP_NO_da42f219_1734_4cd5_bed4_9bab21a45b8f
-  __CMP_YES_da42f219_1734_4cd5_bed4_9bab21a45b8f:
+  BCC	__CMP_NO_dfd6b653_6bc8_4eaa_b5d8_607bfb7af8b2
+  BNE	__CMP_YES_dfd6b653_6bc8_4eaa_b5d8_607bfb7af8b2
+  JMP	__CMP_NO_dfd6b653_6bc8_4eaa_b5d8_607bfb7af8b2
+  __CMP_YES_dfd6b653_6bc8_4eaa_b5d8_607bfb7af8b2:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_da42f219_1734_4cd5_bed4_9bab21a45b8f
-  __CMP_NO_da42f219_1734_4cd5_bed4_9bab21a45b8f:
+  BRA	__CMP_END_dfd6b653_6bc8_4eaa_b5d8_607bfb7af8b2
+  __CMP_NO_dfd6b653_6bc8_4eaa_b5d8_607bfb7af8b2:
   SEP	#$20
   LDA	#$00
-  __CMP_END_da42f219_1734_4cd5_bed4_9bab21a45b8f:
+  __CMP_END_dfd6b653_6bc8_4eaa_b5d8_607bfb7af8b2:
   SEP	#$20
   STA	__@scratchBase + 1
-  __SKIP78b8ade6_79c0_48a7_b255_8ec4a386ce7a:
+  __SKIP78b6d58c_0f20_44a7_b7e3_7285464c2474:
   LDA	__@scratchBase + 0
   AND	__@scratchBase + 1
-  BEQ	__IFNOT_3d575cd1_e77c_4ef7_9f6d_7b7b2a982842
+  BEQ	__IFNOT_199cbc35_4965_4fe0_9362_0edf405fd6d7
   .dbg	line, "Example\example.c", 113
   REP	#$20
   LDA	#$0000
@@ -2091,8 +2091,8 @@ main:	; @func void()
   LDA	lowOAMBuffer + 5
   SBC	#$01
   STA	lowOAMBuffer + 5
-  JMP	__IFNOTELSE_3d575cd1_e77c_4ef7_9f6d_7b7b2a982842
-  __IFNOT_3d575cd1_e77c_4ef7_9f6d_7b7b2a982842:
+  JMP	__IFNOTELSE_199cbc35_4965_4fe0_9362_0edf405fd6d7
+  __IFNOT_199cbc35_4965_4fe0_9362_0edf405fd6d7:
   REP	#$20
   LDA	#$0400
   AND	JOYPAD + 2
@@ -2106,27 +2106,27 @@ main:	; @func void()
 : TXA
   SEP	#$20
   STA	__@scratchBase + 0
-  BEQ	__SKIP0202da4c_458e_4ea6_8e94_99f9b171cc77
+  BEQ	__SKIP09176a8e_3d86_4410_9108_cebd551675ca
   CLC
   LDA	lowOAMBuffer + 5
   CMP	#$d0
-  BCC	__CMP_YES_a4de96d2_e668_4568_994a_dd51c6cb2053
-  BNE	__CMP_NO_a4de96d2_e668_4568_994a_dd51c6cb2053
-  JMP	__CMP_NO_a4de96d2_e668_4568_994a_dd51c6cb2053
-  __CMP_YES_a4de96d2_e668_4568_994a_dd51c6cb2053:
+  BCC	__CMP_YES_33fbf4e5_035a_4a3a_a765_557d40c9d89f
+  BNE	__CMP_NO_33fbf4e5_035a_4a3a_a765_557d40c9d89f
+  JMP	__CMP_NO_33fbf4e5_035a_4a3a_a765_557d40c9d89f
+  __CMP_YES_33fbf4e5_035a_4a3a_a765_557d40c9d89f:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_a4de96d2_e668_4568_994a_dd51c6cb2053
-  __CMP_NO_a4de96d2_e668_4568_994a_dd51c6cb2053:
+  BRA	__CMP_END_33fbf4e5_035a_4a3a_a765_557d40c9d89f
+  __CMP_NO_33fbf4e5_035a_4a3a_a765_557d40c9d89f:
   SEP	#$20
   LDA	#$00
-  __CMP_END_a4de96d2_e668_4568_994a_dd51c6cb2053:
+  __CMP_END_33fbf4e5_035a_4a3a_a765_557d40c9d89f:
   SEP	#$20
   STA	__@scratchBase + 1
-  __SKIP0202da4c_458e_4ea6_8e94_99f9b171cc77:
+  __SKIP09176a8e_3d86_4410_9108_cebd551675ca:
   LDA	__@scratchBase + 0
   AND	__@scratchBase + 1
-  BEQ	__IFNOT_9afbdfa3_d121_4eee_a802_f7c54dff50e6
+  BEQ	__IFNOT_1d386436_044a_4303_98d4_0f4d41238360
   .dbg	line, "Example\example.c", 115
   REP	#$20
   LDA	#$0000
@@ -2136,8 +2136,8 @@ main:	; @func void()
   LDA	lowOAMBuffer + 5
   ADC	#$01
   STA	lowOAMBuffer + 5
-  __IFNOT_9afbdfa3_d121_4eee_a802_f7c54dff50e6:
-  __IFNOTELSE_3d575cd1_e77c_4ef7_9f6d_7b7b2a982842:
+  __IFNOT_1d386436_044a_4303_98d4_0f4d41238360:
+  __IFNOTELSE_199cbc35_4965_4fe0_9362_0edf405fd6d7:
   .dbg	line, "Example\example.c", 117
   SEP	#$10
   LDX	#$00
@@ -2147,7 +2147,7 @@ main:	; @func void()
   BNE	:+
   INX
 : TXA
-  BNE	__condSkipf2e572d7_cf51_43f7_bcfe_bcd427556c63
+  BNE	__condSkip66a85f46_589f_48cd_a578_a299f7025cc8
   SEP	#$20
   LDA	__@scratchBase + 0
   BPL	:+
@@ -2161,8 +2161,8 @@ main:	; @func void()
   SEP	#$20
   LDA	#$01
   STA	__@scratchBase + 0
-  JMP	__condEndf2e572d7_cf51_43f7_bcfe_bcd427556c63
-  __condSkipf2e572d7_cf51_43f7_bcfe_bcd427556c63:
+  JMP	__condEnd66a85f46_589f_48cd_a578_a299f7025cc8
+  __condSkip66a85f46_589f_48cd_a578_a299f7025cc8:
   SEP	#$20
   LDA	__@scratchBase + 0
   BPL	:+
@@ -2176,7 +2176,7 @@ main:	; @func void()
   SEP	#$20
   LDA	#$ff
   STA	__@scratchBase + 0
-  __condEndf2e572d7_cf51_43f7_bcfe_bcd427556c63:
+  __condEnd66a85f46_589f_48cd_a578_a299f7025cc8:
   CLC
   SEP	#$20
   LDA	lowOAMBuffer + 8
@@ -2190,7 +2190,7 @@ main:	; @func void()
   BNE	:+
   INX
 : TXA
-  BNE	__condSkip3df17a99_e547_45c4_986e_8ad3caabe8cc
+  BNE	__condSkip2c5ee3bb_6045_44dc_8eeb_efd3de11e43b
   SEP	#$20
   LDA	__@scratchBase + 0
   BPL	:+
@@ -2204,8 +2204,8 @@ main:	; @func void()
   SEP	#$20
   LDA	#$01
   STA	__@scratchBase + 0
-  JMP	__condEnd3df17a99_e547_45c4_986e_8ad3caabe8cc
-  __condSkip3df17a99_e547_45c4_986e_8ad3caabe8cc:
+  JMP	__condEnd2c5ee3bb_6045_44dc_8eeb_efd3de11e43b
+  __condSkip2c5ee3bb_6045_44dc_8eeb_efd3de11e43b:
   SEP	#$20
   LDA	__@scratchBase + 0
   BPL	:+
@@ -2219,7 +2219,7 @@ main:	; @func void()
   SEP	#$20
   LDA	#$ff
   STA	__@scratchBase + 0
-  __condEnd3df17a99_e547_45c4_986e_8ad3caabe8cc:
+  __condEnd2c5ee3bb_6045_44dc_8eeb_efd3de11e43b:
   CLC
   SEP	#$20
   LDA	lowOAMBuffer + 9
@@ -2237,7 +2237,7 @@ main:	; @func void()
   BNE	:+
   INX
 : TXA
-  BEQ	__IFNOT_8a7b17b4_2b38_49b1_a1a2_8dae9890d850
+  BEQ	__IFNOT_b484f141_bb07_4a69_8b50_1e31b87ecaef
   .dbg	line, "Example\example.c", 121
   .dbg	line, "Example\example.c", 122
   SEP	#$20
@@ -2245,24 +2245,24 @@ main:	; @func void()
   STA	main@goDown + 0
   .dbg	line, "Example\example.c", 123
   STA	lowOAMBuffer + 9
-  JMP	__IFNOTELSE_8a7b17b4_2b38_49b1_a1a2_8dae9890d850
-  __IFNOT_8a7b17b4_2b38_49b1_a1a2_8dae9890d850:
+  JMP	__IFNOTELSE_b484f141_bb07_4a69_8b50_1e31b87ecaef
+  __IFNOT_b484f141_bb07_4a69_8b50_1e31b87ecaef:
   CLC
   SEP	#$20
   LDA	lowOAMBuffer + 9
   CMP	#$d8
-  BCC	__CMP_NO_e63dd7c1_042e_4170_96cf_e5f26533a7e8
-  BNE	__CMP_YES_e63dd7c1_042e_4170_96cf_e5f26533a7e8
-  JMP	__CMP_NO_e63dd7c1_042e_4170_96cf_e5f26533a7e8
-  __CMP_YES_e63dd7c1_042e_4170_96cf_e5f26533a7e8:
+  BCC	__CMP_NO_896df4dc_9382_46e8_b2e8_667d7033702d
+  BNE	__CMP_YES_896df4dc_9382_46e8_b2e8_667d7033702d
+  JMP	__CMP_NO_896df4dc_9382_46e8_b2e8_667d7033702d
+  __CMP_YES_896df4dc_9382_46e8_b2e8_667d7033702d:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_e63dd7c1_042e_4170_96cf_e5f26533a7e8
-  __CMP_NO_e63dd7c1_042e_4170_96cf_e5f26533a7e8:
+  BRA	__CMP_END_896df4dc_9382_46e8_b2e8_667d7033702d
+  __CMP_NO_896df4dc_9382_46e8_b2e8_667d7033702d:
   SEP	#$20
   LDA	#$00
-  __CMP_END_e63dd7c1_042e_4170_96cf_e5f26533a7e8:
-  BEQ	__IFNOT_53bb8434_9874_4b6e_a22c_09ce90caf7df
+  __CMP_END_896df4dc_9382_46e8_b2e8_667d7033702d:
+  BEQ	__IFNOT_f8866e73_e20d_4a25_9503_8473a564c14d
   .dbg	line, "Example\example.c", 126
   .dbg	line, "Example\example.c", 127
   SEP	#$20
@@ -2271,8 +2271,8 @@ main:	; @func void()
   .dbg	line, "Example\example.c", 128
   LDA	#$d8
   STA	lowOAMBuffer + 9
-  __IFNOT_53bb8434_9874_4b6e_a22c_09ce90caf7df:
-  __IFNOTELSE_8a7b17b4_2b38_49b1_a1a2_8dae9890d850:
+  __IFNOT_f8866e73_e20d_4a25_9503_8473a564c14d:
+  __IFNOTELSE_b484f141_bb07_4a69_8b50_1e31b87ecaef:
   .dbg	line, "Example\example.c", 130
   REP	#$20
   LDA	#.loWord(main@scoreP2Tiles)
@@ -2302,7 +2302,7 @@ main:	; @func void()
   INX
 : TXA
   BNE	:+
-  JMP	__IFNOT_2344629d_8467_4e27_b557_c76f45f62edf
+  JMP	__IFNOT_99143454_30a3_418b_8b8b_618dbd2655d8
   :
   .dbg	line, "Example\example.c", 132
   .dbg	line, "Example\example.c", 133
@@ -2348,25 +2348,25 @@ main:	; @func void()
   SEP	#$20
   LDA	#$01
   STA	main@refreshScores + 0
-  JMP	__IFNOTELSE_2344629d_8467_4e27_b557_c76f45f62edf
-  __IFNOT_2344629d_8467_4e27_b557_c76f45f62edf:
+  JMP	__IFNOTELSE_99143454_30a3_418b_8b8b_618dbd2655d8
+  __IFNOT_99143454_30a3_418b_8b8b_618dbd2655d8:
   CLC
   SEP	#$20
   LDA	lowOAMBuffer + 8
   CMP	#$f8
-  BCC	__CMP_NO_fdb16cc0_2131_4452_b2a6_e564aa48303c
-  BNE	__CMP_YES_fdb16cc0_2131_4452_b2a6_e564aa48303c
-  JMP	__CMP_NO_fdb16cc0_2131_4452_b2a6_e564aa48303c
-  __CMP_YES_fdb16cc0_2131_4452_b2a6_e564aa48303c:
+  BCC	__CMP_NO_221ee6e7_1ef0_4b21_bc11_97147e04c6d8
+  BNE	__CMP_YES_221ee6e7_1ef0_4b21_bc11_97147e04c6d8
+  JMP	__CMP_NO_221ee6e7_1ef0_4b21_bc11_97147e04c6d8
+  __CMP_YES_221ee6e7_1ef0_4b21_bc11_97147e04c6d8:
   SEP	#$20
   LDA	#$01
-  BRA	__CMP_END_fdb16cc0_2131_4452_b2a6_e564aa48303c
-  __CMP_NO_fdb16cc0_2131_4452_b2a6_e564aa48303c:
+  BRA	__CMP_END_221ee6e7_1ef0_4b21_bc11_97147e04c6d8
+  __CMP_NO_221ee6e7_1ef0_4b21_bc11_97147e04c6d8:
   SEP	#$20
   LDA	#$00
-  __CMP_END_fdb16cc0_2131_4452_b2a6_e564aa48303c:
+  __CMP_END_221ee6e7_1ef0_4b21_bc11_97147e04c6d8:
   BNE	:+
-  JMP	__IFNOT_c65747f9_45ee_463a_9c76_051df4476f70
+  JMP	__IFNOT_05e9bffb_aae8_4f30_927f_679cde6d21c9
   :
   .dbg	line, "Example\example.c", 142
   .dbg	line, "Example\example.c", 143
@@ -2413,8 +2413,8 @@ main:	; @func void()
   SEP	#$20
   LDA	#$01
   STA	main@refreshScores + 0
-  __IFNOT_c65747f9_45ee_463a_9c76_051df4476f70:
-  __IFNOTELSE_2344629d_8467_4e27_b557_c76f45f62edf:
+  __IFNOT_05e9bffb_aae8_4f30_927f_679cde6d21c9:
+  __IFNOTELSE_99143454_30a3_418b_8b8b_618dbd2655d8:
   .dbg	line, "Example\example.c", 152
   SEP	#$20
   LDA	lowOAMBuffer + 0
@@ -2444,7 +2444,7 @@ main:	; @func void()
   BNE	:+
   INX
 : TXA
-  BNE	__IFNOT_8cfbc89d_c40c_4248_94fa_3f7a0fe184b2
+  BNE	__IFNOT_d2f67012_4c44_4dec_a987_f9118eba2c67
   .dbg	line, "Example\example.c", 153
   .dbg	line, "Example\example.c", 154
   REP	#$20
@@ -2468,8 +2468,8 @@ main:	; @func void()
 : TXA
   SEP	#$20
   STA	main@goDown + 0
-  JMP	__IFNOTELSE_8cfbc89d_c40c_4248_94fa_3f7a0fe184b2
-  __IFNOT_8cfbc89d_c40c_4248_94fa_3f7a0fe184b2:
+  JMP	__IFNOTELSE_d2f67012_4c44_4dec_a987_f9118eba2c67
+  __IFNOT_d2f67012_4c44_4dec_a987_f9118eba2c67:
   SEP	#$20
   LDA	lowOAMBuffer + 4
   STA	isColliding@x1 + 0
@@ -2498,7 +2498,7 @@ main:	; @func void()
   BNE	:+
   INX
 : TXA
-  BNE	__IFNOT_7b127356_5e1c_4d26_bec1_e84b61987f61
+  BNE	__IFNOT_f607f9c7_8936_4600_b481_df94044ae479
   .dbg	line, "Example\example.c", 159
   .dbg	line, "Example\example.c", 160
   REP	#$20
@@ -2521,10 +2521,10 @@ main:	; @func void()
 : TXA
   SEP	#$20
   STA	main@goDown + 0
-  __IFNOT_7b127356_5e1c_4d26_bec1_e84b61987f61:
-  __IFNOTELSE_8cfbc89d_c40c_4248_94fa_3f7a0fe184b2:
+  __IFNOT_f607f9c7_8936_4600_b481_df94044ae479:
+  __IFNOTELSE_d2f67012_4c44_4dec_a987_f9118eba2c67:
   .dbg	line, "Example\example.c", 165
-  __ITER__START__5a4abacf_2f25_405b_8b22_390d2ba45c3d:
+  __ITER__START__b5245f2f_ba6d_4655_ad84_81db8a2e4a6e:
   SEP	#$10
   LDX	#$01
   SEP	#$20
@@ -2536,26 +2536,26 @@ main:	; @func void()
   SEP	#$20
   CMP	#$00
   BNE	:+
-  JMP	__ITER__END__5a4abacf_2f25_405b_8b22_390d2ba45c3d
+  JMP	__ITER__END__b5245f2f_ba6d_4655_ad84_81db8a2e4a6e
   :
-  JMP	__ITER__START__5a4abacf_2f25_405b_8b22_390d2ba45c3d
-  __ITER__END__5a4abacf_2f25_405b_8b22_390d2ba45c3d:
-  JMP	__ITER__START__b4e4674c_75b8_4cd6_acba_6a0bfd796bc0
-  __ITER__END__b4e4674c_75b8_4cd6_acba_6a0bfd796bc0:
+  JMP	__ITER__START__b5245f2f_ba6d_4655_ad84_81db8a2e4a6e
+  __ITER__END__b5245f2f_ba6d_4655_ad84_81db8a2e4a6e:
+  JMP	__ITER__START__338f965a_6207_41c6_9813_0e8de44f9f9c
+  __ITER__END__338f965a_6207_41c6_9813_0e8de44f9f9c:
 __main_END:
 RTL	; @endfunc
-; @asm imp_math\imp_float_f2u64.h
+; @asm
 ; @endasm
-; @asm imp_math\imp_float_f2u64.asm
+; @asm
 ; @endasm
-; @asm imp_math\imp_float_s2f64.asm
+; @asm
 ; Doubles
 ; @endasm
-; @asm imp_math\imp_float_f2s32.h
+; @asm
 ; @endasm
-; @asm imp_math\imp_float.asm
+; @asm
 ; @endasm
-; @asm Example\SNES\init.asm
+; @asm
 ; Stolen shamelessly from https
 ; en.wikibooks.org/wiki/Super_NES_Programming/Initialization_Tutorial/Snes_Init
 initSNES: ; @func
@@ -2647,19 +2647,19 @@ initSNES: ; @func
 	cli 	 	; Enable interrupts
 RTL
 ; @endasm
-; @asm SNES\Graphics\colors.h
+; @asm
 ; @endasm
-; @asm imp_math\imp_float_f2s64.asm
+; @asm
 ; @endasm
-; @asm stdlib\stdint.h
+; @asm
 ; @endasm
-; @asm imp_math\imp_float_s2f32.h
+; @asm
 ; @endasm
-; @asm Resources\resources.h
+; @asm
 ; @endasm
-; @asm imp_math\imp_float_f32.h
+; @asm
 ; @endasm
-; @asm imp_math\imp_mult.asm
+; @asm
 ; Thanks to Sir Walrus for long div/mod code
 ; Multiplication
 ; Division
@@ -2993,31 +2993,31 @@ ____mod24by24_END:
 RTL	; @endfunc
 ; @endasm
 ; @endasm
-; @asm imp_math\imp_float_u2f32.asm
+; @asm
 ; @endasm
-; @asm SNES\mmio.h
+; @asm
 ; @endasm
-; @asm imp_math\imp_float_f2u32.asm
+; @asm
 ; @endasm
-; @asm imp_math\imp_float_f64.asm
+; @asm
 ; @endasm
-; @asm imp_math\imp_float.h
+; @asm
 ; @endasm
-; @asm SNES\init.h
+; @asm
 ; @endasm
-; @asm imp_math\imp_float_u2f32.h
+; @asm
 ; @endasm
-; @asm SNES\Graphics\oam.h
+; @asm
 ; @endasm
-; @asm imp_math\imp_float_s2f64.h
+; @asm
 ; @endasm
-; @asm imp_math\imp_float_f2u32.h
+; @asm
 ; @endasm
-; @asm imp_math\imp_float_s2f32.asm
+; @asm
 ; @endasm
-; @asm imp_math\imp_mult.h
+; @asm
 ; @endasm
-; @asm Example\SNES\mmio.asm
+; @asm
 ; Registers as the library sees them
 ; https://snes.nesdev.org/wiki/MMIO_registers
 ; PPU - https://snes.nesdev.org/wiki/PPU_registers
@@ -3096,27 +3096,27 @@ APUIO1 = $002141
 APUIO2 = $002142
 APUIO3 = $002143
 ; @endasm
-; @asm imp_math\imp_float_f2s64.h
+; @asm
 ; @endasm
-; @asm imp_math\imp_float_f2s32.asm
+; @asm
 ; @endasm
-; @asm SNES\cpu.h
+; @asm
 ; @endasm
-; @asm SNES\Graphics\backgrounds.h
+; @asm
 ; @endasm
-; @asm SNES\Graphics\ppu.h
+; @asm
 ; @endasm
-; @asm SNES\controls.h
+; @asm
 ; @endasm
-; @asm SNES\dma.h
+; @asm
 ; @endasm
-; @asm imp_math\imp_float_f64.h
+; @asm
 ; @endasm
-; @asm imp_math\imp_float_f32.asm
+; @asm
 ; @endasm
-; @asm imp_math\imp_float_u2f64.asm
+; @asm
 ; @endasm
-; @asm imp_math\imp_float_u2f64.h
+; @asm
 ; @endasm
 tilemap:
   .byte	$04, $00, $04, $00, $04, $00, $04, $00, $04, $00, $04, $00, $04, $00, $04, $00, $04, $00, $04, $00, $04, $00, $04, $00, $04, $00, $04, $00, $04, $00, $04, $00

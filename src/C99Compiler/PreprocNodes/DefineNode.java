@@ -3,11 +3,7 @@
 
 package C99Compiler.PreprocNodes;
 
-import java.util.LinkedList;
-import java.util.List;
-
-import C99Compiler.CompConfig;
-import C99Compiler.Utils.LineInfo;
+import C99Compiler.Exceptions.CompilerException;
 
 public class DefineNode extends PreProcComponentNode<DefineNode> implements GeneratingNode
 {
@@ -55,10 +51,12 @@ public class DefineNode extends PreProcComponentNode<DefineNode> implements Gene
 			if (parameters[i].equals(parameter)) return i;
 		return -1;
 	}
-	public String getText(String... parameters) throws Exception
+	public String getText(String... parameters) throws CompilerException
 	{
 		String text = "";
-		if (parameters.length != this.parameters.length) throw new Exception("Bad macro"); // TODO
+		
+		if (parameters.length != this.parameters.length)
+			throw new CompilerException("Bad macro"); // TODO
 		for (String word : replacements)
 		{
 			int i = indexOfParam(word);
