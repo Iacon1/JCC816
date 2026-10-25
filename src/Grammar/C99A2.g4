@@ -78,7 +78,7 @@ expression : assignment_expression (Comma assignment_expression)* ;
 constant_expression : conditional_expression ;
 
 // A.2.2 Declarations
-attributes_declaration : TwoLSB identifier_list TwoRSB ;
+attributes_declaration : LeSqBr LeSqBr identifier_list RiSqBr RiSqBr ;
 declaration : attributes_declaration* declaration_specifiers init_declarator_list? Semico
 	{
 		C99Compiler.C99Compiler.tryRegisterTypedef($ctx);

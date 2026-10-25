@@ -44,9 +44,6 @@ LessMd : '<%' ;
 GretMd : '%>' ;
 ModCol : '%:' ;
 
-TwoLSB : '[[' ;
-TwoRSB : ']]' ; // These two are not C99-compliant and were added for the attribute functionality
-
 Amper  : '&';
 Star   : '*' ;
 Plus   : '+' ;
