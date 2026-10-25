@@ -126,6 +126,9 @@ public class InitializerNode extends InterpretingNode<InitializerNode, Initializ
 	
 	private int checkForEmbeds(int arrayIndex)
 	{
+		if (arrayInitializers == null)
+			return arrayIndex;
+		
 		if (arrayInitializers.get(arrayIndex).expr != null
 				&& UnaryExpressionNode.class.isAssignableFrom(arrayInitializers.get(arrayIndex).expr.getClass())
 				&& ((UnaryExpressionNode) arrayInitializers.get(arrayIndex).expr).isEMBED())
