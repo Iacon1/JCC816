@@ -22,6 +22,7 @@ import java.util.Arrays;
 
 import C99Compiler.CompilerNodes.FunctionDefinitionNode;
 import C99Compiler.CompilerNodes.TranslationUnitNode;
+import C99Compiler.CompilerNodes.Declarations.DeclarationNode.InitDeclaratorPair;
 import C99Compiler.CompilerNodes.Declarations.InitializerNode;
 import C99Compiler.CompilerNodes.Definitions.EnumDefinitionNode;
 import C99Compiler.CompilerNodes.Definitions.StructUnionDefinitionNode;
@@ -340,9 +341,12 @@ public final class AsmBuilder implements Catalogger
 					new ConstantSource(0, BSSSize)).apply(pair);
 		// Load initialized globals
 		for (TranslationUnit unit : translationUnits)
-			for (InitializerNode init : unit.getGlobalInitializers())
-				if (!init.isROM()) // Only RAM ones up here, to save space in 0 bank
-					pair = init.apply(pair);
+			for (InitDeclaratorPair decl : unit.getGlobalInitDeclarators())
+				if (!decl.isROM(new ProgramState()) && decl.init != null) // Only RAM ones up here, to save space in 0 bank
+				{
+					pair = new AssemblyStatePair(pair.assembly, pair.state.setDestSource(decl.var.getSource()));
+					pair = decl.init.apply(pair);
+				}
 		assembly += pair.assembly;
 		
 		assembly += "JML\tmain\n";
@@ -416,9 +420,11 @@ public final class AsmBuilder implements Catalogger
 		{	
 			// Get ROM data
 			for (TranslationUnit unit : translationUnits)
-				for (InitializerNode init : unit.getGlobalInitializers())
-					if (!init.getType().isExtern() && init.isROM()) // Rom ones go last
-						assembly += init.getAssembly(new ProgramState());
+				for (InitDeclaratorPair decl : unit.getGlobalInitDeclarators())
+				{
+					if (decl.isROM(new ProgramState()) && decl.init != null) // Rom ones go last
+						assembly += decl.getROMAssembly(new ProgramState());
+				}
 
 			Map<String, Integer> varPoses = mapVariables(cartConfig, memorySize, callGraph);
 			if (CompConfig.wordAddresses && memorySize.WRAMSize > 0xFFFF)

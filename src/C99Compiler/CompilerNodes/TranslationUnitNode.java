@@ -11,6 +11,7 @@ import java.util.Set;
 
 import C99Compiler.CompConfig.DefinableInterrupt;
 import C99Compiler.CompilerNodes.Declarations.DeclarationNode;
+import C99Compiler.CompilerNodes.Declarations.DeclarationNode.InitDeclaratorPair;
 import C99Compiler.CompilerNodes.Declarations.InitializerNode;
 import C99Compiler.CompilerNodes.Definitions.EnumDefinitionNode;
 import C99Compiler.CompilerNodes.Definitions.StructUnionDefinitionNode;
@@ -34,7 +35,7 @@ public class TranslationUnitNode extends InterpretingNode<TranslationUnitNode, T
 	private Set<String> includedStdLibs;
 	private Set<String> includedOtherLibs;
 	private Map<String, byte[]> embedFiles;
-	private List<InitializerNode> globalInitializers;
+	private List<InitDeclaratorPair> globalInitDeclarators;
 	private String filename;
 	private String staticUUID;
 	
@@ -44,7 +45,7 @@ public class TranslationUnitNode extends InterpretingNode<TranslationUnitNode, T
 		interrupts = new LinkedHashMap<DefinableInterrupt, String>();
 		typedefs = new LinkedHashMap<String, Type>();
 		requiredSubs = new LinkedHashMap<String, String>();
-		globalInitializers = new LinkedList<InitializerNode>();
+		globalInitDeclarators = new LinkedList<InitDeclaratorPair>();
 		this.filename = filename;
 		this.embedFiles = embedFiles;
 		this.lineInfo = lineInfo;
@@ -60,9 +61,9 @@ public class TranslationUnitNode extends InterpretingNode<TranslationUnitNode, T
 	@Override public LinkedHashMap<String, String> getRequiredSubs() {return requiredSubs;}
 	@Override public LinkedHashMap<DefinableInterrupt, String> getInterrupts() {return interrupts;}
 	@Override
-	public List<InitializerNode> getGlobalInitializers()
+	public List<InitDeclaratorPair> getGlobalInitDeclarators()
 	{
-		return globalInitializers;
+		return globalInitDeclarators;
 	}
 	public void registerTypedef(String name, Type type)
 	{
@@ -77,15 +78,23 @@ public class TranslationUnitNode extends InterpretingNode<TranslationUnitNode, T
 	{
 		interrupts.put(interrupt, funcName);
 	}
-	public void addGlobalInitializer(InitializerNode n)
+	public void addGlobalInitDeclarator(VariableNode v, InitializerNode n)
 	{
+		v.swapParent(this);
 		n.swapParent(this);
-		globalInitializers.add(n);
+		globalInitDeclarators.add(new InitDeclaratorPair(v, n));
 	}
-	public void removeGlobalInitializer(InitializerNode n)
+	public void addGlobalInitDeclarator(InitDeclaratorPair p)
 	{
-		removeChild(n);
-		globalInitializers.remove(n);
+		p.var.swapParent(this);
+		p.init.swapParent(this);
+		globalInitDeclarators.add(p);
+	}
+	public void removeGlobalInitDeclarator(InitDeclaratorPair p)
+	{
+		removeChild(p.var);
+		removeChild(p.init);
+		globalInitDeclarators.remove(p);
 	}
 	@Override
 	public TranslationUnitNode interpret(Translation_unitContext node) throws Exception
@@ -96,9 +105,7 @@ public class TranslationUnitNode extends InterpretingNode<TranslationUnitNode, T
 			if (extDec.declaration() != null)
 			{
 				DeclarationNode declNode = new DeclarationNode(this).interpret(extDec.declaration());
-				for (ComponentNode<?> child : declNode.children)
-					if ((InitializerNode.class.isAssignableFrom(child.getClass())))
-						globalInitializers.add((InitializerNode) child);
+				globalInitDeclarators.addAll(declNode.getInitDeclarators());
 			}
 			else
 			{

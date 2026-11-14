@@ -1,32 +1,75 @@
-// Created by Iacon1 on 10/290/2023.
+// Created by Iacon1 on 10/29/2023.
 //
 package C99Compiler.CompilerNodes.Declarations;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import C99Compiler.CompConfig;
 import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.FunctionDefinitionNode;
 import C99Compiler.CompilerNodes.InterpretingNode;
+import C99Compiler.CompilerNodes.Dummies.DummyExpressionNode;
 import C99Compiler.CompilerNodes.Definitions.Type;
 import C99Compiler.CompilerNodes.Interfaces.UnvaluedAssemblableNode;
 import C99Compiler.CompilerNodes.LValues.VariableNode;
 import C99Compiler.Exceptions.CompilerMultipleDefinitionException;
 import C99Compiler.Exceptions.ConstraintException;
 import C99Compiler.ProgramState.ProgramState;
+import C99Compiler.Utils.OperandSources.ConstantSource;
 import Grammar.C99.C99Parser.DeclarationContext;
 import Grammar.C99.C99Parser.Init_declaratorContext;
 
 public class DeclarationNode extends InterpretingNode<DeclarationNode, DeclarationContext> implements UnvaluedAssemblableNode
 {
-	private List<VariableNode> variables;
-	private List<InitializerNode> initializers;
-	
+	public static class InitDeclaratorPair
+	{
+		public final VariableNode var;
+		public final InitializerNode init;
+		
+		public InitDeclaratorPair(VariableNode var, InitializerNode init)
+		{
+			this.var = var;
+			this.init = init;
+		}
+		
+		public boolean isROM(ProgramState state)
+		{
+			if (this.init == null) return false;
+			
+			if (!this.var.getType().isROM()) return false;
+			
+			if (!this.init.hasPropValue(state)) return false;
+			
+			return true;
+		}
+
+		public String getROMAssembly(ProgramState state)
+		{
+			String whitespace = state.getWhitespace();
+			int size = var.getSize();
+			if (init.checkStringLiteral() && var.getType().isPointer() && !var.getType().isArray())
+				size = init.checkStringLiteralSize();
+			ConstantSource source = new ConstantSource(init.getPropValue(state), size);
+			String assembly = whitespace + var.getFullName() + ":";
+			whitespace = state.indent().getWhitespace();
+			for (int i = 0; i < source.getSize(); ++i)
+			{
+				if (i % CompConfig.bytesPerDataLine == 0) // New line needed
+					assembly += "\n" + whitespace + ".byte\t";
+				assembly += source.getBase(state, i).replace("#", "");
+				if (i != source.getSize() - 1 && (i + 1) % CompConfig.bytesPerDataLine != 0)
+					assembly += ", "; // There will be another and on the same line
+			}
+			assembly += "\n";
+			return assembly;
+		}
+	}
+	private List<InitDeclaratorPair> initDeclPairs;
 	public DeclarationNode(ComponentNode<?> parent)
 	{
 		super(parent);
-		variables = new ArrayList<VariableNode>();
-		initializers = new ArrayList<InitializerNode>();
+		initDeclPairs = new ArrayList<InitDeclaratorPair>();
 	}
 
 	@Override
@@ -63,10 +106,11 @@ public class DeclarationNode extends InterpretingNode<DeclarationNode, Declarati
 					if (checkRepeatVariables((ComponentNode<?> c) -> new VariableNode(c, declaratorNode.getIdentifier(), type)) != null)
 						throw new CompilerMultipleDefinitionException(declaratorNode.getIdentifier(), initDeclarator.start, this); // Two variables cannot have same full name
 					VariableNode variable = new VariableNode(this, declaratorNode.getIdentifier(), type);
-					variables.add(variable);
+					InitializerNode initializer = null;
 					if (initDeclarator.initializer() != null)
-						initializers.add(new InitializerNode(this, variable).interpret(initDeclarator.initializer()));
-					else initializers.add(new InitializerNode(this, variable));
+						initializer = new InitializerNode(this, variable.getType()).interpret(initDeclarator.initializer());
+
+					initDeclPairs.add(new InitDeclaratorPair(variable, initializer));
 				}
 				
 			}
@@ -82,18 +126,24 @@ public class DeclarationNode extends InterpretingNode<DeclarationNode, Declarati
 	@Override
 	public boolean canCall(ProgramState state, FunctionDefinitionNode function)
 	{
-		for (InitializerNode initializer : initializers) if (
+		for (InitDeclaratorPair initDeclPair : initDeclPairs)
+		{
+			InitializerNode initializer = initDeclPair.init;
+			if (
 				initializer != null &&
 				initializer.hasAssembly(state) &&
 				initializer.canCall(state, function)) return true;
+		}
 		return false;
 	}
 	@Override
 	public boolean hasAssembly(ProgramState state)
 	{
-		for (InitializerNode initializer : initializers) if (
-				initializer != null &&
-				initializer.hasAssembly(state)) return true;
+		for (InitDeclaratorPair initDeclPair : initDeclPairs)
+		{
+			if (
+					initDeclPair.init != null) return true;
+		}
 		return false;
 	}
 	
@@ -103,11 +153,11 @@ public class DeclarationNode extends InterpretingNode<DeclarationNode, Declarati
 		if (!children.contains(child))
 			throw new IllegalArgumentException();
 
-		for (InitializerNode initializer : initializers)
+		for (InitDeclaratorPair initDeclPair : initDeclPairs)
 		{
-			if (child == initializer)
+			if (child == initDeclPair.init)
 				break;
-			state = initializer.getStateAfter(state);
+			state = initDeclPair.init.getStateAfter(state);
 		}
 		return state;
 	}
@@ -118,13 +168,22 @@ public class DeclarationNode extends InterpretingNode<DeclarationNode, Declarati
 		AssemblyStatePair tmpPair;
 		
 		String assembly = "";
-		for (InitializerNode initializer : initializers)
+		
+		for (InitDeclaratorPair initDeclPair : initDeclPairs)
 		{
-			tmpPair = initializer.getAssemblyAndState(state);
+			if (initDeclPair.init == null) continue;
+			
+			state = state.setDestSource(initDeclPair.var.getSource());
+			tmpPair = initDeclPair.init.getAssemblyAndState(state);
 			assembly += tmpPair.assembly;
 			state = tmpPair.state;
 		}
 				
 		return new AssemblyStatePair(assembly, state);
+	}
+	
+	public List<InitDeclaratorPair> getInitDeclarators()
+	{
+		return new ArrayList<InitDeclaratorPair>(initDeclPairs);
 	}
 }

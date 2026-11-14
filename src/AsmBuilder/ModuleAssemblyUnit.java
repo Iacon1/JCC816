@@ -13,6 +13,7 @@ import java.util.Set;
 
 import C99Compiler.CompConfig.DefinableInterrupt;
 import C99Compiler.CompilerNodes.FunctionDefinitionNode;
+import C99Compiler.CompilerNodes.Declarations.DeclarationNode.InitDeclaratorPair;
 import C99Compiler.CompilerNodes.Declarations.InitializerNode;
 import C99Compiler.CompilerNodes.Definitions.EnumDefinitionNode;
 import C99Compiler.CompilerNodes.Definitions.StructUnionDefinitionNode;
@@ -62,7 +63,7 @@ public class ModuleAssemblyUnit extends AssemblyUnit
 	@Override public LinkedHashMap<String, String> getRequiredSubs() {return unit.getRequiredSubs();}
 	@Override public LinkedHashMap<DefinableInterrupt, String> getInterrupts() {return unit.getInterrupts();}
 	@Override public LinkedHashMap<String, VariableNode> getGlobalVariables() {return unit.getGlobalVariables();}
-	@Override public List<InitializerNode> getGlobalInitializers() {return unit.getGlobalInitializers();}
+	@Override public List<InitDeclaratorPair> getGlobalInitDeclarators() {return unit.getGlobalInitDeclarators();}
 	@Override public String getFilename() {return unit.getFilename();}
 	@Override public Set<String> getIncludedStdLibs() {return unit.getIncludedStdLibs();}
 	@Override public Set<String> getIncludedOtherLibs() {return unit.getIncludedOtherLibs();}

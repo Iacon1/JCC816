@@ -6,6 +6,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
 
+import C99Compiler.CompilerNodes.Declarations.DeclarationNode.InitDeclaratorPair;
 import C99Compiler.CompilerNodes.Declarations.InitializerNode;
 import C99Compiler.CompilerNodes.LValues.VariableNode;
 
@@ -13,7 +14,7 @@ public interface TranslationUnit extends Catalogger
 {
 
 	public LinkedHashMap<String, VariableNode> getGlobalVariables();
-	public List<InitializerNode> getGlobalInitializers();
+	public List<InitDeclaratorPair> getGlobalInitDeclarators();
 	public String getFilename();
 	public Set<String> getIncludedStdLibs();
 	public Set<String> getIncludedOtherLibs();

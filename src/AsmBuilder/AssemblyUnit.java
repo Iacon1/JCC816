@@ -18,6 +18,7 @@ import C99Compiler.CompConfig;
 import C99Compiler.CompConfig.DefinableInterrupt;
 import C99Compiler.CompConfig.VerbosityLevel;
 import C99Compiler.CompilerNodes.FunctionDefinitionNode;
+import C99Compiler.CompilerNodes.Declarations.DeclarationNode.InitDeclaratorPair;
 import C99Compiler.CompilerNodes.Declarations.InitializerNode;
 import C99Compiler.CompilerNodes.Definitions.EnumDefinitionNode;
 import C99Compiler.CompilerNodes.Definitions.StructUnionDefinitionNode;
@@ -61,7 +62,7 @@ public class AssemblyUnit implements TranslationUnit {
 	@Override public LinkedHashMap<String, String> getRequiredSubs() {return new LinkedHashMap<String, String>();}
 	@Override public LinkedHashMap<DefinableInterrupt, String> getInterrupts() {return new LinkedHashMap<DefinableInterrupt, String>();}
 	@Override public LinkedHashMap<String, VariableNode> getGlobalVariables() {return new LinkedHashMap<String, VariableNode>();}
-	@Override public List<InitializerNode> getGlobalInitializers() {return new LinkedList<InitializerNode>();}
+	@Override public List<InitDeclaratorPair> getGlobalInitDeclarators() {return new LinkedList<InitDeclaratorPair>();}
 	@Override public String getFilename() {return filename;}
 	@Override public Set<String> getIncludedStdLibs() {return new HashSet<String>();}
 	@Override public Set<String> getIncludedOtherLibs() {return new HashSet<String>();}

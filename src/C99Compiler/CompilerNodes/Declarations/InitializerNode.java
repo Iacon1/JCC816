@@ -3,155 +3,33 @@
 // Initializes a variable
 package C99Compiler.CompilerNodes.Declarations;
 
-import java.util.AbstractMap.SimpleEntry;
-import java.util.Collection;
 import java.util.LinkedHashMap;
-import java.util.Map;
 
-import C99Compiler.CompConfig;
 import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.Dummies.DummyExpressionNode;
-import C99Compiler.CompilerNodes.Dummies.DummyType;
 import C99Compiler.CompilerNodes.FunctionDefinitionNode;
 import C99Compiler.CompilerNodes.InterpretingNode;
-import C99Compiler.CompilerNodes.Definitions.ArrayType;
-import C99Compiler.CompilerNodes.Definitions.PointerType;
-import C99Compiler.CompilerNodes.Definitions.StructUnionDefinitionNode;
 import C99Compiler.CompilerNodes.Definitions.Type;
 import C99Compiler.CompilerNodes.Expressions.AssignmentExpressionNode;
 import C99Compiler.CompilerNodes.Expressions.BaseExpressionNode;
-import C99Compiler.CompilerNodes.Expressions.CastExpressionNode;
-import C99Compiler.CompilerNodes.Expressions.ConstantExpressionNode;
 import C99Compiler.CompilerNodes.Expressions.PrimaryExpressionNode;
-import C99Compiler.CompilerNodes.Expressions.UnaryExpressionNode;
 import C99Compiler.CompilerNodes.Interfaces.AssemblableNode;
 import C99Compiler.CompilerNodes.Interfaces.SequencePointNode;
 import C99Compiler.CompilerNodes.Interfaces.TypedNode;
-import C99Compiler.CompilerNodes.LValues.LValueNode;
-import C99Compiler.CompilerNodes.LValues.WrapperLValueNode;
-import C99Compiler.CompilerNodes.LValues.VariableNode;
-import C99Compiler.Exceptions.ConstraintException;
 import C99Compiler.ProgramState.ProgramState;
 import C99Compiler.Utils.AssemblyUtils.ByteCopier;
 import C99Compiler.Utils.OperandSources.ConstantSource;
-import Grammar.C99.C99Parser.DesignationContext;
-import Grammar.C99.C99Parser.DesignatorContext;
 import Grammar.C99.C99Parser.InitializerContext;
 import Shared.Assemblable;
 
 public class InitializerNode extends InterpretingNode<InitializerNode, InitializerContext> implements AssemblableNode, TypedNode, SequencePointNode
 {
-	private LValueNode<?> LValue;
-	private Map<Integer, InitializerNode> arrayInitializers;
-	private Map<String, InitializerNode> structInitializers;
-	
+	private Type type;
 	private BaseExpressionNode<?> expr;
+	private InitializerListNode list;
+	
 	private LinkedHashMap<ComponentNode<?>, Assemblable> assemblableQueue;
 
-	public InitializerNode(ComponentNode<?> parent, LValueNode<?> LValue, String literal)
-	{
-		super(parent);
-		expr = null;
-		assemblableQueue = new LinkedHashMap<ComponentNode<?>, Assemblable>();
-		arrayInitializers = new LinkedHashMap<Integer, InitializerNode>();
-		expr = new DummyExpressionNode(this, LValue.getType(), literal);		
-		this.LValue = LValue;
-	}
-	
-	public InitializerNode(ComponentNode<?> parent, LValueNode<?> LValue)
-	{
-		super(parent);
-		expr = null;
-
-		assemblableQueue = new LinkedHashMap<ComponentNode<?>, Assemblable>();
-		if (LValue.getType().isArray())
-		{
-			arrayInitializers = new LinkedHashMap<Integer, InitializerNode>();
-			ArrayType arrayType = (ArrayType) LValue.getType();
-			if (!LValue.getType().isExtern() && !arrayType.isIncomplete()) // Length known, not extern
-			{
-				for (int i = 0; i < arrayType.getLength(); ++i) // Default initializers
-					arrayInitializers.put(i, new InitializerNode(this, arrayType.getAtIndex(LValue, i)));
-			}
-		}
-		else if (LValue.getType().isAggregate()) // Aggregate + not array = struct
-		{
-			structInitializers = new LinkedHashMap<String, InitializerNode>();
-			StructUnionDefinitionNode structType = LValue.getType().getStruct();
-			if (!LValue.getType().isExtern()) // Not extern
-			{
-				for (String memberName : structType.getMemberNames()) // Default initializers
-					structInitializers.put(memberName, new InitializerNode(this,
-							structType.getMember(memberName).getInstance(LValue)));
-			}
-		}
-		this.LValue = LValue;
-	}
-	
-	private static InitializerNode resolveInitializer(InitializerNode startNode, DesignationContext designation) throws Exception
-	{
-		InitializerNode currNode = startNode;
-		
-		for (DesignatorContext designator : designation.designator_list().designator())
-		{
-			if (currNode.arrayInitializers != null) // Array
-			{
-				if (designator.identifier() != null) // Must be struct to use struct references
-					throw new ConstraintException("6.7.8", 7, designator.start, startNode);
-				
-				int index = (int) new ConstantExpressionNode(currNode).interpret(designator.constant_expression()).getPropLong(new ProgramState());
-				
-				if (index > currNode.arrayInitializers.size() && !currNode.LValue.getType().isIncomplete())
-					throw new ConstraintException("6.7.8", 6, designator.start, startNode); // Array's length is known and this exceeds it
-				
-				currNode = currNode.arrayInitializers.get(index);
-			}
-			else
-			if (currNode.structInitializers != null) // Struct
-			{
-				if (designator.constant_expression() != null) // Must be array to use array references
-					throw new ConstraintException("6.7.8", 6, designator.start, startNode);
-				
-				String memberName = designator.identifier().getText();
-				
-				if (currNode.LValue.getType().getStruct().getMember(memberName) == null)
-					throw new ConstraintException("6.7.8", 7, designator.start, startNode); // This is not a member of this struct
-				
-				currNode = currNode.structInitializers.get(memberName);
-			}
-		}
-		
-		return currNode;
-	}
-	
-	private int checkForEmbeds(int arrayIndex)
-	{
-		if (arrayInitializers == null)
-			return arrayIndex;
-		
-		if (arrayInitializers.get(arrayIndex).expr != null
-				&& UnaryExpressionNode.class.isAssignableFrom(arrayInitializers.get(arrayIndex).expr.getClass())
-				&& ((UnaryExpressionNode) arrayInitializers.get(arrayIndex).expr).isEMBED())
-		{
-			UnaryExpressionNode e = (UnaryExpressionNode) arrayInitializers.get(arrayIndex).expr;
-			byte[] bytes = (byte[]) e.getPropValue(new ProgramState());
-			Type type = ((ArrayType) e.getType()).getType();
-			if (bytes.length > 0)
-				arrayInitializers.get(arrayIndex).expr = new DummyExpressionNode(e, type, bytes[0]);
-			arrayIndex += 1;
-			for (int ii = 1; ii < bytes.length; ++ii)
-			{
-				arrayInitializers.put(arrayIndex, new InitializerNode(this, new WrapperLValueNode(this, type, LValue, type.getSize() * arrayIndex)));
-				arrayInitializers.get(arrayIndex).expr = new DummyExpressionNode(e, type, bytes[ii]);
-				arrayIndex += 1;
-			}
-		}
-		else
-			arrayIndex += 1;
-		
-		return arrayIndex;
-	}
-	
 	@Override public boolean isSequencePoint() {return true;}
 	@Override public void registerAssemblable(ComponentNode<?> owner, Assemblable assemblable)
 	{
@@ -171,306 +49,142 @@ public class InitializerNode extends InterpretingNode<InitializerNode, Initializ
 		return new AssemblyStatePair(assembly, state);
 	}
 	
+	public InitializerNode(ComponentNode<?> parent, Type type, String literal)
+	{
+		super(parent);
+		this.type = type;
+		expr = new DummyExpressionNode(this, type, literal);
+		list = null;
+		
+		assemblableQueue = new LinkedHashMap<ComponentNode<?>, Assemblable>();
+	}
+	
+	public InitializerNode(ComponentNode<?> parent, Type type)
+	{
+		super(parent);
+		this.type = type;
+		expr = null;
+		list = null;
+		assemblableQueue = new LinkedHashMap<ComponentNode<?>, Assemblable>();
+	}
+	
+	public InitializerNode(ComponentNode<?> parent, Type type, Object obj)
+	{
+		super(parent);
+		this.type = type;
+		expr = new DummyExpressionNode(this, type, obj);
+		list = null;
+		assemblableQueue = new LinkedHashMap<ComponentNode<?>, Assemblable>();
+	}
+	
 	@Override
 	public InitializerNode interpret(InitializerContext node) throws Exception
 	{
-		if (node == null) return null;
-		if (node.children.size() == 1) // Can't be an initializer, which would at least have brackets
-		{
+		if (node == null)
+			return null;
+		if (node.assignment_expression() != null)
 			expr = new AssignmentExpressionNode(this).interpret(node.assignment_expression());
-			// String literal doesn't need a dummy initializer if we are an initializer
-			if (PrimaryExpressionNode.class.isAssignableFrom(expr.getClass()) &&
-				((PrimaryExpressionNode) expr).isStringLiteral())
-			{
-				if (getType().isArray())
-					((PrimaryExpressionNode) expr).killStringLiteralNode();
-				else
-					expr = new CastExpressionNode(this, new PointerType(new DummyType("char")), expr);
-			}
-			if (getType().isFloat() ^ expr.getType().isFloat() || (getType().isFloat() && expr.getType().isFloat() && expr.getSize() != expr.getSize()))
-			{
-				BaseExpressionNode<?> tmpExpr = new CastExpressionNode(this, getType(), expr);
-				expr.swapParent(tmpExpr);
-				expr = tmpExpr;
-			}
-			if (LValue.getType().isArray() && expr.getType().isArray() && !expr.getType().isIncomplete()) // Expression is fixed-size array
-			{
-				ArrayType arrayType = (ArrayType) LValue.getType();
-				arrayType.setLength(((ArrayType) expr.getType()).getLength());
-			}
-		}
-		else
-		{
-			expr = null;
-			ArrayType arrayType;
-			int arrayIndex = 0;
-			int arraySize = -1;
-			int j = 0, k = 0;
-			if (arrayInitializers != null) // Set all array initializers to be zero
-			{
-				arrayType = (ArrayType) LValue.getType();
-				// Set space for incomplete arrays
-				if (arrayType.isIncomplete())
-				{
-					arrayInitializers = new LinkedHashMap<Integer, InitializerNode>();
-					arraySize = node.initializer_list().initializer().size();
-					for (DesignationContext designation : node.initializer_list().designation())
-					{
-						DesignatorContext designator0 = designation.designator_list().designator(0);
-						if (designator0.constant_expression() != null) // Skip forward in array list
-							arrayIndex = (int) new ConstantExpressionNode(this).interpret(designator0.constant_expression()).getPropLong(new ProgramState());
-						arraySize = Math.max(arraySize, arrayIndex + 1);
-					}
-
-					for (arrayIndex = 0; arrayIndex < arraySize; ++arrayIndex)
-						arrayInitializers.put(arrayIndex, new InitializerNode(this, arrayType.getAtIndex(LValue, arrayIndex)));
-					arrayIndex = 0;
-				}
-				for (InitializerNode initializer : arrayInitializers.values())
-					initializer.expr = new DummyExpressionNode(this, initializer.getType(), 0);
-			}
-			else if (structInitializers != null) // Set all struct initializers to be zero
-				for (InitializerNode initializer : structInitializers.values())
-					initializer.expr = new DummyExpressionNode(this, initializer.getType(), 0);
-			for (int i = 0; i < node.initializer_list().getChildCount(); i += 2)
-			{
-				if (i == node.initializer_list().getChildCount() - 1 &&
-						node.initializer_list().getChild(i).getText().equals(","))
-					break; // Last child is comma
-				if (node.initializer_list().getChild(i) == node.initializer_list().initializer(k)) // Designator not present
-				{
-					if (arrayInitializers != null)
-					{
-						arrayType = (ArrayType) LValue.getType();
-						
-						if (!arrayType.isIncomplete() && arrayIndex >= arrayInitializers.size()) // Too many array indices
-							throw new ConstraintException("6.7.8", 6, node.initializer_list().initializer(k).start, this);
-						else if (arrayIndex >= arrayInitializers.size()) // Just make a new one if we're incomplete
-							arrayInitializers.put(arrayIndex, new InitializerNode(this, arrayType.getAtIndex(LValue, i)));
-						arrayInitializers.get(arrayIndex).interpret(node.initializer_list().initializer(k++));
-						arrayIndex = checkForEmbeds(arrayIndex);
-						arraySize = Math.max(arrayIndex, arraySize); // Only set if an incomplete array
-						
-					}
-					else if (structInitializers != null)
-					{
-						if (arrayIndex >= structInitializers.size()) // No more struct members to populate
-							throw new ConstraintException("6.7.8", 7, node.initializer_list().initializer(k).start, this);
-						structInitializers.get(LValue.getType().getStruct().getMemberNames().get(arrayIndex++)).interpret(node.initializer_list().initializer(k++));						
-					}
-				}
-				else if (node.initializer_list().getChild(i) == node.initializer_list().designation(j)) // Designator present
-				{
-					DesignatorContext designator0 = node.initializer_list().designation(j).designator_list().designator(0);
-					if (designator0.constant_expression() != null) // Skip forward in array list
-						arrayIndex = (int) new ConstantExpressionNode(this).interpret(designator0.constant_expression()).getPropLong(new ProgramState());
-					else if (designator0.identifier() != null)
-						arrayIndex = LValue.getType().getStruct().getMemberNames().indexOf(designator0.identifier().getText());
-					InitializerNode initializer = resolveInitializer(this, node.initializer_list().designation(j++));
-					initializer.interpret(node.initializer_list().initializer(k++));
-					arrayIndex = checkForEmbeds(arrayIndex);
-					i += 1;
-				}
-			}
-			
-			if (arraySize != -1 && LValue.getType().isIncomplete()) // Array size was set, meaning it's an array
-			{
-				arrayType = (ArrayType) LValue.getType();
-				arrayType.setLength(arraySize);
-			}
-				
-		}
-		
+		else if (node.initializer_list() != null)
+			list = new InitializerListNode(this, type).interpret(node.initializer_list());
 		return this;
-	}
-	
-	@Override
-	protected void onSwap(ComponentNode<?> from, ComponentNode<?> to)
-	{
-		if (expr == from)
-			expr = (BaseExpressionNode<?>) to;
-	}
-	
-	@Override
-	public boolean canCall(ProgramState state, FunctionDefinitionNode function)
-	{
-		return expr != null && expr.canCall(state, function);
 	}
 	
 	@Override
 	public Type getType()
 	{
-		return LValue.getType();
+		return type;
 	}
-	
-	public boolean isROM()
-	{
-		return LValue.getType().isROM();
-	}
-	
-	
 	@Override
-	public boolean hasAssembly(ProgramState state)
+	public boolean canCall(ProgramState state, FunctionDefinitionNode function)
 	{
-		return !LValue.getType().isIncomplete();
+		if (expr != null)
+			return expr.canCall(state, function);
+		else
+			return list.canCall(state, function);
 	}
-
 	@Override
 	public boolean hasPropValue(ProgramState state)
 	{
-		if (expr != null) return expr.hasPropValue(state);
-		else if (LValue.getType().isIncomplete()) return false;
-		else if (arrayInitializers != null) // Array
-		{
-			for (InitializerNode initializer : arrayInitializers.values())
-				if (!initializer.hasPropValue(state)) return false;
-			return true;
-		}
-		else if (structInitializers != null) // Struct
-		{
-			for (InitializerNode initializer : structInitializers.values())
-				if (!initializer.hasPropValue(state)) return false;
-			return true;
-		}
-		else return true;
+		if (expr != null)
+			return expr.hasPropValue(state);
+		else
+			return list.hasPropValue(state);
 	}
-
 	@Override
 	public Object getPropValue(ProgramState state)
 	{
-		Collection<InitializerNode> initCollection = null;
-		if (expr != null) return expr.getPropValue(state);
-		else if (arrayInitializers != null) // Array
-			initCollection = arrayInitializers.values();
-		else if (structInitializers != null) // Struct
-			initCollection = structInitializers.values();
-		else return Long.valueOf(0);
-
-		ConstantSource.ConstList propVals = new ConstantSource.ConstList();
-		for (InitializerNode init : initCollection)
-		{
-			Object obj = init.getPropValue(state);
-			if (ConstantSource.ConstList.class.isAssignableFrom(obj.getClass())) // Other array
-				propVals.addAll((ConstantSource.ConstList) obj);
-			else
-			{
-				SimpleEntry<Integer, Object> e = new SimpleEntry<Integer, Object>(init.getSize(), obj);
-				propVals.add(e);
-			}
-		}
-		return propVals;
+		if (expr != null)
+			return expr.getPropValue(state);
+		else
+			return list.getPropValue(state);
 	}
-
+	@Override
+	public boolean hasAssembly(ProgramState state)
+	{
+		return true;
+	}
 	@Override
 	public ProgramState getStateBefore(ProgramState state, ComponentNode<?> child) throws Exception
 	{
-		if (!children.contains(child))
-			throw new IllegalArgumentException();
-
 		if (expr != null)
-		{
-			if (child == expr)
-				return state;
-			if (expr.hasAssembly(state))
-				state = expr.getStateAfter(state);
-		}
-		else if (arrayInitializers != null)
-		{
-			for (InitializerNode initializer : arrayInitializers.values())
-			{
-				if (child == initializer)
-					break;
-				state = initializer.getStateAfter(state);
-			}
-		}
-		else if (structInitializers != null)
-		{
-			for (InitializerNode initializer : structInitializers.values())
-			{
-				if (child == initializer)
-					break;
-				state = initializer.getStateAfter(state);
-			}
-		}
-		return state;
+			return expr.getStateBefore(state, child);
+		else
+			return list.getStateBefore(state, child);
 	}
+	
+	// Check if string literal
+	public boolean checkStringLiteral()
+	{
+		if (expr == null) return false;
+		if (!PrimaryExpressionNode.class.isAssignableFrom(expr.getClass())) return false;
+		PrimaryExpressionNode n = (PrimaryExpressionNode) expr;
+		return n.isStringLiteral();
+	}
+	
+	public int checkStringLiteralSize()
+	{
+		if (expr == null) return 0;
+		if (!PrimaryExpressionNode.class.isAssignableFrom(expr.getClass())) return 0;
+		PrimaryExpressionNode n = (PrimaryExpressionNode) expr;
+		return n.getSize();
+	}
+	
+	public void checkKillStringLiteral()
+	{
+		if (expr == null) return;
+		if (!PrimaryExpressionNode.class.isAssignableFrom(expr.getClass())) return;
+		PrimaryExpressionNode n = (PrimaryExpressionNode) expr;
+		n.killStringLiteralNode();
+	}
+	
+	BaseExpressionNode<?> getExpr() // For EMBED purposes in InitializerListNode
+	{
+		return expr;
+	}
+	
 	@Override
 	public AssemblyStatePair getAssemblyAndState(ProgramState state) throws Exception
 	{
 		clearAssemblables();
-
-		state = state.setDestSource(LValue.getSource());
-		if (!getScope().isRoot() || !isROM()) // Normal RAM one
+		AssemblyStatePair pair1 = new AssemblyStatePair("", state), pair2;
+		if (expr != null)
 		{
-			if (expr != null)
+			if (expr.hasAssembly(state))
+				pair1 = expr.getAssemblyAndState(state);
+			else if (expr.hasPropValue(state))
 			{
-				AssemblyStatePair pair = new AssemblyStatePair("", state);
-
-				if (expr.hasAssembly(state))
-					pair = expr.apply(pair);
-				else
-				{
-					ByteCopier copier;
-					if (expr.hasPropValue(state))
-					{
-						copier = new ByteCopier(LValue.getSize(), LValue.getSource(), new ConstantSource(expr.getPropValue(state), LValue.getSize()));
-						if (!getScope().isRoot())
-							state = state.setPossibleValue(LValue, expr.getPropValue(state));
-					}
-					else if (expr.hasLValue(state))
-						copier = new ByteCopier(LValue.getSize(), LValue.getSource(), expr.getLValue(state).castTo(getType()).getSource());
-					else return pair;
-					
-					pair = copier.apply(pair);
-				}
-
-				pair = applyRegistered(pair);
-				return pair;
-			}	
-			else if (arrayInitializers != null) // Array
-			{
-				AssemblyStatePair pair = new AssemblyStatePair("", state);
-				for (InitializerNode initializer : arrayInitializers.values())
-					pair = initializer.apply(pair);
-				
-				return pair;
+				ConstantSource source = new ConstantSource(expr.getPropValue(state), state.destSource().getSize());
+				pair1 = new ByteCopier(
+						state.destSource().getSize(),
+						state.destSource(), 
+						source).getAssemblyAndState(state);
 			}
-			else if (structInitializers != null) // Struct
-			{
-				AssemblyStatePair pair = new AssemblyStatePair("", state);
-				for (InitializerNode initializer : structInitializers.values())
-					pair = initializer.apply(pair);
 				
-				return pair;
-			}
-			else if (LValue.getType().isStatic() && CompConfig.initializeStatics) // Statics are initialized always when compliant
-			{
-				AssemblyStatePair pair = new AssemblyStatePair("", state);
-				ByteCopier copier = new ByteCopier(LValue.getSize(), LValue.getSource(), new ConstantSource(0, LValue.getSize()));
-				pair = copier.apply(pair);
-				
-				pair = applyRegistered(pair);
-				return pair;
-			}
-			else return new AssemblyStatePair("", state);
 		}
-		else // ROM one
-		{
-			String whitespace = state.getWhitespace();
-			ConstantSource source = new ConstantSource(getPropValue(state), LValue.getSize());
-			String assembly = whitespace + ((VariableNode) LValue).getFullName() + ":";
-			whitespace = state.indent().getWhitespace();
-			for (int i = 0; i < source.getSize(); ++i)
-			{
-				if (i % CompConfig.bytesPerDataLine == 0) // New line needed
-					assembly += "\n" + whitespace + ".byte\t";
-				assembly += source.getBase(state, i).replace("#", "");
-				if (i != source.getSize() - 1 && (i + 1) % CompConfig.bytesPerDataLine != 0)
-					assembly += ", "; // There will be another and on the same line
-			}
-			assembly += "\n";
-			return new AssemblyStatePair(assembly, state);
-		}
+		else if (list != null)
+			pair1 = list.getAssemblyAndState(state);
+		pair2 = getRegisteredAssemblyAndState(pair1.state);
+		
+		return new AssemblyStatePair(pair1.assembly + pair2.assembly, pair2.state);
 	}
-
 }

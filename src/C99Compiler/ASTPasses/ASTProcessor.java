@@ -21,6 +21,7 @@ public class ASTProcessor
 		new FloatCastPass().apply(unit);
 
 		// O0 optimizations
+		new StringLiteralCleanupPass().apply(unit);
 		new ArrayIndexPass2().apply(unit);
 		new MultOptimizer().apply(unit);
 		// O1 optimizations

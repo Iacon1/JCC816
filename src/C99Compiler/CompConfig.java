@@ -178,8 +178,12 @@ public final class CompConfig
 		}
 	}
 	public static VerbosityLevel verbosityLevel = VerbosityLevel.none;
+	// DEBUG ONLY - never commit enabled
 	public static boolean showParseTree = false;
+	public static boolean noMath = false; // To make parse tree easier to read, don't include math
 	public static boolean throwExceptions = false;
+
+	
 	
 	public static final class Attributes
 	{

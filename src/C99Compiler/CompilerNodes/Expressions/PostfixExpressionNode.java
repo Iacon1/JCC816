@@ -14,6 +14,9 @@ import java.util.Set;
 import C99Compiler.CompConfig;
 import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.FunctionDefinitionNode;
+import C99Compiler.CompilerNodes.Declarations.InitializerListNode;
+import C99Compiler.CompilerNodes.Declarations.InitializerNode;
+import C99Compiler.CompilerNodes.Declarations.TypeNameNode;
 import C99Compiler.CompilerNodes.Definitions.PointerType;
 import C99Compiler.CompilerNodes.Definitions.FunctionType;
 import C99Compiler.CompilerNodes.Definitions.Type;
@@ -57,8 +60,12 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 		funcCall,
 		structMember,
 		structMemberP,
+		init, // Initializer-like assignment
 	}
 	private PFType type;
+	
+	private Type initType;
+	private InitializerListNode initializerList;
 	
 	private BaseExpressionNode<?> expr, indexExpr;
 	private AdditiveExpressionNode pAddExpr;
@@ -81,6 +88,7 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 	{
 		super(parent);
 		expr = null;
+		initType = null;
 		params = new ArrayList<BaseExpressionNode<?>>();
 		dummySource = new AddressSource(CompUtils.getSafeUUID(), 0);
 	}
@@ -89,6 +97,7 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 	{
 		super(parent);
 		this.type = PFType.funcCall;
+		this.initType = null;
 		this.expr = new PrimaryExpressionNode(this, functionName);
 		this.params = Arrays.asList(params);
 		dummySource = new AddressSource(CompUtils.getSafeUUID(), 0);
@@ -99,6 +108,15 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 	{
 		if (node.primary_expression() != null)
 			return delegate(new PrimaryExpressionNode(parent).interpret(node.primary_expression()));
+		
+		if (node.postfix_expression() == null) // Can only be initializer
+		{
+			type = PFType.init;
+			initType = new TypeNameNode(this).interpret(node.type_name()).getType();
+			initializerList = new InitializerListNode(this, initType).interpret(node.initializer_list());
+			return this;
+		}
+		
 		expr = new PostfixExpressionNode(this).interpret(node.postfix_expression());
 		switch (node.getChild(1).getText())
 		{
@@ -191,6 +209,8 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 			return (((PointerType) expr.getType()).getType()).getStruct().getMember(memberName).getType();	
 		case incr: case decr:
 			return expr.getType();
+		case init:
+			return initType;
 		default:
 			return null;
 		}
@@ -208,29 +228,35 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 				return getReferencedFunction(state).getFullName().equals(function.getFullName()) || getReferencedFunction(state).canCall(state, function);
 			else return true;
 		}
-		else
+		else if (type != PFType.init)
 		{
 			if (pAddExpr != null && pAddExpr.canCall(state, function)) return true;
 			else if (indexExpr != null && indexExpr.canCall(state, function)) return true;
 			else return expr.canCall(state, function);
 		}
+		else
+			return initializerList.canCall(state, function);
 	}
 	@Override public boolean isIndirect() {return type == PFType.arraySubscript;}
 	@Override
 	public boolean hasPropValue(ProgramState state)
 	{
-		if (type == PFType.structMember)
-			if (getType().isArray())
-				return true; // Arrays can degrade to pointers
-		return false;
+		switch (type)
+		{
+		case structMember: return getType().isArray();
+		case init: return initializerList.hasPropValue(state);
+		default: return false;
+		}
 	}
 	@Override
 	public Object getPropValue(ProgramState state)
 	{
-		if (type == PFType.structMember)
-			if (getType().isArray())
-				return new PropPointer<LValueNode<?>>(getLValue(state), 0);
-		return null;
+		switch (type)
+		{
+		case structMember: new PropPointer<LValueNode<?>>(getLValue(state), 0);
+		case init: return initializerList.getPropValue(state);
+		default: return false;
+		}
 	}
 	@Override
 	public boolean hasLValue(ProgramState state)
@@ -291,6 +317,7 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 		case structMember: return expr.hasAssembly(state);
 		case structMemberP: return true;
 		case incr: case decr: return true;
+		case init: return initializerList.hasAssembly(state);
 		default: return false; // TODO
 		}
 	}
@@ -691,6 +718,8 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 			
 			if (scratchX != null) state = state.releaseScratchBlock(scratchX);
 			break;
+		case init:
+			return initializerList.getAssemblyAndState(state);
 		default:
 			break;
 		}
@@ -723,6 +752,8 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 	public Set<String> getIdlePointerDisqualifiers()
 	{
 		Set<String> set = new HashSet<String>();
+		if (expr == null)
+			return set;
 		set.addAll(expr.getIdlePointerDisqualifiers());
 		if (indexExpr != null) set.addAll(indexExpr.getIdlePointerDisqualifiers());
 		
@@ -733,6 +764,8 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 	public Set<String> getPointerDisqualifiers()
 	{
 		Set<String> set = new HashSet<String>();
+		if (expr == null)
+			return set;
 		set.addAll(expr.getPointerDisqualifiers());
 		if (indexExpr != null) set.addAll(indexExpr.getPointerDisqualifiers());
 		switch (type)
