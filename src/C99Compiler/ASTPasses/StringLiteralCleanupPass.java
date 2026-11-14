@@ -4,8 +4,12 @@
 
 package C99Compiler.ASTPasses;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import C99Compiler.CompilerNodes.TranslationUnitNode;
 import C99Compiler.CompilerNodes.Declarations.DeclarationNode.InitDeclaratorPair;
+import C99Compiler.CompilerNodes.Declarations.InitializerNode;
 import C99Compiler.ProgramState.ProgramState;
 
 public class StringLiteralCleanupPass implements ASTPass
@@ -13,10 +17,13 @@ public class StringLiteralCleanupPass implements ASTPass
 	@Override
 	public void apply(TranslationUnitNode unit) throws Exception
 	{
+		List<InitializerNode> subList = new LinkedList<InitializerNode>(); // Avoid concurrent modification
+		
 		for (InitDeclaratorPair decl : unit.getGlobalInitDeclarators())
-		{
 			if (decl.isROM(new ProgramState()))
-				decl.init.checkKillStringLiteral();
-		}
+				subList.add(decl.init);
+		
+		for (InitializerNode init : subList)
+			init.checkKillStringLiteral();
 	}
 }

@@ -9,9 +9,9 @@ import C99Compiler.Utils.OperandSources.OperandSource;
 
 public class EnumeratorNode extends VariableNode
 {
-	private int value;
+	private long value;
 	
-	public EnumeratorNode(EnumDefinitionNode parent, String name, int value)
+	public EnumeratorNode(EnumDefinitionNode parent, String name, long value)
 	{
 		super(parent, name, parent.getType());
 		this.value = value;
@@ -23,7 +23,7 @@ public class EnumeratorNode extends VariableNode
 		return null;
 	}
 
-	public int getValue()
+	public long getValue()
 	{
 		return value;
 	}

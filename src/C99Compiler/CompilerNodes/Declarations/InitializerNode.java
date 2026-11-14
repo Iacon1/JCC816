@@ -19,6 +19,7 @@ import C99Compiler.CompilerNodes.Interfaces.TypedNode;
 import C99Compiler.ProgramState.ProgramState;
 import C99Compiler.Utils.AssemblyUtils.ByteCopier;
 import C99Compiler.Utils.OperandSources.ConstantSource;
+import C99Compiler.Utils.OperandSources.OperandSource;
 import Grammar.C99.C99Parser.InitializerContext;
 import Shared.Assemblable;
 
@@ -163,6 +164,13 @@ public class InitializerNode extends InterpretingNode<InitializerNode, Initializ
 	}
 	
 	@Override
+	protected void onSwap(ComponentNode<?> from, ComponentNode<?> to)
+	{
+		if (from == expr)
+			expr = (BaseExpressionNode<?>) to;
+	}
+	
+	@Override
 	public AssemblyStatePair getAssemblyAndState(ProgramState state) throws Exception
 	{
 		clearAssemblables();
@@ -174,6 +182,14 @@ public class InitializerNode extends InterpretingNode<InitializerNode, Initializ
 			else if (expr.hasPropValue(state))
 			{
 				ConstantSource source = new ConstantSource(expr.getPropValue(state), state.destSource().getSize());
+				pair1 = new ByteCopier(
+						state.destSource().getSize(),
+						state.destSource(), 
+						source).getAssemblyAndState(state);
+			}
+			else if (expr.hasLValue(state))
+			{
+				OperandSource source = expr.getLValue(state).getSource();
 				pair1 = new ByteCopier(
 						state.destSource().getSize(),
 						state.destSource(), 

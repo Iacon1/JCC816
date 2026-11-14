@@ -48,8 +48,13 @@ public class DeclarationNode extends InterpretingNode<DeclarationNode, Declarati
 		{
 			String whitespace = state.getWhitespace();
 			int size = var.getSize();
-			if (init.checkStringLiteral() && var.getType().isPointer() && !var.getType().isArray())
+			if (init.checkStringLiteral() &&
+					var.getType().isPointer() && (
+						!var.getType().isArray() ||
+						var.getType().isIncomplete()
+					))
 				size = init.checkStringLiteralSize();
+			
 			ConstantSource source = new ConstantSource(init.getPropValue(state), size);
 			String assembly = whitespace + var.getFullName() + ":";
 			whitespace = state.indent().getWhitespace();
