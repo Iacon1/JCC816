@@ -253,7 +253,7 @@ public class PostfixExpressionNode extends SPBaseExpressionNode<Postfix_expressi
 	{
 		switch (type)
 		{
-		case structMember: new PropPointer<LValueNode<?>>(getLValue(state), 0);
+		case structMember: return new PropPointer<LValueNode<?>>(getLValue(state), 0);
 		case init: return initializerList.getPropValue(state);
 		default: return false;
 		}

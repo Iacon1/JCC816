@@ -326,7 +326,7 @@ public class Type implements Serializable
 				isPointer() && type.isPointer() && ((PointerType) this).getType().canCastFrom(((PointerType) type).getType(), CastContext.assignment) ||
 				isPointer() && type.isPointer() && ((PointerType) this).getType().isVoid() ||
 				isPointer() && type.isPointer() && ((PointerType) type).getType().isVoid() ||
-				isPointer() && type.isConstant() && type.isInteger() || // Null pointer
+				isPointer() && type.isInteger() || // Null pointer. Technically more permissive than C99 standard but I don't wanna check whether you're nullptr specifically
 				typeSpecifiers.contains("_Bool") && type.isPointer();
 		case add_assignment: // Defined by 6.5.16.1
 			return

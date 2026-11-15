@@ -69,6 +69,15 @@ public class InitializerNode extends InterpretingNode<InitializerNode, Initializ
 		assemblableQueue = new LinkedHashMap<ComponentNode<?>, Assemblable>();
 	}
 	
+	public InitializerNode(ComponentNode<?> parent)
+	{
+		super(parent);
+		this.type = null; // Can be null but only for assignment expressions.
+		expr = null;
+		list = null;
+		assemblableQueue = new LinkedHashMap<ComponentNode<?>, Assemblable>();
+	}
+	
 	public InitializerNode(ComponentNode<?> parent, Type type, Object obj)
 	{
 		super(parent);
@@ -84,9 +93,15 @@ public class InitializerNode extends InterpretingNode<InitializerNode, Initializ
 		if (node == null)
 			return null;
 		if (node.assignment_expression() != null)
+		{
 			expr = new AssignmentExpressionNode(this).interpret(node.assignment_expression());
+			type = (type != null) ? type : expr.getType();
+		}
 		else if (node.initializer_list() != null)
+		{
+			assert type != null;
 			list = new InitializerListNode(this, type).interpret(node.initializer_list());
+		}
 		return this;
 	}
 	
@@ -94,6 +109,10 @@ public class InitializerNode extends InterpretingNode<InitializerNode, Initializ
 	public Type getType()
 	{
 		return type;
+	}
+	void setType(Type type)
+	{
+		this.type = type;
 	}
 	@Override
 	public boolean canCall(ProgramState state, FunctionDefinitionNode function)

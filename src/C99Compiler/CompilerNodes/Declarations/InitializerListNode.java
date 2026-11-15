@@ -5,25 +5,25 @@
 package C99Compiler.CompilerNodes.Declarations;
 
 import java.util.AbstractMap.SimpleEntry;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 
 import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.FunctionDefinitionNode;
 import C99Compiler.CompilerNodes.InterpretingNode;
 import C99Compiler.CompilerNodes.Definitions.ArrayType;
 import C99Compiler.CompilerNodes.Definitions.Type;
+import C99Compiler.CompilerNodes.Definitions.Type.CastContext;
 import C99Compiler.CompilerNodes.Dummies.DummyLValueNode;
-import C99Compiler.CompilerNodes.Expressions.BaseExpressionNode;
 import C99Compiler.CompilerNodes.Expressions.UnaryExpressionNode;
-import C99Compiler.CompilerNodes.Expressions.AssignmentExpressionNode;
 import C99Compiler.CompilerNodes.Interfaces.AssemblableNode;
 import C99Compiler.CompilerNodes.Interfaces.TypedNode;
 import C99Compiler.CompilerNodes.LValues.LValueNode;
 import C99Compiler.ProgramState.ProgramState;
 import C99Compiler.Utils.OperandSources.ConstantSource.ConstList;
 import C99Compiler.Utils.OperandSources.OperandSource;
-import Grammar.C99.C99Parser.Assignment_expressionContext;
 import Grammar.C99.C99Parser.DesignationContext;
 import Grammar.C99.C99Parser.InitializerContext;
 import Grammar.C99.C99Parser.Initializer_listContext;
@@ -32,127 +32,133 @@ public class InitializerListNode extends InterpretingNode<InitializerListNode, I
 {
 	private Type type;
 
-	LinkedHashMap<DesignationNode, InitializerNode> initMap;
+	LinkedHashMap<Designation, InitializerNode> initMap;
 	
 	public InitializerListNode(ComponentNode<?> parent, Type type)
 	{
 		super(parent);
 		this.type = type;
 		
-		initMap = new LinkedHashMap<DesignationNode, InitializerNode>();
+		initMap = new LinkedHashMap<Designation, InitializerNode>();
 	}
 
 	private int countElements(Initializer_listContext node) throws Exception
 	{
 		// Find highest index
-		DesignationNode currDes;
+		Designation currDes = new Designation().getChildren(type).getFirst();
 		
-		int maxIndex = 0;
-		int currIndex = 0;
-		
-		for (int i = 0; i < node.getChildCount(); ++i)
-		{
-			Object child = node.getChild(i);
-			if (DesignationContext.class.isAssignableFrom(child.getClass()))
-			{
-				currDes = new DesignationNode(this).interpret((DesignationContext) child);
-				currIndex = currDes.getIndex();
-				removeChild(currDes);
-				
-				maxIndex = (maxIndex < currIndex) ? currIndex : maxIndex;
-				i += 1; // Skip over initializers that follow designations for this search
-			}
-			else if (InitializerContext.class.isAssignableFrom(child.getClass())) // Might be EMBED
-			{
-				// Is it an embed?
-				Assignment_expressionContext grandchild = ((InitializerContext) child).assignment_expression();
-				if (grandchild != null)
-				{
-					BaseExpressionNode<?> n = new AssignmentExpressionNode(this).interpret(grandchild);
-					if (UnaryExpressionNode.class.isAssignableFrom(n.getClass()) && ((UnaryExpressionNode) n).isEMBED())
-					{
-						// EMBED
-						int l = n.getSize();
-						currIndex += l - 1;
-					}
-					removeChild(n);	
-				}
-
-				maxIndex = (maxIndex < currIndex) ? currIndex : maxIndex;
-				currIndex += 1;
-			}
-		}
-		
-		return maxIndex + 1;				
-	}
-	
-	@Override
-	public InitializerListNode interpret(Initializer_listContext node) throws Exception
-	{
-		DesignationNode currDes;
+		long maxIndex = 0;
+		long currIndex = 0;
 		InitializerNode init;
 		
-		if (type.isArray() && type.isIncomplete()) // Must complete type
-			((ArrayType) type).setLength(countElements(node));
-
-		currDes = new DesignationNode(this, type);
-		
-		while (!currDes.atEnd(type))
-		{
-			initMap.put(currDes, new InitializerNode(this, currDes.resolve(type), 0));
-			currDes = currDes.getIterated(type);
-		}
-		initMap.put(currDes, new InitializerNode(this, currDes.resolve(type), 0));
-		
-		currDes = new DesignationNode(this, type);
-		
 		for (int i = 0; i < node.getChildCount(); ++i)
 		{
 			Object child = node.getChild(i);
 			if (DesignationContext.class.isAssignableFrom(child.getClass()))
-				currDes = new DesignationNode(this).interpret((DesignationContext) child);
+				currDes = Designation.interpret(this, new ProgramState(), (DesignationContext) child);
 			else if (InitializerContext.class.isAssignableFrom(child.getClass())) // Initializer
 			{
-				init = new InitializerNode(this, currDes.resolve(type)).interpret((InitializerContext) child);
+				InitializerContext initChild = (InitializerContext) child;
+				if (initChild.assignment_expression() != null)
+					init = new InitializerNode(this).interpret(initChild);
+				else
+					init = new InitializerNode(this, currDes.resolve(type)).interpret(initChild);
 				
-				// If init is an EMBED we have to split into different elements
-
-				if (
-						init.getExpr() != null &&
+				// Handle EMBEDs
+				if (init.getExpr() != null &&
 						UnaryExpressionNode.class.isAssignableFrom(init.getExpr().getClass()) &&
 						((UnaryExpressionNode) init.getExpr()).isEMBED())
 				{
-					UnaryExpressionNode uno = (UnaryExpressionNode) init.getExpr();
+					UnaryExpressionNode unoNode = (UnaryExpressionNode) init.getExpr();
+					Type unoType = ((ArrayType) init.getType()).getType();
+					while (!unoType.canCastTo(currDes.resolve(type), CastContext.assignment))
+						currDes = currDes.getChildren(type).get(0);
 					
-					byte[] unoBytes = (byte[]) uno.getPropValue(new ProgramState());
-					Type unoType = ((ArrayType) uno.getType()).getType();
-					if (unoBytes.length > 0) // Insert first element
+					for (int j = 0; j < unoNode.getSize() - 1; ++j)
+						currDes = currDes.getNext(type, false);
+				}
+				else
+					while (!init.canCastTo(currDes.resolve(type), CastContext.assignment))
+						currDes = currDes.getChildren(type).get(0);
+				
+				removeChild(init); // Save memory
+			}
+			else
+				continue;
+			
+			currIndex = currDes.getIndex();
+			maxIndex = (maxIndex < currIndex) ? currIndex : maxIndex;
+			currDes = currDes.getNext(type, false);
+		}
+		
+		return (int) maxIndex + 1;				
+	}
+
+	@Override
+	public InitializerListNode interpret(Initializer_listContext node) throws Exception
+	{
+		// First, we complete the array.
+		if (type.isArray() && type.isIncomplete())
+			((ArrayType) type).setLength(countElements(node));
+		
+		// Next, we figure out all the designations we need.
+		Set<Designation> neededDesigs = new HashSet<Designation>();
+		neededDesigs.addAll(new Designation().getAllLeaves(type));
+		
+		// After that, we find all the ones we provide.
+		Designation currDes = new Designation();
+		if (!currDes.getChildren(type).isEmpty())
+			currDes = currDes.getChildren(type).getFirst();
+		InitializerNode init;
+		
+		for (int i = 0; i < node.getChildCount(); ++i)
+		{
+			Object child = node.getChild(i);
+			if (DesignationContext.class.isAssignableFrom(child.getClass()))
+				currDes = Designation.interpret(this, new ProgramState(), (DesignationContext) child);
+			else if (InitializerContext.class.isAssignableFrom(child.getClass())) // Initializer
+			{
+				InitializerContext initChild = (InitializerContext) child;
+				if (initChild.assignment_expression() != null)
+					init = new InitializerNode(this).interpret(initChild);
+				else
+					init = new InitializerNode(this, currDes.resolve(type)).interpret(initChild);
+				
+				// Handle EMBEDs
+				if (init.getExpr() != null &&
+						UnaryExpressionNode.class.isAssignableFrom(init.getExpr().getClass()) &&
+						((UnaryExpressionNode) init.getExpr()).isEMBED())
+				{
+					UnaryExpressionNode unoNode = (UnaryExpressionNode) init.getExpr();
+					byte[] unoBytes = (byte[]) unoNode.getPropValue(new ProgramState());
+					Type unoType = ((ArrayType) init.getType()).getType();
+					while (!unoType.canCastTo(currDes.resolve(type), CastContext.assignment))
+						currDes = currDes.getChildren(type).get(0);
+					
+					for (int j = 0; j < unoBytes.length; ++j)
 					{
-						init = new InitializerNode(this, unoType, Long.valueOf(unoBytes[0]));
-						if (initMap.get(currDes) != null)
-							initMap.remove(currDes);
-						initMap.put(currDes, init);
+						neededDesigs.removeAll(currDes.getAllLeaves(type));
+						initMap.put(currDes, new InitializerNode(this, unoType, unoBytes[j]));
+						currDes = currDes.getNext(type);
 					}
-					currDes = currDes.getIterated(type); // Always inc size by at least 1
-					
-					for (int j = 1; j < unoBytes.length; ++j)
-					{
-						init = new InitializerNode(this, unoType, Long.valueOf(unoBytes[j]));
-						if (initMap.get(currDes) != null)
-							initMap.remove(currDes);
-						initMap.put(currDes, init);
-						currDes = currDes.getIterated(type);
-					}						
 				}
 				else
 				{
-					if (initMap.get(currDes) != null)
-						initMap.remove(currDes);
+					while (!init.canCastTo(currDes.resolve(type), CastContext.assignment))
+						currDes = currDes.getChildren(type).get(0);
+					
+					init.setType(currDes.resolve(type)); // To get around certain constants
+					neededDesigs.removeAll(currDes.getAllLeaves(type));
 					initMap.put(currDes, init);
-					currDes = currDes.getIterated(type);
+					
+					currDes = currDes.getNext(type);
 				}
 			}
 		}
+		
+		// Fill rest with 0s
+		for (Designation des : neededDesigs)
+			initMap.put(des, new InitializerNode(this, des.resolve(type), 0));
 		
 		return this;
 	}
@@ -213,9 +219,9 @@ public class InitializerListNode extends InterpretingNode<InitializerListNode, I
 		LValueNode<?> n = new DummyLValueNode(this, type, state.destSource());
 		
 		OperandSource s0 = pair.state.destSource();
-		for (Map.Entry<DesignationNode, InitializerNode> init : initMap.sequencedEntrySet())
+		for (Map.Entry<Designation, InitializerNode> init : initMap.sequencedEntrySet())
 		{
-			OperandSource s = init.getKey().resolve(n).getSource();
+			OperandSource s = init.getKey().resolve(this, n).getSource();
 			pair.state = pair.state.setDestSource(s);
 			
 			AssemblyStatePair p = init.getValue().getAssemblyAndState(pair.state);
