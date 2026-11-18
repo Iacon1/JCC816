@@ -353,6 +353,8 @@ public class JCC816
 			new HelpFormatter().printHelp(helpName, helpHeader, getOptions(), helpFooter, true);
 			return;
 		}
+		if (commandLine.hasOption("path-CL65"))
+			CompConfig.pathCL65 = commandLine.getOptionValue("path-CL65");
 		if (commandLine.hasOption("l") && !Assembler.hasCL65()) // No Cl65 installed
 		{
 			Logging.logError("CL65 not detected. Cannot link to executable without CL65 installed.");
@@ -370,8 +372,6 @@ public class JCC816
 			FileIO.writeFile(filename, FileIO.readResourceBytes("XML\\Header.XML"));
 			return;
 		}
-		if (commandLine.hasOption("path-CL65"))
-			CompConfig.pathCL65 = commandLine.getOptionValue("path-CL65");
 		
 		// Load header
 		if (commandLine.hasOption("l")) // Executable
@@ -494,14 +494,17 @@ public class JCC816
 			try
 			{
 				trueMain(args);
+				System.exit(0);
 			}
 			catch (SoftException e)
 			{
 				Logging.logError(e.getMessage());
+				System.exit(1);
 			}
 		}
 		else
 			trueMain(args);
+		System.exit(0);
 	}
 
 }
