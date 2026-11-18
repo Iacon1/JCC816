@@ -194,7 +194,13 @@ public class InitializerListNode extends InterpretingNode<InitializerListNode, I
 	{
 		ConstList list = new ConstList();
 		for (InitializerNode init : initMap.values())
-			list.add(new SimpleEntry<Integer, Object>(init.getSize(), init.getPropValue(state)));
+		{
+			Object obj = init.getPropValue(state);
+			if (ConstList.class.isAssignableFrom(obj.getClass()))
+				list.addAll((ConstList) obj);
+			else
+				list.add(new SimpleEntry<Integer, Object>(init.getSize(), obj));
+		}
 		
 		return list;
 	}

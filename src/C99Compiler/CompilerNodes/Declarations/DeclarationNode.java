@@ -9,7 +9,6 @@ import C99Compiler.CompConfig;
 import C99Compiler.CompilerNodes.ComponentNode;
 import C99Compiler.CompilerNodes.FunctionDefinitionNode;
 import C99Compiler.CompilerNodes.InterpretingNode;
-import C99Compiler.CompilerNodes.Dummies.DummyExpressionNode;
 import C99Compiler.CompilerNodes.Definitions.Type;
 import C99Compiler.CompilerNodes.Interfaces.UnvaluedAssemblableNode;
 import C99Compiler.CompilerNodes.LValues.VariableNode;
