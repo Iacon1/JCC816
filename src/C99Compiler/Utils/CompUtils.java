@@ -167,9 +167,11 @@ public final class CompUtils
 		return false;
 	}
 	
+
+	private static int currUUID = 0;
 	public static final String getSafeUUID()
 	{
-		return UUID.randomUUID().toString().replace("-", "_");
+		return String.valueOf(currUUID++).replace("-", "_");
 	}
 	public static final String getMiscLabel()
 	{
