@@ -75,10 +75,10 @@ public interface MapModeInterface extends Configurer
 	 * 	@return the address of the first byte of the long-vector table.
 	 */
 	public int getHVAddress(boolean isFast);
-	public default int getHeaderROMAddress(boolean longHeader) // Position in ROM instead of in memory
-	{
-		return (getHVAddress(false) + 24) & 0x00FFFF + (longHeader? 0 : 0x10);
-	}
+	/** Returns the address in ROM of the first byte of the header.
+	 * 	@return the address of the first byte of the header table.
+	 */
+	public int getHeaderROMAddress(boolean longHeader);
 	/**
 	 * @param i The current bank
 	 * @return Whether the next bank is contiguous.

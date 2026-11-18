@@ -24,5 +24,7 @@ public interface MapModeInterfaceWrapper extends MapModeInterface
 	@Override default public int getROMBankAlign(int i) {return getImplementer().getROMBankAlign(i);}
 	
 	@Override default public int getHVAddress(boolean isFast) {return getImplementer().getHVAddress(isFast);}
+	@Override default public int getHeaderROMAddress(boolean longHeader) {return getImplementer().getHeaderROMAddress(longHeader);}
+
 	@Override default public boolean isContiguous(int i) {return getImplementer().isContiguous(i);}
 }

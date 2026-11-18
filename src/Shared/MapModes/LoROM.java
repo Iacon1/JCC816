@@ -25,6 +25,7 @@ public class LoROM implements MapModeInterface
 	@Override public int getROMBankAlign(int i) {return 0x008000;}
 	
 	@Override public int getHVAddress(boolean isFast) {return (isFast ? 0x80FFB0 : 0x00FFB0) - 24;}
-	
+	@Override public int getHeaderROMAddress(boolean longHeader) {return (getHVAddress(false) + 24) & 0x007FFF + (longHeader? 0 : 0x10);}
+
 	@Override public boolean isContiguous(int i) {return false;}
 }

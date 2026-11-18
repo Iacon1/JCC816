@@ -30,5 +30,7 @@ public class HiROM implements MapModeInterface
 			return 0x010000;
 	} // 4096 KB ; 
 	@Override public int getHVAddress(boolean isFast) {return (isFast ? 0xC0FFB0 : 0x40FFB0) - 24;}
+	@Override public int getHeaderROMAddress(boolean longHeader) {return (getHVAddress(false) + 24) & 0x00FFFF + (longHeader? 0 : 0x10);}
+
 	@Override public boolean isContiguous(int i) {return true;}
 }
