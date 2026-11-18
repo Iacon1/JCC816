@@ -3,6 +3,7 @@
 // Stores data used by other parts of the compiler.
 package C99Compiler.Utils;
 
+import java.nio.ByteBuffer;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
@@ -171,7 +172,8 @@ public final class CompUtils
 	private static int currUUID = 0;
 	public static final String getSafeUUID()
 	{
-		return String.valueOf(currUUID++).replace("-", "_");
+		byte[] bytes = ByteBuffer.allocate(8).putInt(currUUID++).array();
+		return UUID.nameUUIDFromBytes(bytes).toString().replace("-", "_");
 	}
 	public static final String getMiscLabel()
 	{
